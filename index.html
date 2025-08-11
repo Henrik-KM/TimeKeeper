@@ -171,6 +171,13 @@
           // Mark data as needing backup
           needsBackup = true;
         }
+
+        // Compute concurrency factor based on the number of active timers.
+        // Factor decreases as more timers run simultaneously: for example, 1 timer=1.0, 2 timers=0.75, 3 timers=0.6.
+        function computeConcurrencyFactor(n) {
+          if (n <= 1) return 1;
+          return 1 / (1 + (n - 1) / 3);
+        }
         let data = loadData();
         // Ensure every project has a color. For pre‑existing projects without a color, assign one.
         let colorAssigned = false;
@@ -1046,12 +1053,16 @@
             });
             // Start an interval that updates all running timers every second
             const tick = () => {
+              const now = new Date();
               runningEntries.forEach(entry => {
-                const now = new Date();
-                const start = new Date(entry.startTime);
-                const seconds = Math.floor((now - start) / 1000);
+                // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
+                const last = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
+                const prev = entry.effectiveSeconds || 0;
+                const factor = entry.factor || computeConcurrencyFactor(runningEntries.length);
+                const extra = (now - last) / 1000 * factor;
+                const effective = prev + extra;
                 const span = document.getElementById('runningElapsed-' + entry.id);
-                if (span) span.textContent = formatDuration(seconds);
+                if (span) span.textContent = formatDuration(Math.floor(effective));
               });
             };
             tick();
@@ -1068,18 +1079,43 @@
 
         // Stop a single running timer by id
         function stopSingleTimer(entryId) {
-          const running = data.entries.find(e => e.id === entryId && e.isRunning);
-          if (running) {
-            const end = new Date();
-            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
-            running.endTime = end.toISOString();
-            running.duration = duration;
-            running.isRunning = false;
-            saveData();
-            updateTimerSection();
-            updateDashboard();
-            updateEntriesTable();
-          }
+          const toStop = data.entries.find(e => e.id === entryId && e.isRunning);
+          if (!toStop) return;
+          const now = new Date();
+          // Gather all running entries including the one to stop
+          const runningEntries = getRunningEntries();
+          const n = runningEntries.length;
+          // First update effective seconds for all running entries using their current factor
+          runningEntries.forEach(e => {
+            const last = e.lastUpdateTime ? new Date(e.lastUpdateTime) : new Date(e.startTime);
+            const elapsedSec = (now - last) / 1000;
+            const prevFactor = e.factor || computeConcurrencyFactor(n);
+            e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
+            e.lastUpdateTime = now.toISOString();
+          });
+          // Finalize the stopped entry
+          const finalSeconds = toStop.effectiveSeconds || 0;
+          toStop.endTime = now.toISOString();
+          toStop.duration = Math.floor(finalSeconds);
+          toStop.isRunning = false;
+          // Cleanup weighted fields (optional)
+          delete toStop.effectiveSeconds;
+          delete toStop.lastUpdateTime;
+          delete toStop.factor;
+          // Compute new concurrency factor for remaining running timers after removal
+          const remaining = runningEntries.filter(e => e.id !== entryId);
+          const newCount = remaining.length;
+          const newFactor = computeConcurrencyFactor(newCount);
+          // Update remaining running entries: set new factor and lastUpdateTime
+          remaining.forEach(e => {
+            e.factor = newFactor;
+            e.lastUpdateTime = now.toISOString();
+          });
+          // Persist and refresh
+          saveData();
+          updateTimerSection();
+          updateDashboard();
+          updateEntriesTable();
         }
         let timerInterval = null;
         // Chart instances for weekly and monthly scatter plots
@@ -1087,36 +1123,87 @@
         let monthlyScatterChart = null;
         document.getElementById('startTimerBtnPro').addEventListener('click', () => {
           const projectId = document.getElementById('timerProjectPro').value;
-          // Hours already spent when starting the timer
+          // Hours already spent when starting the timer (pre-filled time)
           const initialHours = parseFloat(document.getElementById('timerInitialPro').value) || 0;
           if (!projectId) return;
+          // Check if there's already a running timer for this project
+          const runningEntries = getRunningEntries();
+          if (runningEntries.some(e => e.projectId === projectId)) {
+            alert('A timer is already running for this project. You cannot start another timer for the same project.');
+            return;
+          }
           const now = new Date();
-          // compute start time by subtracting already spent hours
-          const start = new Date(now.getTime() - initialHours * 3600 * 1000);
+          // Update all existing running entries: accumulate effective seconds and set new factor
+          const newConcurrencyCount = runningEntries.length + 1;
+          const newFactor = computeConcurrencyFactor(newConcurrencyCount);
+          runningEntries.forEach(e => {
+            // Update effective seconds for elapsed time since last update
+            const last = e.lastUpdateTime ? new Date(e.lastUpdateTime) : new Date(e.startTime);
+            const elapsedSec = (now - last) / 1000;
+            const prevFactor = e.factor || computeConcurrencyFactor(runningEntries.length);
+            e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
+            e.lastUpdateTime = now.toISOString();
+            // Assign new factor for all running entries
+            e.factor = newFactor;
+          });
+          // Create new entry for the selected project
+          // Set real start time by subtracting initial hours so the start time reflects the past
+          const realStart = new Date(now.getTime() - initialHours * 3600 * 1000);
           const newEntry = {
             id: uuid(),
             projectId,
             description: '',
-            startTime: start.toISOString(),
+            startTime: realStart.toISOString(),
             endTime: null,
             duration: null,
             isRunning: true,
-            createdAt: now.toISOString()
+            createdAt: now.toISOString(),
+            // Track weighted timing fields
+            effectiveSeconds: initialHours * 3600,
+            lastUpdateTime: now.toISOString(),
+            factor: newFactor
           };
           data.entries.push(newEntry);
-          // reset initial input
+          // Reset initial input
           document.getElementById('timerInitialPro').value = '';
           saveData();
+          // Update selects so the started project is disabled
+          updateProjectSelects();
           updateTimerSection();
           updateDashboard();
         });
         document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
-          // Stop all currently running timers
-          const runningList = getRunningEntries();
-          runningList.forEach(entry => {
-            stopSingleTimer(entry.id);
-          });
+          stopAllTimers();
         });
+
+        // Stop all running timers at once, updating their weighted durations consistently
+        function stopAllTimers() {
+          const runningList = getRunningEntries();
+          if (runningList.length === 0) return;
+          const now = new Date();
+          const n = runningList.length;
+          // Update effective seconds for all entries using their current factors
+          runningList.forEach(e => {
+            const last = e.lastUpdateTime ? new Date(e.lastUpdateTime) : new Date(e.startTime);
+            const elapsedSec = (now - last) / 1000;
+            const prevFactor = e.factor || computeConcurrencyFactor(n);
+            e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
+            e.lastUpdateTime = now.toISOString();
+          });
+          // Finalize each entry: set duration, endTime, isRunning
+          runningList.forEach(e => {
+            e.duration = Math.floor(e.effectiveSeconds || 0);
+            e.endTime = now.toISOString();
+            e.isRunning = false;
+            delete e.effectiveSeconds;
+            delete e.lastUpdateTime;
+            delete e.factor;
+          });
+          saveData();
+          updateTimerSection();
+          updateDashboard();
+          updateEntriesTable();
+        }
 
         // Update project selects for timer and manual forms
         function updateProjectSelects() {
@@ -1142,6 +1229,13 @@
             o2.value = project.id;
             o2.textContent = project.name;
             manualSelect.appendChild(o2);
+          });
+          // Disable timer options for projects that already have a running timer
+          const runningIds = getRunningEntries().map(e => e.projectId);
+          timerSelect.querySelectorAll('option').forEach(opt => {
+            if (runningIds.includes(opt.value)) {
+              opt.disabled = true;
+            }
           });
           document.getElementById('startTimerBtnPro').disabled = false;
         }
@@ -1244,7 +1338,27 @@
               return;
             }
             data = imported;
-            saveData();
+            // Remove any transient timer fields (effectiveSeconds, lastUpdateTime, factor) from imported entries
+            data.entries.forEach(entry => {
+              delete entry.effectiveSeconds;
+              delete entry.lastUpdateTime;
+              delete entry.factor;
+            });
+            // Assign colors to projects without color and ensure uniqueness
+            let colorChanged = false;
+            data.projects.forEach(p => {
+              if (!p.color) {
+                p.color = getUniqueColor();
+                colorChanged = true;
+              }
+            });
+            if (colorChanged) {
+              saveData();
+            } else {
+              // Save imported data even if colors did not change
+              saveData();
+            }
+            // Refresh UI
             updateDashboard();
             updateProjectsPage();
             updateEntriesTable();
