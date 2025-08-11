@@ -27,6 +27,9 @@
         <div id="projectOverview"></div>
         <div id="detailedBreakdown"></div>
 
+        <!-- Recommendations Section: dynamically populated with suggested projects to work on -->
+        <div id="recommendations"></div>
+
         <!-- Scatter charts for project progress -->
         <div class="card" id="weeklyScatterCard">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Weekly (Expected vs Actual)</h3>
@@ -250,9 +253,33 @@
           const daysLeft = Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60 * 24)));
           const avgDailyBurn = totalHours / daysPassed;
           const daysToExhaust = avgDailyBurn > 0 ? remainingHours / avgDailyBurn : Infinity;
-          let status = 'green';
-          if (daysToExhaust < daysLeft - 3) status = 'red';
-          else if (Math.abs(daysToExhaust - daysLeft) <= 3) status = 'amber';
+          // Determine a more descriptive status for the project based on budget consumption and schedule
+          // Calculate expected used hours based on how far through the project we are
+          const totalProjectDays = daysPassed + daysLeft;
+          const expectedUsed = totalProjectDays > 0 ? project.budgetHours * (daysPassed / totalProjectDays) : totalHours;
+          let status = 'on-track';
+          let statusColor = 'green';
+          let reason = '';
+          // If total hours already exceed expected usage at this point in the schedule, mark as over budget
+          if (totalHours > expectedUsed) {
+            status = 'over-budget';
+            statusColor = 'red';
+            reason = 'Projected to exceed budget before deadline.';
+          // If days to exhaust at current burn rate is less than days left, the project will finish late (behind schedule)
+          } else if (daysToExhaust < daysLeft) {
+            status = 'behind-schedule';
+            statusColor = 'red';
+            reason = 'Not enough days left at current pace.';
+          // If days to exhaust and days left are very close (within three days), label as tight schedule
+          } else if (Math.abs(daysToExhaust - daysLeft) <= 3) {
+            status = 'tight';
+            statusColor = 'amber';
+            reason = 'On track but very little margin.';
+          } else {
+            status = 'on-track';
+            statusColor = 'green';
+            reason = 'On track.';
+          }
           // Weekly and monthly expected hours
           let weeklyExpected = 0;
           let monthlyExpected = 0;
@@ -300,6 +327,8 @@
             daysLeft,
             daysPassed,
             status,
+            statusColor,
+            reason,
             weeklyExpected,
             monthlyExpected,
             weeklyHours,
@@ -492,6 +521,45 @@
           // Project status overview and detailed breakdown
           renderProjectOverview();
           renderDetailedBreakdown();
+          // Recommendations: determine which projects are most behind on weekly and monthly expectations
+          const recContainer = document.getElementById('recommendations');
+          if (recContainer) {
+            recContainer.innerHTML = '';
+            if (data.projects.length > 0) {
+              let maxWeeklyDeficit = -Infinity;
+              let maxMonthlyDeficit = -Infinity;
+              let recommendedWeekly = null;
+              let recommendedMonthly = null;
+              data.projects.forEach(project => {
+                const sp = computeProjectStats(project);
+                const weeklyDeficit = (sp.weeklyExpected || 0) - (sp.weeklyHours || 0);
+                if (weeklyDeficit > maxWeeklyDeficit) {
+                  maxWeeklyDeficit = weeklyDeficit;
+                  recommendedWeekly = project;
+                }
+                const monthlyDeficit = (sp.monthlyExpected || 0) - (sp.monthlyHours || 0);
+                if (monthlyDeficit > maxMonthlyDeficit) {
+                  maxMonthlyDeficit = monthlyDeficit;
+                  recommendedMonthly = project;
+                }
+              });
+              const recCard = document.createElement('div');
+              recCard.className = 'card';
+              const title = document.createElement('h3');
+              title.textContent = 'Recommended Projects';
+              title.style.margin = '0 0 0.5rem 0';
+              title.style.fontSize = '1.1rem';
+              title.style.fontWeight = '600';
+              recCard.appendChild(title);
+              const pWeek = document.createElement('p');
+              pWeek.innerHTML = '<strong>This Week:</strong> ' + (recommendedWeekly ? recommendedWeekly.name : '—');
+              recCard.appendChild(pWeek);
+              const pMonth = document.createElement('p');
+              pMonth.innerHTML = '<strong>This Month:</strong> ' + (recommendedMonthly ? recommendedMonthly.name : '—');
+              recCard.appendChild(pMonth);
+              recContainer.appendChild(recCard);
+            }
+          }
 
           // Prepare data for weekly and monthly scatter charts
           const weeklyDatasets = [];
@@ -505,6 +573,9 @@
             weeklyDatasets.push({
               label: project.name,
               data: [{ x: statsP.weeklyExpected, y: statsP.weeklyHours }],
+              // Use project color for point appearance
+              pointBackgroundColor: color,
+              pointBorderColor: color,
               backgroundColor: color,
               borderColor: color,
               pointRadius: 5,
@@ -514,6 +585,9 @@
             monthlyDatasets.push({
               label: project.name,
               data: [{ x: statsP.monthlyExpected, y: statsP.monthlyHours }],
+              // Use project color for point appearance
+              pointBackgroundColor: color,
+              pointBorderColor: color,
               backgroundColor: color,
               borderColor: color,
               pointRadius: 5,
@@ -672,10 +746,20 @@
             bar.appendChild(fill);
             progressContainer.appendChild(bar);
             item.appendChild(progressContainer);
-            // status
+            // status badge with descriptive text and tooltip
             const status = document.createElement('span');
-            status.className = 'status-badge ' + stats.status;
-            status.textContent = stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk');
+            status.className = 'status-badge ' + (stats.statusColor || 'green');
+            // Determine human-friendly label
+            let statusLabel;
+            if (stats.status === 'over-budget') statusLabel = 'Over Budget';
+            else if (stats.status === 'behind-schedule') statusLabel = 'Behind Schedule';
+            else if (stats.status === 'tight') statusLabel = 'Tight';
+            else statusLabel = 'On Track';
+            status.textContent = statusLabel;
+            // Tooltip explaining the reason
+            if (stats.reason) {
+              status.title = stats.reason;
+            }
             item.appendChild(status);
             wrapper.appendChild(item);
           });
@@ -703,12 +787,18 @@
           data.projects.forEach(project => {
             const stats = computeProjectStats(project);
             const tr = document.createElement('tr');
+            // Determine human-friendly label and color for status
+            let statusLabel;
+            if (stats.status === 'over-budget') statusLabel = 'Over Budget';
+            else if (stats.status === 'behind-schedule') statusLabel = 'Behind Schedule';
+            else if (stats.status === 'tight') statusLabel = 'Tight';
+            else statusLabel = 'On Track';
             tr.innerHTML = `
               <td>${project.name}</td>
               <td>${project.client || '-'}</td>
               <td>${stats.totalHours.toFixed(1)}h</td>
               <td>${project.budgetHours.toFixed(1)}h</td>
-              <td><span class="status-badge ${stats.status}">${stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk')}</span></td>
+              <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
               <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h</td>
               <td>${stats.lastWeekHours.toFixed(1)}h</td>
               <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</td>
@@ -737,6 +827,12 @@
           }
           data.projects.forEach(project => {
             const stats = computeProjectStats(project);
+            // Determine a human-friendly status label and color
+            let statusLabel;
+            if (stats.status === 'over-budget') statusLabel = 'Over Budget';
+            else if (stats.status === 'behind-schedule') statusLabel = 'Behind Schedule';
+            else if (stats.status === 'tight') statusLabel = 'Tight';
+            else statusLabel = 'On Track';
             const card = document.createElement('div');
             card.className = 'card';
             card.innerHTML = `
@@ -756,10 +852,41 @@
                 <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
-              <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.status}">${stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk')}</span></p>
-              <button class="btn danger" data-id="${project.id}" style="margin-top:0.5rem;">Delete</button>
+              <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
+              <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
+                <button class="btn secondary edit-btn" data-id="${project.id}">Edit</button>
+                <button class="btn danger delete-btn" data-id="${project.id}">Delete</button>
+              </div>
             `;
-            card.querySelector('button').addEventListener('click', () => {
+            // Edit button handler
+            const editBtn = card.querySelector('.edit-btn');
+            editBtn.addEventListener('click', () => {
+              // Prompt the user for new project details
+              const newName = prompt('Project Name:', project.name);
+              if (!newName) return;
+              const newClient = prompt('Client (optional):', project.client || '');
+              const newBudgetStr = prompt('Budget Hours:', project.budgetHours.toFixed(1));
+              const newBudget = parseFloat(newBudgetStr);
+              if (isNaN(newBudget)) return;
+              const newRateStr = prompt('Hourly Rate:', project.hourlyRate.toFixed(2));
+              const newRate = parseFloat(newRateStr);
+              if (isNaN(newRate)) return;
+              const newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
+              if (!newDeadline) return;
+              // Update project fields
+              project.name = newName.trim();
+              project.client = newClient ? newClient.trim() : null;
+              project.budgetHours = newBudget;
+              project.hourlyRate = newRate;
+              project.deadline = newDeadline;
+              saveData();
+              updateProjectsPage();
+              updateProjectSelects();
+              updateDashboard();
+            });
+            // Delete button handler
+            const deleteBtn = card.querySelector('.delete-btn');
+            deleteBtn.addEventListener('click', () => {
               if (confirm('Delete this project and its entries?')) {
                 data.projects = data.projects.filter(p => p.id !== project.id);
                 data.entries = data.entries.filter(e => e.projectId !== project.id);
@@ -807,38 +934,96 @@
         }
 
         // Timer section functions (reuse from previous implementation but adjust IDs)
-        function getRunningEntry() {
-          return data.entries.find(e => e.isRunning);
+        function getRunningEntries() {
+          // Return an array of all entries that are currently running
+          return data.entries.filter(e => e.isRunning);
         }
         function updateTimerSection() {
-          const runningEntry = getRunningEntry();
+          const runningEntries = getRunningEntries();
           const runningDiv = document.getElementById('runningTimerPro');
           const startDiv = document.getElementById('startTimerPro');
-          if (runningEntry) {
-            // Show the running timer and hide the start form
+          // Clear any previous interval that updated timers
+          clearInterval(timerInterval);
+          if (runningEntries.length > 0) {
+            // Show the running timers section and hide the start form
             runningDiv.style.display = '';
             startDiv.style.display = 'none';
-            const project = data.projects.find(p => p.id === runningEntry.projectId);
-            document.getElementById('runningProjectNamePro').textContent = project ? project.name : '';
-            // No description field for running timer
-            document.getElementById('runningStartTimePro').textContent = formatDateTime(runningEntry.startTime);
-            function tick() {
-              const now = new Date();
-              const start = new Date(runningEntry.startTime);
-              const seconds = Math.floor((now - start) / 1000);
-              document.getElementById('runningElapsedPro').textContent = formatDuration(seconds);
-            }
+            // Clear and rebuild the running timers list
+            runningDiv.innerHTML = '';
+            // Heading for running timers
+            const heading = document.createElement('h3');
+            heading.textContent = 'Running Timers';
+            heading.style.margin = '0 0 0.5rem 0';
+            heading.style.fontSize = '1.1rem';
+            heading.style.fontWeight = '600';
+            runningDiv.appendChild(heading);
+            // Render each running entry
+            runningEntries.forEach(entry => {
+              const project = data.projects.find(p => p.id === entry.projectId);
+              const row = document.createElement('div');
+              row.style.marginBottom = '0.75rem';
+              // Project name
+              const nameP = document.createElement('p');
+              nameP.innerHTML = '<strong>Project:</strong> ' + (project ? project.name : '');
+              row.appendChild(nameP);
+              // Started time
+              const startP = document.createElement('p');
+              startP.innerHTML = '<strong>Started:</strong> ' + formatDateTime(entry.startTime);
+              row.appendChild(startP);
+              // Elapsed time
+              const elapsedP = document.createElement('p');
+              elapsedP.innerHTML = '<strong>Elapsed:</strong> ';
+              const elapsedSpan = document.createElement('span');
+              elapsedSpan.id = 'runningElapsed-' + entry.id;
+              elapsedSpan.textContent = '';
+              elapsedP.appendChild(elapsedSpan);
+              row.appendChild(elapsedP);
+              // Stop button
+              const stopBtn = document.createElement('button');
+              stopBtn.className = 'btn danger';
+              stopBtn.textContent = 'Stop';
+              stopBtn.addEventListener('click', () => {
+                stopSingleTimer(entry.id);
+              });
+              row.appendChild(stopBtn);
+              runningDiv.appendChild(row);
+            });
+            // Start an interval that updates all running timers every second
+            const tick = () => {
+              runningEntries.forEach(entry => {
+                const now = new Date();
+                const start = new Date(entry.startTime);
+                const seconds = Math.floor((now - start) / 1000);
+                const span = document.getElementById('runningElapsed-' + entry.id);
+                if (span) span.textContent = formatDuration(seconds);
+              });
+            };
             tick();
-            clearInterval(timerInterval);
             timerInterval = setInterval(tick, 1000);
           } else {
-            // Hide running timer and show start form
+            // No running entries: hide running timer section and show start form
             runningDiv.style.display = 'none';
+            runningDiv.innerHTML = '';
             startDiv.style.display = '';
-            clearInterval(timerInterval);
           }
-          // update selects
+          // update project selects
           updateProjectSelects();
+        }
+
+        // Stop a single running timer by id
+        function stopSingleTimer(entryId) {
+          const running = data.entries.find(e => e.id === entryId && e.isRunning);
+          if (running) {
+            const end = new Date();
+            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
+            running.endTime = end.toISOString();
+            running.duration = duration;
+            running.isRunning = false;
+            saveData();
+            updateTimerSection();
+            updateDashboard();
+            updateEntriesTable();
+          }
         }
         let timerInterval = null;
         // Chart instances for weekly and monthly scatter plots
@@ -849,15 +1034,6 @@
           // Hours already spent when starting the timer
           const initialHours = parseFloat(document.getElementById('timerInitialPro').value) || 0;
           if (!projectId) return;
-          // stop running entry if exists
-          const running = getRunningEntry();
-          if (running) {
-            const end = new Date();
-            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
-            running.endTime = end.toISOString();
-            running.duration = duration;
-            running.isRunning = false;
-          }
           const now = new Date();
           // compute start time by subtracting already spent hours
           const start = new Date(now.getTime() - initialHours * 3600 * 1000);
@@ -879,18 +1055,11 @@
           updateDashboard();
         });
         document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
-          const running = getRunningEntry();
-          if (running) {
-            const end = new Date();
-            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
-            running.endTime = end.toISOString();
-            running.duration = duration;
-            running.isRunning = false;
-            saveData();
-            updateTimerSection();
-            updateDashboard();
-            updateEntriesTable();
-          }
+          // Stop all currently running timers
+          const runningList = getRunningEntries();
+          runningList.forEach(entry => {
+            stopSingleTimer(entry.id);
+          });
         });
 
         // Update project selects for timer and manual forms
