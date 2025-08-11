@@ -139,6 +139,8 @@
             <span>Enable auto sync to local file</span>
           </label>
           <p id="autoSyncStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;"></p>
+        <!-- Button to choose backup directory when enabling auto sync -->
+        <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
         </div>
       </section>
     </div>
@@ -199,6 +201,11 @@
 
         // Auto data sync flag. Determines whether data is automatically exported (downloaded) on changes.
         let autoSyncEnabled = false;
+        // Handle to the directory chosen by the user for backups (File System Access API). This
+        // will be set when the user picks a folder via the "Set Backup Folder" button. It is
+        // kept in-memory for the current session; due to browser security restrictions,
+        // directory handles cannot be serialized to localStorage for reuse across sessions.
+        let backupDirHandle = null;
         // Load persisted auto sync preference
         const autoSyncPref = localStorage.getItem('autoSyncEnabledPro');
         if (autoSyncPref !== null) {
@@ -219,17 +226,54 @@
           URL.revokeObjectURL(url);
         }
 
+        // Save the current data to the user-selected backup directory. If no directory
+        // has been chosen yet, this function silently does nothing. When called,
+        // it writes the entire data object to a file named `timekeeper-data.json` in
+        // the chosen folder using the File System Access API.
+        async function saveBackupToDir() {
+          try {
+            if (!backupDirHandle) return;
+            // Request permission to write. Some browsers may prompt the user here.
+            const fileHandle = await backupDirHandle.getFileHandle('timekeeper-data.json', { create: true });
+            const writable = await fileHandle.createWritable();
+            await writable.write(JSON.stringify(data, null, 2));
+            await writable.close();
+            // After successful backup, clear the needsBackup flag
+            needsBackup = false;
+          } catch (err) {
+            console.error('Saving backup failed:', err);
+          }
+        }
+
+        // Prompt the user to choose a backup directory using the File System Access API. When
+        // the directory is selected, set it as the backupDirHandle and enable auto sync.
+        async function chooseBackupDir() {
+          try {
+            const dirHandle = await window.showDirectoryPicker();
+            backupDirHandle = dirHandle;
+            // Enable auto sync once a folder is chosen
+            autoSyncEnabled = true;
+            localStorage.setItem('autoSyncEnabledPro', 'true');
+            // Reflect UI state if toggle exists
+            const toggle = document.getElementById('autoSyncToggle');
+            if (toggle) toggle.checked = true;
+            updateAutoSyncStatus();
+            // Immediately save a backup now that the directory is chosen
+            await saveBackupToDir();
+          } catch (err) {
+            console.error('Backup folder not selected:', err);
+          }
+        }
+
         // Periodically export data if there have been changes.
         // Runs every 10 minutes (600000 ms). Adjust interval as needed.
         setInterval(() => {
-          // Only perform automatic backups when auto sync is enabled
+          // Only perform automatic backups when auto sync is enabled. When a backup directory
+          // is selected, data will be written to the file; otherwise, nothing happens.
           if (autoSyncEnabled && needsBackup) {
-            try {
-              downloadData();
-              needsBackup = false;
-            } catch (err) {
+            saveBackupToDir().catch(err => {
               console.error('Auto backup failed:', err);
-            }
+            });
           }
         }, 600000);
 
@@ -1128,6 +1172,10 @@
           updateTimerSection();
           updateDashboard();
           updateEntriesTable();
+          // If auto sync is enabled, perform an immediate backup after stopping a timer
+          if (autoSyncEnabled) {
+            saveBackupToDir();
+          }
         }
         let timerInterval = null;
         // Chart instances for weekly and monthly scatter plots
@@ -1216,6 +1264,10 @@
           updateTimerSection();
           updateDashboard();
           updateEntriesTable();
+          // Immediate backup when stopping all timers if auto sync is enabled
+          if (autoSyncEnabled) {
+            saveBackupToDir();
+          }
         }
 
         // Update project selects for timer and manual forms
@@ -1407,6 +1459,21 @@
             autoSyncEnabled = autoSyncToggle.checked;
             localStorage.setItem('autoSyncEnabledPro', autoSyncEnabled);
             updateAutoSyncStatus();
+            // If user just enabled auto sync but no backup folder is set, prompt them to choose one.
+            if (autoSyncEnabled && !backupDirHandle) {
+              chooseBackupDir();
+            }
+          });
+        }
+
+        // Set Backup Folder button: prompts the user to pick a directory for backups. When
+        // auto sync is enabled and no directory is selected, clicking this button
+        // will call chooseBackupDir(). If auto sync is disabled, this button remains
+        // functional to allow the user to preselect a folder before enabling auto sync.
+        const chooseBtn = document.getElementById('chooseBackupDirBtn');
+        if (chooseBtn) {
+          chooseBtn.addEventListener('click', () => {
+            chooseBackupDir();
           });
         }
       })();
