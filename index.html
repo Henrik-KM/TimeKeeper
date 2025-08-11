@@ -28,7 +28,7 @@
         <div id="detailedBreakdown"></div>
 
         <!-- Recommendations Section: dynamically populated with suggested projects to work on -->
-        <div id="recommendations"></div>
+
 
         <!-- Scatter charts for project progress -->
         <div class="card" id="weeklyScatterCard">
@@ -130,6 +130,16 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Import Data</h3>
           <input id="importInputPro" type="file" accept="application/json" />
         </div>
+
+        <!-- Auto Sync card: allows toggling automatic periodic export of data -->
+        <div class="card" style="margin-top:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Auto Data Sync</h3>
+          <label style="display:flex; align-items:center; gap:0.5rem; cursor:pointer;">
+            <input type="checkbox" id="autoSyncToggle" />
+            <span>Enable auto sync to local file</span>
+          </label>
+          <p id="autoSyncStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;"></p>
+        </div>
       </section>
     </div>
     <script>
@@ -166,7 +176,7 @@
         let colorAssigned = false;
         data.projects.forEach(p => {
           if (!p.color) {
-            p.color = getRandomColor();
+            p.color = getUniqueColor();
             colorAssigned = true;
           }
         });
@@ -179,6 +189,14 @@
         let currentRecommendedMonthlyId = null;
         // Flag indicating whether data changed since last backup
         let needsBackup = false;
+
+        // Auto data sync flag. Determines whether data is automatically exported (downloaded) on changes.
+        let autoSyncEnabled = false;
+        // Load persisted auto sync preference
+        const autoSyncPref = localStorage.getItem('autoSyncEnabledPro');
+        if (autoSyncPref !== null) {
+          autoSyncEnabled = autoSyncPref === 'true';
+        }
 
         // Download the current data to a JSON file. Uses the same filename
         // each time so the browser can overwrite older backups.
@@ -197,7 +215,8 @@
         // Periodically export data if there have been changes.
         // Runs every 10 minutes (600000 ms). Adjust interval as needed.
         setInterval(() => {
-          if (needsBackup) {
+          // Only perform automatic backups when auto sync is enabled
+          if (autoSyncEnabled && needsBackup) {
             try {
               downloadData();
               needsBackup = false;
@@ -444,7 +463,7 @@
         // Dashboard rendering
         function updateDashboard() {
           const stats = computeGlobalStats();
-          // Determine recommended projects before building cards
+          // Determine recommended projects before building cards and assign global identifiers
           let maxWeeklyDeficitCard = -Infinity;
           let maxMonthlyDeficitCard = -Infinity;
           let recommendedWeeklyProject = null;
@@ -464,6 +483,9 @@
               }
             });
           }
+          // Update global identifiers so other sections know which projects are recommended
+          currentRecommendedWeeklyId = recommendedWeeklyProject ? recommendedWeeklyProject.id : null;
+          currentRecommendedMonthlyId = recommendedMonthlyProject ? recommendedMonthlyProject.id : null;
           // Stats cards data; integrate recommended project suggestions in week and month cards
           const cards = [
             {
@@ -556,48 +578,7 @@
           // Project status overview and detailed breakdown
           renderProjectOverview();
           renderDetailedBreakdown();
-          // Recommendations: determine which projects are most behind on weekly and monthly expectations
-          const recContainer = document.getElementById('recommendations');
-          if (recContainer) {
-            recContainer.innerHTML = '';
-            if (data.projects.length > 0) {
-              let maxWeeklyDeficit = -Infinity;
-              let maxMonthlyDeficit = -Infinity;
-              let recommendedWeekly = null;
-              let recommendedMonthly = null;
-              data.projects.forEach(project => {
-                const sp = computeProjectStats(project);
-                const weeklyDeficit = (sp.weeklyExpected || 0) - (sp.weeklyHours || 0);
-                if (weeklyDeficit > maxWeeklyDeficit) {
-                  maxWeeklyDeficit = weeklyDeficit;
-                  recommendedWeekly = project;
-                }
-                const monthlyDeficit = (sp.monthlyExpected || 0) - (sp.monthlyHours || 0);
-                if (monthlyDeficit > maxMonthlyDeficit) {
-                  maxMonthlyDeficit = monthlyDeficit;
-                  recommendedMonthly = project;
-                }
-              });
-              const recCard = document.createElement('div');
-              recCard.className = 'card';
-              const title = document.createElement('h3');
-              title.textContent = 'Recommended Projects';
-              title.style.margin = '0 0 0.5rem 0';
-              title.style.fontSize = '1.1rem';
-              title.style.fontWeight = '600';
-              recCard.appendChild(title);
-              const pWeek = document.createElement('p');
-              pWeek.innerHTML = '<strong>This Week:</strong> ' + (recommendedWeekly ? recommendedWeekly.name : '—');
-              recCard.appendChild(pWeek);
-              const pMonth = document.createElement('p');
-              pMonth.innerHTML = '<strong>This Month:</strong> ' + (recommendedMonthly ? recommendedMonthly.name : '—');
-              recCard.appendChild(pMonth);
-              recContainer.appendChild(recCard);
-              // Assign global recommended IDs for use in other render functions
-              currentRecommendedWeeklyId = recommendedWeekly ? recommendedWeekly.id : null;
-              currentRecommendedMonthlyId = recommendedMonthly ? recommendedMonthly.id : null;
-            }
-          }
+          // Previously there was a separate Recommendations card here. It has been removed in favor of integrating suggestions directly into other sections.
 
           // Prepare data for weekly and monthly scatter charts
           const weeklyDatasets = [];
@@ -976,7 +957,7 @@
             hourlyRate: rate,
             deadline,
             createdAt: new Date().toISOString(),
-            color: getRandomColor(),
+            color: getUniqueColor(),
             isActive: true
           };
           data.projects.push(newProject);
@@ -987,10 +968,24 @@
           updateDashboard();
         });
 
-        // Color generator for project dots
+        // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
-          const colors = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
-          return colors[Math.floor(Math.random() * colors.length)];
+          const palette = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+          return palette[Math.floor(Math.random() * palette.length)];
+        }
+
+        function getUniqueColor() {
+          const palette = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+          // Collect colors already used by existing projects
+          const used = new Set(data.projects.map(p => p.color).filter(c => c));
+          // Find a color not used yet
+          for (const col of palette) {
+            if (!used.has(col)) {
+              return col;
+            }
+          }
+          // If all colors are used, return a random one
+          return palette[Math.floor(Math.random() * palette.length)];
         }
 
         // Timer section functions (reuse from previous implementation but adjust IDs)
@@ -1266,6 +1261,27 @@
         updateProjectsPage();
         updateDashboard();
         updateTimerSection();
+
+        // Initialize auto sync toggle and status message
+        const autoSyncToggle = document.getElementById('autoSyncToggle');
+        const autoSyncStatusElem = document.getElementById('autoSyncStatus');
+        function updateAutoSyncStatus() {
+          if (!autoSyncStatusElem) return;
+          if (autoSyncEnabled) {
+            autoSyncStatusElem.textContent = 'Auto sync is ON. Data will be exported automatically.';
+          } else {
+            autoSyncStatusElem.textContent = 'Auto sync is OFF.';
+          }
+        }
+        if (autoSyncToggle) {
+          autoSyncToggle.checked = autoSyncEnabled;
+          updateAutoSyncStatus();
+          autoSyncToggle.addEventListener('change', () => {
+            autoSyncEnabled = autoSyncToggle.checked;
+            localStorage.setItem('autoSyncEnabledPro', autoSyncEnabled);
+            updateAutoSyncStatus();
+          });
+        }
       })();
     </script>
   </body>
