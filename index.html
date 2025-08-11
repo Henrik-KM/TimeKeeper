@@ -162,6 +162,21 @@
           needsBackup = true;
         }
         let data = loadData();
+        // Ensure every project has a color. For pre‑existing projects without a color, assign one.
+        let colorAssigned = false;
+        data.projects.forEach(p => {
+          if (!p.color) {
+            p.color = getRandomColor();
+            colorAssigned = true;
+          }
+        });
+        // Persist newly assigned colors once
+        if (colorAssigned) {
+          saveData();
+        }
+        // Global variables to track recommended projects (by id)
+        let currentRecommendedWeeklyId = null;
+        let currentRecommendedMonthlyId = null;
         // Flag indicating whether data changed since last backup
         let needsBackup = false;
 
@@ -429,7 +444,27 @@
         // Dashboard rendering
         function updateDashboard() {
           const stats = computeGlobalStats();
-          // Stats cards data
+          // Determine recommended projects before building cards
+          let maxWeeklyDeficitCard = -Infinity;
+          let maxMonthlyDeficitCard = -Infinity;
+          let recommendedWeeklyProject = null;
+          let recommendedMonthlyProject = null;
+          if (data.projects.length > 0) {
+            data.projects.forEach(project => {
+              const sp = computeProjectStats(project);
+              const weeklyDeficit = (sp.weeklyExpected || 0) - (sp.weeklyHours || 0);
+              if (weeklyDeficit > maxWeeklyDeficitCard) {
+                maxWeeklyDeficitCard = weeklyDeficit;
+                recommendedWeeklyProject = project;
+              }
+              const monthlyDeficit = (sp.monthlyExpected || 0) - (sp.monthlyHours || 0);
+              if (monthlyDeficit > maxMonthlyDeficitCard) {
+                maxMonthlyDeficitCard = monthlyDeficit;
+                recommendedMonthlyProject = project;
+              }
+            });
+          }
+          // Stats cards data; integrate recommended project suggestions in week and month cards
           const cards = [
             {
               title: "Today's Hours",
@@ -443,14 +478,14 @@
               value: stats.weekHours.toFixed(1) + ' / ' + (stats.weekTarget ? stats.weekTarget.toFixed(1) : '0') + 'h',
               progress: stats.weeklyProgress,
               icon: '📅',
-              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of target'
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : '')
             },
             {
               title: 'This Month',
               value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
               progress: stats.monthProgress,
               icon: '🗓',
-              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of target'
+              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : '')
             },
             {
               title: 'Active Projects',
@@ -558,6 +593,9 @@
               pMonth.innerHTML = '<strong>This Month:</strong> ' + (recommendedMonthly ? recommendedMonthly.name : '—');
               recCard.appendChild(pMonth);
               recContainer.appendChild(recCard);
+              // Assign global recommended IDs for use in other render functions
+              currentRecommendedWeeklyId = recommendedWeekly ? recommendedWeekly.id : null;
+              currentRecommendedMonthlyId = recommendedMonthly ? recommendedMonthly.id : null;
             }
           }
 
@@ -727,6 +765,23 @@
             nameDiv.style.fontWeight = '600';
             nameDiv.style.fontSize = '0.9rem';
             nameDiv.textContent = project.name;
+            // Add star markers for recommended projects
+            if (project.id === currentRecommendedWeeklyId) {
+              const starW = document.createElement('span');
+              starW.textContent = '★';
+              starW.style.color = '#ef4444';
+              starW.style.marginLeft = '0.25rem';
+              starW.title = 'Recommended this week';
+              nameDiv.appendChild(starW);
+            }
+            if (project.id === currentRecommendedMonthlyId) {
+              const starM = document.createElement('span');
+              starM.textContent = '★';
+              starM.style.color = '#f97316';
+              starM.style.marginLeft = '0.25rem';
+              starM.title = 'Recommended this month';
+              nameDiv.appendChild(starM);
+            }
             info.appendChild(nameDiv);
             const hoursDiv = document.createElement('div');
             hoursDiv.style.fontSize = '0.8rem';
@@ -786,6 +841,8 @@
           const tbody = document.createElement('tbody');
           data.projects.forEach(project => {
             const stats = computeProjectStats(project);
+            const isRecommendedWeekly = (project.id === currentRecommendedWeeklyId);
+            const isRecommendedMonthly = (project.id === currentRecommendedMonthlyId);
             const tr = document.createElement('tr');
             // Determine human-friendly label and color for status
             let statusLabel;
@@ -799,9 +856,9 @@
               <td>${stats.totalHours.toFixed(1)}h</td>
               <td>${project.budgetHours.toFixed(1)}h</td>
               <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
-              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h</td>
+              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''}</td>
               <td>${stats.lastWeekHours.toFixed(1)}h</td>
-              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</td>
+              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</td>
               <td>${formatCurrency(stats.revenue)}</td>
             `;
             tbody.appendChild(tr);
@@ -827,6 +884,9 @@
           }
           data.projects.forEach(project => {
             const stats = computeProjectStats(project);
+            // Determine if this project is the recommended one for this week or month
+            const isRecommendedWeekly = (project.id === currentRecommendedWeeklyId);
+            const isRecommendedMonthly = (project.id === currentRecommendedMonthlyId);
             // Determine a human-friendly status label and color
             let statusLabel;
             if (stats.status === 'over-budget') statusLabel = 'Over Budget';
@@ -845,11 +905,11 @@
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyHours / (stats.weeklyExpected || 1) * 100}%"></div></div>
-                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h</small>
+                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''}</small>
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyHours / (stats.monthlyExpected || 1) * 100}%"></div></div>
-                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</small>
+                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
               <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
@@ -945,9 +1005,10 @@
           // Clear any previous interval that updated timers
           clearInterval(timerInterval);
           if (runningEntries.length > 0) {
-            // Show the running timers section and hide the start form
+            // Show the running timers section
             runningDiv.style.display = '';
-            startDiv.style.display = 'none';
+            // Keep the start form visible to allow starting additional timers
+            startDiv.style.display = '';
             // Clear and rebuild the running timers list
             runningDiv.innerHTML = '';
             // Heading for running timers
