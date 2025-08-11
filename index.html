@@ -1,67 +1,1042 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TimeTracker Pro</title>
-  <link rel="stylesheet" href="./style.css?v=2">
-</head>
-<body>
-  <div class="sidebar">
-    <div class="logo">TimeTracker Pro</div>
-    <ul>
-      <li class="active">Dashboard</li>
-      <li>Timer</li>
-      <li>Projects</li>
-      <li>Entries</li>
-      <li>Import/Export</li>
-    </ul>
-  </div>
-  <div class="content">
-    <h1>Dashboard</h1>
-    <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-title">Today's Hours</div>
-        <div class="stat-value">0.0h</div>
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TimeKeeper Pro – Offline</title>
+    <!-- Chart.js for graphs -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="style.css">
+  </head>
+  <body>
+    <div class="sidebar">
+      <div class="logo">TimeTracker&nbsp;Pro</div>
+      <ul id="navList">
+        <li class="active" data-section="dashboard">Dashboard</li>
+        <li data-section="timer">Timer</li>
+        <li data-section="projects">Projects</li>
+        <li data-section="entries">Entries</li>
+        <li data-section="importExport">Import/Export</li>
+      </ul>
     </div>
-    <canvas id="weeklyScatter"></canvas>
-    <canvas id="monthlyScatter"></canvas>
-  </div>
+    <div class="content">
+      <!-- Dashboard Section -->
+      <section id="dashboard" class="section active">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
+        <div class="stats-grid" id="statsGrid"></div>
+        <div id="projectOverview"></div>
+        <div id="detailedBreakdown"></div>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script>
-    const weeklyCtx = document.getElementById('weeklyScatter').getContext('2d');
-    const monthlyCtx = document.getElementById('monthlyScatter').getContext('2d');
-
-    const scatterConfig = (label) => ({
-      type: 'scatter',
-      data: {
-        datasets: [{
-          label: label,
-          data: [{x:1,y:1},{x:2,y:1.5},{x:3,y:3}],
-          backgroundColor: 'blue'
-        },
-        {
-          label: 'Ideal (x=y)',
-          type: 'line',
-          data: Array.from({length:10}, (_,i)=>({x:i,y:i})),
-          borderColor: 'red',
-          fill: false
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          x: { type: 'linear', position: 'bottom' },
-          y: { type: 'linear' }
+        <!-- Scatter charts for project progress -->
+        <div class="card" id="weeklyScatterCard">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Weekly (Expected vs Actual)</h3>
+          <canvas id="weeklyScatter" height="200"></canvas>
+        </div>
+        <div class="card" id="monthlyScatterCard">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Monthly (Expected vs Actual)</h3>
+          <canvas id="monthlyScatter" height="200"></canvas>
+        </div>
+      </section>
+      <!-- Timer Section -->
+      <section id="timer" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Timer</h2>
+        <div id="runningTimerPro" class="card" style="display:none;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Running Timer</h3>
+          <p><strong>Project:</strong> <span id="runningProjectNamePro"></span></p>
+          <p><strong>Started:</strong> <span id="runningStartTimePro"></span></p>
+          <p><strong>Elapsed:</strong> <span id="runningElapsedPro"></span></p>
+          <button id="stopTimerBtnPro" class="btn danger">Stop</button>
+        </div>
+        <div id="startTimerPro" class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Start Timer</h3>
+          <label for="timerProjectPro" style="margin-bottom:0.25rem; font-weight:500;">Project</label>
+          <select id="timerProjectPro" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
+          <label for="timerInitialPro" style="margin-bottom:0.25rem; font-weight:500;">Hours already spent (optional)</label>
+          <input id="timerInitialPro" type="number" min="0" step="0.1" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 0.5" />
+          <button id="startTimerBtnPro" class="btn primary" disabled>Start</button>
+        </div>
+      </section>
+      <!-- Projects Section -->
+      <section id="projects" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Projects</h2>
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">New Project</h3>
+          <form id="projectFormPro" style="display:flex; flex-direction:column; gap:0.5rem;">
+            <label for="projectNamePro" style="font-weight:500;">Project Name</label>
+            <input id="projectNamePro" type="text" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <label for="projectClientPro" style="font-weight:500;">Client (optional)</label>
+            <input id="projectClientPro" type="text" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <label for="projectBudgetPro" style="font-weight:500;">Budget Hours</label>
+            <input id="projectBudgetPro" type="number" min="0" step="0.1" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <label for="projectRatePro" style="font-weight:500;">Hourly Rate</label>
+            <input id="projectRatePro" type="number" min="0" step="0.01" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <label for="projectDeadlinePro" style="font-weight:500;">Deadline</label>
+            <input id="projectDeadlinePro" type="date" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary" style="align-self:flex-start;">Add Project</button>
+          </form>
+        </div>
+        <div id="projectsPageList"></div>
+      </section>
+      <!-- Entries Section -->
+      <section id="entries" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Time Entries</h2>
+        <div class="card">
+          <div style="margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
+            <h3 style="margin:0; font-size:1.1rem; font-weight:600;">Entries</h3>
+            <button id="addManualEntryBtnPro" class="btn secondary">Add Manual Entry</button>
+          </div>
+          <div id="manualEntryFormPro" class="hidden" style="margin-top:1rem;">
+            <h4 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">New Manual Entry</h4>
+            <form id="manualFormPro" style="display:flex; flex-direction:column; gap:0.5rem;">
+              <label for="manualProjectPro" style="font-weight:500;">Project</label>
+              <select id="manualProjectPro" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
+              <label for="manualDescriptionPro" style="font-weight:500;">Description (optional)</label>
+              <input id="manualDescriptionPro" type="text" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+              <label for="manualHoursPro" style="font-weight:500;">Hours</label>
+              <input id="manualHoursPro" type="number" min="0" step="0.1" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 2" />
+              <button type="submit" class="btn primary" style="align-self:flex-start;">Save Entry</button>
+              <button type="button" id="cancelManualBtnPro" class="btn secondary" style="align-self:flex-start;">Cancel</button>
+            </form>
+          </div>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Project</th>
+                  <th>Description</th>
+                  <th>Start</th>
+                  <th>End</th>
+                  <th>Duration</th>
+                  <th>Total</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="entriesTableBodyPro"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+      <!-- Import/Export Section -->
+      <section id="importExport" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Import / Export</h2>
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Export Data</h3>
+          <button id="exportBtnPro" class="btn primary">Export JSON</button>
+        </div>
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Import Data</h3>
+          <input id="importInputPro" type="file" accept="application/json" />
+        </div>
+      </section>
+    </div>
+    <script>
+      (function() {
+        // Simple UUID generator
+        function uuid() {
+          return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+            const r = Math.random() * 16 | 0;
+            const v = c === 'x' ? r : (r & 0x3 | 0x8);
+            return v.toString(16);
+          });
         }
-      }
-    });
+        // Load and save data
+        function loadData() {
+          const raw = localStorage.getItem('timekeeperDataPro');
+          if (!raw) return { projects: [], entries: [] };
+          try {
+            const parsed = JSON.parse(raw);
+            return {
+              projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+              entries: Array.isArray(parsed.entries) ? parsed.entries : []
+            };
+          } catch (err) {
+            return { projects: [], entries: [] };
+          }
+        }
+        function saveData() {
+          localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
+          // Mark data as needing backup
+          needsBackup = true;
+        }
+        let data = loadData();
+        // Flag indicating whether data changed since last backup
+        let needsBackup = false;
 
-    new Chart(weeklyCtx, scatterConfig('Weekly Progress'));
-    new Chart(monthlyCtx, scatterConfig('Monthly Progress'));
-  </script>
-</body>
+        // Download the current data to a JSON file. Uses the same filename
+        // each time so the browser can overwrite older backups.
+        function downloadData() {
+          const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'timekeeper-offline-data.json';
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+        }
+
+        // Periodically export data if there have been changes.
+        // Runs every 10 minutes (600000 ms). Adjust interval as needed.
+        setInterval(() => {
+          if (needsBackup) {
+            try {
+              downloadData();
+              needsBackup = false;
+            } catch (err) {
+              console.error('Auto backup failed:', err);
+            }
+          }
+        }, 600000);
+
+        // Navigation
+        const navList = document.getElementById('navList');
+        navList.querySelectorAll('li').forEach(li => {
+          li.addEventListener('click', () => {
+            navList.querySelectorAll('li').forEach(item => item.classList.remove('active'));
+            li.classList.add('active');
+            const sectionId = li.getAttribute('data-section');
+            document.querySelectorAll('.section').forEach(sec => {
+              sec.style.display = 'none';
+            });
+            document.getElementById(sectionId).style.display = 'block';
+            // update content if needed
+            if (sectionId === 'dashboard') {
+              updateDashboard();
+            } else if (sectionId === 'projects') {
+              updateProjectsPage();
+            } else if (sectionId === 'entries') {
+              updateEntriesTable();
+            } else if (sectionId === 'timer') {
+              updateTimerSection();
+            }
+          });
+        });
+
+        // Helper functions for formatting
+        function formatDateTime(dateStr) {
+          const dt = new Date(dateStr);
+          return isNaN(dt) ? '' : dt.toLocaleString();
+        }
+        function formatDate(dateStr) {
+          const dt = new Date(dateStr);
+          return isNaN(dt) ? '' : dt.toLocaleDateString();
+        }
+        function formatCurrency(num) {
+          // Format currency as Swedish Krona. Place 'kr' after the amount.
+          return num.toFixed(2) + ' kr';
+        }
+        function formatDuration(seconds) {
+          const hrs = Math.floor(seconds / 3600);
+          const mins = Math.floor((seconds % 3600) / 60);
+          const secs = Math.floor(seconds % 60);
+          const parts = [];
+          if (hrs > 0) parts.push(hrs + 'h');
+          if (mins > 0 || hrs > 0) parts.push(mins + 'm');
+          parts.push(secs + 's');
+          return parts.join(' ');
+        }
+
+        // Compute statistics per project
+        function computeProjectStats(project) {
+          const now = new Date();
+          const entries = data.entries.filter(e => e.projectId === project.id && !e.isRunning);
+          const totalSeconds = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
+          const totalHours = totalSeconds / 3600;
+          const remainingHours = project.budgetHours - totalHours;
+          const created = new Date(project.createdAt);
+          const deadline = new Date(project.deadline);
+          const daysPassed = Math.max(1, Math.round((now - created) / (1000 * 60 * 60 * 24)));
+          const daysLeft = Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60 * 24)));
+          const avgDailyBurn = totalHours / daysPassed;
+          const daysToExhaust = avgDailyBurn > 0 ? remainingHours / avgDailyBurn : Infinity;
+          let status = 'green';
+          if (daysToExhaust < daysLeft - 3) status = 'red';
+          else if (Math.abs(daysToExhaust - daysLeft) <= 3) status = 'amber';
+          // Weekly and monthly expected hours
+          let weeklyExpected = 0;
+          let monthlyExpected = 0;
+          if (remainingHours > 0 && daysLeft > 0) {
+            const weeklyEst = (remainingHours / daysLeft) * 7;
+            weeklyExpected = Math.min(weeklyEst, remainingHours);
+            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+            const daysLeftInMonth = Math.max(0, Math.round((endOfMonth - now) / (1000 * 60 * 60 * 24)));
+            const daysLimited = Math.min(daysLeft, daysLeftInMonth);
+            const monthlyEst = (remainingHours / daysLeft) * daysLimited;
+            monthlyExpected = Math.min(monthlyEst, remainingHours);
+          }
+          // Weekly and last week hours
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
+          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+          const weeklySeconds = entries
+            .filter(e => new Date(e.startTime) >= weekStart)
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const weeklyHours = weeklySeconds / 3600;
+          const lastWeekSeconds = entries
+            .filter(e => new Date(e.startTime) >= lastWeekStart && new Date(e.startTime) < lastWeekEnd)
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const lastWeekHours = lastWeekSeconds / 3600;
+          // Monthly hours and last month hours
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+          const monthlySeconds = entries.filter(e => new Date(e.startTime) >= monthStart)
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const monthlyHours = monthlySeconds / 3600;
+          const lastMonthSeconds = entries.filter(e => new Date(e.startTime) >= lastMonthStart && new Date(e.startTime) < lastMonthEnd)
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const lastMonthHours = lastMonthSeconds / 3600;
+          // Revenue
+          const revenue = totalHours * project.hourlyRate;
+          const weeklyRevenue = weeklyHours * project.hourlyRate;
+          const lastWeekRevenue = lastWeekHours * project.hourlyRate;
+          const monthlyRevenue = monthlyHours * project.hourlyRate;
+          const lastMonthRevenue = lastMonthHours * project.hourlyRate;
+          return {
+            totalHours,
+            remainingHours,
+            usedPct: project.budgetHours > 0 ? (totalHours / project.budgetHours) * 100 : 0,
+            daysLeft,
+            daysPassed,
+            status,
+            weeklyExpected,
+            monthlyExpected,
+            weeklyHours,
+            lastWeekHours,
+            monthlyHours,
+            lastMonthHours,
+            revenue,
+            weeklyRevenue,
+            lastWeekRevenue,
+            monthlyRevenue,
+            lastMonthRevenue
+          };
+        }
+
+        // Compute global statistics
+        function computeGlobalStats() {
+          const now = new Date();
+          const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+          const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+          let todaySeconds = 0;
+          let yesterdaySeconds = 0;
+          let weekSeconds = 0;
+          let monthSeconds = 0;
+          let lastMonthSeconds = 0;
+          let totalRevenue = 0;
+          let monthlyRevenue = 0;
+          let lastMonthRevenue = 0;
+          let weeklyTarget = 0;
+          let monthTarget = 0;
+          // sum expected weekly and monthly hours from each project
+          data.projects.forEach(project => {
+            const stats = computeProjectStats(project);
+            weeklyTarget += stats.weeklyExpected;
+            monthTarget += stats.monthlyExpected;
+          });
+          data.entries.forEach(entry => {
+            if (entry.isRunning || !entry.duration) return;
+            const start = new Date(entry.startTime);
+            const project = data.projects.find(p => p.id === entry.projectId);
+            const hours = entry.duration / 3600;
+            if (!project) return;
+            if (start >= todayStart) {
+              todaySeconds += entry.duration;
+            }
+            if (start >= yesterdayStart && start < todayStart) {
+              yesterdaySeconds += entry.duration;
+            }
+            if (start >= weekStart) {
+              weekSeconds += entry.duration;
+            }
+            if (start >= monthStart) {
+              monthSeconds += entry.duration;
+              monthlyRevenue += hours * project.hourlyRate;
+            } else if (start >= lastMonthStart && start < lastMonthEnd) {
+              lastMonthSeconds += entry.duration;
+              lastMonthRevenue += hours * project.hourlyRate;
+            }
+            totalRevenue += hours * project.hourlyRate;
+          });
+          const todayHours = todaySeconds / 3600;
+          const yesterdayHours = yesterdaySeconds / 3600;
+          const weekHours = weekSeconds / 3600;
+          const monthHours = monthSeconds / 3600;
+          const lastMonthHours = lastMonthSeconds / 3600;
+          const weeklyProgress = weeklyTarget > 0 ? (weekHours / weeklyTarget) * 100 : 0;
+          const revenueChange = lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : null;
+          const todayChange = yesterdayHours > 0 ? ((todayHours - yesterdayHours) / yesterdayHours) * 100 : null;
+          const activeProjects = data.projects.length;
+          const dueThisWeek = data.projects.filter(p => {
+            const d = new Date(p.deadline);
+            const diffDays = Math.round((d - now) / (1000 * 60 * 60 * 24));
+            return diffDays >= 0 && diffDays <= 7;
+          }).length;
+          const monthProgress = monthTarget > 0 ? (monthHours / monthTarget) * 100 : 0;
+          return {
+            todayHours,
+            yesterdayHours,
+            weekHours,
+            weekTarget: weeklyTarget,
+            weeklyProgress,
+            monthHours,
+            monthTarget,
+            monthProgress,
+            monthRevenue: monthlyRevenue,
+            lastMonthRevenue,
+            revenueChange,
+            todayChange,
+            activeProjects,
+            dueThisWeek,
+            totalRevenue
+          };
+        }
+
+        // Dashboard rendering
+        function updateDashboard() {
+          const stats = computeGlobalStats();
+          // Stats cards data
+          const cards = [
+            {
+              title: "Today's Hours",
+              value: stats.todayHours.toFixed(1) + 'h',
+              change: stats.todayChange,
+              icon: '⏱',
+              changeLabel: 'vs yesterday'
+            },
+            {
+              title: 'This Week',
+              value: stats.weekHours.toFixed(1) + ' / ' + (stats.weekTarget ? stats.weekTarget.toFixed(1) : '0') + 'h',
+              progress: stats.weeklyProgress,
+              icon: '📅',
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of target'
+            },
+            {
+              title: 'This Month',
+              value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
+              progress: stats.monthProgress,
+              icon: '🗓',
+              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of target'
+            },
+            {
+              title: 'Active Projects',
+              value: stats.activeProjects.toString(),
+              changeLabel: stats.dueThisWeek + ' due this week',
+              change: null,
+              icon: '📁'
+            },
+            {
+              title: 'Revenue',
+              value: formatCurrency(stats.monthRevenue),
+              change: stats.revenueChange,
+              changeLabel: 'this month',
+              icon: '💰'
+            }
+          ];
+          const statsGrid = document.getElementById('statsGrid');
+          statsGrid.innerHTML = '';
+          cards.forEach(card => {
+            const div = document.createElement('div');
+            div.className = 'stat-card';
+            // icon
+            const iconDiv = document.createElement('div');
+            iconDiv.className = 'stat-icon';
+            iconDiv.textContent = card.icon;
+            div.appendChild(iconDiv);
+            // title
+            const titleDiv = document.createElement('div');
+            titleDiv.className = 'stat-title';
+            titleDiv.textContent = card.title;
+            div.appendChild(titleDiv);
+            // value
+            const valueDiv = document.createElement('div');
+            valueDiv.className = 'stat-value';
+            valueDiv.textContent = card.value;
+            div.appendChild(valueDiv);
+            // progress or change
+            if (card.progress !== undefined) {
+              // progress bar and label
+              const progressBar = document.createElement('div');
+              progressBar.className = 'progress-bar';
+              const fill = document.createElement('div');
+              fill.className = 'fill';
+              fill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
+              progressBar.appendChild(fill);
+              div.appendChild(progressBar);
+              const pLabel = document.createElement('div');
+              pLabel.className = 'stat-change';
+              pLabel.textContent = card.progressLabel || '';
+              pLabel.style.color = '#475569';
+              div.appendChild(pLabel);
+            } else {
+              const changeDiv = document.createElement('div');
+              changeDiv.className = 'stat-change';
+              if (card.change === null || card.change === undefined) {
+                changeDiv.textContent = card.changeLabel || '';
+                changeDiv.style.color = '#475569';
+              } else {
+                const change = card.change;
+                const prefix = change >= 0 ? '+' : '';
+                changeDiv.textContent = prefix + change.toFixed(0) + '% ' + card.changeLabel;
+                changeDiv.classList.add(change >= 0 ? 'positive' : 'negative');
+              }
+              div.appendChild(changeDiv);
+            }
+            statsGrid.appendChild(div);
+          });
+          // Project status overview and detailed breakdown
+          renderProjectOverview();
+          renderDetailedBreakdown();
+
+          // Prepare data for weekly and monthly scatter charts
+          const weeklyDatasets = [];
+          const monthlyDatasets = [];
+          // Track the maximum expected/actual values to draw an ideal x=y line
+          let maxWeeklyVal = 0;
+          let maxMonthlyVal = 0;
+          data.projects.forEach(project => {
+            const statsP = computeProjectStats(project);
+            const color = project.color || '#3b82f6';
+            weeklyDatasets.push({
+              label: project.name,
+              data: [{ x: statsP.weeklyExpected, y: statsP.weeklyHours }],
+              backgroundColor: color,
+              borderColor: color,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              showLine: false
+            });
+            monthlyDatasets.push({
+              label: project.name,
+              data: [{ x: statsP.monthlyExpected, y: statsP.monthlyHours }],
+              backgroundColor: color,
+              borderColor: color,
+              pointRadius: 5,
+              pointHoverRadius: 7,
+              showLine: false
+            });
+            // Update max values for diagonal line
+            maxWeeklyVal = Math.max(maxWeeklyVal, statsP.weeklyExpected, statsP.weeklyHours);
+            maxMonthlyVal = Math.max(maxMonthlyVal, statsP.monthlyExpected, statsP.monthlyHours);
+          });
+          // Add diagonal x=y guide line datasets to both charts
+          if (weeklyDatasets.length > 0) {
+            weeklyDatasets.unshift({
+              label: 'Ideal (x=y)',
+              data: [
+                { x: 0, y: 0 },
+                { x: maxWeeklyVal, y: maxWeeklyVal }
+              ],
+              borderColor: '#94a3b8',
+              borderDash: [5, 5],
+              showLine: true,
+              fill: false,
+              pointRadius: 0
+            });
+          }
+          if (monthlyDatasets.length > 0) {
+            monthlyDatasets.unshift({
+              label: 'Ideal (x=y)',
+              data: [
+                { x: 0, y: 0 },
+                { x: maxMonthlyVal, y: maxMonthlyVal }
+              ],
+              borderColor: '#94a3b8',
+              borderDash: [5, 5],
+              showLine: true,
+              fill: false,
+              pointRadius: 0
+            });
+          }
+          // Weekly scatter chart
+          const weeklyCanvas = document.getElementById('weeklyScatter');
+          if (weeklyCanvas) {
+            if (!weeklyScatterChart) {
+              const ctx = weeklyCanvas.getContext('2d');
+              weeklyScatterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: { datasets: weeklyDatasets },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: true, position: 'bottom', labels: { boxWidth: 12 } },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          const label = context.dataset.label || '';
+                          const xVal = context.parsed.x;
+                          const yVal = context.parsed.y;
+                          return label + ': Expected ' + xVal.toFixed(1) + 'h, Actual ' + yVal.toFixed(1) + 'h';
+                        }
+                      }
+                    },
+                    title: { display: false }
+                  },
+                  scales: {
+                    x: { title: { display: true, text: 'Expected Hours' }, beginAtZero: true },
+                    y: { title: { display: true, text: 'Actual Hours' }, beginAtZero: true }
+                  }
+                }
+              });
+            } else {
+              weeklyScatterChart.data.datasets = weeklyDatasets;
+              weeklyScatterChart.update();
+            }
+          }
+          // Monthly scatter chart
+          const monthlyCanvas = document.getElementById('monthlyScatter');
+          if (monthlyCanvas) {
+            if (!monthlyScatterChart) {
+              const ctx2 = monthlyCanvas.getContext('2d');
+              monthlyScatterChart = new Chart(ctx2, {
+                type: 'scatter',
+                data: { datasets: monthlyDatasets },
+                options: {
+                  responsive: true,
+                  maintainAspectRatio: false,
+                  plugins: {
+                    legend: { display: true, position: 'bottom', labels: { boxWidth: 12 } },
+                    tooltip: {
+                      callbacks: {
+                        label: function(context) {
+                          const label = context.dataset.label || '';
+                          const xVal = context.parsed.x;
+                          const yVal = context.parsed.y;
+                          return label + ': Expected ' + xVal.toFixed(1) + 'h, Actual ' + yVal.toFixed(1) + 'h';
+                        }
+                      }
+                    },
+                    title: { display: false }
+                  },
+                  scales: {
+                    x: { title: { display: true, text: 'Expected Hours' }, beginAtZero: true },
+                    y: { title: { display: true, text: 'Actual Hours' }, beginAtZero: true }
+                  }
+                }
+              });
+            } else {
+              monthlyScatterChart.data.datasets = monthlyDatasets;
+              monthlyScatterChart.update();
+            }
+          }
+        }
+
+        // Render project overview list
+        function renderProjectOverview() {
+          const container = document.getElementById('projectOverview');
+          container.innerHTML = '';
+          if (data.projects.length === 0) return;
+          const wrapper = document.createElement('div');
+          wrapper.className = 'project-list';
+          const header = document.createElement('div');
+          header.className = 'project-list-header';
+          header.textContent = 'Project Status Overview';
+          wrapper.appendChild(header);
+          data.projects.forEach(project => {
+            const stats = computeProjectStats(project);
+            const item = document.createElement('div');
+            item.className = 'project-item';
+            // info section
+            const info = document.createElement('div');
+            info.className = 'project-info';
+            const dot = document.createElement('div');
+            dot.className = 'dot';
+            dot.style.backgroundColor = project.color || '#3b82f6';
+            info.appendChild(dot);
+            const nameDiv = document.createElement('div');
+            nameDiv.style.fontWeight = '600';
+            nameDiv.style.fontSize = '0.9rem';
+            nameDiv.textContent = project.name;
+            info.appendChild(nameDiv);
+            const hoursDiv = document.createElement('div');
+            hoursDiv.style.fontSize = '0.8rem';
+            hoursDiv.style.color = '#64748b';
+            hoursDiv.textContent = stats.totalHours.toFixed(1) + 'h / ' + project.budgetHours.toFixed(1) + 'h';
+            info.appendChild(hoursDiv);
+            item.appendChild(info);
+            // progress bar container
+            const progressContainer = document.createElement('div');
+            progressContainer.style.flex = '1';
+            progressContainer.style.margin = '0 1rem';
+            const bar = document.createElement('div');
+            bar.className = 'progress-bar';
+            const fill = document.createElement('div');
+            fill.className = 'fill';
+            fill.style.width = Math.min(100, stats.usedPct).toFixed(1) + '%';
+            bar.appendChild(fill);
+            progressContainer.appendChild(bar);
+            item.appendChild(progressContainer);
+            // status
+            const status = document.createElement('span');
+            status.className = 'status-badge ' + stats.status;
+            status.textContent = stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk');
+            item.appendChild(status);
+            wrapper.appendChild(item);
+          });
+          container.appendChild(wrapper);
+        }
+
+        // Render detailed project breakdown table
+        function renderDetailedBreakdown() {
+          const container = document.getElementById('detailedBreakdown');
+          container.innerHTML = '';
+          if (data.projects.length === 0) return;
+          const card = document.createElement('div');
+          card.className = 'card';
+          const heading = document.createElement('h3');
+          heading.textContent = 'Detailed Project Breakdown';
+          heading.style.margin = '0 0 0.5rem 0';
+          heading.style.fontSize = '1.1rem';
+          heading.style.fontWeight = '600';
+          card.appendChild(heading);
+          const table = document.createElement('table');
+          const thead = document.createElement('thead');
+          thead.innerHTML = '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>This Month</th><th>Revenue</th></tr>';
+          table.appendChild(thead);
+          const tbody = document.createElement('tbody');
+          data.projects.forEach(project => {
+            const stats = computeProjectStats(project);
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${project.name}</td>
+              <td>${project.client || '-'}</td>
+              <td>${stats.totalHours.toFixed(1)}h</td>
+              <td>${project.budgetHours.toFixed(1)}h</td>
+              <td><span class="status-badge ${stats.status}">${stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk')}</span></td>
+              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h</td>
+              <td>${stats.lastWeekHours.toFixed(1)}h</td>
+              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</td>
+              <td>${formatCurrency(stats.revenue)}</td>
+            `;
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          card.appendChild(table);
+          container.appendChild(card);
+        }
+
+        // Projects page rendering
+        function updateProjectsPage() {
+          updateProjectSelects();
+          renderProjectsPageList();
+        }
+        function renderProjectsPageList() {
+          const container = document.getElementById('projectsPageList');
+          container.innerHTML = '';
+          if (data.projects.length === 0) {
+            const p = document.createElement('p');
+            p.textContent = 'No projects yet.';
+            container.appendChild(p);
+            return;
+          }
+          data.projects.forEach(project => {
+            const stats = computeProjectStats(project);
+            const card = document.createElement('div');
+            card.className = 'card';
+            card.innerHTML = `
+              <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">${project.name}</h3>
+              <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${project.client || '-'}</p>
+              <p style="margin:0 0 0.25rem 0;"><strong>Budget:</strong> ${project.budgetHours.toFixed(1)}h @ ${formatCurrency(project.hourlyRate)}</p>
+              <div style="margin:0.5rem 0;">
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${Math.min(100, stats.usedPct).toFixed(1)}%;"></div></div>
+                <small>${stats.totalHours.toFixed(1)}h used (${stats.usedPct.toFixed(1)}%), ${stats.remainingHours.toFixed(1)}h left</small>
+              </div>
+              <div style="margin:0.5rem 0;">
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyHours / (stats.weeklyExpected || 1) * 100}%"></div></div>
+                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h</small>
+              </div>
+              <div style="margin:0.5rem 0;">
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyHours / (stats.monthlyExpected || 1) * 100}%"></div></div>
+                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h</small>
+              </div>
+              <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
+              <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.status}">${stats.status === 'green' ? 'on-track' : (stats.status === 'amber' ? 'amber' : 'at risk')}</span></p>
+              <button class="btn danger" data-id="${project.id}" style="margin-top:0.5rem;">Delete</button>
+            `;
+            card.querySelector('button').addEventListener('click', () => {
+              if (confirm('Delete this project and its entries?')) {
+                data.projects = data.projects.filter(p => p.id !== project.id);
+                data.entries = data.entries.filter(e => e.projectId !== project.id);
+                saveData();
+                updateProjectsPage();
+                updateDashboard();
+              }
+            });
+            container.appendChild(card);
+          });
+        }
+
+        // Create new project
+        document.getElementById('projectFormPro').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const name = document.getElementById('projectNamePro').value.trim();
+          const client = document.getElementById('projectClientPro').value.trim();
+          const budget = parseFloat(document.getElementById('projectBudgetPro').value);
+          const rate = parseFloat(document.getElementById('projectRatePro').value);
+          const deadline = document.getElementById('projectDeadlinePro').value;
+          if (!name || !deadline) return;
+          const newProject = {
+            id: uuid(),
+            name,
+            client: client || null,
+            budgetHours: budget,
+            hourlyRate: rate,
+            deadline,
+            createdAt: new Date().toISOString(),
+            color: getRandomColor(),
+            isActive: true
+          };
+          data.projects.push(newProject);
+          saveData();
+          e.target.reset();
+          updateProjectsPage();
+          updateProjectSelects();
+          updateDashboard();
+        });
+
+        // Color generator for project dots
+        function getRandomColor() {
+          const colors = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
+          return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        // Timer section functions (reuse from previous implementation but adjust IDs)
+        function getRunningEntry() {
+          return data.entries.find(e => e.isRunning);
+        }
+        function updateTimerSection() {
+          const runningEntry = getRunningEntry();
+          const runningDiv = document.getElementById('runningTimerPro');
+          const startDiv = document.getElementById('startTimerPro');
+          if (runningEntry) {
+            // Show the running timer and hide the start form
+            runningDiv.style.display = '';
+            startDiv.style.display = 'none';
+            const project = data.projects.find(p => p.id === runningEntry.projectId);
+            document.getElementById('runningProjectNamePro').textContent = project ? project.name : '';
+            // No description field for running timer
+            document.getElementById('runningStartTimePro').textContent = formatDateTime(runningEntry.startTime);
+            function tick() {
+              const now = new Date();
+              const start = new Date(runningEntry.startTime);
+              const seconds = Math.floor((now - start) / 1000);
+              document.getElementById('runningElapsedPro').textContent = formatDuration(seconds);
+            }
+            tick();
+            clearInterval(timerInterval);
+            timerInterval = setInterval(tick, 1000);
+          } else {
+            // Hide running timer and show start form
+            runningDiv.style.display = 'none';
+            startDiv.style.display = '';
+            clearInterval(timerInterval);
+          }
+          // update selects
+          updateProjectSelects();
+        }
+        let timerInterval = null;
+        // Chart instances for weekly and monthly scatter plots
+        let weeklyScatterChart = null;
+        let monthlyScatterChart = null;
+        document.getElementById('startTimerBtnPro').addEventListener('click', () => {
+          const projectId = document.getElementById('timerProjectPro').value;
+          // Hours already spent when starting the timer
+          const initialHours = parseFloat(document.getElementById('timerInitialPro').value) || 0;
+          if (!projectId) return;
+          // stop running entry if exists
+          const running = getRunningEntry();
+          if (running) {
+            const end = new Date();
+            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
+            running.endTime = end.toISOString();
+            running.duration = duration;
+            running.isRunning = false;
+          }
+          const now = new Date();
+          // compute start time by subtracting already spent hours
+          const start = new Date(now.getTime() - initialHours * 3600 * 1000);
+          const newEntry = {
+            id: uuid(),
+            projectId,
+            description: '',
+            startTime: start.toISOString(),
+            endTime: null,
+            duration: null,
+            isRunning: true,
+            createdAt: now.toISOString()
+          };
+          data.entries.push(newEntry);
+          // reset initial input
+          document.getElementById('timerInitialPro').value = '';
+          saveData();
+          updateTimerSection();
+          updateDashboard();
+        });
+        document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
+          const running = getRunningEntry();
+          if (running) {
+            const end = new Date();
+            const duration = Math.floor((end - new Date(running.startTime)) / 1000);
+            running.endTime = end.toISOString();
+            running.duration = duration;
+            running.isRunning = false;
+            saveData();
+            updateTimerSection();
+            updateDashboard();
+            updateEntriesTable();
+          }
+        });
+
+        // Update project selects for timer and manual forms
+        function updateProjectSelects() {
+          const timerSelect = document.getElementById('timerProjectPro');
+          const manualSelect = document.getElementById('manualProjectPro');
+          timerSelect.innerHTML = '';
+          manualSelect.innerHTML = '';
+          if (data.projects.length === 0) {
+            const opt = document.createElement('option');
+            opt.value = '';
+            opt.textContent = '-- no projects --';
+            timerSelect.appendChild(opt);
+            manualSelect.appendChild(opt.cloneNode(true));
+            document.getElementById('startTimerBtnPro').disabled = true;
+            return;
+          }
+          data.projects.forEach(project => {
+            const o1 = document.createElement('option');
+            o1.value = project.id;
+            o1.textContent = project.name;
+            timerSelect.appendChild(o1);
+            const o2 = document.createElement('option');
+            o2.value = project.id;
+            o2.textContent = project.name;
+            manualSelect.appendChild(o2);
+          });
+          document.getElementById('startTimerBtnPro').disabled = false;
+        }
+        // Manual entry add/cancel
+        document.getElementById('addManualEntryBtnPro').addEventListener('click', () => {
+          document.getElementById('manualEntryFormPro').classList.remove('hidden');
+        });
+        document.getElementById('cancelManualBtnPro').addEventListener('click', () => {
+          document.getElementById('manualEntryFormPro').classList.add('hidden');
+          document.getElementById('manualFormPro').reset();
+        });
+        document.getElementById('manualFormPro').addEventListener('submit', (e) => {
+          e.preventDefault();
+          const projectId = document.getElementById('manualProjectPro').value;
+          const description = document.getElementById('manualDescriptionPro').value.trim();
+          const hoursVal = parseFloat(document.getElementById('manualHoursPro').value);
+          if (!projectId || isNaN(hoursVal) || hoursVal <= 0) return;
+          const now = new Date();
+          const durationSeconds = Math.floor(hoursVal * 3600);
+          // start time is computed as end time minus duration
+          const startTime = new Date(now.getTime() - durationSeconds * 1000);
+          const newEntry = {
+            id: uuid(),
+            projectId,
+            description,
+            startTime: startTime.toISOString(),
+            endTime: now.toISOString(),
+            duration: durationSeconds,
+            isRunning: false,
+            createdAt: now.toISOString()
+          };
+          data.entries.push(newEntry);
+          saveData();
+          e.target.reset();
+          document.getElementById('manualEntryFormPro').classList.add('hidden');
+          updateEntriesTable();
+          updateDashboard();
+          updateProjectsPage();
+        });
+
+        // Delete entry
+        function deleteEntry(id) {
+          data.entries = data.entries.filter(e => e.id !== id);
+          saveData();
+          updateEntriesTable();
+          updateDashboard();
+          updateProjectsPage();
+        }
+
+        // Entries table
+        function updateEntriesTable() {
+          const tbody = document.getElementById('entriesTableBodyPro');
+          tbody.innerHTML = '';
+          if (data.entries.length === 0) {
+            const tr = document.createElement('tr');
+            const td = document.createElement('td');
+            td.colSpan = 7;
+            td.textContent = 'No entries yet.';
+            td.style.textAlign = 'center';
+            tr.appendChild(td);
+            tbody.appendChild(tr);
+            return;
+          }
+          // sort by start time desc
+          const sorted = [...data.entries].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+          sorted.forEach(entry => {
+            const tr = document.createElement('tr');
+            const project = data.projects.find(p => p.id === entry.projectId);
+            const hours = entry.duration ? entry.duration / 3600 : 0;
+            const total = project ? hours * project.hourlyRate : 0;
+            tr.innerHTML = `
+              <td>${project ? project.name : ''}</td>
+              <td>${entry.description || ''}</td>
+              <td>${formatDateTime(entry.startTime)}</td>
+              <td>${entry.endTime ? formatDateTime(entry.endTime) : (entry.isRunning ? '—' : '')}</td>
+              <td>${entry.duration ? formatDuration(entry.duration) : (entry.isRunning ? 'Running…' : '')}</td>
+              <td>${formatCurrency(total)}</td>
+              <td><button class="btn danger" data-id="${entry.id}" style="padding:0.25rem 0.5rem; font-size:0.75rem;">Delete</button></td>
+            `;
+            tr.querySelector('button').addEventListener('click', () => {
+              if (confirm('Delete this entry?')) deleteEntry(entry.id);
+            });
+            tbody.appendChild(tr);
+          });
+        }
+
+        // Export / Import
+        document.getElementById('exportBtnPro').addEventListener('click', () => {
+          // Use shared downloadData function for exports
+          downloadData();
+        });
+        document.getElementById('importInputPro').addEventListener('change', async (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const text = await file.text();
+          try {
+            const imported = JSON.parse(text);
+            if (!Array.isArray(imported.projects) || !Array.isArray(imported.entries)) {
+              alert('Invalid data format');
+              return;
+            }
+            data = imported;
+            saveData();
+            updateDashboard();
+            updateProjectsPage();
+            updateEntriesTable();
+            updateTimerSection();
+            alert('Data imported successfully');
+          } catch (err) {
+            alert('Failed to import: ' + err.message);
+          }
+        });
+
+        // Initial render
+        updateProjectSelects();
+        updateEntriesTable();
+        updateProjectsPage();
+        updateDashboard();
+        updateTimerSection();
+      })();
+    </script>
+  </body>
 </html>
