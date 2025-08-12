@@ -17,6 +17,7 @@
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
+        <li data-section="todo">Todo</li>
       </ul>
     </div>
     <div class="content">
@@ -143,6 +144,24 @@
         <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
         </div>
       </section>
+
+      <!-- Todo Section -->
+      <section id="todo" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Todo</h2>
+        <!-- Form to add new todo item -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Task</h3>
+          <form id="todoForm" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
+            <input id="todoName" type="text" required placeholder="Task name" style="flex:1; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+        </div>
+        <!-- List of tasks -->
+        <div class="card" id="todoListContainer">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Tasks</h3>
+          <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+      </section>
     </div>
     <script>
       (function() {
@@ -157,15 +176,16 @@
         // Load and save data
         function loadData() {
           const raw = localStorage.getItem('timekeeperDataPro');
-          if (!raw) return { projects: [], entries: [] };
+          if (!raw) return { projects: [], entries: [], todos: [] };
           try {
             const parsed = JSON.parse(raw);
             return {
               projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-              entries: Array.isArray(parsed.entries) ? parsed.entries : []
+              entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+              todos: Array.isArray(parsed.todos) ? parsed.todos : []
             };
           } catch (err) {
-            return { projects: [], entries: [] };
+            return { projects: [], entries: [], todos: [] };
           }
         }
         function saveData() {
@@ -181,6 +201,31 @@
           return 1 / (1 + (n - 1) / 3);
         }
         let data = loadData();
+        // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
+        // mark all tasks as unchecked and update the reset date in localStorage. This ensures
+        // todos remain persistent week-to-week but are reset at the start of each new week.
+        function resetTodosIfNeeded() {
+          const today = new Date();
+          // Determine the Monday of this week
+          const monday = new Date(today);
+          const dow = monday.getDay();
+          const diffToMonday = (dow + 6) % 7;
+          monday.setDate(monday.getDate() - diffToMonday);
+          const mondayStr = monday.toDateString();
+          const lastReset = localStorage.getItem('todoResetDatePro');
+          if (lastReset !== mondayStr) {
+            // Reset checked state on all todos
+            if (Array.isArray(data.todos)) {
+              data.todos.forEach(t => {
+                t.checked = false;
+              });
+            }
+            localStorage.setItem('todoResetDatePro', mondayStr);
+            saveData();
+          }
+        }
+        // Perform initial todo reset check
+        resetTodosIfNeeded();
         // Ensure every project has a color and that colors are unique when possible.
         (function assignProjectColors() {
           const used = new Set();
@@ -215,6 +260,108 @@
         if (autoSyncPref !== null) {
           autoSyncEnabled = autoSyncPref === 'true';
         }
+
+        // -------------------------------------------------------------------------
+        //  Webhook support and Todo functionality
+        //
+        //  These constants define the webhook endpoints that should be called when
+        //  timers start and stop. They are used to toggle focus modes on the user's
+        //  Android and Windows devices. When the first timer starts, the start
+        //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
+        const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
+        const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
+
+        // Send a ping to each URL in the list. Uses navigator.sendBeacon where
+        // available to avoid blocking the page; falls back to fetch otherwise.
+        function triggerWebhooks(urls) {
+          urls.forEach(u => {
+            try {
+              navigator.sendBeacon(u);
+            } catch (err) {
+              // sendBeacon may not support GET-only endpoints; fallback to fetch
+              fetch(u, { method: 'GET', mode: 'no-cors' }).catch(() => {});
+            }
+          });
+        }
+
+        // Convenience wrappers to trigger start/stop webhooks.
+        function triggerFocusStart() {
+          triggerWebhooks(START_WEBHOOKS);
+        }
+        function triggerFocusStop() {
+          triggerWebhooks(STOP_WEBHOOKS);
+        }
+
+        // Update the Todo section UI based on the current data.todos array. Each
+        // todo displays a checkbox reflecting its checked state and a delete
+        // button. Changing the checkbox updates the corresponding task and
+        // persists to localStorage.
+        function updateTodoSection() {
+          const listEl = document.getElementById('todoList');
+          if (!listEl) return;
+          listEl.innerHTML = '';
+          const todos = Array.isArray(data.todos) ? data.todos : [];
+          todos.forEach((todo, index) => {
+            const li = document.createElement('li');
+            li.style.display = 'flex';
+            li.style.alignItems = 'center';
+            li.style.justifyContent = 'space-between';
+            li.style.padding = '0.25rem 0';
+            // Label containing checkbox and name
+            const label = document.createElement('label');
+            label.style.display = 'flex';
+            label.style.alignItems = 'center';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = !!todo.checked;
+            checkbox.addEventListener('change', () => {
+              todo.checked = checkbox.checked;
+              saveData();
+            });
+            const span = document.createElement('span');
+            span.textContent = todo.name || '';
+            span.style.marginLeft = '0.5rem';
+            label.appendChild(checkbox);
+            label.appendChild(span);
+            li.appendChild(label);
+            // Delete button to remove the task
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger';
+            delBtn.textContent = 'Delete';
+            delBtn.style.fontSize = '0.7rem';
+            delBtn.addEventListener('click', () => {
+              // Remove the todo at this index and re-render
+              data.todos.splice(index, 1);
+              saveData();
+              updateTodoSection();
+            });
+            li.appendChild(delBtn);
+            listEl.appendChild(li);
+          });
+        }
+
+        // Attach submit handler to the Todo form. When submitted, a new task is
+        // added to data.todos with a unique ID. The list is then re-rendered.
+        const todoForm = document.getElementById('todoForm');
+        if (todoForm) {
+          todoForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const nameInput = document.getElementById('todoName');
+            const name = nameInput.value.trim();
+            if (!name) return;
+            if (!Array.isArray(data.todos)) {
+              data.todos = [];
+            }
+            data.todos.push({ id: uuid(), name: name, checked: false });
+            saveData();
+            updateTodoSection();
+            nameInput.value = '';
+          });
+        }
+
+        // Render the todo list once on load so that tasks persist across
+        // navigation between sections.
+        updateTodoSection();
 
         // Download the current data to a JSON file. Uses the same filename
         // each time so the browser can overwrite older backups.
@@ -301,6 +448,8 @@
               updateEntriesTable();
             } else if (sectionId === 'timer') {
               updateTimerSection();
+            } else if (sectionId === 'todo') {
+              updateTodoSection();
             }
           });
         });
@@ -1252,6 +1401,10 @@
           if (autoSyncEnabled) {
             saveBackupToDir();
           }
+          // If there are no more running timers after this stop, trigger focus stop hooks
+          if (getRunningEntries().length === 0) {
+            triggerFocusStop();
+          }
         }
         let timerInterval = null;
         // Chart instances for weekly and monthly scatter plots
@@ -1268,6 +1421,10 @@
           if (runningEntries.some(e => String(e.projectId) === String(projectId))) {
             alert('A timer is already running for this project. You cannot start another timer for the same project.');
             return;
+          }
+          // Trigger focus start if no timers were running previously
+          if (runningEntries.length === 0) {
+            triggerFocusStart();
           }
           const now = new Date();
           // Update all existing running entries: accumulate effective seconds and set new factor
@@ -1343,6 +1500,10 @@
           // Immediate backup when stopping all timers if auto sync is enabled
           if (autoSyncEnabled) {
             saveBackupToDir();
+          }
+          // If there are no more running timers after this stop, trigger focus stop hooks
+          if (getRunningEntries().length === 0) {
+            triggerFocusStop();
           }
         }
 
