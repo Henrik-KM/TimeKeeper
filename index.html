@@ -181,18 +181,22 @@
           return 1 / (1 + (n - 1) / 3);
         }
         let data = loadData();
-        // Ensure every project has a color. For pre‑existing projects without a color, assign one.
-        let colorAssigned = false;
-        data.projects.forEach(p => {
-          if (!p.color) {
-            p.color = getUniqueColor();
-            colorAssigned = true;
+        // Ensure every project has a color and that colors are unique when possible.
+        (function assignProjectColors() {
+          const used = new Set();
+          let assigned = false;
+          data.projects.forEach(p => {
+            // If project has a color but it has already been used by a previous project, treat as missing
+            if (!p.color || used.has(p.color)) {
+              p.color = getUniqueColor();
+              assigned = true;
+            }
+            used.add(p.color);
+          });
+          if (assigned) {
+            saveData();
           }
-        });
-        // Persist newly assigned colors once
-        if (colorAssigned) {
-          saveData();
-        }
+        })();
         // Global variables to track recommended projects (by id)
         let currentRecommendedWeeklyId = null;
         let currentRecommendedMonthlyId = null;
@@ -325,6 +329,23 @@
           return parts.join(' ');
         }
 
+        // Helper function: Count the number of working days (Mon-Fri) between two dates.
+        // The start date is inclusive and the end date is exclusive. If start >= end, returns 0.
+        function countWorkdays(startDate, endDate) {
+          const start = new Date(startDate.getFullYear(), startDate.getMonth(), startDate.getDate());
+          const end = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+          if (end <= start) return 0;
+          let count = 0;
+          let current = new Date(start);
+          while (current < end) {
+            const day = current.getDay();
+            // 1-5 are Monday to Friday (0=Sunday, 6=Saturday)
+            if (day >= 1 && day <= 5) count++;
+            current.setDate(current.getDate() + 1);
+          }
+          return count;
+        }
+
         // Compute statistics per project
         function computeProjectStats(project) {
           const now = new Date();
@@ -368,15 +389,27 @@
           // Weekly and monthly expected hours
           let weeklyExpected = 0;
           let monthlyExpected = 0;
-          if (remainingHours > 0 && daysLeft > 0) {
-            const weeklyEst = (remainingHours / daysLeft) * 7;
-            weeklyExpected = Math.min(weeklyEst, remainingHours);
-            const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-            const daysLeftInMonth = Math.max(0, Math.round((endOfMonth - now) / (1000 * 60 * 60 * 24)));
-            const daysLimited = Math.min(daysLeft, daysLeftInMonth);
-            const monthlyEst = (remainingHours / daysLeft) * daysLimited;
-            monthlyExpected = Math.min(monthlyEst, remainingHours);
-          }
+          // Calculate expected (target) hours to date for this week and this month.
+          // We base the daily budget on the total calendar days between project creation and deadline.
+          // This yields a more realistic expected-to-date value than strictly using working days, which can
+          // produce very small denominators when projects span long periods.
+          const totalDays = Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)) || 1;
+          const dailyBudget = project.budgetHours / totalDays;
+          // Determine the start of the current week (Monday) and the start of the current month
+          const startOfWeek = new Date(now);
+          const dow = startOfWeek.getDay();
+          const diffToMonday = (dow + 6) % 7;
+          startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
+          const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          // Compute calendar day counts relative to project creation date
+          const daysTillNow = Math.max(0, Math.ceil((now - created) / (1000 * 60 * 60 * 24)));
+          const daysTillStartOfWeekCal = Math.max(0, Math.ceil((startOfWeek - created) / (1000 * 60 * 60 * 24)));
+          const daysTillStartOfMonthCal = Math.max(0, Math.ceil((startOfMonth - created) / (1000 * 60 * 60 * 24)));
+          weeklyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfWeekCal));
+          monthlyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfMonthCal));
+          // Clamp expected values so they do not exceed the project's total budget hours
+          if (weeklyExpected > project.budgetHours) weeklyExpected = project.budgetHours;
+          if (monthlyExpected > project.budgetHours) monthlyExpected = project.budgetHours;
           // Weekly and last week hours
           const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
           const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
@@ -405,6 +438,16 @@
           const lastWeekRevenue = lastWeekHours * project.hourlyRate;
           const monthlyRevenue = monthlyHours * project.hourlyRate;
           const lastMonthRevenue = lastMonthHours * project.hourlyRate;
+          // Calculate constant weekly and monthly targets for this project. These targets are derived by
+          // spreading the total budget evenly across the total number of weeks and months between
+          // the project start and its deadline. We use calendar weeks (7‑day chunks) and calendar
+          // months (30‑day chunks) rather than working days so that targets are intuitive and stable.
+          // At least one week and one month are assumed to avoid division by zero.
+          const totalProjectDaysConst = Math.max(1, Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)));
+          const totalWeeksConst = Math.max(1, Math.ceil(totalProjectDaysConst / 7));
+          const totalMonthsConst = Math.max(1, Math.ceil(totalProjectDaysConst / 30));
+          const weeklyTargetConst = project.budgetHours / totalWeeksConst;
+          const monthlyTargetConst = project.budgetHours / totalMonthsConst;
           return {
             totalHours,
             remainingHours,
@@ -424,7 +467,9 @@
             weeklyRevenue,
             lastWeekRevenue,
             monthlyRevenue,
-            lastMonthRevenue
+            lastMonthRevenue,
+            weeklyTargetConst,
+            monthlyTargetConst
           };
         }
 
@@ -445,13 +490,20 @@
           let totalRevenue = 0;
           let monthlyRevenue = 0;
           let lastMonthRevenue = 0;
+          // Constant weekly and monthly targets for all projects. Each project's budget is spread evenly across
+          // its total duration in weeks and months (using calendar weeks of 7 days and months of 30 days). The
+          // sum of these per‑project targets represents the number of hours you should aim to work this week
+          // and this month across all projects.
           let weeklyTarget = 0;
           let monthTarget = 0;
-          // sum expected weekly and monthly hours from each project
           data.projects.forEach(project => {
-            const stats = computeProjectStats(project);
-            weeklyTarget += stats.weeklyExpected;
-            monthTarget += stats.monthlyExpected;
+            const created = new Date(project.createdAt);
+            const deadline = new Date(project.deadline);
+            const totalProjectDaysConst = Math.max(1, Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)));
+            const totalWeeksConst = Math.max(1, Math.ceil(totalProjectDaysConst / 7));
+            const totalMonthsConst = Math.max(1, Math.ceil(totalProjectDaysConst / 30));
+            weeklyTarget += project.budgetHours / totalWeeksConst;
+            monthTarget += project.budgetHours / totalMonthsConst;
           });
           data.entries.forEach(entry => {
             if (entry.isRunning || !entry.duration) return;
@@ -537,6 +589,11 @@
           // Update global identifiers so other sections know which projects are recommended
           currentRecommendedWeeklyId = recommendedWeeklyProject ? recommendedWeeklyProject.id : null;
           currentRecommendedMonthlyId = recommendedMonthlyProject ? recommendedMonthlyProject.id : null;
+          // Precompute per-project stats once for use in cards and recommendations. This avoids
+          // recalculating computeProjectStats multiple times during rendering.
+          const perProjectStats = data.projects.map(p => {
+            return { project: p, stats: computeProjectStats(p) };
+          });
           // Stats cards data; integrate recommended project suggestions in week and month cards
           const cards = [
             {
@@ -551,14 +608,16 @@
               value: stats.weekHours.toFixed(1) + ' / ' + (stats.weekTarget ? stats.weekTarget.toFixed(1) : '0') + 'h',
               progress: stats.weeklyProgress,
               icon: '📅',
-              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : '')
+              // Weekly progress shows how much of the constant weekly target has been completed.
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : '')
             },
             {
               title: 'This Month',
               value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
               progress: stats.monthProgress,
               icon: '🗓',
-              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : '')
+              // Monthly progress shows how much of the constant monthly target has been completed.
+              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : '')
             },
             {
               title: 'Active Projects',
@@ -623,6 +682,23 @@
                 changeDiv.classList.add(change >= 0 ? 'positive' : 'negative');
               }
               div.appendChild(changeDiv);
+            }
+            // If this card represents weekly or monthly totals, append per-project breakdowns underneath
+            if (card.title === 'This Week' || card.title === 'This Month') {
+              const targetList = document.createElement('div');
+              targetList.style.marginTop = '0.5rem';
+              perProjectStats.forEach(item => {
+                const row = document.createElement('div');
+                row.style.fontSize = '0.75rem';
+                row.style.color = '#475569';
+                if (card.title === 'This Week') {
+                  row.textContent = `${item.project.name}: ${item.stats.weeklyHours.toFixed(1)} / ${item.stats.weeklyTargetConst.toFixed(1)}h`;
+                } else {
+                  row.textContent = `${item.project.name}: ${item.stats.monthlyHours.toFixed(1)} / ${item.stats.monthlyTargetConst.toFixed(1)}h`;
+                }
+                targetList.appendChild(row);
+              });
+              div.appendChild(targetList);
             }
             statsGrid.appendChild(div);
           });
@@ -888,9 +964,9 @@
               <td>${stats.totalHours.toFixed(1)}h</td>
               <td>${project.budgetHours.toFixed(1)}h</td>
               <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
-              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''}</td>
+              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target to date)</td>
               <td>${stats.lastWeekHours.toFixed(1)}h</td>
-              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</td>
+              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target to date)</td>
               <td>${formatCurrency(stats.revenue)}</td>
             `;
             tbody.appendChild(tr);
@@ -937,11 +1013,11 @@
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyHours / (stats.weeklyExpected || 1) * 100}%"></div></div>
-                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''}</small>
+                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target to date)</small>
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyHours / (stats.monthlyExpected || 1) * 100}%"></div></div>
-                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</small>
+                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target to date)</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
               <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
@@ -1188,8 +1264,8 @@
           if (!projectId) return;
           // Check if there's already a running timer for this project
           const runningEntries = getRunningEntries();
-          // Prevent starting multiple timers for the same project. Compare loosely to allow numeric/string ids.
-          if (runningEntries.some(e => e.projectId == projectId)) {
+          // Prevent starting multiple timers for the same project. Compare string representations of IDs to avoid mismatches.
+          if (runningEntries.some(e => String(e.projectId) === String(projectId))) {
             alert('A timer is already running for this project. You cannot start another timer for the same project.');
             return;
           }
@@ -1298,8 +1374,7 @@
           // Disable timer options for projects that already have a running timer
           const runningProjects = getRunningEntries().map(e => e.projectId);
           timerSelect.querySelectorAll('option').forEach(opt => {
-            // Use loose comparison to avoid string/number mismatch when disabling options
-            const shouldDisable = runningProjects.some(id => id == opt.value);
+            const shouldDisable = runningProjects.some(id => String(id) === String(opt.value));
             opt.disabled = shouldDisable;
           });
           document.getElementById('startTimerBtnPro').disabled = false;
