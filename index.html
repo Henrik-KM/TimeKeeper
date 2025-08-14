@@ -12,8 +12,9 @@
     <div class="sidebar">
       <div class="logo">TimeTracker&nbsp;Pro</div>
       <ul id="navList">
-        <li class="active" data-section="dashboard">Dashboard</li>
-        <li data-section="timer">Timer</li>
+        <li data-section="dashboard">Dashboard</li>
+        <!-- Set Timer as the default active section -->
+        <li class="active" data-section="timer">Timer</li>
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
@@ -22,7 +23,8 @@
     </div>
     <div class="content">
       <!-- Dashboard Section -->
-      <section id="dashboard" class="section active">
+      <!-- Hide dashboard by default; timer will be the default visible section -->
+      <section id="dashboard" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
         <div class="stats-grid" id="statsGrid"></div>
         <div id="projectOverview"></div>
@@ -42,7 +44,8 @@
         </div>
       </section>
       <!-- Timer Section -->
-      <section id="timer" class="section" style="display:none;">
+      <!-- Timer section is visible by default -->
+      <section id="timer" class="section active">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Timer</h2>
         <div id="runningTimerPro" class="card" style="display:none;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Running Timer</h3>
@@ -628,6 +631,9 @@
           const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
           const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+          // Define last week's date range for revenue calculation (7 days before the current week)
+          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
+          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
           const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -639,6 +645,11 @@
           let totalRevenue = 0;
           let monthlyRevenue = 0;
           let lastMonthRevenue = 0;
+          // Revenue totals for today and this week (across all projects)
+          let todayRevenue = 0;
+          let yesterdayRevenue = 0;
+          let weekRevenue = 0;
+          let lastWeekRevenue = 0;
           // Constant weekly and monthly targets for all projects. Each project's budget is spread evenly across
           // its total duration in weeks and months (using calendar weeks of 7 days and months of 30 days). The
           // sum of these per‑project targets represents the number of hours you should aim to work this week
@@ -662,12 +673,15 @@
             if (!project) return;
             if (start >= todayStart) {
               todaySeconds += entry.duration;
+              todayRevenue += hours * project.hourlyRate;
             }
             if (start >= yesterdayStart && start < todayStart) {
               yesterdaySeconds += entry.duration;
+              yesterdayRevenue += hours * project.hourlyRate;
             }
             if (start >= weekStart) {
               weekSeconds += entry.duration;
+              weekRevenue += hours * project.hourlyRate;
             }
             if (start >= monthStart) {
               monthSeconds += entry.duration;
@@ -677,6 +691,10 @@
               lastMonthRevenue += hours * project.hourlyRate;
             }
             totalRevenue += hours * project.hourlyRate;
+            // Accumulate revenue for last week (previous 7 days before the current week)
+            if (start >= lastWeekStart && start < lastWeekEnd) {
+              lastWeekRevenue += hours * project.hourlyRate;
+            }
           });
           const todayHours = todaySeconds / 3600;
           const yesterdayHours = yesterdaySeconds / 3600;
@@ -693,6 +711,14 @@
             return diffDays >= 0 && diffDays <= 7;
           }).length;
           const monthProgress = monthTarget > 0 ? (monthHours / monthTarget) * 100 : 0;
+          // Weekly revenue change relative to last week
+          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
+          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+          // Compute revenue for last week if needed. Note: this loop is separate to avoid
+          // double-counting in the main loop above.
+          // Already computed lastWeekRevenue in entry loop above.
+          const weekRevenueChange = lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : null;
+          const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
           return {
             todayHours,
             yesterdayHours,
@@ -706,6 +732,11 @@
             lastMonthRevenue,
             revenueChange,
             todayChange,
+            // revenue today and this week
+            todayRevenue,
+            weekRevenue,
+            todayRevenueChange,
+            weekRevenueChange,
             activeProjects,
             dueThisWeek,
             totalRevenue
@@ -781,6 +812,22 @@
               change: stats.revenueChange,
               changeLabel: 'this month',
               icon: '💰'
+            },
+            // Revenue today card. Shows the total revenue earned across all projects for the current day.
+            {
+              title: 'Revenue Today',
+              value: formatCurrency(stats.todayRevenue || 0),
+              change: null,
+              changeLabel: 'today',
+              icon: '🪙'
+            },
+            // Revenue this week card. Shows the total revenue earned across all projects in the last seven days.
+            {
+              title: 'Revenue This Week',
+              value: formatCurrency(stats.weekRevenue || 0),
+              change: null,
+              changeLabel: 'this week',
+              icon: '💵'
             }
           ];
           const statsGrid = document.getElementById('statsGrid');
@@ -1289,6 +1336,11 @@
             heading.style.fontSize = '1.1rem';
             heading.style.fontWeight = '600';
             runningDiv.appendChild(heading);
+            // Display total earnings for all running timers
+            const totalEarnedP = document.createElement('p');
+            totalEarnedP.innerHTML = '<strong>Total Earned:</strong> <span id="runningTotalEarned"></span>';
+            totalEarnedP.style.marginBottom = '0.75rem';
+            runningDiv.appendChild(totalEarnedP);
             // Render each running entry
             runningEntries.forEach(entry => {
               const project = data.projects.find(p => p.id === entry.projectId);
@@ -1318,6 +1370,62 @@
               factorSpan.textContent = '';
               factorP.appendChild(factorSpan);
               row.appendChild(factorP);
+              // Factor override selector. Allows the user to override the concurrency factor
+              const overrideP = document.createElement('p');
+              overrideP.innerHTML = '<strong>Override:</strong> ';
+              const factorSelect = document.createElement('select');
+              factorSelect.style.marginLeft = '0.25rem';
+              // Default option for automatic concurrency (no override)
+              const optDef = document.createElement('option');
+              optDef.value = '';
+              optDef.textContent = 'Auto';
+              factorSelect.appendChild(optDef);
+              // Predefined override options
+              [
+                ['1', '100%'],
+                ['0.75', '75%'],
+                ['0.5', '50%'],
+                ['0.25', '25%']
+              ].forEach(([val, label]) => {
+                const opt = document.createElement('option');
+                opt.value = val;
+                opt.textContent = label;
+                factorSelect.appendChild(opt);
+              });
+              // Set current selection based on manualFactor
+              if (entry.manualFactor) {
+                factorSelect.value = String(entry.manualFactor);
+              } else {
+                factorSelect.value = '';
+              }
+              factorSelect.addEventListener('change', () => {
+                const v = factorSelect.value;
+                if (!v) {
+                  // Remove override: restore concurrency factor for this entry
+                  entry.manualFactor = null;
+                  const count = getRunningEntries().length;
+                  entry.factor = computeConcurrencyFactor(count);
+                } else {
+                  const fVal = parseFloat(v);
+                  entry.manualFactor = fVal;
+                  entry.factor = fVal;
+                }
+                // Reset timing baseline so the effectiveSeconds calculation starts fresh
+                entry.lastUpdateTime = new Date().toISOString();
+                saveData();
+                // Re-render the timer section to refresh display and apply changes
+                updateTimerSection();
+              });
+              overrideP.appendChild(factorSelect);
+              row.appendChild(overrideP);
+              // Earned display
+              const earnP = document.createElement('p');
+              earnP.innerHTML = '<strong>Earned:</strong> ';
+              const earnSpan = document.createElement('span');
+              earnSpan.id = 'runningEarned-' + entry.id;
+              earnSpan.textContent = '';
+              earnP.appendChild(earnSpan);
+              row.appendChild(earnP);
               // Stop button
               const stopBtn = document.createElement('button');
               stopBtn.className = 'btn danger';
@@ -1331,6 +1439,7 @@
             // Start an interval that updates all running timers every second
             const tick = () => {
               const now = new Date();
+              let totalEarned = 0;
               runningEntries.forEach(entry => {
                 // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
                 const last = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
@@ -1344,7 +1453,19 @@
                 // Update factor display as percentage
                 const factorSpan = document.getElementById('runningFactor-' + entry.id);
                 if (factorSpan) factorSpan.textContent = Math.round(factor * 100) + '%';
+                // Compute earned amount for this entry based on the project hourly rate
+                const project = data.projects.find(p => p.id === entry.projectId);
+                let earned = 0;
+                if (project) {
+                  earned = (effective / 3600) * (project.hourlyRate || 0);
+                }
+                const earnSpan = document.getElementById('runningEarned-' + entry.id);
+                if (earnSpan) earnSpan.textContent = formatCurrency(earned);
+                totalEarned += earned;
               });
+              // Update total earned across all running timers
+              const totalSpan = document.getElementById('runningTotalEarned');
+              if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned);
             };
             tick();
             timerInterval = setInterval(tick, 1000);
@@ -1387,9 +1508,11 @@
           const remaining = runningEntries.filter(e => e.id !== entryId);
           const newCount = remaining.length;
           const newFactor = computeConcurrencyFactor(newCount);
-          // Update remaining running entries: set new factor and lastUpdateTime
+          // Update remaining running entries: assign new factor only if no manual override
           remaining.forEach(e => {
-            e.factor = newFactor;
+            if (!e.manualFactor) {
+              e.factor = newFactor;
+            }
             e.lastUpdateTime = now.toISOString();
           });
           // Persist and refresh
@@ -1434,11 +1557,15 @@
             // Update effective seconds for elapsed time since last update
             const last = e.lastUpdateTime ? new Date(e.lastUpdateTime) : new Date(e.startTime);
             const elapsedSec = (now - last) / 1000;
+            // Use the previous factor (entry.factor) as the current weighted rate
             const prevFactor = e.factor || computeConcurrencyFactor(runningEntries.length);
             e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
+            // Update last update timestamp
             e.lastUpdateTime = now.toISOString();
-            // Assign new factor for all running entries
-            e.factor = newFactor;
+            // Only assign the new concurrency factor if no manual override exists
+            if (!e.manualFactor) {
+              e.factor = newFactor;
+            }
           });
           // Create new entry for the selected project
           // Set real start time by subtracting initial hours so the start time reflects the past
@@ -1455,7 +1582,10 @@
             // Track weighted timing fields
             effectiveSeconds: initialHours * 3600,
             lastUpdateTime: now.toISOString(),
-            factor: newFactor
+            // Concurrency factor for this entry. If the user later sets a manual
+            // override, this value will be replaced.
+            factor: newFactor,
+            manualFactor: null
           };
           data.entries.push(newEntry);
           // Reset initial input
@@ -1522,7 +1652,25 @@
             document.getElementById('startTimerBtnPro').disabled = true;
             return;
           }
-          data.projects.forEach(project => {
+          // Sort projects so that those most in need of attention appear first. We use the
+          // percentage of budget consumed (usedPct) as an urgency metric: higher values are
+          // more urgent and thus appear earlier in the dropdown. If usedPct is equal, fall
+          // back to original order.
+          const sortedProjects = data.projects.slice().sort((a, b) => {
+            try {
+              const statsA = computeProjectStats(a);
+              const statsB = computeProjectStats(b);
+              const usedA = statsA.usedPct || 0;
+              const usedB = statsB.usedPct || 0;
+              if (usedB > usedA) return 1;
+              if (usedB < usedA) return -1;
+            } catch (err) {
+              // Fallback to stable order if computeProjectStats fails
+              return 0;
+            }
+            return 0;
+          });
+          sortedProjects.forEach(project => {
             const o1 = document.createElement('option');
             o1.value = project.id;
             o1.textContent = project.name;
