@@ -12,9 +12,9 @@
     <div class="sidebar">
       <div class="logo">TimeTracker&nbsp;Pro</div>
       <ul id="navList">
-        <li data-section="dashboard">Dashboard</li>
-        <!-- Set Timer as the default active section -->
-        <li class="active" data-section="timer">Timer</li>
+        <!-- Set Dashboard tab without active class; we will programmatically activate the Timer tab on load -->
+        <li data-section="dashboard" class="active">Dashboard</li>
+        <li data-section="timer">Timer</li>
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
@@ -23,8 +23,7 @@
     </div>
     <div class="content">
       <!-- Dashboard Section -->
-      <!-- Hide dashboard by default; timer will be the default visible section -->
-      <section id="dashboard" class="section" style="display:none;">
+      <section id="dashboard" class="section">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
         <div class="stats-grid" id="statsGrid"></div>
         <div id="projectOverview"></div>
@@ -44,8 +43,7 @@
         </div>
       </section>
       <!-- Timer Section -->
-      <!-- Timer section is visible by default -->
-      <section id="timer" class="section active">
+      <section id="timer" class="section">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Timer</h2>
         <div id="runningTimerPro" class="card" style="display:none;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Running Timer</h3>
@@ -204,6 +202,13 @@
           return 1 / (1 + (n - 1) / 3);
         }
         let data = loadData();
+        // Initialize backup and sync flags before they are referenced in saveData().
+        // needsBackup tracks whether the data has changed and needs to be exported.
+        // autoSyncEnabled indicates whether automatic export is enabled.
+        // backupDirHandle holds the selected directory for backups via the File System Access API.
+        let needsBackup = false;
+        let autoSyncEnabled = false;
+        let backupDirHandle = null;
         // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
         // mark all tasks as unchecked and update the reset date in localStorage. This ensures
         // todos remain persistent week-to-week but are reset at the start of each new week.
@@ -248,16 +253,6 @@
         // Global variables to track recommended projects (by id)
         let currentRecommendedWeeklyId = null;
         let currentRecommendedMonthlyId = null;
-        // Flag indicating whether data changed since last backup
-        let needsBackup = false;
-
-        // Auto data sync flag. Determines whether data is automatically exported (downloaded) on changes.
-        let autoSyncEnabled = false;
-        // Handle to the directory chosen by the user for backups (File System Access API). This
-        // will be set when the user picks a folder via the "Set Backup Folder" button. It is
-        // kept in-memory for the current session; due to browser security restrictions,
-        // directory handles cannot be serialized to localStorage for reuse across sessions.
-        let backupDirHandle = null;
         // Load persisted auto sync preference
         const autoSyncPref = localStorage.getItem('autoSyncEnabledPro');
         if (autoSyncPref !== null) {
@@ -711,12 +706,9 @@
             return diffDays >= 0 && diffDays <= 7;
           }).length;
           const monthProgress = monthTarget > 0 ? (monthHours / monthTarget) * 100 : 0;
-          // Weekly revenue change relative to last week
-          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
-          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-          // Compute revenue for last week if needed. Note: this loop is separate to avoid
-          // double-counting in the main loop above.
-          // Already computed lastWeekRevenue in entry loop above.
+          // Weekly revenue change relative to last week. lastWeekRevenue was
+          // accumulated in the main entry loop above using the lastWeekStart
+          // and lastWeekEnd constants defined earlier in this function.
           const weekRevenueChange = lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : null;
           const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
           return {
@@ -1824,6 +1816,14 @@
         updateProjectsPage();
         updateDashboard();
         updateTimerSection();
+        // Programmatically activate the Timer tab on first load. This ensures the Timer
+        // section is displayed instead of the Dashboard when the page is opened. We
+        // simulate a click on the Timer navigation item which will trigger the
+        // navigation handler to set the active class and hide/show sections.
+        const timerNavItem = document.querySelector('#navList li[data-section="timer"]');
+        if (timerNavItem) {
+          timerNavItem.click();
+        }
 
         // Initialize auto sync toggle and status message
         const autoSyncToggle = document.getElementById('autoSyncToggle');
