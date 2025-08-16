@@ -130,6 +130,34 @@ body {
   width: 0%;
 }
 
+/* Multi progress bar to visualize time progress versus work progress. The first bar (time-fill)
+   represents how far through the week or month we are based on working days. The second bar
+   (hours-fill) represents how much of the weekly or monthly target has been completed. Both
+   bars are absolutely positioned within the same container so they stack neatly. */
+.progress-bar.multi {
+  position: relative;
+  height: 0.4rem;
+  background-color: #e2e8f0;
+  border-radius: 0.25rem;
+  overflow: hidden;
+}
+.progress-bar.multi .time-fill,
+.progress-bar.multi .hours-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  border-radius: 0.25rem;
+}
+.progress-bar.multi .time-fill {
+  background-color: #cbd5e1;
+  z-index: 0;
+}
+.progress-bar.multi .hours-fill {
+  background-color: #3b82f6;
+  z-index: 1;
+}
+
 /* Project status overview */
 .project-list {
   background-color: #ffffff;
