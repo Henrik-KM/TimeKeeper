@@ -766,27 +766,78 @@
           const perProjectStats = data.projects.map(p => {
             return { project: p, stats: computeProjectStats(p) };
           });
-          // Stats cards data; integrate recommended project suggestions in week and month cards
+          // Calculate working-day-based time progress for the current week and month. We count
+          // how many working days (Mon–Fri) have elapsed so far relative to the total number of
+          // working days in the week/month. These values are used to determine schedule
+          // comparisons between time progress and hours worked.
+          const nowTime = new Date();
+          // Compute weekly time progress as working days elapsed / total working days (Mon‑Fri)
+          const nowDay = nowTime.getDay();
+          const startWeek = new Date(nowTime);
+          const diffMon = (nowDay + 6) % 7;
+          startWeek.setDate(startWeek.getDate() - diffMon);
+          let workdaysElapsedWeek = 0;
+          for (let d = new Date(startWeek); d <= nowTime; d.setDate(d.getDate() + 1)) {
+            const day = d.getDay();
+            if (day >= 1 && day <= 5) workdaysElapsedWeek++;
+          }
+          const totalWorkdaysWeek = 5;
+          const weeklyTimeProgress = Math.min(workdaysElapsedWeek / totalWorkdaysWeek, 1) * 100;
+          // Compute monthly time progress similarly based on working days
+          const startMonth = new Date(nowTime.getFullYear(), nowTime.getMonth(), 1);
+          const startNextMonth = new Date(nowTime.getFullYear(), nowTime.getMonth() + 1, 1);
+          // Total working days in current month
+          let totalWorkdaysMonth = countWorkdays(startMonth, startNextMonth);
+          // Working days elapsed so far (include today if it's a workday)
+          let workdaysElapsedMonth = countWorkdays(startMonth, nowTime);
+          // Include current day if it is a working day (countWorkdays excludes end date)
+          const todayDay = nowTime.getDay();
+          if (todayDay >= 1 && todayDay <= 5) {
+            workdaysElapsedMonth++;
+          }
+          // Avoid division by zero
+          if (totalWorkdaysMonth === 0) totalWorkdaysMonth = 1;
+          const monthlyTimeProgress = Math.min(workdaysElapsedMonth / totalWorkdaysMonth, 1) * 100;
+
+          // Determine schedule status for weekly and monthly progress by comparing hours progress
+          // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
+          const weekHoursProgress = stats.weekTarget > 0 ? (stats.weekHours / stats.weekTarget) * 100 : 0;
+          const monthHoursProgress = stats.monthTarget > 0 ? (stats.monthHours / stats.monthTarget) * 100 : 0;
+          const weekScheduleDiff = weekHoursProgress - weeklyTimeProgress;
+          const monthScheduleDiff = monthHoursProgress - monthlyTimeProgress;
+          const weekScheduleLabel = weekScheduleDiff > 5 ? 'Ahead of schedule' : (weekScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
+          const monthScheduleLabel = monthScheduleDiff > 5 ? 'Ahead of schedule' : (monthScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
+
+          // Stats cards data; integrate recommendations and revenue into relevant cards. Cards with
+          // progress also include timeProgress and scheduleLabel for additional context.
           const cards = [
             {
               title: "Today's Hours",
               value: stats.todayHours.toFixed(1) + 'h',
               change: stats.todayChange,
               icon: '⏱',
-              changeLabel: 'vs yesterday'
+              changeLabel: 'vs yesterday',
+              // Revenue for today is shown on the same card
+              revenue: stats.todayRevenue || 0
             },
             {
               title: 'This Week',
               value: stats.weekHours.toFixed(1) + ' / ' + (stats.weekTarget ? stats.weekTarget.toFixed(1) : '0') + 'h',
               progress: stats.weeklyProgress,
+              timeProgress: weeklyTimeProgress,
+              scheduleLabel: weekScheduleLabel,
               icon: '📅',
               // Weekly progress shows how much of the constant weekly target has been completed.
-              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : '')
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : ''),
+              // Revenue for the week is shown on the same card
+              revenue: stats.weekRevenue || 0
             },
             {
               title: 'This Month',
               value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
               progress: stats.monthProgress,
+              timeProgress: monthlyTimeProgress,
+              scheduleLabel: monthScheduleLabel,
               icon: '🗓',
               // Monthly progress shows how much of the constant monthly target has been completed.
               progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : '')
@@ -804,22 +855,6 @@
               change: stats.revenueChange,
               changeLabel: 'this month',
               icon: '💰'
-            },
-            // Revenue today card. Shows the total revenue earned across all projects for the current day.
-            {
-              title: 'Revenue Today',
-              value: formatCurrency(stats.todayRevenue || 0),
-              change: null,
-              changeLabel: 'today',
-              icon: '🪙'
-            },
-            // Revenue this week card. Shows the total revenue earned across all projects in the last seven days.
-            {
-              title: 'Revenue This Week',
-              value: formatCurrency(stats.weekRevenue || 0),
-              change: null,
-              changeLabel: 'this week',
-              icon: '💵'
             }
           ];
           const statsGrid = document.getElementById('statsGrid');
@@ -844,20 +879,44 @@
             div.appendChild(valueDiv);
             // progress or change
             if (card.progress !== undefined) {
-              // progress bar and label
-              const progressBar = document.createElement('div');
-              progressBar.className = 'progress-bar';
-              const fill = document.createElement('div');
-              fill.className = 'fill';
-              fill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
-              progressBar.appendChild(fill);
-              div.appendChild(progressBar);
+              // Use a multi progress bar if timeProgress is provided, otherwise fallback to a single bar.
+              if (card.timeProgress !== undefined) {
+                const multiBar = document.createElement('div');
+                multiBar.className = 'progress-bar multi';
+                const timeFill = document.createElement('div');
+                timeFill.className = 'time-fill';
+                timeFill.style.width = Math.min(100, card.timeProgress).toFixed(1) + '%';
+                multiBar.appendChild(timeFill);
+                const hoursFill = document.createElement('div');
+                hoursFill.className = 'hours-fill';
+                hoursFill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
+                multiBar.appendChild(hoursFill);
+                div.appendChild(multiBar);
+              } else {
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                const fill = document.createElement('div');
+                fill.className = 'fill';
+                fill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
+                progressBar.appendChild(fill);
+                div.appendChild(progressBar);
+              }
+              // Label describing work progress relative to target
               const pLabel = document.createElement('div');
               pLabel.className = 'stat-change';
               pLabel.textContent = card.progressLabel || '';
               pLabel.style.color = '#475569';
               div.appendChild(pLabel);
+              // Schedule status label if provided (e.g., ahead/behind)
+              if (card.scheduleLabel) {
+                const schedLabel = document.createElement('div');
+                schedLabel.className = 'stat-change';
+                schedLabel.textContent = card.scheduleLabel;
+                schedLabel.style.color = '#475569';
+                div.appendChild(schedLabel);
+              }
             } else {
+              // Change or change label for cards without progress
               const changeDiv = document.createElement('div');
               changeDiv.className = 'stat-change';
               if (card.change === null || card.change === undefined) {
@@ -870,6 +929,14 @@
                 changeDiv.classList.add(change >= 0 ? 'positive' : 'negative');
               }
               div.appendChild(changeDiv);
+            }
+            // Append revenue information if provided on the card
+            if (card.revenue !== undefined) {
+              const revenueDiv = document.createElement('div');
+              revenueDiv.className = 'stat-change';
+              revenueDiv.textContent = 'Revenue: ' + formatCurrency(card.revenue);
+              revenueDiv.style.color = '#475569';
+              div.appendChild(revenueDiv);
             }
             // If this card represents weekly or monthly totals, append per-project breakdowns underneath
             if (card.title === 'This Week' || card.title === 'This Month') {
@@ -1085,18 +1152,44 @@
             hoursDiv.textContent = stats.totalHours.toFixed(1) + 'h / ' + project.budgetHours.toFixed(1) + 'h';
             info.appendChild(hoursDiv);
             item.appendChild(info);
-            // progress bar container
+            // progress bar container showing time progress (grey) versus hours progress (colored)
             const progressContainer = document.createElement('div');
             progressContainer.style.flex = '1';
             progressContainer.style.margin = '0 1rem';
+            // Calculate time progress through the project (days passed / total days)
+            const totalProjectDaysProg = stats.daysPassed + stats.daysLeft;
+            const timeProg = totalProjectDaysProg > 0 ? (stats.daysPassed / totalProjectDaysProg) * 100 : 0;
+            const usedProg = stats.usedPct;
             const bar = document.createElement('div');
-            bar.className = 'progress-bar';
-            const fill = document.createElement('div');
-            fill.className = 'fill';
-            fill.style.width = Math.min(100, stats.usedPct).toFixed(1) + '%';
-            bar.appendChild(fill);
+            bar.className = 'progress-bar multi';
+            // Grey bar indicating time progress
+            const timeF = document.createElement('div');
+            timeF.className = 'time-fill';
+            timeF.style.width = Math.min(100, timeProg).toFixed(1) + '%';
+            bar.appendChild(timeF);
+            // Colored bar indicating hours progress
+            const hoursF = document.createElement('div');
+            hoursF.className = 'hours-fill';
+            hoursF.style.width = Math.min(100, usedProg).toFixed(1) + '%';
+            bar.appendChild(hoursF);
             progressContainer.appendChild(bar);
             item.appendChild(progressContainer);
+            // Schedule label based on difference between hours progress and time progress
+            const diffProg = usedProg - timeProg;
+            let schedLabel = '';
+            if (diffProg > 5) {
+              schedLabel = 'Ahead of schedule';
+            } else if (diffProg < -5) {
+              schedLabel = 'Behind schedule';
+            } else {
+              schedLabel = 'On schedule';
+            }
+            const schedDiv = document.createElement('div');
+            schedDiv.style.fontSize = '0.7rem';
+            schedDiv.style.color = '#475569';
+            schedDiv.style.marginTop = '0.25rem';
+            schedDiv.textContent = schedLabel;
+            progressContainer.appendChild(schedDiv);
             // status badge with descriptive text and tooltip
             const status = document.createElement('span');
             status.className = 'status-badge ' + (stats.statusColor || 'green');
@@ -1152,9 +1245,9 @@
               <td>${stats.totalHours.toFixed(1)}h</td>
               <td>${project.budgetHours.toFixed(1)}h</td>
               <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
-              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target to date)</td>
+              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target)</td>
               <td>${stats.lastWeekHours.toFixed(1)}h</td>
-              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target to date)</td>
+              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</td>
               <td>${formatCurrency(stats.revenue)}</td>
             `;
             tbody.appendChild(tr);
@@ -1644,20 +1737,20 @@
             document.getElementById('startTimerBtnPro').disabled = true;
             return;
           }
-          // Sort projects so that those most in need of attention appear first. We use the
-          // percentage of budget consumed (usedPct) as an urgency metric: higher values are
-          // more urgent and thus appear earlier in the dropdown. If usedPct is equal, fall
-          // back to original order.
+          // Sort projects based on monthly budget urgency rather than percentage used. We compute the
+          // deficit between the constant monthly target and the hours worked so far this month. Projects
+          // with larger positive deficits (i.e., those most behind on their monthly target) are shown
+          // first. Negative deficits (projects ahead of their monthly target) will appear later.
           const sortedProjects = data.projects.slice().sort((a, b) => {
             try {
-              const statsA = computeProjectStats(a);
-              const statsB = computeProjectStats(b);
-              const usedA = statsA.usedPct || 0;
-              const usedB = statsB.usedPct || 0;
-              if (usedB > usedA) return 1;
-              if (usedB < usedA) return -1;
+              const sa = computeProjectStats(a);
+              const sb = computeProjectStats(b);
+              const deficitA = (sa.monthlyTargetConst || 0) - (sa.monthlyHours || 0);
+              const deficitB = (sb.monthlyTargetConst || 0) - (sb.monthlyHours || 0);
+              if (deficitB > deficitA) return 1;
+              if (deficitB < deficitA) return -1;
             } catch (err) {
-              // Fallback to stable order if computeProjectStats fails
+              // If computation fails for any reason, preserve original order
               return 0;
             }
             return 0;
