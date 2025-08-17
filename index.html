@@ -879,19 +879,30 @@
             if (card.progress !== undefined) {
               // Use a multi progress bar if timeProgress is provided, otherwise fallback to a single bar.
               if (card.timeProgress !== undefined) {
-                const multiBar = document.createElement('div');
-                multiBar.className = 'progress-bar multi';
-                // Expected progress (how far through the week or month we should be)
+                // Create a container for two stacked progress bars: one for expected progress (black) and one for actual hours (blue).
+                const barContainer = document.createElement('div');
+                barContainer.style.display = 'flex';
+                barContainer.style.flexDirection = 'column';
+                barContainer.style.gap = '0.2rem';
+                // Expected progress bar
+                const expectedBar = document.createElement('div');
+                expectedBar.className = 'progress-bar';
                 const expectedFill = document.createElement('div');
-                expectedFill.className = 'expected-fill';
+                expectedFill.className = 'fill';
+                // Override background color to black for expected progress
+                expectedFill.style.backgroundColor = '#000000';
                 expectedFill.style.width = Math.min(100, card.timeProgress).toFixed(1) + '%';
-                multiBar.appendChild(expectedFill);
-                // Actual hours worked progress
+                expectedBar.appendChild(expectedFill);
+                barContainer.appendChild(expectedBar);
+                // Actual hours worked bar
+                const hoursBar = document.createElement('div');
+                hoursBar.className = 'progress-bar';
                 const hoursFill = document.createElement('div');
-                hoursFill.className = 'hours-fill';
+                hoursFill.className = 'fill';
                 hoursFill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
-                multiBar.appendChild(hoursFill);
-                div.appendChild(multiBar);
+                hoursBar.appendChild(hoursFill);
+                barContainer.appendChild(hoursBar);
+                div.appendChild(barContainer);
               } else {
                 const progressBar = document.createElement('div');
                 progressBar.className = 'progress-bar';
@@ -1136,27 +1147,34 @@
             hoursDiv.textContent = stats.totalHours.toFixed(1) + 'h / ' + project.budgetHours.toFixed(1) + 'h';
             info.appendChild(hoursDiv);
             item.appendChild(info);
-            // progress bar container showing expected progress (black) versus hours worked (blue)
+            // progress bar container showing expected progress (black) and hours worked (blue) as two stacked bars
             const progressContainer = document.createElement('div');
             progressContainer.style.flex = '1';
             progressContainer.style.margin = '0 1rem';
+            progressContainer.style.display = 'flex';
+            progressContainer.style.flexDirection = 'column';
+            progressContainer.style.gap = '0.2rem';
             // Calculate expected progress through the project (days passed / total days)
             const totalProjectDaysProg = stats.daysPassed + stats.daysLeft;
             const timeProg = totalProjectDaysProg > 0 ? (stats.daysPassed / totalProjectDaysProg) * 100 : 0;
             const usedProg = stats.usedPct;
-            const bar = document.createElement('div');
-            bar.className = 'progress-bar multi';
-            // Dark bar indicating expected progress through the project timeline
-            const expectedF = document.createElement('div');
-            expectedF.className = 'expected-fill';
-            expectedF.style.width = Math.min(100, timeProg).toFixed(1) + '%';
-            bar.appendChild(expectedF);
-            // Blue bar indicating hours worked progress
-            const hoursF = document.createElement('div');
-            hoursF.className = 'hours-fill';
-            hoursF.style.width = Math.min(100, usedProg).toFixed(1) + '%';
-            bar.appendChild(hoursF);
-            progressContainer.appendChild(bar);
+            // Expected progress bar (black)
+            const expectedBar = document.createElement('div');
+            expectedBar.className = 'progress-bar';
+            const expectedFill = document.createElement('div');
+            expectedFill.className = 'fill';
+            expectedFill.style.backgroundColor = '#000000';
+            expectedFill.style.width = Math.min(100, timeProg).toFixed(1) + '%';
+            expectedBar.appendChild(expectedFill);
+            progressContainer.appendChild(expectedBar);
+            // Hours worked progress bar (blue)
+            const hoursBar = document.createElement('div');
+            hoursBar.className = 'progress-bar';
+            const hoursFill = document.createElement('div');
+            hoursFill.className = 'fill';
+            hoursFill.style.width = Math.min(100, usedProg).toFixed(1) + '%';
+            hoursBar.appendChild(hoursFill);
+            progressContainer.appendChild(hoursBar);
             item.appendChild(progressContainer);
             // No textual schedule label; the bar visualizes ahead/behind status
             // status badge with descriptive text and tooltip
