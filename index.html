@@ -18,6 +18,7 @@
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
+        <li data-section="analytics">Reports</li>
         <li data-section="todo">Todo</li>
       </ul>
     </div>
@@ -40,6 +41,21 @@
         <div class="card" id="monthlyScatterCard">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Monthly (Expected vs Actual)</h3>
           <canvas id="monthlyScatter" height="200"></canvas>
+        </div>
+
+        <!-- Daily Hours Heatmap -->
+        <div class="card" id="heatmapCard">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Daily Hours Heatmap</h3>
+          <div id="heatmap" style="overflow-x:auto;"></div>
+        </div>
+        <!-- Project Burndown Chart -->
+        <div class="card" id="burndownCard">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Burndown</h3>
+          <div style="margin-bottom:0.5rem;">
+            <label for="burndownProjectSelect" style="font-size:0.9rem; font-weight:500;">Select Project:</label>
+            <select id="burndownProjectSelect" style="margin-left:0.5rem; padding:0.25rem; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
+          </div>
+          <canvas id="burndownChart" height="200"></canvas>
         </div>
       </section>
       <!-- Timer Section -->
@@ -75,6 +91,15 @@
             <input id="projectBudgetPro" type="number" min="0" step="0.1" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <label for="projectRatePro" style="font-weight:500;">Hourly Rate</label>
             <input id="projectRatePro" type="number" min="0" step="0.01" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+
+            <!-- Rounding selection: allow user to choose rounding interval for entries in minutes -->
+            <label for="projectRoundingPro" style="font-weight:500;">Rounding (minutes)</label>
+            <select id="projectRoundingPro" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="0">None</option>
+              <option value="5">5</option>
+              <option value="10">10</option>
+              <option value="15">15</option>
+            </select>
             <label for="projectDeadlinePro" style="font-weight:500;">Deadline</label>
             <input id="projectDeadlinePro" type="date" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <button type="submit" class="btn primary" style="align-self:flex-start;">Add Project</button>
@@ -98,7 +123,12 @@
               <label for="manualDescriptionPro" style="font-weight:500;">Description (optional)</label>
               <input id="manualDescriptionPro" type="text" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
               <label for="manualHoursPro" style="font-weight:500;">Hours</label>
-              <input id="manualHoursPro" type="number" min="0" step="0.1" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 2" />
+              <!-- Hours input with nudge buttons for ±5 minutes -->
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <input id="manualHoursPro" type="number" min="0" step="0.1" style="flex:1; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 2" />
+                <button type="button" id="manualMinus5Btn" class="btn secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">-5m</button>
+                <button type="button" id="manualPlus5Btn" class="btn secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">+5m</button>
+              </div>
               <button type="submit" class="btn primary" style="align-self:flex-start;">Save Entry</button>
               <button type="button" id="cancelManualBtnPro" class="btn secondary" style="align-self:flex-start;">Cancel</button>
             </form>
@@ -161,6 +191,21 @@
         <div class="card" id="todoListContainer">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Tasks</h3>
           <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+      </section>
+
+      <!-- Analytics/Reports Section -->
+      <section id="analytics" class="section" style="display:none;">
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Reports</h2>
+        <!-- Heatmap card -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Heatmap</h3>
+          <div id="heatmapContainer"></div>
+        </div>
+        <!-- Burndown charts card -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Burndown Charts</h3>
+          <div id="burndownContainer"></div>
         </div>
       </section>
     </div>
@@ -361,6 +406,200 @@
         // navigation between sections.
         updateTodoSection();
 
+        // Render reports section including monthly heatmap and per-project burndown charts. This
+        // function is called whenever navigating to the Reports section or when data is
+        // updated (e.g., after modifying entries). It recomputes the heatmap for the
+        // current month and builds burndown charts for each project using Chart.js.
+        let burndownCharts = {};
+        function updateAnalyticsSection() {
+          const heatmapContainer = document.getElementById('heatmapContainer');
+          const burndownContainer = document.getElementById('burndownContainer');
+          if (!heatmapContainer || !burndownContainer) return;
+          // Clear previous contents
+          heatmapContainer.innerHTML = '';
+          burndownContainer.innerHTML = '';
+          // ---------- Build monthly heatmap ----------
+          // Determine the start and end of the current month
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const firstDay = new Date(year, month, 1);
+          const lastDay = new Date(year, month + 1, 0);
+          const daysInMonth = lastDay.getDate();
+          // Accumulate hours per day
+          const hoursPerDay = {};
+          // Initialize to zero for each day of month
+          for (let d = 1; d <= daysInMonth; d++) {
+            hoursPerDay[d] = 0;
+          }
+          data.entries.forEach(entry => {
+            if (entry.isRunning || !entry.duration) return;
+            const start = new Date(entry.startTime);
+            if (start.getFullYear() === year && start.getMonth() === month) {
+              const day = start.getDate();
+              hoursPerDay[day] = (hoursPerDay[day] || 0) + entry.duration / 3600;
+            }
+          });
+          // Compute maximum hours for scaling colors
+          let maxHours = 0;
+          Object.values(hoursPerDay).forEach(h => { if (h > maxHours) maxHours = h; });
+          // Build a 7-column table starting on Monday (0=Monday). We will map JS getDay (0=Sunday) to Monday start.
+          const heatmapTable = document.createElement('table');
+          heatmapTable.style.width = '100%';
+          heatmapTable.style.borderCollapse = 'collapse';
+          const headerRow = document.createElement('tr');
+          ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].forEach(dName => {
+            const th = document.createElement('th');
+            th.textContent = dName;
+            th.style.textAlign = 'center';
+            th.style.padding = '0.25rem';
+            th.style.fontSize = '0.75rem';
+            headerRow.appendChild(th);
+          });
+          heatmapTable.appendChild(headerRow);
+          // Determine the weekday index of the first day (0=Monday, 6=Sunday)
+          const firstDow = (firstDay.getDay() + 6) % 7;
+          let currentDay = 1;
+          // We'll build up to 6 rows to cover all days
+          for (let week = 0; week < 6; week++) {
+            const tr = document.createElement('tr');
+            for (let dow = 0; dow < 7; dow++) {
+              const td = document.createElement('td');
+              td.style.border = '1px solid #e2e8f0';
+              td.style.height = '1.5rem';
+              td.style.textAlign = 'center';
+              td.style.fontSize = '0.7rem';
+              // Determine if this cell corresponds to a valid day
+              const cellIndex = week * 7 + dow;
+              if (cellIndex >= firstDow && currentDay <= daysInMonth) {
+                const dayNum = currentDay;
+                const hours = hoursPerDay[dayNum] || 0;
+                // Colour intensity based on hours
+                let alpha;
+                if (maxHours > 0) {
+                  alpha = 0.1 + 0.8 * (hours / maxHours);
+                } else {
+                  alpha = 0;
+                }
+                td.style.backgroundColor = `rgba(59, 130, 246, ${alpha.toFixed(2)})`;
+                // Display day number and hours (optional)
+                const spanDay = document.createElement('div');
+                spanDay.textContent = dayNum.toString();
+                spanDay.style.fontWeight = '600';
+                const spanHrs = document.createElement('div');
+                spanHrs.textContent = hours > 0 ? hours.toFixed(1) + 'h' : '';
+                spanHrs.style.fontSize = '0.6rem';
+                td.appendChild(spanDay);
+                td.appendChild(spanHrs);
+                currentDay++;
+              } else {
+                td.textContent = '';
+              }
+              tr.appendChild(td);
+            }
+            heatmapTable.appendChild(tr);
+            if (currentDay > daysInMonth) break;
+          }
+          heatmapContainer.appendChild(heatmapTable);
+          // ---------- Build per-project burndown charts ----------
+          // Destroy existing charts to prevent memory leaks
+          Object.values(burndownCharts).forEach(ch => {
+            if (ch && typeof ch.destroy === 'function') ch.destroy();
+          });
+          burndownCharts = {};
+          data.projects.forEach(project => {
+            // Compute daily cumulative hours from project creation to now
+            const createdAt = new Date(project.createdAt);
+            const deadline = new Date(project.deadline);
+            const today = new Date();
+            // Determine end date for chart: use min(today, deadline)
+            const endDate = today < deadline ? today : deadline;
+            // Build date labels and cumulative actual hours and expected hours arrays
+            const labels = [];
+            const actualData = [];
+            const expectedData = [];
+            const totalDays = Math.ceil((endDate - createdAt) / (1000 * 60 * 60 * 24)) || 1;
+            // Create a map of cumulative hours keyed by date string
+            const dailyHoursMap = {};
+            data.entries.forEach(entry => {
+              if (entry.isRunning || !entry.duration) return;
+              if (entry.projectId !== project.id) return;
+              const start = new Date(entry.startTime);
+              const dateStr = start.toISOString().split('T')[0];
+              dailyHoursMap[dateStr] = (dailyHoursMap[dateStr] || 0) + entry.duration / 3600;
+            });
+            let cumulative = 0;
+            for (let i = 0; i < totalDays; i++) {
+              const date = new Date(createdAt.getTime());
+              date.setDate(createdAt.getDate() + i);
+              const dateStr = date.toISOString().split('T')[0];
+              labels.push(dateStr);
+              cumulative += dailyHoursMap[dateStr] || 0;
+              actualData.push(cumulative);
+              // Expected cumulative: linear expected burn from 0 to budget hours over total days
+              expectedData.push((project.budgetHours / totalDays) * (i + 1));
+            }
+            // Build canvas
+            const projectCard = document.createElement('div');
+            projectCard.style.marginBottom = '1rem';
+            const h4 = document.createElement('h4');
+            h4.style.margin = '0 0 0.5rem 0';
+            h4.style.fontSize = '1rem';
+            h4.style.fontWeight = '600';
+            h4.textContent = project.name;
+            projectCard.appendChild(h4);
+            const canvas = document.createElement('canvas');
+            canvas.height = 150;
+            projectCard.appendChild(canvas);
+            burndownContainer.appendChild(projectCard);
+            // Create Chart.js line chart
+            const ctx = canvas.getContext('2d');
+            burndownCharts[project.id] = new Chart(ctx, {
+              type: 'line',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Cumulative Hours',
+                    data: actualData,
+                    borderColor: project.color || '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.3)',
+                    fill: false,
+                    tension: 0.1
+                  },
+                  {
+                    label: 'Expected Hours',
+                    data: expectedData,
+                    borderColor: '#999999',
+                    backgroundColor: 'rgba(153,153,153,0.3)',
+                    fill: false,
+                    borderDash: [5,5],
+                    tension: 0.1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: { display: true, text: 'Date' },
+                    ticks: { maxRotation: 90, minRotation: 45 }
+                  },
+                  y: {
+                    title: { display: true, text: 'Hours' },
+                    beginAtZero: true
+                  }
+                },
+                plugins: {
+                  legend: { display: true },
+                  tooltip: { enabled: true }
+                }
+              }
+            });
+          });
+        }
+
         // Download the current data to a JSON file. Uses the same filename
         // each time so the browser can overwrite older backups.
         function downloadData() {
@@ -448,6 +687,8 @@
               updateTimerSection();
             } else if (sectionId === 'todo') {
               updateTodoSection();
+            } else if (sectionId === 'analytics') {
+              updateAnalyticsSection();
             }
           });
         });
@@ -814,6 +1055,8 @@
           // overlay and the actual hours progress as the blue overlay. No textual
           // schedule label is displayed; instead the bar visualises whether you are ahead
           // or behind schedule.
+          // Build the dashboard cards. Each card includes a value, progress bar(s), and labels.  
+          // For the weekly and monthly cards we include both the percentage of target worked and the percentage of the period elapsed.  
           const cards = [
             {
               title: "Today's Hours",
@@ -831,8 +1074,10 @@
               // Expected progress based on working days in the week
               timeProgress: weeklyTimeProgress,
               icon: '📅',
-              // Progress label without recommended weekly text
-              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target',
+              // Progress label expresses hours progress relative to target and time progress relative to the week
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target in ' + weeklyTimeProgress.toFixed(1) + '% of the week',
+              // Schedule label indicates whether the user is ahead, behind, or on schedule this week
+              scheduleLabel: weekScheduleLabel,
               // Show revenue earned this week on the same card
               revenue: stats.weekRevenue || 0
             },
@@ -843,7 +1088,8 @@
               // Expected progress based on working days in the month
               timeProgress: monthlyTimeProgress,
               icon: '🗓',
-              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : ''),
+              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target in ' + monthlyTimeProgress.toFixed(1) + '% of the month',
+              scheduleLabel: monthScheduleLabel,
               // Integrate monthly revenue into this card
               revenue: stats.monthRevenue || 0
             },
@@ -912,12 +1158,24 @@
                 progressBar.appendChild(fill);
                 div.appendChild(progressBar);
               }
-              // Label describing work progress relative to target
+              // Label describing work progress relative to target and time progress
               const pLabel = document.createElement('div');
               pLabel.className = 'stat-change';
               pLabel.textContent = card.progressLabel || '';
               pLabel.style.color = '#475569';
               div.appendChild(pLabel);
+              // If the card contains a schedule label (ahead/behind/on), add a second line with colour coding
+              if (card.scheduleLabel) {
+                const sched = document.createElement('div');
+                sched.className = 'stat-change';
+                sched.textContent = card.scheduleLabel;
+                // Colour code the schedule: green for ahead, red for behind, amber for on schedule
+                const text = card.scheduleLabel.toLowerCase();
+                if (text.includes('ahead')) sched.style.color = '#15803d';
+                else if (text.includes('behind')) sched.style.color = '#b91c1c';
+                else sched.style.color = '#92400e';
+                div.appendChild(sched);
+              }
             } else {
               // Change or change label for cards without progress
               const changeDiv = document.createElement('div');
@@ -963,6 +1221,9 @@
           // Project status overview and detailed breakdown
           renderProjectOverview();
           renderDetailedBreakdown();
+          // Render daily hours heatmap and update burndown chart
+          renderHeatmap();
+          updateBurndownSelect();
           // Previously there was a separate Recommendations card here. It has been removed in favor of integrating suggestions directly into other sections.
 
           // Prepare data for weekly and monthly scatter charts
@@ -1175,8 +1436,25 @@
             hoursFill.style.width = Math.min(100, usedProg).toFixed(1) + '%';
             hoursBar.appendChild(hoursFill);
             progressContainer.appendChild(hoursBar);
+            // Determine schedule status for this project by comparing used percent to time progress
+            const scheduleDiffProj = usedProg - timeProg;
+            let scheduleTextProj;
+            if (scheduleDiffProj > 5) scheduleTextProj = 'Ahead of schedule';
+            else if (scheduleDiffProj < -5) scheduleTextProj = 'Behind schedule';
+            else scheduleTextProj = 'On schedule';
+            // Create a small label below the bars to indicate schedule status
+            const schedDivProj = document.createElement('div');
+            schedDivProj.style.fontSize = '0.7rem';
+            schedDivProj.style.marginTop = '0.25rem';
+            // Colour code: green ahead, red behind, amber for on schedule
+            if (scheduleDiffProj > 5) schedDivProj.style.color = '#15803d';
+            else if (scheduleDiffProj < -5) schedDivProj.style.color = '#b91c1c';
+            else schedDivProj.style.color = '#92400e';
+            schedDivProj.textContent = scheduleTextProj;
+            progressContainer.appendChild(schedDivProj);
             item.appendChild(progressContainer);
-            // No textual schedule label; the bar visualizes ahead/behind status
+            // Add schedule text comment after bars
+            // Note: status badge with descriptive text and tooltip will still be appended below
             // status badge with descriptive text and tooltip
             const status = document.createElement('span');
             status.className = 'status-badge ' + (stats.statusColor || 'green');
@@ -1244,6 +1522,233 @@
           container.appendChild(card);
         }
 
+        // Render a heatmap of hours per day for the current month. Each cell's color intensity
+        // corresponds to the number of hours worked on that day. Darker colors represent more
+        // hours. The heatmap table is created dynamically within the #heatmap div.
+        function renderHeatmap() {
+          const heatmapDiv = document.getElementById('heatmap');
+          if (!heatmapDiv) return;
+          heatmapDiv.innerHTML = '';
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const firstDay = new Date(year, month, 1);
+          const daysInMonth = new Date(year, month + 1, 0).getDate();
+          // Accumulate hours for each day of this month
+          const dailyHours = {};
+          data.entries.forEach(entry => {
+            if (!entry.duration) return;
+            if (entry.isRunning) return;
+            const dt = new Date(entry.startTime);
+            if (dt.getFullYear() === year && dt.getMonth() === month) {
+              const day = dt.getDate();
+              dailyHours[day] = (dailyHours[day] || 0) + (entry.duration / 3600);
+            }
+          });
+          // Determine the maximum hours to scale colors
+          let maxHours = 0;
+          Object.values(dailyHours).forEach(val => {
+            if (val > maxHours) maxHours = val;
+          });
+          // Define function to interpolate between two colors based on a factor (0 to 1)
+          function interpolateColor(color1, color2, factor) {
+            const c1 = parseInt(color1.slice(1), 16);
+            const c2 = parseInt(color2.slice(1), 16);
+            const r1 = (c1 >> 16) & 0xff;
+            const g1 = (c1 >> 8) & 0xff;
+            const b1 = c1 & 0xff;
+            const r2 = (c2 >> 16) & 0xff;
+            const g2 = (c2 >> 8) & 0xff;
+            const b2 = c2 & 0xff;
+            const r = Math.round(r1 + (r2 - r1) * factor);
+            const g = Math.round(g1 + (g2 - g1) * factor);
+            const b = Math.round(b1 + (b2 - b1) * factor);
+            const hex = (r << 16) | (g << 8) | b;
+            return '#' + hex.toString(16).padStart(6, '0');
+          }
+          // Colors for low and high values
+          const lowColor = '#e0e7ff';
+          const highColor = '#1e40af';
+          // Create table element
+          const table = document.createElement('table');
+          table.style.borderCollapse = 'collapse';
+          table.style.width = '100%';
+          const headerRow = document.createElement('tr');
+          const daysOfWeek = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+          daysOfWeek.forEach(dow => {
+            const th = document.createElement('th');
+            th.textContent = dow;
+            th.style.fontSize = '0.8rem';
+            th.style.padding = '0.25rem';
+            headerRow.appendChild(th);
+          });
+          table.appendChild(headerRow);
+          // Determine how many blank cells before the first day (Monday=0) adjusting for Sunday=6
+          // In this implementation, Monday is first column; getDay() returns 0 for Sunday so convert
+          let startWeekday = firstDay.getDay();
+          startWeekday = (startWeekday + 6) % 7; // convert so Monday=0, Sunday=6
+          let currentDay = 1;
+          // Build rows until all days placed
+          while (currentDay <= daysInMonth) {
+            const row = document.createElement('tr');
+            for (let i = 0; i < 7; i++) {
+              const cell = document.createElement('td');
+              cell.style.width = '14.28%';
+              cell.style.height = '2rem';
+              cell.style.border = '1px solid #f1f5f9';
+              cell.style.textAlign = 'center';
+              cell.style.fontSize = '0.75rem';
+              if ((currentDay === 1 && i < startWeekday) || currentDay > daysInMonth) {
+                // empty cell
+                cell.textContent = '';
+                cell.style.backgroundColor = '#f8fafc';
+              } else {
+                const hours = dailyHours[currentDay] || 0;
+                // compute color intensity
+                let color;
+                if (hours <= 0 || maxHours === 0) {
+                  color = '#f8fafc';
+                } else {
+                  const factor = Math.min(hours / maxHours, 1);
+                  color = interpolateColor(lowColor, highColor, factor);
+                }
+                cell.style.backgroundColor = color;
+                cell.textContent = currentDay;
+                if (hours > 0) {
+                  const hoursSpan = document.createElement('div');
+                  hoursSpan.textContent = hours.toFixed(1) + 'h';
+                  hoursSpan.style.fontSize = '0.6rem';
+                  hoursSpan.style.color = '#0f172a';
+                  cell.appendChild(hoursSpan);
+                }
+                currentDay++;
+              }
+              row.appendChild(cell);
+            }
+            table.appendChild(row);
+          }
+          heatmapDiv.appendChild(table);
+        }
+
+        // Populate the burndown project selector and render the initial burndown chart
+        function updateBurndownSelect() {
+          const select = document.getElementById('burndownProjectSelect');
+          if (!select) return;
+          // Prevent multiple event listeners by cloning without listeners
+          const newSelect = select.cloneNode(false);
+          select.parentNode.replaceChild(newSelect, select);
+          data.projects.forEach(project => {
+            const opt = document.createElement('option');
+            opt.value = project.id;
+            opt.textContent = project.name;
+            newSelect.appendChild(opt);
+          });
+          newSelect.addEventListener('change', (e) => {
+            renderBurndownChart(e.target.value);
+          });
+          // Render initial chart for first project (if any)
+          if (data.projects.length > 0) {
+            const firstId = data.projects[0].id;
+            newSelect.value = firstId;
+            renderBurndownChart(firstId);
+          }
+        }
+
+        // Render the burndown chart for a given project ID. This charts cumulative hours worked
+        // against the expected cumulative hours (linear budget burn) from project start to deadline.
+        function renderBurndownChart(projectId) {
+          const canvas = document.getElementById('burndownChart');
+          if (!canvas || !Chart) return;
+          const ctx = canvas.getContext('2d');
+          // Destroy existing chart if present
+          if (window.burndownChart) {
+            try {
+              window.burndownChart.destroy();
+            } catch (err) {}
+          }
+          const project = data.projects.find(p => String(p.id) === String(projectId));
+          if (!project) return;
+          // Build date range from project start to today (or deadline, whichever is earlier)
+          const startDate = new Date(project.createdAt);
+          const today = new Date();
+          const endDate = today < new Date(project.deadline) ? today : new Date(project.deadline);
+          const days = [];
+          for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+            // copy date to avoid reference issues
+            days.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
+          }
+          // Build labels and actual cumulative hours
+          const labels = [];
+          const actual = [];
+          let cumulativeSeconds = 0;
+          days.forEach(day => {
+            labels.push(day.toISOString().slice(5, 10)); // 'MM-DD'
+            // Sum durations for entries up to this day (inclusive)
+            const dayEntries = data.entries.filter(e => {
+              return e.projectId === projectId && !e.isRunning && new Date(e.startTime) <= day;
+            });
+            cumulativeSeconds = dayEntries.reduce((sum, e) => sum + (e.duration || 0), 0);
+            actual.push((cumulativeSeconds / 3600));
+          });
+          // Expected cumulative line: linear interpolation from 0 to budget over total days until deadline
+          const totalProjectDays = (new Date(project.deadline) - startDate) / (1000 * 60 * 60 * 24);
+          const expected = [];
+          days.forEach(day => {
+            const diff = (day - startDate) / (1000 * 60 * 60 * 24);
+            const ratio = totalProjectDays > 0 ? Math.min(diff / totalProjectDays, 1) : 0;
+            expected.push(project.budgetHours * ratio);
+          });
+          // Create chart
+          window.burndownChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: labels,
+              datasets: [
+                {
+                  label: 'Expected',
+                  data: expected,
+                  borderColor: '#64748b',
+                  backgroundColor: '#64748b',
+                  borderWidth: 2,
+                  fill: false
+                },
+                {
+                  label: 'Actual',
+                  data: actual,
+                  borderColor: project.color || '#3b82f6',
+                  backgroundColor: project.color || '#3b82f6',
+                  borderWidth: 2,
+                  fill: false
+                }
+              ]
+            },
+            options: {
+              responsive: true,
+              plugins: {
+                legend: {
+                  display: true,
+                  position: 'bottom'
+                }
+              },
+              scales: {
+                y: {
+                  beginAtZero: true,
+                  title: {
+                    display: true,
+                    text: 'Hours'
+                  }
+                },
+                x: {
+                  title: {
+                    display: true,
+                    text: 'Date'
+                  }
+                }
+              }
+            }
+          });
+        }
+
         // Projects page rendering
         function updateProjectsPage() {
           updateProjectSelects();
@@ -1309,6 +1814,13 @@
               if (isNaN(newRate)) return;
               const newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
               if (!newDeadline) return;
+              // Prompt for rounding preference (minutes) and update roundingMinutes
+              const newRoundingStr = prompt('Rounding (minutes – 0 for none, 5, 10, 15):', project.roundingMinutes != null ? project.roundingMinutes.toString() : '0');
+              const newRoundingInt = parseInt(newRoundingStr, 10);
+              // If the user cancels or enters invalid number, leave rounding unchanged
+              if (!isNaN(newRoundingInt)) {
+                project.roundingMinutes = newRoundingInt;
+              }
               // Update project fields
               project.name = newName.trim();
               project.client = newClient ? newClient.trim() : null;
@@ -1353,7 +1865,9 @@
             deadline,
             createdAt: new Date().toISOString(),
             color: getUniqueColor(),
-            isActive: true
+            isActive: true,
+            // Store rounding preference for this project; roundingMinutes is the interval in minutes (0 means no rounding)
+            roundingMinutes: parseInt(document.getElementById('projectRoundingPro').value, 10) || 0
           };
           data.projects.push(newProject);
           saveData();
@@ -1688,7 +2202,17 @@
           });
           // Finalize each entry: set duration, endTime, isRunning
           runningList.forEach(e => {
-            e.duration = Math.floor(e.effectiveSeconds || 0);
+            // Compute raw duration in seconds
+            let rawDuration = Math.floor(e.effectiveSeconds || 0);
+            // Apply rounding based on project rounding preference
+            const projR = data.projects.find(p => String(p.id) === String(e.projectId));
+            if (projR && projR.roundingMinutes && projR.roundingMinutes > 0) {
+              const rounding = projR.roundingMinutes;
+              const minutes = rawDuration / 60;
+              const roundedMinutes = Math.round(minutes / rounding) * rounding;
+              rawDuration = Math.floor(roundedMinutes * 60);
+            }
+            e.duration = rawDuration;
             e.endTime = now.toISOString();
             e.isRunning = false;
             delete e.effectiveSeconds;
@@ -1743,15 +2267,21 @@
             return 0;
           });
           sortedProjects.forEach(project => {
+            // First option for timer select with possible recommendation hint
             const o1 = document.createElement('option');
             o1.value = project.id;
-            // Append " (Recommended)" to the project name if it is the monthly recommended project
             let label = project.name;
+            // If this project is the monthly recommended project, append a hint about how many hours are needed this week
             if (project.id === currentRecommendedMonthlyId) {
-              label += ' (Recommended)';
+              const sp = computeProjectStats(project);
+              // Calculate remaining hours needed this week based on dynamic weekly target minus hours already worked
+              let weeklyNeeded = (sp.weeklyTargetConst || 0) - (sp.weeklyHours || 0);
+              if (weeklyNeeded < 0) weeklyNeeded = 0;
+              label += ' (Recommended, needs ~' + weeklyNeeded.toFixed(1) + 'h this week)';
             }
             o1.textContent = label;
             timerSelect.appendChild(o1);
+            // Second option for manual entry select (no recommendation hint)
             const o2 = document.createElement('option');
             o2.value = project.id;
             o2.textContent = project.name;
@@ -1780,7 +2310,17 @@
           const hoursVal = parseFloat(document.getElementById('manualHoursPro').value);
           if (!projectId || isNaN(hoursVal) || hoursVal <= 0) return;
           const now = new Date();
-          const durationSeconds = Math.floor(hoursVal * 3600);
+          // Apply rounding based on project preferences. If the project specifies a rounding interval (minutes),
+          // we round the hours to the nearest interval before converting to seconds.
+          let adjustedHours = hoursVal;
+          const projForRound = data.projects.find(p => String(p.id) === String(projectId));
+          if (projForRound && projForRound.roundingMinutes && projForRound.roundingMinutes > 0) {
+            const rounding = projForRound.roundingMinutes;
+            const minutesVal = hoursVal * 60;
+            const roundedMinutes = Math.round(minutesVal / rounding) * rounding;
+            adjustedHours = roundedMinutes / 60;
+          }
+          const durationSeconds = Math.floor(adjustedHours * 3600);
           // start time is computed as end time minus duration
           const startTime = new Date(now.getTime() - durationSeconds * 1000);
           const newEntry = {
@@ -1801,6 +2341,25 @@
           updateDashboard();
           updateProjectsPage();
         });
+
+        // Nudge buttons for manual entry: adjust hours by ±5 minutes
+        const minusBtn = document.getElementById('manualMinus5Btn');
+        const plusBtn = document.getElementById('manualPlus5Btn');
+        if (minusBtn && plusBtn) {
+          minusBtn.addEventListener('click', () => {
+            const hoursInput = document.getElementById('manualHoursPro');
+            let current = parseFloat(hoursInput.value) || 0;
+            current -= (5 / 60);
+            if (current < 0) current = 0;
+            hoursInput.value = current.toFixed(2);
+          });
+          plusBtn.addEventListener('click', () => {
+            const hoursInput = document.getElementById('manualHoursPro');
+            let current = parseFloat(hoursInput.value) || 0;
+            current += (5 / 60);
+            hoursInput.value = current.toFixed(2);
+          });
+        }
 
         // Delete entry
         function deleteEntry(id) {
@@ -1839,11 +2398,98 @@
               <td>${entry.endTime ? formatDateTime(entry.endTime) : (entry.isRunning ? '—' : '')}</td>
               <td>${entry.duration ? formatDuration(entry.duration) : (entry.isRunning ? 'Running…' : '')}</td>
               <td>${formatCurrency(total)}</td>
-              <td><button class="btn danger" data-id="${entry.id}" style="padding:0.25rem 0.5rem; font-size:0.75rem;">Delete</button></td>
+              <td></td>
             `;
-            tr.querySelector('button').addEventListener('click', () => {
+            // Action cell: add nudge and snap controls plus delete button
+            const actionsTd = tr.lastElementChild;
+            // −5m button
+            const minusBtn = document.createElement('button');
+            minusBtn.className = 'btn secondary';
+            minusBtn.style.padding = '0.25rem 0.5rem';
+            minusBtn.style.fontSize = '0.7rem';
+            minusBtn.textContent = '−5m';
+            minusBtn.addEventListener('click', () => {
+              // Subtract 5 minutes (300 seconds) from the entry duration
+              let newDur = (entry.duration || 0) - 300;
+              if (newDur < 0) newDur = 0;
+              entry.duration = newDur;
+              // Update endTime based on new duration
+              const start = new Date(entry.startTime);
+              entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
+              saveData();
+              updateEntriesTable();
+              updateDashboard();
+              updateProjectsPage();
+              updateTimerSection();
+            });
+            actionsTd.appendChild(minusBtn);
+            // +5m button
+            const plusBtn = document.createElement('button');
+            plusBtn.className = 'btn secondary';
+            plusBtn.style.padding = '0.25rem 0.5rem';
+            plusBtn.style.fontSize = '0.7rem';
+            plusBtn.style.marginLeft = '0.25rem';
+            plusBtn.textContent = '+5m';
+            plusBtn.addEventListener('click', () => {
+              // Add 5 minutes to the duration
+              let newDur = (entry.duration || 0) + 300;
+              entry.duration = newDur;
+              const start = new Date(entry.startTime);
+              entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
+              saveData();
+              updateEntriesTable();
+              updateDashboard();
+              updateProjectsPage();
+              updateTimerSection();
+            });
+            actionsTd.appendChild(plusBtn);
+            // Snap selector: choose nearest minutes (5,10,15)
+            const snapSelect = document.createElement('select');
+            snapSelect.style.marginLeft = '0.25rem';
+            snapSelect.style.padding = '0.25rem';
+            snapSelect.style.fontSize = '0.7rem';
+            snapSelect.style.border = '1px solid #cbd5e1';
+            snapSelect.style.borderRadius = '0.375rem';
+            // Placeholder option
+            const placeholderOption = document.createElement('option');
+            placeholderOption.value = '';
+            placeholderOption.textContent = 'Snap';
+            snapSelect.appendChild(placeholderOption);
+            [5,10,15].forEach(mins => {
+              const opt = document.createElement('option');
+              opt.value = String(mins);
+              opt.textContent = mins + 'm';
+              snapSelect.appendChild(opt);
+            });
+            snapSelect.addEventListener('change', () => {
+              const val = parseInt(snapSelect.value);
+              if (!isNaN(val) && val > 0) {
+                const minutes = (entry.duration || 0) / 60;
+                const snappedMinutes = Math.round(minutes / val) * val;
+                entry.duration = Math.max(0, Math.floor(snappedMinutes * 60));
+                const start = new Date(entry.startTime);
+                entry.endTime = new Date(start.getTime() + entry.duration * 1000).toISOString();
+                saveData();
+                updateEntriesTable();
+                updateDashboard();
+                updateProjectsPage();
+                updateTimerSection();
+              }
+              // reset to placeholder
+              snapSelect.value = '';
+            });
+            actionsTd.appendChild(snapSelect);
+            // Delete button
+            const delBtn = document.createElement('button');
+            delBtn.className = 'btn danger';
+            delBtn.style.padding = '0.25rem 0.5rem';
+            delBtn.style.fontSize = '0.7rem';
+            delBtn.style.marginLeft = '0.25rem';
+            delBtn.textContent = 'Delete';
+            delBtn.addEventListener('click', () => {
               if (confirm('Delete this entry?')) deleteEntry(entry.id);
             });
+            actionsTd.appendChild(delBtn);
             tbody.appendChild(tr);
           });
         }
