@@ -153,8 +153,9 @@ body {
 /* The expected-fill represents how far along in the week or month we should be (expected progress). It is
    drawn underneath the actual hours progress. The hours-fill shows how much of the target has been
    completed. Both fills are absolutely positioned and layered via z-index. */
+/* Expected progress is shown as a solid black bar underneath the hours progress. */
 .progress-bar.multi .expected-fill {
-  background-color: #334155; /* dark grey/black for expected progress */
+  background-color: #000000;
   z-index: 1;
 }
 .progress-bar.multi .hours-fill {

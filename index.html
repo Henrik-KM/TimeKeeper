@@ -585,16 +585,17 @@
           const lastWeekRevenue = lastWeekHours * project.hourlyRate;
           const monthlyRevenue = monthlyHours * project.hourlyRate;
           const lastMonthRevenue = lastMonthHours * project.hourlyRate;
-          // Calculate constant weekly and monthly targets for this project. These targets are derived by
-          // spreading the total budget evenly across the total number of weeks and months between
-          // the project start and its deadline. We use calendar weeks (7‑day chunks) and calendar
-          // months (30‑day chunks) rather than working days so that targets are intuitive and stable.
-          // At least one week and one month are assumed to avoid division by zero.
-          const totalProjectDaysConst = Math.max(1, Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)));
-          const totalWeeksConst = Math.max(1, Math.ceil(totalProjectDaysConst / 7));
-          const totalMonthsConst = Math.max(1, Math.ceil(totalProjectDaysConst / 30));
-          const weeklyTargetConst = project.budgetHours / totalWeeksConst;
-          const monthlyTargetConst = project.budgetHours / totalMonthsConst;
+          // Calculate dynamic weekly and monthly targets for this project. The dynamic targets
+          // spread the remaining hours evenly across the remaining time. For the weekly target,
+          // we divide the remaining hours by the number of calendar weeks left (rounded up).
+          // For the monthly target, we divide the remaining hours by the number of calendar
+          // months left. If there are no remaining days (past deadline), we treat the count as
+          // at least one to avoid division by zero.
+          const remaining = Math.max(0, remainingHours);
+          const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
+          const monthsLeft = Math.max(1, Math.ceil(daysLeft / 30));
+          const weeklyTargetConst = remaining / weeksLeft;
+          const monthlyTargetConst = remaining / monthsLeft;
           return {
             totalHours,
             remainingHours,
@@ -645,20 +646,16 @@
           let yesterdayRevenue = 0;
           let weekRevenue = 0;
           let lastWeekRevenue = 0;
-          // Constant weekly and monthly targets for all projects. Each project's budget is spread evenly across
-          // its total duration in weeks and months (using calendar weeks of 7 days and months of 30 days). The
-          // sum of these per‑project targets represents the number of hours you should aim to work this week
-          // and this month across all projects.
+          // Dynamic weekly and monthly targets for all projects. We recalculate each project's
+          // weekly and monthly targets based on remaining hours and remaining time until
+          // deadline. The sum of these per‑project targets represents the number of hours
+          // you should aim to work this week and this month across all projects.
           let weeklyTarget = 0;
           let monthTarget = 0;
           data.projects.forEach(project => {
-            const created = new Date(project.createdAt);
-            const deadline = new Date(project.deadline);
-            const totalProjectDaysConst = Math.max(1, Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)));
-            const totalWeeksConst = Math.max(1, Math.ceil(totalProjectDaysConst / 7));
-            const totalMonthsConst = Math.max(1, Math.ceil(totalProjectDaysConst / 30));
-            weeklyTarget += project.budgetHours / totalWeeksConst;
-            monthTarget += project.budgetHours / totalMonthsConst;
+            const sp = computeProjectStats(project);
+            weeklyTarget += sp.weeklyTargetConst || 0;
+            monthTarget += sp.monthlyTargetConst || 0;
           });
           data.entries.forEach(entry => {
             if (entry.isRunning || !entry.duration) return;
