@@ -141,7 +141,8 @@ body {
   border-radius: 0.25rem;
   overflow: hidden;
 }
-.progress-bar.multi .time-fill,
+/* Ensure both expected (formerly time) and hours fills are stacked within the multi progress bar */
+.progress-bar.multi .expected-fill,
 .progress-bar.multi .hours-fill {
   position: absolute;
   top: 0;
@@ -149,13 +150,16 @@ body {
   height: 100%;
   border-radius: 0.25rem;
 }
-.progress-bar.multi .time-fill {
-  background-color: #cbd5e1;
-  z-index: 0;
+/* The expected-fill represents how far along in the week or month we should be (expected progress). It is
+   drawn underneath the actual hours progress. The hours-fill shows how much of the target has been
+   completed. Both fills are absolutely positioned and layered via z-index. */
+.progress-bar.multi .expected-fill {
+  background-color: #334155; /* dark grey/black for expected progress */
+  z-index: 1;
 }
 .progress-bar.multi .hours-fill {
-  background-color: #3b82f6;
-  z-index: 1;
+  background-color: #3b82f6; /* blue for actual hours progress */
+  z-index: 2;
 }
 
 /* Project status overview */

@@ -810,6 +810,13 @@
 
           // Stats cards data; integrate recommendations and revenue into relevant cards. Cards with
           // progress also include timeProgress and scheduleLabel for additional context.
+          // Build the dashboard cards. We merge revenue into the relevant cards rather than
+          // using a separate Revenue card. A multi progress bar visualises both how far
+          // through the period we are (expected progress) and how much of the target has
+          // been worked. The expected progress (timeProgress) will be rendered as a dark
+          // overlay and the actual hours progress as the blue overlay. No textual
+          // schedule label is displayed; instead the bar visualises whether you are ahead
+          // or behind schedule.
           const cards = [
             {
               title: "Today's Hours",
@@ -817,30 +824,31 @@
               change: stats.todayChange,
               icon: '⏱',
               changeLabel: 'vs yesterday',
-              // Revenue for today is shown on the same card
+              // Revenue for today shown on this card
               revenue: stats.todayRevenue || 0
             },
             {
               title: 'This Week',
               value: stats.weekHours.toFixed(1) + ' / ' + (stats.weekTarget ? stats.weekTarget.toFixed(1) : '0') + 'h',
               progress: stats.weeklyProgress,
+              // Expected progress based on working days in the week
               timeProgress: weeklyTimeProgress,
-              scheduleLabel: weekScheduleLabel,
               icon: '📅',
-              // Weekly progress shows how much of the constant weekly target has been completed.
-              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target' + (recommendedWeeklyProject ? ' · Work on ' + recommendedWeeklyProject.name : ''),
-              // Revenue for the week is shown on the same card
+              // Progress label without recommended weekly text
+              progressLabel: (stats.weeklyProgress || 0).toFixed(1) + '% of weekly target',
+              // Show revenue earned this week on the same card
               revenue: stats.weekRevenue || 0
             },
             {
               title: 'This Month',
               value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
               progress: stats.monthProgress,
+              // Expected progress based on working days in the month
               timeProgress: monthlyTimeProgress,
-              scheduleLabel: monthScheduleLabel,
               icon: '🗓',
-              // Monthly progress shows how much of the constant monthly target has been completed.
-              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : '')
+              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target' + (recommendedMonthlyProject ? ' · Work on ' + recommendedMonthlyProject.name : ''),
+              // Integrate monthly revenue into this card
+              revenue: stats.monthRevenue || 0
             },
             {
               title: 'Active Projects',
@@ -848,13 +856,6 @@
               changeLabel: stats.dueThisWeek + ' due this week',
               change: null,
               icon: '📁'
-            },
-            {
-              title: 'Revenue',
-              value: formatCurrency(stats.monthRevenue),
-              change: stats.revenueChange,
-              changeLabel: 'this month',
-              icon: '💰'
             }
           ];
           const statsGrid = document.getElementById('statsGrid');
@@ -883,10 +884,12 @@
               if (card.timeProgress !== undefined) {
                 const multiBar = document.createElement('div');
                 multiBar.className = 'progress-bar multi';
-                const timeFill = document.createElement('div');
-                timeFill.className = 'time-fill';
-                timeFill.style.width = Math.min(100, card.timeProgress).toFixed(1) + '%';
-                multiBar.appendChild(timeFill);
+                // Expected progress (how far through the week or month we should be)
+                const expectedFill = document.createElement('div');
+                expectedFill.className = 'expected-fill';
+                expectedFill.style.width = Math.min(100, card.timeProgress).toFixed(1) + '%';
+                multiBar.appendChild(expectedFill);
+                // Actual hours worked progress
                 const hoursFill = document.createElement('div');
                 hoursFill.className = 'hours-fill';
                 hoursFill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
@@ -907,14 +910,6 @@
               pLabel.textContent = card.progressLabel || '';
               pLabel.style.color = '#475569';
               div.appendChild(pLabel);
-              // Schedule status label if provided (e.g., ahead/behind)
-              if (card.scheduleLabel) {
-                const schedLabel = document.createElement('div');
-                schedLabel.className = 'stat-change';
-                schedLabel.textContent = card.scheduleLabel;
-                schedLabel.style.color = '#475569';
-                div.appendChild(schedLabel);
-              }
             } else {
               // Change or change label for cards without progress
               const changeDiv = document.createElement('div');
@@ -1128,15 +1123,7 @@
             nameDiv.style.fontWeight = '600';
             nameDiv.style.fontSize = '0.9rem';
             nameDiv.textContent = project.name;
-            // Add star markers for recommended projects
-            if (project.id === currentRecommendedWeeklyId) {
-              const starW = document.createElement('span');
-              starW.textContent = '★';
-              starW.style.color = '#ef4444';
-              starW.style.marginLeft = '0.25rem';
-              starW.title = 'Recommended this week';
-              nameDiv.appendChild(starW);
-            }
+            // Add a star marker only for the monthly recommended project
             if (project.id === currentRecommendedMonthlyId) {
               const starM = document.createElement('span');
               starM.textContent = '★';
@@ -1152,44 +1139,29 @@
             hoursDiv.textContent = stats.totalHours.toFixed(1) + 'h / ' + project.budgetHours.toFixed(1) + 'h';
             info.appendChild(hoursDiv);
             item.appendChild(info);
-            // progress bar container showing time progress (grey) versus hours progress (colored)
+            // progress bar container showing expected progress (black) versus hours worked (blue)
             const progressContainer = document.createElement('div');
             progressContainer.style.flex = '1';
             progressContainer.style.margin = '0 1rem';
-            // Calculate time progress through the project (days passed / total days)
+            // Calculate expected progress through the project (days passed / total days)
             const totalProjectDaysProg = stats.daysPassed + stats.daysLeft;
             const timeProg = totalProjectDaysProg > 0 ? (stats.daysPassed / totalProjectDaysProg) * 100 : 0;
             const usedProg = stats.usedPct;
             const bar = document.createElement('div');
             bar.className = 'progress-bar multi';
-            // Grey bar indicating time progress
-            const timeF = document.createElement('div');
-            timeF.className = 'time-fill';
-            timeF.style.width = Math.min(100, timeProg).toFixed(1) + '%';
-            bar.appendChild(timeF);
-            // Colored bar indicating hours progress
+            // Dark bar indicating expected progress through the project timeline
+            const expectedF = document.createElement('div');
+            expectedF.className = 'expected-fill';
+            expectedF.style.width = Math.min(100, timeProg).toFixed(1) + '%';
+            bar.appendChild(expectedF);
+            // Blue bar indicating hours worked progress
             const hoursF = document.createElement('div');
             hoursF.className = 'hours-fill';
             hoursF.style.width = Math.min(100, usedProg).toFixed(1) + '%';
             bar.appendChild(hoursF);
             progressContainer.appendChild(bar);
             item.appendChild(progressContainer);
-            // Schedule label based on difference between hours progress and time progress
-            const diffProg = usedProg - timeProg;
-            let schedLabel = '';
-            if (diffProg > 5) {
-              schedLabel = 'Ahead of schedule';
-            } else if (diffProg < -5) {
-              schedLabel = 'Behind schedule';
-            } else {
-              schedLabel = 'On schedule';
-            }
-            const schedDiv = document.createElement('div');
-            schedDiv.style.fontSize = '0.7rem';
-            schedDiv.style.color = '#475569';
-            schedDiv.style.marginTop = '0.25rem';
-            schedDiv.textContent = schedLabel;
-            progressContainer.appendChild(schedDiv);
+            // No textual schedule label; the bar visualizes ahead/behind status
             // status badge with descriptive text and tooltip
             const status = document.createElement('span');
             status.className = 'status-badge ' + (stats.statusColor || 'green');
@@ -1245,7 +1217,7 @@
               <td>${stats.totalHours.toFixed(1)}h</td>
               <td>${project.budgetHours.toFixed(1)}h</td>
               <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
-              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target)</td>
+              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
               <td>${stats.lastWeekHours.toFixed(1)}h</td>
               <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</td>
               <td>${formatCurrency(stats.revenue)}</td>
@@ -1293,12 +1265,12 @@
                 <small>${stats.totalHours.toFixed(1)}h used (${stats.usedPct.toFixed(1)}%), ${stats.remainingHours.toFixed(1)}h left</small>
               </div>
               <div style="margin:0.5rem 0;">
-                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyHours / (stats.weeklyExpected || 1) * 100}%"></div></div>
-                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyExpected.toFixed(1)}h${isRecommendedWeekly ? ' (Recommended)' : ''} (target to date)</small>
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyTargetConst ? (stats.weeklyHours / stats.weeklyTargetConst * 100) : 0}%"></div></div>
+                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</small>
               </div>
               <div style="margin:0.5rem 0;">
-                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyHours / (stats.monthlyExpected || 1) * 100}%"></div></div>
-                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyExpected.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target to date)</small>
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyTargetConst ? (stats.monthlyHours / stats.monthlyTargetConst * 100) : 0}%"></div></div>
+                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
               <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
@@ -1758,7 +1730,12 @@
           sortedProjects.forEach(project => {
             const o1 = document.createElement('option');
             o1.value = project.id;
-            o1.textContent = project.name;
+            // Append " (Recommended)" to the project name if it is the monthly recommended project
+            let label = project.name;
+            if (project.id === currentRecommendedMonthlyId) {
+              label += ' (Recommended)';
+            }
+            o1.textContent = label;
             timerSelect.appendChild(o1);
             const o2 = document.createElement('option');
             o2.value = project.id;
