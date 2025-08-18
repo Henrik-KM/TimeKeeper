@@ -113,7 +113,11 @@
         <div class="card">
           <div style="margin-bottom:0.5rem; display:flex; justify-content:space-between; align-items:center;">
             <h3 style="margin:0; font-size:1.1rem; font-weight:600;">Entries</h3>
-            <button id="addManualEntryBtnPro" class="btn secondary">Add Manual Entry</button>
+            <div style="display:flex; gap:0.5rem;">
+              <button id="addManualEntryBtnPro" class="btn secondary">Add Manual Entry</button>
+              <!-- Toggle button to switch between showing recent entries and all entries -->
+              <button id="toggleEntriesViewBtn" class="btn secondary">Show Recent</button>
+            </div>
           </div>
           <div id="manualEntryFormPro" class="hidden" style="margin-top:1rem;">
             <h4 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">New Manual Entry</h4>
@@ -254,6 +258,87 @@
         let needsBackup = false;
         let autoSyncEnabled = false;
         let backupDirHandle = null;
+        // Flag to track whether to show all entries or only recent ones. If false,
+        // entries older than approximately one month are hidden by default to keep
+        // the list manageable. This can be toggled via a button in the Entries section.
+        let showAllEntries = false;
+
+        // -------------------------------------------------------------------------
+        //  Haptic feedback and simple audio cues
+        //
+        //  provideHaptic() triggers vibration on devices that support the
+        //  Vibration API. If a 'beep' type is requested, it plays a short tone via
+        //  the Web Audio API. These feedback cues enhance the feeling of
+        //  interaction when starting/stopping timers or adjusting entry durations.
+        function provideHaptic(type) {
+          // Trigger a short vibration where supported
+          if (navigator && 'vibrate' in navigator) {
+            if (type === 'long') navigator.vibrate([50, 50, 50]);
+            else navigator.vibrate(40);
+          }
+          // Play a simple beep for auditory feedback
+          if (type === 'beep') {
+            try {
+              if (!window._beepAudioCtx) {
+                window._beepAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+              }
+              const ctx = window._beepAudioCtx;
+              const osc = ctx.createOscillator();
+              osc.type = 'sine';
+              osc.frequency.value = 440;
+              osc.connect(ctx.destination);
+              osc.start();
+              osc.stop(ctx.currentTime + 0.05);
+            } catch (err) {
+              // Audio may fail if the page is not interacted with yet
+            }
+          }
+        }
+
+        // -------------------------------------------------------------------------
+        //  IndexedDB persistence for backup directory handle
+        //
+        //  Persisting the selected backup folder across sessions requires storing
+        //  the FileSystemDirectoryHandle in IndexedDB. Handles are structured
+        //  cloneable and can be retrieved on subsequent page loads. These
+        //  functions abstract opening the database, saving the handle, and
+        //  retrieving it when the page initializes.
+        function openHandleDB() {
+          return new Promise((resolve, reject) => {
+            const request = indexedDB.open('timekeeper-db', 1);
+            request.onupgradeneeded = (e) => {
+              const db = e.target.result;
+              if (!db.objectStoreNames.contains('handles')) {
+                db.createObjectStore('handles');
+              }
+            };
+            request.onsuccess = (e) => resolve(e.target.result);
+            request.onerror = (e) => reject(e.target.error);
+          });
+        }
+        async function saveBackupDirHandle(handle) {
+          try {
+            const db = await openHandleDB();
+            const tx = db.transaction('handles', 'readwrite');
+            tx.objectStore('handles').put(handle, 'backupDir');
+            return tx.complete;
+          } catch (err) {
+            console.error('Error saving backup handle:', err);
+          }
+        }
+        async function loadBackupDirHandle() {
+          try {
+            const db = await openHandleDB();
+            return await new Promise((resolve) => {
+              const tx = db.transaction('handles', 'readonly');
+              const getReq = tx.objectStore('handles').get('backupDir');
+              getReq.onsuccess = () => resolve(getReq.result || null);
+              getReq.onerror = () => resolve(null);
+            });
+          } catch (err) {
+            return null;
+          }
+        }
         // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
         // mark all tasks as unchecked and update the reset date in localStorage. This ensures
         // todos remain persistent week-to-week but are reset at the start of each new week.
@@ -303,6 +388,16 @@
         if (autoSyncPref !== null) {
           autoSyncEnabled = autoSyncPref === 'true';
         }
+
+        // Attempt to restore the backup directory handle from IndexedDB on load. If
+        // a handle exists, assign it to the global backupDirHandle so that auto
+        // sync can operate without requiring the user to pick a folder each
+        // time the page loads.
+        loadBackupDirHandle().then(handle => {
+          if (handle) {
+            backupDirHandle = handle;
+          }
+        });
 
         // -------------------------------------------------------------------------
         //  Webhook support and Todo functionality
@@ -621,7 +716,14 @@
         async function saveBackupToDir() {
           try {
             if (!backupDirHandle) return;
-            // Request permission to write. Some browsers may prompt the user here.
+            // Ensure we have permission to write to the directory. If not granted, abort silently.
+            try {
+              const perm = await backupDirHandle.requestPermission({ mode: 'readwrite' });
+              if (perm !== 'granted') return;
+            } catch (err) {
+              // If requestPermission fails (not supported), we proceed and hope existing permission works
+            }
+            // Create or overwrite a file named timekeeper-data.json in the selected directory
             const fileHandle = await backupDirHandle.getFileHandle('timekeeper-data.json', { create: true });
             const writable = await fileHandle.createWritable();
             await writable.write(JSON.stringify(data, null, 2));
@@ -639,6 +741,8 @@
           try {
             const dirHandle = await window.showDirectoryPicker();
             backupDirHandle = dirHandle;
+            // Persist the directory handle in IndexedDB so it can be restored on future visits
+            await saveBackupDirHandle(dirHandle);
             // Enable auto sync once a folder is chosen
             autoSyncEnabled = true;
             localStorage.setItem('autoSyncEnabledPro', 'true');
@@ -1004,38 +1108,34 @@
           const perProjectStats = data.projects.map(p => {
             return { project: p, stats: computeProjectStats(p) };
           });
-          // Calculate working-day-based time progress for the current week and month. We count
-          // how many working days (Mon–Fri) have elapsed so far relative to the total number of
-          // working days in the week/month. These values are used to determine schedule
-          // comparisons between time progress and hours worked.
+          // Calculate time progress for the current week and month. Instead of using only
+          // whole working days, include the fraction of the day that has elapsed. For
+          // weekly progress, Monday 00:00 marks the start and Friday 23:59 marks the
+          // end (5 days). For monthly progress, the first day of the month marks
+          // the start and the first day of the following month marks the end.
           const nowTime = new Date();
-          // Compute weekly time progress as working days elapsed / total working days (Mon‑Fri)
-          const nowDay = nowTime.getDay();
-          const startWeek = new Date(nowTime);
-          const diffMon = (nowDay + 6) % 7;
-          startWeek.setDate(startWeek.getDate() - diffMon);
-          let workdaysElapsedWeek = 0;
-          for (let d = new Date(startWeek); d <= nowTime; d.setDate(d.getDate() + 1)) {
-            const day = d.getDay();
-            if (day >= 1 && day <= 5) workdaysElapsedWeek++;
+          // Weekly time progress: compute fraction of the 5-day work week that has elapsed.
+          // If today is Saturday or Sunday, cap at 100%.
+          const dayOfWeek = nowTime.getDay();
+          let weeklyTimeProgress;
+          if (dayOfWeek === 0 || dayOfWeek === 6) {
+            weeklyTimeProgress = 100;
+          } else {
+            // Start of week (Monday) at 00:00
+            const startWeek = new Date(nowTime);
+            const diffToMonday = (dayOfWeek + 6) % 7;
+            startWeek.setDate(startWeek.getDate() - diffToMonday);
+            startWeek.setHours(0, 0, 0, 0);
+            const diffMs = nowTime - startWeek;
+            const totalMs = 5 * 24 * 60 * 60 * 1000;
+            weeklyTimeProgress = Math.min((diffMs / totalMs) * 100, 100);
           }
-          const totalWorkdaysWeek = 5;
-          const weeklyTimeProgress = Math.min(workdaysElapsedWeek / totalWorkdaysWeek, 1) * 100;
-          // Compute monthly time progress similarly based on working days
+          // Monthly time progress: compute fraction of the month elapsed (including days and time)
           const startMonth = new Date(nowTime.getFullYear(), nowTime.getMonth(), 1);
           const startNextMonth = new Date(nowTime.getFullYear(), nowTime.getMonth() + 1, 1);
-          // Total working days in current month
-          let totalWorkdaysMonth = countWorkdays(startMonth, startNextMonth);
-          // Working days elapsed so far (include today if it's a workday)
-          let workdaysElapsedMonth = countWorkdays(startMonth, nowTime);
-          // Include current day if it is a working day (countWorkdays excludes end date)
-          const todayDay = nowTime.getDay();
-          if (todayDay >= 1 && todayDay <= 5) {
-            workdaysElapsedMonth++;
-          }
-          // Avoid division by zero
-          if (totalWorkdaysMonth === 0) totalWorkdaysMonth = 1;
-          const monthlyTimeProgress = Math.min(workdaysElapsedMonth / totalWorkdaysMonth, 1) * 100;
+          const totalMsMonth = startNextMonth - startMonth;
+          const diffMsMonth = nowTime - startMonth;
+          let monthlyTimeProgress = Math.min((diffMsMonth / totalMsMonth) * 100, 100);
 
           // Determine schedule status for weekly and monthly progress by comparing hours progress
           // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
@@ -1986,8 +2086,18 @@
               }
               factorSelect.addEventListener('change', () => {
                 const v = factorSelect.value;
+                // Before changing the factor, accumulate time elapsed since last update
+                const now = new Date();
+                const lastUpdate = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
+                const elapsedSec = (now - lastUpdate) / 1000;
+                // Use current factor (manual override or concurrency) to update effective seconds
+                const currentFactor = entry.factor || computeConcurrencyFactor(getRunningEntries().length);
+                entry.effectiveSeconds = (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
+                // Update last update timestamp to now
+                entry.lastUpdateTime = now.toISOString();
+                // Apply new override or restore automatic factor
                 if (!v) {
-                  // Remove override: restore concurrency factor for this entry
+                  // Remove override: restore concurrency factor based on current running count
                   entry.manualFactor = null;
                   const count = getRunningEntries().length;
                   entry.factor = computeConcurrencyFactor(count);
@@ -1996,10 +2106,8 @@
                   entry.manualFactor = fVal;
                   entry.factor = fVal;
                 }
-                // Reset timing baseline so the effectiveSeconds calculation starts fresh
-                entry.lastUpdateTime = new Date().toISOString();
                 saveData();
-                // Re-render the timer section to refresh display and apply changes
+                // Refresh the timer section to apply the new factor
                 updateTimerSection();
               });
               overrideP.appendChild(factorSelect);
@@ -2068,6 +2176,8 @@
         // Stop a single running timer by id
         function stopSingleTimer(entryId) {
           const toStop = data.entries.find(e => e.id === entryId && e.isRunning);
+          // Provide tactile feedback when stopping a timer
+          provideHaptic('long');
           if (!toStop) return;
           const now = new Date();
           // Gather all running entries including the one to stop
@@ -2135,6 +2245,9 @@
           if (runningEntries.length === 0) {
             triggerFocusStart();
           }
+
+          // Provide tactile feedback when starting a timer
+          provideHaptic('long');
           const now = new Date();
           // Update all existing running entries: accumulate effective seconds and set new factor
           const newConcurrencyCount = runningEntries.length + 1;
@@ -2342,11 +2455,26 @@
           updateProjectsPage();
         });
 
+        // Toggle between showing all entries and only recent entries (last 30 days). When
+        // showing only recent entries, the button text reads "Show All". When
+        // showing all entries, it reads "Show Recent". Clicking the button
+        // toggles the view and re-renders the entries table.
+        const toggleEntriesBtn = document.getElementById('toggleEntriesViewBtn');
+        if (toggleEntriesBtn) {
+          toggleEntriesBtn.addEventListener('click', () => {
+            showAllEntries = !showAllEntries;
+            toggleEntriesBtn.textContent = showAllEntries ? 'Show Recent' : 'Show All';
+            updateEntriesTable();
+          });
+        }
+
         // Nudge buttons for manual entry: adjust hours by ±5 minutes
         const minusBtn = document.getElementById('manualMinus5Btn');
         const plusBtn = document.getElementById('manualPlus5Btn');
         if (minusBtn && plusBtn) {
           minusBtn.addEventListener('click', () => {
+            // Provide a short beep when nudging entry time
+            provideHaptic('beep');
             const hoursInput = document.getElementById('manualHoursPro');
             let current = parseFloat(hoursInput.value) || 0;
             current -= (5 / 60);
@@ -2354,6 +2482,7 @@
             hoursInput.value = current.toFixed(2);
           });
           plusBtn.addEventListener('click', () => {
+            provideHaptic('beep');
             const hoursInput = document.getElementById('manualHoursPro');
             let current = parseFloat(hoursInput.value) || 0;
             current += (5 / 60);
@@ -2384,8 +2513,21 @@
             tbody.appendChild(tr);
             return;
           }
+          // Decide which entries to show. If showAllEntries is false, only include entries
+          // whose start or end times are within the past 30 days. Otherwise include all.
+          let entriesToShow = data.entries;
+          if (!showAllEntries) {
+            const cutoff = new Date();
+            // Set cutoff to 30 days ago
+            cutoff.setDate(cutoff.getDate() - 30);
+            entriesToShow = data.entries.filter(e => {
+              const startDate = new Date(e.startTime);
+              const endDate = e.endTime ? new Date(e.endTime) : startDate;
+              return startDate >= cutoff || endDate >= cutoff;
+            });
+          }
           // sort by start time desc
-          const sorted = [...data.entries].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+          const sorted = [...entriesToShow].sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
           sorted.forEach(entry => {
             const tr = document.createElement('tr');
             const project = data.projects.find(p => p.id === entry.projectId);
@@ -2409,6 +2551,8 @@
             minusBtn.style.fontSize = '0.7rem';
             minusBtn.textContent = '−5m';
             minusBtn.addEventListener('click', () => {
+              // Provide quick beep feedback
+              provideHaptic('beep');
               // Subtract 5 minutes (300 seconds) from the entry duration
               let newDur = (entry.duration || 0) - 300;
               if (newDur < 0) newDur = 0;
@@ -2431,6 +2575,7 @@
             plusBtn.style.marginLeft = '0.25rem';
             plusBtn.textContent = '+5m';
             plusBtn.addEventListener('click', () => {
+              provideHaptic('beep');
               // Add 5 minutes to the duration
               let newDur = (entry.duration || 0) + 300;
               entry.duration = newDur;
@@ -2562,7 +2707,12 @@
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
           if (autoSyncEnabled) {
-            autoSyncStatusElem.textContent = 'Auto sync is ON. Data will be exported automatically.';
+            // If a backup folder is already chosen, display its name; otherwise prompt user
+            if (backupDirHandle) {
+              autoSyncStatusElem.textContent = 'Auto sync is ON. Backups saved to ' + (backupDirHandle.name || 'selected folder') + '.';
+            } else {
+              autoSyncStatusElem.textContent = 'Auto sync is ON, but no backup folder is set.';
+            }
           } else {
             autoSyncStatusElem.textContent = 'Auto sync is OFF.';
           }
