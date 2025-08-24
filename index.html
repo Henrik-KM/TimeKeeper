@@ -74,6 +74,15 @@
           <select id="timerProjectPro" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
           <label for="timerInitialPro" style="margin-bottom:0.25rem; font-weight:500;">Hours already spent (optional)</label>
           <input id="timerInitialPro" type="number" min="0" step="0.1" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 0.5" />
+          <!-- Allow the user to choose the initial focus factor when starting a timer -->
+          <label for="startFactorPro" style="margin-bottom:0.25rem; font-weight:500;">Focus factor</label>
+          <select id="startFactorPro" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;">
+            <option value="">Auto</option>
+            <option value="1">100%</option>
+            <option value="0.75">75%</option>
+            <option value="0.5">50%</option>
+            <option value="0.25">25%</option>
+          </select>
           <button id="startTimerBtnPro" class="btn primary" disabled style="padding:0.75rem 1.5rem; font-size:1rem;">Start</button>
         </div>
       </section>
@@ -397,6 +406,8 @@
           if (handle) {
             backupDirHandle = handle;
           }
+          // After restoring the backup directory, determine if focus blocker should be active
+          updateFocusBlocker();
         });
 
         // -------------------------------------------------------------------------
@@ -428,6 +439,26 @@
         }
         function triggerFocusStop() {
           triggerWebhooks(STOP_WEBHOOKS);
+        }
+
+        // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
+        // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
+        let focusBlockerActive = false;
+        function updateFocusBlocker() {
+          // Sum the factors of all running timers. Use the factor property; if undefined, compute concurrency factor.
+          const running = getRunningEntries();
+          let total = 0;
+          running.forEach(e => {
+            total += e.factor || computeConcurrencyFactor(running.length);
+          });
+          // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal
+          if (!focusBlockerActive && total > 0.5) {
+            focusBlockerActive = true;
+            triggerFocusStart();
+          } else if (focusBlockerActive && total <= 0.5) {
+            focusBlockerActive = false;
+            triggerFocusStop();
+          }
         }
 
         // Update the Todo section UI based on the current data.todos array. Each
@@ -806,9 +837,11 @@
           const dt = new Date(dateStr);
           return isNaN(dt) ? '' : dt.toLocaleDateString();
         }
-        function formatCurrency(num) {
+        function formatCurrency(num, decimals = 1) {
           // Format currency as Swedish Krona. Place 'kr' after the amount.
-          return num.toFixed(2) + ' kr';
+          // Allow specifying the number of decimal places. Dashboard uses 1 decimal,
+          // timers use 0 decimal places.
+          return num.toFixed(decimals) + ' kr';
         }
         function formatDuration(seconds) {
           const hrs = Math.floor(seconds / 3600);
@@ -997,11 +1030,15 @@
           // you should aim to work this week and this month across all projects.
           let weeklyTarget = 0;
           let monthTarget = 0;
+          // We'll compute dailyTarget after summing weekly targets
+          let dailyTarget = 0;
           data.projects.forEach(project => {
             const sp = computeProjectStats(project);
             weeklyTarget += sp.weeklyTargetConst || 0;
             monthTarget += sp.monthlyTargetConst || 0;
           });
+          // Distribute the weekly target evenly across a 5-day work week
+          dailyTarget = weeklyTarget / 5;
           data.entries.forEach(entry => {
             if (entry.isRunning || !entry.duration) return;
             const start = new Date(entry.startTime);
@@ -1073,7 +1110,8 @@
             weekRevenueChange,
             activeProjects,
             dueThisWeek,
-            totalRevenue
+            totalRevenue,
+            dailyTarget
           };
         }
 
@@ -1160,7 +1198,8 @@
           const cards = [
             {
               title: "Today's Hours",
-              value: stats.todayHours.toFixed(1) + 'h',
+              // Show today's hours against the daily target
+              value: stats.todayHours.toFixed(1) + ' / ' + (stats.dailyTarget ? stats.dailyTarget.toFixed(1) : '0') + 'h',
               change: stats.todayChange,
               icon: '⏱',
               changeLabel: 'vs yesterday',
@@ -2025,8 +2064,17 @@
             // Display total earnings for all running timers
             const totalEarnedP = document.createElement('p');
             totalEarnedP.innerHTML = '<strong>Total Earned:</strong> <span id="runningTotalEarned"></span>';
-            totalEarnedP.style.marginBottom = '0.75rem';
+            totalEarnedP.style.marginBottom = '0.5rem';
             runningDiv.appendChild(totalEarnedP);
+            // Add a "Stop All Timers" button to allow stopping all timers at once
+            const stopAllBtn = document.createElement('button');
+            stopAllBtn.className = 'btn danger';
+            stopAllBtn.textContent = 'Stop All Timers';
+            stopAllBtn.style.marginBottom = '0.75rem';
+            stopAllBtn.addEventListener('click', () => {
+              stopAllTimers();
+            });
+            runningDiv.appendChild(stopAllBtn);
             // Render each running entry
             runningEntries.forEach(entry => {
               const project = data.projects.find(p => p.id === entry.projectId);
@@ -2109,6 +2157,8 @@
                 saveData();
                 // Refresh the timer section to apply the new factor
                 updateTimerSection();
+                // Recompute focus blocker activation in case total factor changed
+                updateFocusBlocker();
               });
               overrideP.appendChild(factorSelect);
               row.appendChild(overrideP);
@@ -2154,12 +2204,12 @@
                   earned = (effective / 3600) * (project.hourlyRate || 0);
                 }
                 const earnSpan = document.getElementById('runningEarned-' + entry.id);
-                if (earnSpan) earnSpan.textContent = formatCurrency(earned);
+                if (earnSpan) earnSpan.textContent = formatCurrency(earned, 0);
                 totalEarned += earned;
               });
               // Update total earned across all running timers
               const totalSpan = document.getElementById('runningTotalEarned');
-              if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned);
+              if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned, 0);
             };
             tick();
             timerInterval = setInterval(tick, 1000);
@@ -2216,14 +2266,10 @@
           updateTimerSection();
           updateDashboard();
           updateEntriesTable();
-          // If auto sync is enabled, perform an immediate backup after stopping a timer
-          if (autoSyncEnabled) {
-            saveBackupToDir();
-          }
-          // If there are no more running timers after this stop, trigger focus stop hooks
-          if (getRunningEntries().length === 0) {
-            triggerFocusStop();
-          }
+          // Do not immediately save backup here; periodic auto‑sync will handle exporting
+          // Recompute focus blocker activation after stopping this timer. If the total
+          // factor has dropped below or equal to 50%, the blocker will be disabled.
+          updateFocusBlocker();
         }
         let timerInterval = null;
         // Chart instances for weekly and monthly scatter plots
@@ -2241,34 +2287,42 @@
             alert('A timer is already running for this project. You cannot start another timer for the same project.');
             return;
           }
-          // Trigger focus start if no timers were running previously
-          if (runningEntries.length === 0) {
-            triggerFocusStart();
-          }
+          // No immediate focus start here; activation of focus mode will be handled
+          // by updateFocusBlocker() based on the total factor of running timers.
 
           // Provide tactile feedback when starting a timer
           provideHaptic('long');
           const now = new Date();
-          // Update all existing running entries: accumulate effective seconds and set new factor
+          // Determine override factor selected by the user (if any)
+          const overrideVal = document.getElementById('startFactorPro').value;
+          // Compute the new concurrency count including the new entry
           const newConcurrencyCount = runningEntries.length + 1;
-          const newFactor = computeConcurrencyFactor(newConcurrencyCount);
+          // Compute the concurrency factor that would apply if no override is used
+          const autoFactor = computeConcurrencyFactor(newConcurrencyCount);
+          // Update all existing running entries: accumulate effective seconds and set new factor
           runningEntries.forEach(e => {
-            // Update effective seconds for elapsed time since last update
             const last = e.lastUpdateTime ? new Date(e.lastUpdateTime) : new Date(e.startTime);
             const elapsedSec = (now - last) / 1000;
-            // Use the previous factor (entry.factor) as the current weighted rate
             const prevFactor = e.factor || computeConcurrencyFactor(runningEntries.length);
             e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
-            // Update last update timestamp
             e.lastUpdateTime = now.toISOString();
-            // Only assign the new concurrency factor if no manual override exists
+            // For timers without manual override, assign the new concurrency factor
             if (!e.manualFactor) {
-              e.factor = newFactor;
+              e.factor = autoFactor;
             }
           });
           // Create new entry for the selected project
-          // Set real start time by subtracting initial hours so the start time reflects the past
           const realStart = new Date(now.getTime() - initialHours * 3600 * 1000);
+          // Determine the factor for the new entry: manual override or auto
+          let newEntryFactor;
+          let newEntryManual = null;
+          if (overrideVal) {
+            newEntryFactor = parseFloat(overrideVal);
+            newEntryManual = newEntryFactor;
+          } else {
+            newEntryFactor = autoFactor;
+            newEntryManual = null;
+          }
           const newEntry = {
             id: uuid(),
             projectId,
@@ -2278,22 +2332,22 @@
             duration: null,
             isRunning: true,
             createdAt: now.toISOString(),
-            // Track weighted timing fields
             effectiveSeconds: initialHours * 3600,
             lastUpdateTime: now.toISOString(),
-            // Concurrency factor for this entry. If the user later sets a manual
-            // override, this value will be replaced.
-            factor: newFactor,
-            manualFactor: null
+            factor: newEntryFactor,
+            manualFactor: newEntryManual
           };
           data.entries.push(newEntry);
-          // Reset initial input
+          // Reset initial input and focus factor selection
           document.getElementById('timerInitialPro').value = '';
+          document.getElementById('startFactorPro').value = '';
           saveData();
-          // Update selects so the started project is disabled
+          // Update UI and timers
           updateProjectSelects();
           updateTimerSection();
           updateDashboard();
+          // After adding the new entry, update the focus blocker based on the new total factor
+          updateFocusBlocker();
         });
         document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
           stopAllTimers();
@@ -2336,14 +2390,9 @@
           updateTimerSection();
           updateDashboard();
           updateEntriesTable();
-          // Immediate backup when stopping all timers if auto sync is enabled
-          if (autoSyncEnabled) {
-            saveBackupToDir();
-          }
-          // If there are no more running timers after this stop, trigger focus stop hooks
-          if (getRunningEntries().length === 0) {
-            triggerFocusStop();
-          }
+          // Do not immediately save backup here; periodic auto‑sync will handle exporting
+          // After stopping all timers, recompute focus blocker activation based on total factor
+          updateFocusBlocker();
         }
 
         // Update project selects for timer and manual forms
