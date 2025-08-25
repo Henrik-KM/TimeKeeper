@@ -403,10 +403,15 @@
         // sync can operate without requiring the user to pick a folder each
         // time the page loads.
         loadBackupDirHandle().then(handle => {
+          // If a handle was previously saved, restore it.
           if (handle) {
             backupDirHandle = handle;
           }
-          // After restoring the backup directory, determine if focus blocker should be active
+          // Update auto sync status now that we know whether a backup folder is set.
+          if (typeof updateAutoSyncStatus === 'function') {
+            updateAutoSyncStatus();
+          }
+          // After restoring the backup directory, determine if focus blocker should be active.
           updateFocusBlocker();
         });
 
@@ -838,10 +843,26 @@
           return isNaN(dt) ? '' : dt.toLocaleDateString();
         }
         function formatCurrency(num, decimals = 1) {
-          // Format currency as Swedish Krona. Place 'kr' after the amount.
-          // Allow specifying the number of decimal places. Dashboard uses 1 decimal,
-          // timers use 0 decimal places.
-          return num.toFixed(decimals) + ' kr';
+          // Format currency as Swedish Krona (kr). Allows rounding to positive or
+          // negative decimal places. A negative decimal value rounds to tens,
+          // hundreds, etc. For example, decimals = -1 rounds to the nearest 10,
+          // decimals = -2 rounds to the nearest 100. When decimals >= 0, round
+          // normally and include that many decimal places. When decimals < 0,
+          // round to the specified magnitude and show no decimals. If num is
+          // not finite, return an empty string.
+          if (!isFinite(num)) return '';
+          let rounded;
+          if (decimals >= 0) {
+            // Round to specified fractional places
+            const factor = Math.pow(10, decimals);
+            rounded = Math.round(num * factor) / factor;
+            return rounded.toFixed(decimals) + ' kr';
+          } else {
+            // Round to tens, hundreds, etc.
+            const factor = Math.pow(10, -decimals);
+            rounded = Math.round(num / factor) * factor;
+            return Math.round(rounded).toString() + ' kr';
+          }
         }
         function formatDuration(seconds) {
           const hrs = Math.floor(seconds / 3600);
@@ -936,9 +957,17 @@
           if (weeklyExpected > project.budgetHours) weeklyExpected = project.budgetHours;
           if (monthlyExpected > project.budgetHours) monthlyExpected = project.budgetHours;
           // Weekly and last week hours
-          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
-          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7);
+          // Determine the start of the current week (Monday 00:00). We calculate how many
+          // days have passed since Monday and subtract that from today's date. This ensures
+          // weekly statistics reset at the beginning of each week.
+          const dayOfWeek = now.getDay();
+          const diffToMondayWeek = (dayOfWeek + 6) % 7;
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMondayWeek);
+          weekStart.setHours(0, 0, 0, 0);
+          // Last week spans the 7 days prior to weekStart
+          const lastWeekStart = new Date(weekStart);
+          lastWeekStart.setDate(weekStart.getDate() - 7);
+          const lastWeekEnd = new Date(weekStart);
           const weeklySeconds = entries
             .filter(e => new Date(e.startTime) >= weekStart)
             .reduce((sum, e) => sum + (e.duration || 0), 0);
@@ -1004,10 +1033,20 @@
           const now = new Date();
           const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
           const yesterdayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
-          // Define last week's date range for revenue calculation (7 days before the current week)
-          const lastWeekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 13);
-          const lastWeekEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6);
+          // Start of this week (Monday 00:00) – the weekly period resets on Mondays. We calculate
+          // the date of Monday in the current week and use it to accumulate weekly hours
+          // and revenue. If today is Monday, weekStart will be today; if today is Tuesday,
+          // weekStart will be yesterday, and so on.
+          const day = now.getDay();
+          const diffToMonday = (day + 6) % 7;
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+          weekStart.setHours(0, 0, 0, 0);
+          // Define last week's date range for revenue calculation (the week before the current week).
+          // We subtract 7 days from weekStart to get the start of the previous week and use weekStart
+          // itself as the end of last week.
+          const lastWeekStart = new Date(weekStart);
+          lastWeekStart.setDate(weekStart.getDate() - 7);
+          const lastWeekEnd = new Date(weekStart);
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
           const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
@@ -1269,7 +1308,15 @@
                 barContainer.style.display = 'flex';
                 barContainer.style.flexDirection = 'column';
                 barContainer.style.gap = '0.2rem';
-                // Expected progress bar
+                // Actual hours worked bar (blue) shown on top
+                const hoursBar = document.createElement('div');
+                hoursBar.className = 'progress-bar';
+                const hoursFill = document.createElement('div');
+                hoursFill.className = 'fill';
+                hoursFill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
+                hoursBar.appendChild(hoursFill);
+                barContainer.appendChild(hoursBar);
+                // Expected progress bar (black) shown beneath
                 const expectedBar = document.createElement('div');
                 expectedBar.className = 'progress-bar';
                 const expectedFill = document.createElement('div');
@@ -1279,14 +1326,6 @@
                 expectedFill.style.width = Math.min(100, card.timeProgress).toFixed(1) + '%';
                 expectedBar.appendChild(expectedFill);
                 barContainer.appendChild(expectedBar);
-                // Actual hours worked bar
-                const hoursBar = document.createElement('div');
-                hoursBar.className = 'progress-bar';
-                const hoursFill = document.createElement('div');
-                hoursFill.className = 'fill';
-                hoursFill.style.width = Math.min(100, card.progress).toFixed(1) + '%';
-                hoursBar.appendChild(hoursFill);
-                barContainer.appendChild(hoursBar);
                 div.appendChild(barContainer);
               } else {
                 const progressBar = document.createElement('div');
@@ -1334,7 +1373,8 @@
             if (card.revenue !== undefined) {
               const revenueDiv = document.createElement('div');
               revenueDiv.className = 'stat-change';
-              revenueDiv.textContent = 'Revenue: ' + formatCurrency(card.revenue);
+              // Round revenue to the nearest 10 (use decimals = -1) for dashboard display
+              revenueDiv.textContent = 'Revenue: ' + formatCurrency(card.revenue, -1);
               revenueDiv.style.color = '#475569';
               div.appendChild(revenueDiv);
             }
@@ -1558,7 +1598,15 @@
             const totalProjectDaysProg = stats.daysPassed + stats.daysLeft;
             const timeProg = totalProjectDaysProg > 0 ? (stats.daysPassed / totalProjectDaysProg) * 100 : 0;
             const usedProg = stats.usedPct;
-            // Expected progress bar (black)
+            // Hours worked progress bar (blue) shown on top
+            const hoursBar = document.createElement('div');
+            hoursBar.className = 'progress-bar';
+            const hoursFill = document.createElement('div');
+            hoursFill.className = 'fill';
+            hoursFill.style.width = Math.min(100, usedProg).toFixed(1) + '%';
+            hoursBar.appendChild(hoursFill);
+            progressContainer.appendChild(hoursBar);
+            // Expected progress bar (black) shown beneath
             const expectedBar = document.createElement('div');
             expectedBar.className = 'progress-bar';
             const expectedFill = document.createElement('div');
@@ -1567,14 +1615,6 @@
             expectedFill.style.width = Math.min(100, timeProg).toFixed(1) + '%';
             expectedBar.appendChild(expectedFill);
             progressContainer.appendChild(expectedBar);
-            // Hours worked progress bar (blue)
-            const hoursBar = document.createElement('div');
-            hoursBar.className = 'progress-bar';
-            const hoursFill = document.createElement('div');
-            hoursFill.className = 'fill';
-            hoursFill.style.width = Math.min(100, usedProg).toFixed(1) + '%';
-            hoursBar.appendChild(hoursFill);
-            progressContainer.appendChild(hoursBar);
             // Determine schedule status for this project by comparing used percent to time progress
             const scheduleDiffProj = usedProg - timeProg;
             let scheduleTextProj;
@@ -2170,6 +2210,56 @@
               earnSpan.textContent = '';
               earnP.appendChild(earnSpan);
               row.appendChild(earnP);
+              // Nudge controls: allow the user to adjust elapsed time in 5 minute increments
+              const nudgeDiv = document.createElement('div');
+              nudgeDiv.style.display = 'flex';
+              nudgeDiv.style.gap = '0.25rem';
+              // Minus 5 minutes button
+              const minusBtn = document.createElement('button');
+              minusBtn.className = 'btn secondary';
+              minusBtn.textContent = '-5m';
+              minusBtn.style.padding = '0.25rem 0.5rem';
+              minusBtn.style.fontSize = '0.75rem';
+              minusBtn.addEventListener('click', () => {
+                // Compute elapsed time since last update and update effective seconds first
+                const now = new Date();
+                const lastUpdate = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
+                const elapsedSec = (now - lastUpdate) / 1000;
+                // Use current factor (manual override or concurrency) to update effective seconds
+                const currentFactor = entry.manualFactor != null ? entry.manualFactor : (entry.factor || computeConcurrencyFactor(getRunningEntries().length));
+                entry.effectiveSeconds = (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
+                entry.lastUpdateTime = now.toISOString();
+                // Subtract 5 minutes of actual time from effectiveSeconds taking into account factor
+                const delta = 300 * currentFactor;
+                entry.effectiveSeconds = Math.max(0, (entry.effectiveSeconds || 0) - delta);
+                saveData();
+                updateTimerSection();
+                provideHaptic('beep');
+              });
+              nudgeDiv.appendChild(minusBtn);
+              // Plus 5 minutes button
+              const plusBtn = document.createElement('button');
+              plusBtn.className = 'btn secondary';
+              plusBtn.textContent = '+5m';
+              plusBtn.style.padding = '0.25rem 0.5rem';
+              plusBtn.style.fontSize = '0.75rem';
+              plusBtn.addEventListener('click', () => {
+                // Compute elapsed time since last update and update effective seconds first
+                const now = new Date();
+                const lastUpdate = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
+                const elapsedSec = (now - lastUpdate) / 1000;
+                const currentFactor = entry.manualFactor != null ? entry.manualFactor : (entry.factor || computeConcurrencyFactor(getRunningEntries().length));
+                entry.effectiveSeconds = (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
+                entry.lastUpdateTime = now.toISOString();
+                // Add 5 minutes of actual time to effectiveSeconds, scaled by factor
+                const delta = 300 * currentFactor;
+                entry.effectiveSeconds = (entry.effectiveSeconds || 0) + delta;
+                saveData();
+                updateTimerSection();
+                provideHaptic('beep');
+              });
+              nudgeDiv.appendChild(plusBtn);
+              row.appendChild(nudgeDiv);
               // Stop button
               const stopBtn = document.createElement('button');
               stopBtn.className = 'btn danger';
@@ -2756,11 +2846,17 @@
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
           if (autoSyncEnabled) {
-            // If a backup folder is already chosen, display its name; otherwise prompt user
+            // If a backup folder is already chosen, display its name. In some browsers
+            // (for example when hosted remotely) the File System Access API cannot persist
+            // directory handles across sessions. In that case, we still show a generic
+            // message to avoid implying a problem. We avoid warning when backupDirHandle
+            // is null because the handle may only be available on local installations.
             if (backupDirHandle) {
+              // Show the folder name if available; fallback to a generic description
               autoSyncStatusElem.textContent = 'Auto sync is ON. Backups saved to ' + (backupDirHandle.name || 'selected folder') + '.';
             } else {
-              autoSyncStatusElem.textContent = 'Auto sync is ON, but no backup folder is set.';
+              // Do not warn about missing backup folder; just note that auto sync is active
+              autoSyncStatusElem.textContent = 'Auto sync is ON. Backups will be saved to the previously selected folder when available.';
             }
           } else {
             autoSyncStatusElem.textContent = 'Auto sync is OFF.';
