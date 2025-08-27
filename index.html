@@ -216,9 +216,14 @@
           <div id="heatmapContainer"></div>
         </div>
         <!-- Burndown charts card -->
-        <div class="card">
+        <div class="card" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Burndown Charts</h3>
           <div id="burndownContainer"></div>
+        </div>
+        <!-- Hours by Project bar chart -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Hours by Project (Month)</h3>
+          <canvas id="hoursByProjectChart" height="200"></canvas>
         </div>
       </section>
     </div>
@@ -632,6 +637,138 @@
             if (currentDay > daysInMonth) break;
           }
           heatmapContainer.appendChild(heatmapTable);
+          // ---------- Build hours by project bar chart ----------
+          // Compute total hours worked per project in the current month
+          const barLabels = [];
+          const barHours = [];
+          const barTargets = [];
+          data.projects.forEach(project => {
+            const sp = computeProjectStats(project);
+            barLabels.push(project.name);
+            // Use monthlyHours for actual and monthlyTargetConst for target
+            barHours.push(sp.monthlyHours || 0);
+            barTargets.push(sp.monthlyTargetConst || 0);
+          });
+          if (barLabels.length > 0) {
+            const barCard = document.createElement('div');
+            barCard.style.marginBottom = '1rem';
+            const barTitle = document.createElement('h3');
+            barTitle.style.margin = '0 0 0.5rem 0';
+            barTitle.style.fontSize = '1.1rem';
+            barTitle.style.fontWeight = '600';
+            barTitle.textContent = 'Hours by Project (This Month)';
+            barCard.appendChild(barTitle);
+            const barCanvas = document.createElement('canvas');
+            barCanvas.height = 200;
+            barCard.appendChild(barCanvas);
+            heatmapContainer.appendChild(barCard);
+            const ctxBar = barCanvas.getContext('2d');
+            new Chart(ctxBar, {
+              type: 'bar',
+              data: {
+                labels: barLabels,
+                datasets: [
+                  {
+                    label: 'Hours Worked',
+                    data: barHours,
+                    backgroundColor: '#3b82f6',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1
+                  },
+                  {
+                    label: 'Target Hours',
+                    data: barTargets,
+                    backgroundColor: '#94a3b8',
+                    borderColor: '#94a3b8',
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: {
+                    title: { display: false },
+                    ticks: { autoSkip: false }
+                  },
+                  y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Hours' }
+                  }
+                },
+                plugins: { legend: { display: true } }
+              }
+            });
+          }
+
+          // ---------- Build daily hours line chart for the current month ----------
+          // This chart shows how many hours were worked each day of the current month and compares to the
+          // average daily target (monthlyTargetConst / daysInMonth) aggregated across all projects.
+          // Compute daily hours across all projects
+          const dailyLabels = [];
+          const dailyHoursData = [];
+          const dailyTargetData = [];
+          for (let d = 1; d <= daysInMonth; d++) {
+            dailyLabels.push(d.toString());
+            dailyHoursData.push(hoursPerDay[d] || 0);
+            // Sum monthly targets for all projects to compute aggregate monthly target and then average per day
+            const dayTarget = data.projects.reduce((sum, proj) => {
+              const ps = computeProjectStats(proj);
+              return sum + (ps.monthlyTargetConst || 0);
+            }, 0) / daysInMonth;
+            dailyTargetData.push(dayTarget);
+          }
+          // Only render chart if there is at least one project
+          if (dailyLabels.length > 0 && data.projects.length > 0) {
+            const lineCard = document.createElement('div');
+            lineCard.style.marginBottom = '1rem';
+            const lineTitle = document.createElement('h3');
+            lineTitle.style.margin = '0 0 0.5rem 0';
+            lineTitle.style.fontSize = '1.1rem';
+            lineTitle.style.fontWeight = '600';
+            lineTitle.textContent = 'Daily Hours Trend (This Month)';
+            lineCard.appendChild(lineTitle);
+            const lineCanvas = document.createElement('canvas');
+            lineCanvas.height = 200;
+            lineCard.appendChild(lineCanvas);
+            heatmapContainer.appendChild(lineCard);
+            const ctxLine = lineCanvas.getContext('2d');
+            new Chart(ctxLine, {
+              type: 'line',
+              data: {
+                labels: dailyLabels,
+                datasets: [
+                  {
+                    label: 'Hours Worked',
+                    data: dailyHoursData,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59,130,246,0.3)',
+                    fill: false,
+                    tension: 0.1
+                  },
+                  {
+                    label: 'Daily Target (avg)',
+                    data: dailyTargetData,
+                    borderColor: '#999999',
+                    backgroundColor: 'rgba(153,153,153,0.3)',
+                    borderDash: [5,5],
+                    fill: false,
+                    tension: 0.1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: { title: { display: true, text: 'Day of Month' }, ticks: { autoSkip: false } },
+                  y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+                },
+                plugins: { legend: { display: true }, tooltip: { mode: 'index', intersect: false } }
+              }
+            });
+          }
           // ---------- Build per-project burndown charts ----------
           // Destroy existing charts to prevent memory leaks
           Object.values(burndownCharts).forEach(ch => {
@@ -729,6 +866,61 @@
               }
             });
           });
+
+          // ---------- Build Hours by Project bar chart ----------
+          const hoursCanvas = document.getElementById('hoursByProjectChart');
+          if (hoursCanvas) {
+            // Destroy existing chart if present
+            if (window.hoursByProjectChart) {
+              try { window.hoursByProjectChart.destroy(); } catch (err) {}
+            }
+            const labels = [];
+            const workedData = [];
+            const targetData = [];
+            data.projects.forEach(project => {
+              const sp = computeProjectStats(project);
+              labels.push(project.name);
+              // Hours worked this month
+              workedData.push(sp.monthlyHours || 0);
+              // Dynamic monthly target
+              targetData.push(sp.monthlyTargetConst || 0);
+            });
+            const ctxHours = hoursCanvas.getContext('2d');
+            window.hoursByProjectChart = new Chart(ctxHours, {
+              type: 'bar',
+              data: {
+                labels: labels,
+                datasets: [
+                  {
+                    label: 'Hours Worked',
+                    data: workedData,
+                    backgroundColor: 'rgba(59,130,246,0.6)',
+                    borderColor: '#3b82f6',
+                    borderWidth: 1
+                  },
+                  {
+                    label: 'Target Hours',
+                    data: targetData,
+                    backgroundColor: 'rgba(203,213,224,0.6)',
+                    borderColor: '#94a3b8',
+                    borderWidth: 1
+                  }
+                ]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                  x: { title: { display: true, text: 'Project' } },
+                  y: { title: { display: true, text: 'Hours' }, beginAtZero: true }
+                },
+                plugins: {
+                  legend: { display: true },
+                  tooltip: { enabled: true }
+                }
+              }
+            });
+          }
         }
 
         // Download the current data to a JSON file. Uses the same filename
@@ -948,9 +1140,10 @@
           startOfWeek.setDate(startOfWeek.getDate() - diffToMonday);
           const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
           // Compute calendar day counts relative to project creation date
-          const daysTillNow = Math.max(0, Math.ceil((now - created) / (1000 * 60 * 60 * 24)));
-          const daysTillStartOfWeekCal = Math.max(0, Math.ceil((startOfWeek - created) / (1000 * 60 * 60 * 24)));
-          const daysTillStartOfMonthCal = Math.max(0, Math.ceil((startOfMonth - created) / (1000 * 60 * 60 * 24)));
+          const daysTillNow = Math.max(0, (now - created) / (1000 * 60 * 60 * 24));
+          const daysTillStartOfWeekCal = Math.max(0, (startOfWeek - created) / (1000 * 60 * 60 * 24));
+          const daysTillStartOfMonthCal = Math.max(0, (startOfMonth - created) / (1000 * 60 * 60 * 24));
+          // Include fractional day for weekly expected by using floating point difference (time-of-day) rather than rounded days.
           weeklyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfWeekCal));
           monthlyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfMonthCal));
           // Clamp expected values so they do not exceed the project's total budget hours
@@ -1000,9 +1193,32 @@
           // at least one to avoid division by zero.
           const remaining = Math.max(0, remainingHours);
           const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
-          const monthsLeft = Math.max(1, Math.ceil(daysLeft / 30));
+          // Determine total months between project creation and deadline (inclusive) for constant monthly targets
+          const startMonthIndex = created.getFullYear() * 12 + created.getMonth();
+          const deadlineMonthIndex = deadline.getFullYear() * 12 + deadline.getMonth();
+          const totalMonths = Math.max(1, (deadlineMonthIndex - startMonthIndex + 1));
+          const monthTargetOriginal = project.budgetHours / totalMonths;
+          // Determine number of full months before the current month (elapsed months) for carry-over calculations
+          const currentMonthIndex = now.getFullYear() * 12 + now.getMonth();
+          const monthsElapsed = Math.max(0, currentMonthIndex - startMonthIndex);
+          // Compute expected hours for all months prior to the current month
+          const expectedBefore = monthTargetOriginal * monthsElapsed;
+          // Compute actual hours for months prior to the current month
+          const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          const secondsBeforeThisMonth = entries
+            .filter(e => new Date(e.startTime) < firstDayOfThisMonth)
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const actualBefore = secondsBeforeThisMonth / 3600;
+          // Adjust the monthly target for the current month based on surplus or deficit from previous months
+          let monthlyTargetConst = monthTargetOriginal + (expectedBefore - actualBefore);
+          // If remaining hours are less than monthly target, clamp to remaining hours
+          if (monthlyTargetConst < 0) monthlyTargetConst = 0;
+          // For dynamic weekly target, continue to spread remaining hours evenly across remaining weeks
           const weeklyTargetConst = remaining / weeksLeft;
-          const monthlyTargetConst = remaining / monthsLeft;
+          // Compute months left from current date to deadline to update monthsLeft variable for dynamic purposes
+          const monthsLeft = Math.max(1, deadlineMonthIndex - currentMonthIndex + 1);
+          // If there is any remaining deficit/surplus after adjusting this month's target, propagate to future months
+          // by updating remaining hours accordingly (not used directly here but conceptually consistent).
           return {
             totalHours,
             remainingHours,
@@ -1069,15 +1285,14 @@
           // you should aim to work this week and this month across all projects.
           let weeklyTarget = 0;
           let monthTarget = 0;
-          // We'll compute dailyTarget after summing weekly targets
+          // We'll compute dailyTarget based on remaining monthly hours later
           let dailyTarget = 0;
           data.projects.forEach(project => {
             const sp = computeProjectStats(project);
             weeklyTarget += sp.weeklyTargetConst || 0;
             monthTarget += sp.monthlyTargetConst || 0;
           });
-          // Distribute the weekly target evenly across a 5-day work week
-          dailyTarget = weeklyTarget / 5;
+          // Daily target will be computed later once monthHours is known.
           data.entries.forEach(entry => {
             if (entry.isRunning || !entry.duration) return;
             const start = new Date(entry.startTime);
@@ -1129,6 +1344,14 @@
           // and lastWeekEnd constants defined earlier in this function.
           const weekRevenueChange = lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : null;
           const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
+
+          // Now that monthHours is known, compute the daily target based on remaining monthly hours and days left in the month.
+          const monthlyRemaining = monthTarget - monthHours;
+          const startNextMonthDT = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          const daysLeftInMonthDT = Math.max(1, Math.ceil((startNextMonthDT - now) / (1000 * 60 * 60 * 24)));
+          const computedDailyTarget = monthlyRemaining > 0 ? monthlyRemaining / daysLeftInMonthDT : 0;
+          // Assign to dailyTarget so it can be returned under the same name
+          dailyTarget = computedDailyTarget;
           return {
             todayHours,
             yesterdayHours,
@@ -1239,9 +1462,8 @@
               title: "Today's Hours",
               // Show today's hours against the daily target
               value: stats.todayHours.toFixed(1) + ' / ' + (stats.dailyTarget ? stats.dailyTarget.toFixed(1) : '0') + 'h',
-              change: stats.todayChange,
+              // Remove change label and comparison to yesterday per user request
               icon: '⏱',
-              changeLabel: 'vs yesterday',
               // Revenue for today shown on this card
               revenue: stats.todayRevenue || 0
             },
@@ -1270,15 +1492,8 @@
               scheduleLabel: monthScheduleLabel,
               // Integrate monthly revenue into this card
               revenue: stats.monthRevenue || 0
-            },
-            {
-              title: 'Active Projects',
-              value: stats.activeProjects.toString(),
-              changeLabel: stats.dueThisWeek + ' due this week',
-              change: null,
-              icon: '📁'
             }
-          ];
+          ]; // Active Projects card removed per user request
           const statsGrid = document.getElementById('statsGrid');
           statsGrid.innerHTML = '';
           cards.forEach(card => {
@@ -1668,6 +1883,8 @@
           heading.style.fontWeight = '600';
           card.appendChild(heading);
           const table = document.createElement('table');
+          // Add responsive-table class for mobile-friendly styling
+          table.classList.add('responsive-table');
           const thead = document.createElement('thead');
           thead.innerHTML = '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>This Month</th><th>Revenue</th></tr>';
           table.appendChild(thead);
@@ -1684,20 +1901,24 @@
             else if (stats.status === 'tight') statusLabel = 'Tight';
             else statusLabel = 'On Track';
             tr.innerHTML = `
-              <td>${project.name}</td>
-              <td>${project.client || '-'}</td>
-              <td>${stats.totalHours.toFixed(1)}h</td>
-              <td>${project.budgetHours.toFixed(1)}h</td>
-              <td><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
-              <td>${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
-              <td>${stats.lastWeekHours.toFixed(1)}h</td>
-              <td>${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</td>
-              <td>${formatCurrency(stats.revenue)}</td>
+              <td data-label="Project">${project.name}</td>
+              <td data-label="Client">${project.client || '-'}</td>
+              <td data-label="Hours">${stats.totalHours.toFixed(1)}h</td>
+              <td data-label="Budget">${project.budgetHours.toFixed(1)}h</td>
+              <td data-label="Status"><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
+              <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
+              <td data-label="Last Week">${stats.lastWeekHours.toFixed(1)}h</td>
+              <td data-label="This Month">${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</td>
+              <td data-label="Revenue">${formatCurrency(stats.revenue)}</td>
             `;
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
-          card.appendChild(table);
+          // Wrap table in a scroll container to improve mobile usability
+          const wrapper = document.createElement('div');
+          wrapper.style.overflowX = 'auto';
+          wrapper.appendChild(table);
+          card.appendChild(wrapper);
           container.appendChild(card);
         }
 
@@ -2500,36 +2721,45 @@
             document.getElementById('startTimerBtnPro').disabled = true;
             return;
           }
-          // Sort projects based on monthly budget urgency rather than percentage used. We compute the
-          // deficit between the constant monthly target and the hours worked so far this month. Projects
+          // Sort projects based on monthly budget urgency rather than alphabetically. We compute the
+          // deficit between the dynamic monthly target and the hours worked so far this month. Projects
           // with larger positive deficits (i.e., those most behind on their monthly target) are shown
-          // first. Negative deficits (projects ahead of their monthly target) will appear later.
+          // first. Negative deficits (projects ahead of their monthly target) will appear later. If two
+          // projects have the same deficit, preserve original order. After sorting, if there is a
+          // recommended monthly project, move it to the top regardless of deficit.
           const sortedProjects = data.projects.slice().sort((a, b) => {
+            let defA = 0; let defB = 0;
             try {
               const sa = computeProjectStats(a);
               const sb = computeProjectStats(b);
-              const deficitA = (sa.monthlyTargetConst || 0) - (sa.monthlyHours || 0);
-              const deficitB = (sb.monthlyTargetConst || 0) - (sb.monthlyHours || 0);
-              if (deficitB > deficitA) return 1;
-              if (deficitB < deficitA) return -1;
+              defA = (sa.monthlyTargetConst || 0) - (sa.monthlyHours || 0);
+              defB = (sb.monthlyTargetConst || 0) - (sb.monthlyHours || 0);
             } catch (err) {
-              // If computation fails for any reason, preserve original order
               return 0;
             }
+            if (defB > defA) return 1;
+            if (defB < defA) return -1;
             return 0;
           });
+          // If there is a recommended monthly project, ensure it appears at the top
+          if (currentRecommendedMonthlyId) {
+            const idx = sortedProjects.findIndex(p => p.id === currentRecommendedMonthlyId);
+            if (idx > 0) {
+              const [recProj] = sortedProjects.splice(idx, 1);
+              sortedProjects.unshift(recProj);
+            }
+          }
           sortedProjects.forEach(project => {
             // First option for timer select with possible recommendation hint
             const o1 = document.createElement('option');
             o1.value = project.id;
             let label = project.name;
-            // If this project is the monthly recommended project, append a hint about how many hours are needed this week
+            // If this project is the monthly recommended project, append a hint about how many hours are needed this month
             if (project.id === currentRecommendedMonthlyId) {
               const sp = computeProjectStats(project);
-              // Calculate remaining hours needed this week based on dynamic weekly target minus hours already worked
-              let weeklyNeeded = (sp.weeklyTargetConst || 0) - (sp.weeklyHours || 0);
-              if (weeklyNeeded < 0) weeklyNeeded = 0;
-              label += ' (Recommended, needs ~' + weeklyNeeded.toFixed(1) + 'h this week)';
+              let monthlyNeeded = (sp.monthlyTargetConst || 0) - (sp.monthlyHours || 0);
+              if (monthlyNeeded < 0) monthlyNeeded = 0;
+              label += ' (Recommended, needs ~' + monthlyNeeded.toFixed(1) + 'h this month)';
             }
             o1.textContent = label;
             timerSelect.appendChild(o1);
@@ -2846,18 +3076,9 @@
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
           if (autoSyncEnabled) {
-            // If a backup folder is already chosen, display its name. In some browsers
-            // (for example when hosted remotely) the File System Access API cannot persist
-            // directory handles across sessions. In that case, we still show a generic
-            // message to avoid implying a problem. We avoid warning when backupDirHandle
-            // is null because the handle may only be available on local installations.
-            if (backupDirHandle) {
-              // Show the folder name if available; fallback to a generic description
-              autoSyncStatusElem.textContent = 'Auto sync is ON. Backups saved to ' + (backupDirHandle.name || 'selected folder') + '.';
-            } else {
-              // Do not warn about missing backup folder; just note that auto sync is active
-              autoSyncStatusElem.textContent = 'Auto sync is ON. Backups will be saved to the previously selected folder when available.';
-            }
+            // Display a generic message indicating auto sync is active. We avoid referring to
+            // specific backup directories since the handle may not be available on hosted sites.
+            autoSyncStatusElem.textContent = 'Auto sync is ON. Changes will be periodically saved to your selected backup folder.';
           } else {
             autoSyncStatusElem.textContent = 'Auto sync is OFF.';
           }

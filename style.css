@@ -236,6 +236,41 @@ tr:nth-child(even) td {
   background-color: #f9fafb;
 }
 
+/* Responsive table for detailed breakdown: show each row as block on small screens */
+@media (max-width: 640px) {
+  table.responsive-table {
+    display: block;
+  }
+  table.responsive-table thead {
+    display: none;
+  }
+  table.responsive-table tbody,
+  table.responsive-table tr,
+  table.responsive-table td {
+    display: block;
+    width: 100%;
+  }
+  table.responsive-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    padding: 0.5rem;
+  }
+  table.responsive-table td {
+    text-align: left;
+    padding: 0.25rem 0;
+    border: none;
+  }
+  table.responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    width: 50%;
+    color: #475569;
+  }
+}
+
 /* Generic cards */
 .card {
   background-color: #ffffff;
