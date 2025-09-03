@@ -246,10 +246,12 @@
             return {
               projects: Array.isArray(parsed.projects) ? parsed.projects : [],
               entries: Array.isArray(parsed.entries) ? parsed.entries : [],
-              todos: Array.isArray(parsed.todos) ? parsed.todos : []
+              todos: Array.isArray(parsed.todos) ? parsed.todos : [],
+              // Preserve additional persisted properties like backupDirName if present in saved data
+              backupDirName: parsed.backupDirName || null
             };
           } catch (err) {
-            return { projects: [], entries: [], todos: [] };
+            return { projects: [], entries: [], todos: [], backupDirName: null };
           }
         }
         function saveData() {
@@ -971,6 +973,10 @@
             backupDirHandle = dirHandle;
             // Persist the directory handle in IndexedDB so it can be restored on future visits
             await saveBackupDirHandle(dirHandle);
+            // Save the directory name into our data so that it persists in JSON exports. This allows
+            // us to remember which folder was chosen even when a handle cannot be restored.
+            data.backupDirName = dirHandle.name;
+            saveData();
             // Enable auto sync once a folder is chosen
             autoSyncEnabled = true;
             localStorage.setItem('autoSyncEnabledPro', 'true');
@@ -1192,13 +1198,17 @@
           // months left. If there are no remaining days (past deadline), we treat the count as
           // at least one to avoid division by zero.
           const remaining = Math.max(0, remainingHours);
+          // Compute the number of calendar weeks remaining until the project deadline. Previously this was
+          // used to spread remaining hours evenly, but to align the weekly target with the monthly plan we
+          // instead derive it from the monthly deficit and the number of working weeks left in the current
+          // calendar month. We still keep the generic weeksLeft calculation for reference.
           const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
           // Determine total months between project creation and deadline (inclusive) for constant monthly targets
           const startMonthIndex = created.getFullYear() * 12 + created.getMonth();
           const deadlineMonthIndex = deadline.getFullYear() * 12 + deadline.getMonth();
           const totalMonths = Math.max(1, (deadlineMonthIndex - startMonthIndex + 1));
           const monthTargetOriginal = project.budgetHours / totalMonths;
-          // Determine number of full months before the current month (elapsed months) for carry-over calculations
+          // Determine number of full months before the current month (elapsed months) for carry‑over calculations
           const currentMonthIndex = now.getFullYear() * 12 + now.getMonth();
           const monthsElapsed = Math.max(0, currentMonthIndex - startMonthIndex);
           // Compute expected hours for all months prior to the current month
@@ -1211,14 +1221,24 @@
           const actualBefore = secondsBeforeThisMonth / 3600;
           // Adjust the monthly target for the current month based on surplus or deficit from previous months
           let monthlyTargetConst = monthTargetOriginal + (expectedBefore - actualBefore);
-          // If remaining hours are less than monthly target, clamp to remaining hours
+          // If the adjusted monthly target is negative, clamp to zero. This may occur if past months consumed
+          // more than expected and the deficit eats into the current month.
           if (monthlyTargetConst < 0) monthlyTargetConst = 0;
-          // For dynamic weekly target, continue to spread remaining hours evenly across remaining weeks
-          const weeklyTargetConst = remaining / weeksLeft;
-          // Compute months left from current date to deadline to update monthsLeft variable for dynamic purposes
+          // Compute months left from current date to deadline. This is used for carry‑over logic but
+          // not directly for weekly target calculations.
           const monthsLeft = Math.max(1, deadlineMonthIndex - currentMonthIndex + 1);
-          // If there is any remaining deficit/surplus after adjusting this month's target, propagate to future months
-          // by updating remaining hours accordingly (not used directly here but conceptually consistent).
+          // Determine how many working days remain in the current month (from now until the first of next month)
+          const startNextMonthWork = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          const workDaysLeftInMonth = countWorkdays(now, startNextMonthWork);
+          // Convert remaining working days into remaining working weeks (5 working days per week). At least 1.
+          const workingWeeksLeftInMonth = Math.max(1, Math.ceil(workDaysLeftInMonth / 5));
+          // Compute remaining monthly hours (deficit or surplus). This is the hours still needed to meet the
+          // adjusted monthly target. If negative, treat as zero (no deficit). This is used to set the weekly
+          // target so that the remaining monthly hours are spread evenly over the remaining working weeks.
+          const monthlyRemaining = Math.max(0, monthlyTargetConst - monthlyHours);
+          // Derive the weekly target from the monthly remaining hours divided by the working weeks left. If
+          // there is no monthly target (0), the weekly target will also be 0.
+          const weeklyTargetConst = workingWeeksLeftInMonth > 0 ? monthlyRemaining / workingWeeksLeftInMonth : 0;
           return {
             totalHours,
             remainingHours,
@@ -1346,10 +1366,22 @@
           const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
 
           // Now that monthHours is known, compute the daily target based on remaining monthly hours and days left in the month.
+          // Compute the daily target based on remaining monthly hours and remaining working days in the month.
+          // We use working days (Monday–Friday) rather than total calendar days so that the
+          // recommended daily hours reflect only the days you actually plan to work. If no workdays
+          // remain, the target is zero. Note: the monthTarget already includes any carry‑over from
+          // previous months, so monthlyRemaining can be negative if you are ahead of schedule; in that
+          // case we clamp it to zero for the daily target.
           const monthlyRemaining = monthTarget - monthHours;
           const startNextMonthDT = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          const daysLeftInMonthDT = Math.max(1, Math.ceil((startNextMonthDT - now) / (1000 * 60 * 60 * 24)));
-          const computedDailyTarget = monthlyRemaining > 0 ? monthlyRemaining / daysLeftInMonthDT : 0;
+          // Count how many working days remain from today (including today) until the first of next month.
+          const workDaysLeftInMonthDT = countWorkdays(now, startNextMonthDT);
+          // Calculate daily target: divide remaining hours by remaining workdays. If there is no deficit
+          // or no remaining workdays, set the target to zero. We use Math.max() to avoid negative values.
+          let computedDailyTarget = 0;
+          if (monthlyRemaining > 0 && workDaysLeftInMonthDT > 0) {
+            computedDailyTarget = monthlyRemaining / workDaysLeftInMonthDT;
+          }
           // Assign to dailyTarget so it can be returned under the same name
           dailyTarget = computedDailyTarget;
           return {
@@ -1414,6 +1446,9 @@
           // end (5 days). For monthly progress, the first day of the month marks
           // the start and the first day of the following month marks the end.
           const nowTime = new Date();
+          // Define the start of today so we can compute today's hours for each project when building
+          // the per‑project breakdown lists. We'll reuse todayStart in the card rendering below.
+          const todayStart = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate());
           // Weekly time progress: compute fraction of the 5-day work week that has elapsed.
           // If today is Saturday or Sunday, cap at 100%.
           const dayOfWeek = nowTime.getDay();
@@ -1430,12 +1465,19 @@
             const totalMs = 5 * 24 * 60 * 60 * 1000;
             weeklyTimeProgress = Math.min((diffMs / totalMs) * 100, 100);
           }
-          // Monthly time progress: compute fraction of the month elapsed (including days and time)
+          // Monthly time progress: compute fraction of working days elapsed in the current month. We count
+          // only Monday–Friday as working days. Use countWorkdays() to determine the total number of
+          // working days in the month and how many have elapsed so far. Weekends contribute nothing.
           const startMonth = new Date(nowTime.getFullYear(), nowTime.getMonth(), 1);
           const startNextMonth = new Date(nowTime.getFullYear(), nowTime.getMonth() + 1, 1);
-          const totalMsMonth = startNextMonth - startMonth;
-          const diffMsMonth = nowTime - startMonth;
-          let monthlyTimeProgress = Math.min((diffMsMonth / totalMsMonth) * 100, 100);
+          const workDaysTotalMonth = countWorkdays(startMonth, startNextMonth);
+          const workDaysElapsedMonth = countWorkdays(startMonth, nowTime);
+          let monthlyTimeProgress = workDaysTotalMonth > 0 ? (workDaysElapsedMonth / workDaysTotalMonth) * 100 : 0;
+          if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
+          // Precompute how many working days remain in the current month. This value is reused
+          // when calculating per‑project daily recommendations. If the result is zero, all
+          // remaining work is effectively overdue.
+          const workDaysLeftInMonth = countWorkdays(nowTime, startNextMonth);
 
           // Determine schedule status for weekly and monthly progress by comparing hours progress
           // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
@@ -1593,22 +1635,52 @@
               revenueDiv.style.color = '#475569';
               div.appendChild(revenueDiv);
             }
-            // If this card represents weekly or monthly totals, append per-project breakdowns underneath
-            if (card.title === 'This Week' || card.title === 'This Month') {
-              const targetList = document.createElement('div');
-              targetList.style.marginTop = '0.5rem';
+            // Append per‑project breakdowns underneath each card. For Today, display today's hours
+            // against the recommended daily hours for each project. For Week and Month, display
+            // actual versus target hours and colour code based on whether the project is ahead
+            // (green) or behind (red) relative to the expected progress so far.
+            if (card.title === "Today's Hours" || card.title === 'This Week' || card.title === 'This Month') {
+              const list = document.createElement('div');
+              list.style.marginTop = '0.5rem';
               perProjectStats.forEach(item => {
                 const row = document.createElement('div');
                 row.style.fontSize = '0.75rem';
-                row.style.color = '#475569';
-                if (card.title === 'This Week') {
+                // Determine today, weekly and monthly metrics
+                // Compute today's hours for this project
+                let projectTodaySeconds = 0;
+                data.entries.forEach(entry => {
+                  if (!entry.isRunning && entry.projectId === item.project.id) {
+                    const s = new Date(entry.startTime);
+                    if (s >= todayStart && s < new Date(todayStart.getTime() + 24 * 60 * 60 * 1000)) {
+                      projectTodaySeconds += entry.duration || 0;
+                    }
+                  }
+                });
+                const projectTodayHours = projectTodaySeconds / 3600;
+                // Calculate recommended daily hours based on remaining monthly target and working days left.
+                const remainingDaily = Math.max(0, item.stats.monthlyTargetConst - item.stats.monthlyHours);
+                const projectDailyTarget = workDaysLeftInMonth > 0 ? (remainingDaily / workDaysLeftInMonth) : 0;
+                // For weekly and monthly expected to date, compute expected hours based on time progress
+                const expectedWeekSoFar = item.stats.weeklyTargetConst * (weeklyTimeProgress / 100);
+                const expectedMonthSoFar = item.stats.monthlyTargetConst * (monthlyTimeProgress / 100);
+                if (card.title === "Today's Hours") {
+                  // For daily: show hours worked and daily target, colour green if on or ahead, else red
+                  row.textContent = `${item.project.name}: ${projectTodayHours.toFixed(1)} / ${projectDailyTarget.toFixed(1)}h`;
+                  row.style.color = projectTodayHours >= projectDailyTarget ? '#15803d' : '#b91c1c';
+                } else if (card.title === 'This Week') {
                   row.textContent = `${item.project.name}: ${item.stats.weeklyHours.toFixed(1)} / ${item.stats.weeklyTargetConst.toFixed(1)}h`;
+                  // Colour code: green if actual hours exceed expected progress so far, red otherwise
+                  const onTrack = item.stats.weeklyHours >= expectedWeekSoFar - 0.01; // small tolerance
+                  row.style.color = onTrack ? '#15803d' : '#b91c1c';
                 } else {
+                  // Month
                   row.textContent = `${item.project.name}: ${item.stats.monthlyHours.toFixed(1)} / ${item.stats.monthlyTargetConst.toFixed(1)}h`;
+                  const onTrack = item.stats.monthlyHours >= expectedMonthSoFar - 0.01;
+                  row.style.color = onTrack ? '#15803d' : '#b91c1c';
                 }
-                targetList.appendChild(row);
+                list.appendChild(row);
               });
-              div.appendChild(targetList);
+              div.appendChild(list);
             }
             statsGrid.appendChild(div);
           });
@@ -2181,8 +2253,14 @@
               <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${project.client || '-'}</p>
               <p style="margin:0 0 0.25rem 0;"><strong>Budget:</strong> ${project.budgetHours.toFixed(1)}h @ ${formatCurrency(project.hourlyRate)}</p>
               <div style="margin:0.5rem 0;">
-                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${Math.min(100, stats.usedPct).toFixed(1)}%;"></div></div>
-                <small>${stats.totalHours.toFixed(1)}h used (${stats.usedPct.toFixed(1)}%), ${stats.remainingHours.toFixed(1)}h left</small>
+                <!-- Dual progress bars showing actual hours vs expected timeline progress -->
+                <div style="display:flex; flex-direction:column; gap:0.2rem; margin-bottom:0.25rem;">
+                  <!-- Actual hours consumed (blue) -->
+                  <div class="progress-bar"><div class="fill" style="width:${Math.min(100, stats.usedPct).toFixed(1)}%;"></div></div>
+                  <!-- Expected progress based on time elapsed relative to deadline (black) -->
+                  <div class="progress-bar"><div class="fill" style="width:${((stats.daysPassed + stats.daysLeft) > 0 ? (stats.daysPassed / (stats.daysPassed + stats.daysLeft)) * 100 : 0).toFixed(1)}%; background-color:#000000;"></div></div>
+                </div>
+                <small>${stats.totalHours.toFixed(1)}h used (${stats.usedPct.toFixed(1)}%) &bullet; Expected ${(stats.daysPassed + stats.daysLeft) > 0 ? (stats.daysPassed / (stats.daysPassed + stats.daysLeft) * 100).toFixed(1) : '0'}%</small>
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyTargetConst ? (stats.weeklyHours / stats.weeklyTargetConst * 100) : 0}%"></div></div>
@@ -3076,9 +3154,22 @@
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
           if (autoSyncEnabled) {
-            // Display a generic message indicating auto sync is active. We avoid referring to
-            // specific backup directories since the handle may not be available on hosted sites.
-            autoSyncStatusElem.textContent = 'Auto sync is ON. Changes will be periodically saved to your selected backup folder.';
+            // If we have a handle, we can show that backup is configured. Otherwise, if a backup
+            // directory name exists in our persisted data, display that name to inform the user
+            // which folder was previously selected. Note: we cannot auto‑open the folder without
+            // user interaction, but we can reassure the user that their selection is remembered.
+            if (backupDirHandle) {
+              const name = backupDirHandle.name || (data && data.backupDirName) || '';
+              autoSyncStatusElem.textContent = name
+                ? `Auto sync is ON. Writing to “${name}”.`
+                : 'Auto sync is ON. Writing to your selected backup folder.';
+            } else {
+              // Fallback: use the stored backup directory name from data if available
+              const name = (data && data.backupDirName) || '';
+              autoSyncStatusElem.textContent = name
+                ? `Auto sync is ON. Backup folder “${name}” remembered — reselect to activate.`
+                : 'Auto sync is ON. Changes will be periodically saved when a backup folder is selected.';
+            }
           } else {
             autoSyncStatusElem.textContent = 'Auto sync is OFF.';
           }
