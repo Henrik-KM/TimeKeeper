@@ -1365,22 +1365,20 @@
           const weekRevenueChange = lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : null;
           const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
 
-          // Now that monthHours is known, compute the daily target based on remaining monthly hours and days left in the month.
-          // Compute the daily target based on remaining monthly hours and remaining working days in the month.
-          // We use working days (Monday–Friday) rather than total calendar days so that the
-          // recommended daily hours reflect only the days you actually plan to work. If no workdays
-          // remain, the target is zero. Note: the monthTarget already includes any carry‑over from
-          // previous months, so monthlyRemaining can be negative if you are ahead of schedule; in that
-          // case we clamp it to zero for the daily target.
-          const monthlyRemaining = monthTarget - monthHours;
-          const startNextMonthDT = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          // Count how many working days remain from today (including today) until the first of next month.
-          const workDaysLeftInMonthDT = countWorkdays(now, startNextMonthDT);
-          // Calculate daily target: divide remaining hours by remaining workdays. If there is no deficit
-          // or no remaining workdays, set the target to zero. We use Math.max() to avoid negative values.
+          // Now that monthHours and weekHours are known, compute the daily target based on remaining
+          // weekly hours and remaining working days in the current week. The weekly target is itself
+          // derived from the remaining monthly budget and the number of working weeks left in the month.
+          // We want the daily target to reflect how much work remains this week rather than spreading
+          // monthly remaining hours evenly across all days of the month. If the weekly target has
+          // already been met or there are no workdays left this week, the daily target is zero.
+          const weeklyRemaining = weeklyTarget - weekHours;
+          // Determine the start of next week (Monday at 00:00) by adding 7 days to this week's start.
+          const startNextWeekDT = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+          // Count how many working days remain from now (inclusive) until the start of next week.
+          const workDaysLeftInWeekDT = countWorkdays(now, startNextWeekDT);
           let computedDailyTarget = 0;
-          if (monthlyRemaining > 0 && workDaysLeftInMonthDT > 0) {
-            computedDailyTarget = monthlyRemaining / workDaysLeftInMonthDT;
+          if (weeklyRemaining > 0 && workDaysLeftInWeekDT > 0) {
+            computedDailyTarget = weeklyRemaining / workDaysLeftInWeekDT;
           }
           // Assign to dailyTarget so it can be returned under the same name
           dailyTarget = computedDailyTarget;
@@ -1450,17 +1448,17 @@
           // the per‑project breakdown lists. We'll reuse todayStart in the card rendering below.
           const todayStart = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate());
           // Weekly time progress: compute fraction of the 5-day work week that has elapsed.
-          // If today is Saturday or Sunday, cap at 100%.
+          // Precompute start of week (Monday 00:00) outside the branch so it can be reused later.
           const dayOfWeek = nowTime.getDay();
+          const diffToMonday = (dayOfWeek + 6) % 7;
+          const startWeek = new Date(nowTime);
+          startWeek.setDate(startWeek.getDate() - diffToMonday);
+          startWeek.setHours(0, 0, 0, 0);
           let weeklyTimeProgress;
           if (dayOfWeek === 0 || dayOfWeek === 6) {
             weeklyTimeProgress = 100;
           } else {
-            // Start of week (Monday) at 00:00
-            const startWeek = new Date(nowTime);
-            const diffToMonday = (dayOfWeek + 6) % 7;
-            startWeek.setDate(startWeek.getDate() - diffToMonday);
-            startWeek.setHours(0, 0, 0, 0);
+            // Compute elapsed time since start of work week and scale over 5 working days
             const diffMs = nowTime - startWeek;
             const totalMs = 5 * 24 * 60 * 60 * 1000;
             weeklyTimeProgress = Math.min((diffMs / totalMs) * 100, 100);
@@ -1474,10 +1472,14 @@
           const workDaysElapsedMonth = countWorkdays(startMonth, nowTime);
           let monthlyTimeProgress = workDaysTotalMonth > 0 ? (workDaysElapsedMonth / workDaysTotalMonth) * 100 : 0;
           if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
-          // Precompute how many working days remain in the current month. This value is reused
-          // when calculating per‑project daily recommendations. If the result is zero, all
+          // Precompute how many working days remain in the current month and current week. The value
+          // for the month is used for monthly recommendations elsewhere; the weekly value is used
+          // for calculating the recommended daily hours per project. If the result is zero, all
           // remaining work is effectively overdue.
           const workDaysLeftInMonth = countWorkdays(nowTime, startNextMonth);
+          // Start of next week (Monday at 00:00) for computing remaining workdays this week
+          const startNextWeek = new Date(startWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+          const workDaysLeftInWeek = countWorkdays(nowTime, startNextWeek);
 
           // Determine schedule status for weekly and monthly progress by comparing hours progress
           // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
@@ -1657,9 +1659,11 @@
                   }
                 });
                 const projectTodayHours = projectTodaySeconds / 3600;
-                // Calculate recommended daily hours based on remaining monthly target and working days left.
-                const remainingDaily = Math.max(0, item.stats.monthlyTargetConst - item.stats.monthlyHours);
-                const projectDailyTarget = workDaysLeftInMonth > 0 ? (remainingDaily / workDaysLeftInMonth) : 0;
+                // Calculate recommended daily hours based on remaining weekly target and working days left in the week.
+                // We use weeklyRemaining (target - hours) to ensure that daily recommendations align with this
+                // week's objectives rather than the overall monthly remaining. Clamp negative values to zero.
+                const remainingWeekly = Math.max(0, item.stats.weeklyTargetConst - item.stats.weeklyHours);
+                const projectDailyTarget = workDaysLeftInWeek > 0 ? (remainingWeekly / workDaysLeftInWeek) : 0;
                 // For weekly and monthly expected to date, compute expected hours based on time progress
                 const expectedWeekSoFar = item.stats.weeklyTargetConst * (weeklyTimeProgress / 100);
                 const expectedMonthSoFar = item.stats.monthlyTargetConst * (monthlyTimeProgress / 100);
