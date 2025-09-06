@@ -283,10 +283,20 @@
               }) : [],
               // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
               groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
-                if (g.carryOver === undefined) g.carryOver = 0;
-                if (g.purchasedCount === undefined) g.purchasedCount = 0;
+                // Migrate legacy properties to new structure. Each item should have a name and frequency.
+                if (!g.name) g.name = '';
+                if (!g.frequency) g.frequency = 'weekly';
+                // In the new structure, we track whether an item has been archived and when it was purchased. Default false/null.
+                if (g.archived === undefined) g.archived = false;
+                if (g.purchasedDate === undefined) g.purchasedDate = null;
+                // Remove legacy fields carryOver and purchasedCount if present
+                if (g.hasOwnProperty('carryOver')) delete g.carryOver;
+                if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
                 return g;
               }) : [],
+              // Global carry-over counters for groceries. If missing, initialise to zero.
+              groceryWeeklyCarry: typeof parsed.groceryWeeklyCarry === 'number' ? parsed.groceryWeeklyCarry : 0,
+              groceryMonthlyCarry: typeof parsed.groceryMonthlyCarry === 'number' ? parsed.groceryMonthlyCarry : 0,
               // Preserve additional persisted properties like backupDirName if present in saved data
               backupDirName: parsed.backupDirName || null
             };
@@ -711,7 +721,8 @@
             if (!Array.isArray(data.groceries)) {
               data.groceries = [];
             }
-            data.groceries.push({ id: uuid(), name: name, frequency: freq, carryOver: 0, purchasedCount: 0 });
+            // When adding a new grocery item, initialise it as not archived with no purchase date.
+            data.groceries.push({ id: uuid(), name: name, frequency: freq, archived: false, purchasedDate: null });
             saveData();
             updateGrocerySection();
             nameInput.value = '';
@@ -747,14 +758,55 @@
           weeklyListEl.innerHTML = '';
           monthlyListEl.innerHTML = '';
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
+          // Compute purchases this week and this month based on items' purchasedDate.
+          // Determine the start of this week (Monday) and start of next week
+          const now = new Date();
+          const day = now.getDay();
+          const diffToMonday = (day + 6) % 7;
+          const startThisWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+          startThisWeek.setHours(0, 0, 0, 0);
+          const startNextWeek = new Date(startThisWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
+          // Determine start of this month and next month
+          const startThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          const startNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          // Count items purchased this week and this month
+          let purchasedWeeklyCount = 0;
+          let purchasedMonthlyCount = 0;
+          groceries.forEach(it => {
+            if (it.archived && it.purchasedDate) {
+              const pd = new Date(it.purchasedDate);
+              if (it.frequency === 'weekly' && pd >= startThisWeek && pd < startNextWeek) {
+                purchasedWeeklyCount++;
+              }
+              if (it.frequency === 'monthly' && pd >= startThisMonth && pd < startNextMonth) {
+                purchasedMonthlyCount++;
+              }
+            }
+          });
+          // Compute dynamic targets for this week and this month
+          const weeklyBase = 1;
+          const weeklyDynamicTarget = Math.max(0, weeklyBase + (data.groceryWeeklyCarry || 0));
+          const monthlyBase = 1;
+          const monthlyDynamicTarget = Math.max(0, monthlyBase + (data.groceryMonthlyCarry || 0));
+          // Display header line showing purchases vs target
+          const weeklyHeader = document.createElement('li');
+          weeklyHeader.style.fontSize = '0.8rem';
+          weeklyHeader.style.fontWeight = '600';
+          weeklyHeader.style.margin = '0.3rem 0';
+          weeklyHeader.textContent = `Purchased: ${purchasedWeeklyCount} / ${weeklyDynamicTarget}`;
+          weeklyListEl.appendChild(weeklyHeader);
+          const monthlyHeader = document.createElement('li');
+          monthlyHeader.style.fontSize = '0.8rem';
+          monthlyHeader.style.fontWeight = '600';
+          monthlyHeader.style.margin = '0.3rem 0';
+          monthlyHeader.textContent = `Purchased: ${purchasedMonthlyCount} / ${monthlyDynamicTarget}`;
+          monthlyListEl.appendChild(monthlyHeader);
+          // Determine if we can purchase more items this period
+          const canPurchaseWeekly = purchasedWeeklyCount < weeklyDynamicTarget;
+          const canPurchaseMonthly = purchasedMonthlyCount < monthlyDynamicTarget;
+          // Filter to items that are not archived (i.e., not yet purchased) and render them
           groceries.forEach((item, index) => {
-            // Ensure properties exist
-            if (!item.name) item.name = '';
-            if (!item.frequency) item.frequency = 'weekly';
-            if (item.carryOver === undefined) item.carryOver = 0;
-            if (item.purchasedCount === undefined) item.purchasedCount = 0;
-            const base = 1;
-            const dynamicTarget = Math.max(0, base + item.carryOver);
+            if (item.archived) return;
             const li = document.createElement('li');
             li.style.display = 'flex';
             li.style.flexDirection = 'column';
@@ -771,21 +823,27 @@
             nameSpan.style.fontWeight = '600';
             row.appendChild(nameSpan);
             const btnGroup = document.createElement('div');
-            // Log purchase button
-            const logBtn = document.createElement('button');
-            logBtn.className = 'btn';
-            logBtn.textContent = '+ Log';
-            logBtn.style.fontSize = '0.7rem';
-            logBtn.addEventListener('click', () => {
-              item.purchasedCount = (item.purchasedCount || 0) + 1;
+            // Buy button (log purchase)
+            const buyBtn = document.createElement('button');
+            buyBtn.className = 'btn';
+            buyBtn.textContent = 'Buy';
+            buyBtn.style.fontSize = '0.7rem';
+            // Disable if quota reached
+            const freq = item.frequency === 'monthly' ? 'monthly' : 'weekly';
+            const canBuy = (freq === 'monthly' ? canPurchaseMonthly : canPurchaseWeekly);
+            if (!canBuy) buyBtn.disabled = true;
+            buyBtn.addEventListener('click', () => {
+              // Mark item as archived (purchased) and record date
+              item.archived = true;
+              item.purchasedDate = new Date().toISOString();
               saveData();
               updateGrocerySection();
               if (typeof provideHaptic === 'function') {
                 provideHaptic('beep');
               }
             });
-            btnGroup.appendChild(logBtn);
-            // Edit button (allow renaming and frequency change)
+            btnGroup.appendChild(buyBtn);
+            // Edit button
             const editBtn = document.createElement('button');
             editBtn.className = 'btn secondary';
             editBtn.textContent = 'Edit';
@@ -816,28 +874,6 @@
             btnGroup.appendChild(delBtn);
             row.appendChild(btnGroup);
             li.appendChild(row);
-            // Progress bar container
-            const progressContainer = document.createElement('div');
-            progressContainer.style.display = 'flex';
-            progressContainer.style.flexDirection = 'column';
-            progressContainer.style.gap = '0.15rem';
-            const bar = document.createElement('div');
-            bar.style.height = '0.35rem';
-            bar.style.backgroundColor = '#e2e8f0';
-            bar.style.borderRadius = '0.25rem';
-            bar.style.overflow = 'hidden';
-            const fill = document.createElement('div');
-            const pct = dynamicTarget > 0 ? (item.purchasedCount / dynamicTarget) : 1;
-            fill.style.width = Math.min(pct, 1) * 100 + '%';
-            fill.style.height = '100%';
-            fill.style.backgroundColor = pct >= 1 ? '#15803d' : '#3b82f6';
-            bar.appendChild(fill);
-            progressContainer.appendChild(bar);
-            const text = document.createElement('div');
-            text.style.fontSize = '0.75rem';
-            text.textContent = item.purchasedCount + ' / ' + dynamicTarget + ' items';
-            progressContainer.appendChild(text);
-            li.appendChild(progressContainer);
             // Append to appropriate list
             if (item.frequency === 'monthly') {
               monthlyListEl.appendChild(li);
@@ -851,52 +887,63 @@
         // Carry over undershoots and overshoots into the next period via the carryOver property.
         function resetGroceriesIfNeeded() {
           const now = new Date();
-          // Weekly reset (Monday 00:00)
+          // Determine the start of this week (Monday at 00:00)
           const dow = now.getDay();
           const diffToMonday = (dow + 6) % 7;
-          const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
-          monday.setHours(0, 0, 0, 0);
-          const mondayStr = monday.toDateString();
+          const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+          thisMonday.setHours(0, 0, 0, 0);
+          const mondayStr = thisMonday.toDateString();
+          // If weekly reset hasn't been done for this Monday, calculate carryover based on last week's purchases
           const lastWeekReset = localStorage.getItem('groceryWeeklyResetPro');
           if (lastWeekReset !== mondayStr) {
+            // Determine the boundaries of last week [prevMonday, thisMonday)
+            const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
+            // Count how many weekly items were purchased in the previous week
+            let purchasedWeeklyCount = 0;
             if (Array.isArray(data.groceries)) {
               data.groceries.forEach(item => {
-                if (item.frequency === 'weekly') {
-                  const base = 1;
-                  const dynTarget = base + (item.carryOver || 0);
-                  const diff = dynTarget - (item.purchasedCount || 0);
-                  // Compute new carryOver; clamp so that the next dynamic target does not go negative
-                  let newCarry = diff;
-                  if (base + newCarry < 0) {
-                    newCarry = -base;
+                if (item.frequency === 'weekly' && item.archived && item.purchasedDate) {
+                  const pd = new Date(item.purchasedDate);
+                  if (pd >= prevMonday && pd < thisMonday) {
+                    purchasedWeeklyCount++;
                   }
-                  item.carryOver = newCarry;
-                  item.purchasedCount = 0;
                 }
               });
             }
+            // Base target is 1 purchase per week. Update global carry-over:
+            // newCarry = oldCarry + (base - purchases)
+            const base = 1;
+            const oldCarry = typeof data.groceryWeeklyCarry === 'number' ? data.groceryWeeklyCarry : 0;
+            data.groceryWeeklyCarry = oldCarry + (base - purchasedWeeklyCount);
+            // Persist the reset date
             localStorage.setItem('groceryWeeklyResetPro', mondayStr);
             saveData();
           }
-          // Monthly reset (first day of month)
-          const monthKey = now.getFullYear() + '-' + now.getMonth();
+          // Monthly reset: if first day of the month hasn't been reset yet
+          const year = now.getFullYear();
+          const month = now.getMonth();
+          const thisMonthStart = new Date(year, month, 1);
+          thisMonthStart.setHours(0, 0, 0, 0);
+          const monthKey = year + '-' + month;
           const lastMonthReset = localStorage.getItem('groceryMonthlyResetPro');
           if (lastMonthReset !== monthKey) {
+            // Determine previous month boundaries [prevMonthStart, thisMonthStart)
+            const prevMonthStart = new Date(year, month - 1, 1);
+            const prevMonthEnd = new Date(year, month, 1);
+            let purchasedMonthlyCount = 0;
             if (Array.isArray(data.groceries)) {
               data.groceries.forEach(item => {
-                if (item.frequency === 'monthly') {
-                  const base = 1;
-                  const dynTarget = base + (item.carryOver || 0);
-                  const diff = dynTarget - (item.purchasedCount || 0);
-                  let newCarry = diff;
-                  if (base + newCarry < 0) {
-                    newCarry = -base;
+                if (item.frequency === 'monthly' && item.archived && item.purchasedDate) {
+                  const pd = new Date(item.purchasedDate);
+                  if (pd >= prevMonthStart && pd < prevMonthEnd) {
+                    purchasedMonthlyCount++;
                   }
-                  item.carryOver = newCarry;
-                  item.purchasedCount = 0;
                 }
               });
             }
+            const baseM = 1;
+            const oldCarryM = typeof data.groceryMonthlyCarry === 'number' ? data.groceryMonthlyCarry : 0;
+            data.groceryMonthlyCarry = oldCarryM + (baseM - purchasedMonthlyCount);
             localStorage.setItem('groceryMonthlyResetPro', monthKey);
             saveData();
           }
