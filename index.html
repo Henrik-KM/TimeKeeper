@@ -189,20 +189,21 @@
         </div>
       </section>
 
-      <!-- Todo Section -->
+      <!-- Workout Tracker Section (replaces Todo) -->
       <section id="todo" class="section" style="display:none;">
-        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Todo</h2>
-        <!-- Form to add new todo item -->
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Workouts</h2>
+        <!-- Form to add a new workout -->
         <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Task</h3>
-          <form id="todoForm" style="display:flex; gap:0.5rem; flex-wrap:wrap;">
-            <input id="todoName" type="text" required placeholder="Task name" style="flex:1; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Workout</h3>
+          <form id="todoForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+            <input id="todoName" type="text" required placeholder="Workout name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <input id="todoTarget" type="number" min="1" step="1" placeholder="Weekly target" style="width:5rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <button type="submit" class="btn primary">Add</button>
           </form>
         </div>
-        <!-- List of tasks -->
+        <!-- List of workouts -->
         <div class="card" id="todoListContainer">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Tasks</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Your Workouts</h3>
           <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
       </section>
@@ -368,10 +369,18 @@
           const mondayStr = monday.toDateString();
           const lastReset = localStorage.getItem('todoResetDatePro');
           if (lastReset !== mondayStr) {
-            // Reset checked state on all todos
+            // Reset checked state on all todos and filter workout logs to this week
             if (Array.isArray(data.todos)) {
               data.todos.forEach(t => {
+                // Uncheck simple tasks if present
                 t.checked = false;
+                // If this todo is used as a workout, remove logs before this week
+                if (Array.isArray(t.logs)) {
+                  t.logs = t.logs.filter(log => {
+                    const dt = new Date(log);
+                    return dt >= monday;
+                  });
+                }
               });
             }
             localStorage.setItem('todoResetDatePro', mondayStr);
@@ -473,70 +482,148 @@
           }
         }
 
-        // Update the Todo section UI based on the current data.todos array. Each
-        // todo displays a checkbox reflecting its checked state and a delete
-        // button. Changing the checkbox updates the corresponding task and
-        // persists to localStorage.
+        // Update the Workout section UI based on the current data.todos array.
+        // Each workout has a name, a weekly target (number of sessions), and a list of
+        // logs indicating when sessions were completed. We display progress
+        // relative to the weekly target and provide buttons to log a session,
+        // edit the target, or delete the workout. The UI resets weekly on
+        // Mondays by filtering logs before this week.
         function updateTodoSection() {
           const listEl = document.getElementById('todoList');
           if (!listEl) return;
           listEl.innerHTML = '';
           const todos = Array.isArray(data.todos) ? data.todos : [];
+          // Determine the start of the current week (Monday 00:00) to count this week's logs
+          const now = new Date();
+          const dow = now.getDay();
+          const diffToMonday = (dow + 6) % 7;
+          const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
+          monday.setHours(0, 0, 0, 0);
           todos.forEach((todo, index) => {
+            // Ensure workout properties exist
+            if (typeof todo.weeklyTarget !== 'number' || todo.weeklyTarget < 1) {
+              todo.weeklyTarget = 1;
+            }
+            if (!Array.isArray(todo.logs)) {
+              todo.logs = [];
+            }
+            // Count sessions completed this week by filtering logs on or after Monday
+            const sessionsThisWeek = todo.logs.filter(log => {
+              const t = new Date(log);
+              return t >= monday;
+            }).length;
+            // Create list item container
             const li = document.createElement('li');
             li.style.display = 'flex';
-            li.style.alignItems = 'center';
-            li.style.justifyContent = 'space-between';
-            li.style.padding = '0.25rem 0';
-            // Label containing checkbox and name
-            const label = document.createElement('label');
-            label.style.display = 'flex';
-            label.style.alignItems = 'center';
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.checked = !!todo.checked;
-            checkbox.addEventListener('change', () => {
-              todo.checked = checkbox.checked;
+            li.style.flexDirection = 'column';
+            li.style.gap = '0.3rem';
+            li.style.padding = '0.5rem 0';
+            li.style.borderBottom = '1px solid #f1f5f9';
+            // Title row: workout name and delete button
+            const titleRow = document.createElement('div');
+            titleRow.style.display = 'flex';
+            titleRow.style.justifyContent = 'space-between';
+            titleRow.style.alignItems = 'center';
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = todo.name || '';
+            nameSpan.style.fontWeight = '600';
+            titleRow.appendChild(nameSpan);
+            const btnGroup = document.createElement('div');
+            // Log session button
+            const logBtn = document.createElement('button');
+            logBtn.className = 'btn';
+            logBtn.textContent = '+ Log';
+            logBtn.style.fontSize = '0.7rem';
+            logBtn.addEventListener('click', () => {
+              // Add a log for now
+              todo.logs.push(new Date().toISOString());
               saveData();
+              updateTodoSection();
+              // Provide tactile feedback on log
+              if (typeof provideHaptic === 'function') {
+                provideHaptic('beep');
+              }
             });
-            const span = document.createElement('span');
-            span.textContent = todo.name || '';
-            span.style.marginLeft = '0.5rem';
-            label.appendChild(checkbox);
-            label.appendChild(span);
-            li.appendChild(label);
-            // Delete button to remove the task
+            btnGroup.appendChild(logBtn);
+            // Edit target button
+            const editBtn = document.createElement('button');
+            editBtn.className = 'btn secondary';
+            editBtn.textContent = 'Edit';
+            editBtn.style.fontSize = '0.7rem';
+            editBtn.addEventListener('click', () => {
+              const newTargetStr = prompt('Set weekly target for ' + (todo.name || ''), String(todo.weeklyTarget));
+              if (newTargetStr !== null) {
+                const newTarget = parseInt(newTargetStr, 10);
+                if (!isNaN(newTarget) && newTarget > 0) {
+                  todo.weeklyTarget = newTarget;
+                  saveData();
+                  updateTodoSection();
+                }
+              }
+            });
+            btnGroup.appendChild(editBtn);
+            // Delete button
             const delBtn = document.createElement('button');
             delBtn.className = 'btn danger';
             delBtn.textContent = 'Delete';
             delBtn.style.fontSize = '0.7rem';
             delBtn.addEventListener('click', () => {
-              // Remove the todo at this index and re-render
               data.todos.splice(index, 1);
               saveData();
               updateTodoSection();
             });
-            li.appendChild(delBtn);
+            btnGroup.appendChild(delBtn);
+            titleRow.appendChild(btnGroup);
+            li.appendChild(titleRow);
+            // Progress bar and text
+            const progressContainer = document.createElement('div');
+            progressContainer.style.display = 'flex';
+            progressContainer.style.flexDirection = 'column';
+            progressContainer.style.gap = '0.15rem';
+            // Bar container
+            const bar = document.createElement('div');
+            bar.style.height = '0.35rem';
+            bar.style.backgroundColor = '#e2e8f0';
+            bar.style.borderRadius = '0.25rem';
+            bar.style.overflow = 'hidden';
+            // Fill bar representing sessions completed
+            const fill = document.createElement('div');
+            const pct = todo.weeklyTarget > 0 ? (sessionsThisWeek / todo.weeklyTarget) : 0;
+            fill.style.width = Math.min(pct, 1) * 100 + '%';
+            fill.style.height = '100%';
+            fill.style.backgroundColor = pct >= 1 ? '#15803d' : '#3b82f6';
+            bar.appendChild(fill);
+            progressContainer.appendChild(bar);
+            // Text showing sessions vs target
+            const text = document.createElement('div');
+            text.style.fontSize = '0.75rem';
+            text.textContent = sessionsThisWeek + ' / ' + todo.weeklyTarget + ' sessions';
+            progressContainer.appendChild(text);
+            li.appendChild(progressContainer);
             listEl.appendChild(li);
           });
         }
 
-        // Attach submit handler to the Todo form. When submitted, a new task is
-        // added to data.todos with a unique ID. The list is then re-rendered.
+        // Attach submit handler to the Workout form. When submitted, a new workout is
+        // added to data.todos with a unique ID, weekly target, and empty logs array.
         const todoForm = document.getElementById('todoForm');
         if (todoForm) {
           todoForm.addEventListener('submit', e => {
             e.preventDefault();
             const nameInput = document.getElementById('todoName');
+            const targetInput = document.getElementById('todoTarget');
             const name = nameInput.value.trim();
+            const targetVal = parseInt(targetInput.value, 10);
             if (!name) return;
+            const target = (!isNaN(targetVal) && targetVal > 0) ? targetVal : 1;
             if (!Array.isArray(data.todos)) {
               data.todos = [];
             }
-            data.todos.push({ id: uuid(), name: name, checked: false });
+            data.todos.push({ id: uuid(), name: name, weeklyTarget: target, logs: [] });
             saveData();
             updateTodoSection();
             nameInput.value = '';
+            targetInput.value = '';
           });
         }
 
