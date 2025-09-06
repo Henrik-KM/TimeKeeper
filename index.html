@@ -244,6 +244,19 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Biannual Items</h3>
           <ul id="biannualGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
+
+        <!-- Archived grocery items (purchased items with cost) -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Archived Purchases</h3>
+          <ul id="archivedGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
+        <!-- Note about excluded categories -->
+        <div class="card" style="background:#f8fafc; border:1px solid #e2e8f0; margin-top:1rem;">
+          <p style="margin:0; padding:0.75rem; font-size:0.85rem; color:#475569;">
+            <strong>Note:</strong> All food, medicine and hygiene products (except luxury items) should be excluded from budgeting.
+          </p>
+        </div>
       </section>
 
       <!-- Analytics/Reports Section -->
@@ -835,6 +848,76 @@
               }
             }
           });
+
+        // After rendering active items, render archived purchases with ability to edit cost
+        const archivedListEl = document.getElementById('archivedGroceryList');
+        if (archivedListEl) {
+          // Clear previous list
+          archivedListEl.innerHTML = '';
+          groceries.forEach((archItem, archIndex) => {
+            if (!archItem.archived) return;
+            const liArch = document.createElement('li');
+            liArch.style.display = 'flex';
+            liArch.style.flexDirection = 'column';
+            liArch.style.gap = '0.3rem';
+            liArch.style.padding = '0.5rem 0';
+            liArch.style.borderBottom = '1px solid #f1f5f9';
+            // Row containing details and action buttons
+            const rowArch = document.createElement('div');
+            rowArch.style.display = 'flex';
+            rowArch.style.justifyContent = 'space-between';
+            rowArch.style.alignItems = 'center';
+            // Details span: name – cost – frequency – purchase date
+            const detailsSpan = document.createElement('span');
+            let dateStr = '';
+            if (archItem.purchasedDate) {
+              const dt = new Date(archItem.purchasedDate);
+              dateStr = dt.toLocaleDateString();
+            }
+            const costString = typeof archItem.cost === 'number' ? formatCurrency(archItem.cost, -1) + ' SEK' : '0 SEK';
+            detailsSpan.textContent = `${archItem.name} – ${costString} – ${archItem.frequency} – ${dateStr}`;
+            rowArch.appendChild(detailsSpan);
+            // Action buttons for archived items
+            const btnGroupArch = document.createElement('div');
+            // Edit archived item: allows editing cost
+            const editArchBtn = document.createElement('button');
+            editArchBtn.className = 'btn secondary';
+            editArchBtn.textContent = 'Edit';
+            editArchBtn.style.fontSize = '0.7rem';
+            editArchBtn.addEventListener('click', () => {
+              // Prompt for new cost
+              let newCostStr = prompt('Edit cost of this item (SEK)', String(archItem.cost || 0));
+              if (newCostStr === null) return;
+              let newCostVal = parseFloat(newCostStr);
+              if (isNaN(newCostVal)) newCostVal = 0;
+              archItem.cost = newCostVal;
+              // Update purchase date to now if none exists
+              if (!archItem.purchasedDate) {
+                archItem.purchasedDate = new Date().toISOString();
+              }
+              saveData();
+              updateGrocerySection();
+              if (typeof provideHaptic === 'function') {
+                provideHaptic('beep');
+              }
+            });
+            btnGroupArch.appendChild(editArchBtn);
+            // Delete archived item
+            const deleteArchBtn = document.createElement('button');
+            deleteArchBtn.className = 'btn danger';
+            deleteArchBtn.textContent = 'Delete';
+            deleteArchBtn.style.fontSize = '0.7rem';
+            deleteArchBtn.addEventListener('click', () => {
+              data.groceries.splice(archIndex, 1);
+              saveData();
+              updateGrocerySection();
+            });
+            btnGroupArch.appendChild(deleteArchBtn);
+            rowArch.appendChild(btnGroupArch);
+            liArch.appendChild(rowArch);
+            archivedListEl.appendChild(liArch);
+          });
+        }
           // Dynamic budgets = base + carry
           const weeklyBaseBudget = data.groceryBudgetWeekly || 0;
           const monthlyBaseBudget = data.groceryBudgetMonthly || 0;
