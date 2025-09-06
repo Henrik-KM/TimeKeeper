@@ -20,7 +20,7 @@
         <li data-section="importExport">Import/Export</li>
         <li data-section="analytics">Reports</li>
         <li data-section="todo">Workouts</li>
-        <li data-section="grocery">Groceries</li>
+        <li data-section="grocery">Budgeting</li>
       </ul>
     </div>
     <div class="content">
@@ -211,15 +211,19 @@
 
       <!-- Grocery Section -->
       <section id="grocery" class="section" style="display:none;">
-        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Groceries</h2>
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Budgeting</h2>
+        <!-- Budget summary card will be inserted here dynamically -->
+        <div id="budgetSummaryContainer"></div>
+
         <!-- Form to add a new grocery item -->
         <div class="card" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Item</h3>
           <form id="groceryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
             <input id="groceryName" type="text" required placeholder="Item name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <select id="groceryFreq" style="width:6rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+            <select id="groceryFreq" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
+              <option value="biannual">Biannual</option>
             </select>
             <button type="submit" class="btn primary">Add</button>
           </form>
@@ -233,6 +237,12 @@
         <div class="card">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Items</h3>
           <ul id="monthlyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
+        <!-- Biannual grocery items -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Biannual Items</h3>
+          <ul id="biannualGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
       </section>
 
@@ -294,9 +304,17 @@
                 if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
                 return g;
               }) : [],
-              // Global carry-over counters for groceries. If missing, initialise to zero.
-              groceryWeeklyCarry: typeof parsed.groceryWeeklyCarry === 'number' ? parsed.groceryWeeklyCarry : 0,
-              groceryMonthlyCarry: typeof parsed.groceryMonthlyCarry === 'number' ? parsed.groceryMonthlyCarry : 0,
+              // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
+              // purchases are no longer used, so we omit them from persisted data.
+        // Budgeting values: base budgets per period (weekly, monthly, biannual) and their carry-overs.
+        groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
+        groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
+        groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
+        groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
+        groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
+        groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
+        // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
+        groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
               // Preserve additional persisted properties like backupDirName if present in saved data
               backupDirName: parsed.backupDirName || null
             };
@@ -754,57 +772,182 @@
         function updateGrocerySection() {
           const weeklyListEl = document.getElementById('weeklyGroceryList');
           const monthlyListEl = document.getElementById('monthlyGroceryList');
-          if (!weeklyListEl || !monthlyListEl) return;
+          const biannualListEl = document.getElementById('biannualGroceryList');
+          const summaryContainer = document.getElementById('budgetSummaryContainer');
+          if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer) return;
+          // Clear lists and summary
           weeklyListEl.innerHTML = '';
           monthlyListEl.innerHTML = '';
+          biannualListEl.innerHTML = '';
+          summaryContainer.innerHTML = '';
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
-          // Compute purchases this week and this month based on items' purchasedDate.
-          // Determine the start of this week (Monday) and start of next week
+          // Determine period boundaries for weekly, monthly and biannual budgets
           const now = new Date();
-          const day = now.getDay();
-          const diffToMonday = (day + 6) % 7;
-          const startThisWeek = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
-          startThisWeek.setHours(0, 0, 0, 0);
-          const startNextWeek = new Date(startThisWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
-          // Determine start of this month and next month
-          const startThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          const startNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          // Count items purchased this week and this month
-          let purchasedWeeklyCount = 0;
-          let purchasedMonthlyCount = 0;
+          // Weekly boundaries (Monday to next Monday) for spending
+          const dayOfWeek = now.getDay();
+          const diffToMon = (dayOfWeek + 6) % 7;
+          const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMon);
+          weekStart.setHours(0, 0, 0, 0);
+          const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+          // Monthly boundaries (1st to next 1st) for spending
+          const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          monthStart.setHours(0, 0, 0, 0);
+          const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+          // Biannual boundaries based on start date
+          let halfStart;
+          let halfEnd;
+          {
+            // Determine budgeting start date; if not set, default to current date (start of month)
+            let startDate;
+            if (data.groceryBudgetStartDate) {
+              startDate = new Date(data.groceryBudgetStartDate);
+            } else {
+              // default to first day of current month
+              startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+              data.groceryBudgetStartDate = startDate.toISOString().split('T')[0];
+              // persist start date
+              saveData();
+            }
+            startDate.setHours(0, 0, 0, 0);
+            // Compute months difference between startDate and now
+            const monthsDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+            const halfIndex = Math.floor(monthsDiff / 6);
+            halfStart = new Date(startDate.getFullYear(), startDate.getMonth() + halfIndex * 6, startDate.getDate());
+            halfStart.setHours(0, 0, 0, 0);
+            halfEnd = new Date(startDate.getFullYear(), startDate.getMonth() + (halfIndex + 1) * 6, startDate.getDate());
+            halfEnd.setHours(0, 0, 0, 0);
+          }
+          // Compute amount spent in each period
+          let weeklySpent = 0;
+          let monthlySpent = 0;
+          let biannualSpent = 0;
           groceries.forEach(it => {
-            if (it.archived && it.purchasedDate) {
+            if (it.archived && it.purchasedDate && typeof it.cost === 'number') {
               const pd = new Date(it.purchasedDate);
-              if (it.frequency === 'weekly' && pd >= startThisWeek && pd < startNextWeek) {
-                purchasedWeeklyCount++;
+              if (it.frequency === 'weekly' && pd >= weekStart && pd < weekEnd) {
+                weeklySpent += it.cost;
               }
-              if (it.frequency === 'monthly' && pd >= startThisMonth && pd < startNextMonth) {
-                purchasedMonthlyCount++;
+              if (it.frequency === 'monthly' && pd >= monthStart && pd < monthEnd) {
+                monthlySpent += it.cost;
+              }
+              if (it.frequency === 'biannual' && pd >= halfStart && pd < halfEnd) {
+                biannualSpent += it.cost;
               }
             }
           });
-          // Compute dynamic targets for this week and this month
-          const weeklyBase = 1;
-          const weeklyDynamicTarget = Math.max(0, weeklyBase + (data.groceryWeeklyCarry || 0));
-          const monthlyBase = 1;
-          const monthlyDynamicTarget = Math.max(0, monthlyBase + (data.groceryMonthlyCarry || 0));
-          // Display header line showing purchases vs target
-          const weeklyHeader = document.createElement('li');
-          weeklyHeader.style.fontSize = '0.8rem';
-          weeklyHeader.style.fontWeight = '600';
-          weeklyHeader.style.margin = '0.3rem 0';
-          weeklyHeader.textContent = `Purchased: ${purchasedWeeklyCount} / ${weeklyDynamicTarget}`;
-          weeklyListEl.appendChild(weeklyHeader);
-          const monthlyHeader = document.createElement('li');
-          monthlyHeader.style.fontSize = '0.8rem';
-          monthlyHeader.style.fontWeight = '600';
-          monthlyHeader.style.margin = '0.3rem 0';
-          monthlyHeader.textContent = `Purchased: ${purchasedMonthlyCount} / ${monthlyDynamicTarget}`;
-          monthlyListEl.appendChild(monthlyHeader);
-          // Determine if we can purchase more items this period
-          const canPurchaseWeekly = purchasedWeeklyCount < weeklyDynamicTarget;
-          const canPurchaseMonthly = purchasedMonthlyCount < monthlyDynamicTarget;
-          // Filter to items that are not archived (i.e., not yet purchased) and render them
+          // Dynamic budgets = base + carry
+          const weeklyBaseBudget = data.groceryBudgetWeekly || 0;
+          const monthlyBaseBudget = data.groceryBudgetMonthly || 0;
+          const biBaseBudget = data.groceryBudgetBiYearly || 0;
+          const weeklyDynamicBudget = weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
+          const monthlyDynamicBudget = monthlyBaseBudget + (data.groceryBudgetMonthlyCarry || 0);
+          const biDynamicBudget = biBaseBudget + (data.groceryBudgetBiYearlyCarry || 0);
+          // Time progress for budgets (fraction of period elapsed)
+          const weekTimeProgress = (now - weekStart) / (weekEnd - weekStart);
+          const monthTimeProgress = (now - monthStart) / (monthEnd - monthStart);
+          const halfTimeProgress = (now - halfStart) / (halfEnd - halfStart);
+          // Expected spending so far
+          const weeklyExpectedSpent = weeklyDynamicBudget * weekTimeProgress;
+          const monthlyExpectedSpent = monthlyDynamicBudget * monthTimeProgress;
+          const biExpectedSpent = biDynamicBudget * halfTimeProgress;
+          // Build budget summary card
+          const summaryCard = document.createElement('div');
+          summaryCard.className = 'card';
+          summaryCard.style.marginBottom = '1rem';
+          const summaryTitle = document.createElement('h3');
+          summaryTitle.style.margin = '0 0 0.5rem 0';
+          summaryTitle.style.fontSize = '1.1rem';
+          summaryTitle.style.fontWeight = '600';
+          summaryTitle.textContent = 'Budget Summary';
+          summaryCard.appendChild(summaryTitle);
+          function addBudgetLine(label, spent, budget, expected) {
+            const line = document.createElement('div');
+            line.style.fontSize = '0.85rem';
+            line.style.marginBottom = '0.25rem';
+            // Format currency to nearest ten (use existing formatCurrency)
+            const spentStr = formatCurrency(spent || 0, -1);
+            const budgetStr = formatCurrency(budget || 0, -1);
+            const expectedStr = formatCurrency(expected || 0, -1);
+            line.textContent = `${label}: ${spentStr} / ${budgetStr} SEK (expected ${expectedStr} SEK)`;
+            summaryCard.appendChild(line);
+            // Create multi progress bar for budgets
+            const pb = document.createElement('div');
+            pb.className = 'progress-bar multi';
+            pb.style.marginBottom = '0.4rem';
+            // Expected fill (black)
+            const expectedFill = document.createElement('div');
+            expectedFill.className = 'expected-fill';
+            expectedFill.style.width = budget > 0 ? Math.min(100, (expected / budget) * 100).toFixed(1) + '%' : '0%';
+            pb.appendChild(expectedFill);
+            // Actual fill (blue)
+            const actualFill = document.createElement('div');
+            actualFill.className = 'hours-fill';
+            actualFill.style.width = budget > 0 ? Math.min(100, (spent / budget) * 100).toFixed(1) + '%' : '0%';
+            pb.appendChild(actualFill);
+            summaryCard.appendChild(pb);
+          }
+          addBudgetLine('Weekly', weeklySpent, weeklyDynamicBudget, weeklyExpectedSpent);
+          addBudgetLine('Monthly', monthlySpent, monthlyDynamicBudget, monthlyExpectedSpent);
+          addBudgetLine('Biannual', biannualSpent, biDynamicBudget, biExpectedSpent);
+          // Add edit buttons for budgets and start date
+          const controlsDiv = document.createElement('div');
+          controlsDiv.style.display = 'flex';
+          controlsDiv.style.gap = '0.5rem';
+          controlsDiv.style.marginTop = '0.5rem';
+          // Edit budgets button
+          const editBudgetsBtn = document.createElement('button');
+          editBudgetsBtn.className = 'btn secondary';
+          editBudgetsBtn.style.fontSize = '0.75rem';
+          editBudgetsBtn.textContent = 'Edit Budgets';
+          editBudgetsBtn.addEventListener('click', () => {
+            const w = prompt('Weekly budget (SEK)', String(data.groceryBudgetWeekly || 0));
+            const m = prompt('Monthly budget (SEK)', String(data.groceryBudgetMonthly || 0));
+            const b = prompt('Biannual budget (SEK)', String(data.groceryBudgetBiYearly || 0));
+            if (w !== null) {
+              const val = parseFloat(w);
+              if (!isNaN(val)) data.groceryBudgetWeekly = val;
+            }
+            if (m !== null) {
+              const val = parseFloat(m);
+              if (!isNaN(val)) data.groceryBudgetMonthly = val;
+            }
+            if (b !== null) {
+              const val = parseFloat(b);
+              if (!isNaN(val)) data.groceryBudgetBiYearly = val;
+            }
+            saveData();
+            updateGrocerySection();
+          });
+          controlsDiv.appendChild(editBudgetsBtn);
+          // Edit start date button
+          const editStartBtn = document.createElement('button');
+          editStartBtn.className = 'btn secondary';
+          editStartBtn.style.fontSize = '0.75rem';
+          editStartBtn.textContent = 'Set Start Date';
+          editStartBtn.addEventListener('click', () => {
+            const d = prompt('Start date for biannual budget periods (YYYY-MM-DD)', data.groceryBudgetStartDate || '');
+            if (d) {
+              // Validate simple YYYY-MM-DD format
+              const parts = d.split('-');
+              if (parts.length === 3) {
+                const testDate = new Date(d);
+                if (!isNaN(testDate.getTime())) {
+                  data.groceryBudgetStartDate = d;
+                  saveData();
+                  updateGrocerySection();
+                }
+              }
+            }
+          });
+          controlsDiv.appendChild(editStartBtn);
+          summaryCard.appendChild(controlsDiv);
+          summaryContainer.appendChild(summaryCard);
+          // ------------------------------------------------------------
+          // In budget-only mode we do not limit the number of items that can be
+          // purchased in a period.  We therefore do not compute or display
+          // purchase quotas, and buy buttons remain enabled regardless of
+          // how many items have been purchased.
+          // Render unarchived items
           groceries.forEach((item, index) => {
             if (item.archived) return;
             const li = document.createElement('li');
@@ -823,17 +966,20 @@
             nameSpan.style.fontWeight = '600';
             row.appendChild(nameSpan);
             const btnGroup = document.createElement('div');
-            // Buy button (log purchase)
+            // Buy button (log purchase with cost). In budget-only mode there is
+            // no limit on the number of purchases per period, so the button
+            // is always enabled.
             const buyBtn = document.createElement('button');
             buyBtn.className = 'btn';
             buyBtn.textContent = 'Buy';
             buyBtn.style.fontSize = '0.7rem';
-            // Disable if quota reached
-            const freq = item.frequency === 'monthly' ? 'monthly' : 'weekly';
-            const canBuy = (freq === 'monthly' ? canPurchaseMonthly : canPurchaseWeekly);
-            if (!canBuy) buyBtn.disabled = true;
             buyBtn.addEventListener('click', () => {
-              // Mark item as archived (purchased) and record date
+              // Prompt for cost
+              let costStr = prompt('Enter cost of this item (SEK)', '0');
+              if (costStr === null) return;
+              let costVal = parseFloat(costStr);
+              if (isNaN(costVal)) costVal = 0;
+              item.cost = costVal;
               item.archived = true;
               item.purchasedDate = new Date().toISOString();
               saveData();
@@ -853,8 +999,8 @@
               if (newName !== null) {
                 item.name = newName.trim();
               }
-              const newFreq = prompt('Frequency (weekly/monthly)', item.frequency);
-              if (newFreq !== null && (newFreq === 'weekly' || newFreq === 'monthly')) {
+              const newFreq = prompt('Frequency (weekly/monthly/biannual)', item.frequency);
+              if (newFreq !== null && (newFreq === 'weekly' || newFreq === 'monthly' || newFreq === 'biannual')) {
                 item.frequency = newFreq;
               }
               saveData();
@@ -877,6 +1023,8 @@
             // Append to appropriate list
             if (item.frequency === 'monthly') {
               monthlyListEl.appendChild(li);
+            } else if (item.frequency === 'biannual') {
+              biannualListEl.appendChild(li);
             } else {
               weeklyListEl.appendChild(li);
             }
@@ -897,24 +1045,27 @@
           const lastWeekReset = localStorage.getItem('groceryWeeklyResetPro');
           if (lastWeekReset !== mondayStr) {
             // Determine the boundaries of last week [prevMonday, thisMonday)
-            const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
-            // Count how many weekly items were purchased in the previous week
-            let purchasedWeeklyCount = 0;
+          const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
+            // Compute the total spent on weekly items in the previous week
+            let weeklySpentPrev = 0;
             if (Array.isArray(data.groceries)) {
               data.groceries.forEach(item => {
-                if (item.frequency === 'weekly' && item.archived && item.purchasedDate) {
+                if (item.archived && item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
-                  if (pd >= prevMonday && pd < thisMonday) {
-                    purchasedWeeklyCount++;
+                  // Accumulate spend on weekly items purchased last week
+                  if (item.frequency === 'weekly' && pd >= prevMonday && pd < thisMonday) {
+                    if (typeof item.cost === 'number') {
+                      weeklySpentPrev += item.cost;
+                    }
                   }
                 }
               });
             }
-            // Base target is 1 purchase per week. Update global carry-over:
-            // newCarry = oldCarry + (base - purchases)
-            const base = 1;
-            const oldCarry = typeof data.groceryWeeklyCarry === 'number' ? data.groceryWeeklyCarry : 0;
-            data.groceryWeeklyCarry = oldCarry + (base - purchasedWeeklyCount);
+            // Update budget carry-over: newCarryBudget = oldCarryBudget + (dynamicBudgetPrev - spentPrev)
+            const baseBudget = typeof data.groceryBudgetWeekly === 'number' ? data.groceryBudgetWeekly : 0;
+            const oldBudgetCarry = typeof data.groceryBudgetWeeklyCarry === 'number' ? data.groceryBudgetWeeklyCarry : 0;
+            const dynamicPrevBudget = baseBudget + oldBudgetCarry;
+            data.groceryBudgetWeeklyCarry = oldBudgetCarry + (dynamicPrevBudget - weeklySpentPrev);
             // Persist the reset date
             localStorage.setItem('groceryWeeklyResetPro', mondayStr);
             saveData();
@@ -930,20 +1081,70 @@
             // Determine previous month boundaries [prevMonthStart, thisMonthStart)
             const prevMonthStart = new Date(year, month - 1, 1);
             const prevMonthEnd = new Date(year, month, 1);
-            let purchasedMonthlyCount = 0;
+            // Compute total spent on monthly items in the previous month
+            let monthlySpentPrev = 0;
+            // We no longer track purchase counts for item quotas
+            let biSpentPrev = 0;
             if (Array.isArray(data.groceries)) {
               data.groceries.forEach(item => {
-                if (item.frequency === 'monthly' && item.archived && item.purchasedDate) {
+                if (item.archived && item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
-                  if (pd >= prevMonthStart && pd < prevMonthEnd) {
-                    purchasedMonthlyCount++;
+                  // Monthly
+                  if (item.frequency === 'monthly' && pd >= prevMonthStart && pd < prevMonthEnd) {
+                    if (typeof item.cost === 'number') {
+                      monthlySpentPrev += item.cost;
+                    }
                   }
                 }
               });
             }
-            const baseM = 1;
-            const oldCarryM = typeof data.groceryMonthlyCarry === 'number' ? data.groceryMonthlyCarry : 0;
-            data.groceryMonthlyCarry = oldCarryM + (baseM - purchasedMonthlyCount);
+            // Update monthly budget carry-over
+            const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
+            const oldBudgetCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
+            const dynamicPrevBudgetM = baseBudgetM + oldBudgetCarryM;
+            data.groceryBudgetMonthlyCarry = oldBudgetCarryM + (dynamicPrevBudgetM - monthlySpentPrev);
+            // Now handle biannual resets at month boundary too if half year changed
+            // Determine start date and current half boundaries
+            const nowDate = new Date();
+            let startDate;
+            if (data.groceryBudgetStartDate) {
+              startDate = new Date(data.groceryBudgetStartDate);
+            } else {
+              startDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
+            }
+            startDate.setHours(0, 0, 0, 0);
+            const monthsDiff = (nowDate.getFullYear() - startDate.getFullYear()) * 12 + (nowDate.getMonth() - startDate.getMonth());
+            const currentHalfIndex = Math.floor(monthsDiff / 6);
+            // Determine if we have moved to a new half-year since last reset
+            const lastHalfReset = localStorage.getItem('groceryBiResetPro');
+            const halfKey = String(currentHalfIndex);
+            if (lastHalfReset !== halfKey) {
+              // Determine previous half boundaries
+              const prevHalfStart = new Date(startDate.getFullYear(), startDate.getMonth() + (currentHalfIndex - 1) * 6, startDate.getDate());
+              const prevHalfEnd = new Date(startDate.getFullYear(), startDate.getMonth() + currentHalfIndex * 6, startDate.getDate());
+              // Compute total spent on biannual items in the previous half-year
+              let biSpentPrevTotal = 0;
+              if (Array.isArray(data.groceries)) {
+                data.groceries.forEach(item => {
+                  if (item.frequency === 'biannual' && item.archived && item.purchasedDate) {
+                    const pd = new Date(item.purchasedDate);
+                    if (pd >= prevHalfStart && pd < prevHalfEnd) {
+                      if (typeof item.cost === 'number') {
+                        biSpentPrevTotal += item.cost;
+                      }
+                    }
+                  }
+                });
+              }
+              // Update biannual budget carry-over
+              const baseBudgetBi = typeof data.groceryBudgetBiYearly === 'number' ? data.groceryBudgetBiYearly : 0;
+              const oldBudgetCarryBi = typeof data.groceryBudgetBiYearlyCarry === 'number' ? data.groceryBudgetBiYearlyCarry : 0;
+              const dynamicPrevBudgetBi = baseBudgetBi + oldBudgetCarryBi;
+              data.groceryBudgetBiYearlyCarry = oldBudgetCarryBi + (dynamicPrevBudgetBi - biSpentPrevTotal);
+              // Persist half-year reset
+              localStorage.setItem('groceryBiResetPro', halfKey);
+            }
+            // Persist monthly reset
             localStorage.setItem('groceryMonthlyResetPro', monthKey);
             saveData();
           }
