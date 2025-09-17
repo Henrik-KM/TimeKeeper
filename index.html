@@ -2654,8 +2654,19 @@ function loadData() {
         // the directory is selected, set it as the backupDirHandle and enable auto sync.
         async function chooseBackupDir(options = {}) {
           const { activateSync = false } = options;
+          if (!window.showDirectoryPicker) {
+            backupWarningMessage = 'Auto sync unavailable: your browser does not support choosing folders.';
+            updateAutoSyncStatus();
+            return false;
+          }
           try {
             const dirHandle = await window.showDirectoryPicker();
+            const permissionGranted = await ensureBackupPermissionWithPrompt(dirHandle);
+            if (!permissionGranted) {
+              backupWarningMessage = 'Permission to access the selected backup folder was not granted. Auto sync unchanged.';
+              updateAutoSyncStatus();
+              return false;
+            }
             backupDirHandle = dirHandle;
             await saveBackupDirHandle(dirHandle);
             data.backupDirName = dirHandle.name || null;
@@ -5035,6 +5046,19 @@ function loadData() {
         // will call chooseBackupDir(). If auto sync is disabled, this button remains
         // functional to allow the user to preselect a folder before enabling auto sync.
         const chooseBtn = document.getElementById('chooseBackupDirBtn');
+        const fsAccessSupported = !!window.showDirectoryPicker;
+        if (!fsAccessSupported) {
+          if (autoSyncToggle) {
+            autoSyncToggle.disabled = true;
+            autoSyncToggle.title = 'Auto sync requires a browser that supports folder access.';
+          }
+          if (chooseBtn) {
+            chooseBtn.disabled = true;
+            chooseBtn.title = 'Auto sync requires a browser that supports folder access.';
+          }
+          backupWarningMessage = 'Auto sync unavailable: your browser does not support choosing folders.';
+          updateAutoSyncStatus();
+        }
         if (chooseBtn) {
           chooseBtn.addEventListener('click', () => {
             chooseBackupDir({ activateSync: true });
