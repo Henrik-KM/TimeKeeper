@@ -677,8 +677,8 @@ function loadData() {
         if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
         return g;
       }) : [],
-      // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
-      // purchases are no longer used, so we omit them from persisted data.
+      // Single-item purchase quotas have been removed. Now, budgets control overall spending rather than item counts.
+      // As a result, carry-over counts for purchases are no longer tracked or persisted in the data structure.
       groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
       groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
       groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
