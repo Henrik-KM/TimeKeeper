@@ -185,6 +185,8 @@
             <span>Enable auto sync to local file</span>
           </label>
           <p id="autoSyncStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;"></p>
+          <p id="autoSyncWarning" class="status-warning" style="display:none;"></p>
+          <p id="lastBackupStatus" class="status-muted" style="display:none;"></p>
         <!-- Button to choose backup directory when enabling auto sync -->
         <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
         </div>
@@ -202,10 +204,18 @@
             <button type="submit" class="btn primary">Add</button>
           </form>
         </div>
+        <div class="card" id="fitnessSummaryCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
+          <div id="fitnessSummaryContent" class="fitness-summary"></div>
+        </div>
         <!-- List of workouts -->
         <div class="card" id="todoListContainer">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Your Workouts</h3>
           <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+        <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
+          <div id="fitnessSettingsContent"></div>
         </div>
       </section>
 
@@ -224,6 +234,11 @@
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="biannual">Biannual</option>
+            </select>
+            <select id="groceryCategory" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="standard">Standard</option>
+              <option value="treat">Treat</option>
+              <option value="essential">Essential</option>
             </select>
             <button type="submit" class="btn primary">Add</button>
           </form>
@@ -289,52 +304,413 @@
             return v.toString(16);
           });
         }
-        // Load and save data
-        function loadData() {
-          const raw = localStorage.getItem('timekeeperDataPro');
-          if (!raw) return { projects: [], entries: [], todos: [] };
-          try {
-            const parsed = JSON.parse(raw);
+        const FITNESS_MODES = {
+          gentle: { label: 'Gentle (6% / 4%)', alpha: 0.06, beta: 0.04 },
+          normal: { label: 'Normal (8% / 6%)', alpha: 0.08, beta: 0.06 },
+          strict: { label: 'Strict (10% / 8%)', alpha: 0.10, beta: 0.08 }
+        };
+        function makeDefaultFitness() {
+          return {
+            mode: 'normal',
+            alpha: FITNESS_MODES.normal.alpha,
+            beta: FITNESS_MODES.normal.beta,
+            currentMultiplier: 1,
+            nextMultiplier: 1,
+            lastProcessedMonday: null,
+            wellnessCredits: 0,
+            creditsCap: 1000,
+            creditSettings: {
+              base: 50,
+              extra: 25,
+              penalty: 40,
+              weeklyBonus: 50,
+              streakBonus: 100
+            },
+            streakCount: 0,
+            pausedWeeks: {},
+            weekendBoostEnabled: true,
+            weekendBoostPercent: 0.1,
+            weekendBoostUnlockedWeek: null,
+            lastWeekSummary: null
+          };
+        }
+        function applyFitnessDefaults(obj) {
+          const defaults = makeDefaultFitness();
+          if (!obj || typeof obj !== 'object') return defaults;
+          const merged = Object.assign({}, defaults, obj);
+          merged.creditSettings = Object.assign({}, defaults.creditSettings, obj.creditSettings || {});
+          merged.pausedWeeks = Object.assign({}, defaults.pausedWeeks, obj.pausedWeeks || {});
+          if (typeof merged.alpha !== 'number' || !isFinite(merged.alpha)) merged.alpha = defaults.alpha;
+          if (typeof merged.beta !== 'number' || !isFinite(merged.beta)) merged.beta = defaults.beta;
+          if (typeof merged.currentMultiplier !== 'number' || !isFinite(merged.currentMultiplier)) merged.currentMultiplier = defaults.currentMultiplier;
+          if (typeof merged.nextMultiplier !== 'number' || !isFinite(merged.nextMultiplier)) merged.nextMultiplier = defaults.nextMultiplier;
+          if (typeof merged.creditsCap !== 'number' || !isFinite(merged.creditsCap)) merged.creditsCap = defaults.creditsCap;
+          if (typeof merged.wellnessCredits !== 'number' || !isFinite(merged.wellnessCredits)) merged.wellnessCredits = defaults.wellnessCredits;
+          if (typeof merged.weekendBoostPercent !== 'number' || !isFinite(merged.weekendBoostPercent)) merged.weekendBoostPercent = defaults.weekendBoostPercent;
+          if (typeof merged.streakCount !== 'number' || !isFinite(merged.streakCount)) merged.streakCount = defaults.streakCount;
+          return merged;
+        }
+        function ensureFitnessDefaults() {
+          data.fitness = applyFitnessDefaults(data.fitness);
+          return data.fitness;
+        }
+        function clampMultiplier(value) {
+          const val = typeof value === 'number' && isFinite(value) ? value : 1;
+          return Math.min(1.2, Math.max(0.9, val));
+        }
+        function getWeekStart(date) {
+          const d = new Date(date);
+          const dow = d.getDay();
+          const diffToMonday = (dow + 6) % 7;
+          const monday = new Date(d.getFullYear(), d.getMonth(), d.getDate() - diffToMonday);
+          monday.setHours(0, 0, 0, 0);
+          return monday;
+        }
+        function getWeekKey(date) {
+          return getWeekStart(date).toISOString().split('T')[0];
+        }
+        function computeFitnessSummary(stats, alpha, beta) {
+          let totalPenalty = 0;
+          let totalOverage = 0;
+          let complianceSum = 0;
+          let workoutsCount = 0;
+          let totalTargets = 0;
+          let totalActual = 0;
+          stats.forEach(stat => {
+            const target = stat && typeof stat.target === 'number' ? stat.target : 0;
+            const actual = stat && typeof stat.actual === 'number' ? stat.actual : 0;
+            if (target <= 0) return;
+            const ratio = target > 0 ? actual / target : 0;
+            const compliance = Math.min(1, Math.max(0, ratio));
+            const overage = Math.max(0, ratio - 1);
+            const penalty = 1 - compliance;
+            totalPenalty += penalty;
+            totalOverage += overage;
+            complianceSum += compliance;
+            workoutsCount += 1;
+            totalTargets += target;
+            totalActual += actual;
+          });
+          const adjPercent = (alpha * totalOverage) - (beta * totalPenalty);
+          return {
+            adjPercent,
+            totalPenalty,
+            totalOverage,
+            complianceAvg: workoutsCount > 0 ? complianceSum / workoutsCount : 1,
+            workoutsCount,
+            totalTargets,
+            totalActual
+          };
+        }
+        function computeCreditsDelta(stats, fitness) {
+          const defaults = makeDefaultFitness();
+          const settings = fitness && fitness.creditSettings ? Object.assign({}, defaults.creditSettings, fitness.creditSettings) : defaults.creditSettings;
+          let baseEarned = 0;
+          let extraEarned = 0;
+          let penalties = 0;
+          let workoutsWithTargets = 0;
+          let metAll = true;
+          stats.forEach(stat => {
+            const target = stat && typeof stat.target === 'number' ? stat.target : 0;
+            const actual = stat && typeof stat.actual === 'number' ? stat.actual : 0;
+            if (target <= 0) return;
+            workoutsWithTargets += 1;
+            const baseSessions = Math.min(actual, target);
+            const extraSessions = Math.max(0, actual - target);
+            const missedSessions = Math.max(0, target - actual);
+            baseEarned += baseSessions * settings.base;
+            extraEarned += extraSessions * settings.extra;
+            penalties += missedSessions * settings.penalty;
+            if (actual < target) metAll = false;
+          });
+          let streakCount = fitness && typeof fitness.streakCount === 'number' ? fitness.streakCount : 0;
+          let bonus = 0;
+          if (metAll && workoutsWithTargets > 0) {
+            bonus += settings.weeklyBonus;
+            streakCount += 1;
+            if (streakCount > 0 && streakCount % 4 === 0) {
+              bonus += settings.streakBonus;
+            }
+          } else if (fitness) {
+            streakCount = 0;
+          }
+          const rawDelta = baseEarned + extraEarned - penalties + bonus;
+          const currentCredits = fitness && typeof fitness.wellnessCredits === 'number' ? fitness.wellnessCredits : 0;
+          const cap = fitness && typeof fitness.creditsCap === 'number' ? fitness.creditsCap : defaults.creditsCap;
+          const newCredits = Math.max(0, Math.min(cap, currentCredits + rawDelta));
+          const delta = newCredits - currentCredits;
+          return {
+            delta,
+            newCredits,
+            streakCount,
+            baseEarned,
+            extraEarned,
+            penalties,
+            bonus,
+            metAllTargets: metAll && workoutsWithTargets > 0,
+            workoutsWithTargets
+          };
+        }
+        function collectWorkoutStats(options = {}) {
+          const start = options.start ? new Date(options.start) : getWeekStart(new Date());
+          const end = options.end ? new Date(options.end) : null;
+          if (isNaN(start.getTime())) {
+            throw new Error('Invalid start date for workout stats');
+          }
+          const todos = Array.isArray(data.todos) ? data.todos : [];
+          const stats = todos.map(todo => {
+            if (!Array.isArray(todo.logs)) todo.logs = [];
+            if (todo.carryOver === undefined) todo.carryOver = 0;
+            const target = typeof todo.weeklyTarget === 'number' ? Math.max(0, todo.weeklyTarget) : 0;
+            let actual = 0;
+            todo.logs.forEach(log => {
+              const dt = new Date(log);
+              if (isNaN(dt.getTime())) return;
+              if (dt >= start && (!end || dt <= end)) {
+                actual += 1;
+              }
+            });
             return {
-              projects: Array.isArray(parsed.projects) ? parsed.projects : [],
-              entries: Array.isArray(parsed.entries) ? parsed.entries : [],
-              // Workouts (formerly todos). Ensure an array and attach carryOver property if missing.
-              todos: Array.isArray(parsed.todos) ? parsed.todos.map(t => {
-                if (t.carryOver === undefined) t.carryOver = 0;
-                if (!Array.isArray(t.logs)) t.logs = [];
-                return t;
-              }) : [],
-              // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
-              groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
-                // Migrate legacy properties to new structure. Each item should have a name and frequency.
-                if (!g.name) g.name = '';
-                if (!g.frequency) g.frequency = 'weekly';
-                // In the new structure, we track whether an item has been archived and when it was purchased. Default false/null.
-                if (g.archived === undefined) g.archived = false;
-                if (g.purchasedDate === undefined) g.purchasedDate = null;
-                // Remove legacy fields carryOver and purchasedCount if present
-                if (g.hasOwnProperty('carryOver')) delete g.carryOver;
-                if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
-                return g;
-              }) : [],
-              // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
-              // purchases are no longer used, so we omit them from persisted data.
-        // Budgeting values: base budgets per period (weekly, monthly, biannual) and their carry-overs.
-        groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
-        groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
-        groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
-        groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
-        groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
-        groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
-        // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
-        groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
-              // Preserve additional persisted properties like backupDirName if present in saved data
-              backupDirName: parsed.backupDirName || null
+              id: todo.id,
+              name: todo.name || '',
+              target,
+              actual
             };
-          } catch (err) {
-            return { projects: [], entries: [], todos: [], groceries: [], backupDirName: null };
+          });
+          return { stats, start, end };
+        }
+        function isWeekPaused(weekKey) {
+          const fitness = ensureFitnessDefaults();
+          return !!(fitness.pausedWeeks && fitness.pausedWeeks[weekKey]);
+        }
+        function setWeekPaused(weekKey, paused) {
+          const fitness = ensureFitnessDefaults();
+          if (!fitness.pausedWeeks) fitness.pausedWeeks = {};
+          if (paused) {
+            fitness.pausedWeeks[weekKey] = true;
+          } else {
+            delete fitness.pausedWeeks[weekKey];
           }
         }
+        function finalizeFitnessWeek(weeklyStats, lastMonday, thisMonday) {
+          const fitness = ensureFitnessDefaults();
+          const lastMondayKey = getWeekKey(lastMonday);
+          const thisMondayKey = getWeekKey(thisMonday);
+          const prevNext = typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : 1;
+          fitness.currentMultiplier = clampMultiplier(prevNext);
+          const pausedWeeks = fitness.pausedWeeks || {};
+          const wasPaused = !!pausedWeeks[lastMondayKey];
+          if (wasPaused) {
+            delete pausedWeeks[lastMondayKey];
+            fitness.pausedWeeks = pausedWeeks;
+          }
+          const hasTargets = Array.isArray(weeklyStats) && weeklyStats.some(stat => stat.target > 0);
+          if (!hasTargets) {
+            fitness.nextMultiplier = fitness.currentMultiplier;
+            fitness.lastWeekSummary = {
+              weekStart: lastMondayKey,
+              weekEnd: thisMonday.toISOString().split('T')[0],
+              adjPercent: 0,
+              totalPenalty: 0,
+              totalOverage: 0,
+              complianceAvg: 1,
+              totalTargets: 0,
+              totalActual: 0,
+              creditsDelta: 0,
+              baseCredits: 0,
+              extraCredits: 0,
+              penalties: 0,
+              bonus: 0,
+              metAllTargets: false,
+              paused: wasPaused
+            };
+          } else if (wasPaused) {
+            fitness.nextMultiplier = fitness.currentMultiplier;
+            fitness.lastWeekSummary = {
+              weekStart: lastMondayKey,
+              weekEnd: thisMonday.toISOString().split('T')[0],
+              adjPercent: 0,
+              totalPenalty: 0,
+              totalOverage: 0,
+              complianceAvg: 1,
+              totalTargets: 0,
+              totalActual: 0,
+              creditsDelta: 0,
+              baseCredits: 0,
+              extraCredits: 0,
+              penalties: 0,
+              bonus: 0,
+              metAllTargets: false,
+              paused: true
+            };
+          } else {
+            const summary = computeFitnessSummary(weeklyStats, fitness.alpha, fitness.beta);
+            const nextMultiplier = clampMultiplier(1 + summary.adjPercent);
+            const creditsInfo = computeCreditsDelta(weeklyStats, fitness);
+            fitness.nextMultiplier = nextMultiplier;
+            fitness.wellnessCredits = creditsInfo.newCredits;
+            fitness.streakCount = creditsInfo.streakCount;
+            fitness.lastWeekSummary = {
+              weekStart: lastMondayKey,
+              weekEnd: thisMonday.toISOString().split('T')[0],
+              adjPercent: summary.adjPercent,
+              totalPenalty: summary.totalPenalty,
+              totalOverage: summary.totalOverage,
+              complianceAvg: summary.complianceAvg,
+              totalTargets: summary.totalTargets,
+              totalActual: summary.totalActual,
+              creditsDelta: creditsInfo.delta,
+              baseCredits: creditsInfo.baseEarned,
+              extraCredits: creditsInfo.extraEarned,
+              penalties: creditsInfo.penalties,
+              bonus: creditsInfo.bonus,
+              metAllTargets: creditsInfo.metAllTargets,
+              paused: false
+            };
+          }
+          fitness.weekendBoostUnlockedWeek = null;
+          fitness.lastProcessedMonday = thisMondayKey;
+        }
+        function evaluateWeekendBoostUnlock() {
+          const fitness = ensureFitnessDefaults();
+          if (!fitness.weekendBoostEnabled) return false;
+          const weekKey = getWeekKey(new Date());
+          if (fitness.weekendBoostUnlockedWeek === weekKey) return true;
+          const monday = getWeekStart(new Date());
+          const fridayCutoff = new Date(monday);
+          fridayCutoff.setDate(fridayCutoff.getDate() + 4);
+          fridayCutoff.setHours(18, 0, 0, 0);
+          const now = new Date();
+          if (now < fridayCutoff) return false;
+          const statsInfo = collectWorkoutStats({ start: monday, end: fridayCutoff });
+          let totalTarget = 0;
+          let totalActual = 0;
+          statsInfo.stats.forEach(stat => {
+            if (stat.target > 0) {
+              totalTarget += stat.target;
+              totalActual += Math.min(stat.actual, stat.target);
+            }
+          });
+          if (totalTarget > 0 && totalActual >= totalTarget) {
+            fitness.weekendBoostUnlockedWeek = weekKey;
+            saveData();
+            return true;
+          }
+          return false;
+        }
+        function isWeekendBoostActive() {
+          const fitness = ensureFitnessDefaults();
+          if (!fitness.weekendBoostEnabled) return false;
+          const weekKey = getWeekKey(new Date());
+          if (fitness.weekendBoostUnlockedWeek !== weekKey) {
+            return evaluateWeekendBoostUnlock();
+          }
+          const now = new Date();
+          const monday = getWeekStart(now);
+          const friday = new Date(monday);
+          friday.setDate(friday.getDate() + 4);
+          friday.setHours(18, 0, 0, 0);
+          const sunday = new Date(monday);
+          sunday.setDate(sunday.getDate() + 6);
+          sunday.setHours(23, 59, 59, 999);
+          return now >= friday && now <= sunday;
+        }
+        function formatPercent(value, decimals = 1) {
+          if (!isFinite(value)) return '0%';
+          return (value * 100).toFixed(decimals) + '%';
+        }
+        function formatSignedCurrency(value, decimals = -1) {
+          if (!isFinite(value) || value === 0) {
+            return '0 SEK';
+          }
+          const formatted = formatCurrency(Math.abs(value), decimals).replace(' kr', '');
+          return (value >= 0 ? '+' : '−') + formatted + ' SEK';
+        }
+        // Load and save data
+
+function loadData() {
+  const raw = localStorage.getItem('timekeeperDataPro');
+  if (!raw) {
+    return {
+      projects: [],
+      entries: [],
+      todos: [],
+      groceries: [],
+      groceryBudgetWeekly: 1000,
+      groceryBudgetMonthly: 4000,
+      groceryBudgetBiYearly: 20000,
+      groceryBudgetWeeklyCarry: 0,
+      groceryBudgetMonthlyCarry: 0,
+      groceryBudgetBiYearlyCarry: 0,
+      groceryBudgetStartDate: null,
+      backupDirName: null,
+      lastBackupAt: null,
+      fitness: makeDefaultFitness()
+    };
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    return {
+      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+      entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+      // Workouts (formerly todos). Ensure an array and attach carryOver property if missing.
+      todos: Array.isArray(parsed.todos) ? parsed.todos.map(t => {
+        if (t.carryOver === undefined) t.carryOver = 0;
+        if (!Array.isArray(t.logs)) t.logs = [];
+        return t;
+      }) : [],
+      // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
+      groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
+        // Migrate legacy properties to new structure. Each item should have a name and frequency.
+        if (!g.name) g.name = '';
+        if (!g.frequency) g.frequency = 'weekly';
+        // In the new structure, we track whether an item has been archived and when it was purchased. Default false/null.
+        if (g.archived === undefined) g.archived = false;
+        if (g.purchasedDate === undefined) g.purchasedDate = null;
+        if (!g.category) g.category = 'standard';
+        if (g.originalCost === undefined && typeof g.cost === 'number') g.originalCost = g.cost;
+                if (g.appliedCredits === undefined) g.appliedCredits = 0;
+                if (g.boostApplied === undefined) g.boostApplied = false;
+                if (g.boostPercentApplied === undefined) g.boostPercentApplied = 0;
+        // Remove legacy fields carryOver and purchasedCount if present
+        if (g.hasOwnProperty('carryOver')) delete g.carryOver;
+        if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
+        return g;
+      }) : [],
+      // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
+      // purchases are no longer used, so we omit them from persisted data.
+      groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
+      groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
+      groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
+      groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
+      groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
+      groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
+      // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
+      groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
+      // Preserve additional persisted properties like backupDirName if present in saved data
+      backupDirName: parsed.backupDirName || null,
+      lastBackupAt: parsed.lastBackupAt || null,
+      fitness: applyFitnessDefaults(parsed.fitness)
+    };
+  } catch (err) {
+    return {
+      projects: [],
+      entries: [],
+      todos: [],
+      groceries: [],
+      groceryBudgetWeekly: 1000,
+      groceryBudgetMonthly: 4000,
+      groceryBudgetBiYearly: 20000,
+      groceryBudgetWeeklyCarry: 0,
+      groceryBudgetMonthlyCarry: 0,
+      groceryBudgetBiYearlyCarry: 0,
+      groceryBudgetStartDate: null,
+      backupDirName: null,
+      lastBackupAt: null,
+      fitness: makeDefaultFitness()
+    };
+  }
+}
         function saveData() {
           localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
           // Mark data as needing backup
@@ -348,6 +724,7 @@
           return 1 / (1 + (n - 1) / 3);
         }
         let data = loadData();
+        ensureFitnessDefaults();
         // Initialize backup and sync flags before they are referenced in saveData().
         // needsBackup tracks whether the data has changed and needs to be exported.
         // autoSyncEnabled indicates whether automatic export is enabled.
@@ -355,6 +732,7 @@
         let needsBackup = false;
         let autoSyncEnabled = false;
         let backupDirHandle = null;
+        let backupWarningMessage = '';
         // Flag to track whether to show all entries or only recent ones. If false,
         // entries older than approximately one month are hidden by default to keep
         // the list manageable. This can be toggled via a button in the Entries section.
@@ -436,6 +814,43 @@
             return null;
           }
         }
+        async function hasBackupPermission(handle) {
+          if (!handle) return false;
+          if (!handle.queryPermission) return true;
+          try {
+            const status = await handle.queryPermission({ mode: 'readwrite' });
+            return status === 'granted';
+          } catch (err) {
+            return false;
+          }
+        }
+        async function ensureBackupPermissionWithPrompt(handle) {
+          if (!handle) return false;
+          if (!handle.queryPermission) return true;
+          try {
+            let status = await handle.queryPermission({ mode: 'readwrite' });
+            if (status === 'granted') return true;
+            if (status === 'prompt' && handle.requestPermission) {
+              status = await handle.requestPermission({ mode: 'readwrite' });
+              return status === 'granted';
+            }
+            return false;
+          } catch (err) {
+            return false;
+          }
+        }
+        function disableAutoSyncWithWarning(message) {
+          autoSyncEnabled = false;
+          localStorage.setItem('autoSyncEnabledPro', 'false');
+          const toggle = document.getElementById('autoSyncToggle');
+          if (toggle) {
+            toggle.checked = false;
+          }
+          if (message) {
+            backupWarningMessage = message;
+          }
+          updateAutoSyncStatus();
+        }
         // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
         // mark all tasks as unchecked and update the reset date in localStorage. This ensures
         // todos remain persistent week-to-week but are reset at the start of each new week.
@@ -455,6 +870,7 @@
               const lastMonday = new Date(monday);
               lastMonday.setDate(monday.getDate() - 7);
               lastMonday.setHours(0, 0, 0, 0);
+              const weeklyStats = [];
               data.todos.forEach(t => {
                 // Ensure properties exist
                 if (typeof t.weeklyTarget !== 'number' || t.weeklyTarget < 1) {
@@ -471,6 +887,7 @@
                   const dt = new Date(log);
                   return dt >= lastMonday && dt < monday;
                 }).length;
+                weeklyStats.push({ id: t.id, name: t.name || '', target: Math.max(0, t.weeklyTarget), actual: sessionsLastWeek });
                 // Dynamic target for the previous week
                 const dynamicTarget = t.weeklyTarget + t.carryOver;
                 // Determine carryOver for the new week based on difference between target and actual sessions
@@ -485,6 +902,7 @@
                   return dt >= monday;
                 });
               });
+              finalizeFitnessWeek(weeklyStats, lastMonday, monday);
             }
             localStorage.setItem('todoResetDatePro', mondayStr);
             saveData();
@@ -521,16 +939,20 @@
         // a handle exists, assign it to the global backupDirHandle so that auto
         // sync can operate without requiring the user to pick a folder each
         // time the page loads.
-        loadBackupDirHandle().then(handle => {
-          // If a handle was previously saved, restore it.
-          if (handle) {
+        loadBackupDirHandle().then(async handle => {
+          if (handle && await hasBackupPermission(handle)) {
             backupDirHandle = handle;
+          } else if (handle) {
+            backupDirHandle = null;
+            if (autoSyncEnabled) {
+              disableAutoSyncWithWarning('Auto sync disabled: backup folder access is required.');
+            } else {
+              backupWarningMessage = 'Backup folder needs to be reselected before auto sync can run.';
+            }
+          } else if (autoSyncEnabled) {
+            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
           }
-          // Update auto sync status now that we know whether a backup folder is set.
-          if (typeof updateAutoSyncStatus === 'function') {
-            updateAutoSyncStatus();
-          }
-          // After restoring the backup directory, determine if focus blocker should be active.
+          updateAutoSyncStatus();
           updateFocusBlocker();
         });
 
@@ -591,6 +1013,418 @@
         // relative to the weekly target and provide buttons to log a session,
         // edit the target, or delete the workout. The UI resets weekly on
         // Mondays by filtering logs before this week.
+        function commitFitnessMutation(mutator) {
+          const fitness = ensureFitnessDefaults();
+          mutator(fitness);
+          saveData();
+          updateTodoSection();
+          updateGrocerySection();
+        }
+        function updateFitnessCards(statsInfo) {
+          const summaryEl = document.getElementById('fitnessSummaryContent');
+          const settingsEl = document.getElementById('fitnessSettingsContent');
+          const fitness = ensureFitnessDefaults();
+          const statsData = statsInfo || collectWorkoutStats();
+          const stats = Array.isArray(statsData.stats) ? statsData.stats : [];
+          const hasTargets = stats.some(stat => stat.target > 0);
+          const summary = hasTargets ? computeFitnessSummary(stats, fitness.alpha, fitness.beta) : {
+            adjPercent: 0,
+            totalPenalty: 0,
+            totalOverage: 0,
+            complianceAvg: 1,
+            totalTargets: 0,
+            totalActual: 0
+          };
+          const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
+          const nextMultiplier = clampMultiplier(typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : currentMultiplier);
+          const projectedMultiplier = clampMultiplier(1 + summary.adjPercent);
+          const weeklyBaseBudget = (data.groceryBudgetWeekly || 0) + (data.groceryBudgetWeeklyCarry || 0);
+          const currentBudget = weeklyBaseBudget * currentMultiplier;
+          const nextBudget = weeklyBaseBudget * nextMultiplier;
+          const projectedBudget = weeklyBaseBudget * projectedMultiplier;
+          const totalTargetSessions = stats.reduce((acc, stat) => stat.target > 0 ? acc + stat.target : acc, 0);
+          const totalActualSessions = stats.reduce((acc, stat) => stat.target > 0 ? acc + stat.actual : acc, 0);
+          const complianceRatio = totalTargetSessions > 0 ? totalActualSessions / totalTargetSessions : 0;
+          const pausedThisWeek = isWeekPaused(getWeekKey(new Date()));
+          const boostEnabled = fitness.weekendBoostEnabled;
+          const boostActive = isWeekendBoostActive();
+          const boostUnlocked = fitness.weekendBoostUnlockedWeek === getWeekKey(new Date());
+          const boostPercent = Math.round((fitness.weekendBoostPercent || 0) * 100);
+          const defaultCreditSettings = makeDefaultFitness().creditSettings;
+          const creditSettings = Object.assign({}, defaultCreditSettings, fitness.creditSettings || {});
+          const formatAmount = (num) => {
+            const str = formatCurrency(num, -1);
+            return str ? str.replace(' kr', ' SEK') : '0 SEK';
+          };
+          if (summaryEl) {
+            summaryEl.innerHTML = '';
+            const grid = document.createElement('div');
+            grid.className = 'fitness-summary-grid';
+            function createRow(label, value, subText) {
+              const row = document.createElement('div');
+              row.className = 'fitness-summary-row';
+              const labelEl = document.createElement('div');
+              labelEl.className = 'fitness-summary-label';
+              labelEl.textContent = label;
+              const valueEl = document.createElement('div');
+              valueEl.className = 'fitness-summary-value';
+              valueEl.textContent = value;
+              row.appendChild(labelEl);
+              row.appendChild(valueEl);
+              if (subText) {
+                const sub = document.createElement('div');
+                sub.className = 'fitness-summary-sub';
+                sub.textContent = subText;
+                row.appendChild(sub);
+              }
+              grid.appendChild(row);
+            }
+            createRow('Current multiplier', currentMultiplier.toFixed(2) + '×', 'Weekly budget ' + formatAmount(currentBudget));
+            const projectedDelta = projectedBudget - weeklyBaseBudget;
+            if (hasTargets) {
+              createRow('Projected (if week ended today)', projectedMultiplier.toFixed(2) + '×', formatSignedCurrency(projectedDelta));
+            }
+            const lastWeek = fitness.lastWeekSummary;
+            const nextDelta = nextBudget - weeklyBaseBudget;
+            let nextSub = formatSignedCurrency(nextDelta);
+            if (lastWeek && !lastWeek.paused) {
+              const bonusPct = fitness.alpha * lastWeek.totalOverage;
+              const penaltyPct = fitness.beta * lastWeek.totalPenalty;
+              nextSub += ' • Last week ' + formatPercent(bonusPct, 1) + ' bonus, ' + formatPercent(penaltyPct, 1) + ' penalty';
+            } else if (lastWeek && lastWeek.paused) {
+              nextSub += ' • Last week paused';
+            }
+            createRow('Next week (locked)', nextMultiplier.toFixed(2) + '×', nextSub);
+            if (hasTargets) {
+              createRow('Weekly compliance', totalActualSessions + ' / ' + totalTargetSessions + ' sessions', formatPercent(Math.min(complianceRatio, 1), 1));
+            } else {
+              createRow('Weekly compliance', 'No targets', null);
+            }
+            const creditsRow = document.createElement('div');
+            creditsRow.className = 'fitness-pill-row';
+            const creditsPill = document.createElement('span');
+            creditsPill.className = 'fitness-pill';
+            creditsPill.textContent = 'Wellness Credits: ' + formatCurrency(fitness.wellnessCredits || 0, -1).replace(' kr', ' SEK');
+            creditsRow.appendChild(creditsPill);
+            if (fitness.creditsCap) {
+              const capPill = document.createElement('span');
+              capPill.className = 'fitness-pill muted';
+              capPill.textContent = 'Cap ' + formatCurrency(fitness.creditsCap, -1).replace(' kr', ' SEK');
+              creditsRow.appendChild(capPill);
+            }
+            if (fitness.streakCount && fitness.streakCount > 0) {
+              const streakPill = document.createElement('span');
+              streakPill.className = 'fitness-pill warm';
+              streakPill.textContent = '🔥 Streak ' + fitness.streakCount + ' week' + (fitness.streakCount === 1 ? '' : 's');
+              creditsRow.appendChild(streakPill);
+            }
+            summaryEl.appendChild(grid);
+            summaryEl.appendChild(creditsRow);
+            const boostRow = document.createElement('div');
+            boostRow.className = 'fitness-summary-row';
+            const boostLabel = document.createElement('div');
+            boostLabel.className = 'fitness-summary-label';
+            boostLabel.textContent = 'Weekend boost';
+            const boostValue = document.createElement('div');
+            boostValue.className = 'fitness-summary-value';
+            if (!boostEnabled) {
+              boostValue.textContent = 'Disabled';
+            } else if (boostActive) {
+              boostValue.textContent = 'Unlocked: +' + boostPercent + '% on Treats';
+            } else if (boostUnlocked) {
+              boostValue.textContent = 'Unlocked – waiting for weekend (+' + boostPercent + '%)';
+            } else if (hasTargets && totalTargetSessions > 0) {
+              const remaining = Math.max(0, totalTargetSessions - totalActualSessions);
+              boostValue.textContent = 'Locked – ' + remaining + ' session' + (remaining === 1 ? '' : 's') + ' to unlock +' + boostPercent + '%';
+            } else {
+              boostValue.textContent = 'Locked';
+            }
+            boostRow.appendChild(boostLabel);
+            boostRow.appendChild(boostValue);
+            summaryEl.appendChild(boostRow);
+            const pauseRow = document.createElement('div');
+            pauseRow.className = 'fitness-summary-row';
+            const pauseLabel = document.createElement('div');
+            pauseLabel.className = 'fitness-summary-label';
+            pauseLabel.textContent = 'Sick / travel pause';
+            const pauseValue = document.createElement('div');
+            pauseValue.className = 'fitness-summary-value';
+            const pauseToggle = document.createElement('label');
+            pauseToggle.className = 'switch-label';
+            const pauseCheckbox = document.createElement('input');
+            pauseCheckbox.type = 'checkbox';
+            pauseCheckbox.checked = pausedThisWeek;
+            pauseCheckbox.addEventListener('change', () => {
+              setWeekPaused(getWeekKey(new Date()), pauseCheckbox.checked);
+              saveData();
+              updateTodoSection();
+              updateGrocerySection();
+            });
+            const toggleSpan = document.createElement('span');
+            toggleSpan.textContent = pauseCheckbox.checked ? 'Paused' : 'Active';
+            pauseCheckbox.addEventListener('change', () => {
+              toggleSpan.textContent = pauseCheckbox.checked ? 'Paused' : 'Active';
+            });
+            pauseToggle.appendChild(pauseCheckbox);
+            pauseToggle.appendChild(toggleSpan);
+            pauseValue.appendChild(pauseToggle);
+            pauseRow.appendChild(pauseLabel);
+            pauseRow.appendChild(pauseValue);
+            summaryEl.appendChild(pauseRow);
+            if (creditSettings) {
+              const ratesRow = document.createElement('div');
+              ratesRow.className = 'fitness-summary-row muted';
+              ratesRow.textContent = `Credits: +${creditSettings.base} up to target, +${creditSettings.extra} extra, −${creditSettings.penalty} missed`;
+              summaryEl.appendChild(ratesRow);
+            }
+          }
+          if (settingsEl) {
+            if (!settingsEl.dataset.initialized) {
+              settingsEl.dataset.initialized = 'true';
+              const settingsGrid = document.createElement('div');
+              settingsGrid.className = 'fitness-settings-grid';
+              const controls = {};
+              function appendSetting(labelText, control) {
+                const row = document.createElement('div');
+                row.className = 'fitness-setting-row';
+                const label = document.createElement('label');
+                label.textContent = labelText;
+                row.appendChild(label);
+                row.appendChild(control);
+                settingsGrid.appendChild(row);
+              }
+              function registerControl(key, control) {
+                controls[key] = control;
+                return control;
+              }
+              const modeSelect = registerControl('mode', document.createElement('select'));
+              Object.entries(FITNESS_MODES).forEach(([key, cfg]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = cfg.label;
+                modeSelect.appendChild(option);
+              });
+              const customOption = document.createElement('option');
+              customOption.value = 'custom';
+              customOption.textContent = 'Custom';
+              modeSelect.appendChild(customOption);
+              modeSelect.addEventListener('change', () => {
+                const val = modeSelect.value;
+                if (FITNESS_MODES[val]) {
+                  commitFitnessMutation(fit => {
+                    fit.mode = val;
+                    fit.alpha = FITNESS_MODES[val].alpha;
+                    fit.beta = FITNESS_MODES[val].beta;
+                  });
+                } else {
+                  commitFitnessMutation(fit => {
+                    fit.mode = 'custom';
+                  });
+                }
+              });
+              appendSetting('Budget mode', modeSelect);
+              const alphaInput = registerControl('alpha', document.createElement('input'));
+              alphaInput.type = 'number';
+              alphaInput.step = '0.1';
+              alphaInput.min = '0';
+              alphaInput.addEventListener('change', () => {
+                const val = parseFloat(alphaInput.value);
+                if (isNaN(val)) {
+                  const fallback = ensureFitnessDefaults().alpha;
+                  alphaInput.value = (fallback * 100).toFixed(1);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.alpha = val / 100;
+                  fit.mode = 'custom';
+                });
+              });
+              appendSetting('Multiplier bonus α (%)', alphaInput);
+              const betaInput = registerControl('beta', document.createElement('input'));
+              betaInput.type = 'number';
+              betaInput.step = '0.1';
+              betaInput.min = '0';
+              betaInput.addEventListener('change', () => {
+                const val = parseFloat(betaInput.value);
+                if (isNaN(val)) {
+                  const fallback = ensureFitnessDefaults().beta;
+                  betaInput.value = (fallback * 100).toFixed(1);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.beta = val / 100;
+                  fit.mode = 'custom';
+                });
+              });
+              appendSetting('Penalty weight β (%)', betaInput);
+              const creditBaseInput = registerControl('creditBase', document.createElement('input'));
+              creditBaseInput.type = 'number';
+              creditBaseInput.step = '1';
+              creditBaseInput.addEventListener('change', () => {
+                const val = parseFloat(creditBaseInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditBaseInput.value = String(fallbackCredits.base);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.base = val;
+                });
+              });
+              appendSetting('Credits per session (up to target)', creditBaseInput);
+              const creditExtraInput = registerControl('creditExtra', document.createElement('input'));
+              creditExtraInput.type = 'number';
+              creditExtraInput.step = '1';
+              creditExtraInput.addEventListener('change', () => {
+                const val = parseFloat(creditExtraInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditExtraInput.value = String(fallbackCredits.extra);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.extra = val;
+                });
+              });
+              appendSetting('Credits per extra session', creditExtraInput);
+              const creditPenaltyInput = registerControl('creditPenalty', document.createElement('input'));
+              creditPenaltyInput.type = 'number';
+              creditPenaltyInput.step = '1';
+              creditPenaltyInput.addEventListener('change', () => {
+                const val = parseFloat(creditPenaltyInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditPenaltyInput.value = String(fallbackCredits.penalty);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.penalty = val;
+                });
+              });
+              appendSetting('Penalty per missed session', creditPenaltyInput);
+              const weeklyBonusInput = registerControl('creditWeeklyBonus', document.createElement('input'));
+              weeklyBonusInput.type = 'number';
+              weeklyBonusInput.step = '1';
+              weeklyBonusInput.addEventListener('change', () => {
+                const val = parseFloat(weeklyBonusInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  weeklyBonusInput.value = String(fallbackCredits.weeklyBonus);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.weeklyBonus = val;
+                });
+              });
+              appendSetting('Weekly bonus', weeklyBonusInput);
+              const streakBonusInput = registerControl('creditStreakBonus', document.createElement('input'));
+              streakBonusInput.type = 'number';
+              streakBonusInput.step = '1';
+              streakBonusInput.addEventListener('change', () => {
+                const val = parseFloat(streakBonusInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  streakBonusInput.value = String(fallbackCredits.streakBonus);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.streakBonus = val;
+                });
+              });
+              appendSetting('Streak bonus (4 weeks)', streakBonusInput);
+              const creditsCapInput = registerControl('creditsCap', document.createElement('input'));
+              creditsCapInput.type = 'number';
+              creditsCapInput.step = '1';
+              creditsCapInput.min = '0';
+              creditsCapInput.addEventListener('change', () => {
+                const val = parseFloat(creditsCapInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  creditsCapInput.value = String(Math.max(0, fallbackFitness.creditsCap || 0));
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.creditsCap = Math.max(0, val);
+                });
+              });
+              appendSetting('Credits cap', creditsCapInput);
+              const boostToggle = registerControl('boostToggle', document.createElement('input'));
+              boostToggle.type = 'checkbox';
+              boostToggle.addEventListener('change', () => {
+                commitFitnessMutation(fit => {
+                  fit.weekendBoostEnabled = boostToggle.checked;
+                });
+              });
+              appendSetting('Enable weekend boost', boostToggle);
+              const boostPercentInput = registerControl('boostPercent', document.createElement('input'));
+              boostPercentInput.type = 'number';
+              boostPercentInput.step = '1';
+              boostPercentInput.min = '0';
+              boostPercentInput.addEventListener('change', () => {
+                const val = parseFloat(boostPercentInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  boostPercentInput.value = ((fallbackFitness.weekendBoostPercent || 0) * 100).toFixed(0);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.weekendBoostPercent = Math.max(0, val) / 100;
+                });
+              });
+              appendSetting('Weekend boost percent', boostPercentInput);
+              settingsEl.innerHTML = '';
+              settingsEl.appendChild(settingsGrid);
+              settingsEl._fitnessControls = controls;
+            }
+            const controls = settingsEl._fitnessControls || {};
+            const liveFitness = ensureFitnessDefaults();
+            const liveCredits = Object.assign({}, defaultCreditSettings, liveFitness.creditSettings || {});
+            if (controls.mode) {
+              controls.mode.value = FITNESS_MODES[liveFitness.mode] ? liveFitness.mode : 'custom';
+            }
+            if (controls.alpha) {
+              controls.alpha.value = (liveFitness.alpha * 100).toFixed(1);
+            }
+            if (controls.beta) {
+              controls.beta.value = (liveFitness.beta * 100).toFixed(1);
+            }
+            if (controls.creditBase) {
+              controls.creditBase.value = String(liveCredits.base);
+            }
+            if (controls.creditExtra) {
+              controls.creditExtra.value = String(liveCredits.extra);
+            }
+            if (controls.creditPenalty) {
+              controls.creditPenalty.value = String(liveCredits.penalty);
+            }
+            if (controls.creditWeeklyBonus) {
+              controls.creditWeeklyBonus.value = String(liveCredits.weeklyBonus);
+            }
+            if (controls.creditStreakBonus) {
+              controls.creditStreakBonus.value = String(liveCredits.streakBonus);
+            }
+            if (controls.creditsCap) {
+              const capVal = typeof liveFitness.creditsCap === 'number' && isFinite(liveFitness.creditsCap) ? liveFitness.creditsCap : 0;
+              controls.creditsCap.value = String(Math.max(0, capVal));
+            }
+            if (controls.boostToggle) {
+              controls.boostToggle.checked = !!liveFitness.weekendBoostEnabled;
+            }
+            if (controls.boostPercent) {
+              controls.boostPercent.value = ((liveFitness.weekendBoostPercent || 0) * 100).toFixed(0);
+            }
+          }
+        }
         function updateTodoSection() {
           const listEl = document.getElementById('todoList');
           if (!listEl) return;
@@ -602,17 +1436,23 @@
           const diffToMonday = (dow + 6) % 7;
           const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
           monday.setHours(0, 0, 0, 0);
-          todos.forEach((todo, index) => {
-            // Ensure workout properties exist
+          todos.forEach(todo => {
             if (typeof todo.weeklyTarget !== 'number' || todo.weeklyTarget < 1) {
               todo.weeklyTarget = 1;
             }
-            if (!Array.isArray(todo.logs)) {
-              todo.logs = [];
-            }
-            if (todo.carryOver === undefined) {
-              todo.carryOver = 0;
-            }
+            if (!Array.isArray(todo.logs)) todo.logs = [];
+            if (todo.carryOver === undefined) todo.carryOver = 0;
+          });
+          const statsInfo = collectWorkoutStats({ start: monday });
+          updateFitnessCards(statsInfo);
+          const statsById = new Map(statsInfo.stats.map(stat => [stat.id, stat]));
+          const fitness = ensureFitnessDefaults();
+          const alpha = fitness.alpha;
+          const beta = fitness.beta;
+          const creditSettings = Object.assign({}, makeDefaultFitness().creditSettings, fitness.creditSettings || {});
+          const fragment = document.createDocumentFragment();
+          todos.forEach((todo, index) => {
+            // Ensure workout properties exist
             // Dynamic target for this week includes spillover from previous weeks
             const dynamicTarget = Math.max(0, todo.weeklyTarget + todo.carryOver);
             // Count sessions completed this week by filtering logs on or after Monday
@@ -620,6 +1460,33 @@
               const t = new Date(log);
               return t >= monday;
             }).length;
+            const statInfo = statsById.get(todo.id) || { target: todo.weeklyTarget, actual: sessionsThisWeek };
+            const baseTarget = statInfo.target;
+            const actualSessions = statInfo.actual;
+            let projectedDeltaPercent = 0;
+            if (baseTarget > 0) {
+              const currentCompliance = Math.min(1, actualSessions / baseTarget);
+              const nextCompliance = Math.min(1, (actualSessions + 1) / baseTarget);
+              const deltaPenalty = currentCompliance - nextCompliance;
+              const currentOverage = Math.max(0, (actualSessions / baseTarget) - 1);
+              const nextOverage = Math.max(0, ((actualSessions + 1) / baseTarget) - 1);
+              const deltaOverage = nextOverage - currentOverage;
+              projectedDeltaPercent = (alpha * deltaOverage - beta * deltaPenalty) * 100;
+            }
+            let impactText;
+            if (baseTarget <= 0) {
+              impactText = 'Budget impact: set a weekly target';
+            } else if (Math.abs(projectedDeltaPercent) >= 0.05) {
+              impactText = `Budget impact: ${projectedDeltaPercent > 0 ? '+' : ''}${projectedDeltaPercent.toFixed(1)}% next week`;
+            } else if (actualSessions >= baseTarget) {
+              impactText = 'Budget impact: already maxed';
+            } else if (projectedDeltaPercent > 0) {
+              impactText = 'Budget impact: <0.1% next week – almost there';
+            } else {
+              const remainingToTarget = Math.max(0, baseTarget - actualSessions);
+              impactText = remainingToTarget === 1 ? 'Budget impact: one more session to move the needle' : 'Budget impact: keep going';
+            }
+            const nextCredit = baseTarget > 0 ? (actualSessions < baseTarget ? creditSettings.base : creditSettings.extra) : 0;
             // Create list item container
             const li = document.createElement('li');
             li.style.display = 'flex';
@@ -708,9 +1575,20 @@
             text.style.fontSize = '0.75rem';
             text.textContent = sessionsThisWeek + ' / ' + dynamicTarget + ' sessions';
             progressContainer.appendChild(text);
+            const impactLine = document.createElement('div');
+            impactLine.className = 'fitness-impact-line';
+            impactLine.textContent = impactText;
+            progressContainer.appendChild(impactLine);
+            if (nextCredit > 0) {
+              const creditLine = document.createElement('div');
+              creditLine.className = 'fitness-credit-line';
+              creditLine.textContent = 'Wellness Credits: +' + nextCredit + ' SEK on next session';
+              progressContainer.appendChild(creditLine);
+            }
             li.appendChild(progressContainer);
-            listEl.appendChild(li);
+            fragment.appendChild(li);
           });
+          listEl.appendChild(fragment);
         }
 
         // Attach submit handler to the Workout form. When submitted, a new workout is
@@ -746,18 +1624,32 @@
             e.preventDefault();
             const nameInput = document.getElementById('groceryName');
             const freqSelect = document.getElementById('groceryFreq');
+            const categorySelect = document.getElementById('groceryCategory');
             const name = nameInput.value.trim();
             const freq = freqSelect.value;
+            const category = categorySelect ? categorySelect.value : 'standard';
             if (!name) return;
             if (!Array.isArray(data.groceries)) {
               data.groceries = [];
             }
             // When adding a new grocery item, initialise it as not archived with no purchase date.
-            data.groceries.push({ id: uuid(), name: name, frequency: freq, archived: false, purchasedDate: null });
+            data.groceries.push({
+              id: uuid(),
+              name: name,
+              frequency: freq,
+              category: category,
+              archived: false,
+              purchasedDate: null,
+              originalCost: 0,
+              appliedCredits: 0,
+              boostApplied: false,
+              boostPercentApplied: 0
+            });
             saveData();
             updateGrocerySection();
             nameInput.value = '';
             freqSelect.value = 'weekly';
+            if (categorySelect) categorySelect.value = 'standard';
           });
         }
 
@@ -874,9 +1766,26 @@
               const dt = new Date(archItem.purchasedDate);
               dateStr = dt.toLocaleDateString();
             }
-            const costString = typeof archItem.cost === 'number' ? formatCurrency(archItem.cost, -1) + ' SEK' : '0 SEK';
-            detailsSpan.textContent = `${archItem.name} – ${costString} – ${archItem.frequency} – ${dateStr}`;
+            const costString = typeof archItem.cost === 'number' ? formatCurrency(archItem.cost, -1).replace(' kr', ' SEK') : '0 SEK';
+            const parts = [`${archItem.name}`, costString];
+            if (typeof archItem.originalCost === 'number' && archItem.originalCost !== archItem.cost) {
+              const originalString = formatCurrency(archItem.originalCost, -1).replace(' kr', ' SEK');
+              let creditNote = `original ${originalString}`;
+              if (typeof archItem.appliedCredits === 'number' && archItem.appliedCredits > 0) {
+                creditNote += `, credits −${formatCurrency(archItem.appliedCredits, -1).replace(' kr', ' SEK')}`;
+              }
+              parts.push(creditNote);
+            }
+            parts.push(archItem.frequency);
+            if (dateStr) parts.push(dateStr);
+            detailsSpan.textContent = parts.join(' – ');
             rowArch.appendChild(detailsSpan);
+            if (archItem.boostApplied && archItem.boostPercentApplied) {
+              const boostNote = document.createElement('div');
+              boostNote.className = 'treat-note archived';
+              boostNote.textContent = 'Weekend Boost covered ' + Math.round((archItem.boostPercentApplied || fitness.weekendBoostPercent || 0) * 100) + '%';
+              liArch.appendChild(boostNote);
+            }
             // Action buttons for archived items
             const btnGroupArch = document.createElement('div');
             // Edit archived item: allows editing cost
@@ -919,12 +1828,17 @@
           });
         }
           // Dynamic budgets = base + carry
+          const fitness = ensureFitnessDefaults();
+          const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
+          const nextMultiplier = clampMultiplier(typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : currentMultiplier);
           const weeklyBaseBudget = data.groceryBudgetWeekly || 0;
           const monthlyBaseBudget = data.groceryBudgetMonthly || 0;
           const biBaseBudget = data.groceryBudgetBiYearly || 0;
-          const weeklyDynamicBudget = weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
+          const weeklyBaseWithCarry = weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
           const monthlyDynamicBudget = monthlyBaseBudget + (data.groceryBudgetMonthlyCarry || 0);
           const biDynamicBudget = biBaseBudget + (data.groceryBudgetBiYearlyCarry || 0);
+          const weeklyDynamicBudget = weeklyBaseWithCarry * currentMultiplier;
+          const nextWeekBudget = weeklyBaseWithCarry * nextMultiplier;
           // Time progress for budgets (fraction of period elapsed)
           const weekTimeProgress = (now - weekStart) / (weekEnd - weekStart);
           const monthTimeProgress = (now - monthStart) / (monthEnd - monthStart);
@@ -970,6 +1884,14 @@
             summaryCard.appendChild(pb);
           }
           addBudgetLine('Weekly', weeklySpent, weeklyDynamicBudget, weeklyExpectedSpent);
+          const multiplierLine = document.createElement('div');
+          multiplierLine.className = 'fitness-summary-sub';
+          multiplierLine.textContent = 'Fitness Multiplier next week: ' + nextMultiplier.toFixed(2) + '× (' + formatSignedCurrency(nextWeekBudget - weeklyBaseWithCarry) + ')';
+          summaryCard.appendChild(multiplierLine);
+          const creditsLine = document.createElement('div');
+          creditsLine.className = 'fitness-summary-sub';
+          creditsLine.textContent = 'Wellness Credits: ' + formatCurrency(fitness.wellnessCredits || 0, -1).replace(' kr', ' SEK') + ' (auto-applied)';
+          summaryCard.appendChild(creditsLine);
           addBudgetLine('Monthly', monthlySpent, monthlyDynamicBudget, monthlyExpectedSpent);
           addBudgetLine('Biannual', biannualSpent, biDynamicBudget, biExpectedSpent);
           // Add edit buttons for budgets and start date
@@ -1031,6 +1953,10 @@
           // purchase quotas, and buy buttons remain enabled regardless of
           // how many items have been purchased.
           // Render unarchived items
+          const boostEnabled = fitness.weekendBoostEnabled;
+          const boostActive = isWeekendBoostActive();
+          const boostUnlocked = fitness.weekendBoostUnlockedWeek === getWeekKey(new Date());
+          const boostPercentDisplay = Math.round((fitness.weekendBoostPercent || 0) * 100);
           groceries.forEach((item, index) => {
             if (item.archived) return;
             const li = document.createElement('li');
@@ -1047,6 +1973,19 @@
             const nameSpan = document.createElement('span');
             nameSpan.textContent = item.name;
             nameSpan.style.fontWeight = '600';
+            if (item.category === 'treat') {
+              const tag = document.createElement('span');
+              tag.className = 'treat-tag';
+              tag.textContent = 'Treat';
+              tag.style.marginLeft = '0.35rem';
+              nameSpan.appendChild(tag);
+            } else if (item.category === 'essential') {
+              const tag = document.createElement('span');
+              tag.className = 'treat-tag muted';
+              tag.textContent = 'Essential';
+              tag.style.marginLeft = '0.35rem';
+              nameSpan.appendChild(tag);
+            }
             row.appendChild(nameSpan);
             const btnGroup = document.createElement('div');
             // Buy button (log purchase with cost). In budget-only mode there is
@@ -1062,11 +2001,41 @@
               if (costStr === null) return;
               let costVal = parseFloat(costStr);
               if (isNaN(costVal)) costVal = 0;
+              const fitnessData = ensureFitnessDefaults();
+              let originalCost = costVal;
+              let creditsUsed = 0;
+              let boostCreditsUsed = 0;
+              let boostPercentApplied = 0;
+              if (item.frequency === 'weekly') {
+                const availableCredits = fitnessData.wellnessCredits || 0;
+                let remainingCredits = availableCredits;
+                if (fitnessData.weekendBoostEnabled && item.category === 'treat' && isWeekendBoostActive()) {
+                  const boostPct = Math.max(0, fitnessData.weekendBoostPercent || 0);
+                  if (boostPct > 0) {
+                    const discount = originalCost * boostPct;
+                    boostCreditsUsed = Math.min(discount, remainingCredits);
+                    creditsUsed += boostCreditsUsed;
+                    remainingCredits -= boostCreditsUsed;
+                    boostPercentApplied = boostPct;
+                  }
+                }
+                const additionalCredits = Math.min(remainingCredits, Math.max(0, originalCost - creditsUsed));
+                creditsUsed += additionalCredits;
+                fitnessData.wellnessCredits = Math.max(0, (fitnessData.wellnessCredits || 0) - creditsUsed);
+                costVal = Math.max(0, originalCost - creditsUsed);
+              }
+              item.originalCost = originalCost;
               item.cost = costVal;
+              item.appliedCredits = creditsUsed;
+              item.boostApplied = boostCreditsUsed > 0;
+              item.boostPercentApplied = boostPercentApplied;
               item.archived = true;
               item.purchasedDate = new Date().toISOString();
               saveData();
               updateGrocerySection();
+              if (typeof updateTodoSection === 'function') {
+                updateTodoSection();
+              }
               if (typeof provideHaptic === 'function') {
                 provideHaptic('beep');
               }
@@ -1086,6 +2055,13 @@
               if (newFreq !== null && (newFreq === 'weekly' || newFreq === 'monthly' || newFreq === 'biannual')) {
                 item.frequency = newFreq;
               }
+              const newCategory = prompt('Category (standard/treat/essential)', item.category || 'standard');
+              if (newCategory) {
+                const cleaned = newCategory.toLowerCase();
+                if (cleaned === 'standard' || cleaned === 'treat' || cleaned === 'essential') {
+                  item.category = cleaned;
+                }
+              }
               saveData();
               updateGrocerySection();
             });
@@ -1103,6 +2079,20 @@
             btnGroup.appendChild(delBtn);
             row.appendChild(btnGroup);
             li.appendChild(row);
+            if (item.category === 'treat') {
+              const note = document.createElement('div');
+              note.className = 'treat-note';
+              if (!boostEnabled) {
+                note.textContent = 'Treat item';
+              } else if (boostActive) {
+                note.textContent = 'Weekend Boost applied: −' + boostPercentDisplay + '% from credits';
+              } else if (boostUnlocked) {
+                note.textContent = 'Weekend Boost unlocked: +' + boostPercentDisplay + '% on Treats this weekend';
+              } else {
+                note.textContent = 'Treat item – unlock +' + boostPercentDisplay + '% by Friday 18:00';
+              }
+              li.appendChild(note);
+            }
             // Append to appropriate list
             if (item.frequency === 'monthly') {
               monthlyListEl.appendChild(li);
@@ -1112,6 +2102,7 @@
               weeklyListEl.appendChild(li);
             }
           });
+          updateFitnessCards();
         }
 
         // Reset grocery counts each Monday for weekly items and on the first day of the month for monthly items.
@@ -1634,49 +2625,58 @@
         // the chosen folder using the File System Access API.
         async function saveBackupToDir() {
           try {
-            if (!backupDirHandle) return;
-            // Ensure we have permission to write to the directory. If not granted, abort silently.
-            try {
-              const perm = await backupDirHandle.requestPermission({ mode: 'readwrite' });
-              if (perm !== 'granted') return;
-            } catch (err) {
-              // If requestPermission fails (not supported), we proceed and hope existing permission works
+            if (!backupDirHandle) {
+              disableAutoSyncWithWarning('Auto sync paused: select a backup folder to resume syncing.');
+              return;
             }
-            // Create or overwrite a file named timekeeper-data.json in the selected directory
+            if (!(await hasBackupPermission(backupDirHandle))) {
+              backupDirHandle = null;
+              disableAutoSyncWithWarning('Auto sync disabled: permission to the backup folder was revoked.');
+              return;
+            }
             const fileHandle = await backupDirHandle.getFileHandle('timekeeper-data.json', { create: true });
             const writable = await fileHandle.createWritable();
             await writable.write(JSON.stringify(data, null, 2));
             await writable.close();
-            // After successful backup, clear the needsBackup flag
+            data.lastBackupAt = new Date().toISOString();
+            localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
             needsBackup = false;
+            backupWarningMessage = '';
+            updateAutoSyncStatus();
           } catch (err) {
             console.error('Saving backup failed:', err);
+            backupWarningMessage = 'Auto backup failed. Check the backup folder and try again.';
+            updateAutoSyncStatus();
           }
         }
 
         // Prompt the user to choose a backup directory using the File System Access API. When
         // the directory is selected, set it as the backupDirHandle and enable auto sync.
-        async function chooseBackupDir() {
+        async function chooseBackupDir(options = {}) {
+          const { activateSync = false } = options;
           try {
             const dirHandle = await window.showDirectoryPicker();
             backupDirHandle = dirHandle;
-            // Persist the directory handle in IndexedDB so it can be restored on future visits
             await saveBackupDirHandle(dirHandle);
-            // Save the directory name into our data so that it persists in JSON exports. This allows
-            // us to remember which folder was chosen even when a handle cannot be restored.
-            data.backupDirName = dirHandle.name;
+            data.backupDirName = dirHandle.name || null;
             saveData();
-            // Enable auto sync once a folder is chosen
-            autoSyncEnabled = true;
-            localStorage.setItem('autoSyncEnabledPro', 'true');
-            // Reflect UI state if toggle exists
-            const toggle = document.getElementById('autoSyncToggle');
-            if (toggle) toggle.checked = true;
+            if (activateSync) {
+              autoSyncEnabled = true;
+              localStorage.setItem('autoSyncEnabledPro', 'true');
+              const toggle = document.getElementById('autoSyncToggle');
+              if (toggle) toggle.checked = true;
+            }
+            backupWarningMessage = '';
             updateAutoSyncStatus();
-            // Immediately save a backup now that the directory is chosen
-            await saveBackupToDir();
+            if (autoSyncEnabled || activateSync) {
+              await saveBackupToDir();
+            }
+            return true;
           } catch (err) {
             console.error('Backup folder not selected:', err);
+            backupWarningMessage = 'Backup folder not selected. Auto sync unchanged.';
+            updateAutoSyncStatus();
+            return false;
           }
         }
 
@@ -1752,6 +2752,24 @@
             rounded = Math.round(num / factor) * factor;
             return Math.round(rounded).toString() + ' kr';
           }
+        }
+        function formatRelativeTime(isoString) {
+          if (!isoString) return '';
+          const date = new Date(isoString);
+          if (isNaN(date)) return '';
+          const diffMs = Date.now() - date.getTime();
+          if (diffMs < 0) return date.toLocaleString();
+          const minutes = Math.floor(diffMs / 60000);
+          if (minutes < 1) return 'just now';
+          if (minutes < 60) return minutes + ' min' + (minutes === 1 ? '' : 's') + ' ago';
+          const hours = Math.floor(minutes / 60);
+          if (hours < 24) return hours + ' hour' + (hours === 1 ? '' : 's') + ' ago';
+          const days = Math.floor(hours / 24);
+          if (days < 30) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+          const months = Math.floor(days / 30);
+          if (months < 12) return months + ' month' + (months === 1 ? '' : 's') + ' ago';
+          const years = Math.floor(months / 12);
+          return years + ' year' + (years === 1 ? '' : 's') + ' ago';
         }
         function formatDuration(seconds) {
           const hrs = Math.floor(seconds / 3600);
@@ -3927,41 +4945,89 @@
         // Initialize auto sync toggle and status message
         const autoSyncToggle = document.getElementById('autoSyncToggle');
         const autoSyncStatusElem = document.getElementById('autoSyncStatus');
+        const autoSyncWarningElem = document.getElementById('autoSyncWarning');
+        const lastBackupStatusElem = document.getElementById('lastBackupStatus');
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
-          if (autoSyncEnabled) {
-            // If we have a handle, we can show that backup is configured. Otherwise, if a backup
-            // directory name exists in our persisted data, display that name to inform the user
-            // which folder was previously selected. Note: we cannot auto‑open the folder without
-            // user interaction, but we can reassure the user that their selection is remembered.
-            if (backupDirHandle) {
-              const name = backupDirHandle.name || (data && data.backupDirName) || '';
-              autoSyncStatusElem.textContent = name
-                ? `Auto sync is ON. Writing to “${name}”.`
-                : 'Auto sync is ON. Writing to your selected backup folder.';
-            } else {
-              // Fallback: use the stored backup directory name from data if available
-              const name = (data && data.backupDirName) || '';
-              autoSyncStatusElem.textContent = name
-                ? `Auto sync is ON. Backup folder “${name}” remembered — reselect to activate.`
-                : 'Auto sync is ON. Changes will be periodically saved when a backup folder is selected.';
-            }
+          const backupName = backupDirHandle ? (backupDirHandle.name || data.backupDirName || '') : (data && data.backupDirName) || '';
+          const hasActiveFolder = !!backupDirHandle;
+          if (autoSyncEnabled && hasActiveFolder) {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is ON – syncing to “${backupName}”.`
+              : 'Auto sync is ON – syncing to your backup folder.';
+          } else if (autoSyncEnabled && !hasActiveFolder) {
+            autoSyncStatusElem.textContent = 'Auto sync is ON but no backup folder is available.';
+          } else if (!autoSyncEnabled && hasActiveFolder) {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is OFF – backup folder “${backupName}” is ready.`
+              : 'Auto sync is OFF – backup folder is ready.';
           } else {
-            autoSyncStatusElem.textContent = 'Auto sync is OFF.';
+            autoSyncStatusElem.textContent = 'Auto sync is OFF. No backup folder selected.';
+          }
+          if (autoSyncWarningElem) {
+            const warning = backupWarningMessage || (!hasActiveFolder ? 'Select a backup folder to keep automatic backups running.' : '');
+            if (warning) {
+              autoSyncWarningElem.textContent = warning;
+              autoSyncWarningElem.style.display = 'block';
+            } else {
+              autoSyncWarningElem.textContent = '';
+              autoSyncWarningElem.style.display = 'none';
+            }
+          }
+          if (lastBackupStatusElem) {
+            if (data && data.lastBackupAt) {
+              const relative = formatRelativeTime(data.lastBackupAt);
+              const backupDate = new Date(data.lastBackupAt);
+              if (!isNaN(backupDate)) {
+                lastBackupStatusElem.textContent = `Last backup: ${relative}`;
+                lastBackupStatusElem.title = backupDate.toLocaleString();
+                lastBackupStatusElem.style.display = 'block';
+              } else {
+                lastBackupStatusElem.textContent = '';
+                lastBackupStatusElem.style.display = 'none';
+              }
+            } else if (autoSyncEnabled && hasActiveFolder) {
+              lastBackupStatusElem.textContent = 'Last backup: pending…';
+              lastBackupStatusElem.title = '';
+              lastBackupStatusElem.style.display = 'block';
+            } else {
+              lastBackupStatusElem.textContent = '';
+              lastBackupStatusElem.style.display = 'none';
+            }
           }
         }
         if (autoSyncToggle) {
-          autoSyncToggle.checked = autoSyncEnabled;
+          autoSyncToggle.checked = autoSyncEnabled && !!backupDirHandle;
+          if (autoSyncEnabled && !backupDirHandle) {
+            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
+          }
           updateAutoSyncStatus();
-          autoSyncToggle.addEventListener('change', () => {
-            autoSyncEnabled = autoSyncToggle.checked;
-            localStorage.setItem('autoSyncEnabledPro', autoSyncEnabled);
-            updateAutoSyncStatus();
-            // If user just enabled auto sync but no backup folder is set, prompt them to choose one.
-            if (autoSyncEnabled && !backupDirHandle) {
-              chooseBackupDir();
+          autoSyncToggle.addEventListener('change', async () => {
+            if (autoSyncToggle.checked) {
+              let ensured = true;
+              if (!backupDirHandle) {
+                ensured = await chooseBackupDir();
+              } else {
+                ensured = await ensureBackupPermissionWithPrompt(backupDirHandle);
+                if (!ensured) {
+                  backupDirHandle = null;
+                }
+              }
+              if (!ensured || !backupDirHandle) {
+                disableAutoSyncWithWarning('Backup folder required to enable auto sync.');
+                return;
+              }
+              autoSyncEnabled = true;
+              localStorage.setItem('autoSyncEnabledPro', 'true');
+              backupWarningMessage = '';
+              updateAutoSyncStatus();
+              await saveBackupToDir();
+            } else {
+              disableAutoSyncWithWarning('Auto sync is OFF. Remember to back up manually.');
             }
           });
+        } else {
+          updateAutoSyncStatus();
         }
 
         // Set Backup Folder button: prompts the user to pick a directory for backups. When
@@ -3971,7 +5037,7 @@
         const chooseBtn = document.getElementById('chooseBackupDirBtn');
         if (chooseBtn) {
           chooseBtn.addEventListener('click', () => {
-            chooseBackupDir();
+            chooseBackupDir({ activateSync: true });
           });
         }
       })();
