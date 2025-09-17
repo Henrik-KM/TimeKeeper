@@ -185,6 +185,8 @@
             <span>Enable auto sync to local file</span>
           </label>
           <p id="autoSyncStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;"></p>
+          <p id="autoSyncWarning" class="status-warning" style="display:none;"></p>
+          <p id="lastBackupStatus" class="status-muted" style="display:none;"></p>
         <!-- Button to choose backup directory when enabling auto sync -->
         <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
         </div>
@@ -206,14 +208,14 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
           <div id="fitnessSummaryContent" class="fitness-summary"></div>
         </div>
-        <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
-          <div id="fitnessSettingsContent"></div>
-        </div>
         <!-- List of workouts -->
         <div class="card" id="todoListContainer">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Your Workouts</h3>
           <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+        <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
+          <div id="fitnessSettingsContent"></div>
         </div>
       </section>
 
@@ -642,6 +644,7 @@ function loadData() {
       groceryBudgetBiYearlyCarry: 0,
       groceryBudgetStartDate: null,
       backupDirName: null,
+      lastBackupAt: null,
       fitness: makeDefaultFitness()
     };
   }
@@ -666,16 +669,16 @@ function loadData() {
         if (g.purchasedDate === undefined) g.purchasedDate = null;
         if (!g.category) g.category = 'standard';
         if (g.originalCost === undefined && typeof g.cost === 'number') g.originalCost = g.cost;
-                if (g.appliedCredits === undefined) g.appliedCredits = 0;
-                if (g.boostApplied === undefined) g.boostApplied = false;
-                if (g.boostPercentApplied === undefined) g.boostPercentApplied = 0;
+        if (g.appliedCredits === undefined) g.appliedCredits = 0;
+        if (g.boostApplied === undefined) g.boostApplied = false;
+        if (g.boostPercentApplied === undefined) g.boostPercentApplied = 0;
         // Remove legacy fields carryOver and purchasedCount if present
         if (g.hasOwnProperty('carryOver')) delete g.carryOver;
         if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
         return g;
       }) : [],
-      // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
-      // purchases are no longer used, so we omit them from persisted data.
+      // Single-item purchase quotas have been removed. Now, budgets control overall spending rather than item counts.
+      // As a result, carry-over counts for purchases are no longer tracked or persisted in the data structure.
       groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
       groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
       groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
@@ -686,6 +689,7 @@ function loadData() {
       groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
       // Preserve additional persisted properties like backupDirName if present in saved data
       backupDirName: parsed.backupDirName || null,
+      lastBackupAt: parsed.lastBackupAt || null,
       fitness: applyFitnessDefaults(parsed.fitness)
     };
   } catch (err) {
@@ -702,6 +706,7 @@ function loadData() {
       groceryBudgetBiYearlyCarry: 0,
       groceryBudgetStartDate: null,
       backupDirName: null,
+      lastBackupAt: null,
       fitness: makeDefaultFitness()
     };
   }
@@ -727,6 +732,7 @@ function loadData() {
         let needsBackup = false;
         let autoSyncEnabled = false;
         let backupDirHandle = null;
+        let backupWarningMessage = '';
         // Flag to track whether to show all entries or only recent ones. If false,
         // entries older than approximately one month are hidden by default to keep
         // the list manageable. This can be toggled via a button in the Entries section.
@@ -807,6 +813,43 @@ function loadData() {
           } catch (err) {
             return null;
           }
+        }
+        async function hasBackupPermission(handle) {
+          if (!handle) return false;
+          if (!handle.queryPermission) return true;
+          try {
+            const status = await handle.queryPermission({ mode: 'readwrite' });
+            return status === 'granted';
+          } catch (err) {
+            return false;
+          }
+        }
+        async function ensureBackupPermissionWithPrompt(handle) {
+          if (!handle) return false;
+          if (!handle.queryPermission) return true;
+          try {
+            let status = await handle.queryPermission({ mode: 'readwrite' });
+            if (status === 'granted') return true;
+            if (status === 'prompt' && handle.requestPermission) {
+              status = await handle.requestPermission({ mode: 'readwrite' });
+              return status === 'granted';
+            }
+            return false;
+          } catch (err) {
+            return false;
+          }
+        }
+        function disableAutoSyncWithWarning(message) {
+          autoSyncEnabled = false;
+          localStorage.setItem('autoSyncEnabledPro', 'false');
+          const toggle = document.getElementById('autoSyncToggle');
+          if (toggle) {
+            toggle.checked = false;
+          }
+          if (message) {
+            backupWarningMessage = message;
+          }
+          updateAutoSyncStatus();
         }
         // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
         // mark all tasks as unchecked and update the reset date in localStorage. This ensures
@@ -896,16 +939,20 @@ function loadData() {
         // a handle exists, assign it to the global backupDirHandle so that auto
         // sync can operate without requiring the user to pick a folder each
         // time the page loads.
-        loadBackupDirHandle().then(handle => {
-          // If a handle was previously saved, restore it.
-          if (handle) {
+        loadBackupDirHandle().then(async handle => {
+          if (handle && await hasBackupPermission(handle)) {
             backupDirHandle = handle;
+          } else if (handle) {
+            backupDirHandle = null;
+            if (autoSyncEnabled) {
+              disableAutoSyncWithWarning('Auto sync disabled: backup folder access is required.');
+            } else {
+              backupWarningMessage = 'Backup folder needs to be reselected before auto sync can run.';
+            }
+          } else if (autoSyncEnabled) {
+            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
           }
-          // Update auto sync status now that we know whether a backup folder is set.
-          if (typeof updateAutoSyncStatus === 'function') {
-            updateAutoSyncStatus();
-          }
-          // After restoring the backup directory, determine if focus blocker should be active.
+          updateAutoSyncStatus();
           updateFocusBlocker();
         });
 
@@ -966,6 +1013,13 @@ function loadData() {
         // relative to the weekly target and provide buttons to log a session,
         // edit the target, or delete the workout. The UI resets weekly on
         // Mondays by filtering logs before this week.
+        function commitFitnessMutation(mutator) {
+          const fitness = ensureFitnessDefaults();
+          mutator(fitness);
+          saveData();
+          updateTodoSection();
+          updateGrocerySection();
+        }
         function updateFitnessCards(statsInfo) {
           const summaryEl = document.getElementById('fitnessSummaryContent');
           const settingsEl = document.getElementById('fitnessSettingsContent');
@@ -1125,136 +1179,250 @@ function loadData() {
             }
           }
           if (settingsEl) {
-            settingsEl.innerHTML = '';
-            const settingsGrid = document.createElement('div');
-            settingsGrid.className = 'fitness-settings-grid';
-            function appendSetting(labelText, control) {
-              const row = document.createElement('div');
-              row.className = 'fitness-setting-row';
-              const label = document.createElement('label');
-              label.textContent = labelText;
-              row.appendChild(label);
-              row.appendChild(control);
-              settingsGrid.appendChild(row);
-            }
-            const modeSelect = document.createElement('select');
-            Object.entries(FITNESS_MODES).forEach(([key, cfg]) => {
-              const option = document.createElement('option');
-              option.value = key;
-              option.textContent = cfg.label;
-              modeSelect.appendChild(option);
-            });
-            const customOption = document.createElement('option');
-            customOption.value = 'custom';
-            customOption.textContent = 'Custom';
-            modeSelect.appendChild(customOption);
-            modeSelect.value = FITNESS_MODES[fitness.mode] ? fitness.mode : 'custom';
-            modeSelect.addEventListener('change', () => {
-              const val = modeSelect.value;
-              if (FITNESS_MODES[val]) {
-                fitness.mode = val;
-                fitness.alpha = FITNESS_MODES[val].alpha;
-                fitness.beta = FITNESS_MODES[val].beta;
-              } else {
-                fitness.mode = 'custom';
+            if (!settingsEl.dataset.initialized) {
+              settingsEl.dataset.initialized = 'true';
+              const settingsGrid = document.createElement('div');
+              settingsGrid.className = 'fitness-settings-grid';
+              const controls = {};
+              function appendSetting(labelText, control) {
+                const row = document.createElement('div');
+                row.className = 'fitness-setting-row';
+                const label = document.createElement('label');
+                label.textContent = labelText;
+                row.appendChild(label);
+                row.appendChild(control);
+                settingsGrid.appendChild(row);
               }
-              saveData();
-              updateTodoSection();
-              updateGrocerySection();
-            });
-            appendSetting('Budget mode', modeSelect);
-            const alphaInput = document.createElement('input');
-            alphaInput.type = 'number';
-            alphaInput.step = '0.1';
-            alphaInput.min = '0';
-            alphaInput.value = (fitness.alpha * 100).toFixed(1);
-            alphaInput.addEventListener('change', () => {
-              const val = parseFloat(alphaInput.value);
-              if (!isNaN(val)) {
-                fitness.alpha = val / 100;
-                fitness.mode = 'custom';
-                saveData();
-                updateTodoSection();
-                updateGrocerySection();
+              function registerControl(key, control) {
+                controls[key] = control;
+                return control;
               }
-            });
-            appendSetting('Multiplier bonus α (%)', alphaInput);
-            const betaInput = document.createElement('input');
-            betaInput.type = 'number';
-            betaInput.step = '0.1';
-            betaInput.min = '0';
-            betaInput.value = (fitness.beta * 100).toFixed(1);
-            betaInput.addEventListener('change', () => {
-              const val = parseFloat(betaInput.value);
-              if (!isNaN(val)) {
-                fitness.beta = val / 100;
-                fitness.mode = 'custom';
-                saveData();
-                updateTodoSection();
-                updateGrocerySection();
-              }
-            });
-            appendSetting('Penalty weight β (%)', betaInput);
-            function numberSetting(label, initial, onChange) {
-              const input = document.createElement('input');
-              input.type = 'number';
-              input.step = '1';
-              input.value = String(initial);
-              input.addEventListener('change', () => {
-                const val = parseFloat(input.value);
-                if (!isNaN(val)) {
-                  onChange(val);
-                  saveData();
-                  updateTodoSection();
-                  updateGrocerySection();
+              const modeSelect = registerControl('mode', document.createElement('select'));
+              Object.entries(FITNESS_MODES).forEach(([key, cfg]) => {
+                const option = document.createElement('option');
+                option.value = key;
+                option.textContent = cfg.label;
+                modeSelect.appendChild(option);
+              });
+              const customOption = document.createElement('option');
+              customOption.value = 'custom';
+              customOption.textContent = 'Custom';
+              modeSelect.appendChild(customOption);
+              modeSelect.addEventListener('change', () => {
+                const val = modeSelect.value;
+                if (FITNESS_MODES[val]) {
+                  commitFitnessMutation(fit => {
+                    fit.mode = val;
+                    fit.alpha = FITNESS_MODES[val].alpha;
+                    fit.beta = FITNESS_MODES[val].beta;
+                  });
+                } else {
+                  commitFitnessMutation(fit => {
+                    fit.mode = 'custom';
+                  });
                 }
               });
-              appendSetting(label, input);
+              appendSetting('Budget mode', modeSelect);
+              const alphaInput = registerControl('alpha', document.createElement('input'));
+              alphaInput.type = 'number';
+              alphaInput.step = '0.1';
+              alphaInput.min = '0';
+              alphaInput.addEventListener('change', () => {
+                const val = parseFloat(alphaInput.value);
+                if (isNaN(val)) {
+                  const fallback = ensureFitnessDefaults().alpha;
+                  alphaInput.value = (fallback * 100).toFixed(1);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.alpha = val / 100;
+                  fit.mode = 'custom';
+                });
+              });
+              appendSetting('Multiplier bonus α (%)', alphaInput);
+              const betaInput = registerControl('beta', document.createElement('input'));
+              betaInput.type = 'number';
+              betaInput.step = '0.1';
+              betaInput.min = '0';
+              betaInput.addEventListener('change', () => {
+                const val = parseFloat(betaInput.value);
+                if (isNaN(val)) {
+                  const fallback = ensureFitnessDefaults().beta;
+                  betaInput.value = (fallback * 100).toFixed(1);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.beta = val / 100;
+                  fit.mode = 'custom';
+                });
+              });
+              appendSetting('Penalty weight β (%)', betaInput);
+              const creditBaseInput = registerControl('creditBase', document.createElement('input'));
+              creditBaseInput.type = 'number';
+              creditBaseInput.step = '1';
+              creditBaseInput.addEventListener('change', () => {
+                const val = parseFloat(creditBaseInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditBaseInput.value = String(fallbackCredits.base);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.base = val;
+                });
+              });
+              appendSetting('Credits per session (up to target)', creditBaseInput);
+              const creditExtraInput = registerControl('creditExtra', document.createElement('input'));
+              creditExtraInput.type = 'number';
+              creditExtraInput.step = '1';
+              creditExtraInput.addEventListener('change', () => {
+                const val = parseFloat(creditExtraInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditExtraInput.value = String(fallbackCredits.extra);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.extra = val;
+                });
+              });
+              appendSetting('Credits per extra session', creditExtraInput);
+              const creditPenaltyInput = registerControl('creditPenalty', document.createElement('input'));
+              creditPenaltyInput.type = 'number';
+              creditPenaltyInput.step = '1';
+              creditPenaltyInput.addEventListener('change', () => {
+                const val = parseFloat(creditPenaltyInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  creditPenaltyInput.value = String(fallbackCredits.penalty);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.penalty = val;
+                });
+              });
+              appendSetting('Penalty per missed session', creditPenaltyInput);
+              const weeklyBonusInput = registerControl('creditWeeklyBonus', document.createElement('input'));
+              weeklyBonusInput.type = 'number';
+              weeklyBonusInput.step = '1';
+              weeklyBonusInput.addEventListener('change', () => {
+                const val = parseFloat(weeklyBonusInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  weeklyBonusInput.value = String(fallbackCredits.weeklyBonus);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.weeklyBonus = val;
+                });
+              });
+              appendSetting('Weekly bonus', weeklyBonusInput);
+              const streakBonusInput = registerControl('creditStreakBonus', document.createElement('input'));
+              streakBonusInput.type = 'number';
+              streakBonusInput.step = '1';
+              streakBonusInput.addEventListener('change', () => {
+                const val = parseFloat(streakBonusInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
+                  streakBonusInput.value = String(fallbackCredits.streakBonus);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  if (!fit.creditSettings) fit.creditSettings = {};
+                  fit.creditSettings.streakBonus = val;
+                });
+              });
+              appendSetting('Streak bonus (4 weeks)', streakBonusInput);
+              const creditsCapInput = registerControl('creditsCap', document.createElement('input'));
+              creditsCapInput.type = 'number';
+              creditsCapInput.step = '1';
+              creditsCapInput.min = '0';
+              creditsCapInput.addEventListener('change', () => {
+                const val = parseFloat(creditsCapInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  creditsCapInput.value = String(Math.max(0, fallbackFitness.creditsCap || 0));
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.creditsCap = Math.max(0, val);
+                });
+              });
+              appendSetting('Credits cap', creditsCapInput);
+              const boostToggle = registerControl('boostToggle', document.createElement('input'));
+              boostToggle.type = 'checkbox';
+              boostToggle.addEventListener('change', () => {
+                commitFitnessMutation(fit => {
+                  fit.weekendBoostEnabled = boostToggle.checked;
+                });
+              });
+              appendSetting('Enable weekend boost', boostToggle);
+              const boostPercentInput = registerControl('boostPercent', document.createElement('input'));
+              boostPercentInput.type = 'number';
+              boostPercentInput.step = '1';
+              boostPercentInput.min = '0';
+              boostPercentInput.addEventListener('change', () => {
+                const val = parseFloat(boostPercentInput.value);
+                if (isNaN(val)) {
+                  const fallbackFitness = ensureFitnessDefaults();
+                  boostPercentInput.value = ((fallbackFitness.weekendBoostPercent || 0) * 100).toFixed(0);
+                  return;
+                }
+                commitFitnessMutation(fit => {
+                  fit.weekendBoostPercent = Math.max(0, val) / 100;
+                });
+              });
+              appendSetting('Weekend boost percent', boostPercentInput);
+              settingsEl.innerHTML = '';
+              settingsEl.appendChild(settingsGrid);
+              settingsEl._fitnessControls = controls;
             }
-            numberSetting('Credits per session (up to target)', creditSettings.base, (val) => {
-              fitness.creditSettings.base = val;
-            });
-            numberSetting('Credits per extra session', creditSettings.extra, (val) => {
-              fitness.creditSettings.extra = val;
-            });
-            numberSetting('Penalty per missed session', creditSettings.penalty, (val) => {
-              fitness.creditSettings.penalty = val;
-            });
-            numberSetting('Weekly bonus', creditSettings.weeklyBonus, (val) => {
-              fitness.creditSettings.weeklyBonus = val;
-            });
-            numberSetting('Streak bonus (4 weeks)', creditSettings.streakBonus, (val) => {
-              fitness.creditSettings.streakBonus = val;
-            });
-            numberSetting('Credits cap', fitness.creditsCap, (val) => {
-              fitness.creditsCap = Math.max(0, val);
-            });
-            const boostToggle = document.createElement('input');
-            boostToggle.type = 'checkbox';
-            boostToggle.checked = boostEnabled;
-            boostToggle.addEventListener('change', () => {
-              fitness.weekendBoostEnabled = boostToggle.checked;
-              saveData();
-              updateTodoSection();
-              updateGrocerySection();
-            });
-            appendSetting('Enable weekend boost', boostToggle);
-            const boostPercentInput = document.createElement('input');
-            boostPercentInput.type = 'number';
-            boostPercentInput.step = '1';
-            boostPercentInput.min = '0';
-            boostPercentInput.value = boostPercent;
-            boostPercentInput.addEventListener('change', () => {
-              const val = parseFloat(boostPercentInput.value);
-              if (!isNaN(val)) {
-                fitness.weekendBoostPercent = Math.max(0, val) / 100;
-                saveData();
-                updateTodoSection();
-                updateGrocerySection();
-              }
-            });
-            appendSetting('Weekend boost percent', boostPercentInput);
-            settingsEl.appendChild(settingsGrid);
+            const controls = settingsEl._fitnessControls || {};
+            const liveFitness = ensureFitnessDefaults();
+            const liveCredits = Object.assign({}, defaultCreditSettings, liveFitness.creditSettings || {});
+            if (controls.mode) {
+              controls.mode.value = FITNESS_MODES[liveFitness.mode] ? liveFitness.mode : 'custom';
+            }
+            if (controls.alpha) {
+              controls.alpha.value = (liveFitness.alpha * 100).toFixed(1);
+            }
+            if (controls.beta) {
+              controls.beta.value = (liveFitness.beta * 100).toFixed(1);
+            }
+            if (controls.creditBase) {
+              controls.creditBase.value = String(liveCredits.base);
+            }
+            if (controls.creditExtra) {
+              controls.creditExtra.value = String(liveCredits.extra);
+            }
+            if (controls.creditPenalty) {
+              controls.creditPenalty.value = String(liveCredits.penalty);
+            }
+            if (controls.creditWeeklyBonus) {
+              controls.creditWeeklyBonus.value = String(liveCredits.weeklyBonus);
+            }
+            if (controls.creditStreakBonus) {
+              controls.creditStreakBonus.value = String(liveCredits.streakBonus);
+            }
+            if (controls.creditsCap) {
+              const capVal = typeof liveFitness.creditsCap === 'number' && isFinite(liveFitness.creditsCap) ? liveFitness.creditsCap : 0;
+              controls.creditsCap.value = String(Math.max(0, capVal));
+            }
+            if (controls.boostToggle) {
+              controls.boostToggle.checked = !!liveFitness.weekendBoostEnabled;
+            }
+            if (controls.boostPercent) {
+              controls.boostPercent.value = ((liveFitness.weekendBoostPercent || 0) * 100).toFixed(0);
+            }
           }
         }
         function updateTodoSection() {
@@ -1281,9 +1449,8 @@ function loadData() {
           const fitness = ensureFitnessDefaults();
           const alpha = fitness.alpha;
           const beta = fitness.beta;
-          const currentSummary = computeFitnessSummary(statsInfo.stats, alpha, beta);
-          const currentAdjPercent = currentSummary.adjPercent;
           const creditSettings = Object.assign({}, makeDefaultFitness().creditSettings, fitness.creditSettings || {});
+          const fragment = document.createDocumentFragment();
           todos.forEach((todo, index) => {
             // Ensure workout properties exist
             // Dynamic target for this week includes spillover from previous weeks
@@ -1296,10 +1463,29 @@ function loadData() {
             const statInfo = statsById.get(todo.id) || { target: todo.weeklyTarget, actual: sessionsThisWeek };
             const baseTarget = statInfo.target;
             const actualSessions = statInfo.actual;
-            const withOneMoreStats = statsInfo.stats.map(stat => stat.id === todo.id ? Object.assign({}, stat, { actual: stat.actual + 1 }) : Object.assign({}, stat));
-            const projectedSummary = computeFitnessSummary(withOneMoreStats, alpha, beta);
-            const projectedDeltaPercent = (projectedSummary.adjPercent - currentAdjPercent) * 100;
-            const impactText = (baseTarget > 0 && Math.abs(projectedDeltaPercent) >= 0.05) ? `Budget impact: ${projectedDeltaPercent > 0 ? '+' : ''}${projectedDeltaPercent.toFixed(1)}% next week` : 'Budget impact: already maxed';
+            let projectedDeltaPercent = 0;
+            if (baseTarget > 0) {
+              const currentCompliance = Math.min(1, actualSessions / baseTarget);
+              const nextCompliance = Math.min(1, (actualSessions + 1) / baseTarget);
+              const deltaPenalty = currentCompliance - nextCompliance;
+              const currentOverage = Math.max(0, (actualSessions / baseTarget) - 1);
+              const nextOverage = Math.max(0, ((actualSessions + 1) / baseTarget) - 1);
+              const deltaOverage = nextOverage - currentOverage;
+              projectedDeltaPercent = (alpha * deltaOverage - beta * deltaPenalty) * 100;
+            }
+            let impactText;
+            if (baseTarget <= 0) {
+              impactText = 'Budget impact: set a weekly target';
+            } else if (Math.abs(projectedDeltaPercent) >= 0.05) {
+              impactText = `Budget impact: ${projectedDeltaPercent > 0 ? '+' : ''}${projectedDeltaPercent.toFixed(1)}% next week`;
+            } else if (actualSessions >= baseTarget) {
+              impactText = 'Budget impact: already maxed';
+            } else if (projectedDeltaPercent > 0) {
+              impactText = 'Budget impact: <0.1% next week – almost there';
+            } else {
+              const remainingToTarget = Math.max(0, baseTarget - actualSessions);
+              impactText = remainingToTarget === 1 ? 'Budget impact: one more session to move the needle' : 'Budget impact: keep going';
+            }
             const nextCredit = baseTarget > 0 ? (actualSessions < baseTarget ? creditSettings.base : creditSettings.extra) : 0;
             // Create list item container
             const li = document.createElement('li');
@@ -1400,8 +1586,9 @@ function loadData() {
               progressContainer.appendChild(creditLine);
             }
             li.appendChild(progressContainer);
-            listEl.appendChild(li);
+            fragment.appendChild(li);
           });
+          listEl.appendChild(fragment);
         }
 
         // Attach submit handler to the Workout form. When submitted, a new workout is
@@ -1596,7 +1783,7 @@ function loadData() {
             if (archItem.boostApplied && archItem.boostPercentApplied) {
               const boostNote = document.createElement('div');
               boostNote.className = 'treat-note archived';
-              boostNote.textContent = 'Weekend Boost covered ' + Math.round((archItem.boostPercentApplied || fitness.weekendBoostPercent || 0) * 100) + '%';
+              boostNote.textContent = 'Weekend Boost covered ' + Math.round((archItem.boostPercentApplied || (typeof fitness !== 'undefined' && fitness.weekendBoostPercent ? fitness.weekendBoostPercent : 0)) * 100) + '%';
               liArch.appendChild(boostNote);
             }
             // Action buttons for archived items
@@ -2438,49 +2625,58 @@ function loadData() {
         // the chosen folder using the File System Access API.
         async function saveBackupToDir() {
           try {
-            if (!backupDirHandle) return;
-            // Ensure we have permission to write to the directory. If not granted, abort silently.
-            try {
-              const perm = await backupDirHandle.requestPermission({ mode: 'readwrite' });
-              if (perm !== 'granted') return;
-            } catch (err) {
-              // If requestPermission fails (not supported), we proceed and hope existing permission works
+            if (!backupDirHandle) {
+              disableAutoSyncWithWarning('Auto sync paused: select a backup folder to resume syncing.');
+              return;
             }
-            // Create or overwrite a file named timekeeper-data.json in the selected directory
+            if (!(await hasBackupPermission(backupDirHandle))) {
+              backupDirHandle = null;
+              disableAutoSyncWithWarning('Auto sync disabled: permission to the backup folder was revoked.');
+              return;
+            }
             const fileHandle = await backupDirHandle.getFileHandle('timekeeper-data.json', { create: true });
             const writable = await fileHandle.createWritable();
             await writable.write(JSON.stringify(data, null, 2));
             await writable.close();
-            // After successful backup, clear the needsBackup flag
+            data.lastBackupAt = new Date().toISOString();
+            localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
             needsBackup = false;
+            backupWarningMessage = '';
+            updateAutoSyncStatus();
           } catch (err) {
             console.error('Saving backup failed:', err);
+            backupWarningMessage = 'Auto backup failed. Check the backup folder and try again.';
+            updateAutoSyncStatus();
           }
         }
 
         // Prompt the user to choose a backup directory using the File System Access API. When
         // the directory is selected, set it as the backupDirHandle and enable auto sync.
-        async function chooseBackupDir() {
+        async function chooseBackupDir(options = {}) {
+          const { activateSync = false } = options;
           try {
             const dirHandle = await window.showDirectoryPicker();
             backupDirHandle = dirHandle;
-            // Persist the directory handle in IndexedDB so it can be restored on future visits
             await saveBackupDirHandle(dirHandle);
-            // Save the directory name into our data so that it persists in JSON exports. This allows
-            // us to remember which folder was chosen even when a handle cannot be restored.
-            data.backupDirName = dirHandle.name;
+            data.backupDirName = dirHandle.name || null;
             saveData();
-            // Enable auto sync once a folder is chosen
-            autoSyncEnabled = true;
-            localStorage.setItem('autoSyncEnabledPro', 'true');
-            // Reflect UI state if toggle exists
-            const toggle = document.getElementById('autoSyncToggle');
-            if (toggle) toggle.checked = true;
+            if (activateSync) {
+              autoSyncEnabled = true;
+              localStorage.setItem('autoSyncEnabledPro', 'true');
+              const toggle = document.getElementById('autoSyncToggle');
+              if (toggle) toggle.checked = true;
+            }
+            backupWarningMessage = '';
             updateAutoSyncStatus();
-            // Immediately save a backup now that the directory is chosen
-            await saveBackupToDir();
+            if (autoSyncEnabled || activateSync) {
+              await saveBackupToDir();
+            }
+            return true;
           } catch (err) {
             console.error('Backup folder not selected:', err);
+            backupWarningMessage = 'Backup folder not selected. Auto sync unchanged.';
+            updateAutoSyncStatus();
+            return false;
           }
         }
 
@@ -2556,6 +2752,24 @@ function loadData() {
             rounded = Math.round(num / factor) * factor;
             return Math.round(rounded).toString() + ' kr';
           }
+        }
+        function formatRelativeTime(isoString) {
+          if (!isoString) return '';
+          const date = new Date(isoString);
+          if (isNaN(date)) return '';
+          const diffMs = Date.now() - date.getTime();
+          if (diffMs < 0) return date.toLocaleString();
+          const minutes = Math.floor(diffMs / 60000);
+          if (minutes < 1) return 'just now';
+          if (minutes < 60) return minutes + ' min' + (minutes === 1 ? '' : 's') + ' ago';
+          const hours = Math.floor(minutes / 60);
+          if (hours < 24) return hours + ' hour' + (hours === 1 ? '' : 's') + ' ago';
+          const days = Math.floor(hours / 24);
+          if (days < 30) return days + ' day' + (days === 1 ? '' : 's') + ' ago';
+          const months = Math.floor(days / 30);
+          if (months < 12) return months + ' month' + (months === 1 ? '' : 's') + ' ago';
+          const years = Math.floor(months / 12);
+          return years + ' year' + (years === 1 ? '' : 's') + ' ago';
         }
         function formatDuration(seconds) {
           const hrs = Math.floor(seconds / 3600);
@@ -4731,41 +4945,89 @@ function loadData() {
         // Initialize auto sync toggle and status message
         const autoSyncToggle = document.getElementById('autoSyncToggle');
         const autoSyncStatusElem = document.getElementById('autoSyncStatus');
+        const autoSyncWarningElem = document.getElementById('autoSyncWarning');
+        const lastBackupStatusElem = document.getElementById('lastBackupStatus');
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
-          if (autoSyncEnabled) {
-            // If we have a handle, we can show that backup is configured. Otherwise, if a backup
-            // directory name exists in our persisted data, display that name to inform the user
-            // which folder was previously selected. Note: we cannot auto‑open the folder without
-            // user interaction, but we can reassure the user that their selection is remembered.
-            if (backupDirHandle) {
-              const name = backupDirHandle.name || (data && data.backupDirName) || '';
-              autoSyncStatusElem.textContent = name
-                ? `Auto sync is ON. Writing to “${name}”.`
-                : 'Auto sync is ON. Writing to your selected backup folder.';
-            } else {
-              // Fallback: use the stored backup directory name from data if available
-              const name = (data && data.backupDirName) || '';
-              autoSyncStatusElem.textContent = name
-                ? `Auto sync is ON. Backup folder “${name}” remembered — reselect to activate.`
-                : 'Auto sync is ON. Changes will be periodically saved when a backup folder is selected.';
-            }
+          const backupName = backupDirHandle ? (backupDirHandle.name || data.backupDirName || '') : (data && data.backupDirName) || '';
+          const hasActiveFolder = !!backupDirHandle;
+          if (autoSyncEnabled && hasActiveFolder) {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is ON – syncing to “${backupName}”.`
+              : 'Auto sync is ON – syncing to your backup folder.';
+          } else if (autoSyncEnabled && !hasActiveFolder) {
+            autoSyncStatusElem.textContent = 'Auto sync is ON but no backup folder is available.';
+          } else if (!autoSyncEnabled && hasActiveFolder) {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is OFF – backup folder “${backupName}” is ready.`
+              : 'Auto sync is OFF – backup folder is ready.';
           } else {
-            autoSyncStatusElem.textContent = 'Auto sync is OFF.';
+            autoSyncStatusElem.textContent = 'Auto sync is OFF. No backup folder selected.';
+          }
+          if (autoSyncWarningElem) {
+            const warning = backupWarningMessage || (!hasActiveFolder ? 'Select a backup folder to keep automatic backups running.' : '');
+            if (warning) {
+              autoSyncWarningElem.textContent = warning;
+              autoSyncWarningElem.style.display = 'block';
+            } else {
+              autoSyncWarningElem.textContent = '';
+              autoSyncWarningElem.style.display = 'none';
+            }
+          }
+          if (lastBackupStatusElem) {
+            if (data && data.lastBackupAt) {
+              const relative = formatRelativeTime(data.lastBackupAt);
+              const backupDate = new Date(data.lastBackupAt);
+              if (!isNaN(backupDate)) {
+                lastBackupStatusElem.textContent = `Last backup: ${relative}`;
+                lastBackupStatusElem.title = backupDate.toLocaleString();
+                lastBackupStatusElem.style.display = 'block';
+              } else {
+                lastBackupStatusElem.textContent = '';
+                lastBackupStatusElem.style.display = 'none';
+              }
+            } else if (autoSyncEnabled && hasActiveFolder) {
+              lastBackupStatusElem.textContent = 'Last backup: pending…';
+              lastBackupStatusElem.title = '';
+              lastBackupStatusElem.style.display = 'block';
+            } else {
+              lastBackupStatusElem.textContent = '';
+              lastBackupStatusElem.style.display = 'none';
+            }
           }
         }
         if (autoSyncToggle) {
-          autoSyncToggle.checked = autoSyncEnabled;
+          autoSyncToggle.checked = autoSyncEnabled && !!backupDirHandle;
+          if (autoSyncEnabled && !backupDirHandle) {
+            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
+          }
           updateAutoSyncStatus();
-          autoSyncToggle.addEventListener('change', () => {
-            autoSyncEnabled = autoSyncToggle.checked;
-            localStorage.setItem('autoSyncEnabledPro', autoSyncEnabled);
-            updateAutoSyncStatus();
-            // If user just enabled auto sync but no backup folder is set, prompt them to choose one.
-            if (autoSyncEnabled && !backupDirHandle) {
-              chooseBackupDir();
+          autoSyncToggle.addEventListener('change', async () => {
+            if (autoSyncToggle.checked) {
+              let ensured = true;
+              if (!backupDirHandle) {
+                ensured = await chooseBackupDir();
+              } else {
+                ensured = await ensureBackupPermissionWithPrompt(backupDirHandle);
+                if (!ensured) {
+                  backupDirHandle = null;
+                }
+              }
+              if (!ensured || !backupDirHandle) {
+                disableAutoSyncWithWarning('Backup folder required to enable auto sync.');
+                return;
+              }
+              autoSyncEnabled = true;
+              localStorage.setItem('autoSyncEnabledPro', 'true');
+              backupWarningMessage = '';
+              updateAutoSyncStatus();
+              await saveBackupToDir();
+            } else {
+              disableAutoSyncWithWarning('Auto sync is OFF. Remember to back up manually.');
             }
           });
+        } else {
+          updateAutoSyncStatus();
         }
 
         // Set Backup Folder button: prompts the user to pick a directory for backups. When
@@ -4775,7 +5037,7 @@ function loadData() {
         const chooseBtn = document.getElementById('chooseBackupDirBtn');
         if (chooseBtn) {
           chooseBtn.addEventListener('click', () => {
-            chooseBackupDir();
+            chooseBackupDir({ activateSync: true });
           });
         }
       })();
