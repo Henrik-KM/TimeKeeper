@@ -193,6 +193,8 @@
       <!-- Workout Tracker Section (replaces Todo) -->
       <section id="todo" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Workouts</h2>
+        <!-- Streak indicator: shows current consecutive weeks meeting all workout targets -->
+        <div id="streakIndicator" style="margin-bottom:0.5rem;"></div>
         <!-- Form to add a new workout -->
         <div class="card" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Workout</h3>
@@ -224,6 +226,11 @@
               <option value="weekly">Weekly</option>
               <option value="monthly">Monthly</option>
               <option value="biannual">Biannual</option>
+            </select>
+            <!-- Category selector: differentiate between regular and treat items for weekend boosts -->
+            <select id="groceryCategory" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="regular">Regular</option>
+              <option value="treat">Treat</option>
             </select>
             <button type="submit" class="btn primary">Add</button>
           </form>
@@ -304,30 +311,38 @@
                 if (!Array.isArray(t.logs)) t.logs = [];
                 return t;
               }) : [],
-              // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
+              // Grocery items: weekly/monthly/biannual shopping list with categories. Ensure defaults.
               groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
-                // Migrate legacy properties to new structure. Each item should have a name and frequency.
                 if (!g.name) g.name = '';
                 if (!g.frequency) g.frequency = 'weekly';
-                // In the new structure, we track whether an item has been archived and when it was purchased. Default false/null.
                 if (g.archived === undefined) g.archived = false;
                 if (g.purchasedDate === undefined) g.purchasedDate = null;
+                // Default category to regular if missing
+                if (!g.category) g.category = 'regular';
                 // Remove legacy fields carryOver and purchasedCount if present
                 if (g.hasOwnProperty('carryOver')) delete g.carryOver;
                 if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
                 return g;
               }) : [],
-              // Removed single-item purchase quotas: budgets control spend, not counts.  Carry-over counts for
-              // purchases are no longer used, so we omit them from persisted data.
-        // Budgeting values: base budgets per period (weekly, monthly, biannual) and their carry-overs.
-        groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
-        groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
-        groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
-        groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
-        groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
-        groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
-        // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
-        groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
+              // Budgeting values: base budgets per period (weekly, monthly, biannual) and their carry-overs.
+              groceryBudgetWeekly: typeof parsed.groceryBudgetWeekly === 'number' ? parsed.groceryBudgetWeekly : 1000,
+              groceryBudgetMonthly: typeof parsed.groceryBudgetMonthly === 'number' ? parsed.groceryBudgetMonthly : 4000,
+              groceryBudgetBiYearly: typeof parsed.groceryBudgetBiYearly === 'number' ? parsed.groceryBudgetBiYearly : 20000,
+              groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
+              groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
+              groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
+              // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
+              groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
+              // Fitness multiplier: current multiplier applied this week and next multiplier computed on Monday
+              fitnessMultiplierCurrent: typeof parsed.fitnessMultiplierCurrent === 'number' ? parsed.fitnessMultiplierCurrent : 1,
+              fitnessMultiplierNext: typeof parsed.fitnessMultiplierNext === 'number' ? parsed.fitnessMultiplierNext : 1,
+              // Details of last week's adjustment (extra and penalty percentages) used for tooltips
+              fitnessAdjustmentExtraPct: typeof parsed.fitnessAdjustmentExtraPct === 'number' ? parsed.fitnessAdjustmentExtraPct : 0,
+              fitnessAdjustmentPenaltyPct: typeof parsed.fitnessAdjustmentPenaltyPct === 'number' ? parsed.fitnessAdjustmentPenaltyPct : 0,
+              // Wellness credits carried over. Top up each week; cap at 1000 SEK.
+              wellnessCredits: typeof parsed.wellnessCredits === 'number' ? parsed.wellnessCredits : 0,
+              // Consecutive weeks meeting all workout targets (for streak bonuses).
+              streakCount: typeof parsed.streakCount === 'number' ? parsed.streakCount : 0,
               // Preserve additional persisted properties like backupDirName if present in saved data
               backupDirName: parsed.backupDirName || null
             };
@@ -450,6 +465,17 @@
           const lastReset = localStorage.getItem('todoResetDatePro');
           if (lastReset !== mondayStr) {
             // At the start of a new week, compute carryOver for each workout based on last week's performance
+            let totTargets = 0;
+            let totAchieved = 0;
+            let totOverage = 0;
+            let creditsEarned = 0;
+            let allTargetsMet = true;
+            // Before computing next multiplier, apply last week's next multiplier to become current
+            if (typeof data.fitnessMultiplierNext === 'number') {
+              data.fitnessMultiplierCurrent = data.fitnessMultiplierNext;
+            } else {
+              data.fitnessMultiplierCurrent = 1;
+            }
             if (Array.isArray(data.todos)) {
               // Determine last Monday (one week before this week's Monday) for computing logs in the previous week
               const lastMonday = new Date(monday);
@@ -479,6 +505,17 @@
                 t.carryOver = newCarry;
                 // Reset checked state
                 t.checked = false;
+                // Accumulate totals for fitness multiplier and credits
+                const T = t.weeklyTarget;
+                const A = sessionsLastWeek;
+                totTargets += T;
+                totAchieved += Math.min(A, T);
+                totOverage += Math.max(A - T, 0);
+                // Credits: +50 per session up to target, +25 per extra, -40 per missed (cannot go below zero total)
+                creditsEarned += 50 * Math.min(A, T) + 25 * Math.max(A - T, 0) - 40 * Math.max(T - A, 0);
+                if (A < T) {
+                  allTargetsMet = false;
+                }
                 // Remove logs before this week; keep logs on or after the current Monday
                 t.logs = t.logs.filter(log => {
                   const dt = new Date(log);
@@ -486,6 +523,51 @@
                 });
               });
             }
+            // Treat the absence of workouts as not meeting targets (no streak or bonus)
+            if (totTargets === 0) {
+              allTargetsMet = false;
+            }
+            // Compute next week's fitness multiplier based on last week's compliance and overage
+            const alpha = 0.08;
+            const beta = 0.06;
+            if (totTargets > 0) {
+              const C = totAchieved / totTargets;
+              const P = 1 - C;
+              const O = totOverage / totTargets;
+              let adj = alpha * O - beta * P;
+              // Clamp adjustment to ±20%
+              if (adj > 0.2) adj = 0.2;
+              if (adj < -0.2) adj = -0.2;
+              let nextMult = 1 + adj;
+              // Clamp multiplier between 0.9× and 1.2×
+              if (nextMult > 1.2) nextMult = 1.2;
+              if (nextMult < 0.9) nextMult = 0.9;
+              data.fitnessMultiplierNext = nextMult;
+              // Store detail breakdown for tooltip (percentage points)
+              data.fitnessAdjustmentExtraPct = alpha * O * 100;
+              data.fitnessAdjustmentPenaltyPct = -beta * P * 100;
+            } else {
+              // No workouts defined → default multiplier of 1
+              data.fitnessMultiplierNext = 1;
+              data.fitnessAdjustmentExtraPct = 0;
+              data.fitnessAdjustmentPenaltyPct = 0;
+            }
+            // Compute wellness credits earned. Ensure creditsEarned is non-negative for the week.
+            let weekCredits = Math.max(0, creditsEarned);
+            // Apply streak bonus: if at least one workout and all targets met this week, +50 SEK; at every 4-week streak an extra +50 SEK
+            if (allTargetsMet && totTargets > 0) {
+              data.streakCount = (typeof data.streakCount === 'number' ? data.streakCount : 0) + 1;
+              weekCredits += 50;
+              if (data.streakCount % 4 === 0) {
+                weekCredits += 50;
+              }
+            } else {
+              data.streakCount = 0;
+            }
+            // Update wellness credits, clamped between 0 and 1000 SEK
+            const newCreditsTotal = (typeof data.wellnessCredits === 'number' ? data.wellnessCredits : 0) + weekCredits;
+            data.wellnessCredits = Math.max(0, Math.min(1000, newCreditsTotal));
+
             localStorage.setItem('todoResetDatePro', mondayStr);
             saveData();
           }
@@ -602,6 +684,51 @@
           const diffToMonday = (dow + 6) % 7;
           const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
           monday.setHours(0, 0, 0, 0);
+          // Compute totals across workouts to estimate the impact of adding sessions on next week's multiplier
+          let totalTargets = 0;
+          let totalAchieved = 0;
+          let totalOverage = 0;
+          // Precompute this week's session counts and store in array for re-use
+          const sessionCounts = [];
+          todos.forEach((td, idx) => {
+            const target = (typeof td.weeklyTarget === 'number' && td.weeklyTarget > 0) ? td.weeklyTarget : 1;
+            const logsArr = Array.isArray(td.logs) ? td.logs : [];
+            const sessCount = logsArr.filter(log => {
+              const t = new Date(log);
+              return t >= monday;
+            }).length;
+            sessionCounts[idx] = sessCount;
+            totalTargets += target;
+            totalAchieved += Math.min(sessCount, target);
+            totalOverage += Math.max(sessCount - target, 0);
+          });
+          // Compute baseline next multiplier using the same formula as weekly reset
+          const alphaF = 0.08;
+          const betaF = 0.06;
+          let baselineMultiplier = 1;
+          if (totalTargets > 0) {
+            const Cbl = totalAchieved / totalTargets;
+            const Pbl = 1 - Cbl;
+            const Obl = totalOverage / totalTargets;
+            let adjbl = alphaF * Obl - betaF * Pbl;
+            if (adjbl > 0.2) adjbl = 0.2;
+            if (adjbl < -0.2) adjbl = -0.2;
+            let tmpMult = 1 + adjbl;
+            if (tmpMult > 1.2) tmpMult = 1.2;
+            if (tmpMult < 0.9) tmpMult = 0.9;
+            baselineMultiplier = tmpMult;
+          }
+          // Update streak indicator
+          const streakEl = document.getElementById('streakIndicator');
+          if (streakEl) {
+            const sc = typeof data.streakCount === 'number' ? data.streakCount : 0;
+            if (sc > 0) {
+              // Flame icon and count
+              streakEl.textContent = '🔥 Streak: ' + sc + ' week' + (sc === 1 ? '' : 's');
+            } else {
+              streakEl.textContent = '';
+            }
+          }
           todos.forEach((todo, index) => {
             // Ensure workout properties exist
             if (typeof todo.weeklyTarget !== 'number' || todo.weeklyTarget < 1) {
@@ -708,6 +835,28 @@
             text.style.fontSize = '0.75rem';
             text.textContent = sessionsThisWeek + ' / ' + dynamicTarget + ' sessions';
             progressContainer.appendChild(text);
+            // Predicted impact of logging one more session on next week's multiplier
+            if (totalTargets > 0) {
+              const A_pred = sessionCounts[index];
+              const T_pred = todo.weeklyTarget;
+              const predictedAchieved = totalAchieved - Math.min(A_pred, T_pred) + Math.min(A_pred + 1, T_pred);
+              const predictedOverage = totalOverage - Math.max(A_pred - T_pred, 0) + Math.max((A_pred + 1) - T_pred, 0);
+              const Cpred = predictedAchieved / totalTargets;
+              const Ppred = 1 - Cpred;
+              const Opred = predictedOverage / totalTargets;
+              let adjPred = alphaF * Opred - betaF * Ppred;
+              if (adjPred > 0.2) adjPred = 0.2;
+              if (adjPred < -0.2) adjPred = -0.2;
+              let multPred = 1 + adjPred;
+              if (multPred > 1.2) multPred = 1.2;
+              if (multPred < 0.9) multPred = 0.9;
+              const deltaPct = (multPred - baselineMultiplier) * 100;
+              const impactDiv = document.createElement('div');
+              impactDiv.style.fontSize = '0.7rem';
+              impactDiv.style.color = '#475569';
+              impactDiv.textContent = 'Budget impact: ' + (deltaPct >= 0 ? '+' : '') + deltaPct.toFixed(1) + '%';
+              progressContainer.appendChild(impactDiv);
+            }
             li.appendChild(progressContainer);
             listEl.appendChild(li);
           });
@@ -746,18 +895,21 @@
             e.preventDefault();
             const nameInput = document.getElementById('groceryName');
             const freqSelect = document.getElementById('groceryFreq');
+            const catSelect = document.getElementById('groceryCategory');
             const name = nameInput.value.trim();
             const freq = freqSelect.value;
+            const cat = catSelect ? catSelect.value : 'regular';
             if (!name) return;
             if (!Array.isArray(data.groceries)) {
               data.groceries = [];
             }
-            // When adding a new grocery item, initialise it as not archived with no purchase date.
-            data.groceries.push({ id: uuid(), name: name, frequency: freq, archived: false, purchasedDate: null });
+            // When adding a new grocery item, initialise it as not archived with no purchase date and set its category.
+            data.groceries.push({ id: uuid(), name: name, frequency: freq, category: cat, archived: false, purchasedDate: null });
             saveData();
             updateGrocerySection();
             nameInput.value = '';
             freqSelect.value = 'weekly';
+            if (catSelect) catSelect.value = 'regular';
           });
         }
 
@@ -918,13 +1070,20 @@
             archivedListEl.appendChild(liArch);
           });
         }
-          // Dynamic budgets = base + carry
+          // Dynamic budgets: incorporate fitness multiplier and wellness credits for weekly budget.
           const weeklyBaseBudget = data.groceryBudgetWeekly || 0;
           const monthlyBaseBudget = data.groceryBudgetMonthly || 0;
           const biBaseBudget = data.groceryBudgetBiYearly || 0;
-          const weeklyDynamicBudget = weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
+          // Dynamic budgets before multiplier
+          const weeklyDynamicBase = weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
           const monthlyDynamicBudget = monthlyBaseBudget + (data.groceryBudgetMonthlyCarry || 0);
           const biDynamicBudget = biBaseBudget + (data.groceryBudgetBiYearlyCarry || 0);
+          // Apply fitness multiplier to weekly budget
+          const fitnessMultCurrent = (typeof data.fitnessMultiplierCurrent === 'number' ? data.fitnessMultiplierCurrent : 1);
+          const weeklyDynamicBudget = weeklyDynamicBase * fitnessMultCurrent;
+          // Net spent for weekly budget after applying wellness credits
+          const creditsAvailable = (typeof data.wellnessCredits === 'number' ? data.wellnessCredits : 0);
+          const weeklySpentNet = Math.max(0, weeklySpent - creditsAvailable);
           // Time progress for budgets (fraction of period elapsed)
           const weekTimeProgress = (now - weekStart) / (weekEnd - weekStart);
           const monthTimeProgress = (now - monthStart) / (monthEnd - monthStart);
@@ -969,7 +1128,8 @@
             pb.appendChild(actualFill);
             summaryCard.appendChild(pb);
           }
-          addBudgetLine('Weekly', weeklySpent, weeklyDynamicBudget, weeklyExpectedSpent);
+          // Weekly line uses net spending after credits and the fitness-adjusted budget
+          addBudgetLine('Weekly', weeklySpentNet, weeklyDynamicBudget, weeklyExpectedSpent);
           addBudgetLine('Monthly', monthlySpent, monthlyDynamicBudget, monthlyExpectedSpent);
           addBudgetLine('Biannual', biannualSpent, biDynamicBudget, biExpectedSpent);
           // Add edit buttons for budgets and start date
@@ -1024,6 +1184,83 @@
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
+          // Compute weekend boost eligibility based on current compliance and day/time
+          let weekendBoostUnlocked = false;
+          {
+            // Determine weekly compliance across workouts (sum of min(A,T) / sum T)
+            let totTargetsWB = 0;
+            let totAchievedWB = 0;
+            if (Array.isArray(data.todos)) {
+              const wNow = new Date();
+              const wDow = wNow.getDay();
+              const wDiffToMon = (wDow + 6) % 7;
+              const wMon = new Date(wNow.getFullYear(), wNow.getMonth(), wNow.getDate() - wDiffToMon);
+              wMon.setHours(0, 0, 0, 0);
+              data.todos.forEach(td => {
+                const Tt = (typeof td.weeklyTarget === 'number' && td.weeklyTarget > 0) ? td.weeklyTarget : 1;
+                const logsArr = Array.isArray(td.logs) ? td.logs : [];
+                const Acount = logsArr.filter(lg => {
+                  const dt = new Date(lg);
+                  return dt >= wMon;
+                }).length;
+                totTargetsWB += Tt;
+                totAchievedWB += Math.min(Acount, Tt);
+              });
+            }
+            let compliance = 0;
+            if (totTargetsWB > 0) compliance = totAchievedWB / totTargetsWB;
+            // Determine if current time is after Friday 18:00
+            const wNow2 = new Date();
+            const dday = wNow2.getDay();
+            const dhour = wNow2.getHours();
+            const afterFriday = (dday > 5) || (dday === 5 && dhour >= 18);
+            weekendBoostUnlocked = (compliance >= 1.0) && afterFriday;
+            // Persist for use in buy button logic
+            data.weekendBoostUnlocked = weekendBoostUnlocked;
+          }
+          // Create chips to show fitness multiplier, next week multiplier, credits and weekend boost
+          const chipsDiv = document.createElement('div');
+          chipsDiv.style.display = 'flex';
+          chipsDiv.style.flexWrap = 'wrap';
+          chipsDiv.style.gap = '0.5rem';
+          chipsDiv.style.marginTop = '0.5rem';
+          function addChip(cls, text, tooltip) {
+            const sp = document.createElement('span');
+            sp.className = 'budget-chip ' + cls;
+            sp.textContent = text;
+            if (tooltip) sp.title = tooltip;
+            chipsDiv.appendChild(sp);
+          }
+          // Current week's fitness multiplier
+          if (typeof fitnessMultCurrent !== 'undefined') {
+            const currMult = fitnessMultCurrent;
+            addChip('fitness-current', 'Fitness Multiplier: ' + currMult.toFixed(2) + '× (this week)', 'Multiplier currently applied to weekly budget');
+          }
+          // Next week's fitness multiplier
+          const nextMultVal = (typeof data.fitnessMultiplierNext === 'number' ? data.fitnessMultiplierNext : 1);
+          {
+            const extraPct = (typeof data.fitnessAdjustmentExtraPct === 'number' ? data.fitnessAdjustmentExtraPct : 0);
+            const penaltyPct = (typeof data.fitnessAdjustmentPenaltyPct === 'number' ? data.fitnessAdjustmentPenaltyPct : 0);
+            let tooltipStr = '';
+            // Only show tooltip if there was any adjustment
+            if (extraPct || penaltyPct) {
+              tooltipStr = '+' + extraPct.toFixed(1) + '% from extra sessions; ' + (penaltyPct >= 0 ? '+' : '') + penaltyPct.toFixed(1) + '% penalty';
+            }
+            addChip('fitness-next', 'Fitness Multiplier next week: ' + nextMultVal.toFixed(2) + '×', tooltipStr);
+          }
+          // Wellness credits chip
+          {
+            const wc = (typeof data.wellnessCredits === 'number' ? data.wellnessCredits : 0);
+            addChip('credits', 'Wellness Credits: ' + wc.toFixed(0) + ' SEK (auto-applied)', 'Credits reduce your net spend each week');
+          }
+          // Weekend boost chip
+          if (weekendBoostUnlocked) {
+            addChip('boost', 'Weekend Boost unlocked: -10% on Treats', 'Treat purchases cost 10% less this weekend');
+          } else {
+            // Show locked state so the user knows the feature exists
+            addChip('neutral', 'Weekend Boost locked', 'Hit all targets by Friday 18:00 to unlock');
+          }
+          summaryCard.appendChild(chipsDiv);
           summaryContainer.appendChild(summaryCard);
           // ------------------------------------------------------------
           // In budget-only mode we do not limit the number of items that can be
@@ -1062,6 +1299,17 @@
               if (costStr === null) return;
               let costVal = parseFloat(costStr);
               if (isNaN(costVal)) costVal = 0;
+              // Apply weekend boost discount to treat category items when unlocked and purchased after Friday 18:00
+              const category = item.category || 'regular';
+              const nowDt = new Date();
+              const dayNow = nowDt.getDay();
+              const hourNow = nowDt.getHours();
+              const afterFri = (dayNow > 5) || (dayNow === 5 && hourNow >= 18);
+              if (category === 'treat' && data && data.weekendBoostUnlocked && afterFri) {
+                // Reduce cost by 10%
+                costVal = costVal * 0.9;
+                alert('Weekend Boost applied! 10% discount on this treat item.');
+              }
               item.cost = costVal;
               item.archived = true;
               item.purchasedDate = new Date().toISOString();

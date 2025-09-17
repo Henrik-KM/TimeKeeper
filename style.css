@@ -163,6 +163,39 @@ body {
   z-index: 2;
 }
 
+/* Chips used in the budget summary for showing fitness multipliers, credits,
+   and weekend boosts. These small pills provide quick feedback without
+   overwhelming the user. Different colour variants indicate the type of
+   adjustment or bonus. */
+.budget-chip {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  line-height: 1;
+  cursor: default;
+}
+.budget-chip.fitness-current {
+  background-color: #eef2ff; /* light indigo */
+  color: #4338ca;            /* indigo */
+}
+.budget-chip.fitness-next {
+  background-color: #dcfce7; /* light green */
+  color: #166534;            /* green */
+}
+.budget-chip.credits {
+  background-color: #fef9c3; /* light yellow */
+  color: #a16207;            /* golden */
+}
+.budget-chip.boost {
+  background-color: #fee2e2; /* light red */
+  color: #b91c1c;            /* red */
+}
+.budget-chip.neutral {
+  background-color: #e5e7eb; /* light grey */
+  color: #374151;            /* grey */
+}
+
 /* Project status overview */
 .project-list {
   background-color: #ffffff;
