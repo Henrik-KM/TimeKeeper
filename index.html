@@ -732,6 +732,12 @@ function loadData() {
         let needsBackup = false;
         let autoSyncEnabled = false;
         let backupDirHandle = null;
+        // backupPermissionState tracks the permission status for writing backups using the File System Access API.
+        // Possible states:
+        //   'missing' - No backup directory has been selected yet.
+        //   'prompt'  - A backup directory is selected, but permission to write has not been granted.
+        //   'granted' - Permission to write to the backup directory has been granted.
+        //   'denied'  - Permission to write to the backup directory has been denied.
         let backupPermissionState = 'missing';
         let backupWarningMessage = '';
         // Flag to track whether to show all entries or only recent ones. If false,
