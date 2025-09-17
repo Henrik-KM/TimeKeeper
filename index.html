@@ -1783,7 +1783,7 @@ function loadData() {
             if (archItem.boostApplied && archItem.boostPercentApplied) {
               const boostNote = document.createElement('div');
               boostNote.className = 'treat-note archived';
-              boostNote.textContent = 'Weekend Boost covered ' + Math.round((archItem.boostPercentApplied || fitness.weekendBoostPercent || 0) * 100) + '%';
+              boostNote.textContent = 'Weekend Boost covered ' + Math.round((archItem.boostPercentApplied || (typeof fitness !== 'undefined' && fitness.weekendBoostPercent ? fitness.weekendBoostPercent : 0)) * 100) + '%';
               liArch.appendChild(boostNote);
             }
             // Action buttons for archived items
