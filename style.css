@@ -163,6 +163,127 @@ body {
   z-index: 2;
 }
 
+.fitness-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.fitness-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+.fitness-summary-row.muted {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.fitness-summary-label {
+  font-weight: 600;
+  color: #475569;
+}
+.fitness-summary-value {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+}
+.fitness-summary-sub {
+  font-size: 0.75rem;
+  color: #475569;
+  margin: 0.25rem 0;
+}
+.fitness-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0;
+}
+.fitness-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: #e0e7ff;
+  color: #1e3a8a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+}
+.fitness-pill.muted {
+  background: #e2e8f0;
+  color: #475569;
+}
+.fitness-pill.warm {
+  background: #fef3c7;
+  color: #b45309;
+}
+.fitness-impact-line {
+  font-size: 0.72rem;
+  color: #2563eb;
+}
+.fitness-credit-line {
+  font-size: 0.72rem;
+  color: #0f766e;
+}
+.fitness-settings-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+.fitness-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.fitness-setting-row label {
+  flex: 1;
+  font-weight: 600;
+  color: #475569;
+}
+.fitness-setting-row input,
+.fitness-setting-row select {
+  flex: 1;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+}
+.treat-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: #fce7f3;
+  color: #be185d;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+}
+.treat-tag.muted {
+  background: #e2e8f0;
+  color: #475569;
+}
+.treat-note {
+  font-size: 0.7rem;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+.treat-note.archived {
+  margin-top: 0.25rem;
+  color: #6b21a8;
+  background: #f5f3ff;
+}
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
 /* Project status overview */
 .project-list {
   background-color: #ffffff;
