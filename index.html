@@ -732,6 +732,7 @@ function loadData() {
         let needsBackup = false;
         let autoSyncEnabled = false;
         let backupDirHandle = null;
+        let backupPermissionState = 'missing';
         let backupWarningMessage = '';
         // Flag to track whether to show all entries or only recent ones. If false,
         // entries older than approximately one month are hidden by default to keep
@@ -814,28 +815,39 @@ function loadData() {
             return null;
           }
         }
-        async function hasBackupPermission(handle) {
-          if (!handle) return false;
-          if (!handle.queryPermission) return true;
+        async function getBackupPermissionState(handle) {
+          if (!handle) return 'missing';
+          if (!handle.queryPermission) return 'granted';
           try {
-            const status = await handle.queryPermission({ mode: 'readwrite' });
-            return status === 'granted';
+            return await handle.queryPermission({ mode: 'readwrite' });
           } catch (err) {
-            return false;
+            return 'denied';
           }
         }
         async function ensureBackupPermissionWithPrompt(handle) {
-          if (!handle) return false;
-          if (!handle.queryPermission) return true;
+          if (!handle) {
+            backupPermissionState = 'missing';
+            return false;
+          }
+          if (!handle.queryPermission) {
+            backupPermissionState = 'granted';
+            return true;
+          }
           try {
             let status = await handle.queryPermission({ mode: 'readwrite' });
-            if (status === 'granted') return true;
+            if (status === 'granted') {
+              backupPermissionState = 'granted';
+              return true;
+            }
             if (status === 'prompt' && handle.requestPermission) {
               status = await handle.requestPermission({ mode: 'readwrite' });
+              backupPermissionState = status;
               return status === 'granted';
             }
+            backupPermissionState = status || 'denied';
             return false;
           } catch (err) {
+            backupPermissionState = 'denied';
             return false;
           }
         }
@@ -940,17 +952,39 @@ function loadData() {
         // sync can operate without requiring the user to pick a folder each
         // time the page loads.
         loadBackupDirHandle().then(async handle => {
-          if (handle && await hasBackupPermission(handle)) {
+          if (handle) {
             backupDirHandle = handle;
-          } else if (handle) {
-            backupDirHandle = null;
-            if (autoSyncEnabled) {
-              disableAutoSyncWithWarning('Auto sync disabled: backup folder access is required.');
+            const permissionState = await getBackupPermissionState(handle);
+            backupPermissionState = permissionState;
+            if (permissionState === 'granted') {
+              backupWarningMessage = '';
+              if (handle.name && data.backupDirName !== handle.name) {
+                data.backupDirName = handle.name;
+                try {
+                  localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
+                } catch (err) {
+                  // Ignore storage write errors; UI will still reflect the folder name.
+                }
+              }
+            } else if (permissionState === 'prompt') {
+              if (autoSyncEnabled) {
+                disableAutoSyncWithWarning('Auto sync paused: confirm access to your backup folder to resume syncing.');
+              } else {
+                backupWarningMessage = 'Confirm access to your backup folder to resume auto sync.';
+              }
             } else {
-              backupWarningMessage = 'Backup folder needs to be reselected before auto sync can run.';
+              if (autoSyncEnabled) {
+                disableAutoSyncWithWarning('Auto sync disabled: permission to the backup folder was denied.');
+              } else {
+                backupWarningMessage = 'Permission to the backup folder was denied. Select it again to restore auto sync.';
+              }
             }
-          } else if (autoSyncEnabled) {
-            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
+          } else {
+            backupDirHandle = null;
+            backupPermissionState = 'missing';
+            if (autoSyncEnabled) {
+              disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
+            }
           }
           updateAutoSyncStatus();
           updateFocusBlocker();
@@ -2626,12 +2660,17 @@ function loadData() {
         async function saveBackupToDir() {
           try {
             if (!backupDirHandle) {
+              backupPermissionState = 'missing';
               disableAutoSyncWithWarning('Auto sync paused: select a backup folder to resume syncing.');
               return;
             }
-            if (!(await hasBackupPermission(backupDirHandle))) {
-              backupDirHandle = null;
-              disableAutoSyncWithWarning('Auto sync disabled: permission to the backup folder was revoked.');
+            const permissionState = await getBackupPermissionState(backupDirHandle);
+            backupPermissionState = permissionState;
+            if (permissionState !== 'granted') {
+              const message = permissionState === 'prompt'
+                ? 'Auto sync paused: confirm access to your backup folder to resume syncing.'
+                : 'Auto sync disabled: permission to the backup folder was revoked.';
+              disableAutoSyncWithWarning(message);
               return;
             }
             const fileHandle = await backupDirHandle.getFileHandle('timekeeper-data.json', { create: true });
@@ -2654,9 +2693,21 @@ function loadData() {
         // the directory is selected, set it as the backupDirHandle and enable auto sync.
         async function chooseBackupDir(options = {}) {
           const { activateSync = false } = options;
+          if (!window.showDirectoryPicker) {
+            backupWarningMessage = 'Auto sync unavailable: your browser does not support choosing folders.';
+            updateAutoSyncStatus();
+            return false;
+          }
           try {
             const dirHandle = await window.showDirectoryPicker();
+            const permissionGranted = await ensureBackupPermissionWithPrompt(dirHandle);
+            if (!permissionGranted) {
+              backupWarningMessage = 'Permission to access the selected backup folder was not granted. Auto sync unchanged.';
+              updateAutoSyncStatus();
+              return false;
+            }
             backupDirHandle = dirHandle;
+            backupPermissionState = 'granted';
             await saveBackupDirHandle(dirHandle);
             data.backupDirName = dirHandle.name || null;
             saveData();
@@ -4947,25 +4998,52 @@ function loadData() {
         const autoSyncStatusElem = document.getElementById('autoSyncStatus');
         const autoSyncWarningElem = document.getElementById('autoSyncWarning');
         const lastBackupStatusElem = document.getElementById('lastBackupStatus');
+        function syncAutoSyncToggleUI() {
+          const toggle = document.getElementById('autoSyncToggle');
+          if (!toggle) return;
+          const shouldCheck = autoSyncEnabled && backupPermissionState === 'granted' && !!backupDirHandle;
+          if (toggle.checked !== shouldCheck) {
+            toggle.checked = shouldCheck;
+          }
+        }
         function updateAutoSyncStatus() {
           if (!autoSyncStatusElem) return;
-          const backupName = backupDirHandle ? (backupDirHandle.name || data.backupDirName || '') : (data && data.backupDirName) || '';
-          const hasActiveFolder = !!backupDirHandle;
-          if (autoSyncEnabled && hasActiveFolder) {
+          syncAutoSyncToggleUI();
+          const hasHandle = !!backupDirHandle;
+          const backupName = hasHandle ? (backupDirHandle.name || data.backupDirName || '') : (data && data.backupDirName) || '';
+          const folderUsable = hasHandle && backupPermissionState === 'granted';
+          if (autoSyncEnabled && folderUsable) {
             autoSyncStatusElem.textContent = backupName
               ? `Auto sync is ON – syncing to “${backupName}”.`
               : 'Auto sync is ON – syncing to your backup folder.';
-          } else if (autoSyncEnabled && !hasActiveFolder) {
+          } else if (autoSyncEnabled && hasHandle && backupPermissionState !== 'granted') {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is ON but access to “${backupName}” must be re-authorized.`
+              : 'Auto sync is ON but access to the backup folder must be re-authorized.';
+          } else if (autoSyncEnabled) {
             autoSyncStatusElem.textContent = 'Auto sync is ON but no backup folder is available.';
-          } else if (!autoSyncEnabled && hasActiveFolder) {
+          } else if (!autoSyncEnabled && folderUsable) {
             autoSyncStatusElem.textContent = backupName
               ? `Auto sync is OFF – backup folder “${backupName}” is ready.`
               : 'Auto sync is OFF – backup folder is ready.';
+          } else if (!autoSyncEnabled && hasHandle) {
+            autoSyncStatusElem.textContent = backupName
+              ? `Auto sync is OFF – allow access to “${backupName}” to resume.`
+              : 'Auto sync is OFF – allow access to the backup folder to resume.';
           } else {
             autoSyncStatusElem.textContent = 'Auto sync is OFF. No backup folder selected.';
           }
           if (autoSyncWarningElem) {
-            const warning = backupWarningMessage || (!hasActiveFolder ? 'Select a backup folder to keep automatic backups running.' : '');
+            let warning = backupWarningMessage;
+            if (!warning) {
+              if (!hasHandle) {
+                warning = 'Select a backup folder to keep automatic backups running.';
+              } else if (backupPermissionState === 'prompt') {
+                warning = backupName
+                  ? `Grant TimeKeeper access to “${backupName}” to keep automatic backups running.`
+                  : 'Grant TimeKeeper access to your backup folder to keep automatic backups running.';
+              }
+            }
             if (warning) {
               autoSyncWarningElem.textContent = warning;
               autoSyncWarningElem.style.display = 'block';
@@ -4986,7 +5064,7 @@ function loadData() {
                 lastBackupStatusElem.textContent = '';
                 lastBackupStatusElem.style.display = 'none';
               }
-            } else if (autoSyncEnabled && hasActiveFolder) {
+            } else if (autoSyncEnabled && folderUsable) {
               lastBackupStatusElem.textContent = 'Last backup: pending…';
               lastBackupStatusElem.title = '';
               lastBackupStatusElem.style.display = 'block';
@@ -4997,10 +5075,6 @@ function loadData() {
           }
         }
         if (autoSyncToggle) {
-          autoSyncToggle.checked = autoSyncEnabled && !!backupDirHandle;
-          if (autoSyncEnabled && !backupDirHandle) {
-            disableAutoSyncWithWarning('Auto sync disabled: no backup folder configured.');
-          }
           updateAutoSyncStatus();
           autoSyncToggle.addEventListener('change', async () => {
             if (autoSyncToggle.checked) {
@@ -5009,12 +5083,9 @@ function loadData() {
                 ensured = await chooseBackupDir();
               } else {
                 ensured = await ensureBackupPermissionWithPrompt(backupDirHandle);
-                if (!ensured) {
-                  backupDirHandle = null;
-                }
               }
               if (!ensured || !backupDirHandle) {
-                disableAutoSyncWithWarning('Backup folder required to enable auto sync.');
+                disableAutoSyncWithWarning('Permission to the backup folder is required to enable auto sync.');
                 return;
               }
               autoSyncEnabled = true;
@@ -5035,6 +5106,19 @@ function loadData() {
         // will call chooseBackupDir(). If auto sync is disabled, this button remains
         // functional to allow the user to preselect a folder before enabling auto sync.
         const chooseBtn = document.getElementById('chooseBackupDirBtn');
+        const fsAccessSupported = !!window.showDirectoryPicker;
+        if (!fsAccessSupported) {
+          if (autoSyncToggle) {
+            autoSyncToggle.disabled = true;
+            autoSyncToggle.title = 'Auto sync requires a browser that supports folder access.';
+          }
+          if (chooseBtn) {
+            chooseBtn.disabled = true;
+            chooseBtn.title = 'Auto sync requires a browser that supports folder access.';
+          }
+          backupWarningMessage = 'Auto sync unavailable: your browser does not support choosing folders.';
+          updateAutoSyncStatus();
+        }
         if (chooseBtn) {
           chooseBtn.addEventListener('click', () => {
             chooseBackupDir({ activateSync: true });
