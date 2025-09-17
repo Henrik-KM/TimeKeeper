@@ -5005,11 +5005,10 @@ function loadData() {
         const autoSyncWarningElem = document.getElementById('autoSyncWarning');
         const lastBackupStatusElem = document.getElementById('lastBackupStatus');
         function syncAutoSyncToggleUI() {
-          const toggle = document.getElementById('autoSyncToggle');
-          if (!toggle) return;
+          if (!autoSyncToggle) return;
           const shouldCheck = autoSyncEnabled && backupPermissionState === 'granted' && !!backupDirHandle;
-          if (toggle.checked !== shouldCheck) {
-            toggle.checked = shouldCheck;
+          if (autoSyncToggle.checked !== shouldCheck) {
+            autoSyncToggle.checked = shouldCheck;
           }
         }
         function updateAutoSyncStatus() {
