@@ -669,9 +669,9 @@ function loadData() {
         if (g.purchasedDate === undefined) g.purchasedDate = null;
         if (!g.category) g.category = 'standard';
         if (g.originalCost === undefined && typeof g.cost === 'number') g.originalCost = g.cost;
-                if (g.appliedCredits === undefined) g.appliedCredits = 0;
-                if (g.boostApplied === undefined) g.boostApplied = false;
-                if (g.boostPercentApplied === undefined) g.boostPercentApplied = 0;
+        if (g.appliedCredits === undefined) g.appliedCredits = 0;
+        if (g.boostApplied === undefined) g.boostApplied = false;
+        if (g.boostPercentApplied === undefined) g.boostPercentApplied = 0;
         // Remove legacy fields carryOver and purchasedCount if present
         if (g.hasOwnProperty('carryOver')) delete g.carryOver;
         if (g.hasOwnProperty('purchasedCount')) delete g.purchasedCount;
