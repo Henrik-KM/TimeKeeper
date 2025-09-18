@@ -3235,7 +3235,7 @@ function loadData() {
           perProjectStats.forEach(item => {
             const deficitValue = Number.isFinite(item.stats.totalScheduleDeficit)
               ? item.stats.totalScheduleDeficit
-              : ((item.stats.totalExpectedToDate || 0) - (item.stats.totalHours || 0));
+              : 0;
             if (deficitValue > maxTotalDeficit) {
               maxTotalDeficit = deficitValue;
               recommendedProjectEntry = item;
