@@ -2873,6 +2873,8 @@ function loadData() {
           // Calculate expected used hours based on how far through the project we are
           const totalProjectDays = daysPassed + daysLeft;
           const expectedUsed = totalProjectDays > 0 ? project.budgetHours * (daysPassed / totalProjectDays) : totalHours;
+          const totalExpectedToDate = expectedUsed;
+          const totalScheduleDeficit = totalExpectedToDate - totalHours;
           let status = 'on-track';
           let statusColor = 'green';
           let reason = '';
@@ -3007,6 +3009,8 @@ function loadData() {
           const weeklyTargetConst = workingWeeksLeftInMonth > 0 ? monthlyRemaining / workingWeeksLeftInMonth : 0;
           return {
             totalHours,
+            totalExpectedToDate,
+            totalScheduleDeficit,
             remainingHours,
             usedPct: project.budgetHours > 0 ? (totalHours / project.budgetHours) * 100 : 0,
             daysLeft,
@@ -3218,34 +3222,28 @@ function loadData() {
         // Dashboard rendering
         function updateDashboard() {
           const stats = computeGlobalStats();
-          // Determine recommended projects before building cards and assign global identifiers
-          let maxWeeklyDeficitCard = -Infinity;
-          let maxMonthlyDeficitCard = -Infinity;
-          let recommendedWeeklyProject = null;
-          let recommendedMonthlyProject = null;
-          if (data.projects.length > 0) {
-            data.projects.forEach(project => {
-              const sp = computeProjectStats(project);
-              const weeklyDeficit = (sp.weeklyExpected || 0) - (sp.weeklyHours || 0);
-              if (weeklyDeficit > maxWeeklyDeficitCard) {
-                maxWeeklyDeficitCard = weeklyDeficit;
-                recommendedWeeklyProject = project;
-              }
-              const monthlyDeficit = (sp.monthlyExpected || 0) - (sp.monthlyHours || 0);
-              if (monthlyDeficit > maxMonthlyDeficitCard) {
-                maxMonthlyDeficitCard = monthlyDeficit;
-                recommendedMonthlyProject = project;
-              }
-            });
-          }
-          // Update global identifiers so other sections know which projects are recommended
-          currentRecommendedWeeklyId = recommendedWeeklyProject ? recommendedWeeklyProject.id : null;
-          currentRecommendedMonthlyId = recommendedMonthlyProject ? recommendedMonthlyProject.id : null;
           // Precompute per-project stats once for use in cards and recommendations. This avoids
           // recalculating computeProjectStats multiple times during rendering.
           const perProjectStats = data.projects.map(p => {
             return { project: p, stats: computeProjectStats(p) };
           });
+          // Determine the recommended project based on overall schedule deficit. Projects with the
+          // largest positive deficit are most behind schedule; if all deficits are negative, choose
+          // the project that is least ahead of schedule (closest to zero).
+          let recommendedProjectEntry = null;
+          let maxTotalDeficit = -Infinity;
+          perProjectStats.forEach(item => {
+            const deficitValue = Number.isFinite(item.stats.totalScheduleDeficit)
+              ? item.stats.totalScheduleDeficit
+              : ((item.stats.totalExpectedToDate || 0) - (item.stats.totalHours || 0));
+            if (deficitValue > maxTotalDeficit) {
+              maxTotalDeficit = deficitValue;
+              recommendedProjectEntry = item;
+            }
+          });
+          // Update global identifiers so other sections know which project is recommended
+          currentRecommendedWeeklyId = recommendedProjectEntry ? recommendedProjectEntry.project.id : null;
+          currentRecommendedMonthlyId = recommendedProjectEntry ? recommendedProjectEntry.project.id : null;
           // Calculate time progress for the current week and month. Instead of using only
           // whole working days, include the fraction of the day that has elapsed. For
           // weekly progress, Monday 00:00 marks the start and Friday 23:59 marks the
