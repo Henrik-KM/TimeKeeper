@@ -2026,8 +2026,8 @@ function loadData() {
             if (data.groceryBudgetStartDate !== normalized) {
               data.groceryBudgetStartDate = normalized;
               saveData();
+              updateGrocerySection();
             }
-            updateGrocerySection();
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
