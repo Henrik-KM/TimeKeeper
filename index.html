@@ -2026,8 +2026,8 @@ function loadData() {
             if (data.groceryBudgetStartDate !== normalized) {
               data.groceryBudgetStartDate = normalized;
               saveData();
-              updateGrocerySection();
             }
+            updateGrocerySection();
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
@@ -2882,18 +2882,30 @@ function loadData() {
           if (typeof value !== 'string') return null;
           const trimmed = value.trim();
           if (!trimmed) return null;
-          const parts = trimmed.split('-');
-          if (parts.length !== 3) return null;
-          const year = Number(parts[0]);
-          const month = Number(parts[1]);
-          const day = Number(parts[2]);
-          if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
-          const date = new Date(year, month - 1, day);
-          if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
-            return null;
+          // Support the persisted formats "YYYY-MM-DD" and ISO timestamps such as
+          // "YYYY-MM-DDTHH:mm:ss.sssZ" by matching the leading date portion. This
+          // keeps existing saves (which previously stored ISO strings) from being
+          // treated as missing and inadvertently resetting the budget start date.
+          const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+          if (match) {
+            const year = Number(match[1]);
+            const month = Number(match[2]);
+            const day = Number(match[3]);
+            const date = new Date(year, month - 1, day);
+            if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
+              date.setHours(0, 0, 0, 0);
+              return date;
+            }
           }
-          date.setHours(0, 0, 0, 0);
-          return date;
+          // Fall back to Date parsing for any other legacy formats, normalizing
+          // the result to the local calendar day when valid.
+          const fallback = new Date(trimmed);
+          if (!isNaN(fallback)) {
+            const date = new Date(fallback.getFullYear(), fallback.getMonth(), fallback.getDate());
+            date.setHours(0, 0, 0, 0);
+            return date;
+          }
+          return null;
         }
 
         function formatLocalDateString(date) {
