@@ -2265,7 +2265,7 @@ function loadData() {
                   } else {
                     // Apply the same fallback for legacy biannual purchases so
                     // they reduce the carry exactly once.
-                    item.purchasedDate = legacyFallbackDate.toISOString();
+                    // Do not mutate item.purchasedDate; use fallback date only for calculation.
                     biSpentPrevTotal += item.cost;
                   }
                 });
