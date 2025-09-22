@@ -2175,11 +2175,11 @@ function loadData() {
                 }
               });
             }
-            // Update budget carry-over: newCarryBudget = oldCarryBudget + (dynamicBudgetPrev - spentPrev)
+            // Update budget carry-over to reflect the remaining budget from last week
             const baseBudget = typeof data.groceryBudgetWeekly === 'number' ? data.groceryBudgetWeekly : 0;
             const oldBudgetCarry = typeof data.groceryBudgetWeeklyCarry === 'number' ? data.groceryBudgetWeeklyCarry : 0;
             const dynamicPrevBudget = baseBudget + oldBudgetCarry;
-            data.groceryBudgetWeeklyCarry = oldBudgetCarry + (dynamicPrevBudget - weeklySpentPrev);
+            data.groceryBudgetWeeklyCarry = dynamicPrevBudget - weeklySpentPrev;
             // Persist the reset date
             localStorage.setItem('groceryWeeklyResetPro', mondayStr);
             saveData();
@@ -2216,7 +2216,7 @@ function loadData() {
             const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
             const oldBudgetCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
             const dynamicPrevBudgetM = baseBudgetM + oldBudgetCarryM;
-            data.groceryBudgetMonthlyCarry = oldBudgetCarryM + (dynamicPrevBudgetM - monthlySpentPrev);
+            data.groceryBudgetMonthlyCarry = dynamicPrevBudgetM - monthlySpentPrev;
             // Now handle biannual resets at month boundary too if half year changed
             // Determine start date and current half boundaries
             const nowDate = new Date();
@@ -2254,7 +2254,7 @@ function loadData() {
               const baseBudgetBi = typeof data.groceryBudgetBiYearly === 'number' ? data.groceryBudgetBiYearly : 0;
               const oldBudgetCarryBi = typeof data.groceryBudgetBiYearlyCarry === 'number' ? data.groceryBudgetBiYearlyCarry : 0;
               const dynamicPrevBudgetBi = baseBudgetBi + oldBudgetCarryBi;
-              data.groceryBudgetBiYearlyCarry = oldBudgetCarryBi + (dynamicPrevBudgetBi - biSpentPrevTotal);
+              data.groceryBudgetBiYearlyCarry = dynamicPrevBudgetBi - biSpentPrevTotal;
               // Persist half-year reset
               localStorage.setItem('groceryBiResetPro', halfKey);
             }
