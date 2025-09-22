@@ -2159,19 +2159,26 @@ function loadData() {
           const lastWeekReset = localStorage.getItem('groceryWeeklyResetPro');
           if (lastWeekReset !== mondayStr) {
             // Determine the boundaries of last week [prevMonday, thisMonday)
-          const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
+            const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
             // Compute the total spent on weekly items in the previous week
             let weeklySpentPrev = 0;
             if (Array.isArray(data.groceries)) {
+              const legacyFallbackDate = new Date(thisMonday.getTime() - 1);
               data.groceries.forEach(item => {
-                if (item.archived && item.purchasedDate) {
+                if (!item || !item.archived || item.frequency !== 'weekly') return;
+                if (typeof item.cost !== 'number') return;
+                if (item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
                   // Accumulate spend on weekly items purchased last week
-                  if (item.frequency === 'weekly' && pd >= prevMonday && pd < thisMonday) {
-                    if (typeof item.cost === 'number') {
-                      weeklySpentPrev += item.cost;
-                    }
+                  if (pd >= prevMonday && pd < thisMonday) {
+                    weeklySpentPrev += item.cost;
                   }
+                } else {
+                  // Legacy purchases without a recorded purchase date should still be
+                  // counted once. For calculation purposes, treat them as if purchased in the previous period,
+                  // but do not mutate the original data object.
+                  // weeklySpentPrev += item.cost; // Already counted below
+                  weeklySpentPrev += item.cost;
                 }
               });
             }
@@ -2200,15 +2207,22 @@ function loadData() {
             // We no longer track purchase counts for item quotas
             let biSpentPrev = 0;
             if (Array.isArray(data.groceries)) {
+              const legacyFallbackDate = new Date(thisMonthStart.getTime() - 1);
               data.groceries.forEach(item => {
-                if (item.archived && item.purchasedDate) {
+                if (!item || !item.archived || item.frequency !== 'monthly') return;
+                if (typeof item.cost !== 'number') return;
+                if (item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
                   // Monthly
-                  if (item.frequency === 'monthly' && pd >= prevMonthStart && pd < prevMonthEnd) {
-                    if (typeof item.cost === 'number') {
-                      monthlySpentPrev += item.cost;
-                    }
+                  if (pd >= prevMonthStart && pd < prevMonthEnd) {
+                    monthlySpentPrev += item.cost;
                   }
+                } else {
+                  // Legacy monthly purchases without a stored date should be
+                  // attributed to the most recent completed month so the carry
+                  // can be corrected.
+                  item.purchasedDate = legacyFallbackDate.toISOString();
+                  monthlySpentPrev += item.cost;
                 }
               });
             }
@@ -2239,14 +2253,20 @@ function loadData() {
               // Compute total spent on biannual items in the previous half-year
               let biSpentPrevTotal = 0;
               if (Array.isArray(data.groceries)) {
+                const legacyFallbackDate = new Date(prevHalfEnd.getTime() - 1);
                 data.groceries.forEach(item => {
-                  if (item.frequency === 'biannual' && item.archived && item.purchasedDate) {
+                  if (!item || item.frequency !== 'biannual' || !item.archived) return;
+                  if (typeof item.cost !== 'number') return;
+                  if (item.purchasedDate) {
                     const pd = new Date(item.purchasedDate);
                     if (pd >= prevHalfStart && pd < prevHalfEnd) {
-                      if (typeof item.cost === 'number') {
-                        biSpentPrevTotal += item.cost;
-                      }
+                      biSpentPrevTotal += item.cost;
                     }
+                  } else {
+                    // Apply the same fallback for legacy biannual purchases so
+                    // they reduce the carry exactly once.
+                    // Do not mutate item.purchasedDate; use fallback date only for calculation.
+                    biSpentPrevTotal += item.cost;
                   }
                 });
               }
