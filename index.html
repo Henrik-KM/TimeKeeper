@@ -1777,13 +1777,11 @@ function loadData() {
           let halfEnd;
           {
             // Determine budgeting start date; if not set, default to current date (start of month)
-            let startDate;
-            if (data.groceryBudgetStartDate) {
-              startDate = new Date(data.groceryBudgetStartDate);
-            } else {
+            let startDate = parseLocalDateString(data.groceryBudgetStartDate);
+            if (!startDate) {
               // default to first day of current month
               startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-              data.groceryBudgetStartDate = startDate.toISOString().split('T')[0];
+              data.groceryBudgetStartDate = formatLocalDateString(startDate);
               // persist start date
               saveData();
             }
@@ -1930,9 +1928,9 @@ function loadData() {
           const weeklyDynamicBudget = weeklyBaseWithCarry * currentMultiplier;
           const nextWeekBudget = weeklyBaseWithCarry * nextMultiplier;
           // Time progress for budgets (fraction of period elapsed)
-          const weekTimeProgress = (now - weekStart) / (weekEnd - weekStart);
-          const monthTimeProgress = (now - monthStart) / (monthEnd - monthStart);
-          const halfTimeProgress = (now - halfStart) / (halfEnd - halfStart);
+          const weekTimeProgress = clampUnitInterval((now - weekStart) / (weekEnd - weekStart));
+          const monthTimeProgress = clampUnitInterval((now - monthStart) / (monthEnd - monthStart));
+          const halfTimeProgress = clampUnitInterval((now - halfStart) / (halfEnd - halfStart));
           // Expected spending so far
           const weeklyExpectedSpent = weeklyDynamicBudget * weekTimeProgress;
           const monthlyExpectedSpent = monthlyDynamicBudget * monthTimeProgress;
@@ -2021,17 +2019,14 @@ function loadData() {
           editStartBtn.textContent = 'Set Start Date';
           editStartBtn.addEventListener('click', () => {
             const d = prompt('Start date for biannual budget periods (YYYY-MM-DD)', data.groceryBudgetStartDate || '');
-            if (d) {
-              // Validate simple YYYY-MM-DD format
-              const parts = d.split('-');
-              if (parts.length === 3) {
-                const testDate = new Date(d);
-                if (!isNaN(testDate.getTime())) {
-                  data.groceryBudgetStartDate = d;
-                  saveData();
-                  updateGrocerySection();
-                }
-              }
+            if (!d) return;
+            const parsed = parseLocalDateString(d);
+            if (!parsed) return;
+            const normalized = formatLocalDateString(parsed);
+            if (data.groceryBudgetStartDate !== normalized) {
+              data.groceryBudgetStartDate = normalized;
+              saveData();
+              updateGrocerySection();
             }
           });
           controlsDiv.appendChild(editStartBtn);
@@ -2305,10 +2300,8 @@ function loadData() {
             dataChanged = true;
           }
           // Biannual carry-over recalculation
-          let startDate;
-          if (data.groceryBudgetStartDate) {
-            startDate = new Date(data.groceryBudgetStartDate);
-          } else {
+          let startDate = parseLocalDateString(data.groceryBudgetStartDate);
+          if (!startDate) {
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           }
           startDate.setHours(0, 0, 0, 0);
@@ -2883,6 +2876,37 @@ function loadData() {
         function formatDate(dateStr) {
           const dt = new Date(dateStr);
           return isNaN(dt) ? '' : dt.toLocaleDateString();
+        }
+
+        function parseLocalDateString(value) {
+          if (typeof value !== 'string') return null;
+          const trimmed = value.trim();
+          if (!trimmed) return null;
+          const parts = trimmed.split('-');
+          if (parts.length !== 3) return null;
+          const year = Number(parts[0]);
+          const month = Number(parts[1]);
+          const day = Number(parts[2]);
+          if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+          const date = new Date(year, month - 1, day);
+          if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
+            return null;
+          }
+          date.setHours(0, 0, 0, 0);
+          return date;
+        }
+
+        function formatLocalDateString(date) {
+          if (!(date instanceof Date) || isNaN(date)) return '';
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+
+        function clampUnitInterval(value) {
+          if (!Number.isFinite(value)) return 0;
+          return Math.min(1, Math.max(0, value));
         }
         function formatCurrency(num, decimals = 1) {
           // Format currency as Swedish Krona (kr). Allows rounding to positive or
