@@ -2283,9 +2283,9 @@ function loadData() {
                   monthlySpentPrev += cost;
                 }
               } else {
-                item.purchasedDate = legacyFallbackDate.toISOString();
-                monthlySpentPrev += cost;
-                dataChanged = true;
+                // Legacy monthly item without a purchasedDate: skip from monthlySpentPrev calculation.
+                // Optionally, flag for user review or log a warning here.
+                // No changes to item or monthlySpentPrev.
               }
             });
           }
