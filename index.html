@@ -2236,10 +2236,10 @@ function loadData() {
                   weeklySpentPrev += cost;
                 }
               } else {
-                // Legacy purchases without a recorded purchase date should still be counted once.
-                item.purchasedDate = legacyFallbackDate.toISOString();
-                weeklySpentPrev += cost;
-                dataChanged = true;
+                // Exclude legacy purchases without a recorded purchase date from budget calculations.
+                // Optionally, assign a neutral date for consistency:
+                item.purchasedDate = null;
+                // Do not count their cost in weeklySpentPrev.
               }
             });
           }
