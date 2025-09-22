@@ -2334,9 +2334,9 @@ function loadData() {
                   biSpentPrevTotal += cost;
                 }
               } else {
-                item.purchasedDate = legacyFallbackDate.toISOString();
-                biSpentPrevTotal += cost;
-                dataChanged = true;
+                // Undated legacy biannual purchase: exclude from carry-over calculation.
+                // Optionally, flag for review:
+                item.needsDateAssignment = true;
               }
             });
           }
