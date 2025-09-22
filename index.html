@@ -2285,7 +2285,7 @@ function loadData() {
             const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
             const oldBudgetCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
             const dynamicPrevBudgetM = baseBudgetM + oldBudgetCarryM;
-            data.groceryBudgetMonthlyCarry = dynamicPrevBudgetM - monthlySpentPrev;
+            data.groceryBudgetMonthlyCarry = oldBudgetCarryM + (dynamicPrevBudgetM - monthlySpentPrev);
             // Now handle biannual resets at month boundary too if half year changed
             // Determine start date and current half boundaries
             const nowDate = new Date();
