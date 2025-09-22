@@ -664,10 +664,28 @@ function loadData() {
         // Migrate legacy properties to new structure. Each item should have a name and frequency.
         if (!g.name) g.name = '';
         if (!g.frequency) g.frequency = 'weekly';
+        if (typeof g.frequency === 'string') {
+          const freq = g.frequency.toLowerCase();
+          if (freq === 'weekly' || freq === 'monthly' || freq === 'biannual') {
+            g.frequency = freq;
+          } else {
+            g.frequency = 'weekly';
+          }
+        } else {
+          g.frequency = 'weekly';
+        }
         // In the new structure, we track whether an item has been archived and when it was purchased. Default false/null.
         if (g.archived === undefined) g.archived = false;
         if (g.purchasedDate === undefined) g.purchasedDate = null;
         if (!g.category) g.category = 'standard';
+        if (typeof g.cost === 'string') {
+          const parsedCost = parseFloat(g.cost);
+          if (!isNaN(parsedCost)) g.cost = parsedCost;
+        }
+        if (typeof g.originalCost === 'string') {
+          const parsedOriginal = parseFloat(g.originalCost);
+          if (!isNaN(parsedOriginal)) g.originalCost = parsedOriginal;
+        }
         if (g.originalCost === undefined && typeof g.cost === 'number') g.originalCost = g.cost;
         if (g.appliedCredits === undefined) g.appliedCredits = 0;
         if (g.boostApplied === undefined) g.boostApplied = false;
@@ -1726,6 +1744,7 @@ function loadData() {
           biannualListEl.innerHTML = '';
           summaryContainer.innerHTML = '';
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
+          let normalizedAny = false;
           // Determine period boundaries for weekly, monthly and biannual budgets
           const now = new Date();
           // Weekly boundaries (Monday to next Monday) for spending
@@ -1767,17 +1786,24 @@ function loadData() {
           let monthlySpent = 0;
           let biannualSpent = 0;
           groceries.forEach(it => {
-            if (it.archived && it.purchasedDate && typeof it.cost === 'number') {
-              const pd = new Date(it.purchasedDate);
-              if (it.frequency === 'weekly' && pd >= weekStart && pd < weekEnd) {
-                weeklySpent += it.cost;
-              }
-              if (it.frequency === 'monthly' && pd >= monthStart && pd < monthEnd) {
-                monthlySpent += it.cost;
-              }
-              if (it.frequency === 'biannual' && pd >= halfStart && pd < halfEnd) {
-                biannualSpent += it.cost;
-              }
+            if (!it || !it.archived || !it.purchasedDate) return;
+            const cost = Number(it.cost);
+            if (!Number.isFinite(cost)) return;
+            const freq = typeof it.frequency === 'string' ? it.frequency.toLowerCase() : 'weekly';
+            if (it.frequency !== freq) {
+              it.frequency = freq;
+              normalizedAny = true;
+            }
+            const pd = new Date(it.purchasedDate);
+            if (isNaN(pd)) return;
+            if (freq === 'weekly' && pd >= weekStart && pd < weekEnd) {
+              weeklySpent += cost;
+            }
+            if (freq === 'monthly' && pd >= monthStart && pd < monthEnd) {
+              monthlySpent += cost;
+            }
+            if (freq === 'biannual' && pd >= halfStart && pd < halfEnd) {
+              biannualSpent += cost;
             }
           });
 
@@ -1802,21 +1828,30 @@ function loadData() {
             // Details span: name – cost – frequency – purchase date
             const detailsSpan = document.createElement('span');
             let dateStr = '';
+            const freq = typeof archItem.frequency === 'string' ? archItem.frequency.toLowerCase() : 'weekly';
+            if (archItem.frequency !== freq) {
+              archItem.frequency = freq;
+              normalizedAny = true;
+            }
             if (archItem.purchasedDate) {
               const dt = new Date(archItem.purchasedDate);
               dateStr = dt.toLocaleDateString();
             }
-            const costString = typeof archItem.cost === 'number' ? formatCurrency(archItem.cost, -1).replace(' kr', ' SEK') : '0 SEK';
+            const costNum = Number(archItem.cost);
+            const costString = Number.isFinite(costNum) ? formatCurrency(costNum, -1).replace(' kr', ' SEK') : '0 SEK';
             const parts = [`${archItem.name}`, costString];
-            if (typeof archItem.originalCost === 'number' && archItem.originalCost !== archItem.cost) {
-              const originalString = formatCurrency(archItem.originalCost, -1).replace(' kr', ' SEK');
+            const originalCostNum = Number(archItem.originalCost);
+            if (Number.isFinite(originalCostNum) && originalCostNum !== costNum) {
+              const originalString = formatCurrency(originalCostNum, -1).replace(' kr', ' SEK');
               let creditNote = `original ${originalString}`;
-              if (typeof archItem.appliedCredits === 'number' && archItem.appliedCredits > 0) {
-                creditNote += `, credits −${formatCurrency(archItem.appliedCredits, -1).replace(' kr', ' SEK')}`;
+              const appliedCreditsNum = Number(archItem.appliedCredits);
+              if (Number.isFinite(appliedCreditsNum) && appliedCreditsNum > 0) {
+                creditNote += `, credits −${formatCurrency(appliedCreditsNum, -1).replace(' kr', ' SEK')}`;
               }
               parts.push(creditNote);
             }
-            parts.push(archItem.frequency);
+            const freqLabel = freq.charAt(0).toUpperCase() + freq.slice(1);
+            parts.push(freqLabel);
             if (dateStr) parts.push(dateStr);
             detailsSpan.textContent = parts.join(' – ');
             rowArch.appendChild(detailsSpan);
@@ -1999,6 +2034,11 @@ function loadData() {
           const boostPercentDisplay = Math.round((fitness.weekendBoostPercent || 0) * 100);
           groceries.forEach((item, index) => {
             if (item.archived) return;
+            const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+            if (item.frequency !== freq) {
+              item.frequency = freq;
+              normalizedAny = true;
+            }
             const li = document.createElement('li');
             li.style.display = 'flex';
             li.style.flexDirection = 'column';
@@ -2046,7 +2086,8 @@ function loadData() {
               let creditsUsed = 0;
               let boostCreditsUsed = 0;
               let boostPercentApplied = 0;
-              if (item.frequency === 'weekly') {
+              const itemFrequency = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+              if (itemFrequency === 'weekly') {
                 const availableCredits = fitnessData.wellnessCredits || 0;
                 let remainingCredits = availableCredits;
                 if (fitnessData.weekendBoostEnabled && item.category === 'treat' && isWeekendBoostActive()) {
@@ -2092,8 +2133,11 @@ function loadData() {
                 item.name = newName.trim();
               }
               const newFreq = prompt('Frequency (weekly/monthly/biannual)', item.frequency);
-              if (newFreq !== null && (newFreq === 'weekly' || newFreq === 'monthly' || newFreq === 'biannual')) {
-                item.frequency = newFreq;
+              if (newFreq !== null) {
+                const cleanedFreq = newFreq.trim().toLowerCase();
+                if (cleanedFreq === 'weekly' || cleanedFreq === 'monthly' || cleanedFreq === 'biannual') {
+                  item.frequency = cleanedFreq;
+                }
               }
               const newCategory = prompt('Category (standard/treat/essential)', item.category || 'standard');
               if (newCategory) {
@@ -2134,15 +2178,18 @@ function loadData() {
               li.appendChild(note);
             }
             // Append to appropriate list
-            if (item.frequency === 'monthly') {
+            if (freq === 'monthly') {
               monthlyListEl.appendChild(li);
-            } else if (item.frequency === 'biannual') {
+            } else if (freq === 'biannual') {
               biannualListEl.appendChild(li);
             } else {
               weeklyListEl.appendChild(li);
             }
           });
           updateFitnessCards();
+          if (normalizedAny) {
+            saveData();
+          }
         }
 
         // Reset grocery counts each Monday for weekly items and on the first day of the month for monthly items.
@@ -2165,20 +2212,24 @@ function loadData() {
             if (Array.isArray(data.groceries)) {
               const legacyFallbackDate = new Date(thisMonday.getTime() - 1);
               data.groceries.forEach(item => {
-                if (!item || !item.archived || item.frequency !== 'weekly') return;
-                if (typeof item.cost !== 'number') return;
+                if (!item || !item.archived) return;
+                const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+                if (item.frequency !== freq) item.frequency = freq;
+                if (freq !== 'weekly') return;
+                const cost = Number(item.cost);
+                if (!Number.isFinite(cost)) return;
                 if (item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
                   // Accumulate spend on weekly items purchased last week
                   if (pd >= prevMonday && pd < thisMonday) {
-                    weeklySpentPrev += item.cost;
+                    weeklySpentPrev += cost;
                   }
                 } else {
                   // Legacy purchases without a recorded purchase date should still be
-                  // counted once. For calculation purposes, treat them as if purchased in the previous period,
-                  // but do not mutate the original data object.
-                  // weeklySpentPrev += item.cost; // Already counted below
-                  weeklySpentPrev += item.cost;
+                  // counted once. Assign them to the previous period so they don't
+                  // permanently inflate the carry-over balance.
+                  item.purchasedDate = legacyFallbackDate.toISOString();
+                  weeklySpentPrev += cost;
                 }
               });
             }
@@ -2209,20 +2260,24 @@ function loadData() {
             if (Array.isArray(data.groceries)) {
               const legacyFallbackDate = new Date(thisMonthStart.getTime() - 1);
               data.groceries.forEach(item => {
-                if (!item || !item.archived || item.frequency !== 'monthly') return;
-                if (typeof item.cost !== 'number') return;
+                if (!item || !item.archived) return;
+                const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+                if (item.frequency !== freq) item.frequency = freq;
+                if (freq !== 'monthly') return;
+                const cost = Number(item.cost);
+                if (!Number.isFinite(cost)) return;
                 if (item.purchasedDate) {
                   const pd = new Date(item.purchasedDate);
                   // Monthly
                   if (pd >= prevMonthStart && pd < prevMonthEnd) {
-                    monthlySpentPrev += item.cost;
+                    monthlySpentPrev += cost;
                   }
                 } else {
                   // Legacy monthly purchases without a stored date should be
                   // attributed to the most recent completed month so the carry
                   // can be corrected.
                   item.purchasedDate = legacyFallbackDate.toISOString();
-                  monthlySpentPrev += item.cost;
+                  monthlySpentPrev += cost;
                 }
               });
             }
@@ -2230,7 +2285,7 @@ function loadData() {
             const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
             const oldBudgetCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
             const dynamicPrevBudgetM = baseBudgetM + oldBudgetCarryM;
-            data.groceryBudgetMonthlyCarry = dynamicPrevBudgetM - monthlySpentPrev;
+            data.groceryBudgetMonthlyCarry = oldBudgetCarryM + (dynamicPrevBudgetM - monthlySpentPrev);
             // Now handle biannual resets at month boundary too if half year changed
             // Determine start date and current half boundaries
             const nowDate = new Date();
@@ -2255,18 +2310,22 @@ function loadData() {
               if (Array.isArray(data.groceries)) {
                 const legacyFallbackDate = new Date(prevHalfEnd.getTime() - 1);
                 data.groceries.forEach(item => {
-                  if (!item || item.frequency !== 'biannual' || !item.archived) return;
-                  if (typeof item.cost !== 'number') return;
+                  if (!item || !item.archived) return;
+                  const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+                  if (item.frequency !== freq) item.frequency = freq;
+                  if (freq !== 'biannual') return;
+                  const cost = Number(item.cost);
+                  if (!Number.isFinite(cost)) return;
                   if (item.purchasedDate) {
                     const pd = new Date(item.purchasedDate);
                     if (pd >= prevHalfStart && pd < prevHalfEnd) {
-                      biSpentPrevTotal += item.cost;
+                      biSpentPrevTotal += cost;
                     }
                   } else {
                     // Apply the same fallback for legacy biannual purchases so
                     // they reduce the carry exactly once.
-                    // Do not mutate item.purchasedDate; use fallback date only for calculation.
-                    biSpentPrevTotal += item.cost;
+                    item.purchasedDate = legacyFallbackDate.toISOString();
+                    biSpentPrevTotal += cost;
                   }
                 });
               }
