@@ -2175,9 +2175,9 @@ function loadData() {
                   }
                 } else {
                   // Legacy purchases without a recorded purchase date should still be
-                  // counted once. Assign them to the previous period so they don't
-                  // permanently inflate the carry-over balance.
-                  item.purchasedDate = legacyFallbackDate.toISOString();
+                  // counted once. For calculation purposes, treat them as if purchased in the previous period,
+                  // but do not mutate the original data object.
+                  // weeklySpentPrev += item.cost; // Already counted below
                   weeklySpentPrev += item.cost;
                 }
               });
