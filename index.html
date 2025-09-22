@@ -642,6 +642,9 @@ function loadData() {
       groceryBudgetWeeklyCarry: 0,
       groceryBudgetMonthlyCarry: 0,
       groceryBudgetBiYearlyCarry: 0,
+      groceryBudgetWeeklyCarryBaseline: 0,
+      groceryBudgetMonthlyCarryBaseline: 0,
+      groceryBudgetBiYearlyCarryBaseline: 0,
       groceryBudgetStartDate: null,
       backupDirName: null,
       lastBackupAt: null,
@@ -703,6 +706,15 @@ function loadData() {
       groceryBudgetWeeklyCarry: typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0,
       groceryBudgetMonthlyCarry: typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0,
       groceryBudgetBiYearlyCarry: typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0,
+      groceryBudgetWeeklyCarryBaseline: typeof parsed.groceryBudgetWeeklyCarryBaseline === 'number'
+        ? parsed.groceryBudgetWeeklyCarryBaseline
+        : (typeof parsed.groceryBudgetWeeklyCarry === 'number' ? parsed.groceryBudgetWeeklyCarry : 0),
+      groceryBudgetMonthlyCarryBaseline: typeof parsed.groceryBudgetMonthlyCarryBaseline === 'number'
+        ? parsed.groceryBudgetMonthlyCarryBaseline
+        : (typeof parsed.groceryBudgetMonthlyCarry === 'number' ? parsed.groceryBudgetMonthlyCarry : 0),
+      groceryBudgetBiYearlyCarryBaseline: typeof parsed.groceryBudgetBiYearlyCarryBaseline === 'number'
+        ? parsed.groceryBudgetBiYearlyCarryBaseline
+        : (typeof parsed.groceryBudgetBiYearlyCarry === 'number' ? parsed.groceryBudgetBiYearlyCarry : 0),
       // Start date for budgeting periods (YYYY-MM-DD); defaults to null to use current date on first run
       groceryBudgetStartDate: parsed.groceryBudgetStartDate || null,
       // Preserve additional persisted properties like backupDirName if present in saved data
@@ -722,6 +734,9 @@ function loadData() {
       groceryBudgetWeeklyCarry: 0,
       groceryBudgetMonthlyCarry: 0,
       groceryBudgetBiYearlyCarry: 0,
+      groceryBudgetWeeklyCarryBaseline: 0,
+      groceryBudgetMonthlyCarryBaseline: 0,
+      groceryBudgetBiYearlyCarryBaseline: 0,
       groceryBudgetStartDate: null,
       backupDirName: null,
       lastBackupAt: null,
@@ -1715,8 +1730,7 @@ function loadData() {
         // navigation between sections.
         updateTodoSection();
 
-        // Perform grocery resets and render groceries list on load
-        resetGroceriesIfNeeded();
+        // Render groceries list on load (reset is triggered within the renderer)
         updateGrocerySection();
 
         // -------------------------------------------------------------------------
@@ -1733,6 +1747,7 @@ function loadData() {
         //  to zero).
 
         function updateGrocerySection() {
+          resetGroceriesIfNeeded();
           const weeklyListEl = document.getElementById('weeklyGroceryList');
           const monthlyListEl = document.getElementById('monthlyGroceryList');
           const biannualListEl = document.getElementById('biannualGroceryList');
@@ -2192,153 +2207,155 @@ function loadData() {
           }
         }
 
-        // Reset grocery counts each Monday for weekly items and on the first day of the month for monthly items.
-        // Carry over undershoots and overshoots into the next period via the carryOver property.
+        // Reset grocery budgets for weekly, monthly, and biannual periods. Carry-overs are recalculated
+        // whenever we cross a boundary or when archived purchases are edited retroactively.
         function resetGroceriesIfNeeded() {
           const now = new Date();
+          let dataChanged = false;
           // Determine the start of this week (Monday at 00:00)
           const dow = now.getDay();
           const diffToMonday = (dow + 6) % 7;
           const thisMonday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
           thisMonday.setHours(0, 0, 0, 0);
           const mondayStr = thisMonday.toDateString();
-          // If weekly reset hasn't been done for this Monday, calculate carryover based on last week's purchases
+          const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
           const lastWeekReset = localStorage.getItem('groceryWeeklyResetPro');
-          if (lastWeekReset !== mondayStr) {
-            // Determine the boundaries of last week [prevMonday, thisMonday)
-            const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
-            // Compute the total spent on weekly items in the previous week
-            let weeklySpentPrev = 0;
-            if (Array.isArray(data.groceries)) {
-              const legacyFallbackDate = new Date(thisMonday.getTime() - 1);
-              data.groceries.forEach(item => {
-                if (!item || !item.archived) return;
-                const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
-                if (item.frequency !== freq) item.frequency = freq;
-                if (freq !== 'weekly') return;
-                const cost = Number(item.cost);
-                if (!Number.isFinite(cost)) return;
-                if (item.purchasedDate) {
-                  const pd = new Date(item.purchasedDate);
-                  // Accumulate spend on weekly items purchased last week
-                  if (pd >= prevMonday && pd < thisMonday) {
-                    weeklySpentPrev += cost;
-                  }
-                } else {
-                  // Legacy purchases without a recorded purchase date should still be
-                  // counted once. Assign them to the previous period so they don't
-                  // permanently inflate the carry-over balance.
-                  item.purchasedDate = legacyFallbackDate.toISOString();
+          let weeklySpentPrev = 0;
+          if (Array.isArray(data.groceries)) {
+            const legacyFallbackDate = new Date(thisMonday.getTime() - 1);
+            data.groceries.forEach(item => {
+              if (!item || !item.archived) return;
+              const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+              if (item.frequency !== freq) item.frequency = freq;
+              if (freq !== 'weekly') return;
+              const cost = Number(item.cost);
+              if (!Number.isFinite(cost)) return;
+              if (item.purchasedDate) {
+                const pd = new Date(item.purchasedDate);
+                if (pd >= prevMonday && pd < thisMonday) {
                   weeklySpentPrev += cost;
                 }
-              });
-            }
-            // Update budget carry-over to reflect the remaining budget from last week
-            const baseBudget = typeof data.groceryBudgetWeekly === 'number' ? data.groceryBudgetWeekly : 0;
-            const oldBudgetCarry = typeof data.groceryBudgetWeeklyCarry === 'number' ? data.groceryBudgetWeeklyCarry : 0;
-            const dynamicPrevBudget = baseBudget + oldBudgetCarry;
-            data.groceryBudgetWeeklyCarry = dynamicPrevBudget - weeklySpentPrev;
-            // Persist the reset date
-            localStorage.setItem('groceryWeeklyResetPro', mondayStr);
-            saveData();
+              } else {
+                // Exclude legacy purchases without a recorded purchase date from budget calculations.
+                // Optionally, assign a neutral date for consistency:
+                item.purchasedDate = null;
+                // Do not count their cost in weeklySpentPrev.
+              }
+            });
           }
-          // Monthly reset: if first day of the month hasn't been reset yet
+          const baseBudget = typeof data.groceryBudgetWeekly === 'number' ? data.groceryBudgetWeekly : 0;
+          const storedCarry = typeof data.groceryBudgetWeeklyCarry === 'number' ? data.groceryBudgetWeeklyCarry : 0;
+          const baselineCarry = lastWeekReset === mondayStr && typeof data.groceryBudgetWeeklyCarryBaseline === 'number'
+            ? data.groceryBudgetWeeklyCarryBaseline
+            : storedCarry;
+          const dynamicPrevBudget = baseBudget + baselineCarry;
+          const newWeeklyCarry = dynamicPrevBudget - weeklySpentPrev;
+          if (lastWeekReset !== mondayStr ||
+              data.groceryBudgetWeeklyCarry !== newWeeklyCarry ||
+              data.groceryBudgetWeeklyCarryBaseline !== baselineCarry) {
+            data.groceryBudgetWeeklyCarry = newWeeklyCarry;
+            data.groceryBudgetWeeklyCarryBaseline = baselineCarry;
+            localStorage.setItem('groceryWeeklyResetPro', mondayStr);
+            dataChanged = true;
+          }
+          // Monthly carry-over recalculation
           const year = now.getFullYear();
           const month = now.getMonth();
           const thisMonthStart = new Date(year, month, 1);
           thisMonthStart.setHours(0, 0, 0, 0);
           const monthKey = year + '-' + month;
           const lastMonthReset = localStorage.getItem('groceryMonthlyResetPro');
-          if (lastMonthReset !== monthKey) {
-            // Determine previous month boundaries [prevMonthStart, thisMonthStart)
-            const prevMonthStart = new Date(year, month - 1, 1);
-            const prevMonthEnd = new Date(year, month, 1);
-            // Compute total spent on monthly items in the previous month
-            let monthlySpentPrev = 0;
-            // We no longer track purchase counts for item quotas
-            let biSpentPrev = 0;
-            if (Array.isArray(data.groceries)) {
-              const legacyFallbackDate = new Date(thisMonthStart.getTime() - 1);
-              data.groceries.forEach(item => {
-                if (!item || !item.archived) return;
-                const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
-                if (item.frequency !== freq) item.frequency = freq;
-                if (freq !== 'monthly') return;
-                const cost = Number(item.cost);
-                if (!Number.isFinite(cost)) return;
-                if (item.purchasedDate) {
-                  const pd = new Date(item.purchasedDate);
-                  // Monthly
-                  if (pd >= prevMonthStart && pd < prevMonthEnd) {
-                    monthlySpentPrev += cost;
-                  }
-                } else {
-                  // Legacy monthly purchases without a stored date should be
-                  // attributed to the most recent completed month so the carry
-                  // can be corrected.
-                  item.purchasedDate = legacyFallbackDate.toISOString();
+          const prevMonthStart = new Date(year, month - 1, 1);
+          const prevMonthEnd = new Date(year, month, 1);
+          let monthlySpentPrev = 0;
+          if (Array.isArray(data.groceries)) {
+            const legacyFallbackDate = new Date(thisMonthStart.getTime() - 1);
+            data.groceries.forEach(item => {
+              if (!item || !item.archived) return;
+              const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+              if (item.frequency !== freq) item.frequency = freq;
+              if (freq !== 'monthly') return;
+              const cost = Number(item.cost);
+              if (!Number.isFinite(cost)) return;
+              if (item.purchasedDate) {
+                const pd = new Date(item.purchasedDate);
+                if (pd >= prevMonthStart && pd < prevMonthEnd) {
                   monthlySpentPrev += cost;
                 }
-              });
-            }
-            // Update monthly budget carry-over
-            const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
-            const oldBudgetCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
-            const dynamicPrevBudgetM = baseBudgetM + oldBudgetCarryM;
-            data.groceryBudgetMonthlyCarry = oldBudgetCarryM + (dynamicPrevBudgetM - monthlySpentPrev);
-            // Now handle biannual resets at month boundary too if half year changed
-            // Determine start date and current half boundaries
-            const nowDate = new Date();
-            let startDate;
-            if (data.groceryBudgetStartDate) {
-              startDate = new Date(data.groceryBudgetStartDate);
-            } else {
-              startDate = new Date(nowDate.getFullYear(), nowDate.getMonth(), 1);
-            }
-            startDate.setHours(0, 0, 0, 0);
-            const monthsDiff = (nowDate.getFullYear() - startDate.getFullYear()) * 12 + (nowDate.getMonth() - startDate.getMonth());
-            const currentHalfIndex = Math.floor(monthsDiff / 6);
-            // Determine if we have moved to a new half-year since last reset
-            const lastHalfReset = localStorage.getItem('groceryBiResetPro');
-            const halfKey = String(currentHalfIndex);
-            if (lastHalfReset !== halfKey) {
-              // Determine previous half boundaries
-              const prevHalfStart = new Date(startDate.getFullYear(), startDate.getMonth() + (currentHalfIndex - 1) * 6, startDate.getDate());
-              const prevHalfEnd = new Date(startDate.getFullYear(), startDate.getMonth() + currentHalfIndex * 6, startDate.getDate());
-              // Compute total spent on biannual items in the previous half-year
-              let biSpentPrevTotal = 0;
-              if (Array.isArray(data.groceries)) {
-                const legacyFallbackDate = new Date(prevHalfEnd.getTime() - 1);
-                data.groceries.forEach(item => {
-                  if (!item || !item.archived) return;
-                  const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
-                  if (item.frequency !== freq) item.frequency = freq;
-                  if (freq !== 'biannual') return;
-                  const cost = Number(item.cost);
-                  if (!Number.isFinite(cost)) return;
-                  if (item.purchasedDate) {
-                    const pd = new Date(item.purchasedDate);
-                    if (pd >= prevHalfStart && pd < prevHalfEnd) {
-                      biSpentPrevTotal += cost;
-                    }
-                  } else {
-                    // Apply the same fallback for legacy biannual purchases so
-                    // they reduce the carry exactly once.
-                    item.purchasedDate = legacyFallbackDate.toISOString();
-                    biSpentPrevTotal += cost;
-                  }
-                });
+              } else {
+                // Legacy monthly item without a purchasedDate: skip from monthlySpentPrev calculation.
+                // Optionally, flag for user review or log a warning here.
+                // No changes to item or monthlySpentPrev.
               }
-              // Update biannual budget carry-over
-              const baseBudgetBi = typeof data.groceryBudgetBiYearly === 'number' ? data.groceryBudgetBiYearly : 0;
-              const oldBudgetCarryBi = typeof data.groceryBudgetBiYearlyCarry === 'number' ? data.groceryBudgetBiYearlyCarry : 0;
-              const dynamicPrevBudgetBi = baseBudgetBi + oldBudgetCarryBi;
-              data.groceryBudgetBiYearlyCarry = dynamicPrevBudgetBi - biSpentPrevTotal;
-              // Persist half-year reset
-              localStorage.setItem('groceryBiResetPro', halfKey);
-            }
-            // Persist monthly reset
+            });
+          }
+          const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
+          const storedCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
+          const baselineCarryM = lastMonthReset === monthKey && typeof data.groceryBudgetMonthlyCarryBaseline === 'number'
+            ? data.groceryBudgetMonthlyCarryBaseline
+            : storedCarryM;
+          const dynamicPrevBudgetM = baseBudgetM + baselineCarryM;
+          const newMonthlyCarry = dynamicPrevBudgetM - monthlySpentPrev;
+          if (lastMonthReset !== monthKey ||
+              data.groceryBudgetMonthlyCarry !== newMonthlyCarry ||
+              data.groceryBudgetMonthlyCarryBaseline !== baselineCarryM) {
+            data.groceryBudgetMonthlyCarry = newMonthlyCarry;
+            data.groceryBudgetMonthlyCarryBaseline = baselineCarryM;
             localStorage.setItem('groceryMonthlyResetPro', monthKey);
+            dataChanged = true;
+          }
+          // Biannual carry-over recalculation
+          let startDate;
+          if (data.groceryBudgetStartDate) {
+            startDate = new Date(data.groceryBudgetStartDate);
+          } else {
+            startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+          }
+          startDate.setHours(0, 0, 0, 0);
+          const monthsDiff = (now.getFullYear() - startDate.getFullYear()) * 12 + (now.getMonth() - startDate.getMonth());
+          const currentHalfIndex = Math.floor(monthsDiff / 6);
+          const lastHalfReset = localStorage.getItem('groceryBiResetPro');
+          const halfKey = String(currentHalfIndex);
+          const prevHalfStart = new Date(startDate.getFullYear(), startDate.getMonth() + (currentHalfIndex - 1) * 6, startDate.getDate());
+          const prevHalfEnd = new Date(startDate.getFullYear(), startDate.getMonth() + currentHalfIndex * 6, startDate.getDate());
+          let biSpentPrevTotal = 0;
+          if (Array.isArray(data.groceries)) {
+            const legacyFallbackDate = new Date(prevHalfEnd.getTime() - 1);
+            data.groceries.forEach(item => {
+              if (!item || !item.archived) return;
+              const freq = typeof item.frequency === 'string' ? item.frequency.toLowerCase() : 'weekly';
+              if (item.frequency !== freq) item.frequency = freq;
+              if (freq !== 'biannual') return;
+              const cost = Number(item.cost);
+              if (!Number.isFinite(cost)) return;
+              if (item.purchasedDate) {
+                const pd = new Date(item.purchasedDate);
+                if (pd >= prevHalfStart && pd < prevHalfEnd) {
+                  biSpentPrevTotal += cost;
+                }
+              } else {
+                // Undated legacy biannual purchase: exclude from carry-over calculation.
+                // Optionally, flag for review:
+                item.needsDateAssignment = true;
+              }
+            });
+          }
+          const baseBudgetBi = typeof data.groceryBudgetBiYearly === 'number' ? data.groceryBudgetBiYearly : 0;
+          const storedCarryBi = typeof data.groceryBudgetBiYearlyCarry === 'number' ? data.groceryBudgetBiYearlyCarry : 0;
+          const baselineCarryBi = lastHalfReset === halfKey && typeof data.groceryBudgetBiYearlyCarryBaseline === 'number'
+            ? data.groceryBudgetBiYearlyCarryBaseline
+            : storedCarryBi;
+          const dynamicPrevBudgetBi = baseBudgetBi + baselineCarryBi;
+          const newBiCarry = dynamicPrevBudgetBi - biSpentPrevTotal;
+          if (lastHalfReset !== halfKey ||
+              data.groceryBudgetBiYearlyCarry !== newBiCarry ||
+              data.groceryBudgetBiYearlyCarryBaseline !== baselineCarryBi) {
+            data.groceryBudgetBiYearlyCarry = newBiCarry;
+            data.groceryBudgetBiYearlyCarryBaseline = baselineCarryBi;
+            localStorage.setItem('groceryBiResetPro', halfKey);
+            dataChanged = true;
+          }
+          if (dataChanged) {
             saveData();
           }
         }
