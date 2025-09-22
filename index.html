@@ -2891,12 +2891,10 @@ function loadData() {
             const year = Number(match[1]);
             const month = Number(match[2]);
             const day = Number(match[3]);
-            if (Number.isFinite(year) && Number.isFinite(month) && Number.isFinite(day)) {
-              const date = new Date(year, month - 1, day);
-              if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
-                date.setHours(0, 0, 0, 0);
-                return date;
-              }
+            const date = new Date(year, month - 1, day);
+            if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
+              date.setHours(0, 0, 0, 0);
+              return date;
             }
           }
           // Fall back to Date parsing for any other legacy formats, normalizing
