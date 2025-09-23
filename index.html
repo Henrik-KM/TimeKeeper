@@ -2207,6 +2207,10 @@ function loadData() {
         function resetGroceriesIfNeeded() {
           const now = new Date();
           let dataChanged = false;
+          const budgetStartDate = parseLocalDateString(data.groceryBudgetStartDate);
+          if (budgetStartDate) {
+            budgetStartDate.setHours(0, 0, 0, 0);
+          }
           // Determine the start of this week (Monday at 00:00)
           const dow = now.getDay();
           const diffToMonday = (dow + 6) % 7;
@@ -2300,7 +2304,8 @@ function loadData() {
           }
           const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
           const storedCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
-          if (hasMonthReset) {
+          const skipMonthlyCarry = !!(budgetStartDate && prevMonthEnd <= budgetStartDate);
+          if (hasMonthReset && !skipMonthlyCarry) {
             const baselineCarryM = lastMonthReset === monthKey && typeof data.groceryBudgetMonthlyCarryBaseline === 'number'
               ? data.groceryBudgetMonthlyCarryBaseline
               : storedCarryM;
@@ -2315,18 +2320,21 @@ function loadData() {
               dataChanged = true;
             }
           } else {
+            const fallbackCarryM = typeof data.groceryBudgetMonthlyCarryBaseline === 'number'
+              ? data.groceryBudgetMonthlyCarryBaseline
+              : storedCarryM;
             localStorage.setItem('groceryMonthlyResetPro', monthKey);
-            if (data.groceryBudgetMonthlyCarry !== storedCarryM) {
-              data.groceryBudgetMonthlyCarry = storedCarryM;
+            if (data.groceryBudgetMonthlyCarry !== fallbackCarryM) {
+              data.groceryBudgetMonthlyCarry = fallbackCarryM;
               dataChanged = true;
             }
-            if (data.groceryBudgetMonthlyCarryBaseline !== storedCarryM) {
-              data.groceryBudgetMonthlyCarryBaseline = storedCarryM;
+            if (data.groceryBudgetMonthlyCarryBaseline !== fallbackCarryM) {
+              data.groceryBudgetMonthlyCarryBaseline = fallbackCarryM;
               dataChanged = true;
             }
           }
           // Biannual carry-over recalculation
-          let startDate = parseLocalDateString(data.groceryBudgetStartDate);
+          let startDate = budgetStartDate ? new Date(budgetStartDate.getTime()) : null;
           if (!startDate) {
             startDate = new Date(now.getFullYear(), now.getMonth(), 1);
           }
@@ -2362,7 +2370,8 @@ function loadData() {
           }
           const baseBudgetBi = typeof data.groceryBudgetBiYearly === 'number' ? data.groceryBudgetBiYearly : 0;
           const storedCarryBi = typeof data.groceryBudgetBiYearlyCarry === 'number' ? data.groceryBudgetBiYearlyCarry : 0;
-          if (hasHalfReset) {
+          const skipBiCarry = !!(budgetStartDate && prevHalfEnd <= budgetStartDate);
+          if (hasHalfReset && !skipBiCarry) {
             const baselineCarryBi = lastHalfReset === halfKey && typeof data.groceryBudgetBiYearlyCarryBaseline === 'number'
               ? data.groceryBudgetBiYearlyCarryBaseline
               : storedCarryBi;
@@ -2377,13 +2386,16 @@ function loadData() {
               dataChanged = true;
             }
           } else {
+            const fallbackCarryBi = typeof data.groceryBudgetBiYearlyCarryBaseline === 'number'
+              ? data.groceryBudgetBiYearlyCarryBaseline
+              : storedCarryBi;
             localStorage.setItem('groceryBiResetPro', halfKey);
-            if (data.groceryBudgetBiYearlyCarry !== storedCarryBi) {
-              data.groceryBudgetBiYearlyCarry = storedCarryBi;
+            if (data.groceryBudgetBiYearlyCarry !== fallbackCarryBi) {
+              data.groceryBudgetBiYearlyCarry = fallbackCarryBi;
               dataChanged = true;
             }
-            if (data.groceryBudgetBiYearlyCarryBaseline !== storedCarryBi) {
-              data.groceryBudgetBiYearlyCarryBaseline = storedCarryBi;
+            if (data.groceryBudgetBiYearlyCarryBaseline !== fallbackCarryBi) {
+              data.groceryBudgetBiYearlyCarryBaseline = fallbackCarryBi;
               dataChanged = true;
             }
           }
