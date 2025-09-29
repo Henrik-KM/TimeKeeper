@@ -494,7 +494,6 @@
             medium: Number.isFinite(mediumPoints) ? mediumPoints : 0,
             light: Number.isFinite(lightPoints) ? lightPoints : 0
           };
-          if (!Number.isFinite(pointMap.medium)) pointMap.medium = 0;
           let totalPoints = 0;
           workouts.entries.forEach(entry => {
             if (!entry || !entry.timestamp) return;
