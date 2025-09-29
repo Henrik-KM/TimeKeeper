@@ -474,8 +474,8 @@
             const key = (entry.intensity || 'medium').toLowerCase();
             const points = getIntensityPoints(key);
             totalPoints += points;
-            if (counts[key] !== undefined) counts[key] += 1; else counts[key] = 1;
-            if (pointsByIntensity[key] !== undefined) pointsByIntensity[key] += points; else pointsByIntensity[key] = points;
+            counts[key] = (counts[key] || 0) + 1;
+            pointsByIntensity[key] = (pointsByIntensity[key] || 0) + points;
           });
           return {
             entries,
