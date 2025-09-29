@@ -341,6 +341,7 @@
             weekendBoostPercent: 0.1,
             weekendBoostUnlockedWeek: null,
             lastWeekSummary: null,
+            pointSpillover: 0,
             pointSettings: {
               intense: 6,
               medium: 4,
@@ -420,6 +421,22 @@
         function getWeekKey(date) {
           return getWeekStart(date).toISOString().split('T')[0];
         }
+        function formatPoints(value, decimals = 1) {
+          if (!Number.isFinite(value)) return '0';
+          if (Math.abs(value - Math.round(value)) < 1e-9) {
+            return String(Math.round(value));
+          }
+          return value.toFixed(decimals);
+        }
+        function formatSignedPoints(value, decimals = 1) {
+          if (!Number.isFinite(value) || Math.abs(value) < 1e-9) {
+            return '0 pts';
+          }
+          const abs = Math.abs(value);
+          const formatted = formatPoints(abs, decimals);
+          const prefix = value >= 0 ? '+' : '−';
+          return `${prefix}${formatted} pts`;
+        }
         function parseISODateOnly(str) {
           if (typeof str !== 'string' || !str) return null;
           const dt = new Date(str + 'T00:00:00');
@@ -453,37 +470,97 @@
         function collectWorkoutPoints(options = {}) {
           const workouts = ensureWorkoutData();
           const start = options.start ? new Date(options.start) : getWeekStart(new Date());
-          const end = options.end ? new Date(options.end) : null;
           if (isNaN(start.getTime())) {
             throw new Error('Invalid start date for workout stats');
           }
-          const entries = [];
-          workouts.entries.forEach(entry => {
-            if (!entry || !entry.timestamp) return;
-            const dt = new Date(entry.timestamp);
-            if (isNaN(dt.getTime())) return;
-            if (dt >= start && (!end || dt < end)) {
-              entries.push(Object.assign({}, entry, { timestamp: dt.toISOString() }));
-            }
-          });
-          entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-          let totalPoints = 0;
+          const end = options.end ? new Date(options.end) : (() => {
+            const next = new Date(start);
+            next.setDate(next.getDate() + 7);
+            return next;
+          })();
+          const startMs = start.getTime();
+          const endMs = end ? end.getTime() : Number.POSITIVE_INFINITY;
+          const includeEntries = !!options.includeEntries;
+          const collected = includeEntries ? [] : undefined;
           const counts = { intense: 0, medium: 0, light: 0 };
           const pointsByIntensity = { intense: 0, medium: 0, light: 0 };
-          entries.forEach(entry => {
-            const key = (entry.intensity || 'medium').toLowerCase();
-            const points = getIntensityPoints(key);
+          const fitness = ensureFitnessDefaults();
+          const settings = fitness.pointSettings || {};
+          const intensePoints = Number(settings.intense);
+          const mediumPoints = Number(settings.medium);
+          const lightPoints = Number(settings.light);
+          const pointMap = {
+            intense: Number.isFinite(intensePoints) ? intensePoints : 0,
+            medium: Number.isFinite(mediumPoints) ? mediumPoints : 0,
+            light: Number.isFinite(lightPoints) ? lightPoints : 0
+          };
+          if (!Number.isFinite(pointMap.medium)) pointMap.medium = 0;
+          let totalPoints = 0;
+          workouts.entries.forEach(entry => {
+            if (!entry || !entry.timestamp) return;
+            const ts = Date.parse(entry.timestamp);
+            if (!Number.isFinite(ts) || ts < startMs || ts >= endMs) return;
+            const key = normalizeIntensity(entry.intensity);
+            const points = Object.prototype.hasOwnProperty.call(pointMap, key) ? pointMap[key] : pointMap.medium;
             totalPoints += points;
             counts[key] = (counts[key] || 0) + 1;
             pointsByIntensity[key] = (pointsByIntensity[key] || 0) + points;
+            if (includeEntries) {
+              collected.push(Object.assign({}, entry, { timestamp: new Date(ts).toISOString() }));
+            }
           });
+          if (includeEntries) {
+            collected.sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
+          }
           return {
-            entries,
+            entries: includeEntries ? collected : [],
             start,
             end,
             totalPoints,
             counts,
             pointsByIntensity
+          };
+        }
+        function computeWorkoutWeekPlan(options = {}) {
+          const now = options.now instanceof Date ? options.now : new Date();
+          const weekStart = options.weekStart instanceof Date ? new Date(options.weekStart) : getWeekStart(now);
+          const weekEnd = options.weekEnd instanceof Date ? new Date(options.weekEnd) : (() => {
+            const end = new Date(weekStart);
+            end.setDate(end.getDate() + 7);
+            return end;
+          })();
+          const fitness = options.fitness || ensureFitnessDefaults();
+          const baseTarget = getWeeklyPointTarget();
+          const carryRaw = Number(fitness.pointSpillover);
+          const carry = Number.isFinite(carryRaw) ? carryRaw : 0;
+          const weekKey = getWeekKey(weekStart);
+          const paused = isWeekPaused(weekKey);
+          const requiredPoints = paused ? 0 : Math.max(0, baseTarget - carry);
+          let actualPoints;
+          if (Number.isFinite(options.actualPoints)) {
+            actualPoints = options.actualPoints;
+          } else if (options.pointsInfo && Number.isFinite(options.pointsInfo.totalPoints)) {
+            actualPoints = options.pointsInfo.totalPoints;
+          } else {
+            actualPoints = collectWorkoutPoints({ start: weekStart, end: weekEnd }).totalPoints;
+          }
+          const totalMs = weekEnd.getTime() - weekStart.getTime();
+          let timeProgress = totalMs > 0 ? ((now.getTime() - weekStart.getTime()) / totalMs) * 100 : 0;
+          if (timeProgress < 0) timeProgress = 0;
+          if (timeProgress > 100) timeProgress = 100;
+          const expectedPoints = requiredPoints * (timeProgress / 100);
+          const progressPercent = requiredPoints > 0 ? (actualPoints / requiredPoints) * 100 : (actualPoints > 0 ? 100 : 0);
+          const scheduleDelta = actualPoints - expectedPoints;
+          return {
+            requiredPoints,
+            actualPoints,
+            progressPercent,
+            timeProgress,
+            expectedPoints,
+            scheduleDelta,
+            baseTarget,
+            carry,
+            paused
           };
         }
         function getWeeklyPointTarget() {
@@ -677,11 +754,15 @@
             fitness.pausedWeeks = pausedWeeks;
           }
           const weeklySummary = collectWorkoutPoints({ start: lastMonday, end: thisMonday });
-          const targetPoints = getWeeklyPointTarget();
+          const baseTarget = getWeeklyPointTarget();
+          const carryRaw = Number(fitness.pointSpillover);
+          const spilloverBefore = Number.isFinite(carryRaw) ? carryRaw : 0;
+          const requiredPoints = wasPaused ? 0 : Math.max(0, baseTarget - spilloverBefore);
+          const actualPoints = weeklySummary.totalPoints;
           const settings = fitness.pointSettings || {};
           const multiplierPerPoint = Number(settings.multiplierPerPoint);
           const creditsPerPoint = Number(settings.creditsPerPoint);
-          const overagePoints = targetPoints > 0 ? Math.max(0, weeklySummary.totalPoints - targetPoints) : weeklySummary.totalPoints;
+          const overagePoints = requiredPoints > 0 ? Math.max(0, actualPoints - requiredPoints) : Math.max(0, actualPoints);
           const multiplierIncrease = (Number.isFinite(multiplierPerPoint) ? multiplierPerPoint : 0) * overagePoints;
           const nextMultiplier = clampMultiplier(1 + multiplierIncrease);
           const defaults = makeDefaultFitness();
@@ -689,20 +770,34 @@
           const creditsEarned = (Number.isFinite(creditsPerPoint) ? creditsPerPoint : 0) * overagePoints;
           const cap = Number.isFinite(fitness.creditsCap) ? fitness.creditsCap : defaults.creditsCap;
           const newCredits = Math.max(0, Math.min(cap, currentCredits + creditsEarned));
-          const metTarget = targetPoints > 0 ? weeklySummary.totalPoints >= targetPoints : weeklySummary.totalPoints > 0;
+          let metTarget;
+          let spilloverAfter = spilloverBefore;
+          if (wasPaused) {
+            metTarget = true;
+          } else if (requiredPoints <= 0) {
+            metTarget = true;
+            spilloverAfter = spilloverBefore + actualPoints;
+          } else {
+            metTarget = actualPoints >= requiredPoints;
+            spilloverAfter = spilloverBefore + (actualPoints - requiredPoints);
+          }
           const previousStreak = Number.isFinite(fitness.streakCount) ? fitness.streakCount : 0;
           const streakCount = metTarget ? previousStreak + 1 : 0;
           if (wasPaused) {
             fitness.nextMultiplier = fitness.currentMultiplier;
+            fitness.pointSpillover = spilloverAfter;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
               weekEnd: thisMonday.toISOString().split('T')[0],
-              totalPoints: weeklySummary.totalPoints,
-              targetPoints,
+              totalPoints: actualPoints,
+              targetPoints: baseTarget,
+              requiredPoints,
               overagePoints: 0,
               multiplierDelta: 0,
               creditsEarned: 0,
               paused: true,
+              spilloverBefore,
+              spilloverAfter,
               counts: weeklySummary.counts,
               pointsByIntensity: weeklySummary.pointsByIntensity
             };
@@ -710,15 +805,19 @@
             fitness.nextMultiplier = nextMultiplier;
             fitness.wellnessCredits = newCredits;
             fitness.streakCount = streakCount;
+            fitness.pointSpillover = spilloverAfter;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
               weekEnd: thisMonday.toISOString().split('T')[0],
-              totalPoints: weeklySummary.totalPoints,
-              targetPoints,
+              totalPoints: actualPoints,
+              targetPoints: baseTarget,
+              requiredPoints,
               overagePoints,
               multiplierDelta: nextMultiplier - 1,
               creditsEarned,
               paused: false,
+              spilloverBefore,
+              spilloverAfter,
               counts: weeklySummary.counts,
               pointsByIntensity: weeklySummary.pointsByIntensity
             };
@@ -738,8 +837,8 @@
           const now = new Date();
           if (now < fridayCutoff) return false;
           const statsInfo = collectWorkoutPoints({ start: monday, end: fridayCutoff });
-          const targetPoints = getWeeklyPointTarget();
-          if (targetPoints > 0 && statsInfo.totalPoints >= targetPoints) {
+          const plan = computeWorkoutWeekPlan({ fitness, weekStart: monday, pointsInfo: { totalPoints: statsInfo.totalPoints } });
+          if (plan.requiredPoints <= 0 || statsInfo.totalPoints >= plan.requiredPoints) {
             fitness.weekendBoostUnlockedWeek = weekKey;
             saveData();
             return true;
@@ -1237,13 +1336,16 @@ function loadData() {
           const settingsEl = document.getElementById('fitnessSettingsContent');
           const fitness = ensureFitnessDefaults();
           const pointsInfo = collectWorkoutPoints();
+          const workoutPlan = computeWorkoutWeekPlan({ fitness, pointsInfo });
           const targetPoints = getWeeklyPointTarget();
           const settings = fitness.pointSettings || {};
           const multiplierPerPoint = Number(settings.multiplierPerPoint);
           const creditsPerPoint = Number(settings.creditsPerPoint);
           const effectiveMultiplierPerPoint = Number.isFinite(multiplierPerPoint) ? multiplierPerPoint : 0;
           const effectiveCreditsPerPoint = Number.isFinite(creditsPerPoint) ? creditsPerPoint : 0;
-          const overagePoints = targetPoints > 0 ? Math.max(0, pointsInfo.totalPoints - targetPoints) : pointsInfo.totalPoints;
+          const overagePoints = workoutPlan.requiredPoints > 0
+            ? Math.max(0, workoutPlan.actualPoints - workoutPlan.requiredPoints)
+            : Math.max(0, workoutPlan.actualPoints);
           const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
           const nextMultiplier = clampMultiplier(typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : currentMultiplier);
           const projectedMultiplier = clampMultiplier(1 + effectiveMultiplierPerPoint * overagePoints);
@@ -1261,10 +1363,6 @@ function loadData() {
           const formatAmount = (num) => {
             const str = formatCurrency(num, -1);
             return str ? str.replace(' kr', ' SEK') : '0 SEK';
-          };
-          const formatPoints = (value) => {
-            if (!Number.isFinite(value)) return '0';
-            return Number.isInteger(value) ? String(value) : value.toFixed(1);
           };
           const formatSignedCredits = (value) => {
             if (!Number.isFinite(value) || value === 0) return '0 credits';
@@ -1305,7 +1403,12 @@ function loadData() {
               } else {
                 const lastPoints = Number.isFinite(lastWeek.totalPoints) ? lastWeek.totalPoints : 0;
                 const lastOver = Number.isFinite(lastWeek.overagePoints) ? lastWeek.overagePoints : 0;
+                const lastRequired = Number.isFinite(lastWeek.requiredPoints) ? lastWeek.requiredPoints : targetPoints;
                 nextSub += ` • Last week ${formatPoints(lastPoints)} pts${lastOver > 0 ? ' (+' + formatPoints(lastOver) + ' over)' : ''}`;
+                nextSub += ` of ${formatPoints(lastRequired)} scheduled`;
+                if (Number.isFinite(lastWeek.spilloverAfter)) {
+                  nextSub += ` • Carryover ${formatSignedPoints(lastWeek.spilloverAfter)}`;
+                }
                 if (Number.isFinite(lastWeek.creditsEarned) && lastWeek.creditsEarned !== 0) {
                   nextSub += ' • ' + formatSignedCredits(lastWeek.creditsEarned);
                 }
@@ -1315,18 +1418,30 @@ function loadData() {
               nextSub += ' • This week paused';
             }
             createRow('Next week (locked)', nextMultiplier.toFixed(2) + '×', nextSub);
-            const pointsValue = targetPoints > 0
-              ? `${formatPoints(pointsInfo.totalPoints)} / ${formatPoints(targetPoints)} pts`
-              : `${formatPoints(pointsInfo.totalPoints)} pts`;
-            let pointsSub = `Over target ${formatPoints(overagePoints)} pts`;
+            const scheduledPoints = workoutPlan.requiredPoints;
+            const pointsValue = scheduledPoints > 0
+              ? `${formatPoints(workoutPlan.actualPoints)} / ${formatPoints(scheduledPoints)} pts`
+              : `${formatPoints(workoutPlan.actualPoints)} pts`;
+            const pointsSubParts = [];
             if (pausedThisWeek) {
-              pointsSub += ' • Paused';
+              pointsSubParts.push('Paused');
+            } else {
+              pointsSubParts.push(`Scheduled ${formatPoints(scheduledPoints)} pts (base ${formatPoints(targetPoints)} pts${Math.abs(workoutPlan.carry) > 0.01 ? ', carryover ' + formatSignedPoints(workoutPlan.carry) : ''})`);
+              pointsSubParts.push(`Expected ${formatPoints(workoutPlan.expectedPoints)} pts (${workoutPlan.timeProgress.toFixed(0)}% of week)`);
+              if (workoutPlan.scheduleDelta >= 1) {
+                pointsSubParts.push(`Ahead by ${formatPoints(workoutPlan.scheduleDelta)} pts`);
+              } else if (workoutPlan.scheduleDelta <= -1) {
+                pointsSubParts.push(`Behind by ${formatPoints(Math.abs(workoutPlan.scheduleDelta))} pts`);
+              } else {
+                pointsSubParts.push('On track');
+              }
             }
             if (overagePoints > 0) {
               const budgetGain = formatSignedCurrency(projectedDelta);
               const creditGain = formatSignedCredits(projectedCredits);
-              pointsSub += ` • Potential ${budgetGain}, ${creditGain}`;
+              pointsSubParts.push(`Potential ${budgetGain}, ${creditGain}`);
             }
+            const pointsSub = pointsSubParts.join(' • ');
             createRow('Points this week', pointsValue, pointsSub);
             const intensityParts = [];
             ['intense', 'medium', 'light'].forEach(key => {
@@ -1361,8 +1476,9 @@ function loadData() {
               potentialPill.textContent = 'Projected ' + formatSignedCredits(projectedCredits);
               creditsRow.appendChild(potentialPill);
             }
-            summaryEl.appendChild(grid);
-            summaryEl.appendChild(creditsRow);
+            const summaryFragment = document.createDocumentFragment();
+            summaryFragment.appendChild(grid);
+            summaryFragment.appendChild(creditsRow);
             const boostRow = document.createElement('div');
             boostRow.className = 'fitness-summary-row';
             const boostLabel = document.createElement('div');
@@ -1383,7 +1499,8 @@ function loadData() {
             }
             boostRow.appendChild(boostLabel);
             boostRow.appendChild(boostValue);
-            summaryEl.appendChild(boostRow);
+            summaryFragment.appendChild(boostRow);
+            summaryEl.appendChild(summaryFragment);
           }
           if (settingsEl) {
             if (!settingsEl.dataset.initialized) {
@@ -1533,6 +1650,7 @@ function loadData() {
 
         function updateTodoSection() {
           const workouts = ensureWorkoutData();
+          const fitnessData = ensureFitnessDefaults();
           const presetsContent = document.getElementById('workoutPresetsContent');
           const entriesContent = document.getElementById('workoutEntriesContent');
           const weekKey = getWeekKey(new Date());
@@ -1547,6 +1665,13 @@ function loadData() {
               return !isNaN(dt) && dt >= monday && dt < nextMonday;
             })
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          const weeklyPoints = weeklyEntries.reduce((sum, entry) => sum + getIntensityPoints(entry.intensity), 0);
+          const weeklyPlan = computeWorkoutWeekPlan({
+            fitness: fitnessData,
+            actualPoints: weeklyPoints,
+            weekStart: monday,
+            weekEnd: nextMonday
+          });
           if (presetsContent) {
             presetsContent.innerHTML = '';
             const presets = workouts.presets.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
@@ -1637,9 +1762,12 @@ function loadData() {
             header.style.justifyContent = 'space-between';
             header.style.alignItems = 'center';
             header.style.marginBottom = '0.5rem';
-            const weeklyPoints = weeklyEntries.reduce((sum, entry) => sum + getIntensityPoints(entry.intensity), 0);
             const headerInfo = document.createElement('div');
-            headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • ${weeklyPoints} pts`;
+            if (weeklyPlan.paused) {
+              headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • Week paused`;
+            } else {
+              headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • ${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(weeklyPlan.requiredPoints)} pts scheduled`;
+            }
             header.appendChild(headerInfo);
             const pauseLabel = document.createElement('label');
             pauseLabel.style.display = 'flex';
@@ -1737,6 +1865,9 @@ function loadData() {
           summaryContainer.innerHTML = '';
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
           let normalizedAny = false;
+          const weeklyFragment = document.createDocumentFragment();
+          const monthlyFragment = document.createDocumentFragment();
+          const biannualFragment = document.createDocumentFragment();
           // Determine period boundaries for weekly, monthly and biannual budgets
           const now = new Date();
           // Weekly boundaries (Monday to next Monday) for spending
@@ -1802,6 +1933,7 @@ function loadData() {
         if (archivedListEl) {
           // Clear previous list
           archivedListEl.innerHTML = '';
+          const archivedFragment = document.createDocumentFragment();
           groceries.forEach((archItem, archIndex) => {
             if (!archItem.archived) return;
             const liArch = document.createElement('li');
@@ -1889,8 +2021,9 @@ function loadData() {
             btnGroupArch.appendChild(deleteArchBtn);
             rowArch.appendChild(btnGroupArch);
             liArch.appendChild(rowArch);
-            archivedListEl.appendChild(liArch);
+            archivedFragment.appendChild(liArch);
           });
+          archivedListEl.appendChild(archivedFragment);
         }
           // Dynamic budgets = base + carry
           const fitness = ensureFitnessDefaults();
@@ -1913,6 +2046,7 @@ function loadData() {
           const monthlyExpectedSpent = monthlyDynamicBudget * monthTimeProgress;
           const biExpectedSpent = biDynamicBudget * halfTimeProgress;
           // Build budget summary card
+          const summaryFragment = document.createDocumentFragment();
           const summaryCard = document.createElement('div');
           summaryCard.className = 'card';
           summaryCard.style.marginBottom = '1rem';
@@ -2008,7 +2142,8 @@ function loadData() {
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
-          summaryContainer.appendChild(summaryCard);
+          summaryFragment.appendChild(summaryCard);
+          summaryContainer.appendChild(summaryFragment);
           // ------------------------------------------------------------
           // In budget-only mode we do not limit the number of items that can be
           // purchased in a period.  We therefore do not compute or display
@@ -2166,13 +2301,16 @@ function loadData() {
             }
             // Append to appropriate list
             if (freq === 'monthly') {
-              monthlyListEl.appendChild(li);
+              monthlyFragment.appendChild(li);
             } else if (freq === 'biannual') {
-              biannualListEl.appendChild(li);
+              biannualFragment.appendChild(li);
             } else {
-              weeklyListEl.appendChild(li);
+              weeklyFragment.appendChild(li);
             }
           });
+          weeklyListEl.appendChild(weeklyFragment);
+          monthlyListEl.appendChild(monthlyFragment);
+          biannualListEl.appendChild(biannualFragment);
           updateFitnessCards();
           if (normalizedAny) {
             saveData();
@@ -3474,6 +3612,28 @@ function loadData() {
           const monthScheduleDiff = monthHoursProgress - monthlyTimeProgress;
           const weekScheduleLabel = weekScheduleDiff > 5 ? 'Ahead of schedule' : (weekScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
           const monthScheduleLabel = monthScheduleDiff > 5 ? 'Ahead of schedule' : (monthScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
+          const workoutPlan = computeWorkoutWeekPlan();
+          const workoutScheduled = workoutPlan.requiredPoints;
+          const workoutValue = workoutScheduled > 0
+            ? `${formatPoints(workoutPlan.actualPoints)} / ${formatPoints(workoutScheduled)} pts`
+            : `${formatPoints(workoutPlan.actualPoints)} pts`;
+          const workoutProgressPercent = workoutPlan.paused ? 0 : Math.min(100, Math.max(0, workoutPlan.progressPercent));
+          const workoutTimeProgress = workoutPlan.paused ? 0 : Math.min(100, Math.max(0, workoutPlan.timeProgress));
+          const workoutProgressLabel = workoutPlan.paused
+            ? 'Week paused – no workouts required'
+            : `${workoutProgressPercent.toFixed(1)}% of weekly schedule in ${workoutTimeProgress.toFixed(1)}% of the week`;
+          let workoutScheduleLabel = workoutPlan.paused ? 'Week paused' : 'On track';
+          if (!workoutPlan.paused) {
+            if (workoutPlan.scheduleDelta >= 1) {
+              workoutScheduleLabel = `Ahead by ${formatPoints(workoutPlan.scheduleDelta)} pts`;
+            } else if (workoutPlan.scheduleDelta <= -1) {
+              workoutScheduleLabel = `Behind by ${formatPoints(Math.abs(workoutPlan.scheduleDelta))} pts`;
+            }
+          }
+          const carrySuffix = Math.abs(workoutPlan.carry) > 0.01 ? `, carryover ${formatSignedPoints(workoutPlan.carry)}` : '';
+          const workoutMetaLabel = workoutPlan.paused
+            ? `Carryover ${formatSignedPoints(workoutPlan.carry)}`
+            : `Scheduled ${formatPoints(workoutScheduled)} pts (base ${formatPoints(workoutPlan.baseTarget)} pts${carrySuffix})`;
 
           // Stats cards data; integrate recommendations and revenue into relevant cards. Cards with
           // progress also include timeProgress and scheduleLabel for additional context.
@@ -3509,6 +3669,16 @@ function loadData() {
               scheduleLabel: weekScheduleLabel,
               // Show revenue earned this week on the same card
               revenue: stats.weekRevenue || 0
+            },
+            {
+              title: 'Workout Progress',
+              value: workoutValue,
+              progress: workoutProgressPercent,
+              timeProgress: workoutTimeProgress,
+              icon: '💪',
+              progressLabel: workoutProgressLabel,
+              scheduleLabel: workoutScheduleLabel,
+              metaLabel: workoutMetaLabel
             },
             {
               title: 'This Month',
@@ -3597,6 +3767,13 @@ function loadData() {
                 else if (text.includes('behind')) sched.style.color = '#b91c1c';
                 else sched.style.color = '#92400e';
                 div.appendChild(sched);
+              }
+              if (card.metaLabel) {
+                const meta = document.createElement('div');
+                meta.className = 'stat-change';
+                meta.textContent = card.metaLabel;
+                meta.style.color = '#475569';
+                div.appendChild(meta);
               }
             } else {
               // Change or change label for cards without progress
