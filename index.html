@@ -2155,7 +2155,11 @@ function loadData() {
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
-          summaryContainer.replaceChildren(summaryCard);
+          if (summaryCard instanceof DocumentFragment) {
+            summaryContainer.replaceChildren(...summaryCard.childNodes);
+          } else {
+            summaryContainer.replaceChildren(summaryCard);
+          }
           // ------------------------------------------------------------
           // In budget-only mode we do not limit the number of items that can be
           // purchased in a period.  We therefore do not compute or display
