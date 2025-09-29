@@ -210,10 +210,6 @@
           </form>
           <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">New combinations of workout name and intensity are saved as presets for quick access.</p>
         </div>
-        <div class="card" id="fitnessSummaryCard" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
-          <div id="fitnessSummaryContent" class="fitness-summary"></div>
-        </div>
         <div class="card" id="workoutPresetsCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Presets</h3>
           <div id="workoutPresetsContent"></div>
@@ -221,6 +217,10 @@
         <div class="card" id="workoutEntriesCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">This Week's Workouts</h3>
           <div id="workoutEntriesContent"></div>
+        </div>
+        <div class="card" id="fitnessSummaryCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
+          <div id="fitnessSummaryContent" class="fitness-summary"></div>
         </div>
         <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
@@ -406,6 +406,11 @@
           data.workouts = applyWorkoutDefaults(data.workouts);
           return data.workouts;
         }
+        const scheduleRender = typeof requestAnimationFrame === 'function'
+          ? (cb) => requestAnimationFrame(cb)
+          : (cb) => setTimeout(cb, 0);
+        let fitnessRenderQueued = false;
+        let groceryRenderQueued = false;
         function clampMultiplier(value) {
           const val = typeof value === 'number' && isFinite(value) ? value : 1;
           return Math.min(1.2, Math.max(0.9, val));
@@ -1330,7 +1335,16 @@ function loadData() {
           updateGrocerySection();
         }
 
-        function updateFitnessCards() {
+        function updateFitnessCards(force = false) {
+          if (!force) {
+            if (fitnessRenderQueued) return;
+            fitnessRenderQueued = true;
+            scheduleRender(() => {
+              fitnessRenderQueued = false;
+              updateFitnessCards(true);
+            });
+            return;
+          }
           const summaryEl = document.getElementById('fitnessSummaryContent');
           const settingsEl = document.getElementById('fitnessSettingsContent');
           const fitness = ensureFitnessDefaults();
@@ -1369,7 +1383,6 @@ function loadData() {
             return prefix + Math.abs(value).toFixed(0) + ' credits';
           };
           if (summaryEl) {
-            summaryEl.innerHTML = '';
             const grid = document.createElement('div');
             grid.className = 'fitness-summary-grid';
             function createRow(label, value, subText) {
@@ -1475,9 +1488,9 @@ function loadData() {
               potentialPill.textContent = 'Projected ' + formatSignedCredits(projectedCredits);
               creditsRow.appendChild(potentialPill);
             }
-            const summaryFragment = document.createDocumentFragment();
-            summaryFragment.appendChild(grid);
-            summaryFragment.appendChild(creditsRow);
+            const fragment = document.createDocumentFragment();
+            fragment.appendChild(grid);
+            fragment.appendChild(creditsRow);
             const boostRow = document.createElement('div');
             boostRow.className = 'fitness-summary-row';
             const boostLabel = document.createElement('div');
@@ -1498,8 +1511,8 @@ function loadData() {
             }
             boostRow.appendChild(boostLabel);
             boostRow.appendChild(boostValue);
-            summaryFragment.appendChild(boostRow);
-            summaryEl.appendChild(summaryFragment);
+            fragment.appendChild(boostRow);
+            summaryEl.replaceChildren(...fragment.childNodes);
           }
           if (settingsEl) {
             if (!settingsEl.dataset.initialized) {
@@ -1850,18 +1863,22 @@ function loadData() {
             }
           }
         }
-        function updateGrocerySection() {
+        function updateGrocerySection(force = false) {
+          if (!force) {
+            if (groceryRenderQueued) return;
+            groceryRenderQueued = true;
+            scheduleRender(() => {
+              groceryRenderQueued = false;
+              updateGrocerySection(true);
+            });
+            return;
+          }
           resetGroceriesIfNeeded();
           const weeklyListEl = document.getElementById('weeklyGroceryList');
           const monthlyListEl = document.getElementById('monthlyGroceryList');
           const biannualListEl = document.getElementById('biannualGroceryList');
           const summaryContainer = document.getElementById('budgetSummaryContainer');
           if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer) return;
-          // Clear lists and summary
-          weeklyListEl.innerHTML = '';
-          monthlyListEl.innerHTML = '';
-          biannualListEl.innerHTML = '';
-          summaryContainer.innerHTML = '';
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
           let normalizedAny = false;
           const weeklyFragment = document.createDocumentFragment();
@@ -1930,8 +1947,6 @@ function loadData() {
         // After rendering active items, render archived purchases with ability to edit cost
         const archivedListEl = document.getElementById('archivedGroceryList');
         if (archivedListEl) {
-          // Clear previous list
-          archivedListEl.innerHTML = '';
           const archivedFragment = document.createDocumentFragment();
           groceries.forEach((archItem, archIndex) => {
             if (!archItem.archived) return;
@@ -2022,7 +2037,7 @@ function loadData() {
             liArch.appendChild(rowArch);
             archivedFragment.appendChild(liArch);
           });
-          archivedListEl.appendChild(archivedFragment);
+          archivedListEl.replaceChildren(...archivedFragment.childNodes);
         }
           // Dynamic budgets = base + carry
           const fitness = ensureFitnessDefaults();
@@ -2045,7 +2060,6 @@ function loadData() {
           const monthlyExpectedSpent = monthlyDynamicBudget * monthTimeProgress;
           const biExpectedSpent = biDynamicBudget * halfTimeProgress;
           // Build budget summary card
-          const summaryFragment = document.createDocumentFragment();
           const summaryCard = document.createElement('div');
           summaryCard.className = 'card';
           summaryCard.style.marginBottom = '1rem';
@@ -2141,8 +2155,11 @@ function loadData() {
           });
           controlsDiv.appendChild(editStartBtn);
           summaryCard.appendChild(controlsDiv);
-          summaryFragment.appendChild(summaryCard);
-          summaryContainer.appendChild(summaryFragment);
+          if (summaryCard instanceof DocumentFragment) {
+            summaryContainer.replaceChildren(...summaryCard.childNodes);
+          } else {
+            summaryContainer.replaceChildren(summaryCard);
+          }
           // ------------------------------------------------------------
           // In budget-only mode we do not limit the number of items that can be
           // purchased in a period.  We therefore do not compute or display
@@ -2307,9 +2324,9 @@ function loadData() {
               weeklyFragment.appendChild(li);
             }
           });
-          weeklyListEl.appendChild(weeklyFragment);
-          monthlyListEl.appendChild(monthlyFragment);
-          biannualListEl.appendChild(biannualFragment);
+          weeklyListEl.replaceChildren(...weeklyFragment.childNodes);
+          monthlyListEl.replaceChildren(...monthlyFragment.childNodes);
+          biannualListEl.replaceChildren(...biannualFragment.childNodes);
           updateFitnessCards();
           if (normalizedAny) {
             saveData();
@@ -3670,16 +3687,6 @@ function loadData() {
               revenue: stats.weekRevenue || 0
             },
             {
-              title: 'Workout Progress',
-              value: workoutValue,
-              progress: workoutProgressPercent,
-              timeProgress: workoutTimeProgress,
-              icon: '💪',
-              progressLabel: workoutProgressLabel,
-              scheduleLabel: workoutScheduleLabel,
-              metaLabel: workoutMetaLabel
-            },
-            {
               title: 'This Month',
               value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
               progress: stats.monthProgress,
@@ -3690,6 +3697,16 @@ function loadData() {
               scheduleLabel: monthScheduleLabel,
               // Integrate monthly revenue into this card
               revenue: stats.monthRevenue || 0
+            },
+            {
+              title: 'Workout Progress',
+              value: workoutValue,
+              progress: workoutProgressPercent,
+              timeProgress: workoutTimeProgress,
+              icon: '💪',
+              progressLabel: workoutProgressLabel,
+              scheduleLabel: workoutScheduleLabel,
+              metaLabel: workoutMetaLabel
             }
           ]; // Active Projects card removed per user request
           const statsGrid = document.getElementById('statsGrid');
