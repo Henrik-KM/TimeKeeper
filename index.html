@@ -2324,9 +2324,9 @@ function loadData() {
               weeklyFragment.appendChild(li);
             }
           });
-          weeklyListEl.replaceChildren(weeklyFragment);
-          monthlyListEl.replaceChildren(monthlyFragment);
-          biannualListEl.replaceChildren(biannualFragment);
+          weeklyListEl.replaceChildren(...weeklyFragment.childNodes);
+          monthlyListEl.replaceChildren(...monthlyFragment.childNodes);
+          biannualListEl.replaceChildren(...biannualFragment.childNodes);
           updateFitnessCards();
           if (normalizedAny) {
             saveData();
