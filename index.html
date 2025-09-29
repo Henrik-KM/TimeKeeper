@@ -1512,7 +1512,7 @@ function loadData() {
             boostRow.appendChild(boostLabel);
             boostRow.appendChild(boostValue);
             fragment.appendChild(boostRow);
-            summaryEl.replaceChildren(fragment);
+            summaryEl.replaceChildren(...fragment.childNodes);
           }
           if (settingsEl) {
             if (!settingsEl.dataset.initialized) {
