@@ -2037,7 +2037,7 @@ function loadData() {
             liArch.appendChild(rowArch);
             archivedFragment.appendChild(liArch);
           });
-          archivedListEl.replaceChildren(archivedFragment);
+          archivedListEl.replaceChildren(...archivedFragment.childNodes);
         }
           // Dynamic budgets = base + carry
           const fitness = ensureFitnessDefaults();
