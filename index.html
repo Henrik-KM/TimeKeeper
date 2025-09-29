@@ -486,10 +486,15 @@
         function setWeekPaused(weekKey, paused) {
           const fitness = ensureFitnessDefaults();
           if (!fitness.pausedWeeks) fitness.pausedWeeks = {};
+          const wasPaused = !!fitness.pausedWeeks[weekKey];
           if (paused) {
-            fitness.pausedWeeks[weekKey] = true;
-          } else {
+            if (!wasPaused) {
+              fitness.pausedWeeks[weekKey] = true;
+              saveData();
+            }
+          } else if (wasPaused) {
             delete fitness.pausedWeeks[weekKey];
+            saveData();
           }
         }
         function finalizeFitnessWeek(weeklyStats, lastMonday, thisMonday) {
