@@ -197,21 +197,30 @@
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Workouts</h2>
         <!-- Form to add a new workout -->
         <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Workout</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Log Workout</h3>
           <form id="todoForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
             <input id="todoName" type="text" required placeholder="Workout name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <input id="todoTarget" type="number" min="1" step="1" placeholder="Weekly target" style="width:5rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <button type="submit" class="btn primary">Add</button>
+            <select id="todoIntensity" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="intense">Intense</option>
+              <option value="medium" selected>Medium</option>
+              <option value="light">Light</option>
+            </select>
+            <input id="todoWhen" type="datetime-local" style="width:13rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary">Log</button>
           </form>
+          <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">New combinations of workout name and intensity are saved as presets for quick access.</p>
         </div>
         <div class="card" id="fitnessSummaryCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
           <div id="fitnessSummaryContent" class="fitness-summary"></div>
         </div>
-        <!-- List of workouts -->
-        <div class="card" id="todoListContainer">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Your Workouts</h3>
-          <ul id="todoList" style="list-style:none; padding:0; margin:0;"></ul>
+        <div class="card" id="workoutPresetsCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Presets</h3>
+          <div id="workoutPresetsContent"></div>
+        </div>
+        <div class="card" id="workoutEntriesCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">This Week's Workouts</h3>
+          <div id="workoutEntriesContent"></div>
         </div>
         <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
@@ -331,7 +340,15 @@
             weekendBoostEnabled: true,
             weekendBoostPercent: 0.1,
             weekendBoostUnlockedWeek: null,
-            lastWeekSummary: null
+            lastWeekSummary: null,
+            pointSettings: {
+              intense: 6,
+              medium: 4,
+              light: 2,
+              weeklyTarget: 18,
+              multiplierPerPoint: 0.015,
+              creditsPerPoint: 40
+            }
           };
         }
         function applyFitnessDefaults(obj) {
@@ -340,6 +357,7 @@
           const merged = Object.assign({}, defaults, obj);
           merged.creditSettings = Object.assign({}, defaults.creditSettings, obj.creditSettings || {});
           merged.pausedWeeks = Object.assign({}, defaults.pausedWeeks, obj.pausedWeeks || {});
+          merged.pointSettings = Object.assign({}, defaults.pointSettings, obj.pointSettings || {});
           if (typeof merged.alpha !== 'number' || !isFinite(merged.alpha)) merged.alpha = defaults.alpha;
           if (typeof merged.beta !== 'number' || !isFinite(merged.beta)) merged.beta = defaults.beta;
           if (typeof merged.currentMultiplier !== 'number' || !isFinite(merged.currentMultiplier)) merged.currentMultiplier = defaults.currentMultiplier;
@@ -353,6 +371,39 @@
         function ensureFitnessDefaults() {
           data.fitness = applyFitnessDefaults(data.fitness);
           return data.fitness;
+        }
+        function makeDefaultWorkouts() {
+          return {
+            presets: [],
+            entries: []
+          };
+        }
+        function applyWorkoutDefaults(obj) {
+          const defaults = makeDefaultWorkouts();
+          if (!obj || typeof obj !== 'object') return defaults;
+          const merged = Object.assign({}, defaults, obj);
+          if (!Array.isArray(merged.presets)) merged.presets = [];
+          if (!Array.isArray(merged.entries)) merged.entries = [];
+          merged.presets = merged.presets.map(preset => ({
+            id: preset && preset.id ? preset.id : uuid(),
+            name: preset && typeof preset.name === 'string' ? preset.name : '',
+            intensity: preset && typeof preset.intensity === 'string' ? preset.intensity : 'medium'
+          }));
+          merged.entries = merged.entries.map(entry => ({
+            id: entry && entry.id ? entry.id : uuid(),
+            name: entry && typeof entry.name === 'string' ? entry.name : '',
+            intensity: entry && typeof entry.intensity === 'string' ? entry.intensity : 'medium',
+            timestamp: entry && entry.timestamp ? entry.timestamp : new Date().toISOString(),
+            presetId: entry && entry.presetId ? entry.presetId : null
+          }));
+          return merged;
+        }
+        function ensureWorkoutData() {
+          if (!data.workouts) {
+            data.workouts = makeDefaultWorkouts();
+          }
+          data.workouts = applyWorkoutDefaults(data.workouts);
+          return data.workouts;
         }
         function clampMultiplier(value) {
           const val = typeof value === 'number' && isFinite(value) ? value : 1;
@@ -369,115 +420,105 @@
         function getWeekKey(date) {
           return getWeekStart(date).toISOString().split('T')[0];
         }
-        function computeFitnessSummary(stats, alpha, beta) {
-          let totalPenalty = 0;
-          let totalOverage = 0;
-          let complianceSum = 0;
-          let workoutsCount = 0;
-          let totalTargets = 0;
-          let totalActual = 0;
-          stats.forEach(stat => {
-            const target = stat && typeof stat.target === 'number' ? stat.target : 0;
-            const actual = stat && typeof stat.actual === 'number' ? stat.actual : 0;
-            if (target <= 0) return;
-            const ratio = target > 0 ? actual / target : 0;
-            const compliance = Math.min(1, Math.max(0, ratio));
-            const overage = Math.max(0, ratio - 1);
-            const penalty = 1 - compliance;
-            totalPenalty += penalty;
-            totalOverage += overage;
-            complianceSum += compliance;
-            workoutsCount += 1;
-            totalTargets += target;
-            totalActual += actual;
-          });
-          const adjPercent = (alpha * totalOverage) - (beta * totalPenalty);
-          return {
-            adjPercent,
-            totalPenalty,
-            totalOverage,
-            complianceAvg: workoutsCount > 0 ? complianceSum / workoutsCount : 1,
-            workoutsCount,
-            totalTargets,
-            totalActual
-          };
+        function parseISODateOnly(str) {
+          if (typeof str !== 'string' || !str) return null;
+          const dt = new Date(str + 'T00:00:00');
+          return isNaN(dt.getTime()) ? null : dt;
         }
-        function computeCreditsDelta(stats, fitness) {
-          const defaults = makeDefaultFitness();
-          const settings = fitness && fitness.creditSettings ? Object.assign({}, defaults.creditSettings, fitness.creditSettings) : defaults.creditSettings;
-          let baseEarned = 0;
-          let extraEarned = 0;
-          let penalties = 0;
-          let workoutsWithTargets = 0;
-          let metAll = true;
-          stats.forEach(stat => {
-            const target = stat && typeof stat.target === 'number' ? stat.target : 0;
-            const actual = stat && typeof stat.actual === 'number' ? stat.actual : 0;
-            if (target <= 0) return;
-            workoutsWithTargets += 1;
-            const baseSessions = Math.min(actual, target);
-            const extraSessions = Math.max(0, actual - target);
-            const missedSessions = Math.max(0, target - actual);
-            baseEarned += baseSessions * settings.base;
-            extraEarned += extraSessions * settings.extra;
-            penalties += missedSessions * settings.penalty;
-            if (actual < target) metAll = false;
-          });
-          let streakCount = fitness && typeof fitness.streakCount === 'number' ? fitness.streakCount : 0;
-          let bonus = 0;
-          if (metAll && workoutsWithTargets > 0) {
-            bonus += settings.weeklyBonus;
-            streakCount += 1;
-            if (streakCount > 0 && streakCount % 4 === 0) {
-              bonus += settings.streakBonus;
-            }
-          } else if (fitness) {
-            streakCount = 0;
+        function getIntensityPoints(intensity) {
+          const fitness = ensureFitnessDefaults();
+          const settings = fitness.pointSettings || {};
+          const key = typeof intensity === 'string' ? intensity.toLowerCase() : 'medium';
+          const intensePoints = Number(settings.intense);
+          const mediumPoints = Number(settings.medium);
+          const lightPoints = Number(settings.light);
+          const map = {
+            intense: Number.isFinite(intensePoints) ? intensePoints : 0,
+            medium: Number.isFinite(mediumPoints) ? mediumPoints : 0,
+            light: Number.isFinite(lightPoints) ? lightPoints : 0
+          };
+          if (!Number.isFinite(map.medium)) map.medium = 0;
+          return Object.prototype.hasOwnProperty.call(map, key) ? map[key] : map.medium;
+        }
+        function getIntensityLabel(intensity) {
+          switch ((intensity || 'medium').toLowerCase()) {
+            case 'intense':
+              return 'Intense';
+            case 'light':
+              return 'Light';
+            default:
+              return 'Medium';
           }
-          const rawDelta = baseEarned + extraEarned - penalties + bonus;
-          const currentCredits = fitness && typeof fitness.wellnessCredits === 'number' ? fitness.wellnessCredits : 0;
-          const cap = fitness && typeof fitness.creditsCap === 'number' ? fitness.creditsCap : defaults.creditsCap;
-          const newCredits = Math.max(0, Math.min(cap, currentCredits + rawDelta));
-          const delta = newCredits - currentCredits;
-          return {
-            delta,
-            newCredits,
-            streakCount,
-            baseEarned,
-            extraEarned,
-            penalties,
-            bonus,
-            metAllTargets: metAll && workoutsWithTargets > 0,
-            workoutsWithTargets
-          };
         }
-        function collectWorkoutStats(options = {}) {
+        function collectWorkoutPoints(options = {}) {
+          const workouts = ensureWorkoutData();
           const start = options.start ? new Date(options.start) : getWeekStart(new Date());
           const end = options.end ? new Date(options.end) : null;
           if (isNaN(start.getTime())) {
             throw new Error('Invalid start date for workout stats');
           }
-          const todos = Array.isArray(data.todos) ? data.todos : [];
-          const stats = todos.map(todo => {
-            if (!Array.isArray(todo.logs)) todo.logs = [];
-            if (todo.carryOver === undefined) todo.carryOver = 0;
-            const target = typeof todo.weeklyTarget === 'number' ? Math.max(0, todo.weeklyTarget) : 0;
-            let actual = 0;
-            todo.logs.forEach(log => {
-              const dt = new Date(log);
-              if (isNaN(dt.getTime())) return;
-              if (dt >= start && (!end || dt <= end)) {
-                actual += 1;
-              }
-            });
-            return {
-              id: todo.id,
-              name: todo.name || '',
-              target,
-              actual
-            };
+          const entries = [];
+          workouts.entries.forEach(entry => {
+            if (!entry || !entry.timestamp) return;
+            const dt = new Date(entry.timestamp);
+            if (isNaN(dt.getTime())) return;
+            if (dt >= start && (!end || dt < end)) {
+              entries.push(Object.assign({}, entry, { timestamp: dt.toISOString() }));
+            }
           });
-          return { stats, start, end };
+          entries.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          let totalPoints = 0;
+          const counts = { intense: 0, medium: 0, light: 0 };
+          const pointsByIntensity = { intense: 0, medium: 0, light: 0 };
+          entries.forEach(entry => {
+            const key = (entry.intensity || 'medium').toLowerCase();
+            const points = getIntensityPoints(key);
+            totalPoints += points;
+            if (counts[key] !== undefined) counts[key] += 1; else counts[key] = 1;
+            if (pointsByIntensity[key] !== undefined) pointsByIntensity[key] += points; else pointsByIntensity[key] = points;
+          });
+          return {
+            entries,
+            start,
+            end,
+            totalPoints,
+            counts,
+            pointsByIntensity
+          };
+        }
+        function getWeeklyPointTarget() {
+          const fitness = ensureFitnessDefaults();
+          const settings = fitness.pointSettings || {};
+          const target = Number(settings.weeklyTarget);
+          return Number.isFinite(target) && target > 0 ? target : 0;
+        }
+        function migrateLegacyTodosToWorkouts(todos) {
+          const workouts = makeDefaultWorkouts();
+          if (!Array.isArray(todos)) return workouts;
+          todos.forEach(todo => {
+            if (!todo || typeof todo.name !== 'string') return;
+            const name = todo.name;
+            const intensity = 'medium';
+            let preset = workouts.presets.find(p => p.name === name && p.intensity === intensity);
+            if (!preset) {
+              preset = { id: uuid(), name, intensity };
+              workouts.presets.push(preset);
+            }
+            if (Array.isArray(todo.logs)) {
+              todo.logs.forEach(log => {
+                const dt = new Date(log);
+                if (isNaN(dt.getTime())) return;
+                workouts.entries.push({
+                  id: uuid(),
+                  name,
+                  intensity,
+                  timestamp: dt.toISOString(),
+                  presetId: preset.id
+                });
+              });
+            }
+          });
+          return workouts;
         }
         function isWeekPaused(weekKey) {
           const fitness = ensureFitnessDefaults();
@@ -497,7 +538,133 @@
             saveData();
           }
         }
-        function finalizeFitnessWeek(weeklyStats, lastMonday, thisMonday) {
+
+        function normalizeIntensity(value) {
+          const key = typeof value === 'string' ? value.toLowerCase().trim() : '';
+          if (key === 'intense' || key === 'medium' || key === 'light') return key;
+          return 'medium';
+        }
+        function ensureWorkoutPreset(name, intensity) {
+          const workouts = ensureWorkoutData();
+          const trimmedName = (name || '').trim();
+          if (!trimmedName) return null;
+          const normalized = normalizeIntensity(intensity);
+          let preset = workouts.presets.find(p => p.name === trimmedName && normalizeIntensity(p.intensity) === normalized);
+          if (!preset) {
+            preset = { id: uuid(), name: trimmedName, intensity: normalized };
+            workouts.presets.push(preset);
+          } else {
+            preset.intensity = normalized;
+            preset.name = trimmedName;
+          }
+          return preset;
+        }
+        function formatWorkoutTimestamp(iso) {
+          if (!iso) return '';
+          const dt = new Date(iso);
+          if (isNaN(dt)) return '';
+          return dt.toLocaleString(undefined, { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+        }
+        function formatTimestampForInput(iso) {
+          if (!iso) return '';
+          const dt = new Date(iso);
+          if (isNaN(dt)) return '';
+          const pad = (num) => String(num).padStart(2, '0');
+          return dt.getFullYear() + '-' + pad(dt.getMonth() + 1) + '-' + pad(dt.getDate()) + 'T' + pad(dt.getHours()) + ':' + pad(dt.getMinutes());
+        }
+        function parseDateTimeInput(value) {
+          if (!value) return null;
+          let normalized = value.trim();
+          if (!normalized) return null;
+          if (!normalized.includes('T') && normalized.includes(' ')) {
+            normalized = normalized.replace(' ', 'T');
+          }
+          const dt = new Date(normalized);
+          return isNaN(dt) ? null : dt;
+        }
+        function logWorkoutEntry({ name, intensity, timestamp, presetId } = {}) {
+          const workouts = ensureWorkoutData();
+          const trimmedName = (name || '').trim();
+          if (!trimmedName) return null;
+          const normalized = normalizeIntensity(intensity);
+          let preset = null;
+          if (presetId) {
+            preset = workouts.presets.find(p => p.id === presetId) || null;
+          }
+          if (!preset || preset.name !== trimmedName || normalizeIntensity(preset.intensity) !== normalized) {
+            preset = ensureWorkoutPreset(trimmedName, normalized);
+          }
+          const when = timestamp ? new Date(timestamp) : new Date();
+          if (isNaN(when)) return null;
+          const entry = {
+            id: uuid(),
+            name: trimmedName,
+            intensity: normalized,
+            timestamp: when.toISOString(),
+            presetId: preset ? preset.id : null
+          };
+          workouts.entries.push(entry);
+          saveData();
+          updateFitnessCards();
+          updateTodoSection();
+          return entry;
+        }
+        function updateEntriesForPreset(preset) {
+          const workouts = ensureWorkoutData();
+          if (!preset || !preset.id) return;
+          workouts.entries.forEach(entry => {
+            if (entry.presetId === preset.id) {
+              entry.name = preset.name;
+              entry.intensity = preset.intensity;
+            }
+          });
+        }
+        function deleteWorkoutPreset(presetId) {
+          const workouts = ensureWorkoutData();
+          const idx = workouts.presets.findIndex(p => p.id === presetId);
+          if (idx >= 0) {
+            workouts.presets.splice(idx, 1);
+            workouts.entries.forEach(entry => {
+              if (entry.presetId === presetId) {
+                entry.presetId = null;
+              }
+            });
+          }
+        }
+        function updateWorkoutEntry(entryId, updates = {}) {
+          const workouts = ensureWorkoutData();
+          const entry = workouts.entries.find(e => e.id === entryId);
+          if (!entry) return null;
+          const newName = updates.name !== undefined ? updates.name : entry.name;
+          const trimmedName = (newName || '').trim();
+          if (!trimmedName) return null;
+          const newIntensity = normalizeIntensity(updates.intensity !== undefined ? updates.intensity : entry.intensity);
+          let preset = ensureWorkoutPreset(trimmedName, newIntensity);
+          entry.name = preset ? preset.name : trimmedName;
+          entry.intensity = preset ? preset.intensity : newIntensity;
+          entry.presetId = preset ? preset.id : null;
+          if (updates.timestamp) {
+            const dt = new Date(updates.timestamp);
+            if (!isNaN(dt)) {
+              entry.timestamp = dt.toISOString();
+            }
+          }
+          saveData();
+          updateFitnessCards();
+          updateTodoSection();
+          return entry;
+        }
+        function deleteWorkoutEntry(entryId) {
+          const workouts = ensureWorkoutData();
+          const idx = workouts.entries.findIndex(e => e.id === entryId);
+          if (idx >= 0) {
+            workouts.entries.splice(idx, 1);
+            saveData();
+            updateFitnessCards();
+            updateTodoSection();
+          }
+        }
+        function finalizeFitnessWeek(lastMonday, thisMonday) {
           const fitness = ensureFitnessDefaults();
           const lastMondayKey = getWeekKey(lastMonday);
           const thisMondayKey = getWeekKey(thisMonday);
@@ -509,68 +676,51 @@
             delete pausedWeeks[lastMondayKey];
             fitness.pausedWeeks = pausedWeeks;
           }
-          const hasTargets = Array.isArray(weeklyStats) && weeklyStats.some(stat => stat.target > 0);
-          if (!hasTargets) {
+          const weeklySummary = collectWorkoutPoints({ start: lastMonday, end: thisMonday });
+          const targetPoints = getWeeklyPointTarget();
+          const settings = fitness.pointSettings || {};
+          const multiplierPerPoint = Number(settings.multiplierPerPoint);
+          const creditsPerPoint = Number(settings.creditsPerPoint);
+          const overagePoints = targetPoints > 0 ? Math.max(0, weeklySummary.totalPoints - targetPoints) : weeklySummary.totalPoints;
+          const multiplierIncrease = (Number.isFinite(multiplierPerPoint) ? multiplierPerPoint : 0) * overagePoints;
+          const nextMultiplier = clampMultiplier(1 + multiplierIncrease);
+          const defaults = makeDefaultFitness();
+          const currentCredits = Number.isFinite(fitness.wellnessCredits) ? fitness.wellnessCredits : defaults.wellnessCredits;
+          const creditsEarned = (Number.isFinite(creditsPerPoint) ? creditsPerPoint : 0) * overagePoints;
+          const cap = Number.isFinite(fitness.creditsCap) ? fitness.creditsCap : defaults.creditsCap;
+          const newCredits = Math.max(0, Math.min(cap, currentCredits + creditsEarned));
+          const metTarget = targetPoints > 0 ? weeklySummary.totalPoints >= targetPoints : weeklySummary.totalPoints > 0;
+          const previousStreak = Number.isFinite(fitness.streakCount) ? fitness.streakCount : 0;
+          const streakCount = metTarget ? previousStreak + 1 : 0;
+          if (wasPaused) {
             fitness.nextMultiplier = fitness.currentMultiplier;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
               weekEnd: thisMonday.toISOString().split('T')[0],
-              adjPercent: 0,
-              totalPenalty: 0,
-              totalOverage: 0,
-              complianceAvg: 1,
-              totalTargets: 0,
-              totalActual: 0,
-              creditsDelta: 0,
-              baseCredits: 0,
-              extraCredits: 0,
-              penalties: 0,
-              bonus: 0,
-              metAllTargets: false,
-              paused: wasPaused
-            };
-          } else if (wasPaused) {
-            fitness.nextMultiplier = fitness.currentMultiplier;
-            fitness.lastWeekSummary = {
-              weekStart: lastMondayKey,
-              weekEnd: thisMonday.toISOString().split('T')[0],
-              adjPercent: 0,
-              totalPenalty: 0,
-              totalOverage: 0,
-              complianceAvg: 1,
-              totalTargets: 0,
-              totalActual: 0,
-              creditsDelta: 0,
-              baseCredits: 0,
-              extraCredits: 0,
-              penalties: 0,
-              bonus: 0,
-              metAllTargets: false,
-              paused: true
+              totalPoints: weeklySummary.totalPoints,
+              targetPoints,
+              overagePoints: 0,
+              multiplierDelta: 0,
+              creditsEarned: 0,
+              paused: true,
+              counts: weeklySummary.counts,
+              pointsByIntensity: weeklySummary.pointsByIntensity
             };
           } else {
-            const summary = computeFitnessSummary(weeklyStats, fitness.alpha, fitness.beta);
-            const nextMultiplier = clampMultiplier(1 + summary.adjPercent);
-            const creditsInfo = computeCreditsDelta(weeklyStats, fitness);
             fitness.nextMultiplier = nextMultiplier;
-            fitness.wellnessCredits = creditsInfo.newCredits;
-            fitness.streakCount = creditsInfo.streakCount;
+            fitness.wellnessCredits = newCredits;
+            fitness.streakCount = streakCount;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
               weekEnd: thisMonday.toISOString().split('T')[0],
-              adjPercent: summary.adjPercent,
-              totalPenalty: summary.totalPenalty,
-              totalOverage: summary.totalOverage,
-              complianceAvg: summary.complianceAvg,
-              totalTargets: summary.totalTargets,
-              totalActual: summary.totalActual,
-              creditsDelta: creditsInfo.delta,
-              baseCredits: creditsInfo.baseEarned,
-              extraCredits: creditsInfo.extraEarned,
-              penalties: creditsInfo.penalties,
-              bonus: creditsInfo.bonus,
-              metAllTargets: creditsInfo.metAllTargets,
-              paused: false
+              totalPoints: weeklySummary.totalPoints,
+              targetPoints,
+              overagePoints,
+              multiplierDelta: nextMultiplier - 1,
+              creditsEarned,
+              paused: false,
+              counts: weeklySummary.counts,
+              pointsByIntensity: weeklySummary.pointsByIntensity
             };
           }
           fitness.weekendBoostUnlockedWeek = null;
@@ -587,16 +737,9 @@
           fridayCutoff.setHours(18, 0, 0, 0);
           const now = new Date();
           if (now < fridayCutoff) return false;
-          const statsInfo = collectWorkoutStats({ start: monday, end: fridayCutoff });
-          let totalTarget = 0;
-          let totalActual = 0;
-          statsInfo.stats.forEach(stat => {
-            if (stat.target > 0) {
-              totalTarget += stat.target;
-              totalActual += Math.min(stat.actual, stat.target);
-            }
-          });
-          if (totalTarget > 0 && totalActual >= totalTarget) {
+          const statsInfo = collectWorkoutPoints({ start: monday, end: fridayCutoff });
+          const targetPoints = getWeeklyPointTarget();
+          if (targetPoints > 0 && statsInfo.totalPoints >= targetPoints) {
             fitness.weekendBoostUnlockedWeek = weekKey;
             saveData();
             return true;
@@ -640,6 +783,7 @@ function loadData() {
       projects: [],
       entries: [],
       todos: [],
+      workouts: makeDefaultWorkouts(),
       groceries: [],
       groceryBudgetWeekly: 1000,
       groceryBudgetMonthly: 4000,
@@ -661,12 +805,8 @@ function loadData() {
     return {
       projects: Array.isArray(parsed.projects) ? parsed.projects : [],
       entries: Array.isArray(parsed.entries) ? parsed.entries : [],
-      // Workouts (formerly todos). Ensure an array and attach carryOver property if missing.
-      todos: Array.isArray(parsed.todos) ? parsed.todos.map(t => {
-        if (t.carryOver === undefined) t.carryOver = 0;
-        if (!Array.isArray(t.logs)) t.logs = [];
-        return t;
-      }) : [],
+      todos: Array.isArray(parsed.todos) ? parsed.todos : [],
+      workouts: applyWorkoutDefaults(parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)),
       // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
       groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
         // Migrate legacy properties to new structure. Each item should have a name and frequency.
@@ -732,6 +872,7 @@ function loadData() {
       projects: [],
       entries: [],
       todos: [],
+      workouts: makeDefaultWorkouts(),
       groceries: [],
       groceryBudgetWeekly: 1000,
       groceryBudgetMonthly: 4000,
@@ -763,6 +904,7 @@ function loadData() {
         }
         let data = loadData();
         ensureFitnessDefaults();
+        ensureWorkoutData();
         // Initialize backup and sync flags before they are referenced in saveData().
         // needsBackup tracks whether the data has changed and needs to be exported.
         // autoSyncEnabled indicates whether automatic export is enabled.
@@ -907,65 +1049,59 @@ function loadData() {
           }
           updateAutoSyncStatus();
         }
-        // Reset todo checkboxes each Monday. If the stored reset date is not for the current Monday,
-        // mark all tasks as unchecked and update the reset date in localStorage. This ensures
-        // todos remain persistent week-to-week but are reset at the start of each new week.
-        function resetTodosIfNeeded() {
+        function processWorkoutWeekIfNeeded() {
           const today = new Date();
-          // Determine the Monday of this week
-          const monday = new Date(today);
-          const dow = monday.getDay();
-          const diffToMonday = (dow + 6) % 7;
-          monday.setDate(monday.getDate() - diffToMonday);
-          const mondayStr = monday.toDateString();
-          const lastReset = localStorage.getItem('todoResetDatePro');
-          if (lastReset !== mondayStr) {
-            // At the start of a new week, compute carryOver for each workout based on last week's performance
-            if (Array.isArray(data.todos)) {
-              // Determine last Monday (one week before this week's Monday) for computing logs in the previous week
-              const lastMonday = new Date(monday);
-              lastMonday.setDate(monday.getDate() - 7);
-              lastMonday.setHours(0, 0, 0, 0);
-              const weeklyStats = [];
-              data.todos.forEach(t => {
-                // Ensure properties exist
-                if (typeof t.weeklyTarget !== 'number' || t.weeklyTarget < 1) {
-                  t.weeklyTarget = 1;
-                }
-                if (t.carryOver === undefined) {
-                  t.carryOver = 0;
-                }
-                if (!Array.isArray(t.logs)) {
-                  t.logs = [];
-                }
-                // Count the number of sessions logged in the previous week
-                const sessionsLastWeek = t.logs.filter(log => {
-                  const dt = new Date(log);
-                  return dt >= lastMonday && dt < monday;
-                }).length;
-                weeklyStats.push({ id: t.id, name: t.name || '', target: Math.max(0, t.weeklyTarget), actual: sessionsLastWeek });
-                // Dynamic target for the previous week
-                const dynamicTarget = t.weeklyTarget + t.carryOver;
-                // Determine carryOver for the new week based on difference between target and actual sessions
-                let newCarry = dynamicTarget - sessionsLastWeek;
-                // Update carryOver (can be negative or positive)
-                t.carryOver = newCarry;
-                // Reset checked state
-                t.checked = false;
-                // Remove logs before this week; keep logs on or after the current Monday
-                t.logs = t.logs.filter(log => {
-                  const dt = new Date(log);
-                  return dt >= monday;
-                });
-              });
-              finalizeFitnessWeek(weeklyStats, lastMonday, monday);
-            }
-            localStorage.setItem('todoResetDatePro', mondayStr);
-            saveData();
+          const currentMonday = getWeekStart(today);
+          const currentMondayKey = currentMonday.toISOString().split('T')[0];
+          const fitness = ensureFitnessDefaults();
+          const lastProcessedKey = fitness.lastProcessedMonday;
+          if (lastProcessedKey === currentMondayKey) {
+            return;
           }
+          let lastMonday = parseISODateOnly(lastProcessedKey);
+          if (!lastMonday || lastMonday >= currentMonday) {
+            lastMonday = new Date(currentMonday);
+            lastMonday.setDate(lastMonday.getDate() - 7);
+          }
+          lastMonday.setHours(0, 0, 0, 0);
+          const maxIterations = 12; // guard against extremely stale data
+          let iterations = 0;
+          while (lastMonday < currentMonday && iterations < maxIterations) {
+            const nextMonday = new Date(lastMonday);
+            nextMonday.setDate(nextMonday.getDate() + 7);
+            finalizeFitnessWeek(lastMonday, nextMonday);
+            lastMonday = nextMonday;
+            iterations += 1;
+          }
+          saveData();
         }
-        // Perform initial todo reset check
-        resetTodosIfNeeded();
+        // Process any outstanding weeks immediately on load
+        processWorkoutWeekIfNeeded();
+        const todoForm = document.getElementById('todoForm');
+        if (todoForm) {
+          todoForm.addEventListener('submit', e => {
+            e.preventDefault();
+            const nameInput = document.getElementById('todoName');
+            const intensityInput = document.getElementById('todoIntensity');
+            const whenInput = document.getElementById('todoWhen');
+            const name = nameInput ? nameInput.value : '';
+            const intensity = intensityInput ? intensityInput.value : 'medium';
+            const whenValue = whenInput && whenInput.value ? whenInput.value : '';
+            const whenDate = whenValue ? new Date(whenValue) : new Date();
+            if (!name.trim()) {
+              alert('Workout name is required.');
+              return;
+            }
+            if (isNaN(whenDate)) {
+              alert('Please provide a valid date and time.');
+              return;
+            }
+            logWorkoutEntry({ name, intensity, timestamp: whenDate });
+            if (nameInput) nameInput.value = '';
+            if (whenInput) whenInput.value = '';
+            if (intensityInput) intensityInput.value = 'medium';
+          });
+        }
         // Ensure every project has a color and that colors are unique when possible.
         (function assignProjectColors() {
           const used = new Set();
@@ -1085,12 +1221,9 @@ function loadData() {
           }
         }
 
-        // Update the Workout section UI based on the current data.todos array.
-        // Each workout has a name, a weekly target (number of sessions), and a list of
-        // logs indicating when sessions were completed. We display progress
-        // relative to the weekly target and provide buttons to log a session,
-        // edit the target, or delete the workout. The UI resets weekly on
-        // Mondays by filtering logs before this week.
+        // Update the Workout section UI based on saved presets and weekly entries.
+        // Presets capture frequently logged workouts, while the entries list shows
+        // everything recorded for the current week with options to edit or remove.
         function commitFitnessMutation(mutator) {
           const fitness = ensureFitnessDefaults();
           mutator(fitness);
@@ -1098,41 +1231,45 @@ function loadData() {
           updateTodoSection();
           updateGrocerySection();
         }
-        function updateFitnessCards(statsInfo) {
+
+        function updateFitnessCards() {
           const summaryEl = document.getElementById('fitnessSummaryContent');
           const settingsEl = document.getElementById('fitnessSettingsContent');
           const fitness = ensureFitnessDefaults();
-          const statsData = statsInfo || collectWorkoutStats();
-          const stats = Array.isArray(statsData.stats) ? statsData.stats : [];
-          const hasTargets = stats.some(stat => stat.target > 0);
-          const summary = hasTargets ? computeFitnessSummary(stats, fitness.alpha, fitness.beta) : {
-            adjPercent: 0,
-            totalPenalty: 0,
-            totalOverage: 0,
-            complianceAvg: 1,
-            totalTargets: 0,
-            totalActual: 0
-          };
+          const pointsInfo = collectWorkoutPoints();
+          const targetPoints = getWeeklyPointTarget();
+          const settings = fitness.pointSettings || {};
+          const multiplierPerPoint = Number(settings.multiplierPerPoint);
+          const creditsPerPoint = Number(settings.creditsPerPoint);
+          const effectiveMultiplierPerPoint = Number.isFinite(multiplierPerPoint) ? multiplierPerPoint : 0;
+          const effectiveCreditsPerPoint = Number.isFinite(creditsPerPoint) ? creditsPerPoint : 0;
+          const overagePoints = targetPoints > 0 ? Math.max(0, pointsInfo.totalPoints - targetPoints) : pointsInfo.totalPoints;
           const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
           const nextMultiplier = clampMultiplier(typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : currentMultiplier);
-          const projectedMultiplier = clampMultiplier(1 + summary.adjPercent);
+          const projectedMultiplier = clampMultiplier(1 + effectiveMultiplierPerPoint * overagePoints);
           const weeklyBaseBudget = (data.groceryBudgetWeekly || 0) + (data.groceryBudgetWeeklyCarry || 0);
           const currentBudget = weeklyBaseBudget * currentMultiplier;
-          const nextBudget = weeklyBaseBudget * nextMultiplier;
           const projectedBudget = weeklyBaseBudget * projectedMultiplier;
-          const totalTargetSessions = stats.reduce((acc, stat) => stat.target > 0 ? acc + stat.target : acc, 0);
-          const totalActualSessions = stats.reduce((acc, stat) => stat.target > 0 ? acc + stat.actual : acc, 0);
-          const complianceRatio = totalTargetSessions > 0 ? totalActualSessions / totalTargetSessions : 0;
+          const nextBudget = weeklyBaseBudget * nextMultiplier;
+          const projectedCredits = overagePoints * effectiveCreditsPerPoint;
           const pausedThisWeek = isWeekPaused(getWeekKey(new Date()));
           const boostEnabled = fitness.weekendBoostEnabled;
           const boostActive = isWeekendBoostActive();
           const boostUnlocked = fitness.weekendBoostUnlockedWeek === getWeekKey(new Date());
           const boostPercent = Math.round((fitness.weekendBoostPercent || 0) * 100);
-          const defaultCreditSettings = makeDefaultFitness().creditSettings;
-          const creditSettings = Object.assign({}, defaultCreditSettings, fitness.creditSettings || {});
+          const lastWeek = fitness.lastWeekSummary || null;
           const formatAmount = (num) => {
             const str = formatCurrency(num, -1);
             return str ? str.replace(' kr', ' SEK') : '0 SEK';
+          };
+          const formatPoints = (value) => {
+            if (!Number.isFinite(value)) return '0';
+            return Number.isInteger(value) ? String(value) : value.toFixed(1);
+          };
+          const formatSignedCredits = (value) => {
+            if (!Number.isFinite(value) || value === 0) return '0 credits';
+            const prefix = value >= 0 ? '+' : '−';
+            return prefix + Math.abs(value).toFixed(0) + ' credits';
           };
           if (summaryEl) {
             summaryEl.innerHTML = '';
@@ -1159,25 +1296,47 @@ function loadData() {
             }
             createRow('Current multiplier', currentMultiplier.toFixed(2) + '×', 'Weekly budget ' + formatAmount(currentBudget));
             const projectedDelta = projectedBudget - weeklyBaseBudget;
-            if (hasTargets) {
-              createRow('Projected (if week ended today)', projectedMultiplier.toFixed(2) + '×', formatSignedCurrency(projectedDelta));
-            }
-            const lastWeek = fitness.lastWeekSummary;
+            createRow('Projected (if week ended today)', projectedMultiplier.toFixed(2) + '×', `${formatSignedCurrency(projectedDelta)} • ${formatSignedCredits(projectedCredits)}`);
             const nextDelta = nextBudget - weeklyBaseBudget;
             let nextSub = formatSignedCurrency(nextDelta);
-            if (lastWeek && !lastWeek.paused) {
-              const bonusPct = fitness.alpha * lastWeek.totalOverage;
-              const penaltyPct = fitness.beta * lastWeek.totalPenalty;
-              nextSub += ' • Last week ' + formatPercent(bonusPct, 1) + ' bonus, ' + formatPercent(penaltyPct, 1) + ' penalty';
-            } else if (lastWeek && lastWeek.paused) {
-              nextSub += ' • Last week paused';
+            if (lastWeek) {
+              if (lastWeek.paused) {
+                nextSub += ' • Last week paused';
+              } else {
+                const lastPoints = Number.isFinite(lastWeek.totalPoints) ? lastWeek.totalPoints : 0;
+                const lastOver = Number.isFinite(lastWeek.overagePoints) ? lastWeek.overagePoints : 0;
+                nextSub += ` • Last week ${formatPoints(lastPoints)} pts${lastOver > 0 ? ' (+' + formatPoints(lastOver) + ' over)' : ''}`;
+                if (Number.isFinite(lastWeek.creditsEarned) && lastWeek.creditsEarned !== 0) {
+                  nextSub += ' • ' + formatSignedCredits(lastWeek.creditsEarned);
+                }
+              }
+            }
+            if (pausedThisWeek) {
+              nextSub += ' • This week paused';
             }
             createRow('Next week (locked)', nextMultiplier.toFixed(2) + '×', nextSub);
-            if (hasTargets) {
-              createRow('Weekly compliance', totalActualSessions + ' / ' + totalTargetSessions + ' sessions', formatPercent(Math.min(complianceRatio, 1), 1));
-            } else {
-              createRow('Weekly compliance', 'No targets', null);
+            const pointsValue = targetPoints > 0
+              ? `${formatPoints(pointsInfo.totalPoints)} / ${formatPoints(targetPoints)} pts`
+              : `${formatPoints(pointsInfo.totalPoints)} pts`;
+            let pointsSub = `Over target ${formatPoints(overagePoints)} pts`;
+            if (pausedThisWeek) {
+              pointsSub += ' • Paused';
             }
+            if (overagePoints > 0) {
+              const budgetGain = formatSignedCurrency(projectedDelta);
+              const creditGain = formatSignedCredits(projectedCredits);
+              pointsSub += ` • Potential ${budgetGain}, ${creditGain}`;
+            }
+            createRow('Points this week', pointsValue, pointsSub);
+            const intensityParts = [];
+            ['intense', 'medium', 'light'].forEach(key => {
+              const count = pointsInfo.counts[key] || 0;
+              if (count > 0) {
+                const pts = pointsInfo.pointsByIntensity[key] || 0;
+                intensityParts.push(`${getIntensityLabel(key)}: ${count} (${formatPoints(pts)} pts)`);
+              }
+            });
+            createRow('Intensity mix', intensityParts.length ? intensityParts.join(' • ') : 'No workouts logged yet', null);
             const creditsRow = document.createElement('div');
             creditsRow.className = 'fitness-pill-row';
             const creditsPill = document.createElement('span');
@@ -1196,6 +1355,12 @@ function loadData() {
               streakPill.textContent = '🔥 Streak ' + fitness.streakCount + ' week' + (fitness.streakCount === 1 ? '' : 's');
               creditsRow.appendChild(streakPill);
             }
+            if (overagePoints > 0) {
+              const potentialPill = document.createElement('span');
+              potentialPill.className = 'fitness-pill accent';
+              potentialPill.textContent = 'Projected ' + formatSignedCredits(projectedCredits);
+              creditsRow.appendChild(potentialPill);
+            }
             summaryEl.appendChild(grid);
             summaryEl.appendChild(creditsRow);
             const boostRow = document.createElement('div');
@@ -1211,50 +1376,14 @@ function loadData() {
               boostValue.textContent = 'Unlocked: +' + boostPercent + '% on Treats';
             } else if (boostUnlocked) {
               boostValue.textContent = 'Unlocked – waiting for weekend (+' + boostPercent + '%)';
-            } else if (hasTargets && totalTargetSessions > 0) {
-              const remaining = Math.max(0, totalTargetSessions - totalActualSessions);
-              boostValue.textContent = 'Locked – ' + remaining + ' session' + (remaining === 1 ? '' : 's') + ' to unlock +' + boostPercent + '%';
+            } else if (pausedThisWeek) {
+              boostValue.textContent = 'Paused this week';
             } else {
-              boostValue.textContent = 'Locked';
+              boostValue.textContent = 'Reach the weekly point target by Friday to unlock (+' + boostPercent + '%)';
             }
             boostRow.appendChild(boostLabel);
             boostRow.appendChild(boostValue);
             summaryEl.appendChild(boostRow);
-            const pauseRow = document.createElement('div');
-            pauseRow.className = 'fitness-summary-row';
-            const pauseLabel = document.createElement('div');
-            pauseLabel.className = 'fitness-summary-label';
-            pauseLabel.textContent = 'Sick / travel pause';
-            const pauseValue = document.createElement('div');
-            pauseValue.className = 'fitness-summary-value';
-            const pauseToggle = document.createElement('label');
-            pauseToggle.className = 'switch-label';
-            const pauseCheckbox = document.createElement('input');
-            pauseCheckbox.type = 'checkbox';
-            pauseCheckbox.checked = pausedThisWeek;
-            pauseCheckbox.addEventListener('change', () => {
-              setWeekPaused(getWeekKey(new Date()), pauseCheckbox.checked);
-              saveData();
-              updateTodoSection();
-              updateGrocerySection();
-            });
-            const toggleSpan = document.createElement('span');
-            toggleSpan.textContent = pauseCheckbox.checked ? 'Paused' : 'Active';
-            pauseCheckbox.addEventListener('change', () => {
-              toggleSpan.textContent = pauseCheckbox.checked ? 'Paused' : 'Active';
-            });
-            pauseToggle.appendChild(pauseCheckbox);
-            pauseToggle.appendChild(toggleSpan);
-            pauseValue.appendChild(pauseToggle);
-            pauseRow.appendChild(pauseLabel);
-            pauseRow.appendChild(pauseValue);
-            summaryEl.appendChild(pauseRow);
-            if (creditSettings) {
-              const ratesRow = document.createElement('div');
-              ratesRow.className = 'fitness-summary-row muted';
-              ratesRow.textContent = `Credits: +${creditSettings.base} up to target, +${creditSettings.extra} extra, −${creditSettings.penalty} missed`;
-              summaryEl.appendChild(ratesRow);
-            }
           }
           if (settingsEl) {
             if (!settingsEl.dataset.initialized) {
@@ -1275,164 +1404,72 @@ function loadData() {
                 controls[key] = control;
                 return control;
               }
-              const modeSelect = registerControl('mode', document.createElement('select'));
-              Object.entries(FITNESS_MODES).forEach(([key, cfg]) => {
-                const option = document.createElement('option');
-                option.value = key;
-                option.textContent = cfg.label;
-                modeSelect.appendChild(option);
-              });
-              const customOption = document.createElement('option');
-              customOption.value = 'custom';
-              customOption.textContent = 'Custom';
-              modeSelect.appendChild(customOption);
-              modeSelect.addEventListener('change', () => {
-                const val = modeSelect.value;
-                if (FITNESS_MODES[val]) {
+              function createPointInput(key, labelText) {
+                const input = registerControl(key, document.createElement('input'));
+                input.type = 'number';
+                input.step = '0.5';
+                input.min = '0';
+                input.addEventListener('change', () => {
+                  const val = parseFloat(input.value);
+                  const defaults = makeDefaultFitness().pointSettings;
                   commitFitnessMutation(fit => {
-                    fit.mode = val;
-                    fit.alpha = FITNESS_MODES[val].alpha;
-                    fit.beta = FITNESS_MODES[val].beta;
+                    if (!fit.pointSettings) fit.pointSettings = {};
+                    fit.pointSettings[key] = isNaN(val) ? defaults[key] : Math.max(0, val);
                   });
-                } else {
-                  commitFitnessMutation(fit => {
-                    fit.mode = 'custom';
-                  });
-                }
-              });
-              appendSetting('Budget mode', modeSelect);
-              const alphaInput = registerControl('alpha', document.createElement('input'));
-              alphaInput.type = 'number';
-              alphaInput.step = '0.1';
-              alphaInput.min = '0';
-              alphaInput.addEventListener('change', () => {
-                const val = parseFloat(alphaInput.value);
-                if (isNaN(val)) {
-                  const fallback = ensureFitnessDefaults().alpha;
-                  alphaInput.value = (fallback * 100).toFixed(1);
-                  return;
-                }
+                });
+                appendSetting(labelText, input);
+              }
+              createPointInput('intense', 'Intense workout points');
+              createPointInput('medium', 'Medium workout points');
+              createPointInput('light', 'Light workout points');
+              const weeklyTargetInput = registerControl('weeklyTarget', document.createElement('input'));
+              weeklyTargetInput.type = 'number';
+              weeklyTargetInput.step = '1';
+              weeklyTargetInput.min = '0';
+              weeklyTargetInput.addEventListener('change', () => {
+                const val = parseFloat(weeklyTargetInput.value);
+                const defaults = makeDefaultFitness().pointSettings;
                 commitFitnessMutation(fit => {
-                  fit.alpha = val / 100;
-                  fit.mode = 'custom';
+                  if (!fit.pointSettings) fit.pointSettings = {};
+                  fit.pointSettings.weeklyTarget = isNaN(val) ? defaults.weeklyTarget : Math.max(0, val);
                 });
               });
-              appendSetting('Multiplier bonus α (%)', alphaInput);
-              const betaInput = registerControl('beta', document.createElement('input'));
-              betaInput.type = 'number';
-              betaInput.step = '0.1';
-              betaInput.min = '0';
-              betaInput.addEventListener('change', () => {
-                const val = parseFloat(betaInput.value);
-                if (isNaN(val)) {
-                  const fallback = ensureFitnessDefaults().beta;
-                  betaInput.value = (fallback * 100).toFixed(1);
-                  return;
-                }
+              appendSetting('Weekly point target', weeklyTargetInput);
+              const multiplierInput = registerControl('multiplierPerPoint', document.createElement('input'));
+              multiplierInput.type = 'number';
+              multiplierInput.step = '0.1';
+              multiplierInput.min = '0';
+              multiplierInput.addEventListener('change', () => {
+                const val = parseFloat(multiplierInput.value);
+                const defaults = makeDefaultFitness().pointSettings;
                 commitFitnessMutation(fit => {
-                  fit.beta = val / 100;
-                  fit.mode = 'custom';
+                  if (!fit.pointSettings) fit.pointSettings = {};
+                  const fallback = defaults.multiplierPerPoint || 0;
+                  fit.pointSettings.multiplierPerPoint = isNaN(val) ? fallback : Math.max(0, val) / 100;
                 });
               });
-              appendSetting('Penalty weight β (%)', betaInput);
-              const creditBaseInput = registerControl('creditBase', document.createElement('input'));
-              creditBaseInput.type = 'number';
-              creditBaseInput.step = '1';
-              creditBaseInput.addEventListener('change', () => {
-                const val = parseFloat(creditBaseInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
-                  creditBaseInput.value = String(fallbackCredits.base);
-                  return;
-                }
+              appendSetting('Budget increase per point (%)', multiplierInput);
+              const creditsPerPointInput = registerControl('creditsPerPoint', document.createElement('input'));
+              creditsPerPointInput.type = 'number';
+              creditsPerPointInput.step = '1';
+              creditsPerPointInput.min = '0';
+              creditsPerPointInput.addEventListener('change', () => {
+                const val = parseFloat(creditsPerPointInput.value);
+                const defaults = makeDefaultFitness().pointSettings;
                 commitFitnessMutation(fit => {
-                  if (!fit.creditSettings) fit.creditSettings = {};
-                  fit.creditSettings.base = val;
+                  if (!fit.pointSettings) fit.pointSettings = {};
+                  fit.pointSettings.creditsPerPoint = isNaN(val) ? defaults.creditsPerPoint : Math.max(0, val);
                 });
               });
-              appendSetting('Credits per session (up to target)', creditBaseInput);
-              const creditExtraInput = registerControl('creditExtra', document.createElement('input'));
-              creditExtraInput.type = 'number';
-              creditExtraInput.step = '1';
-              creditExtraInput.addEventListener('change', () => {
-                const val = parseFloat(creditExtraInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
-                  creditExtraInput.value = String(fallbackCredits.extra);
-                  return;
-                }
-                commitFitnessMutation(fit => {
-                  if (!fit.creditSettings) fit.creditSettings = {};
-                  fit.creditSettings.extra = val;
-                });
-              });
-              appendSetting('Credits per extra session', creditExtraInput);
-              const creditPenaltyInput = registerControl('creditPenalty', document.createElement('input'));
-              creditPenaltyInput.type = 'number';
-              creditPenaltyInput.step = '1';
-              creditPenaltyInput.addEventListener('change', () => {
-                const val = parseFloat(creditPenaltyInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
-                  creditPenaltyInput.value = String(fallbackCredits.penalty);
-                  return;
-                }
-                commitFitnessMutation(fit => {
-                  if (!fit.creditSettings) fit.creditSettings = {};
-                  fit.creditSettings.penalty = val;
-                });
-              });
-              appendSetting('Penalty per missed session', creditPenaltyInput);
-              const weeklyBonusInput = registerControl('creditWeeklyBonus', document.createElement('input'));
-              weeklyBonusInput.type = 'number';
-              weeklyBonusInput.step = '1';
-              weeklyBonusInput.addEventListener('change', () => {
-                const val = parseFloat(weeklyBonusInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
-                  weeklyBonusInput.value = String(fallbackCredits.weeklyBonus);
-                  return;
-                }
-                commitFitnessMutation(fit => {
-                  if (!fit.creditSettings) fit.creditSettings = {};
-                  fit.creditSettings.weeklyBonus = val;
-                });
-              });
-              appendSetting('Weekly bonus', weeklyBonusInput);
-              const streakBonusInput = registerControl('creditStreakBonus', document.createElement('input'));
-              streakBonusInput.type = 'number';
-              streakBonusInput.step = '1';
-              streakBonusInput.addEventListener('change', () => {
-                const val = parseFloat(streakBonusInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  const fallbackCredits = Object.assign({}, defaultCreditSettings, fallbackFitness.creditSettings || {});
-                  streakBonusInput.value = String(fallbackCredits.streakBonus);
-                  return;
-                }
-                commitFitnessMutation(fit => {
-                  if (!fit.creditSettings) fit.creditSettings = {};
-                  fit.creditSettings.streakBonus = val;
-                });
-              });
-              appendSetting('Streak bonus (4 weeks)', streakBonusInput);
+              appendSetting('Credits per point', creditsPerPointInput);
               const creditsCapInput = registerControl('creditsCap', document.createElement('input'));
               creditsCapInput.type = 'number';
               creditsCapInput.step = '1';
               creditsCapInput.min = '0';
               creditsCapInput.addEventListener('change', () => {
                 const val = parseFloat(creditsCapInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  creditsCapInput.value = String(Math.max(0, fallbackFitness.creditsCap || 0));
-                  return;
-                }
                 commitFitnessMutation(fit => {
-                  fit.creditsCap = Math.max(0, val);
+                  fit.creditsCap = isNaN(val) ? makeDefaultFitness().creditsCap : Math.max(0, val);
                 });
               });
               appendSetting('Credits cap', creditsCapInput);
@@ -1450,13 +1487,8 @@ function loadData() {
               boostPercentInput.min = '0';
               boostPercentInput.addEventListener('change', () => {
                 const val = parseFloat(boostPercentInput.value);
-                if (isNaN(val)) {
-                  const fallbackFitness = ensureFitnessDefaults();
-                  boostPercentInput.value = ((fallbackFitness.weekendBoostPercent || 0) * 100).toFixed(0);
-                  return;
-                }
                 commitFitnessMutation(fit => {
-                  fit.weekendBoostPercent = Math.max(0, val) / 100;
+                  fit.weekendBoostPercent = isNaN(val) ? makeDefaultFitness().weekendBoostPercent : Math.max(0, val) / 100;
                 });
               });
               appendSetting('Weekend boost percent', boostPercentInput);
@@ -1466,30 +1498,25 @@ function loadData() {
             }
             const controls = settingsEl._fitnessControls || {};
             const liveFitness = ensureFitnessDefaults();
-            const liveCredits = Object.assign({}, defaultCreditSettings, liveFitness.creditSettings || {});
-            if (controls.mode) {
-              controls.mode.value = FITNESS_MODES[liveFitness.mode] ? liveFitness.mode : 'custom';
+            const livePoints = liveFitness.pointSettings || {};
+            if (controls.intense) {
+              controls.intense.value = (Number(livePoints.intense) || 0).toString();
             }
-            if (controls.alpha) {
-              controls.alpha.value = (liveFitness.alpha * 100).toFixed(1);
+            if (controls.medium) {
+              controls.medium.value = (Number(livePoints.medium) || 0).toString();
             }
-            if (controls.beta) {
-              controls.beta.value = (liveFitness.beta * 100).toFixed(1);
+            if (controls.light) {
+              controls.light.value = (Number(livePoints.light) || 0).toString();
             }
-            if (controls.creditBase) {
-              controls.creditBase.value = String(liveCredits.base);
+            if (controls.weeklyTarget) {
+              controls.weeklyTarget.value = (Number(livePoints.weeklyTarget) || 0).toString();
             }
-            if (controls.creditExtra) {
-              controls.creditExtra.value = String(liveCredits.extra);
+            if (controls.multiplierPerPoint) {
+              const pct = Number(livePoints.multiplierPerPoint) || 0;
+              controls.multiplierPerPoint.value = (pct * 100).toFixed(2);
             }
-            if (controls.creditPenalty) {
-              controls.creditPenalty.value = String(liveCredits.penalty);
-            }
-            if (controls.creditWeeklyBonus) {
-              controls.creditWeeklyBonus.value = String(liveCredits.weeklyBonus);
-            }
-            if (controls.creditStreakBonus) {
-              controls.creditStreakBonus.value = String(liveCredits.streakBonus);
+            if (controls.creditsPerPoint) {
+              controls.creditsPerPoint.value = (Number(livePoints.creditsPerPoint) || 0).toString();
             }
             if (controls.creditsCap) {
               const capVal = typeof liveFitness.creditsCap === 'number' && isFinite(liveFitness.creditsCap) ? liveFitness.creditsCap : 0;
@@ -1503,254 +1530,199 @@ function loadData() {
             }
           }
         }
+
         function updateTodoSection() {
-          const listEl = document.getElementById('todoList');
-          if (!listEl) return;
-          listEl.innerHTML = '';
-          const todos = Array.isArray(data.todos) ? data.todos : [];
-          // Determine the start of the current week (Monday 00:00) to count this week's logs
-          const now = new Date();
-          const dow = now.getDay();
-          const diffToMonday = (dow + 6) % 7;
-          const monday = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMonday);
-          monday.setHours(0, 0, 0, 0);
-          todos.forEach(todo => {
-            if (typeof todo.weeklyTarget !== 'number' || todo.weeklyTarget < 1) {
-              todo.weeklyTarget = 1;
-            }
-            if (!Array.isArray(todo.logs)) todo.logs = [];
-            if (todo.carryOver === undefined) todo.carryOver = 0;
-          });
-          const statsInfo = collectWorkoutStats({ start: monday });
-          updateFitnessCards(statsInfo);
-          const statsById = new Map(statsInfo.stats.map(stat => [stat.id, stat]));
-          const fitness = ensureFitnessDefaults();
-          const alpha = fitness.alpha;
-          const beta = fitness.beta;
-          const creditSettings = Object.assign({}, makeDefaultFitness().creditSettings, fitness.creditSettings || {});
-          const fragment = document.createDocumentFragment();
-          todos.forEach((todo, index) => {
-            // Ensure workout properties exist
-            // Dynamic target for this week includes spillover from previous weeks
-            const dynamicTarget = Math.max(0, todo.weeklyTarget + todo.carryOver);
-            // Count sessions completed this week by filtering logs on or after Monday
-            const sessionsThisWeek = todo.logs.filter(log => {
-              const t = new Date(log);
-              return t >= monday;
-            }).length;
-            const statInfo = statsById.get(todo.id) || { target: todo.weeklyTarget, actual: sessionsThisWeek };
-            const baseTarget = statInfo.target;
-            const actualSessions = statInfo.actual;
-            let projectedDeltaPercent = 0;
-            if (baseTarget > 0) {
-              const currentCompliance = Math.min(1, actualSessions / baseTarget);
-              const nextCompliance = Math.min(1, (actualSessions + 1) / baseTarget);
-              const deltaPenalty = currentCompliance - nextCompliance;
-              const currentOverage = Math.max(0, (actualSessions / baseTarget) - 1);
-              const nextOverage = Math.max(0, ((actualSessions + 1) / baseTarget) - 1);
-              const deltaOverage = nextOverage - currentOverage;
-              projectedDeltaPercent = (alpha * deltaOverage - beta * deltaPenalty) * 100;
-            }
-            let impactText;
-            if (baseTarget <= 0) {
-              impactText = 'Budget impact: set a weekly target';
-            } else if (Math.abs(projectedDeltaPercent) >= 0.05) {
-              impactText = `Budget impact: ${projectedDeltaPercent > 0 ? '+' : ''}${projectedDeltaPercent.toFixed(1)}% next week`;
-            } else if (actualSessions >= baseTarget) {
-              impactText = 'Budget impact: already maxed';
-            } else if (projectedDeltaPercent > 0) {
-              impactText = 'Budget impact: <0.1% next week – almost there';
+          const workouts = ensureWorkoutData();
+          const presetsContent = document.getElementById('workoutPresetsContent');
+          const entriesContent = document.getElementById('workoutEntriesContent');
+          const weekKey = getWeekKey(new Date());
+          const pausedThisWeek = isWeekPaused(weekKey);
+          const monday = getWeekStart(new Date());
+          const nextMonday = new Date(monday);
+          nextMonday.setDate(nextMonday.getDate() + 7);
+          const weeklyEntries = workouts.entries
+            .filter(entry => {
+              if (!entry || !entry.timestamp) return false;
+              const dt = new Date(entry.timestamp);
+              return !isNaN(dt) && dt >= monday && dt < nextMonday;
+            })
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          if (presetsContent) {
+            presetsContent.innerHTML = '';
+            const presets = workouts.presets.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+            if (presets.length === 0) {
+              const empty = document.createElement('p');
+              empty.className = 'muted';
+              empty.textContent = 'Log a workout to create your first preset. Each unique name/intensity combination is saved automatically.';
+              presetsContent.appendChild(empty);
             } else {
-              const remainingToTarget = Math.max(0, baseTarget - actualSessions);
-              impactText = remainingToTarget === 1 ? 'Budget impact: one more session to move the needle' : 'Budget impact: keep going';
-            }
-            const nextCredit = baseTarget > 0 ? (actualSessions < baseTarget ? creditSettings.base : creditSettings.extra) : 0;
-            // Create list item container
-            const li = document.createElement('li');
-            li.style.display = 'flex';
-            li.style.flexDirection = 'column';
-            li.style.gap = '0.3rem';
-            li.style.padding = '0.5rem 0';
-            li.style.borderBottom = '1px solid #f1f5f9';
-            // Title row: workout name and delete button
-            const titleRow = document.createElement('div');
-            titleRow.style.display = 'flex';
-            titleRow.style.justifyContent = 'space-between';
-            titleRow.style.alignItems = 'center';
-            const nameSpan = document.createElement('span');
-            nameSpan.textContent = todo.name || '';
-            nameSpan.style.fontWeight = '600';
-            titleRow.appendChild(nameSpan);
-            const btnGroup = document.createElement('div');
-            // Log session button
-            const logBtn = document.createElement('button');
-            logBtn.className = 'btn';
-            logBtn.textContent = '+ Log';
-            logBtn.style.fontSize = '0.7rem';
-            logBtn.addEventListener('click', () => {
-              // Add a log for now
-              todo.logs.push(new Date().toISOString());
-              saveData();
-              updateTodoSection();
-              // Provide tactile feedback on log
-              if (typeof provideHaptic === 'function') {
-                provideHaptic('beep');
-              }
-            });
-            btnGroup.appendChild(logBtn);
-            // Edit target button
-            const editBtn = document.createElement('button');
-            editBtn.className = 'btn secondary';
-            editBtn.textContent = 'Edit';
-            editBtn.style.fontSize = '0.7rem';
-            editBtn.addEventListener('click', () => {
-              const newTargetStr = prompt('Set weekly target for ' + (todo.name || ''), String(todo.weeklyTarget));
-              if (newTargetStr !== null) {
-                const newTarget = parseInt(newTargetStr, 10);
-                if (!isNaN(newTarget) && newTarget > 0) {
-                  todo.weeklyTarget = newTarget;
+              presets.forEach(preset => {
+                const row = document.createElement('div');
+                row.className = 'workout-preset-row';
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.padding = '0.4rem 0';
+                row.style.borderBottom = '1px solid #e2e8f0';
+                const info = document.createElement('div');
+                info.innerHTML = `<strong>${preset.name}</strong> • ${getIntensityLabel(preset.intensity)} (${getIntensityPoints(preset.intensity)} pts)`;
+                row.appendChild(info);
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '0.4rem';
+                const logBtn = document.createElement('button');
+                logBtn.className = 'btn primary';
+                logBtn.textContent = 'Log';
+                logBtn.style.fontSize = '0.75rem';
+                logBtn.addEventListener('click', () => {
+                  logWorkoutEntry({ name: preset.name, intensity: preset.intensity, presetId: preset.id });
+                });
+                actions.appendChild(logBtn);
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn secondary';
+                editBtn.textContent = 'Edit';
+                editBtn.style.fontSize = '0.75rem';
+                editBtn.addEventListener('click', () => {
+                  const newName = prompt('Preset name', preset.name || '');
+                  if (newName === null) return;
+                  const trimmed = newName.trim();
+                  if (!trimmed) {
+                    alert('Preset name cannot be empty.');
+                    return;
+                  }
+                  const newIntensity = prompt('Intensity (intense / medium / light)', preset.intensity || 'medium');
+                  if (newIntensity === null) return;
+                  const normalized = normalizeIntensity(newIntensity);
+                  const existing = workouts.presets.find(p => p.id !== preset.id && p.name === trimmed && normalizeIntensity(p.intensity) === normalized);
+                  if (existing) {
+                    workouts.entries.forEach(entry => {
+                      if (entry.presetId === preset.id) {
+                        entry.presetId = existing.id;
+                        entry.name = existing.name;
+                        entry.intensity = existing.intensity;
+                      }
+                    });
+                    deleteWorkoutPreset(preset.id);
+                  } else {
+                    preset.name = trimmed;
+                    preset.intensity = normalized;
+                    updateEntriesForPreset(preset);
+                  }
                   saveData();
+                  updateFitnessCards();
                   updateTodoSection();
-                }
-              }
-            });
-            btnGroup.appendChild(editBtn);
-            // Delete button
-            const delBtn = document.createElement('button');
-            delBtn.className = 'btn danger';
-            delBtn.textContent = 'Delete';
-            delBtn.style.fontSize = '0.7rem';
-            delBtn.addEventListener('click', () => {
-              data.todos.splice(index, 1);
-              saveData();
+                });
+                actions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.fontSize = '0.75rem';
+                deleteBtn.addEventListener('click', () => {
+                  if (!confirm('Delete this preset? Existing entries stay recorded.')) return;
+                  deleteWorkoutPreset(preset.id);
+                  saveData();
+                  updateFitnessCards();
+                  updateTodoSection();
+                });
+                actions.appendChild(deleteBtn);
+                row.appendChild(actions);
+                presetsContent.appendChild(row);
+              });
+            }
+          }
+          if (entriesContent) {
+            entriesContent.innerHTML = '';
+            const header = document.createElement('div');
+            header.style.display = 'flex';
+            header.style.justifyContent = 'space-between';
+            header.style.alignItems = 'center';
+            header.style.marginBottom = '0.5rem';
+            const weeklyPoints = weeklyEntries.reduce((sum, entry) => sum + getIntensityPoints(entry.intensity), 0);
+            const headerInfo = document.createElement('div');
+            headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • ${weeklyPoints} pts`;
+            header.appendChild(headerInfo);
+            const pauseLabel = document.createElement('label');
+            pauseLabel.style.display = 'flex';
+            pauseLabel.style.alignItems = 'center';
+            pauseLabel.style.gap = '0.4rem';
+            const pauseCheckbox = document.createElement('input');
+            pauseCheckbox.type = 'checkbox';
+            pauseCheckbox.checked = pausedThisWeek;
+            pauseCheckbox.addEventListener('change', () => {
+              setWeekPaused(weekKey, pauseCheckbox.checked);
+              updateFitnessCards();
               updateTodoSection();
             });
-            btnGroup.appendChild(delBtn);
-            titleRow.appendChild(btnGroup);
-            li.appendChild(titleRow);
-            // Progress bar and text
-            const progressContainer = document.createElement('div');
-            progressContainer.style.display = 'flex';
-            progressContainer.style.flexDirection = 'column';
-            progressContainer.style.gap = '0.15rem';
-            // Bar container
-            const bar = document.createElement('div');
-            bar.style.height = '0.35rem';
-            bar.style.backgroundColor = '#e2e8f0';
-            bar.style.borderRadius = '0.25rem';
-            bar.style.overflow = 'hidden';
-            // Fill bar representing sessions completed
-            const fill = document.createElement('div');
-            // Use dynamicTarget for progress and colour the bar green when the goal is met or exceeded.
-            const pct = dynamicTarget > 0 ? (sessionsThisWeek / dynamicTarget) : 1;
-            fill.style.width = Math.min(pct, 1) * 100 + '%';
-            fill.style.height = '100%';
-            fill.style.backgroundColor = pct >= 1 ? '#15803d' : '#3b82f6';
-            bar.appendChild(fill);
-            progressContainer.appendChild(bar);
-            // Text showing sessions vs dynamic target
-            const text = document.createElement('div');
-            text.style.fontSize = '0.75rem';
-            text.textContent = sessionsThisWeek + ' / ' + dynamicTarget + ' sessions';
-            progressContainer.appendChild(text);
-            const impactLine = document.createElement('div');
-            impactLine.className = 'fitness-impact-line';
-            impactLine.textContent = impactText;
-            progressContainer.appendChild(impactLine);
-            if (nextCredit > 0) {
-              const creditLine = document.createElement('div');
-              creditLine.className = 'fitness-credit-line';
-              creditLine.textContent = 'Wellness Credits: +' + nextCredit + ' SEK on next session';
-              progressContainer.appendChild(creditLine);
+            pauseLabel.appendChild(pauseCheckbox);
+            const pauseText = document.createElement('span');
+            pauseText.textContent = 'Pause this week';
+            pauseLabel.appendChild(pauseText);
+            header.appendChild(pauseLabel);
+            entriesContent.appendChild(header);
+            if (weeklyEntries.length === 0) {
+              const empty = document.createElement('p');
+              empty.className = 'muted';
+              empty.textContent = pausedThisWeek ? 'Week paused – no workouts required.' : 'No workouts logged yet this week.';
+              entriesContent.appendChild(empty);
+            } else {
+              weeklyEntries.forEach(entry => {
+                const row = document.createElement('div');
+                row.className = 'workout-entry-row';
+                row.style.display = 'flex';
+                row.style.justifyContent = 'space-between';
+                row.style.alignItems = 'center';
+                row.style.borderBottom = '1px solid #e2e8f0';
+                row.style.padding = '0.5rem 0';
+                const info = document.createElement('div');
+                info.innerHTML = `<strong>${entry.name}</strong> • ${getIntensityLabel(entry.intensity)} (${getIntensityPoints(entry.intensity)} pts) • ${formatWorkoutTimestamp(entry.timestamp)}`;
+                row.appendChild(info);
+                const actions = document.createElement('div');
+                actions.style.display = 'flex';
+                actions.style.gap = '0.4rem';
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn secondary';
+                editBtn.textContent = 'Edit';
+                editBtn.style.fontSize = '0.75rem';
+                editBtn.addEventListener('click', () => {
+                  const newName = prompt('Workout name', entry.name || '');
+                  if (newName === null) return;
+                  const trimmed = newName.trim();
+                  if (!trimmed) {
+                    alert('Workout name cannot be empty.');
+                    return;
+                  }
+                  const newIntensity = prompt('Intensity (intense / medium / light)', entry.intensity || 'medium');
+                  if (newIntensity === null) return;
+                  const timeDefault = formatTimestampForInput(entry.timestamp).replace('T', ' ');
+                  const newTimeRaw = prompt('When? (YYYY-MM-DD HH:MM, leave blank to keep current)', timeDefault);
+                  if (newTimeRaw === null) return;
+                  let newTimestamp = entry.timestamp;
+                  if (newTimeRaw.trim()) {
+                    const parsed = parseDateTimeInput(newTimeRaw);
+                    if (!parsed) {
+                      alert('Invalid date or time.');
+                      return;
+                    }
+                    newTimestamp = parsed.toISOString();
+                  }
+                  updateWorkoutEntry(entry.id, { name: trimmed, intensity: newIntensity, timestamp: newTimestamp });
+                });
+                actions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.fontSize = '0.75rem';
+                deleteBtn.addEventListener('click', () => {
+                  if (!confirm('Delete this workout entry?')) return;
+                  deleteWorkoutEntry(entry.id);
+                });
+                actions.appendChild(deleteBtn);
+                row.appendChild(actions);
+                entriesContent.appendChild(row);
+              });
             }
-            li.appendChild(progressContainer);
-            fragment.appendChild(li);
-          });
-          listEl.appendChild(fragment);
+          }
         }
-
-        // Attach submit handler to the Workout form. When submitted, a new workout is
-        // added to data.todos with a unique ID, weekly target, and empty logs array.
-        const todoForm = document.getElementById('todoForm');
-        if (todoForm) {
-          todoForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const nameInput = document.getElementById('todoName');
-            const targetInput = document.getElementById('todoTarget');
-            const name = nameInput.value.trim();
-            const targetVal = parseInt(targetInput.value, 10);
-            if (!name) return;
-            const target = (!isNaN(targetVal) && targetVal > 0) ? targetVal : 1;
-            if (!Array.isArray(data.todos)) {
-              data.todos = [];
-            }
-            // When adding a new workout, initialise carryOver to zero so that spillover can be tracked.
-            data.todos.push({ id: uuid(), name: name, weeklyTarget: target, logs: [], carryOver: 0 });
-            saveData();
-            updateTodoSection();
-            nameInput.value = '';
-            targetInput.value = '';
-          });
-        }
-
-        // Attach submit handler to the Grocery form. When submitted, a new grocery
-        // item is added to data.groceries with a unique ID, frequency, carryOver
-        // and purchasedCount initialised to zero.
-        const groceryForm = document.getElementById('groceryForm');
-        if (groceryForm) {
-          groceryForm.addEventListener('submit', e => {
-            e.preventDefault();
-            const nameInput = document.getElementById('groceryName');
-            const freqSelect = document.getElementById('groceryFreq');
-            const categorySelect = document.getElementById('groceryCategory');
-            const name = nameInput.value.trim();
-            const freq = freqSelect.value;
-            const category = categorySelect ? categorySelect.value : 'standard';
-            if (!name) return;
-            if (!Array.isArray(data.groceries)) {
-              data.groceries = [];
-            }
-            // When adding a new grocery item, initialise it as not archived with no purchase date.
-            data.groceries.push({
-              id: uuid(),
-              name: name,
-              frequency: freq,
-              category: category,
-              archived: false,
-              purchasedDate: null,
-              originalCost: 0,
-              appliedCredits: 0,
-              boostApplied: false,
-              boostPercentApplied: 0
-            });
-            saveData();
-            updateGrocerySection();
-            nameInput.value = '';
-            freqSelect.value = 'weekly';
-            if (categorySelect) categorySelect.value = 'standard';
-          });
-        }
-
-        // Render the todo list once on load so that tasks persist across
-        // navigation between sections.
-        updateTodoSection();
-
-        // Render groceries list on load (reset is triggered within the renderer)
-        updateGrocerySection();
-
-        // -------------------------------------------------------------------------
-        //  Grocery functions
-        //
-        //  The grocery section tracks items that should be purchased either weekly
-        //  or monthly. Each item has a base target of 1 purchase per period. A
-        //  carryOver value (positive or negative) indicates how many extra or
-        //  fewer items should be purchased next period due to under- or over-
-        //  purchase in the previous period. On reset (weekly or monthly), the
-        //  carryOver is updated based on the difference between the dynamic
-        //  target (base + carryOver) and the number of purchases made. The
-        //  dynamic target for the current period is base + carryOver (clamped
-        //  to zero).
-
         function updateGrocerySection() {
           resetGroceriesIfNeeded();
           const weeklyListEl = document.getElementById('weeklyGroceryList');
