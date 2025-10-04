@@ -560,8 +560,8 @@
             const points = getIntensityPoints(normalizedIntensity);
             const bucket = parseCustomIntensity(normalizedIntensity) !== null ? 'custom' : normalizedIntensity;
             totalPoints += points;
-            if (!counts.hasOwnProperty(bucket)) counts[bucket] = 0;
-            if (!pointsByIntensity.hasOwnProperty(bucket)) pointsByIntensity[bucket] = 0;
+            if (!Object.prototype.hasOwnProperty.call(counts, bucket)) counts[bucket] = 0;
+            if (!Object.prototype.hasOwnProperty.call(pointsByIntensity, bucket)) pointsByIntensity[bucket] = 0;
             counts[bucket] += 1;
             pointsByIntensity[bucket] += points;
             if (includeEntries) {
