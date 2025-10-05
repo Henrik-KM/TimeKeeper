@@ -244,6 +244,17 @@
         <!-- Budget summary card will be inserted here dynamically -->
         <div id="budgetSummaryContainer"></div>
 
+        <!-- Manage fixed monthly expenses that should count against the monthly budget -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Recurring Payments</h3>
+          <form id="monthlyRecurringForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.75rem;">
+            <input id="monthlyPaymentName" type="text" required placeholder="Name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <input id="monthlyPaymentAmount" type="number" min="0" step="0.01" required placeholder="Amount" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+          <ul id="monthlyRecurringList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
         <!-- Form to add a new grocery item -->
         <div class="card" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Item</h3>
@@ -415,6 +426,26 @@
           }
           data.workouts = applyWorkoutDefaults(data.workouts);
           return data.workouts;
+        }
+        function ensureMonthlyRecurringPayments() {
+          if (!Array.isArray(data.monthlyRecurringPayments)) {
+            data.monthlyRecurringPayments = [];
+          }
+          data.monthlyRecurringPayments = data.monthlyRecurringPayments.map(payment => {
+            const normalized = payment && typeof payment === 'object' ? payment : {};
+            if (!normalized.id) normalized.id = uuid();
+            normalized.name = typeof normalized.name === 'string' ? normalized.name : '';
+            const amountNum = Number(normalized.amount);
+            normalized.amount = Number.isFinite(amountNum) && amountNum >= 0 ? amountNum : 0;
+            return normalized;
+          });
+          return data.monthlyRecurringPayments;
+        }
+        function getMonthlyRecurringTotal(payments = ensureMonthlyRecurringPayments()) {
+          return payments.reduce((sum, payment) => {
+            const amountNum = Number(payment && payment.amount);
+            return sum + (Number.isFinite(amountNum) && amountNum > 0 ? amountNum : 0);
+          }, 0);
         }
         const scheduleRender = typeof requestAnimationFrame === 'function'
           ? (cb) => requestAnimationFrame(cb)
@@ -960,6 +991,7 @@ function loadData() {
       entries: [],
       todos: [],
       workouts: makeDefaultWorkouts(),
+      monthlyRecurringPayments: [],
       groceries: [],
       groceryBudgetWeekly: 1000,
       groceryBudgetMonthly: 4000,
@@ -983,6 +1015,16 @@ function loadData() {
       entries: Array.isArray(parsed.entries) ? parsed.entries : [],
       todos: Array.isArray(parsed.todos) ? parsed.todos : [],
       workouts: applyWorkoutDefaults(parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)),
+      monthlyRecurringPayments: Array.isArray(parsed.monthlyRecurringPayments)
+        ? parsed.monthlyRecurringPayments.map(p => {
+            const payment = p && typeof p === 'object' ? p : {};
+            if (!payment.id) payment.id = uuid();
+            payment.name = typeof payment.name === 'string' ? payment.name : '';
+            const amountNum = Number(payment.amount);
+            payment.amount = Number.isFinite(amountNum) && amountNum >= 0 ? amountNum : 0;
+            return payment;
+          })
+        : [],
       // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
       groceries: Array.isArray(parsed.groceries) ? parsed.groceries.map(g => {
         // Migrate legacy properties to new structure. Each item should have a name and frequency.
@@ -1049,6 +1091,7 @@ function loadData() {
       entries: [],
       todos: [],
       workouts: makeDefaultWorkouts(),
+      monthlyRecurringPayments: [],
       groceries: [],
       groceryBudgetWeekly: 1000,
       groceryBudgetMonthly: 4000,
@@ -1081,6 +1124,7 @@ function loadData() {
         let data = loadData();
         ensureFitnessDefaults();
         ensureWorkoutData();
+        ensureMonthlyRecurringPayments();
         // Initialize backup and sync flags before they are referenced in saveData().
         // needsBackup tracks whether the data has changed and needs to be exported.
         // autoSyncEnabled indicates whether automatic export is enabled.
@@ -1987,8 +2031,11 @@ function loadData() {
           const monthlyListEl = document.getElementById('monthlyGroceryList');
           const biannualListEl = document.getElementById('biannualGroceryList');
           const summaryContainer = document.getElementById('budgetSummaryContainer');
-          if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer) return;
+          const recurringListEl = document.getElementById('monthlyRecurringList');
+          if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer || !recurringListEl) return;
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
+          const recurringPayments = ensureMonthlyRecurringPayments();
+          const recurringTotal = getMonthlyRecurringTotal(recurringPayments);
           let normalizedAny = false;
           const weeklyFragment = document.createDocumentFragment();
           const monthlyFragment = document.createDocumentFragment();
@@ -2052,6 +2099,77 @@ function loadData() {
               biannualSpent += cost;
             }
           });
+          monthlySpent += recurringTotal;
+
+          const recurringFragment = document.createDocumentFragment();
+          if (recurringPayments.length === 0) {
+            const empty = document.createElement('li');
+            empty.style.fontSize = '0.8rem';
+            empty.style.color = '#64748b';
+            empty.textContent = 'No recurring payments added.';
+            recurringFragment.appendChild(empty);
+          } else {
+            recurringPayments.forEach(payment => {
+              const li = document.createElement('li');
+              li.style.display = 'flex';
+              li.style.justifyContent = 'space-between';
+              li.style.alignItems = 'center';
+              li.style.padding = '0.5rem 0';
+              li.style.borderBottom = '1px solid #f1f5f9';
+
+              const info = document.createElement('span');
+              info.style.fontWeight = '600';
+              const amountLabel = formatCurrency(payment.amount || 0, -1).replace(' kr', ' SEK');
+              info.textContent = `${payment.name || 'Recurring payment'} – ${amountLabel}`;
+              li.appendChild(info);
+
+              const actions = document.createElement('div');
+              actions.style.display = 'flex';
+              actions.style.gap = '0.4rem';
+
+              const editBtn = document.createElement('button');
+              editBtn.className = 'btn secondary';
+              editBtn.style.fontSize = '0.7rem';
+              editBtn.textContent = 'Edit';
+              editBtn.addEventListener('click', () => {
+                const newName = prompt('Payment name', payment.name || '');
+                if (newName === null) return;
+                const trimmedName = newName.trim();
+                if (!trimmedName) {
+                  alert('Payment name cannot be empty.');
+                  return;
+                }
+                const newAmountStr = prompt('Monthly amount (SEK)', String(payment.amount || 0));
+                if (newAmountStr === null) return;
+                const newAmount = parseFloat(newAmountStr);
+                if (!Number.isFinite(newAmount) || newAmount < 0) {
+                  alert('Enter a valid amount.');
+                  return;
+                }
+                payment.name = trimmedName;
+                payment.amount = newAmount;
+                saveData();
+                updateGrocerySection();
+              });
+              actions.appendChild(editBtn);
+
+              const deleteBtn = document.createElement('button');
+              deleteBtn.className = 'btn danger';
+              deleteBtn.style.fontSize = '0.7rem';
+              deleteBtn.textContent = 'Delete';
+              deleteBtn.addEventListener('click', () => {
+                if (!confirm('Remove this recurring payment?')) return;
+                data.monthlyRecurringPayments = data.monthlyRecurringPayments.filter(p => p.id !== payment.id);
+                saveData();
+                updateGrocerySection();
+              });
+              actions.appendChild(deleteBtn);
+
+              li.appendChild(actions);
+              recurringFragment.appendChild(li);
+            });
+          }
+          recurringListEl.replaceChildren(...recurringFragment.childNodes);
 
         // After rendering active items, render archived purchases with ability to edit cost
         const archivedListEl = document.getElementById('archivedGroceryList');
@@ -2214,6 +2332,12 @@ function loadData() {
           creditsLine.textContent = 'Wellness Credits: ' + formatCurrency(fitness.wellnessCredits || 0, -1).replace(' kr', ' SEK') + ' (auto-applied)';
           summaryCard.appendChild(creditsLine);
           addBudgetLine('Monthly', monthlySpent, monthlyDynamicBudget, monthlyExpectedSpent);
+          if (recurringTotal > 0) {
+            const recurringLine = document.createElement('div');
+            recurringLine.className = 'fitness-summary-sub';
+            recurringLine.textContent = 'Recurring payments this month: ' + formatCurrency(recurringTotal, -1).replace(' kr', ' SEK');
+            summaryCard.appendChild(recurringLine);
+          }
           addBudgetLine('Biannual', biannualSpent, biDynamicBudget, biExpectedSpent);
           // Add edit buttons for budgets and start date
           const controlsDiv = document.createElement('div');
@@ -2542,6 +2666,7 @@ function loadData() {
               }
             });
           }
+          monthlySpentPrev += getMonthlyRecurringTotal();
           const baseBudgetM = typeof data.groceryBudgetMonthly === 'number' ? data.groceryBudgetMonthly : 0;
           const storedCarryM = typeof data.groceryBudgetMonthlyCarry === 'number' ? data.groceryBudgetMonthlyCarry : 0;
           const skipMonthlyCarry = !!(budgetStartDate && prevMonthEnd <= budgetStartDate);
@@ -4665,6 +4790,32 @@ function loadData() {
           updateProjectSelects();
           updateDashboard();
         });
+
+        const monthlyRecurringForm = document.getElementById('monthlyRecurringForm');
+        if (monthlyRecurringForm) {
+          monthlyRecurringForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('monthlyPaymentName');
+            const amountInput = document.getElementById('monthlyPaymentAmount');
+            const name = nameInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            if (!name) {
+              alert('Please enter a payment name.');
+              nameInput.focus();
+              return;
+            }
+            if (!Number.isFinite(amount) || amount < 0) {
+              alert('Enter a valid amount.');
+              amountInput.focus();
+              return;
+            }
+            const payments = ensureMonthlyRecurringPayments();
+            payments.push({ id: uuid(), name, amount });
+            saveData();
+            monthlyRecurringForm.reset();
+            updateGrocerySection();
+          });
+        }
 
         // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
