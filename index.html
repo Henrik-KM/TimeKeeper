@@ -853,8 +853,19 @@
           const fitness = ensureFitnessDefaults();
           const lastMondayKey = getWeekKey(lastMonday);
           const thisMondayKey = getWeekKey(thisMonday);
-          const prevNext = typeof fitness.nextMultiplier === 'number' ? fitness.nextMultiplier : 1;
-          fitness.currentMultiplier = clampMultiplier(prevNext);
+          const defaults = makeDefaultFitness();
+          const prevNextRaw = typeof fitness.nextMultiplier === 'number' && isFinite(fitness.nextMultiplier)
+            ? fitness.nextMultiplier
+            : null;
+          const prevCurrentRaw = typeof fitness.currentMultiplier === 'number' && isFinite(fitness.currentMultiplier)
+            ? fitness.currentMultiplier
+            : null;
+          const fallbackMultiplier = clampMultiplier(
+            prevNextRaw !== null
+              ? prevNextRaw
+              : (prevCurrentRaw !== null ? prevCurrentRaw : defaults.currentMultiplier)
+          );
+          let resultingMultiplier = fallbackMultiplier;
           const pausedWeeks = fitness.pausedWeeks || {};
           const wasPaused = !!pausedWeeks[lastMondayKey];
           if (wasPaused) {
@@ -872,8 +883,7 @@
           const creditsPerPoint = Number(settings.creditsPerPoint);
           const overagePoints = requiredPoints > 0 ? Math.max(0, actualPoints - requiredPoints) : Math.max(0, actualPoints);
           const multiplierIncrease = (Number.isFinite(multiplierPerPoint) ? multiplierPerPoint : 0) * overagePoints;
-          const nextMultiplier = clampMultiplier(1 + multiplierIncrease);
-          const defaults = makeDefaultFitness();
+          const computedMultiplier = clampMultiplier(1 + multiplierIncrease);
           const currentCredits = Number.isFinite(fitness.wellnessCredits) ? fitness.wellnessCredits : defaults.wellnessCredits;
           const creditsEarned = (Number.isFinite(creditsPerPoint) ? creditsPerPoint : 0) * overagePoints;
           const cap = Number.isFinite(fitness.creditsCap) ? fitness.creditsCap : defaults.creditsCap;
@@ -892,7 +902,7 @@
           const previousStreak = Number.isFinite(fitness.streakCount) ? fitness.streakCount : 0;
           const streakCount = metTarget ? previousStreak + 1 : 0;
           if (wasPaused) {
-            fitness.nextMultiplier = fitness.currentMultiplier;
+            resultingMultiplier = fallbackMultiplier;
             fitness.pointSpillover = spilloverAfter;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
@@ -907,10 +917,11 @@
               spilloverBefore,
               spilloverAfter,
               counts: weeklySummary.counts,
-              pointsByIntensity: weeklySummary.pointsByIntensity
+              pointsByIntensity: weeklySummary.pointsByIntensity,
+              lockedMultiplier: resultingMultiplier
             };
           } else {
-            fitness.nextMultiplier = nextMultiplier;
+            resultingMultiplier = computedMultiplier;
             fitness.wellnessCredits = newCredits;
             fitness.streakCount = streakCount;
             fitness.pointSpillover = spilloverAfter;
@@ -921,15 +932,18 @@
               targetPoints: baseTarget,
               requiredPoints,
               overagePoints,
-              multiplierDelta: nextMultiplier - 1,
+              multiplierDelta: resultingMultiplier - 1,
               creditsEarned,
               paused: false,
               spilloverBefore,
               spilloverAfter,
               counts: weeklySummary.counts,
-              pointsByIntensity: weeklySummary.pointsByIntensity
+              pointsByIntensity: weeklySummary.pointsByIntensity,
+              lockedMultiplier: resultingMultiplier
             };
           }
+          fitness.currentMultiplier = resultingMultiplier;
+          fitness.nextMultiplier = resultingMultiplier;
           fitness.weekendBoostUnlockedWeek = null;
           fitness.lastProcessedMonday = thisMondayKey;
         }
