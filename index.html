@@ -942,6 +942,9 @@
               lockedMultiplier: resultingMultiplier
             };
           }
+          // Intentionally set both currentMultiplier and nextMultiplier to the same value here
+          // to synchronize the multipliers at the end of the week. This ensures consistency
+          // when starting a new week or after a pause/reset.
           fitness.currentMultiplier = resultingMultiplier;
           fitness.nextMultiplier = resultingMultiplier;
           fitness.weekendBoostUnlockedWeek = null;
