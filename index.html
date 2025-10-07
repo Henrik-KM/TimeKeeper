@@ -612,6 +612,10 @@
           };
         }
         function computeWorkoutWeekPlan(options = {}) {
+          // Ensure any outstanding weekly rollovers are applied before computing the plan.
+          // This keeps the carryover/required points up-to-date even if the page has been
+          // open across a week boundary without a reload.
+          processWorkoutWeekIfNeeded();
           const now = options.now instanceof Date ? options.now : new Date();
           const weekStart = options.weekStart instanceof Date ? new Date(options.weekStart) : getWeekStart(now);
           const weekEnd = options.weekEnd instanceof Date ? new Date(options.weekEnd) : (() => {
