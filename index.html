@@ -892,12 +892,19 @@
           let spilloverAfter = spilloverBefore;
           if (wasPaused) {
             metTarget = true;
-          } else if (requiredPoints <= 0) {
-            metTarget = true;
-            spilloverAfter = spilloverBefore + actualPoints;
           } else {
-            metTarget = actualPoints >= requiredPoints;
-            spilloverAfter = spilloverBefore + (actualPoints - requiredPoints);
+            const pointsOverTarget = actualPoints - baseTarget;
+            spilloverAfter = spilloverBefore + (Number.isFinite(pointsOverTarget) ? pointsOverTarget : 0);
+            if (!Number.isFinite(spilloverAfter)) {
+              spilloverAfter = 0;
+            } else if (Math.abs(spilloverAfter) < 1e-9) {
+              spilloverAfter = 0;
+            }
+            if (requiredPoints <= 0) {
+              metTarget = true;
+            } else {
+              metTarget = actualPoints >= requiredPoints;
+            }
           }
           const previousStreak = Number.isFinite(fitness.streakCount) ? fitness.streakCount : 0;
           const streakCount = metTarget ? previousStreak + 1 : 0;
