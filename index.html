@@ -893,8 +893,8 @@
           if (wasPaused) {
             metTarget = true;
           } else {
-            const netSpilloverChange = actualPoints - baseTarget;
-            spilloverAfter = spilloverBefore + (Number.isFinite(netSpilloverChange) ? netSpilloverChange : 0);
+            const pointsOverTarget = actualPoints - baseTarget;
+            spilloverAfter = spilloverBefore + (Number.isFinite(pointsOverTarget) ? pointsOverTarget : 0);
             if (!Number.isFinite(spilloverAfter)) {
               spilloverAfter = 0;
             } else if (Math.abs(spilloverAfter) < 1e-9) {
