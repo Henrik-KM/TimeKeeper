@@ -4845,6 +4845,45 @@ function loadData() {
           });
         }
 
+        const groceryForm = document.getElementById('groceryForm');
+        if (groceryForm) {
+          groceryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const nameInput = document.getElementById('groceryName');
+            const freqSelect = document.getElementById('groceryFreq');
+            const categorySelect = document.getElementById('groceryCategory');
+            const name = nameInput.value.trim();
+            if (!name) {
+              alert('Please enter an item name.');
+              nameInput.focus();
+              return;
+            }
+            const normalizedFreq = ['weekly', 'monthly', 'biannual'].includes((freqSelect.value || '').toLowerCase())
+              ? freqSelect.value.toLowerCase()
+              : 'weekly';
+            const normalizedCategory = ['standard', 'treat', 'essential'].includes((categorySelect.value || '').toLowerCase())
+              ? categorySelect.value.toLowerCase()
+              : 'standard';
+            if (!Array.isArray(data.groceries)) {
+              data.groceries = [];
+            }
+            data.groceries.push({
+              id: uuid(),
+              name,
+              frequency: normalizedFreq,
+              category: normalizedCategory,
+              archived: false,
+              createdAt: new Date().toISOString()
+            });
+            saveData();
+            groceryForm.reset();
+            updateGrocerySection();
+            if (typeof provideHaptic === 'function') {
+              provideHaptic('tick');
+            }
+          });
+        }
+
         // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
           const palette = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
