@@ -392,7 +392,41 @@
         }
         function ensureFitnessDefaults() {
           data.fitness = applyFitnessDefaults(data.fitness);
-          return data.fitness;
+          const fitness = data.fitness;
+          if (fitness.lastProcessedMonday) {
+            const normalized = normalizeWeekKey(fitness.lastProcessedMonday);
+            if (normalized) {
+              fitness.lastProcessedMonday = normalized;
+            }
+          }
+          if (fitness.weekendBoostUnlockedWeek) {
+            const normalized = normalizeWeekKey(fitness.weekendBoostUnlockedWeek);
+            if (normalized) {
+              fitness.weekendBoostUnlockedWeek = normalized;
+            }
+          }
+          if (fitness.pausedWeeks && typeof fitness.pausedWeeks === 'object') {
+            const normalizedPaused = {};
+            Object.keys(fitness.pausedWeeks).forEach(key => {
+              const normalizedKey = normalizeWeekKey(key);
+              if (normalizedKey) {
+                normalizedPaused[normalizedKey] = !!fitness.pausedWeeks[key];
+              }
+            });
+            fitness.pausedWeeks = normalizedPaused;
+          }
+          if (fitness.lastWeekSummary && typeof fitness.lastWeekSummary === 'object') {
+            const summary = fitness.lastWeekSummary;
+            if (summary.weekStart) {
+              const normalizedStart = normalizeWeekKey(summary.weekStart);
+              if (normalizedStart) summary.weekStart = normalizedStart;
+            }
+            if (summary.weekEnd) {
+              const normalizedEnd = normalizeWeekKey(summary.weekEnd);
+              if (normalizedEnd) summary.weekEnd = normalizedEnd;
+            }
+          }
+          return fitness;
         }
         function makeDefaultWorkouts() {
           return {
@@ -464,8 +498,15 @@
           monday.setHours(0, 0, 0, 0);
           return monday;
         }
+        function formatDateKey(date) {
+          if (!(date instanceof Date) || isNaN(date.getTime())) return '';
+          const year = date.getFullYear();
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const day = String(date.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
         function getWeekKey(date) {
-          return getWeekStart(date).toISOString().split('T')[0];
+          return formatDateKey(getWeekStart(date));
         }
         function formatPoints(value, decimals = 1) {
           if (!Number.isFinite(value)) return '0';
@@ -485,8 +526,31 @@
         }
         function parseISODateOnly(str) {
           if (typeof str !== 'string' || !str) return null;
-          const dt = new Date(str + 'T00:00:00');
+          const match = str.trim().match(/^(\d{4})-(\d{2})-(\d{2})$/);
+          if (!match) return null;
+          const year = Number(match[1]);
+          const month = Number(match[2]);
+          const day = Number(match[3]);
+          if (!Number.isFinite(year) || !Number.isFinite(month) || !Number.isFinite(day)) return null;
+          const dt = new Date(year, month - 1, day);
+          dt.setHours(0, 0, 0, 0);
           return isNaN(dt.getTime()) ? null : dt;
+        }
+        function normalizeWeekKey(key) {
+          if (typeof key !== 'string' || !key) return null;
+          const parsed = parseISODateOnly(key);
+          if (!parsed) return null;
+          if (parsed.getDay() !== 1) {
+            const adjust = (8 - parsed.getDay()) % 7;
+            parsed.setDate(parsed.getDate() + adjust);
+          }
+          parsed.setHours(0, 0, 0, 0);
+          return formatDateKey(parsed);
+        }
+        function weekKeyToDate(key) {
+          const normalized = normalizeWeekKey(key);
+          if (!normalized) return null;
+          return parseISODateOnly(normalized);
         }
         function sanitizeCustomPoints(value) {
           const num = typeof value === 'number' ? value : parseFloat(value);
@@ -917,7 +981,7 @@
             fitness.pointSpillover = spilloverAfter;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
-              weekEnd: thisMonday.toISOString().split('T')[0],
+              weekEnd: formatDateKey(thisMonday),
               totalPoints: actualPoints,
               targetPoints: baseTarget,
               requiredPoints,
@@ -938,7 +1002,7 @@
             fitness.pointSpillover = spilloverAfter;
             fitness.lastWeekSummary = {
               weekStart: lastMondayKey,
-              weekEnd: thisMonday.toISOString().split('T')[0],
+              weekEnd: formatDateKey(thisMonday),
               totalPoints: actualPoints,
               targetPoints: baseTarget,
               requiredPoints,
@@ -1300,13 +1364,16 @@ function loadData() {
         function processWorkoutWeekIfNeeded() {
           const today = new Date();
           const currentMonday = getWeekStart(today);
-          const currentMondayKey = currentMonday.toISOString().split('T')[0];
+          const currentMondayKey = getWeekKey(currentMonday);
           const fitness = ensureFitnessDefaults();
-          const lastProcessedKey = fitness.lastProcessedMonday;
-          if (lastProcessedKey === currentMondayKey) {
+          const normalizedLastKey = normalizeWeekKey(fitness.lastProcessedMonday);
+          if (normalizedLastKey && normalizedLastKey !== fitness.lastProcessedMonday) {
+            fitness.lastProcessedMonday = normalizedLastKey;
+          }
+          if (normalizedLastKey === currentMondayKey) {
             return;
           }
-          let lastMonday = parseISODateOnly(lastProcessedKey);
+          let lastMonday = normalizedLastKey ? weekKeyToDate(normalizedLastKey) : null;
           if (!lastMonday || lastMonday >= currentMonday) {
             lastMonday = new Date(currentMonday);
             lastMonday.setDate(lastMonday.getDate() - 7);
@@ -3568,21 +3635,34 @@ function loadData() {
           // If the adjusted monthly target is negative, clamp to zero. This may occur if past months consumed
           // more than expected and the deficit eats into the current month.
           if (monthlyTargetConst < 0) monthlyTargetConst = 0;
-          // Compute months left from current date to deadline. This is used for carry‑over logic but
-          // not directly for weekly target calculations.
-          const monthsLeft = Math.max(1, deadlineMonthIndex - currentMonthIndex + 1);
-          // Determine how many working days remain in the current month (from now until the first of next month)
-          const startNextMonthWork = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          const workDaysLeftInMonth = countWorkdays(now, startNextMonthWork);
-          // Convert remaining working days into remaining working weeks (5 working days per week). At least 1.
-          const workingWeeksLeftInMonth = Math.max(1, Math.ceil(workDaysLeftInMonth / 5));
-          // Compute remaining monthly hours (deficit or surplus). This is the hours still needed to meet the
-          // adjusted monthly target. If negative, treat as zero (no deficit). This is used to set the weekly
-          // target so that the remaining monthly hours are spread evenly over the remaining working weeks.
-          const monthlyRemaining = Math.max(0, monthlyTargetConst - monthlyHours);
-          // Derive the weekly target from the monthly remaining hours divided by the working weeks left. If
-          // there is no monthly target (0), the weekly target will also be 0.
-          const weeklyTargetConst = workingWeeksLeftInMonth > 0 ? monthlyRemaining / workingWeeksLeftInMonth : 0;
+          // Capture a monthly target snapshot as of the week's start so the weekly target remains stable
+          // throughout the week even as hours are logged.
+          const weekMonthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
+          const weekMonthIndex = weekStart.getFullYear() * 12 + weekStart.getMonth();
+          const monthsElapsedAtWeekStart = Math.max(0, weekMonthIndex - startMonthIndex);
+          let secondsBeforeWeekMonth;
+          if (weekMonthStart.getTime() === firstDayOfThisMonth.getTime()) {
+            secondsBeforeWeekMonth = secondsBeforeThisMonth;
+          } else {
+            secondsBeforeWeekMonth = entries
+              .filter(e => new Date(e.startTime) < weekMonthStart)
+              .reduce((sum, e) => sum + (e.duration || 0), 0);
+          }
+          const actualBeforeWeekMonth = secondsBeforeWeekMonth / 3600;
+          let monthlyTargetAtWeekStart = monthTargetOriginal + (monthTargetOriginal * monthsElapsedAtWeekStart - actualBeforeWeekMonth);
+          if (monthlyTargetAtWeekStart < 0) monthlyTargetAtWeekStart = 0;
+          const monthlySecondsAtWeekStart = entries
+            .filter(e => {
+              const st = new Date(e.startTime);
+              return st >= weekMonthStart && st < weekStart;
+            })
+            .reduce((sum, e) => sum + (e.duration || 0), 0);
+          const monthlyHoursAtWeekStart = monthlySecondsAtWeekStart / 3600;
+          const monthlyRemainingAtWeekStart = Math.max(0, monthlyTargetAtWeekStart - monthlyHoursAtWeekStart);
+          const startNextMonthFromWeekStart = new Date(weekStart.getFullYear(), weekStart.getMonth() + 1, 1);
+          const workDaysLeftFromWeekStart = countWorkdays(weekStart, startNextMonthFromWeekStart);
+          const workingWeeksLeftFromWeekStart = Math.max(1, Math.ceil(workDaysLeftFromWeekStart / 5));
+          const weeklyTargetConst = workingWeeksLeftFromWeekStart > 0 ? monthlyRemainingAtWeekStart / workingWeeksLeftFromWeekStart : 0;
           return {
             totalHours,
             totalExpectedToDate,
