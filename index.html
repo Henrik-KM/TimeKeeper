@@ -1143,9 +1143,14 @@
               summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} on ${goalDateParsed.toLocaleDateString()} (date has passed).`);
             } else {
               const gap = goal.amount - goalProjection;
-              const monthlyDeltaNeeded = gap / (daysToGoal / 30);
-              summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
-              summaryParts.push(`<span class="muted">To close the gap, adjust savings by roughly ${formatSignedCurrency(monthlyDeltaNeeded, -1)} per month versus the current projection.</span>`);
+              if (daysToGoal < 7) {
+                summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
+                summaryParts.push(`<span class="muted">Goal date is too close for monthly adjustment calculations.</span>`);
+              } else {
+                const monthlyDeltaNeeded = gap / (daysToGoal / 30);
+                summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
+                summaryParts.push(`<span class="muted">To close the gap, adjust savings by roughly ${formatSignedCurrency(monthlyDeltaNeeded, -1)} per month versus the current projection.</span>`);
+              }
             }
           } else {
             summaryParts.push('<span class="muted">Set a goal amount and date to see what pace you need to stay on track.</span>');
