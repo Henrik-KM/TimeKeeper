@@ -20,7 +20,7 @@
         <li data-section="importExport">Import/Export</li>
         <li data-section="analytics">Reports</li>
         <li data-section="todo">Workouts</li>
-        <li data-section="grocery">Budgeting</li>
+        <li data-section="grocery">Finances</li>
       </ul>
     </div>
     <div class="content">
@@ -238,9 +238,28 @@
         </div>
       </section>
 
-      <!-- Grocery Section -->
+      <!-- Grocery/Finances Section -->
       <section id="grocery" class="section" style="display:none;">
-        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Budgeting</h2>
+        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Finances</h2>
+        <div class="card" id="wealthDashboardCard" style="margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; flex-wrap:wrap;">
+            <div>
+              <h3 style="margin:0 0 0.35rem 0; font-size:1.1rem; font-weight:600;">Wealth Dashboard</h3>
+              <p style="margin:0; font-size:0.9rem; color:#475569;">Track total wealth over time, view projections with uncertainty, and plan for goals.</p>
+            </div>
+            <div class="wealth-goal-row">
+              <label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label>
+              <input id="wealthGoalAmount" type="number" min="0" step="1000" class="wealth-input" placeholder="2,000,000" />
+              <label for="wealthGoalDate" class="wealth-label">Goal date</label>
+              <input id="wealthGoalDate" type="date" class="wealth-input" />
+              <button id="wealthGoalApply" class="btn secondary">Save goal</button>
+            </div>
+          </div>
+          <div class="wealth-chart-wrapper">
+            <canvas id="wealthChart" height="220"></canvas>
+          </div>
+          <div id="wealthProjectionSummary" class="wealth-summary"></div>
+        </div>
         <!-- Budget summary card will be inserted here dynamically -->
         <div id="budgetSummaryContainer"></div>
 
@@ -480,6 +499,32 @@
             const amountNum = Number(payment && payment.amount);
             return sum + (Number.isFinite(amountNum) && amountNum > 0 ? amountNum : 0);
           }, 0);
+        }
+        function ensureWealthData() {
+          let changed = false;
+          if (!Array.isArray(data.wealthHistory) || !data.wealthHistory.length) {
+            data.wealthHistory = getDefaultWealthHistory();
+            changed = true;
+          } else {
+            const normalized = data.wealthHistory
+              .map(normalizeWealthEntry)
+              .filter(entry => entry.date && Number.isFinite(entry.amount));
+            if (normalized.length !== data.wealthHistory.length) changed = true;
+            data.wealthHistory = normalized;
+          }
+          if (!data.wealthGoal || typeof data.wealthGoal !== 'object') {
+            data.wealthGoal = makeDefaultWealthGoal();
+            changed = true;
+          } else {
+            const amount = parseWealthAmount(data.wealthGoal.amount);
+            const date = typeof data.wealthGoal.date === 'string' ? data.wealthGoal.date : '';
+            if (amount !== data.wealthGoal.amount || date !== data.wealthGoal.date) {
+              data.wealthGoal = { amount, date };
+              changed = true;
+            }
+          }
+          if (changed) saveData();
+          return data.wealthHistory;
         }
         const scheduleRender = typeof requestAnimationFrame === 'function'
           ? (cb) => requestAnimationFrame(cb)
@@ -917,6 +962,196 @@
             updateTodoSection();
           }
         }
+        let wealthChartInstance = null;
+        function computeWealthRegression(points) {
+          if (!Array.isArray(points) || points.length < 2) return null;
+          const n = points.length;
+          const meanX = points.reduce((sum, p) => sum + p.x, 0) / n;
+          const meanY = points.reduce((sum, p) => sum + p.y, 0) / n;
+          const sumSqX = points.reduce((sum, p) => sum + Math.pow(p.x - meanX, 2), 0);
+          const covXY = points.reduce((sum, p) => sum + (p.x - meanX) * (p.y - meanY), 0);
+          const slope = sumSqX === 0 ? 0 : covXY / sumSqX;
+          const intercept = meanY - slope * meanX;
+          let residualSum = 0;
+          points.forEach(p => {
+            const pred = intercept + slope * p.x;
+            residualSum += Math.pow(p.y - pred, 2);
+          });
+          const residualStd = Math.sqrt(residualSum / Math.max(1, n - 2));
+          return { slope, intercept, meanX, meanY, residualStd, sumSqX };
+        }
+        function updateWealthDashboard() {
+          const chartEl = document.getElementById('wealthChart');
+          const summaryEl = document.getElementById('wealthProjectionSummary');
+          const goalAmountInput = document.getElementById('wealthGoalAmount');
+          const goalDateInput = document.getElementById('wealthGoalDate');
+          if (!chartEl || !summaryEl) return;
+          const msPerDay = 24 * 60 * 60 * 1000;
+          const wealthHistory = ensureWealthData()
+            .map(entry => ({ ...entry, time: new Date(entry.date).getTime() }))
+            .filter(entry => Number.isFinite(entry.time))
+            .sort((a, b) => a.time - b.time);
+          if (!wealthHistory.length) return;
+          const goal = data.wealthGoal || makeDefaultWealthGoal();
+          if (goalAmountInput) goalAmountInput.value = goal.amount || '';
+          if (goalDateInput) goalDateInput.value = goal.date || '';
+          const baseTime = wealthHistory[0].time;
+          const chartPoints = wealthHistory.map(entry => ({ x: entry.time, y: entry.amount }));
+          const regressionPoints = wealthHistory.map(entry => ({ x: (entry.time - baseTime) / msPerDay, y: entry.amount }));
+          const regression = computeWealthRegression(regressionPoints);
+          const lastEntry = wealthHistory[wealthHistory.length - 1];
+          const lastDate = new Date(lastEntry.time);
+          const formatWealth = (num, decimals = -1) => {
+            const formatted = formatCurrency(num, decimals);
+            return formatted ? formatted.replace(' kr', ' SEK') : '0 SEK';
+          };
+          const projectionHorizonDate = (() => {
+            const goalDateParsed = parseLocalDateString(goal.date);
+            if (goalDateParsed && goalDateParsed > lastDate) return goalDateParsed;
+            const twelveMonths = new Date(lastDate);
+            twelveMonths.setMonth(twelveMonths.getMonth() + 12);
+            return twelveMonths;
+          })();
+          const projectionData = [];
+          const upperBand = [];
+          const lowerBand = [];
+          const getPrediction = (targetDate) => {
+            const x = (targetDate.getTime() - baseTime) / msPerDay;
+            if (!regression) return { value: lastEntry.amount, band: 0 };
+            const predicted = regression.intercept + regression.slope * x;
+            const spread = regression.residualStd * Math.sqrt(1 + (regression.sumSqX > 0 ? Math.pow(x - regression.meanX, 2) / regression.sumSqX : 0));
+            return { value: predicted, band: spread * 1.25 };
+          };
+          let cursor = new Date(lastDate);
+          const stepDays = Math.max(14, Math.round((projectionHorizonDate.getTime() - lastDate.getTime()) / msPerDay / 18));
+          const stepMs = stepDays * msPerDay;
+          while (cursor.getTime() <= projectionHorizonDate.getTime()) {
+            const { value, band } = getPrediction(cursor);
+            const ts = cursor.getTime();
+            projectionData.push({ x: ts, y: value });
+            upperBand.push({ x: ts, y: value + band });
+            lowerBand.push({ x: ts, y: Math.max(0, value - band) });
+            cursor = new Date(cursor.getTime() + stepMs);
+          }
+          if (projectionData[projectionData.length - 1].x !== projectionHorizonDate.getTime()) {
+            const { value, band } = getPrediction(projectionHorizonDate);
+            projectionData.push({ x: projectionHorizonDate.getTime(), y: value });
+            upperBand.push({ x: projectionHorizonDate.getTime(), y: value + band });
+            lowerBand.push({ x: projectionHorizonDate.getTime(), y: Math.max(0, value - band) });
+          }
+          const datasets = [
+            {
+              label: 'Recorded wealth',
+              data: chartPoints,
+              borderColor: '#2563eb',
+              backgroundColor: '#2563eb',
+              tension: 0.2,
+              pointRadius: 4,
+              fill: false
+            }
+          ];
+          if (projectionData.length) {
+            datasets.push(
+              {
+                label: 'Projection band (± ~1σ)',
+                data: lowerBand,
+                borderColor: 'rgba(59,130,246,0.1)',
+                backgroundColor: 'rgba(59,130,246,0.12)',
+                pointRadius: 0,
+                fill: '+1',
+                tension: 0.2,
+                borderWidth: 0
+              },
+              {
+                label: 'Projection upper bound',
+                data: upperBand,
+                borderColor: 'rgba(59,130,246,0.1)',
+                backgroundColor: 'rgba(59,130,246,0.12)',
+                pointRadius: 0,
+                fill: false,
+                tension: 0.2,
+                borderWidth: 0
+              },
+              {
+                label: 'Projection',
+                data: projectionData,
+                borderColor: '#0ea5e9',
+                backgroundColor: '#0ea5e9',
+                borderDash: [6, 4],
+                pointRadius: 0,
+                tension: 0.2
+              }
+            );
+          }
+          const goalDateParsed = parseLocalDateString(goal.date);
+          const hasGoal = goal.amount > 0 && goalDateParsed instanceof Date && !isNaN(goalDateParsed);
+          if (hasGoal) {
+            datasets.push({
+              label: 'Goal',
+              data: [{ x: goalDateParsed.getTime(), y: goal.amount }],
+              borderColor: '#16a34a',
+              backgroundColor: '#16a34a',
+              pointRadius: 6,
+              pointStyle: 'triangle',
+              showLine: false
+            });
+          }
+          if (wealthChartInstance) wealthChartInstance.destroy();
+          wealthChartInstance = new Chart(chartEl.getContext('2d'), {
+            type: 'line',
+            data: { datasets },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              scales: {
+                x: {
+                  type: 'linear',
+                  title: { display: true, text: 'Date' },
+                  ticks: {
+                    callback: (value) => {
+                      const date = new Date(value);
+                      return isNaN(date) ? '' : date.toLocaleDateString();
+                    }
+                  }
+                },
+                y: {
+                  title: { display: true, text: 'Total wealth (SEK)' },
+                  ticks: {
+                    callback: (val) => formatCurrency(val, -2).replace(' kr', ' SEK')
+                  }
+                }
+              },
+              plugins: {
+                legend: { position: 'bottom' },
+                tooltip: {
+                  callbacks: {
+                    label: (ctx) => `${ctx.dataset.label}: ${formatWealth(ctx.parsed.y, -1)}`
+                  }
+                }
+              }
+            }
+          });
+          const summaryParts = [];
+          const monthlySlope = regression ? regression.slope * 30 : 0;
+          const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
+          summaryParts.push(`<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`);
+          summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope * 12, -1)} per year based on trend).`);
+          if (hasGoal) {
+            const daysToGoal = Math.round((goalDateParsed.getTime() - lastDate.getTime()) / msPerDay);
+            const goalProjection = getPrediction(goalDateParsed).value;
+            if (daysToGoal <= 0) {
+              summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} on ${goalDateParsed.toLocaleDateString()} (date has passed).`);
+            } else {
+              const gap = goal.amount - goalProjection;
+              const monthlyDeltaNeeded = gap / (daysToGoal / 30);
+              summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
+              summaryParts.push(`<span class="muted">To close the gap, adjust savings by roughly ${formatSignedCurrency(monthlyDeltaNeeded, -1)} per month versus the current projection.</span>`);
+            }
+          } else {
+            summaryParts.push('<span class="muted">Set a goal amount and date to see what pace you need to stay on track.</span>');
+          }
+          summaryEl.innerHTML = summaryParts.map(part => `<div style="margin-bottom:0.35rem;">${part}</div>`).join('');
+        }
         function finalizeFitnessWeek(lastMonday, thisMonday) {
           const fitness = ensureFitnessDefaults();
           const lastMondayKey = getWeekKey(lastMonday);
@@ -1075,6 +1310,57 @@
         }
         // Load and save data
 
+const defaultWealthPoints = [
+  { date: '2020-01-01', amount: 1150000 },
+  { date: '2022-01-01', amount: 1280000 },
+  { date: '2023-04-25', amount: 1350000 },
+  { date: '2024-01-01', amount: 1415000 },
+  { date: '2024-01-25', amount: 1488400 },
+  { date: '2024-02-26', amount: 1518000 },
+  { date: '2024-03-25', amount: 1515000, note: '1,565,000 without taxes' },
+  { date: '2024-04-25', amount: 1507000 },
+  { date: '2024-05-24', amount: 1567000 },
+  { date: '2024-06-25', amount: 1600000 },
+  { date: '2024-07-25', amount: 1661000 },
+  { date: '2024-08-25', amount: 1629000 },
+  { date: '2024-09-25', amount: 1630000 },
+  { date: '2024-10-25', amount: 1715000 },
+  { date: '2024-11-25', amount: 1773000 },
+  { date: '2024-12-23', amount: 1755200 },
+  { date: '2025-01-24', amount: 1830000 },
+  { date: '2025-09-24', amount: 1931600 },
+  { date: '2025-10-24', amount: 1962000 },
+  { date: '2025-11-05', amount: 2010000 }
+];
+
+function parseWealthAmount(raw) {
+  const cleaned = String(raw ?? '')
+    .replace(/\s+/g, '')
+    .replace(/[^0-9.-]/g, '');
+  const value = parseFloat(cleaned);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function normalizeWealthEntry(entry) {
+  const obj = entry && typeof entry === 'object' ? { ...entry } : {};
+  const amount = parseWealthAmount(obj.amount);
+  const dateStr = typeof obj.date === 'string' ? obj.date.trim() : '';
+  return {
+    id: obj.id || uuid(),
+    date: dateStr,
+    amount,
+    note: typeof obj.note === 'string' ? obj.note : ''
+  };
+}
+
+function getDefaultWealthHistory() {
+  return defaultWealthPoints.map(p => normalizeWealthEntry(p));
+}
+
+function makeDefaultWealthGoal() {
+  return { amount: 2000000, date: '' };
+}
+
 function loadData() {
   const raw = localStorage.getItem('timekeeperDataPro');
   if (!raw) {
@@ -1097,7 +1383,9 @@ function loadData() {
       groceryBudgetStartDate: null,
       backupDirName: null,
       lastBackupAt: null,
-      fitness: makeDefaultFitness()
+      fitness: makeDefaultFitness(),
+      wealthHistory: getDefaultWealthHistory(),
+      wealthGoal: makeDefaultWealthGoal()
     };
   }
   try {
@@ -1175,7 +1463,16 @@ function loadData() {
       // Preserve additional persisted properties like backupDirName if present in saved data
       backupDirName: parsed.backupDirName || null,
       lastBackupAt: parsed.lastBackupAt || null,
-      fitness: applyFitnessDefaults(parsed.fitness)
+      fitness: applyFitnessDefaults(parsed.fitness),
+      wealthHistory: Array.isArray(parsed.wealthHistory)
+        ? parsed.wealthHistory.map(normalizeWealthEntry)
+        : getDefaultWealthHistory(),
+      wealthGoal: parsed.wealthGoal && typeof parsed.wealthGoal === 'object'
+        ? {
+            amount: parseWealthAmount(parsed.wealthGoal.amount || 0) || 0,
+            date: typeof parsed.wealthGoal.date === 'string' ? parsed.wealthGoal.date : ''
+          }
+        : makeDefaultWealthGoal()
     };
   } catch (err) {
     return {
@@ -1197,7 +1494,9 @@ function loadData() {
       groceryBudgetStartDate: null,
       backupDirName: null,
       lastBackupAt: null,
-      fitness: makeDefaultFitness()
+      fitness: makeDefaultFitness(),
+      wealthHistory: getDefaultWealthHistory(),
+      wealthGoal: makeDefaultWealthGoal()
     };
   }
 }
@@ -1217,6 +1516,7 @@ function loadData() {
         ensureFitnessDefaults();
         ensureWorkoutData();
         ensureMonthlyRecurringPayments();
+        ensureWealthData();
         // Initialize backup and sync flags before they are referenced in saveData().
         // needsBackup tracks whether the data has changed and needs to be exported.
         // autoSyncEnabled indicates whether automatic export is enabled.
@@ -2128,6 +2428,7 @@ function loadData() {
           const summaryContainer = document.getElementById('budgetSummaryContainer');
           const recurringListEl = document.getElementById('monthlyRecurringList');
           if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer || !recurringListEl) return;
+          updateWealthDashboard();
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
           const recurringPayments = ensureMonthlyRecurringPayments();
           const recurringTotal = getMonthlyRecurringTotal(recurringPayments);
@@ -4963,6 +5264,27 @@ function loadData() {
             }
           });
         }
+
+        const wealthGoalApplyBtn = document.getElementById('wealthGoalApply');
+        const wealthGoalAmountInput = document.getElementById('wealthGoalAmount');
+        const wealthGoalDateInput = document.getElementById('wealthGoalDate');
+        function persistWealthGoal() {
+          const amount = parseWealthAmount(wealthGoalAmountInput ? wealthGoalAmountInput.value : null);
+          const date = wealthGoalDateInput && wealthGoalDateInput.value ? wealthGoalDateInput.value : '';
+          data.wealthGoal = { amount, date };
+          saveData();
+          updateWealthDashboard();
+        }
+        if (wealthGoalApplyBtn) {
+          wealthGoalApplyBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            persistWealthGoal();
+          });
+        }
+        [wealthGoalAmountInput, wealthGoalDateInput].forEach(input => {
+          if (!input) return;
+          input.addEventListener('change', () => persistWealthGoal());
+        });
 
         // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
