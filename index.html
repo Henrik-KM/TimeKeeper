@@ -1009,6 +1009,14 @@
             const formatted = formatCurrency(num, decimals);
             return formatted ? formatted.replace(' kr', ' SEK') : '0 SEK';
           };
+          const formatCompactWealth = (num) => {
+            if (!isFinite(num)) return '';
+            const compact = new Intl.NumberFormat('sv-SE', {
+              notation: 'compact',
+              maximumFractionDigits: 1
+            }).format(num);
+            return `${compact} SEK`;
+          };
           const projectionHorizonDate = (() => {
             const goalDateParsed = parseLocalDateString(goal.date);
             if (goalDateParsed && goalDateParsed > lastDate) return goalDateParsed;
@@ -1107,28 +1115,39 @@
             options: {
               responsive: true,
               maintainAspectRatio: false,
+              interaction: { mode: 'index', intersect: false },
+              layout: { padding: { top: 8, right: 12, bottom: 0, left: 4 } },
               scales: {
                 x: {
                   type: 'linear',
                   title: { display: true, text: 'Date' },
                   ticks: {
+                    maxRotation: 0,
+                    autoSkipPadding: 14,
                     callback: (value) => {
                       const date = new Date(value);
-                      return isNaN(date) ? '' : date.toLocaleDateString();
+                      return isNaN(date) ? '' : date.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
                     }
                   }
                 },
                 y: {
                   title: { display: true, text: 'Total wealth (SEK)' },
                   ticks: {
-                    callback: (val) => formatCurrency(val, -2).replace(' kr', ' SEK')
+                    callback: (val) => formatCompactWealth(val),
+                    padding: 6
                   }
                 }
               },
               plugins: {
                 legend: { position: 'bottom' },
                 tooltip: {
+                  padding: 10,
                   callbacks: {
+                    title: (items) => {
+                      const raw = items[0]?.parsed?.x;
+                      const date = new Date(raw);
+                      return isNaN(date) ? '' : date.toLocaleDateString();
+                    },
                     label: (ctx) => `${ctx.dataset.label}: ${formatWealth(ctx.parsed.y, -1)}`
                   }
                 }
