@@ -256,7 +256,7 @@
             </div>
           </div>
           <div class="wealth-chart-wrapper">
-            <canvas id="wealthChart" height="220"></canvas>
+            <canvas id="wealthChart" height="320"></canvas>
           </div>
           <div id="wealthProjectionSummary" class="wealth-summary"></div>
         </div>
@@ -995,10 +995,14 @@
           const goal = data.wealthGoal || makeDefaultWealthGoal();
           if (goalAmountInput) goalAmountInput.value = goal.amount || '';
           if (goalDateInput) goalDateInput.value = goal.date || '';
-          const baseTime = wealthHistory[0].time;
+          const projectionWindowMs = 540 * msPerDay; // 18 months window for a more realistic trend
+          const windowStart = wealthHistory[wealthHistory.length - 1].time - projectionWindowMs;
+          const regressionSource = wealthHistory.filter(entry => entry.time >= windowStart);
+          const regressionBaseTime = (regressionSource.length ? regressionSource[0].time : wealthHistory[0].time);
+          const regressionInput = (regressionSource.length >= 2 ? regressionSource : wealthHistory)
+            .map(entry => ({ x: (entry.time - regressionBaseTime) / msPerDay, y: entry.amount }));
           const chartPoints = wealthHistory.map(entry => ({ x: entry.time, y: entry.amount }));
-          const regressionPoints = wealthHistory.map(entry => ({ x: (entry.time - baseTime) / msPerDay, y: entry.amount }));
-          const regression = computeWealthRegression(regressionPoints);
+          const regression = computeWealthRegression(regressionInput);
           const lastEntry = wealthHistory[wealthHistory.length - 1];
           const lastDate = new Date(lastEntry.time);
           const formatWealth = (num, decimals = -1) => {
@@ -1016,7 +1020,7 @@
           const upperBand = [];
           const lowerBand = [];
           const getPrediction = (targetDate) => {
-            const x = (targetDate.getTime() - baseTime) / msPerDay;
+            const x = (targetDate.getTime() - regressionBaseTime) / msPerDay;
             if (!regression) return { value: lastEntry.amount, band: 0 };
             const predicted = regression.intercept + regression.slope * x;
             const spread = regression.residualStd * Math.sqrt(1 + (regression.sumSqX > 0 ? Math.pow(x - regression.meanX, 2) / regression.sumSqX : 0));
@@ -1136,6 +1140,7 @@
           const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
           summaryParts.push(`<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`);
           summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope * 12, -1)} per year based on trend).`);
+          summaryParts.push('<span class="muted">Projection trend uses the most recent 18 months of data for a closer fit.</span>');
           if (hasGoal) {
             const daysToGoal = Math.round((goalDateParsed.getTime() - lastDate.getTime()) / msPerDay);
             const goalProjection = getPrediction(goalDateParsed).value;
