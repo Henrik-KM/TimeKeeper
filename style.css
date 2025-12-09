@@ -182,6 +182,12 @@ body {
 }
 .wealth-chart-wrapper {
   margin: 0.75rem 0 0.5rem;
+  width: 100%;
+}
+.wealth-chart-wrapper canvas {
+  width: 100% !important;
+  height: 260px !important;
+  max-width: 100%;
 }
 .wealth-summary {
   background: #f8fafc;
@@ -473,5 +479,8 @@ tr:nth-child(even) td {
   .content {
     margin-left: 0;
     padding-top: 1rem;
+  }
+  .wealth-chart-wrapper canvas {
+    height: 320px !important;
   }
 }
