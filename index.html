@@ -1011,11 +1011,10 @@
           };
           const formatCompactWealth = (num) => {
             if (!isFinite(num)) return '';
-            const compact = new Intl.NumberFormat('sv-SE', {
+            return new Intl.NumberFormat('sv-SE', {
               notation: 'compact',
               maximumFractionDigits: 1
             }).format(num);
-            return `${compact} SEK`;
           };
           const projectionHorizonDate = (() => {
             const goalDateParsed = parseLocalDateString(goal.date);
@@ -1158,11 +1157,15 @@
           const monthlySlope = regression ? regression.slope * 30 : 0;
           const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
           summaryParts.push(`<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`);
-          summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope * 12, -1)} per year based on trend).`);
+          summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope, -1)} per month trend).`);
+          summaryParts.push(`<strong>Current savings pace:</strong> ${formatSignedCurrency(monthlySlope, -1)} per month based on the latest data.`);
           summaryParts.push('<span class="muted">Projection trend uses the most recent 18 months of data for a closer fit.</span>');
           if (hasGoal) {
             const daysToGoal = Math.round((goalDateParsed.getTime() - lastDate.getTime()) / msPerDay);
             const goalProjection = getPrediction(goalDateParsed).value;
+            const monthsToGoal = daysToGoal / 30;
+            const requiredMonthlyTotal = monthsToGoal > 0 ? (goal.amount - lastEntry.amount) / monthsToGoal : null;
+            const monthlyDeltaNeeded = requiredMonthlyTotal !== null ? requiredMonthlyTotal - monthlySlope : null;
             if (daysToGoal <= 0) {
               summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} on ${goalDateParsed.toLocaleDateString()} (date has passed).`);
             } else {
@@ -1171,9 +1174,8 @@
                 summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
                 summaryParts.push(`<span class="muted">Goal date is too close for monthly adjustment calculations.</span>`);
               } else {
-                const monthlyDeltaNeeded = gap / (daysToGoal / 30);
                 summaryParts.push(`<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`);
-                summaryParts.push(`<span class="muted">To close the gap, adjust savings by roughly ${formatSignedCurrency(monthlyDeltaNeeded, -1)} per month versus the current projection.</span>`);
+                summaryParts.push(`<span class="muted">To stay on track, aim for about ${formatWealth(requiredMonthlyTotal, -1)} per month in total. Current trend is ${formatSignedCurrency(monthlySlope, -1)} per month, so adjust by ${formatSignedCurrency(monthlyDeltaNeeded, -1)} each month.</span>`);
               }
             }
           } else {
