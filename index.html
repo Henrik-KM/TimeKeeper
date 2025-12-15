@@ -260,6 +260,28 @@
           </div>
           <div id="wealthProjectionSummary" class="wealth-summary"></div>
         </div>
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add wealth data point</h3>
+          <form id="wealthEntryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.75rem;">
+            <input id="wealthEntryDate" type="date" required style="flex:1 1 10rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <input id="wealthEntryAmount" type="number" step="1" min="0" required placeholder="Amount (SEK)" style="flex:1 1 10rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <input id="wealthEntryNote" type="text" placeholder="Note (optional)" style="flex:2 1 12rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary">Add point</button>
+          </form>
+          <div style="overflow-x:auto;">
+            <table>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Amount</th>
+                  <th>Note</th>
+                  <th style="width:1%; white-space:nowrap;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="wealthHistoryBody"></tbody>
+            </table>
+          </div>
+        </div>
         <!-- Budget summary card will be inserted here dynamically -->
         <div id="budgetSummaryContainer"></div>
 
@@ -979,6 +1001,67 @@
           });
           const residualStd = Math.sqrt(residualSum / Math.max(1, n - 2));
           return { slope, intercept, meanX, meanY, residualStd, sumSqX };
+        }
+        function addWealthHistoryEntry(dateStr, amountRaw, noteRaw = '') {
+          const parsedDate = parseISODateOnly(dateStr);
+          if (!parsedDate) return { ok: false, reason: 'date' };
+          const amount = parseWealthAmount(amountRaw);
+          if (!Number.isFinite(amount)) return { ok: false, reason: 'amount' };
+          const entry = {
+            id: uuid(),
+            date: formatDateKey(parsedDate),
+            amount,
+            note: typeof noteRaw === 'string' ? noteRaw.trim() : ''
+          };
+          const wealthHistory = ensureWealthData();
+          wealthHistory.push(entry);
+          wealthHistory.sort((a, b) => new Date(a.date) - new Date(b.date));
+          saveData();
+          return { ok: true, entry };
+        }
+        function deleteWealthHistoryEntry(entryId) {
+          const wealthHistory = ensureWealthData();
+          const idx = wealthHistory.findIndex(e => e.id === entryId);
+          if (idx >= 0) {
+            wealthHistory.splice(idx, 1);
+            saveData();
+          }
+        }
+        function renderWealthHistoryTable() {
+          const body = document.getElementById('wealthHistoryBody');
+          if (!body) return;
+          const wealthHistory = ensureWealthData()
+            .slice()
+            .sort((a, b) => new Date(b.date) - new Date(a.date));
+          body.innerHTML = '';
+          wealthHistory.forEach(entry => {
+            const row = document.createElement('tr');
+            const dateCell = document.createElement('td');
+            dateCell.textContent = entry.date || '';
+            row.appendChild(dateCell);
+            const amountCell = document.createElement('td');
+            amountCell.textContent = formatCurrency(entry.amount, -1);
+            row.appendChild(amountCell);
+            const noteCell = document.createElement('td');
+            noteCell.textContent = entry.note || '';
+            row.appendChild(noteCell);
+            const actionsCell = document.createElement('td');
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'btn danger';
+            deleteBtn.style.padding = '0.25rem 0.5rem';
+            deleteBtn.style.fontSize = '0.85rem';
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.addEventListener('click', () => {
+              if (confirm('Delete this data point?')) {
+                deleteWealthHistoryEntry(entry.id);
+                updateWealthDashboard();
+                renderWealthHistoryTable();
+              }
+            });
+            actionsCell.appendChild(deleteBtn);
+            row.appendChild(actionsCell);
+            body.appendChild(row);
+          });
         }
         function updateWealthDashboard() {
           const chartEl = document.getElementById('wealthChart');
@@ -2459,6 +2542,7 @@ function loadData() {
           const summaryContainer = document.getElementById('budgetSummaryContainer');
           const recurringListEl = document.getElementById('monthlyRecurringList');
           if (!weeklyListEl || !monthlyListEl || !biannualListEl || !summaryContainer || !recurringListEl) return;
+          renderWealthHistoryTable();
           updateWealthDashboard();
           const groceries = Array.isArray(data.groceries) ? data.groceries : [];
           const recurringPayments = ensureMonthlyRecurringPayments();
@@ -5299,6 +5383,10 @@ function loadData() {
         const wealthGoalApplyBtn = document.getElementById('wealthGoalApply');
         const wealthGoalAmountInput = document.getElementById('wealthGoalAmount');
         const wealthGoalDateInput = document.getElementById('wealthGoalDate');
+        const wealthEntryForm = document.getElementById('wealthEntryForm');
+        const wealthEntryDateInput = document.getElementById('wealthEntryDate');
+        const wealthEntryAmountInput = document.getElementById('wealthEntryAmount');
+        const wealthEntryNoteInput = document.getElementById('wealthEntryNote');
         function persistWealthGoal() {
           const amount = parseWealthAmount(wealthGoalAmountInput ? wealthGoalAmountInput.value : null);
           const date = wealthGoalDateInput && wealthGoalDateInput.value ? wealthGoalDateInput.value : '';
@@ -5316,6 +5404,22 @@ function loadData() {
           if (!input) return;
           input.addEventListener('change', () => persistWealthGoal());
         });
+        if (wealthEntryForm) {
+          wealthEntryForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const dateVal = wealthEntryDateInput ? wealthEntryDateInput.value : '';
+            const amountVal = wealthEntryAmountInput ? wealthEntryAmountInput.value : '';
+            const noteVal = wealthEntryNoteInput ? wealthEntryNoteInput.value : '';
+            const result = addWealthHistoryEntry(dateVal, amountVal, noteVal);
+            if (!result.ok) {
+              alert(result.reason === 'date' ? 'Enter a valid date.' : 'Enter a valid amount.');
+              return;
+            }
+            wealthEntryForm.reset();
+            renderWealthHistoryTable();
+            updateWealthDashboard();
+          });
+        }
 
         // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
