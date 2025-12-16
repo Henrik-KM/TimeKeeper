@@ -203,6 +203,107 @@ body {
 .wealth-summary .muted {
   color: #475569;
 }
+.wealth-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+.wealth-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.wealth-add-card {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.wealth-add-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.card-subtitle {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.wealth-entry-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+  align-items: end;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+.wealth-entry-input {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.wealth-entry-submit {
+  width: 100%;
+  justify-self: flex-end;
+}
+.wealth-history-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  overflow: hidden;
+}
+.wealth-history-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+.wealth-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.wealth-history-table th,
+.wealth-history-table td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.wealth-history-table th {
+  background: #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.wealth-history-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+.wealth-history-table th:last-child,
+.wealth-history-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
 
 .fitness-summary-grid {
   display: grid;
@@ -466,6 +567,15 @@ tr:nth-child(even) td {
   height: 320px;
   max-height: 360px;
   min-height: 280px;
+}
+
+@media (max-width: 1024px) {
+  .wealth-grid {
+    grid-template-columns: 1fr;
+  }
+  .wealth-entry-form {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
 }
 
 /* Responsive adjustments */

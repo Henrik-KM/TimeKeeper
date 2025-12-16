@@ -241,45 +241,55 @@
       <!-- Grocery/Finances Section -->
       <section id="grocery" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Finances</h2>
-        <div class="card" id="wealthDashboardCard" style="margin-bottom:1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.75rem; flex-wrap:wrap;">
-            <div>
-              <h3 style="margin:0 0 0.35rem 0; font-size:1.1rem; font-weight:600;">Wealth Dashboard</h3>
-              <p style="margin:0; font-size:0.9rem; color:#475569;">Track total wealth over time, view projections with uncertainty, and plan for goals.</p>
+        <div class="wealth-grid">
+          <div class="card" id="wealthDashboardCard">
+            <div class="wealth-dashboard-header">
+              <div>
+                <h3 class="card-title">Wealth Dashboard</h3>
+                <p class="card-subtitle">Track total wealth over time, view projections with uncertainty, and plan for goals.</p>
+              </div>
+              <div class="wealth-goal-row">
+                <label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label>
+                <input id="wealthGoalAmount" type="number" min="0" step="1000" class="wealth-input" placeholder="2,000,000" />
+                <label for="wealthGoalDate" class="wealth-label">Goal date</label>
+                <input id="wealthGoalDate" type="date" class="wealth-input" />
+                <button id="wealthGoalApply" class="btn secondary">Save goal</button>
+              </div>
             </div>
-            <div class="wealth-goal-row">
-              <label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label>
-              <input id="wealthGoalAmount" type="number" min="0" step="1000" class="wealth-input" placeholder="2,000,000" />
-              <label for="wealthGoalDate" class="wealth-label">Goal date</label>
-              <input id="wealthGoalDate" type="date" class="wealth-input" />
-              <button id="wealthGoalApply" class="btn secondary">Save goal</button>
+            <div class="wealth-chart-wrapper">
+              <canvas id="wealthChart" height="320"></canvas>
             </div>
+            <div id="wealthProjectionSummary" class="wealth-summary"></div>
           </div>
-          <div class="wealth-chart-wrapper">
-            <canvas id="wealthChart" height="320"></canvas>
-          </div>
-          <div id="wealthProjectionSummary" class="wealth-summary"></div>
-        </div>
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add wealth data point</h3>
-          <form id="wealthEntryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.75rem;">
-            <input id="wealthEntryDate" type="date" required style="flex:1 1 10rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <input id="wealthEntryAmount" type="number" step="1" min="0" required placeholder="Amount (SEK)" style="flex:1 1 10rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <input id="wealthEntryNote" type="text" placeholder="Note (optional)" style="flex:2 1 12rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <button type="submit" class="btn primary">Add point</button>
-          </form>
-          <div style="overflow-x:auto;">
-            <table>
-              <thead>
-                <tr>
-                  <th>Date</th>
-                  <th>Amount</th>
-                  <th>Note</th>
-                  <th style="width:1%; white-space:nowrap;">Actions</th>
-                </tr>
-              </thead>
-              <tbody id="wealthHistoryBody"></tbody>
-            </table>
+          <div class="card wealth-add-card">
+            <div class="wealth-add-header">
+              <div>
+                <p class="eyebrow">Entries</p>
+                <h3 class="card-title">Wealth data points</h3>
+              </div>
+              <p class="card-subtitle">Log quick snapshots without crowding the dashboard.</p>
+            </div>
+            <form id="wealthEntryForm" class="wealth-entry-form">
+              <input id="wealthEntryDate" type="date" required class="wealth-entry-input" />
+              <input id="wealthEntryAmount" type="number" step="1" min="0" required placeholder="Amount (SEK)" class="wealth-entry-input" />
+              <input id="wealthEntryNote" type="text" placeholder="Note (optional)" class="wealth-entry-input" />
+              <button type="submit" class="btn primary wealth-entry-submit">Add point</button>
+            </form>
+            <div class="wealth-history-wrapper">
+              <div class="wealth-history-scroll">
+                <table class="wealth-history-table">
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Amount</th>
+                      <th>Note</th>
+                      <th>Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="wealthHistoryBody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
         <!-- Budget summary card will be inserted here dynamically -->
