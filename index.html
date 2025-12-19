@@ -4365,8 +4365,8 @@ function loadData() {
           // Determine the number of working weeks left in the current month. We reuse the
           // same calculation as computeProjectStats: count working days from now to the
           // first day of next month, then convert to weeks of 5 working days each.
-          const startOfWeekForMonth = startWeek < startMonth ? startMonth : startWeek;
-          const workDaysLeftInMonthForAll = countWorkdays(startOfWeekForMonth, startNextMonth);
+          const weekStartForMonth = startWeek < startMonth ? startMonth : startWeek;
+          const workDaysLeftInMonthForAll = countWorkdays(weekStartForMonth, startNextMonth);
           const workingWeeksLeftInMonthForAll = Math.max(1, Math.ceil(workDaysLeftInMonthForAll / 5));
           if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
           // Precompute how many working days remain in the current month and current week. The value
