@@ -4062,31 +4062,19 @@ function loadData() {
           // more than expected and the deficit eats into the current month.
           if (monthlyTargetConst < 0) monthlyTargetConst = 0;
           // Capture a monthly target snapshot as of the week's start so the weekly target remains stable
-          // throughout the week even as hours are logged.
-          const weekMonthStart = new Date(weekStart.getFullYear(), weekStart.getMonth(), 1);
-          const weekMonthIndex = weekStart.getFullYear() * 12 + weekStart.getMonth();
-          const monthsElapsedAtWeekStart = Math.max(0, weekMonthIndex - startMonthIndex);
-          let secondsBeforeWeekMonth;
-          if (weekMonthStart.getTime() === firstDayOfThisMonth.getTime()) {
-            secondsBeforeWeekMonth = secondsBeforeThisMonth;
-          } else {
-            secondsBeforeWeekMonth = entries
-              .filter(e => new Date(e.startTime) < weekMonthStart)
-              .reduce((sum, e) => sum + (e.duration || 0), 0);
-          }
-          const actualBeforeWeekMonth = secondsBeforeWeekMonth / 3600;
-          let monthlyTargetAtWeekStart = monthTargetOriginal + (monthTargetOriginal * monthsElapsedAtWeekStart - actualBeforeWeekMonth);
-          if (monthlyTargetAtWeekStart < 0) monthlyTargetAtWeekStart = 0;
+          // throughout the week even as hours are logged. Always align the weekly target to the current
+          // calendar month so weeks that straddle a month boundary don't inherit the prior month's plan.
+          const weekStartForMonth = weekStart < firstDayOfThisMonth ? firstDayOfThisMonth : weekStart;
           const monthlySecondsAtWeekStart = entries
             .filter(e => {
               const st = new Date(e.startTime);
-              return st >= weekMonthStart && st < weekStart;
+              return st >= firstDayOfThisMonth && st < weekStartForMonth;
             })
             .reduce((sum, e) => sum + (e.duration || 0), 0);
           const monthlyHoursAtWeekStart = monthlySecondsAtWeekStart / 3600;
-          const monthlyRemainingAtWeekStart = Math.max(0, monthlyTargetAtWeekStart - monthlyHoursAtWeekStart);
-          const startNextMonthFromWeekStart = new Date(weekStart.getFullYear(), weekStart.getMonth() + 1, 1);
-          const workDaysLeftFromWeekStart = countWorkdays(weekStart, startNextMonthFromWeekStart);
+          const monthlyRemainingAtWeekStart = Math.max(0, monthlyTargetConst - monthlyHoursAtWeekStart);
+          const startNextMonthFromWeekStart = new Date(firstDayOfThisMonth.getFullYear(), firstDayOfThisMonth.getMonth() + 1, 1);
+          const workDaysLeftFromWeekStart = countWorkdays(weekStartForMonth, startNextMonthFromWeekStart);
           const workingWeeksLeftFromWeekStart = Math.max(1, Math.ceil(workDaysLeftFromWeekStart / 5));
           const weeklyTargetConst = workingWeeksLeftFromWeekStart > 0 ? monthlyRemainingAtWeekStart / workingWeeksLeftFromWeekStart : 0;
           return {
@@ -4246,7 +4234,8 @@ function loadData() {
           // Determine working days left in the current month and convert to working weeks (5 days per week). We
           // reuse the logic from computeProjectStats for consistency. We'll compute this once and use for all projects.
           const startNextMonthWork = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          const workDaysLeftInMonthAll = countWorkdays(now, startNextMonthWork);
+          const startOfWeekForMonth = weekStart < monthStart ? monthStart : weekStart;
+          const workDaysLeftInMonthAll = countWorkdays(startOfWeekForMonth, startNextMonthWork);
           const workingWeeksLeftInMonthAll = Math.max(1, Math.ceil(workDaysLeftInMonthAll / 5));
           // Compute a weekly target snapshot for the start of the day by summing per‑project
           // weekly targets calculated from monthly remaining hours *at the start of the day*.
@@ -4376,7 +4365,8 @@ function loadData() {
           // Determine the number of working weeks left in the current month. We reuse the
           // same calculation as computeProjectStats: count working days from now to the
           // first day of next month, then convert to weeks of 5 working days each.
-          const workDaysLeftInMonthForAll = countWorkdays(nowTime, startNextMonth);
+          const startOfWeekForMonth = startWeek < startMonth ? startMonth : startWeek;
+          const workDaysLeftInMonthForAll = countWorkdays(startOfWeekForMonth, startNextMonth);
           const workingWeeksLeftInMonthForAll = Math.max(1, Math.ceil(workDaysLeftInMonthForAll / 5));
           if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
           // Precompute how many working days remain in the current month and current week. The value
