@@ -4234,8 +4234,8 @@ function loadData() {
           // Determine working days left in the current month and convert to working weeks (5 days per week). We
           // reuse the logic from computeProjectStats for consistency. We'll compute this once and use for all projects.
           const startNextMonthWork = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-          const startOfWeekForMonth = weekStart < monthStart ? monthStart : weekStart;
-          const workDaysLeftInMonthAll = countWorkdays(startOfWeekForMonth, startNextMonthWork);
+          const weekStartForMonth = weekStart < monthStart ? monthStart : weekStart;
+          const workDaysLeftInMonthAll = countWorkdays(weekStartForMonth, startNextMonthWork);
           const workingWeeksLeftInMonthAll = Math.max(1, Math.ceil(workDaysLeftInMonthAll / 5));
           // Compute a weekly target snapshot for the start of the day by summing per‑project
           // weekly targets calculated from monthly remaining hours *at the start of the day*.
