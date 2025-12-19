@@ -4320,25 +4320,8 @@ function loadData() {
           const workDaysElapsedMonth = countWorkdays(startMonth, nowTime);
           let monthlyTimeProgress = workDaysTotalMonth > 0 ? (workDaysElapsedMonth / workDaysTotalMonth) * 100 : 0;
 
-          // For daily target and per‑project recommendations, we want a snapshot of
-          // monthly remaining hours at the start of the day. We'll build a lookup
-          // table of monthly seconds per project up to the start of today. This
-          // replicates logic in computeGlobalStats for daily target but per project.
-          const monthlySecondsStartOfDayByProj = {};
-          data.entries.forEach(entry => {
-            if (entry.isRunning || !entry.duration) return;
-            const st = new Date(entry.startTime);
-            // Only include entries that started before today and are within the current month
-            if (st >= startMonth && st < todayStart) {
-              monthlySecondsStartOfDayByProj[entry.projectId] = (monthlySecondsStartOfDayByProj[entry.projectId] || 0) + entry.duration;
-            }
-          });
-          // Determine the number of working weeks left in the current month. We reuse the
-          // same calculation as computeProjectStats: count working days from now to the
-          // first day of next month, then convert to weeks of 5 working days each.
-          const weekStartForMonth = startWeek < startMonth ? startMonth : startWeek;
-          const workDaysLeftInMonthForAll = countWorkdays(weekStartForMonth, startNextMonth);
-          const workingWeeksLeftInMonthForAll = Math.max(1, Math.ceil(workDaysLeftInMonthForAll / 5));
+          // The per-project daily targets align with the global daily target snapshot,
+          // so no per-project monthly snapshot is needed here.
           if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
           // Precompute how many working days remain in the current month and current week. The value
           // for the month is used for monthly recommendations elsewhere; the weekly value is used
@@ -4580,15 +4563,11 @@ function loadData() {
                   }
                 });
                 const projectWeekHoursStart = projectWeekSecondsStartOfDay / 3600;
-                // Compute this project's weekly target snapshot at the start of the day. We base this on
-                // monthly remaining hours at the start of the day and spread them evenly across the
-                // working weeks left in the current month. This ensures the daily recommendation
-                // remains constant throughout the day. If monthly remaining is zero or negative,
-                // the target becomes zero. If there are no working weeks left, treat as zero.
-                const monthlyTargetConst = item.stats.monthlyTargetConst || 0;
-                const monthlyHoursSoFar = (monthlySecondsStartOfDayByProj[item.project.id] || 0) / 3600;
-                const monthlyRemainingStart = Math.max(0, monthlyTargetConst - monthlyHoursSoFar);
-                const weeklyTargetStart = workingWeeksLeftInMonthForAll > 0 ? monthlyRemainingStart / workingWeeksLeftInMonthForAll : 0;
+                // Compute this project's weekly target snapshot at the start of the day. We align this
+                // with computeGlobalStats by using the weeklyTargetConst (set at week start) and
+                // subtracting hours logged earlier in the week. This keeps the daily recommendation
+                // consistent with the main "Today's Hours" target.
+                const weeklyTargetStart = item.stats.weeklyTargetConst || 0;
                 const remainingWeekly = Math.max(0, weeklyTargetStart - projectWeekHoursStart);
                 const projectDailyTarget = workDaysLeftInWeek > 0 ? (remainingWeekly / workDaysLeftInWeek) : 0;
                 // For weekly and monthly expected to date, compute expected hours based on time progress
