@@ -3961,13 +3961,14 @@ function loadData() {
           const deadline = new Date(project.deadline);
           const daysPassed = Math.max(1, Math.round((now - created) / (1000 * 60 * 60 * 24)));
           const daysLeft = Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60 * 24)));
+          const projectNotStarted = created > now;
           const avgDailyBurn = totalHours / daysPassed;
           const daysToExhaust = avgDailyBurn > 0 ? remainingHours / avgDailyBurn : Infinity;
           // Determine a more descriptive status for the project based on budget consumption and schedule
           // Calculate expected used hours based on how far through the project we are
           const totalProjectDays = daysPassed + daysLeft;
           const expectedUsed = totalProjectDays > 0 ? project.budgetHours * (daysPassed / totalProjectDays) : totalHours;
-          const totalExpectedToDate = expectedUsed;
+          const totalExpectedToDate = projectNotStarted ? 0 : expectedUsed;
           const totalScheduleDeficit = totalExpectedToDate - totalHours;
           let status = 'on-track';
           let statusColor = 'green';
@@ -4014,6 +4015,10 @@ function loadData() {
           // Include fractional day for weekly expected by using floating point difference (time-of-day) rather than rounded days.
           weeklyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfWeekCal));
           monthlyExpected = Math.max(0, dailyBudget * (daysTillNow - daysTillStartOfMonthCal));
+          if (projectNotStarted) {
+            weeklyExpected = 0;
+            monthlyExpected = 0;
+          }
           // Clamp expected values so they do not exceed the project's total budget hours
           if (weeklyExpected > project.budgetHours) weeklyExpected = project.budgetHours;
           if (monthlyExpected > project.budgetHours) monthlyExpected = project.budgetHours;
@@ -4102,6 +4107,34 @@ function loadData() {
           const workDaysLeftFromWeekStart = countWorkdays(weekStartForMonth, startNextMonthFromWeekStart);
           const workingWeeksLeftFromWeekStart = Math.max(1, Math.ceil(workDaysLeftFromWeekStart / 5));
           const weeklyTargetConst = workingWeeksLeftFromWeekStart > 0 ? monthlyRemainingAtWeekStart / workingWeeksLeftFromWeekStart : 0;
+          if (projectNotStarted) {
+            monthlyTargetConst = 0;
+            return {
+              totalHours,
+              totalExpectedToDate,
+              totalScheduleDeficit,
+              remainingHours,
+              usedPct: project.budgetHours > 0 ? (totalHours / project.budgetHours) * 100 : 0,
+              daysLeft,
+              daysPassed,
+              status,
+              statusColor,
+              reason,
+              weeklyExpected,
+              monthlyExpected,
+              weeklyHours,
+              lastWeekHours,
+              monthlyHours,
+              lastMonthHours,
+              revenue,
+              weeklyRevenue,
+              lastWeekRevenue,
+              monthlyRevenue,
+              lastMonthRevenue,
+              weeklyTargetConst: 0,
+              monthlyTargetConst: 0
+            };
+          }
           return {
             totalHours,
             totalExpectedToDate,
