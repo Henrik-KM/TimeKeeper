@@ -4359,8 +4359,8 @@ function loadData() {
           // weekly progress, Monday 00:00 marks the start and Friday 23:59 marks the
           // end (5 days). For monthly progress, the first day of the month marks
           // the start and the first day of the following month marks the end.
-          // Define the start of today so we can compute today's hours for each project when building
-          // the per‑project breakdown lists. We'll reuse todayStart in the card rendering below.
+          // Using nowTime, define the start of today so we can compute today's hours for each
+          // project when building the per-project breakdown lists and reuse todayStart below.
           const todayStart = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate());
           // Weekly time progress: compute fraction of the 5-day work week that has elapsed.
           // Precompute start of week (Monday 00:00) outside the branch so it can be reused later.
