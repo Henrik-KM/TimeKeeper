@@ -3842,9 +3842,19 @@ function loadData() {
 
         function isProjectActive(project, referenceDate = new Date()) {
           const startDate = getProjectStartDate(project);
-          const deadline = new Date(project.deadline);
-          if (isNaN(deadline)) return false;
-          return startDate <= referenceDate && deadline >= referenceDate;
+          const hasDeadline = project.deadline != null && String(project.deadline).trim() !== '';
+          // If there is no usable deadline, treat the project as ongoing once started.
+          if (!hasDeadline) {
+            return startDate <= referenceDate;
+          }
+          // Parse deadline using the same helper as other dates, with a Date fallback.
+          const parsedDeadline =
+            parseLocalDateString(String(project.deadline)) || new Date(project.deadline);
+          // If deadline is still invalid, fall back to "ongoing if started" behavior.
+          if (!parsedDeadline || isNaN(parsedDeadline)) {
+            return startDate <= referenceDate;
+          }
+          return startDate <= referenceDate && parsedDeadline >= referenceDate;
         }
 
         function parseLocalDateString(value) {
