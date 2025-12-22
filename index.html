@@ -3840,6 +3840,13 @@ function loadData() {
           return new Date(project.createdAt || Date.now());
         }
 
+        function isProjectActive(project, referenceDate = new Date()) {
+          const startDate = getProjectStartDate(project);
+          const deadline = new Date(project.deadline);
+          if (isNaN(deadline)) return false;
+          return startDate <= referenceDate && deadline >= referenceDate;
+        }
+
         function parseLocalDateString(value) {
           if (typeof value !== 'string') return null;
           const trimmed = value.trim();
@@ -4208,7 +4215,8 @@ function loadData() {
           let monthTarget = 0;
           // We'll compute dailyTarget based on remaining monthly hours later
           let dailyTarget = 0;
-          data.projects.forEach(project => {
+          const activeProjects = data.projects.filter(project => isProjectActive(project, now));
+          activeProjects.forEach(project => {
             const sp = computeProjectStats(project);
             weeklyTarget += sp.weeklyTargetConst || 0;
             monthTarget += sp.monthlyTargetConst || 0;
@@ -4257,8 +4265,8 @@ function loadData() {
           const weeklyProgress = weeklyTarget > 0 ? (weekHours / weeklyTarget) * 100 : 0;
           const revenueChange = lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : null;
           const todayChange = yesterdayHours > 0 ? ((todayHours - yesterdayHours) / yesterdayHours) * 100 : null;
-          const activeProjects = data.projects.length;
-          const dueThisWeek = data.projects.filter(p => {
+          const activeProjectsCount = activeProjects.length;
+          const dueThisWeek = activeProjects.filter(p => {
             const d = new Date(p.deadline);
             const diffDays = Math.round((d - now) / (1000 * 60 * 60 * 24));
             return diffDays >= 0 && diffDays <= 7;
@@ -4312,7 +4320,7 @@ function loadData() {
             weekRevenue,
             todayRevenueChange,
             weekRevenueChange,
-            activeProjects,
+            activeProjects: activeProjectsCount,
             dueThisWeek,
             totalRevenue,
             dailyTarget
@@ -4322,9 +4330,11 @@ function loadData() {
         // Dashboard rendering
         function updateDashboard() {
           const stats = computeGlobalStats();
+          const nowTime = new Date();
+          const activeProjects = data.projects.filter(project => isProjectActive(project, nowTime));
           // Precompute per-project stats once for use in cards and recommendations. This avoids
           // recalculating computeProjectStats multiple times during rendering.
-          const perProjectStats = data.projects.map(p => {
+          const perProjectStats = activeProjects.map(p => {
             return { project: p, stats: computeProjectStats(p) };
           });
           // Determine the recommended project based on overall schedule deficit. Projects with the
@@ -4349,7 +4359,6 @@ function loadData() {
           // weekly progress, Monday 00:00 marks the start and Friday 23:59 marks the
           // end (5 days). For monthly progress, the first day of the month marks
           // the start and the first day of the following month marks the end.
-          const nowTime = new Date();
           // Define the start of today so we can compute today's hours for each project when building
           // the per‑project breakdown lists. We'll reuse todayStart in the card rendering below.
           const todayStart = new Date(nowTime.getFullYear(), nowTime.getMonth(), nowTime.getDate());
@@ -4666,7 +4675,7 @@ function loadData() {
           // Track the maximum expected/actual values to draw an ideal x=y line
           let maxWeeklyVal = 0;
           let maxMonthlyVal = 0;
-          data.projects.forEach(project => {
+          activeProjects.forEach(project => {
             const statsP = computeProjectStats(project);
             const color = project.color || '#3b82f6';
             weeklyDatasets.push({
@@ -4804,14 +4813,15 @@ function loadData() {
         function renderProjectOverview() {
           const container = document.getElementById('projectOverview');
           container.innerHTML = '';
-          if (data.projects.length === 0) return;
+          const activeProjects = data.projects.filter(project => isProjectActive(project));
+          if (activeProjects.length === 0) return;
           const wrapper = document.createElement('div');
           wrapper.className = 'project-list';
           const header = document.createElement('div');
           header.className = 'project-list-header';
           header.textContent = 'Project Status Overview';
           wrapper.appendChild(header);
-          data.projects.forEach(project => {
+          activeProjects.forEach(project => {
             const stats = computeProjectStats(project);
             const item = document.createElement('div');
             item.className = 'project-item';
@@ -4913,7 +4923,8 @@ function loadData() {
         function renderDetailedBreakdown() {
           const container = document.getElementById('detailedBreakdown');
           container.innerHTML = '';
-          if (data.projects.length === 0) return;
+          const activeProjects = data.projects.filter(project => isProjectActive(project));
+          if (activeProjects.length === 0) return;
           const card = document.createElement('div');
           card.className = 'card';
           const heading = document.createElement('h3');
@@ -4929,7 +4940,7 @@ function loadData() {
           thead.innerHTML = '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>This Month</th><th>Revenue</th></tr>';
           table.appendChild(thead);
           const tbody = document.createElement('tbody');
-          data.projects.forEach(project => {
+          activeProjects.forEach(project => {
             const stats = computeProjectStats(project);
             const isRecommendedWeekly = (project.id === currentRecommendedWeeklyId);
             const isRecommendedMonthly = (project.id === currentRecommendedMonthlyId);
