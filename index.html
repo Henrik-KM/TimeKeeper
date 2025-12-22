@@ -110,6 +110,8 @@
               <option value="10">10</option>
               <option value="15">15</option>
             </select>
+            <label for="projectStartDatePro" style="font-weight:500;">Start Date</label>
+            <input id="projectStartDatePro" type="date" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <label for="projectDeadlinePro" style="font-weight:500;">Deadline</label>
             <input id="projectDeadlinePro" type="date" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <button type="submit" class="btn primary" style="align-self:flex-start;">Add Project</button>
@@ -1485,6 +1487,23 @@ function makeDefaultWealthGoal() {
   return { amount: 2000000, date: '' };
 }
 
+function formatDateInputValue(date) {
+  if (!(date instanceof Date) || isNaN(date)) return '';
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function normalizeProjectData(project) {
+  const obj = project && typeof project === 'object' ? { ...project } : {};
+  if (!obj.id) obj.id = uuid();
+  if (!obj.createdAt) obj.createdAt = new Date().toISOString();
+  const parsedStart = parseLocalDateString(obj.startDate || obj.createdAt);
+  obj.startDate = parsedStart ? formatDateInputValue(parsedStart) : '';
+  return obj;
+}
+
 function loadData() {
   const raw = localStorage.getItem('timekeeperDataPro');
   if (!raw) {
@@ -1515,7 +1534,7 @@ function loadData() {
   try {
     const parsed = JSON.parse(raw);
     return {
-      projects: Array.isArray(parsed.projects) ? parsed.projects : [],
+      projects: Array.isArray(parsed.projects) ? parsed.projects.map(normalizeProjectData) : [],
       entries: Array.isArray(parsed.entries) ? parsed.entries : [],
       todos: Array.isArray(parsed.todos) ? parsed.todos : [],
       workouts: applyWorkoutDefaults(parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)),
@@ -3525,7 +3544,7 @@ function loadData() {
           burndownCharts = {};
           data.projects.forEach(project => {
             // Compute daily cumulative hours from project creation to now
-            const createdAt = new Date(project.createdAt);
+            const createdAt = getProjectStartDate(project);
             const deadline = new Date(project.deadline);
             const today = new Date();
             // Determine end date for chart: use min(today, deadline)
@@ -3815,6 +3834,12 @@ function loadData() {
           return isNaN(dt) ? '' : dt.toLocaleDateString();
         }
 
+        function getProjectStartDate(project) {
+          const start = parseLocalDateString(project.startDate || project.createdAt);
+          if (start) return start;
+          return new Date(project.createdAt || Date.now());
+        }
+
         function parseLocalDateString(value) {
           if (typeof value !== 'string') return null;
           const trimmed = value.trim();
@@ -3932,7 +3957,7 @@ function loadData() {
           const totalSeconds = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
           const totalHours = totalSeconds / 3600;
           const remainingHours = project.budgetHours - totalHours;
-          const created = new Date(project.createdAt);
+          const created = getProjectStartDate(project);
           const deadline = new Date(project.deadline);
           const daysPassed = Math.max(1, Math.round((now - created) / (1000 * 60 * 60 * 24)));
           const daysLeft = Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60 * 24)));
@@ -5051,7 +5076,7 @@ function loadData() {
           const project = data.projects.find(p => String(p.id) === String(projectId));
           if (!project) return;
           // Build date range from project start to today (or deadline, whichever is earlier)
-          const startDate = new Date(project.createdAt);
+          const startDate = getProjectStartDate(project);
           const today = new Date();
           const endDate = today < new Date(project.deadline) ? today : new Date(project.deadline);
           const days = [];
@@ -5180,6 +5205,7 @@ function loadData() {
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyTargetConst ? (stats.monthlyHours / stats.monthlyTargetConst * 100) : 0}%"></div></div>
                 <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</small>
               </div>
+              <p style="margin:0.25rem 0;"><strong>Start Date:</strong> ${formatDate(project.startDate || project.createdAt)}</p>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
               <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
               <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
@@ -5200,6 +5226,9 @@ function loadData() {
               const newRateStr = prompt('Hourly Rate:', project.hourlyRate.toFixed(2));
               const newRate = parseFloat(newRateStr);
               if (isNaN(newRate)) return;
+              const currentStartDate = project.startDate || formatDateInputValue(getProjectStartDate(project));
+              const newStartDate = prompt('Start Date (YYYY-MM-DD):', currentStartDate);
+              if (!newStartDate) return;
               const newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
               if (!newDeadline) return;
               // Prompt for rounding preference (minutes) and update roundingMinutes
@@ -5214,6 +5243,7 @@ function loadData() {
               project.client = newClient ? newClient.trim() : null;
               project.budgetHours = newBudget;
               project.hourlyRate = newRate;
+              project.startDate = newStartDate;
               project.deadline = newDeadline;
               saveData();
               updateProjectsPage();
@@ -5242,14 +5272,17 @@ function loadData() {
           const client = document.getElementById('projectClientPro').value.trim();
           const budget = parseFloat(document.getElementById('projectBudgetPro').value);
           const rate = parseFloat(document.getElementById('projectRatePro').value);
+          const startDateInput = document.getElementById('projectStartDatePro').value;
           const deadline = document.getElementById('projectDeadlinePro').value;
           if (!name || !deadline) return;
+          const startDate = startDateInput || formatDateInputValue(new Date());
           const newProject = {
             id: uuid(),
             name,
             client: client || null,
             budgetHours: budget,
             hourlyRate: rate,
+            startDate,
             deadline,
             createdAt: new Date().toISOString(),
             color: getUniqueColor(),
