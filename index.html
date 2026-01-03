@@ -4087,27 +4087,13 @@ function loadData() {
           // instead derive it from the monthly deficit and the number of working weeks left in the current
           // calendar month. We still keep the generic weeksLeft calculation for reference.
           const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
-          // Determine total months between project creation and deadline (inclusive) for constant monthly targets
-          const startMonthIndex = created.getFullYear() * 12 + created.getMonth();
-          const deadlineMonthIndex = deadline.getFullYear() * 12 + deadline.getMonth();
-          const totalMonths = Math.max(1, (deadlineMonthIndex - startMonthIndex + 1));
-          const monthTargetOriginal = project.budgetHours / totalMonths;
-          // Determine number of full months before the current month (elapsed months) for carry‑over calculations
+          // Determine remaining calendar months from the current month through the deadline (inclusive)
           const currentMonthIndex = now.getFullYear() * 12 + now.getMonth();
-          const monthsElapsed = Math.max(0, currentMonthIndex - startMonthIndex);
-          // Compute expected hours for all months prior to the current month
-          const expectedBefore = monthTargetOriginal * monthsElapsed;
-          // Compute actual hours for months prior to the current month
+          const deadlineMonthIndex = deadline.getFullYear() * 12 + deadline.getMonth();
+          const monthsLeft = Math.max(1, (deadlineMonthIndex - currentMonthIndex + 1));
+          // Spread the remaining hours evenly across the months left in the project.
+          let monthlyTargetConst = remaining / monthsLeft;
           const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          const secondsBeforeThisMonth = entries
-            .filter(e => new Date(e.startTime) < firstDayOfThisMonth)
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const actualBefore = secondsBeforeThisMonth / 3600;
-          // Adjust the monthly target for the current month based on surplus or deficit from previous months
-          let monthlyTargetConst = monthTargetOriginal + (expectedBefore - actualBefore);
-          // If the adjusted monthly target is negative, clamp to zero. This may occur if past months consumed
-          // more than expected and the deficit eats into the current month.
-          if (monthlyTargetConst < 0) monthlyTargetConst = 0;
           // Capture a monthly target snapshot as of the week's start so the weekly target remains stable
           // throughout the week even as hours are logged. Always align the weekly target to the current
           // calendar month so weeks that straddle a month boundary don't inherit the prior month's plan.
