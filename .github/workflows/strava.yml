@@ -5,6 +5,9 @@ on:
     - cron: "17 */6 * * *"
   workflow_dispatch:
 
+concurrency:
+  group: update-strava-feed
+  cancel-in-progress: true
 permissions:
   contents: write
 
