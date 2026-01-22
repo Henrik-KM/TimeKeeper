@@ -79,7 +79,11 @@ def slim(activity: dict) -> dict:
             if activity.get("elapsed_time")
             else None
         ),
-        "total_elevation_gain_m": activity.get("total_elevation_gain"),
+        "total_elevation_gain_m": (
+            round(activity.get("total_elevation_gain", 0.0), 1)
+            if activity.get("total_elevation_gain") is not None
+            else None
+        ),
         "avg_hr": activity.get("average_heartrate"),
         "max_hr": activity.get("max_heartrate"),
         "avg_speed_kmh": (
