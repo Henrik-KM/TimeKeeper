@@ -33,5 +33,9 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add assets/strava.json
-          git commit -m "Update Strava feed" || exit 0
+          if git diff --cached --quiet -- assets/strava.json; then
+            echo "No changes to assets/strava.json; nothing to commit."
+            exit 0
+          fi
+          git commit -m "Update Strava feed"
           git push
