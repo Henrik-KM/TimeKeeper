@@ -7,7 +7,7 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
 ### Setup
 
 1. Create a Strava API app and note the Client ID and Client Secret.
-2. Generate a refresh token with `read` and `activity:read_all` scopes.
+2. Generate a refresh token with the `activity:read_all` scope.
 3. Add repository secrets in GitHub:
    - `STRAVA_CLIENT_ID`
    - `STRAVA_CLIENT_SECRET`
