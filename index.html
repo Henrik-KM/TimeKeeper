@@ -6312,7 +6312,9 @@ function loadData() {
         updateProjectsPage();
         updateDashboard();
         updateTimerSection();
-        loadStravaFeed();
+        loadStravaFeed().catch((err) => {
+          console.error('Failed to load Strava feed:', err);
+        });
         // Programmatically activate the Timer tab on first load. This ensures the Timer
         // section is displayed instead of the Dashboard when the page is opened. We
         // simulate a click on the Timer navigation item which will trigger the
