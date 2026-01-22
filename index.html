@@ -3997,13 +3997,15 @@ function loadData() {
             if (activity.avg_hr !== null && activity.avg_hr !== undefined) {
               metaParts.push(`Avg HR ${activity.avg_hr}`);
             }
-            metaParts.forEach(part => {
-              const pill = document.createElement('span');
-              pill.className = 'strava-pill';
-              pill.textContent = part;
-              meta.appendChild(pill);
-            });
-            item.appendChild(meta);
+            if (metaParts.length > 0) {
+              metaParts.forEach(part => {
+                const pill = document.createElement('span');
+                pill.className = 'strava-pill';
+                pill.textContent = part;
+                meta.appendChild(pill);
+              });
+              item.appendChild(meta);
+            }
             list.appendChild(item);
           });
         }
