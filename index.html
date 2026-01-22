@@ -234,6 +234,11 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness &amp; Budget Summary</h3>
           <div id="fitnessSummaryContent" class="fitness-summary"></div>
         </div>
+        <div class="card" id="stravaFeedCard" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Latest Strava Activities</h3>
+          <p id="stravaFeedStatus" class="status-muted">Connect your Strava data to see recent workouts here.</p>
+          <ul id="stravaFeedList" class="strava-feed"></ul>
+        </div>
         <div class="card" id="fitnessSettingsCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Fitness Settings</h3>
           <div id="fitnessSettingsContent"></div>
@@ -3950,6 +3955,89 @@ function loadData() {
           return parts.join(' ');
         }
 
+        function renderStravaActivities(activities) {
+          const list = document.getElementById('stravaFeedList');
+          if (!list) return;
+          list.innerHTML = '';
+          activities.forEach(activity => {
+            const item = document.createElement('li');
+            const header = document.createElement('div');
+            const title = document.createElement(activity.url ? 'a' : 'span');
+            title.className = 'strava-title';
+            title.textContent = activity.name || 'Untitled activity';
+            if (activity.url) {
+              title.href = activity.url;
+              title.target = '_blank';
+              title.rel = 'noopener noreferrer';
+            }
+            header.appendChild(title);
+            const dateLine = document.createElement('div');
+            dateLine.className = 'strava-date';
+            const startDate = activity.start_date ? new Date(activity.start_date) : null;
+            if (startDate && !isNaN(startDate)) {
+              dateLine.textContent = startDate.toLocaleString();
+            }
+            item.appendChild(header);
+            if (dateLine.textContent) {
+              item.appendChild(dateLine);
+            }
+            const meta = document.createElement('div');
+            meta.className = 'strava-meta';
+            const metaParts = [];
+            if (activity.type) metaParts.push(activity.type);
+            if (activity.distance_km !== null && activity.distance_km !== undefined) {
+              metaParts.push(`${activity.distance_km} km`);
+            }
+            if (activity.moving_time_min !== null && activity.moving_time_min !== undefined) {
+              metaParts.push(`${activity.moving_time_min} min`);
+            }
+            if (activity.total_elevation_gain_m !== null && activity.total_elevation_gain_m !== undefined) {
+              metaParts.push(`${activity.total_elevation_gain_m} m elev`);
+            }
+            if (activity.avg_hr !== null && activity.avg_hr !== undefined) {
+              metaParts.push(`Avg HR ${activity.avg_hr}`);
+            }
+            metaParts.forEach(part => {
+              const pill = document.createElement('span');
+              pill.className = 'strava-pill';
+              pill.textContent = part;
+              meta.appendChild(pill);
+            });
+            item.appendChild(meta);
+            list.appendChild(item);
+          });
+        }
+
+        async function loadStravaFeed() {
+          const status = document.getElementById('stravaFeedStatus');
+          const list = document.getElementById('stravaFeedList');
+          if (!status || !list) return;
+          status.textContent = 'Loading latest activities...';
+          list.innerHTML = '';
+          try {
+            const response = await fetch('assets/strava.json', { cache: 'no-store' });
+            if (!response.ok) {
+              throw new Error('Unable to load Strava feed.');
+            }
+            const data = await response.json();
+            if (data.error) {
+              status.textContent = data.error;
+              return;
+            }
+            const activities = Array.isArray(data.activities) ? data.activities : [];
+            if (activities.length === 0) {
+              status.textContent = 'No activities available yet.';
+              return;
+            }
+            status.textContent = data.updated_utc
+              ? `Updated ${formatRelativeTime(data.updated_utc)}`
+              : 'Latest activities';
+            renderStravaActivities(activities);
+          } catch (error) {
+            status.textContent = 'Strava feed not available yet. Run the GitHub Action to publish activities.';
+          }
+        }
+
         // Helper function: Count the number of working days (Mon-Fri) between two dates.
         // The start date is inclusive and the end date is exclusive. If start >= end, returns 0.
         function countWorkdays(startDate, endDate) {
@@ -6228,6 +6316,7 @@ function loadData() {
         updateProjectsPage();
         updateDashboard();
         updateTimerSection();
+        loadStravaFeed();
         // Programmatically activate the Timer tab on first load. This ensures the Timer
         // section is displayed instead of the Dashboard when the page is opened. We
         // simulate a click on the Timer navigation item which will trigger the
