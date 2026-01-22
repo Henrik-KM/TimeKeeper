@@ -94,7 +94,17 @@ def main() -> None:
             print(message)
             write_payload([], error=message)
             return
-        raise
+        # Handle other HTTP errors by writing an error payload instead of crashing
+        message = f"HTTP error while fetching Strava data: {error}"
+        print(message)
+        write_payload([], error=message)
+        return
+    except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
+        # Catch other errors (connection issues, JSON problems, missing keys, etc.)
+        message = f"Unexpected error while fetching Strava data: {error}"
+        print(message)
+        write_payload([], error=message)
+        return
 
 
 if __name__ == "__main__":
