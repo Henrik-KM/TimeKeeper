@@ -64,9 +64,21 @@ def slim(activity: dict) -> dict:
         "name": activity.get("name"),
         "type": activity.get("type"),
         "start_date": activity.get("start_date"),
-        "distance_km": round((activity.get("distance", 0.0) / 1000.0), 2),
-        "moving_time_min": round((activity.get("moving_time", 0) / 60.0), 1),
-        "elapsed_time_min": round((activity.get("elapsed_time", 0) / 60.0), 1),
+        "distance_km": (
+            round(activity.get("distance") / 1000.0, 2)
+            if activity.get("distance")
+            else None
+        ),
+        "moving_time_min": (
+            round(activity.get("moving_time") / 60.0, 1)
+            if activity.get("moving_time")
+            else None
+        ),
+        "elapsed_time_min": (
+            round(activity.get("elapsed_time") / 60.0, 1)
+            if activity.get("elapsed_time")
+            else None
+        ),
         "total_elevation_gain_m": activity.get("total_elevation_gain"),
         "avg_hr": activity.get("average_heartrate"),
         "max_hr": activity.get("max_heartrate"),
