@@ -4,10 +4,31 @@ from datetime import datetime, timezone
 
 import requests
 
-CLIENT_ID = os.environ["STRAVA_CLIENT_ID"]
-CLIENT_SECRET = os.environ["STRAVA_CLIENT_SECRET"]
-REFRESH_TOKEN = os.environ["STRAVA_REFRESH_TOKEN"]
 
+def _get_env_var(name: str) -> str:
+    """
+    Retrieve a required environment variable or raise a descriptive error.
+    """
+    try:
+        value = os.environ[name]
+    except KeyError as exc:
+        raise RuntimeError(
+            f"Required environment variable '{name}' is not set. "
+            "Please set it before running this script."
+        ) from exc
+
+    if not value:
+        raise RuntimeError(
+            f"Required environment variable '{name}' is empty. "
+            "Please set it to a non-empty value before running this script."
+        )
+
+    return value
+
+
+CLIENT_ID = _get_env_var("STRAVA_CLIENT_ID")
+CLIENT_SECRET = _get_env_var("STRAVA_CLIENT_SECRET")
+REFRESH_TOKEN = _get_env_var("STRAVA_REFRESH_TOKEN")
 OUTFILE = "assets/strava.json"
 
 
