@@ -92,7 +92,9 @@ def main() -> None:
         "activities": [slim(activity) for activity in activities],
     }
 
-    os.makedirs(os.path.dirname(OUTFILE), exist_ok=True)
+    outdir = os.path.dirname(OUTFILE)
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
     with open(OUTFILE, "w", encoding="utf-8") as output_file:
         json.dump(payload, output_file, ensure_ascii=False, indent=2)
         output_file.write("\n")
