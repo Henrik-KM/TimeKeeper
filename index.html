@@ -3985,17 +3985,21 @@ function loadData() {
             meta.className = 'strava-meta';
             const metaParts = [];
             if (activity.type) metaParts.push(activity.type);
-            if (activity.distance_km !== null && activity.distance_km !== undefined) {
-              metaParts.push(`${activity.distance_km} km`);
+            const distanceKm = Number(activity.distance_km);
+            if (Number.isFinite(distanceKm)) {
+              metaParts.push(`${distanceKm} km`);
             }
-            if (activity.moving_time_min !== null && activity.moving_time_min !== undefined) {
-              metaParts.push(`${activity.moving_time_min} min`);
+            const movingTimeMin = Number(activity.moving_time_min);
+            if (Number.isFinite(movingTimeMin)) {
+              metaParts.push(`${movingTimeMin} min`);
             }
-            if (activity.total_elevation_gain_m !== null && activity.total_elevation_gain_m !== undefined) {
-              metaParts.push(`${activity.total_elevation_gain_m} m elev`);
+            const totalElevationGainM = Number(activity.total_elevation_gain_m);
+            if (Number.isFinite(totalElevationGainM)) {
+              metaParts.push(`${totalElevationGainM} m elev`);
             }
-            if (activity.avg_hr !== null && activity.avg_hr !== undefined) {
-              metaParts.push(`Avg HR ${activity.avg_hr}`);
+            const avgHr = Number(activity.avg_hr);
+            if (Number.isFinite(avgHr)) {
+              metaParts.push(`Avg HR ${avgHr}`);
             }
             metaParts.forEach(part => {
               const pill = document.createElement('span');
