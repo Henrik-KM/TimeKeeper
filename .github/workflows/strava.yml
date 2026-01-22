@@ -19,7 +19,7 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install requests
+        run: pip install "requests>=2.31.0,<3.0.0"
 
       - name: Fetch Strava activities
         env:
