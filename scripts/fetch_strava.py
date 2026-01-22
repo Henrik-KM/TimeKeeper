@@ -44,7 +44,13 @@ def refresh_access_token() -> str:
         timeout=30,
     )
     response.raise_for_status()
-    return response.json()["access_token"]
+    data = response.json()
+    try:
+        return data["access_token"]
+    except (TypeError, KeyError) as exc:
+        raise ValueError(
+            "Strava token refresh response is missing the expected 'access_token' field."
+        ) from exc
 
 
 def get_activities(access_token: str, per_page: int = 20) -> list[dict]:
