@@ -7,7 +7,7 @@ import requests
 CLIENT_ID = os.environ["STRAVA_CLIENT_ID"]
 CLIENT_SECRET = os.environ["STRAVA_CLIENT_SECRET"]
 REFRESH_TOKEN = os.environ["STRAVA_REFRESH_TOKEN"]
-PER_PAGE = int(os.getenv("STRAVA_PER_PAGE", "20"))
+PER_PAGE = 200
 
 OUTFILE = "assets/strava.json"
 
@@ -28,15 +28,29 @@ def refresh_access_token() -> str:
     return payload["access_token"]
 
 
-def get_activities(access_token: str, per_page: int) -> list[dict]:
+def get_activities_page(access_token: str, page: int, per_page: int) -> list[dict]:
     response = requests.get(
         "https://www.strava.com/api/v3/athlete/activities",
         headers={"Authorization": f"Bearer {access_token}"},
-        params={"per_page": per_page},
+        params={"per_page": per_page, "page": page},
         timeout=30,
     )
     response.raise_for_status()
     return response.json()
+
+
+def get_all_activities(access_token: str) -> list[dict]:
+    activities: list[dict] = []
+    page = 1
+    while True:
+        batch = get_activities_page(access_token, page=page, per_page=PER_PAGE)
+        if not batch:
+            break
+        activities.extend(batch)
+        if len(batch) < PER_PAGE:
+            break
+        page += 1
+    return activities
 
 
 def slim(activity: dict) -> dict:
@@ -82,7 +96,7 @@ def write_payload(activities: list[dict], error: str | None = None) -> None:
 def main() -> None:
     try:
         token = refresh_access_token()
-        activities = get_activities(token, per_page=PER_PAGE)
+        activities = get_all_activities(token)
         write_payload([slim(activity) for activity in activities])
     except requests.HTTPError as error:
         status_code = error.response.status_code if error.response else None

@@ -13,7 +13,7 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
    - `STRAVA_CLIENT_SECRET`
    - `STRAVA_REFRESH_TOKEN`
 
-Optional: set `STRAVA_PER_PAGE` to control how many activities to fetch (default: 20).
+The workflow fetches all available activities by paging through the Strava API.
 
 ### Troubleshooting
 
