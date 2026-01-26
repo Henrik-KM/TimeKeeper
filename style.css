@@ -483,12 +483,30 @@ body {
   font-size: 0.7rem;
   font-weight: 600;
 }
-.strava-actions {
+.strava-exertion {
   display: flex;
-  justify-content: flex-start;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
 }
-.strava-actions .btn {
-  padding: 0.2rem 0.5rem;
+.strava-exertion-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.strava-exertion-range {
+  flex: 1;
+  min-width: 140px;
+}
+.strava-exertion-value {
+  width: 4.5rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+}
+.strava-exertion .btn {
+  padding: 0.2rem 0.6rem;
   font-size: 0.7rem;
 }
 

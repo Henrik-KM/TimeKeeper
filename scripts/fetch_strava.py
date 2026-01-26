@@ -77,6 +77,31 @@ def get_all_activities(access_token: str) -> list[dict]:
     return activities
 
 
+def get_activity_details(access_token: str, activity_id: int) -> dict:
+    response = requests.get(
+        f"https://www.strava.com/api/v3/activities/{activity_id}",
+        headers={"Authorization": f"Bearer {access_token}"},
+        timeout=30,
+    )
+    response.raise_for_status()
+    return response.json()
+
+
+def enrich_activity(activity: dict, access_token: str) -> dict:
+    needs_details = False
+    for key in ("average_heartrate", "max_heartrate", "perceived_exertion"):
+        if activity.get(key) is None:
+            needs_details = True
+            break
+    if not needs_details or not activity.get("id"):
+        return activity
+    details = get_activity_details(access_token, activity["id"])
+    for key in ("average_heartrate", "max_heartrate", "perceived_exertion"):
+        if activity.get(key) is None and details.get(key) is not None:
+            activity[key] = details.get(key)
+    return activity
+
+
 def load_exertion_overrides() -> dict[str, float]:
     if not os.path.exists(OVERRIDES_FILE):
         return {}
@@ -157,7 +182,8 @@ def main() -> None:
         activities = get_all_activities(access_token)
         slimmed: list[dict] = []
         for activity in activities:
-            payload = slim(activity)
+            enriched = enrich_activity(activity, access_token)
+            payload = slim(enriched)
             payload["estimated_exertion"] = estimate_exertion(
                 payload.get("avg_hr"),
                 payload.get("max_hr"),

@@ -4003,6 +4003,13 @@ function loadData() {
           return Math.round(clamped * 10) / 10;
         }
 
+        function parseExertionValue(rawValue) {
+          const value = Number.parseFloat(rawValue);
+          if (!Number.isFinite(value)) return null;
+          const clamped = Math.max(0, Math.min(5, value));
+          return Math.round(clamped * 10) / 10;
+        }
+
         function formatExertion(value) {
           const numeric = Number(value);
           if (!Number.isFinite(numeric)) return '';
@@ -4079,27 +4086,78 @@ function loadData() {
               });
               item.appendChild(meta);
             }
-            const actions = document.createElement('div');
-            actions.className = 'strava-actions';
-            const editButton = document.createElement('button');
-            editButton.type = 'button';
-            editButton.className = 'btn secondary';
-            editButton.textContent = 'Edit exertion';
-            editButton.addEventListener('click', () => {
-              const current = actualExertion ?? activity.reported_exertion ?? estimatedExertion ?? '';
-              const input = prompt('Set exertion (0-5):', current !== '' ? String(current) : '');
-              if (input === null) return;
-              const value = Number.parseFloat(input);
-              if (!Number.isFinite(value) || value < 0 || value > 5) {
+            const exertionRow = document.createElement('div');
+            exertionRow.className = 'strava-exertion';
+            const exertionLabel = document.createElement('span');
+            exertionLabel.className = 'strava-exertion-label';
+            exertionLabel.textContent = 'Exertion';
+            const exertionValue = document.createElement('input');
+            exertionValue.type = 'number';
+            exertionValue.min = '0';
+            exertionValue.max = '5';
+            exertionValue.step = '0.1';
+            exertionValue.inputMode = 'decimal';
+            exertionValue.className = 'strava-exertion-value';
+            const exertionRange = document.createElement('input');
+            exertionRange.type = 'range';
+            exertionRange.min = '0';
+            exertionRange.max = '5';
+            exertionRange.step = '0.1';
+            exertionRange.className = 'strava-exertion-range';
+            const fallbackExertion = actualExertion ?? activity.reported_exertion ?? estimatedExertion;
+            const startingValue = Number.isFinite(Number(fallbackExertion)) ? Number(fallbackExertion) : 0;
+            exertionValue.value = formatExertion(startingValue);
+            exertionRange.value = String(startingValue);
+            const saveButton = document.createElement('button');
+            saveButton.type = 'button';
+            saveButton.className = 'btn secondary';
+            saveButton.textContent = 'Save';
+            const clearButton = document.createElement('button');
+            clearButton.type = 'button';
+            clearButton.className = 'btn secondary';
+            clearButton.textContent = 'Clear';
+
+            const syncFromValue = () => {
+              const parsed = parseExertionValue(exertionValue.value);
+              if (parsed === null) return null;
+              exertionValue.value = formatExertion(parsed);
+              exertionRange.value = String(parsed);
+              return parsed;
+            };
+
+            const syncFromRange = () => {
+              const parsed = parseExertionValue(exertionRange.value);
+              if (parsed === null) return null;
+              exertionValue.value = formatExertion(parsed);
+              return parsed;
+            };
+
+            exertionValue.addEventListener('input', () => {
+              syncFromValue();
+            });
+            exertionRange.addEventListener('input', () => {
+              syncFromRange();
+            });
+            saveButton.addEventListener('click', () => {
+              const parsed = syncFromValue();
+              if (parsed === null) {
                 alert('Enter a value between 0 and 5.');
                 return;
               }
-              const rounded = Math.round(value * 10) / 10;
-              saveStravaExertionOverride(activity.id, rounded);
+              saveStravaExertionOverride(activity.id, parsed);
               renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
             });
-            actions.appendChild(editButton);
-            item.appendChild(actions);
+            clearButton.addEventListener('click', () => {
+              saveStravaExertionOverride(activity.id, null);
+              renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
+            });
+
+            exertionRow.appendChild(exertionLabel);
+            exertionRow.appendChild(exertionRange);
+            exertionRow.appendChild(exertionValue);
+            exertionRow.appendChild(saveButton);
+            exertionRow.appendChild(clearButton);
+            item.appendChild(exertionRow);
             list.appendChild(item);
           });
         }
