@@ -11,9 +11,13 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
 3. Add repository secrets in GitHub:
    - `STRAVA_CLIENT_ID`
    - `STRAVA_CLIENT_SECRET`
-   - `STRAVA_REFRESH_TOKEN`
+
+4. Store the refresh token in `_private/strava_token.json`. The workflow will update
+   this file automatically if Strava rotates the refresh token.
 
 The workflow fetches all available activities by paging through the Strava API.
+
+Note: `_private/strava_token.json` contains a refresh token. Keep the repo private.
 
 ### Troubleshooting
 

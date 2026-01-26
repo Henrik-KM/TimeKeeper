@@ -3955,6 +3955,61 @@ function loadData() {
           return parts.join(' ');
         }
 
+        let cachedStravaActivities = [];
+
+        function getStravaExertionOverrides() {
+          try {
+            const raw = localStorage.getItem('stravaExertionOverrides');
+            return raw ? JSON.parse(raw) : {};
+          } catch (error) {
+            return {};
+          }
+        }
+
+        function saveStravaExertionOverride(activityId, value) {
+          const overrides = getStravaExertionOverrides();
+          if (value === null || value === undefined) {
+            delete overrides[String(activityId)];
+          } else {
+            overrides[String(activityId)] = value;
+          }
+          localStorage.setItem('stravaExertionOverrides', JSON.stringify(overrides));
+        }
+
+        function applyStravaExertionOverrides(activities) {
+          const overrides = getStravaExertionOverrides();
+          return activities.map(activity => {
+            const override = overrides[String(activity.id)];
+            if (override === undefined) {
+              return activity;
+            }
+            return { ...activity, local_exertion: override };
+          });
+        }
+
+        function estimateStravaExertion(activity) {
+          const avgHr = Number(activity.avg_hr);
+          const maxHr = Number(activity.max_hr);
+          const elapsed = Number(activity.elapsed_time_min);
+          if (!Number.isFinite(avgHr) || !Number.isFinite(maxHr) || !Number.isFinite(elapsed)) {
+            return null;
+          }
+          if (avgHr <= 0 || maxHr <= 0 || elapsed <= 0) {
+            return null;
+          }
+          const intensity = avgHr / maxHr;
+          const score = intensity * (elapsed / 60) * 3.5;
+          const clamped = Math.max(0, Math.min(5, score));
+          return Math.round(clamped * 10) / 10;
+        }
+
+        function formatExertion(value) {
+          const numeric = Number(value);
+          if (!Number.isFinite(numeric)) return '';
+          const rounded = Math.round(numeric * 10) / 10;
+          return rounded % 1 === 0 ? String(rounded.toFixed(0)) : String(rounded.toFixed(1));
+        }
+
         function renderStravaActivities(activities) {
           const list = document.getElementById('stravaFeedList');
           if (!list) return;
@@ -3984,18 +4039,36 @@ function loadData() {
             const meta = document.createElement('div');
             meta.className = 'strava-meta';
             const metaParts = [];
-            if (activity.type) metaParts.push(activity.type);
-            if (activity.distance_km !== null && activity.distance_km !== undefined) {
-              metaParts.push(`${activity.distance_km} km`);
-            }
-            if (activity.moving_time_min !== null && activity.moving_time_min !== undefined) {
-              metaParts.push(`${activity.moving_time_min} min`);
-            }
-            if (activity.total_elevation_gain_m !== null && activity.total_elevation_gain_m !== undefined) {
-              metaParts.push(`${activity.total_elevation_gain_m} m elev`);
+            if (activity.elapsed_time_min !== null && activity.elapsed_time_min !== undefined) {
+              const elapsed = Number(activity.elapsed_time_min);
+              if (Number.isFinite(elapsed)) {
+                metaParts.push(`Elapsed ${Math.round(elapsed * 10) / 10} min`);
+              }
             }
             if (activity.avg_hr !== null && activity.avg_hr !== undefined) {
-              metaParts.push(`Avg HR ${activity.avg_hr}`);
+              const avgHr = Number(activity.avg_hr);
+              if (Number.isFinite(avgHr)) {
+                metaParts.push(`Avg HR ${Math.round(avgHr)}`);
+              }
+            }
+            if (activity.max_hr !== null && activity.max_hr !== undefined) {
+              const maxHr = Number(activity.max_hr);
+              if (Number.isFinite(maxHr)) {
+                metaParts.push(`Max HR ${Math.round(maxHr)}`);
+              }
+            }
+            if (activity.reported_exertion !== null && activity.reported_exertion !== undefined) {
+              metaParts.push(`Reported Exertion ${formatExertion(activity.reported_exertion)}`);
+            }
+            const estimatedExertion = activity.estimated_exertion ?? estimateStravaExertion(activity);
+            if (estimatedExertion !== null && estimatedExertion !== undefined) {
+              metaParts.push(`Est Exertion ${formatExertion(estimatedExertion)}`);
+            }
+            const actualExertion = activity.local_exertion !== undefined
+              ? activity.local_exertion
+              : activity.exertion;
+            if (actualExertion !== null && actualExertion !== undefined) {
+              metaParts.push(`Actual Exertion ${formatExertion(actualExertion)}`);
             }
             if (metaParts.length > 0) {
               metaParts.forEach(part => {
@@ -4006,6 +4079,27 @@ function loadData() {
               });
               item.appendChild(meta);
             }
+            const actions = document.createElement('div');
+            actions.className = 'strava-actions';
+            const editButton = document.createElement('button');
+            editButton.type = 'button';
+            editButton.className = 'btn secondary';
+            editButton.textContent = 'Edit exertion';
+            editButton.addEventListener('click', () => {
+              const current = actualExertion ?? activity.reported_exertion ?? estimatedExertion ?? '';
+              const input = prompt('Set exertion (0-5):', current !== '' ? String(current) : '');
+              if (input === null) return;
+              const value = Number.parseFloat(input);
+              if (!Number.isFinite(value) || value < 0 || value > 5) {
+                alert('Enter a value between 0 and 5.');
+                return;
+              }
+              const rounded = Math.round(value * 10) / 10;
+              saveStravaExertionOverride(activity.id, rounded);
+              renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
+            });
+            actions.appendChild(editButton);
+            item.appendChild(actions);
             list.appendChild(item);
           });
         }
@@ -4034,7 +4128,8 @@ function loadData() {
             status.textContent = data.updated_utc
               ? `Updated ${formatRelativeTime(data.updated_utc)}`
               : 'Latest activities';
-            renderStravaActivities(activities);
+            cachedStravaActivities = activities;
+            renderStravaActivities(applyStravaExertionOverrides(activities));
           } catch (error) {
             status.textContent = 'Strava feed not available yet. Run the GitHub Action to publish activities.';
           }
