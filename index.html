@@ -1999,11 +1999,18 @@ function loadData() {
         // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
         let focusBlockerActive = false;
         function updateFocusBlocker() {
-          // Sum the factors of all running timers. Use the factor property; if undefined, compute concurrency factor.
+          // Sum the factors of all running timers, excluding unpaid projects.
           const running = getRunningEntries();
           let total = 0;
           running.forEach(e => {
-            total += e.factor || computeConcurrencyFactor(running.length);
+            const project = data.projects.find(p => String(p.id) === String(e.projectId));
+            const hourlyRate = project ? Number(project.hourlyRate) : NaN;
+            const isUnpaid = Number.isFinite(hourlyRate) && hourlyRate <= 0;
+            if (isUnpaid) return;
+            const factor = e.manualFactor != null
+              ? e.manualFactor
+              : (e.factor || computeConcurrencyFactor(running.length));
+            total += factor;
           });
           // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal
           if (!focusBlockerActive && total > 0.5) {
