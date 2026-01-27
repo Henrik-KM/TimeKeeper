@@ -30,7 +30,10 @@
         <div class="stats-grid" id="statsGrid"></div>
         <div id="projectOverview"></div>
         <div id="detailedBreakdown"></div>
+
         <!-- Recommendations Section: dynamically populated with suggested projects to work on -->
+
+
         <!-- Scatter charts for project progress -->
         <div class="card" id="weeklyScatterCard">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Weekly (Expected vs Actual)</h3>
@@ -40,6 +43,7 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Monthly (Expected vs Actual)</h3>
           <canvas id="monthlyScatter" height="320"></canvas>
         </div>
+
         <!-- Daily Hours Heatmap -->
         <div class="card" id="heatmapCard">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Daily Hours Heatmap</h3>
@@ -97,6 +101,7 @@
             <input id="projectBudgetPro" type="number" min="0" step="0.1" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <label for="projectRatePro" style="font-weight:500;">Hourly Rate</label>
             <input id="projectRatePro" type="number" min="0" step="0.01" required style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+
             <!-- Rounding selection: allow user to choose rounding interval for entries in minutes -->
             <label for="projectRoundingPro" style="font-weight:500;">Rounding (minutes)</label>
             <select id="projectRoundingPro" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
@@ -173,6 +178,7 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Import Data</h3>
           <input id="importInputPro" type="file" accept="application/json" />
         </div>
+
         <!-- Auto Sync card: allows toggling automatic periodic export of data -->
         <div class="card" style="margin-top:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Auto Data Sync</h3>
@@ -187,29 +193,41 @@
         <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
         </div>
       </section>
+
       <!-- Workout Tracker Section (replaces Todo) -->
       <section id="todo" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Workouts</h2>
-        <!-- Form to add a manual workout activity -->
+        <!-- Form to add a new workout -->
         <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Manual Activity</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Log Workout</h3>
           <form id="todoForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-            <input id="todoName" type="text" required placeholder="Activity name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <div class="manual-exertion-row">
-              <input id="todoExertionRange" type="range" min="0" max="5" step="0.1" value="2" />
-              <input id="todoExertionValue" type="number" min="0" max="5" step="0.1" inputmode="decimal" placeholder="Exertion" />
-            </div>
+            <input id="todoName" type="text" required placeholder="Workout name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <select id="todoIntensity" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="intense">Intense</option>
+              <option value="medium" selected>Medium</option>
+              <option value="light">Light</option>
+              <option value="custom">Custom</option>
+            </select>
+            <input
+              id="todoCustomIntensity"
+              type="number"
+              min="0.01"
+              step="0.01"
+              inputmode="decimal"
+              placeholder="Points"
+              style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem; display:none;"
+            />
             <input id="todoWhen" type="datetime-local" style="width:13rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <button type="submit" class="btn primary">Add</button>
+            <button type="submit" class="btn primary">Log</button>
           </form>
-          <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">Manual activities count toward your weekly points using the exertion value (0–5). Use this for workouts not captured by Strava.</p>
+          <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">New combinations of workout name and intensity are saved as presets for quick access. Choose <strong>Custom</strong> to log workouts with your own point value.</p>
         </div>
         <div class="card" id="workoutPresetsCard" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Manual Activities</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Presets</h3>
           <div id="workoutPresetsContent"></div>
         </div>
         <div class="card" id="workoutEntriesCard" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">This Week's Activities</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">This Week's Workouts</h3>
           <div id="workoutEntriesContent"></div>
         </div>
         <div class="card" id="fitnessSummaryCard" style="margin-bottom:1rem;">
@@ -218,10 +236,6 @@
         </div>
         <div class="card" id="stravaFeedCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Latest Strava Activities</h3>
-          <div class="strava-actions-row">
-            <button id="runStravaSyncBtn" class="btn secondary" type="button">Run Strava Sync</button>
-            <span class="strava-actions-note">Opens the GitHub Actions workflow in a new tab.</span>
-          </div>
           <p id="stravaFeedStatus" class="status-muted">Connect your Strava data to see recent workouts here.</p>
           <ul id="stravaFeedList" class="strava-feed"></ul>
         </div>
@@ -230,54 +244,10 @@
           <div id="fitnessSettingsContent"></div>
         </div>
       </section>
+
       <!-- Grocery/Finances Section -->
       <section id="grocery" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Finances</h2>
-        <!-- Budget summary card will be inserted here dynamically -->
-        <div id="budgetSummaryContainer"></div>
-        <!-- Manage fixed monthly expenses that should count against the monthly budget -->
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Recurring Payments</h3>
-          <form id="monthlyRecurringForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.75rem;">
-            <input id="monthlyPaymentName" type="text" required placeholder="Name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <input id="monthlyPaymentAmount" type="number" min="0" step="0.01" required placeholder="Amount" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <button type="submit" class="btn primary">Add</button>
-          </form>
-          <ul id="monthlyRecurringList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-        <!-- Form to add a new grocery item -->
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Item</h3>
-          <form id="groceryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-            <input id="groceryName" type="text" required placeholder="Item name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <select id="groceryFreq" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
-              <option value="weekly">Weekly</option>
-              <option value="monthly">Monthly</option>
-              <option value="biannual">Biannual</option>
-            </select>
-            <select id="groceryCategory" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
-              <option value="standard">Standard</option>
-              <option value="treat">Treat</option>
-              <option value="essential">Essential</option>
-            </select>
-            <button type="submit" class="btn primary">Add</button>
-          </form>
-        </div>
-        <!-- Weekly grocery items -->
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Weekly Items</h3>
-          <ul id="weeklyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-        <!-- Monthly grocery items -->
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Items</h3>
-          <ul id="monthlyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-        <!-- Biannual grocery items -->
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Biannual Items</h3>
-          <ul id="biannualGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
         <div class="wealth-grid">
           <div class="card" id="wealthDashboardCard">
             <div class="wealth-dashboard-header">
@@ -329,11 +299,61 @@
             </div>
           </div>
         </div>
+        <!-- Budget summary card will be inserted here dynamically -->
+        <div id="budgetSummaryContainer"></div>
+
+        <!-- Manage fixed monthly expenses that should count against the monthly budget -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Recurring Payments</h3>
+          <form id="monthlyRecurringForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center; margin-bottom:0.75rem;">
+            <input id="monthlyPaymentName" type="text" required placeholder="Name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <input id="monthlyPaymentAmount" type="number" min="0" step="0.01" required placeholder="Amount" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+          <ul id="monthlyRecurringList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
+        <!-- Form to add a new grocery item -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Add Item</h3>
+          <form id="groceryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+            <input id="groceryName" type="text" required placeholder="Item name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+            <select id="groceryFreq" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="weekly">Weekly</option>
+              <option value="monthly">Monthly</option>
+              <option value="biannual">Biannual</option>
+            </select>
+            <select id="groceryCategory" style="width:7rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+              <option value="standard">Standard</option>
+              <option value="treat">Treat</option>
+              <option value="essential">Essential</option>
+            </select>
+            <button type="submit" class="btn primary">Add</button>
+          </form>
+        </div>
+        <!-- Weekly grocery items -->
+        <div class="card" style="margin-bottom:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Weekly Items</h3>
+          <ul id="weeklyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+        <!-- Monthly grocery items -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Monthly Items</h3>
+          <ul id="monthlyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
+        <!-- Biannual grocery items -->
+        <div class="card">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Biannual Items</h3>
+          <ul id="biannualGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
+        </div>
+
         <!-- Archived grocery items (purchased items with cost) -->
         <div class="card">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Archived Purchases</h3>
           <ul id="archivedGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
+
         <!-- Note about excluded categories -->
         <div class="card" style="background:#f8fafc; border:1px solid #e2e8f0; margin-top:1rem;">
           <p style="margin:0; padding:0.75rem; font-size:0.85rem; color:#475569;">
@@ -341,6 +361,7 @@
           </p>
         </div>
       </section>
+
       <!-- Analytics/Reports Section -->
       <section id="analytics" class="section" style="display:none;">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Reports</h2>
@@ -471,23 +492,6 @@
             entries: []
           };
         }
-        function makeDefaultManualActivities() {
-          return [];
-        }
-        function normalizeManualActivity(entry) {
-          const obj = entry && typeof entry === 'object' ? { ...entry } : {};
-          if (!obj.id) obj.id = uuid();
-          obj.name = typeof obj.name === 'string' ? obj.name : '';
-          const rawExertion = Number(obj.exertion);
-          if (Number.isFinite(rawExertion)) {
-            obj.exertion = Math.max(0, Math.min(5, Math.round(rawExertion * 10) / 10));
-          } else {
-            obj.exertion = 0;
-          }
-          const dt = obj.timestamp ? new Date(obj.timestamp) : new Date();
-          obj.timestamp = isNaN(dt) ? new Date().toISOString() : dt.toISOString();
-          return obj;
-        }
         function applyWorkoutDefaults(obj) {
           const defaults = makeDefaultWorkouts();
           if (!obj || typeof obj !== 'object') return defaults;
@@ -514,24 +518,6 @@
           }
           data.workouts = applyWorkoutDefaults(data.workouts);
           return data.workouts;
-        }
-        function ensureManualActivities() {
-          if (!Array.isArray(data.manualActivities)) {
-            data.manualActivities = makeDefaultManualActivities();
-          }
-          if (data.manualActivities.length === 0 && data.workouts && Array.isArray(data.workouts.entries) && data.workouts.entries.length > 0) {
-            data.manualActivities = data.workouts.entries.map(entry => {
-              const exertion = Math.max(0, Math.min(5, getIntensityPoints(entry.intensity)));
-              return {
-                id: entry.id || uuid(),
-                name: entry.name || 'Workout',
-                exertion,
-                timestamp: entry.timestamp || new Date().toISOString()
-              };
-            });
-          }
-          data.manualActivities = data.manualActivities.map(normalizeManualActivity);
-          return data.manualActivities;
         }
         function ensureMonthlyRecurringPayments() {
           if (!Array.isArray(data.monthlyRecurringPayments)) {
@@ -727,34 +713,8 @@
           }
           return normalized;
         }
-        function resolveStravaExertion(activity) {
-          const override = activity && activity.local_exertion !== undefined
-            ? activity.local_exertion
-            : activity ? activity.exertion : undefined;
-          const overrideVal = parseExertionValue(override);
-          if (overrideVal !== null) return { value: overrideVal, source: 'override' };
-          const reportedVal = parseExertionValue(activity ? activity.reported_exertion : undefined);
-          if (reportedVal !== null) return { value: reportedVal, source: 'reported' };
-          const estimatedRaw = activity && activity.estimated_exertion !== undefined
-            ? activity.estimated_exertion
-            : estimateStravaExertion(activity || {});
-          const estimatedVal = parseExertionValue(estimatedRaw);
-          if (estimatedVal !== null) return { value: estimatedVal, source: 'estimated' };
-          return { value: null, source: null };
-        }
-        function getResolvedStravaActivities() {
-          const resolved = applyStravaExertionOverrides(cachedStravaActivities);
-          return resolved.map(activity => {
-            const exertionInfo = resolveStravaExertion(activity);
-            return {
-              ...activity,
-              resolved_exertion: exertionInfo.value,
-              exertion_source: exertionInfo.source
-            };
-          });
-        }
         function collectWorkoutPoints(options = {}) {
-          const manualActivities = ensureManualActivities();
+          const workouts = ensureWorkoutData();
           const start = options.start ? new Date(options.start) : getWeekStart(new Date());
           if (isNaN(start.getTime())) {
             throw new Error('Invalid start date for workout stats');
@@ -768,49 +728,23 @@
           const endMs = end ? end.getTime() : Number.POSITIVE_INFINITY;
           const includeEntries = !!options.includeEntries;
           const collected = includeEntries ? [] : undefined;
-          const counts = { strava: 0, manual: 0 };
-          const pointsByIntensity = { strava: 0, manual: 0 };
+          const counts = { intense: 0, medium: 0, light: 0, custom: 0 };
+          const pointsByIntensity = { intense: 0, medium: 0, light: 0, custom: 0 };
           let totalPoints = 0;
-          const resolvedStrava = getResolvedStravaActivities();
-          resolvedStrava.forEach(activity => {
-            if (!activity || !activity.start_date) return;
-            const ts = Date.parse(activity.start_date);
-            if (!Number.isFinite(ts) || ts < startMs || ts >= endMs) return;
-            const exertionInfo = resolveStravaExertion(activity);
-            if (exertionInfo.value === null) return;
-            totalPoints += exertionInfo.value;
-            counts.strava += 1;
-            pointsByIntensity.strava += exertionInfo.value;
-            if (includeEntries) {
-              collected.push({
-                id: activity.id,
-                name: activity.name || 'Strava Activity',
-                timestamp: new Date(ts).toISOString(),
-                exertion: exertionInfo.value,
-                source: 'strava',
-                type: activity.type || '',
-                url: activity.url || '',
-                exertionSource: exertionInfo.source || ''
-              });
-            }
-          });
-          manualActivities.forEach(entry => {
+          workouts.entries.forEach(entry => {
             if (!entry || !entry.timestamp) return;
             const ts = Date.parse(entry.timestamp);
             if (!Number.isFinite(ts) || ts < startMs || ts >= endMs) return;
-            const exertionVal = parseExertionValue(entry.exertion);
-            if (exertionVal === null) return;
-            totalPoints += exertionVal;
-            counts.manual += 1;
-            pointsByIntensity.manual += exertionVal;
+            const normalizedIntensity = normalizeIntensity(entry.intensity);
+            const points = getIntensityPoints(normalizedIntensity);
+            const bucket = parseCustomIntensity(normalizedIntensity) !== null ? 'custom' : normalizedIntensity;
+            totalPoints += points;
+            if (!Object.prototype.hasOwnProperty.call(counts, bucket)) counts[bucket] = 0;
+            if (!Object.prototype.hasOwnProperty.call(pointsByIntensity, bucket)) pointsByIntensity[bucket] = 0;
+            counts[bucket] += 1;
+            pointsByIntensity[bucket] += points;
             if (includeEntries) {
-              collected.push({
-                id: entry.id,
-                name: entry.name || 'Manual Activity',
-                timestamp: new Date(ts).toISOString(),
-                exertion: exertionVal,
-                source: 'manual'
-              });
+              collected.push(Object.assign({}, entry, { timestamp: new Date(ts).toISOString() }));
             }
           });
           if (includeEntries) {
@@ -923,6 +857,7 @@
             saveData();
           }
         }
+
         function normalizeIntensity(value) {
           if (typeof value === 'string') {
             const trimmed = value.trim();
@@ -1061,60 +996,6 @@
           const idx = workouts.entries.findIndex(e => e.id === entryId);
           if (idx >= 0) {
             workouts.entries.splice(idx, 1);
-            saveData();
-            updateFitnessCards();
-            updateTodoSection();
-          }
-        }
-        function addManualActivity({ name, exertion, timestamp } = {}) {
-          const manualActivities = ensureManualActivities();
-          const trimmedName = (name || '').trim();
-          if (!trimmedName) return null;
-          const exertionVal = parseExertionValue(exertion);
-          if (exertionVal === null) return null;
-          const when = timestamp ? new Date(timestamp) : new Date();
-          if (isNaN(when)) return null;
-          const entry = {
-            id: uuid(),
-            name: trimmedName,
-            exertion: exertionVal,
-            timestamp: when.toISOString()
-          };
-          manualActivities.push(entry);
-          saveData();
-          updateFitnessCards();
-          updateTodoSection();
-          return entry;
-        }
-        function updateManualActivity(entryId, updates = {}) {
-          const manualActivities = ensureManualActivities();
-          const entry = manualActivities.find(e => e.id === entryId);
-          if (!entry) return null;
-          const newName = updates.name !== undefined ? updates.name : entry.name;
-          const trimmedName = (newName || '').trim();
-          if (!trimmedName) return null;
-          const exertionVal = updates.exertion !== undefined
-            ? parseExertionValue(updates.exertion)
-            : parseExertionValue(entry.exertion);
-          if (exertionVal === null) return null;
-          entry.name = trimmedName;
-          entry.exertion = exertionVal;
-          if (updates.timestamp) {
-            const dt = new Date(updates.timestamp);
-            if (!isNaN(dt)) {
-              entry.timestamp = dt.toISOString();
-            }
-          }
-          saveData();
-          updateFitnessCards();
-          updateTodoSection();
-          return entry;
-        }
-        function deleteManualActivity(entryId) {
-          const manualActivities = ensureManualActivities();
-          const idx = manualActivities.findIndex(e => e.id === entryId);
-          if (idx >= 0) {
-            manualActivities.splice(idx, 1);
             saveData();
             updateFitnessCards();
             updateTodoSection();
@@ -1559,6 +1440,7 @@
           return (value >= 0 ? '+' : '−') + formatted + ' SEK';
         }
         // Load and save data
+
 const defaultWealthPoints = [
   { date: '2020-01-01', amount: 1150000 },
   { date: '2022-01-01', amount: 1280000 },
@@ -1581,6 +1463,7 @@ const defaultWealthPoints = [
   { date: '2025-10-24', amount: 1962000 },
   { date: '2025-11-05', amount: 2010000 }
 ];
+
 function parseWealthAmount(raw) {
   const cleaned = String(raw ?? '')
     .replace(/\s+/g, '')
@@ -1588,6 +1471,7 @@ function parseWealthAmount(raw) {
   const value = parseFloat(cleaned);
   return Number.isFinite(value) ? value : 0;
 }
+
 function normalizeWealthEntry(entry) {
   const obj = entry && typeof entry === 'object' ? { ...entry } : {};
   const amount = parseWealthAmount(obj.amount);
@@ -1599,12 +1483,15 @@ function normalizeWealthEntry(entry) {
     note: typeof obj.note === 'string' ? obj.note : ''
   };
 }
+
 function getDefaultWealthHistory() {
   return defaultWealthPoints.map(p => normalizeWealthEntry(p));
 }
+
 function makeDefaultWealthGoal() {
   return { amount: 2000000, date: '' };
 }
+
 function formatDateInputValue(date) {
   if (!(date instanceof Date) || isNaN(date)) return '';
   const year = date.getFullYear();
@@ -1612,6 +1499,7 @@ function formatDateInputValue(date) {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
 function normalizeProjectData(project) {
   const obj = project && typeof project === 'object' ? { ...project } : {};
   if (!obj.id) obj.id = uuid();
@@ -1620,17 +1508,17 @@ function normalizeProjectData(project) {
   obj.startDate = parsedStart ? formatDateInputValue(parsedStart) : '';
   return obj;
 }
+
 function loadData() {
   const raw = localStorage.getItem('timekeeperDataPro');
   if (!raw) {
-      return {
-        projects: [],
-        entries: [],
-        todos: [],
-        workouts: makeDefaultWorkouts(),
-        manualActivities: makeDefaultManualActivities(),
-        monthlyRecurringPayments: [],
-        groceries: [],
+    return {
+      projects: [],
+      entries: [],
+      todos: [],
+      workouts: makeDefaultWorkouts(),
+      monthlyRecurringPayments: [],
+      groceries: [],
       groceryBudgetWeekly: 1000,
       groceryBudgetMonthly: 4000,
       groceryBudgetBiYearly: 20000,
@@ -1650,16 +1538,13 @@ function loadData() {
   }
   try {
     const parsed = JSON.parse(raw);
-      return {
-        projects: Array.isArray(parsed.projects) ? parsed.projects.map(normalizeProjectData) : [],
-        entries: Array.isArray(parsed.entries) ? parsed.entries : [],
-        todos: Array.isArray(parsed.todos) ? parsed.todos : [],
-        workouts: applyWorkoutDefaults(parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)),
-        manualActivities: Array.isArray(parsed.manualActivities)
-          ? parsed.manualActivities.map(normalizeManualActivity)
-          : makeDefaultManualActivities(),
-        monthlyRecurringPayments: Array.isArray(parsed.monthlyRecurringPayments)
-          ? parsed.monthlyRecurringPayments.map(p => {
+    return {
+      projects: Array.isArray(parsed.projects) ? parsed.projects.map(normalizeProjectData) : [],
+      entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+      todos: Array.isArray(parsed.todos) ? parsed.todos : [],
+      workouts: applyWorkoutDefaults(parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)),
+      monthlyRecurringPayments: Array.isArray(parsed.monthlyRecurringPayments)
+        ? parsed.monthlyRecurringPayments.map(p => {
             const payment = p && typeof p === 'object' ? p : {};
             if (!payment.id) payment.id = uuid();
             payment.name = typeof payment.name === 'string' ? payment.name : '';
@@ -1743,7 +1628,6 @@ function loadData() {
       entries: [],
       todos: [],
       workouts: makeDefaultWorkouts(),
-      manualActivities: makeDefaultManualActivities(),
       monthlyRecurringPayments: [],
       groceries: [],
       groceryBudgetWeekly: 1000,
@@ -1769,6 +1653,7 @@ function loadData() {
           // Mark data as needing backup
           needsBackup = true;
         }
+
         // Compute concurrency factor based on the number of active timers.
         // Factor decreases as more timers run simultaneously: for example, 1 timer=1.0, 2 timers=0.75, 3 timers=0.6.
         function computeConcurrencyFactor(n) {
@@ -1778,7 +1663,6 @@ function loadData() {
         let data = loadData();
         ensureFitnessDefaults();
         ensureWorkoutData();
-        ensureManualActivities();
         ensureMonthlyRecurringPayments();
         ensureWealthData();
         // Initialize backup and sync flags before they are referenced in saveData().
@@ -1800,6 +1684,7 @@ function loadData() {
         // entries older than approximately one month are hidden by default to keep
         // the list manageable. This can be toggled via a button in the Entries section.
         let showAllEntries = false;
+
         // -------------------------------------------------------------------------
         //  Haptic feedback and simple audio cues
         //
@@ -1831,6 +1716,7 @@ function loadData() {
             }
           }
         }
+
         // -------------------------------------------------------------------------
         //  IndexedDB persistence for backup directory handle
         //
@@ -1956,31 +1842,20 @@ function loadData() {
         processWorkoutWeekIfNeeded();
         const todoForm = document.getElementById('todoForm');
         if (todoForm) {
-          const exertionRange = document.getElementById('todoExertionRange');
-          const exertionValue = document.getElementById('todoExertionValue');
-          const syncFromRange = () => {
-            if (!exertionRange || !exertionValue) return null;
-            const parsed = parseExertionValue(exertionRange.value);
-            if (parsed === null) return null;
-            exertionValue.value = formatExertion(parsed);
-            return parsed;
+          const intensityInput = document.getElementById('todoIntensity');
+          const customIntensityInput = document.getElementById('todoCustomIntensity');
+          const updateCustomIntensityVisibility = () => {
+            if (!intensityInput || !customIntensityInput) return;
+            if (intensityInput.value === 'custom') {
+              customIntensityInput.style.display = '';
+            } else {
+              customIntensityInput.style.display = 'none';
+              customIntensityInput.value = '';
+            }
           };
-          const syncFromValue = () => {
-            if (!exertionRange || !exertionValue) return null;
-            const parsed = parseExertionValue(exertionValue.value);
-            if (parsed === null) return null;
-            exertionRange.value = String(parsed);
-            exertionValue.value = formatExertion(parsed);
-            return parsed;
-          };
-          if (exertionRange) {
-            exertionRange.addEventListener('input', syncFromRange);
-          }
-          if (exertionValue) {
-            exertionValue.addEventListener('input', syncFromValue);
-          }
-          if (exertionRange && exertionValue) {
-            syncFromRange();
+          if (intensityInput && customIntensityInput) {
+            intensityInput.addEventListener('change', updateCustomIntensityVisibility);
+            updateCustomIntensityVisibility();
           }
           todoForm.addEventListener('submit', e => {
             e.preventDefault();
@@ -1990,23 +1865,34 @@ function loadData() {
             const whenValue = whenInput && whenInput.value ? whenInput.value : '';
             const whenDate = whenValue ? new Date(whenValue) : new Date();
             if (!name.trim()) {
-              alert('Activity name is required.');
+              alert('Workout name is required.');
               return;
             }
             if (isNaN(whenDate)) {
               alert('Please provide a valid date and time.');
               return;
             }
-            const exertion = syncFromValue();
-            if (exertion === null) {
-              alert('Please enter an exertion value between 0 and 5.');
-              return;
+            let intensityValue = intensityInput ? intensityInput.value : 'medium';
+            let intensityToSave = intensityValue;
+            if (intensityValue === 'custom') {
+              const raw = customIntensityInput ? customIntensityInput.value : '';
+              const customPoints = sanitizeCustomPoints(raw);
+              if (customPoints === null) {
+                alert('Please enter a valid custom intensity (positive number of points).');
+                return;
+              }
+              intensityToSave = makeCustomIntensity(customPoints);
             }
-            addManualActivity({ name, exertion, timestamp: whenDate });
+            logWorkoutEntry({ name, intensity: intensityToSave, timestamp: whenDate });
             if (nameInput) nameInput.value = '';
             if (whenInput) whenInput.value = '';
-            if (exertionRange) exertionRange.value = '2';
-            if (exertionValue) exertionValue.value = '';
+            if (intensityInput) {
+              intensityInput.value = 'medium';
+            }
+            if (customIntensityInput) {
+              customIntensityInput.value = '';
+            }
+            updateCustomIntensityVisibility();
           });
         }
         // Ensure every project has a color and that colors are unique when possible.
@@ -2033,6 +1919,7 @@ function loadData() {
         if (autoSyncPref !== null) {
           autoSyncEnabled = autoSyncPref === 'true';
         }
+
         // Attempt to restore the backup directory handle from IndexedDB on load. If
         // a handle exists, assign it to the global backupDirHandle so that auto
         // sync can operate without requiring the user to pick a folder each
@@ -2075,6 +1962,7 @@ function loadData() {
           updateAutoSyncStatus();
           updateFocusBlocker();
         });
+
         // -------------------------------------------------------------------------
         //  Webhook support and Todo functionality
         //
@@ -2084,6 +1972,7 @@ function loadData() {
         //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
         const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
         const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
+
         // Send a ping to each URL in the list. Uses navigator.sendBeacon where
         // available to avoid blocking the page; falls back to fetch otherwise.
         function triggerWebhooks(urls) {
@@ -2096,6 +1985,7 @@ function loadData() {
             }
           });
         }
+
         // Convenience wrappers to trigger start/stop webhooks.
         function triggerFocusStart() {
           triggerWebhooks(START_WEBHOOKS);
@@ -2103,6 +1993,7 @@ function loadData() {
         function triggerFocusStop() {
           triggerWebhooks(STOP_WEBHOOKS);
         }
+
         // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
         // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
         let focusBlockerActive = false;
@@ -2111,15 +2002,7 @@ function loadData() {
           const running = getRunningEntries();
           let total = 0;
           running.forEach(e => {
-            const factor = e.manualFactor != null ? e.manualFactor : (e.factor || computeConcurrencyFactor(running.length));
-            const project = data.projects.find(p => String(p.id) === String(e.projectId));
-            const hourlyRate = project ? Number(project.hourlyRate) : NaN;
-            const isUnpaid = Number.isFinite(hourlyRate) && hourlyRate <= 0;
-            // Skip unpaid projects entirely when deciding whether to enable the blocker.
-            if (isUnpaid) {
-              return;
-            }
-            total += factor;
+            total += e.factor || computeConcurrencyFactor(running.length);
           });
           // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal
           if (!focusBlockerActive && total > 0.5) {
@@ -2130,6 +2013,7 @@ function loadData() {
             triggerFocusStop();
           }
         }
+
         // Update the Workout section UI based on saved presets and weekly entries.
         // Presets capture frequently logged workouts, while the entries list shows
         // everything recorded for the current week with options to edit or remove.
@@ -2140,6 +2024,7 @@ function loadData() {
           updateTodoSection();
           updateGrocerySection();
         }
+
         function updateFitnessCards(force = false) {
           if (!force) {
             if (fitnessRenderQueued) return;
@@ -2260,19 +2145,21 @@ function loadData() {
             }
             const pointsSub = pointsSubParts.join(' • ');
             createRow('Points this week', pointsValue, pointsSub);
-            const sourceParts = [];
-            [
-              { key: 'strava', label: 'Strava' },
-              { key: 'manual', label: 'Manual' }
-            ].forEach(({ key, label }) => {
+            const intensityParts = [];
+            ['intense', 'medium', 'light', 'custom'].forEach(key => {
               const count = pointsInfo.counts[key] || 0;
               if (count > 0) {
                 const pts = pointsInfo.pointsByIntensity[key] || 0;
-                const formattedPts = formatExertion(pts) || formatPoints(pts, 2);
-                sourceParts.push(`${label}: ${count} (${formattedPts} pts)`);
+                let formattedPts;
+                if (key === 'custom') {
+                  formattedPts = formatCustomIntensityValue(pts) || formatPoints(pts, 2);
+                } else {
+                  formattedPts = formatPoints(pts);
+                }
+                intensityParts.push(`${getIntensityLabel(key)}: ${count} (${formattedPts} pts)`);
               }
             });
-            createRow('Activity mix', sourceParts.length ? sourceParts.join(' - ') : 'No activities logged yet', null);
+            createRow('Intensity mix', intensityParts.length ? intensityParts.join(' • ') : 'No workouts logged yet', null);
             const creditsRow = document.createElement('div');
             creditsRow.className = 'fitness-pill-row';
             const creditsPill = document.createElement('span');
@@ -2468,9 +2355,10 @@ function loadData() {
             }
           }
         }
+
         function updateTodoSection() {
+          const workouts = ensureWorkoutData();
           const fitnessData = ensureFitnessDefaults();
-          const manualActivities = ensureManualActivities();
           const presetsContent = document.getElementById('workoutPresetsContent');
           const entriesContent = document.getElementById('workoutEntriesContent');
           const weekKey = getWeekKey(new Date());
@@ -2478,70 +2366,84 @@ function loadData() {
           const monday = getWeekStart(new Date());
           const nextMonday = new Date(monday);
           nextMonday.setDate(nextMonday.getDate() + 7);
-          const pointsInfo = collectWorkoutPoints({ start: monday, end: nextMonday, includeEntries: true });
-          const weeklyEntries = pointsInfo.entries;
+          const weeklyEntries = workouts.entries
+            .filter(entry => {
+              if (!entry || !entry.timestamp) return false;
+              const dt = new Date(entry.timestamp);
+              return !isNaN(dt) && dt >= monday && dt < nextMonday;
+            })
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+          const weeklyPoints = weeklyEntries.reduce((sum, entry) => sum + getIntensityPoints(entry.intensity), 0);
           const weeklyPlan = computeWorkoutWeekPlan({
             fitness: fitnessData,
-            actualPoints: pointsInfo.totalPoints,
+            actualPoints: weeklyPoints,
             weekStart: monday,
             weekEnd: nextMonday
           });
           if (presetsContent) {
             presetsContent.innerHTML = '';
-            const sortedManual = manualActivities.slice().sort((a, b) => Date.parse(b.timestamp) - Date.parse(a.timestamp));
-            if (sortedManual.length === 0) {
+            const presets = workouts.presets.slice().sort((a, b) => a.name.localeCompare(b.name, undefined, { sensitivity: 'base' }));
+            if (presets.length === 0) {
               const empty = document.createElement('p');
               empty.className = 'muted';
-              empty.textContent = 'No manual activities logged yet.';
+              empty.textContent = 'Log a workout to create your first preset. Each unique name/intensity combination is saved automatically.';
               presetsContent.appendChild(empty);
             } else {
-              sortedManual.forEach(entry => {
+              presets.forEach(preset => {
                 const row = document.createElement('div');
-                row.className = 'workout-entry-row';
+                row.className = 'workout-preset-row';
                 row.style.display = 'flex';
                 row.style.justifyContent = 'space-between';
                 row.style.alignItems = 'center';
+                row.style.padding = '0.4rem 0';
                 row.style.borderBottom = '1px solid #e2e8f0';
-                row.style.padding = '0.5rem 0';
                 const info = document.createElement('div');
-                const exertionLabel = formatExertion(entry.exertion) || '0';
-                info.innerHTML = `<strong>${entry.name}</strong> ? Exertion ${exertionLabel} ? ${formatWorkoutTimestamp(entry.timestamp)}`;
+                info.innerHTML = `<strong>${preset.name}</strong> • ${getIntensitySummary(preset.intensity)}`;
                 row.appendChild(info);
                 const actions = document.createElement('div');
                 actions.style.display = 'flex';
                 actions.style.gap = '0.4rem';
+                const logBtn = document.createElement('button');
+                logBtn.className = 'btn primary';
+                logBtn.textContent = 'Log';
+                logBtn.style.fontSize = '0.75rem';
+                logBtn.addEventListener('click', () => {
+                  logWorkoutEntry({ name: preset.name, intensity: preset.intensity, presetId: preset.id });
+                });
+                actions.appendChild(logBtn);
                 const editBtn = document.createElement('button');
                 editBtn.className = 'btn secondary';
                 editBtn.textContent = 'Edit';
                 editBtn.style.fontSize = '0.75rem';
                 editBtn.addEventListener('click', () => {
-                  const newName = prompt('Activity name', entry.name || '');
+                  const newName = prompt('Preset name', preset.name || '');
                   if (newName === null) return;
                   const trimmed = newName.trim();
                   if (!trimmed) {
-                    alert('Activity name cannot be empty.');
+                    alert('Preset name cannot be empty.');
                     return;
                   }
-                  const newExertion = prompt('Exertion (0-5)', String(entry.exertion));
-                  if (newExertion === null) return;
-                  const parsedExertion = parseExertionValue(newExertion);
-                  if (parsedExertion === null) {
-                    alert('Enter a value between 0 and 5.');
-                    return;
+                  const newIntensity = prompt('Intensity (intense / medium / light / custom points)', getIntensityPromptDefault(preset.intensity));
+                  if (newIntensity === null) return;
+                  const normalized = normalizeIntensity(newIntensity);
+                  const existing = workouts.presets.find(p => p.id !== preset.id && p.name === trimmed && normalizeIntensity(p.intensity) === normalized);
+                  if (existing) {
+                    workouts.entries.forEach(entry => {
+                      if (entry.presetId === preset.id) {
+                        entry.presetId = existing.id;
+                        entry.name = existing.name;
+                        entry.intensity = existing.intensity;
+                      }
+                    });
+                    deleteWorkoutPreset(preset.id);
+                  } else {
+                    preset.name = trimmed;
+                    preset.intensity = normalized;
+                    updateEntriesForPreset(preset);
                   }
-                  const timeDefault = formatTimestampForInput(entry.timestamp).replace('T', ' ');
-                  const newTimeRaw = prompt('When? (YYYY-MM-DD HH:MM, leave blank to keep current)', timeDefault);
-                  if (newTimeRaw === null) return;
-                  let newTimestamp = entry.timestamp;
-                  if (newTimeRaw.trim()) {
-                    const parsed = parseDateTimeInput(newTimeRaw);
-                    if (!parsed) {
-                      alert('Invalid date or time.');
-                      return;
-                    }
-                    newTimestamp = parsed.toISOString();
-                  }
-                  updateManualActivity(entry.id, { name: trimmed, exertion: parsedExertion, timestamp: newTimestamp });
+                  saveData();
+                  updateFitnessCards();
+                  updateTodoSection();
                 });
                 actions.appendChild(editBtn);
                 const deleteBtn = document.createElement('button');
@@ -2549,8 +2451,11 @@ function loadData() {
                 deleteBtn.textContent = 'Delete';
                 deleteBtn.style.fontSize = '0.75rem';
                 deleteBtn.addEventListener('click', () => {
-                  if (!confirm('Delete this manual activity?')) return;
-                  deleteManualActivity(entry.id);
+                  if (!confirm('Delete this preset? Existing entries stay recorded.')) return;
+                  deleteWorkoutPreset(preset.id);
+                  saveData();
+                  updateFitnessCards();
+                  updateTodoSection();
                 });
                 actions.appendChild(deleteBtn);
                 row.appendChild(actions);
@@ -2567,9 +2472,9 @@ function loadData() {
             header.style.marginBottom = '0.5rem';
             const headerInfo = document.createElement('div');
             if (weeklyPlan.paused) {
-              headerInfo.textContent = `This week: ${weeklyEntries.length} activity${weeklyEntries.length === 1 ? '' : 'ies'} ? Week paused`;
+              headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • Week paused`;
             } else {
-              headerInfo.textContent = `This week: ${weeklyEntries.length} activity${weeklyEntries.length === 1 ? '' : 'ies'} ? ${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(weeklyPlan.requiredPoints)} pts scheduled`;
+              headerInfo.textContent = `This week: ${weeklyEntries.length} workout${weeklyEntries.length === 1 ? '' : 's'} • ${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(weeklyPlan.requiredPoints)} pts scheduled`;
             }
             header.appendChild(headerInfo);
             const pauseLabel = document.createElement('label');
@@ -2593,7 +2498,7 @@ function loadData() {
             if (weeklyEntries.length === 0) {
               const empty = document.createElement('p');
               empty.className = 'muted';
-              empty.textContent = pausedThisWeek ? 'Week paused ? no workouts required.' : 'No activities logged yet this week.';
+              empty.textContent = pausedThisWeek ? 'Week paused – no workouts required.' : 'No workouts logged yet this week.';
               entriesContent.appendChild(empty);
             } else {
               weeklyEntries.forEach(entry => {
@@ -2605,83 +2510,49 @@ function loadData() {
                 row.style.borderBottom = '1px solid #e2e8f0';
                 row.style.padding = '0.5rem 0';
                 const info = document.createElement('div');
-                const exertionLabel = formatExertion(entry.exertion) || '0';
-                const sourceLabel = entry.source === 'strava' ? 'Strava' : 'Manual';
-                const sourceSuffix = entry.exertionSource ? ` (${entry.exertionSource})` : '';
-                if (entry.source === 'strava' && entry.url) {
-                  const link = document.createElement('a');
-                  link.href = entry.url;
-                  link.target = '_blank';
-                  link.rel = 'noopener noreferrer';
-                  link.className = 'strava-title';
-                  link.textContent = entry.name || 'Strava Activity';
-                  info.appendChild(link);
-                } else {
-                  const strong = document.createElement('strong');
-                  strong.textContent = entry.name || 'Activity';
-                  info.appendChild(strong);
-                }
-                const meta = document.createElement('span');
-                meta.innerHTML = ` ? ${sourceLabel} ? Exertion ${exertionLabel}${sourceSuffix} ? ${formatWorkoutTimestamp(entry.timestamp)}`;
-                info.appendChild(meta);
+                info.innerHTML = `<strong>${entry.name}</strong> • ${getIntensitySummary(entry.intensity)} • ${formatWorkoutTimestamp(entry.timestamp)}`;
                 row.appendChild(info);
                 const actions = document.createElement('div');
                 actions.style.display = 'flex';
                 actions.style.gap = '0.4rem';
-                if (entry.source === 'manual') {
-                  const editBtn = document.createElement('button');
-                  editBtn.className = 'btn secondary';
-                  editBtn.textContent = 'Edit';
-                  editBtn.style.fontSize = '0.75rem';
-                  editBtn.addEventListener('click', () => {
-                    const newName = prompt('Activity name', entry.name || '');
-                    if (newName === null) return;
-                    const trimmed = newName.trim();
-                    if (!trimmed) {
-                      alert('Activity name cannot be empty.');
+                const editBtn = document.createElement('button');
+                editBtn.className = 'btn secondary';
+                editBtn.textContent = 'Edit';
+                editBtn.style.fontSize = '0.75rem';
+                editBtn.addEventListener('click', () => {
+                  const newName = prompt('Workout name', entry.name || '');
+                  if (newName === null) return;
+                  const trimmed = newName.trim();
+                  if (!trimmed) {
+                    alert('Workout name cannot be empty.');
+                    return;
+                  }
+                  const newIntensity = prompt('Intensity (intense / medium / light / custom points)', getIntensityPromptDefault(entry.intensity));
+                  if (newIntensity === null) return;
+                  const timeDefault = formatTimestampForInput(entry.timestamp).replace('T', ' ');
+                  const newTimeRaw = prompt('When? (YYYY-MM-DD HH:MM, leave blank to keep current)', timeDefault);
+                  if (newTimeRaw === null) return;
+                  let newTimestamp = entry.timestamp;
+                  if (newTimeRaw.trim()) {
+                    const parsed = parseDateTimeInput(newTimeRaw);
+                    if (!parsed) {
+                      alert('Invalid date or time.');
                       return;
                     }
-                    const newExertion = prompt('Exertion (0-5)', String(entry.exertion));
-                    if (newExertion === null) return;
-                    const parsedExertion = parseExertionValue(newExertion);
-                    if (parsedExertion === null) {
-                      alert('Enter a value between 0 and 5.');
-                      return;
-                    }
-                    const timeDefault = formatTimestampForInput(entry.timestamp).replace('T', ' ');
-                    const newTimeRaw = prompt('When? (YYYY-MM-DD HH:MM, leave blank to keep current)', timeDefault);
-                    if (newTimeRaw === null) return;
-                    let newTimestamp = entry.timestamp;
-                    if (newTimeRaw.trim()) {
-                      const parsed = parseDateTimeInput(newTimeRaw);
-                      if (!parsed) {
-                        alert('Invalid date or time.');
-                        return;
-                      }
-                      newTimestamp = parsed.toISOString();
-                    }
-                    updateManualActivity(entry.id, { name: trimmed, exertion: parsedExertion, timestamp: newTimestamp });
-                  });
-                  actions.appendChild(editBtn);
-                  const deleteBtn = document.createElement('button');
-                  deleteBtn.className = 'btn danger';
-                  deleteBtn.textContent = 'Delete';
-                  deleteBtn.style.fontSize = '0.75rem';
-                  deleteBtn.addEventListener('click', () => {
-                    if (!confirm('Delete this manual activity?')) return;
-                    deleteManualActivity(entry.id);
-                  });
-                  actions.appendChild(deleteBtn);
-                } else if (entry.url) {
-                  const openBtn = document.createElement('button');
-                  openBtn.className = 'btn secondary';
-                  openBtn.textContent = 'Open';
-                  openBtn.style.fontSize = '0.75rem';
-                  openBtn.addEventListener('click', () => {
-                    window.open(entry.url, '_blank');
-                  });
-                  actions.appendChild(openBtn);
-                }
+                    newTimestamp = parsed.toISOString();
+                  }
+                  updateWorkoutEntry(entry.id, { name: trimmed, intensity: newIntensity, timestamp: newTimestamp });
+                });
+                actions.appendChild(editBtn);
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn danger';
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.style.fontSize = '0.75rem';
+                deleteBtn.addEventListener('click', () => {
+                  if (!confirm('Delete this workout entry?')) return;
+                  deleteWorkoutEntry(entry.id);
+                });
+                actions.appendChild(deleteBtn);
                 row.appendChild(actions);
                 entriesContent.appendChild(row);
               });
@@ -2774,6 +2645,7 @@ function loadData() {
             }
           });
           monthlySpent += recurringTotal;
+
           const recurringFragment = document.createDocumentFragment();
           if (recurringPayments.length === 0) {
             const empty = document.createElement('li');
@@ -2789,14 +2661,17 @@ function loadData() {
               li.style.alignItems = 'center';
               li.style.padding = '0.5rem 0';
               li.style.borderBottom = '1px solid #f1f5f9';
+
               const info = document.createElement('span');
               info.style.fontWeight = '600';
               const amountLabel = formatCurrency(payment.amount || 0, -1).replace(' kr', ' SEK');
               info.textContent = `${payment.name || 'Recurring payment'} – ${amountLabel}`;
               li.appendChild(info);
+
               const actions = document.createElement('div');
               actions.style.display = 'flex';
               actions.style.gap = '0.4rem';
+
               const editBtn = document.createElement('button');
               editBtn.className = 'btn secondary';
               editBtn.style.fontSize = '0.7rem';
@@ -2822,6 +2697,7 @@ function loadData() {
                 updateGrocerySection();
               });
               actions.appendChild(editBtn);
+
               const deleteBtn = document.createElement('button');
               deleteBtn.className = 'btn danger';
               deleteBtn.style.fontSize = '0.7rem';
@@ -2833,11 +2709,13 @@ function loadData() {
                 updateGrocerySection();
               });
               actions.appendChild(deleteBtn);
+
               li.appendChild(actions);
               recurringFragment.appendChild(li);
             });
           }
           recurringListEl.replaceChildren(...recurringFragment.childNodes);
+
         // After rendering active items, render archived purchases with ability to edit cost
         const archivedListEl = document.getElementById('archivedGroceryList');
         if (archivedListEl) {
@@ -3232,6 +3110,7 @@ function loadData() {
             saveData();
           }
         }
+
         // Reset grocery budgets for weekly, monthly, and biannual periods. Carry-overs are recalculated
         // whenever we cross a boundary or when archived purchases are edited retroactively.
         function resetGroceriesIfNeeded() {
@@ -3434,6 +3313,7 @@ function loadData() {
             saveData();
           }
         }
+
         // Render reports section including monthly heatmap and per-project burndown charts. This
         // function is called whenever navigating to the Reports section or when data is
         // updated (e.g., after modifying entries). It recomputes the heatmap for the
@@ -3593,6 +3473,7 @@ function loadData() {
               }
             });
           }
+
           // ---------- Build daily hours line chart for the current month ----------
           // This chart shows how many hours were worked each day of the current month and compares to the
           // average daily target (monthlyTargetConst / daysInMonth) aggregated across all projects.
@@ -3757,6 +3638,7 @@ function loadData() {
               }
             });
           });
+
           // ---------- Build Hours by Project bar chart ----------
           const hoursCanvas = document.getElementById('hoursByProjectChart');
           if (hoursCanvas) {
@@ -3812,6 +3694,7 @@ function loadData() {
             });
           }
         }
+
         // Download the current data to a JSON file. Uses the same filename
         // each time so the browser can overwrite older backups.
         function downloadData() {
@@ -3825,6 +3708,7 @@ function loadData() {
           document.body.removeChild(a);
           URL.revokeObjectURL(url);
         }
+
         // Save the current data to the user-selected backup directory. If no directory
         // has been chosen yet, this function silently does nothing. When called,
         // it writes the entire data object to a file named `timekeeper-data.json` in
@@ -3860,6 +3744,7 @@ function loadData() {
             updateAutoSyncStatus();
           }
         }
+
         // Prompt the user to choose a backup directory using the File System Access API. When
         // the directory is selected, set it as the backupDirHandle and enable auto sync.
         async function chooseBackupDir(options = {}) {
@@ -3901,6 +3786,7 @@ function loadData() {
             return false;
           }
         }
+
         // Periodically export data if there have been changes.
         // Runs every 10 minutes (600000 ms). Adjust interval as needed.
         setInterval(() => {
@@ -3912,6 +3798,7 @@ function loadData() {
             });
           }
         }, 600000);
+
         // Navigation
         const navList = document.getElementById('navList');
         navList.querySelectorAll('li').forEach(li => {
@@ -3941,6 +3828,7 @@ function loadData() {
             }
           });
         });
+
         // Helper functions for formatting
         function formatDateTime(dateStr) {
           const dt = new Date(dateStr);
@@ -3950,11 +3838,13 @@ function loadData() {
           const dt = new Date(dateStr);
           return isNaN(dt) ? '' : dt.toLocaleDateString();
         }
+
         function getProjectStartDate(project) {
           const start = parseLocalDateString(project.startDate || project.createdAt);
           if (start) return start;
           return new Date(project.createdAt || Date.now());
         }
+
         function isProjectActive(project, referenceDate = new Date()) {
           const startDate = getProjectStartDate(project);
           const hasDeadline = project.deadline != null && String(project.deadline).trim() !== '';
@@ -3971,6 +3861,7 @@ function loadData() {
           }
           return startDate <= referenceDate && parsedDeadline >= referenceDate;
         }
+
         function parseLocalDateString(value) {
           if (typeof value !== 'string') return null;
           const trimmed = value.trim();
@@ -4000,6 +3891,7 @@ function loadData() {
           }
           return null;
         }
+
         function formatLocalDateString(date) {
           if (!(date instanceof Date) || isNaN(date)) return '';
           const year = date.getFullYear();
@@ -4007,6 +3899,7 @@ function loadData() {
           const day = String(date.getDate()).padStart(2, '0');
           return `${year}-${month}-${day}`;
         }
+
         function clampUnitInterval(value) {
           if (!Number.isFinite(value)) return 0;
           return Math.min(1, Math.max(0, value));
@@ -4061,7 +3954,9 @@ function loadData() {
           parts.push(secs + 's');
           return parts.join(' ');
         }
+
         let cachedStravaActivities = [];
+
         function getStravaExertionOverrides() {
           try {
             const raw = localStorage.getItem('stravaExertionOverrides');
@@ -4070,6 +3965,7 @@ function loadData() {
             return {};
           }
         }
+
         function saveStravaExertionOverride(activityId, value) {
           const overrides = getStravaExertionOverrides();
           if (value === null || value === undefined) {
@@ -4079,6 +3975,7 @@ function loadData() {
           }
           localStorage.setItem('stravaExertionOverrides', JSON.stringify(overrides));
         }
+
         function applyStravaExertionOverrides(activities) {
           const overrides = getStravaExertionOverrides();
           return activities.map(activity => {
@@ -4089,6 +3986,7 @@ function loadData() {
             return { ...activity, local_exertion: override };
           });
         }
+
         function estimateStravaExertion(activity) {
           const avgHr = Number(activity.avg_hr);
           const maxHr = Number(activity.max_hr);
@@ -4104,18 +4002,21 @@ function loadData() {
           const clamped = Math.max(0, Math.min(5, score));
           return Math.round(clamped * 10) / 10;
         }
+
         function parseExertionValue(rawValue) {
           const value = Number.parseFloat(rawValue);
           if (!Number.isFinite(value)) return null;
           const clamped = Math.max(0, Math.min(5, value));
           return Math.round(clamped * 10) / 10;
         }
+
         function formatExertion(value) {
           const numeric = Number(value);
           if (!Number.isFinite(numeric)) return '';
           const rounded = Math.round(numeric * 10) / 10;
           return rounded % 1 === 0 ? String(rounded.toFixed(0)) : String(rounded.toFixed(1));
         }
+
         function renderStravaActivities(activities) {
           const list = document.getElementById('stravaFeedList');
           if (!list) return;
@@ -4215,6 +4116,7 @@ function loadData() {
             clearButton.type = 'button';
             clearButton.className = 'btn secondary';
             clearButton.textContent = 'Clear';
+
             const syncFromValue = () => {
               const parsed = parseExertionValue(exertionValue.value);
               if (parsed === null) return null;
@@ -4222,12 +4124,14 @@ function loadData() {
               exertionRange.value = String(parsed);
               return parsed;
             };
+
             const syncFromRange = () => {
               const parsed = parseExertionValue(exertionRange.value);
               if (parsed === null) return null;
               exertionValue.value = formatExertion(parsed);
               return parsed;
             };
+
             exertionValue.addEventListener('input', () => {
               syncFromValue();
             });
@@ -4241,16 +4145,13 @@ function loadData() {
                 return;
               }
               saveStravaExertionOverride(activity.id, parsed);
-              updateFitnessCards();
-              updateTodoSection();
               renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
             });
             clearButton.addEventListener('click', () => {
               saveStravaExertionOverride(activity.id, null);
-              updateFitnessCards();
-              updateTodoSection();
               renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
             });
+
             exertionRow.appendChild(exertionLabel);
             exertionRow.appendChild(exertionRange);
             exertionRow.appendChild(exertionValue);
@@ -4260,6 +4161,7 @@ function loadData() {
             list.appendChild(item);
           });
         }
+
         async function loadStravaFeed() {
           const status = document.getElementById('stravaFeedStatus');
           const list = document.getElementById('stravaFeedList');
@@ -4286,18 +4188,11 @@ function loadData() {
               : 'Latest activities';
             cachedStravaActivities = activities;
             renderStravaActivities(applyStravaExertionOverrides(activities));
-            updateFitnessCards();
-            updateTodoSection();
           } catch (error) {
             status.textContent = 'Strava feed not available yet. Run the GitHub Action to publish activities.';
           }
         }
-        const runStravaSyncBtn = document.getElementById('runStravaSyncBtn');
-        if (runStravaSyncBtn) {
-          runStravaSyncBtn.addEventListener('click', () => {
-            window.open('https://github.com/Henrik-KM/TimeKeeper/actions/workflows/strava.yml', '_blank');
-          });
-        }
+
         // Helper function: Count the number of working days (Mon-Fri) between two dates.
         // The start date is inclusive and the end date is exclusive. If start >= end, returns 0.
         function countWorkdays(startDate, endDate) {
@@ -4314,6 +4209,7 @@ function loadData() {
           }
           return count;
         }
+
         // Compute statistics per project
         function computeProjectStats(project) {
           const now = new Date();
@@ -4511,6 +4407,7 @@ function loadData() {
             monthlyTargetConst
           };
         }
+
         // Compute global statistics
         function computeGlobalStats() {
           const now = new Date();
@@ -4619,6 +4516,7 @@ function loadData() {
           // and lastWeekEnd constants defined earlier in this function.
           const weekRevenueChange = lastWeekRevenue > 0 ? ((weekRevenue - lastWeekRevenue) / lastWeekRevenue) * 100 : null;
           const todayRevenueChange = yesterdayRevenue > 0 ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100 : null;
+
           // --- Daily Target Calculation ---
           // We want the daily target to remain constant throughout a given day. To accomplish this,
           // we base it on the weekly target and hours remaining at the *start* of the day. The weekly
@@ -4667,6 +4565,7 @@ function loadData() {
             dailyTarget
           };
         }
+
         // Dashboard rendering
         function updateDashboard() {
           const stats = computeGlobalStats();
@@ -4726,6 +4625,7 @@ function loadData() {
           const workDaysTotalMonth = countWorkdays(startMonth, startNextMonth);
           const workDaysElapsedMonth = countWorkdays(startMonth, nowTime);
           let monthlyTimeProgress = workDaysTotalMonth > 0 ? (workDaysElapsedMonth / workDaysTotalMonth) * 100 : 0;
+
           // The per-project daily targets align with the global daily target snapshot,
           // so no per-project monthly snapshot is needed here.
           if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
@@ -4737,6 +4637,7 @@ function loadData() {
           // Start of next week (Monday at 00:00) for computing remaining workdays this week
           const startNextWeek = new Date(startWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
           const workDaysLeftInWeek = countWorkdays(nowTime, startNextWeek);
+
           // Determine schedule status for weekly and monthly progress by comparing hours progress
           // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
           const weekHoursProgress = stats.weekTarget > 0 ? (stats.weekHours / stats.weekTarget) * 100 : 0;
@@ -4767,6 +4668,7 @@ function loadData() {
           const workoutMetaLabel = workoutPlan.paused
             ? `Carryover ${formatSignedPoints(workoutPlan.carry)}`
             : `Scheduled ${formatPoints(workoutScheduled)} pts (base ${formatPoints(workoutPlan.baseTarget)} pts${carrySuffix})`;
+
           // Stats cards data; integrate recommendations and revenue into relevant cards. Cards with
           // progress also include timeProgress and scheduleLabel for additional context.
           // Build the dashboard cards. We merge revenue into the relevant cards rather than
@@ -5005,6 +4907,7 @@ function loadData() {
           renderHeatmap();
           updateBurndownSelect();
           // Previously there was a separate Recommendations card here. It has been removed in favor of integrating suggestions directly into other sections.
+
           // Prepare data for weekly and monthly scatter charts
           const weeklyDatasets = [];
           const monthlyDatasets = [];
@@ -5144,6 +5047,7 @@ function loadData() {
             }
           }
         }
+
         // Render project overview list
         function renderProjectOverview() {
           const container = document.getElementById('projectOverview');
@@ -5253,6 +5157,7 @@ function loadData() {
           });
           container.appendChild(wrapper);
         }
+
         // Render detailed project breakdown table
         function renderDetailedBreakdown() {
           const container = document.getElementById('detailedBreakdown');
@@ -5306,6 +5211,7 @@ function loadData() {
           card.appendChild(wrapper);
           container.appendChild(card);
         }
+
         // Render a heatmap of hours per day for the current month. Each cell's color intensity
         // corresponds to the number of hours worked on that day. Darker colors represent more
         // hours. The heatmap table is created dynamically within the #heatmap div.
@@ -5413,6 +5319,7 @@ function loadData() {
           }
           heatmapDiv.appendChild(table);
         }
+
         // Populate the burndown project selector and render the initial burndown chart
         function updateBurndownSelect() {
           const select = document.getElementById('burndownProjectSelect');
@@ -5436,6 +5343,7 @@ function loadData() {
             renderBurndownChart(firstId);
           }
         }
+
         // Render the burndown chart for a given project ID. This charts cumulative hours worked
         // against the expected cumulative hours (linear budget burn) from project start to deadline.
         function renderBurndownChart(projectId) {
@@ -5530,6 +5438,7 @@ function loadData() {
             }
           });
         }
+
         // Projects page rendering
         function updateProjectsPage() {
           updateProjectSelects();
@@ -5638,6 +5547,7 @@ function loadData() {
             container.appendChild(card);
           });
         }
+
         // Create new project
         document.getElementById('projectFormPro').addEventListener('submit', (e) => {
           e.preventDefault();
@@ -5670,6 +5580,7 @@ function loadData() {
           updateProjectSelects();
           updateDashboard();
         });
+
         const monthlyRecurringForm = document.getElementById('monthlyRecurringForm');
         if (monthlyRecurringForm) {
           monthlyRecurringForm.addEventListener('submit', (e) => {
@@ -5695,6 +5606,7 @@ function loadData() {
             updateGrocerySection();
           });
         }
+
         const groceryForm = document.getElementById('groceryForm');
         if (groceryForm) {
           groceryForm.addEventListener('submit', (e) => {
@@ -5733,6 +5645,7 @@ function loadData() {
             }
           });
         }
+
         const wealthGoalApplyBtn = document.getElementById('wealthGoalApply');
         const wealthGoalAmountInput = document.getElementById('wealthGoalAmount');
         const wealthGoalDateInput = document.getElementById('wealthGoalDate');
@@ -5773,11 +5686,13 @@ function loadData() {
             updateWealthDashboard();
           });
         }
+
         // Color generator for project dots. Ensures uniqueness by selecting an unused color when possible.
         function getRandomColor() {
           const palette = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
           return palette[Math.floor(Math.random() * palette.length)];
         }
+
         function getUniqueColor() {
           const palette = ['#2563eb', '#dc2626', '#10b981', '#8b5cf6', '#f59e0b', '#ec4899'];
           // Collect colors already used by existing projects
@@ -5791,6 +5706,7 @@ function loadData() {
           // If all colors are used, return a random one
           return palette[Math.floor(Math.random() * palette.length)];
         }
+
         // Timer section functions (reuse from previous implementation but adjust IDs)
         function getRunningEntries() {
           // Return an array of all entries that are currently running
@@ -6027,6 +5943,7 @@ function loadData() {
           // update project selects
           updateProjectSelects();
         }
+
         // Stop a single running timer by id
         function stopSingleTimer(entryId) {
           const toStop = data.entries.find(e => e.id === entryId && e.isRunning);
@@ -6093,6 +6010,7 @@ function loadData() {
           }
           // No immediate focus start here; activation of focus mode will be handled
           // by updateFocusBlocker() based on the total factor of running timers.
+
           // Provide tactile feedback when starting a timer
           provideHaptic('long');
           const now = new Date();
@@ -6155,6 +6073,7 @@ function loadData() {
         document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
           stopAllTimers();
         });
+
         // Stop all running timers at once, updating their weighted durations consistently
         function stopAllTimers() {
           const runningList = getRunningEntries();
@@ -6196,6 +6115,7 @@ function loadData() {
           // After stopping all timers, recompute focus blocker activation based on total factor
           updateFocusBlocker();
         }
+
         // Update project selects for timer and manual forms
         function updateProjectSelects() {
           const timerSelect = document.getElementById('timerProjectPro');
@@ -6313,6 +6233,7 @@ function loadData() {
           updateDashboard();
           updateProjectsPage();
         });
+
         // Toggle between showing all entries and only recent entries (last 30 days). When
         // showing only recent entries, the button text reads "Show All". When
         // showing all entries, it reads "Show Recent". Clicking the button
@@ -6325,6 +6246,7 @@ function loadData() {
             updateEntriesTable();
           });
         }
+
         // Nudge buttons for manual entry: adjust hours by ±5 minutes
         const minusBtn = document.getElementById('manualMinus5Btn');
         const plusBtn = document.getElementById('manualPlus5Btn');
@@ -6346,6 +6268,7 @@ function loadData() {
             hoursInput.value = current.toFixed(2);
           });
         }
+
         // Delete entry
         function deleteEntry(id) {
           data.entries = data.entries.filter(e => e.id !== id);
@@ -6354,6 +6277,7 @@ function loadData() {
           updateDashboard();
           updateProjectsPage();
         }
+
         // Entries table
         function updateEntriesTable() {
           const tbody = document.getElementById('entriesTableBodyPro');
@@ -6493,6 +6417,7 @@ function loadData() {
             tbody.appendChild(tr);
           });
         }
+
         // Export / Import
         document.getElementById('exportBtnPro').addEventListener('click', () => {
           // Use shared downloadData function for exports
@@ -6539,6 +6464,7 @@ function loadData() {
             alert('Failed to import: ' + err.message);
           }
         });
+
         // Initial render
         updateProjectSelects();
         updateEntriesTable();
@@ -6554,6 +6480,7 @@ function loadData() {
         if (timerNavItem) {
           timerNavItem.click();
         }
+
         // Initialize auto sync toggle and status message
         const autoSyncToggle = document.getElementById('autoSyncToggle');
         const autoSyncStatusElem = document.getElementById('autoSyncStatus');
@@ -6660,6 +6587,7 @@ function loadData() {
         } else {
           updateAutoSyncStatus();
         }
+
         // Set Backup Folder button: prompts the user to pick a directory for backups. When
         // auto sync is enabled and no directory is selected, clicking this button
         // will call chooseBackupDir(). If auto sync is disabled, this button remains
