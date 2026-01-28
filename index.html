@@ -220,7 +220,7 @@
             <input id="todoWhen" type="datetime-local" style="width:13rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
             <button type="submit" class="btn primary">Log</button>
           </form>
-          <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">Manual activities supplement Strava. Choose <strong>Custom</strong> to log a specific exertion value (0–5).</p>
+          <p style="margin:0.75rem 0 0; font-size:0.85rem; color:#475569;">Manual activities supplement Strava. Choose <strong>Custom</strong> to log a specific workout score (0–5).</p>
         </div>
         <div class="card" id="workoutPresetsCard" style="margin-bottom:1rem;">
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Presets</h3>
@@ -749,6 +749,7 @@
             }
           });
           const stravaActivities = applyStravaExertionOverrides(window.stravaActivitiesCache || []);
+          refreshStravaScoreModel(stravaActivities);
           stravaActivities.forEach(activity => {
             if (!activity || !activity.start_date) return;
             const ts = Date.parse(activity.start_date);
@@ -4006,7 +4007,23 @@ function loadData() {
           });
         }
 
-        function estimateStravaExertion(activity) {
+        function parseExertionValue(rawValue) {
+          const value = Number.parseFloat(rawValue);
+          if (!Number.isFinite(value)) return null;
+          const clamped = Math.max(0, Math.min(5, value));
+          return Math.round(clamped * 10) / 10;
+        }
+
+        const STRAVA_SCORE_DEFAULT_SCALE = 3.5;
+        const STRAVA_SCORE_SCALE_MIN = 0.5;
+        const STRAVA_SCORE_SCALE_MAX = 6;
+        const STRAVA_SCORE_INTENSITY_REF_HR = 250;
+        const STRAVA_SCORE_BASELINE_MAX_HR = STRAVA_SCORE_INTENSITY_REF_HR;
+        const STRAVA_SCORE_MAX_HR_MIN_FACTOR = 0.85;
+        const STRAVA_SCORE_MAX_HR_MAX_FACTOR = 1.25;
+
+        function computeStravaScoreBase(activity) {
+          if (!activity) return null;
           const avgHr = Number(activity.avg_hr);
           const maxHr = Number(activity.max_hr);
           const elapsed = Number(activity.elapsed_time_min);
@@ -4016,17 +4033,67 @@ function loadData() {
           if (avgHr <= 0 || maxHr <= 0 || elapsed <= 0) {
             return null;
           }
-          const intensity = avgHr / maxHr;
-          const score = intensity * (elapsed / 60) * 3.5;
-          const clamped = Math.max(0, Math.min(5, score));
-          return Math.round(clamped * 10) / 10;
+          const intensity = avgHr / STRAVA_SCORE_INTENSITY_REF_HR;
+          const integrated = intensity * (elapsed / 60);
+          let factor = maxHr / STRAVA_SCORE_BASELINE_MAX_HR;
+          if (factor < STRAVA_SCORE_MAX_HR_MIN_FACTOR) factor = STRAVA_SCORE_MAX_HR_MIN_FACTOR;
+          if (factor > STRAVA_SCORE_MAX_HR_MAX_FACTOR) factor = STRAVA_SCORE_MAX_HR_MAX_FACTOR;
+          return integrated * factor;
         }
 
-        function parseExertionValue(rawValue) {
-          const value = Number.parseFloat(rawValue);
-          if (!Number.isFinite(value)) return null;
-          const clamped = Math.max(0, Math.min(5, value));
-          return Math.round(clamped * 10) / 10;
+        function getStravaActualScore(activity) {
+          if (!activity) return null;
+          if (activity.local_exertion !== undefined) {
+            return parseExertionValue(activity.local_exertion);
+          }
+          if (activity.exertion !== undefined) {
+            const parsed = parseExertionValue(activity.exertion);
+            if (parsed !== null) return parsed;
+          }
+          return parseExertionValue(activity.reported_exertion);
+        }
+
+        function buildStravaScoreModel(activities) {
+          const model = { scale: STRAVA_SCORE_DEFAULT_SCALE, sampleCount: 0 };
+          if (!Array.isArray(activities) || activities.length === 0) {
+            return model;
+          }
+          let sumX2 = 0;
+          let sumXY = 0;
+          let sampleCount = 0;
+          activities.forEach(activity => {
+            const actual = getStravaActualScore(activity);
+            if (actual === null) return;
+            const base = computeStravaScoreBase(activity);
+            if (base === null) return;
+            sumX2 += base * base;
+            sumXY += base * actual;
+            sampleCount += 1;
+          });
+          if (sampleCount >= 2 && sumX2 > 0) {
+            let scale = sumXY / sumX2;
+            if (Number.isFinite(scale) && scale > 0) {
+              if (scale < STRAVA_SCORE_SCALE_MIN) scale = STRAVA_SCORE_SCALE_MIN;
+              if (scale > STRAVA_SCORE_SCALE_MAX) scale = STRAVA_SCORE_SCALE_MAX;
+              model.scale = scale;
+            }
+          }
+          model.sampleCount = sampleCount;
+          return model;
+        }
+
+        function refreshStravaScoreModel(activities) {
+          window.stravaScoreModel = buildStravaScoreModel(activities);
+        }
+
+        function estimateStravaExertion(activity) {
+          const model = window.stravaScoreModel || { scale: STRAVA_SCORE_DEFAULT_SCALE };
+          const base = computeStravaScoreBase(activity);
+          if (base === null) {
+            if (!activity) return null;
+            return parseExertionValue(activity.estimated_exertion);
+          }
+          return parseExertionValue(base * model.scale);
         }
 
         function resolveStravaExertion(activity) {
@@ -4036,8 +4103,7 @@ function loadData() {
           if (resolved !== null) return resolved;
           resolved = parseExertionValue(activity.reported_exertion);
           if (resolved !== null) return resolved;
-          const estimated = activity.estimated_exertion ?? estimateStravaExertion(activity);
-          return parseExertionValue(estimated);
+          return estimateStravaExertion(activity);
         }
 
         function formatExertion(value) {
@@ -4095,17 +4161,17 @@ function loadData() {
               }
             }
             if (activity.reported_exertion !== null && activity.reported_exertion !== undefined) {
-              metaParts.push(`Reported Exertion ${formatExertion(activity.reported_exertion)}`);
+              metaParts.push(`Reported Score ${formatExertion(activity.reported_exertion)}`);
             }
-            const estimatedExertion = activity.estimated_exertion ?? estimateStravaExertion(activity);
+            const estimatedExertion = estimateStravaExertion(activity);
             if (estimatedExertion !== null && estimatedExertion !== undefined) {
-              metaParts.push(`Est Exertion ${formatExertion(estimatedExertion)}`);
+              metaParts.push(`Est Score ${formatExertion(estimatedExertion)}`);
             }
             const actualExertion = activity.local_exertion !== undefined
               ? activity.local_exertion
               : activity.exertion;
             if (actualExertion !== null && actualExertion !== undefined) {
-              metaParts.push(`Actual Exertion ${formatExertion(actualExertion)}`);
+              metaParts.push(`Actual Score ${formatExertion(actualExertion)}`);
             }
             if (metaParts.length > 0) {
               metaParts.forEach(part => {
@@ -4120,7 +4186,7 @@ function loadData() {
             exertionRow.className = 'strava-exertion';
             const exertionLabel = document.createElement('span');
             exertionLabel.className = 'strava-exertion-label';
-            exertionLabel.textContent = 'Exertion';
+            exertionLabel.textContent = 'Workout Score';
             const exertionValue = document.createElement('input');
             exertionValue.type = 'number';
             exertionValue.min = '0';
@@ -4175,12 +4241,16 @@ function loadData() {
                 return;
               }
               saveStravaExertionOverride(activity.id, parsed);
-              renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
+              const updatedActivities = applyStravaExertionOverrides(cachedStravaActivities);
+              refreshStravaScoreModel(updatedActivities);
+              renderStravaActivities(updatedActivities);
               updateFitnessCards();
             });
             clearButton.addEventListener('click', () => {
               saveStravaExertionOverride(activity.id, null);
-              renderStravaActivities(applyStravaExertionOverrides(cachedStravaActivities));
+              const updatedActivities = applyStravaExertionOverrides(cachedStravaActivities);
+              refreshStravaScoreModel(updatedActivities);
+              renderStravaActivities(updatedActivities);
               updateFitnessCards();
             });
 
@@ -4220,7 +4290,9 @@ function loadData() {
               : 'Latest activities';
             cachedStravaActivities = activities;
             window.stravaActivitiesCache = activities;
-            renderStravaActivities(applyStravaExertionOverrides(activities));
+            const overriddenActivities = applyStravaExertionOverrides(activities);
+            refreshStravaScoreModel(overriddenActivities);
+            renderStravaActivities(overriddenActivities);
             updateFitnessCards();
           } catch (error) {
             status.textContent = 'Strava feed not available yet. Run the GitHub Action to publish activities.';
