@@ -11,13 +11,6 @@ PER_PAGE = 200
 OUTFILE = "assets/strava.json"
 TOKEN_FILE = "_private/strava_token.json"
 OVERRIDES_FILE = "assets/strava_overrides.json"
-DEFAULT_SCORE_SCALE = 3.5
-SCORE_SCALE_MIN = 0.5
-SCORE_SCALE_MAX = 6.0
-SCORE_INTENSITY_REF_HR = 250.0
-SCORE_BASELINE_MAX_HR = SCORE_INTENSITY_REF_HR
-SCORE_MAX_HR_MIN_FACTOR = 0.85
-SCORE_MAX_HR_MAX_FACTOR = 1.25
 
 
 def load_refresh_token() -> tuple[str, bool]:
@@ -125,58 +118,15 @@ def load_exertion_overrides() -> dict[str, float]:
     return overrides
 
 
-def compute_score_base(
+def estimate_exertion(
     avg_hr: float | None, max_hr: float | None, elapsed_time_min: float | None
 ) -> float | None:
-    if avg_hr is None or max_hr is None or elapsed_time_min is None:
+    if not avg_hr or not max_hr or not elapsed_time_min:
         return None
-    if avg_hr <= 0 or max_hr <= 0 or elapsed_time_min <= 0:
+    if max_hr <= 0 or elapsed_time_min <= 0:
         return None
-    intensity = avg_hr / SCORE_INTENSITY_REF_HR
-    integrated = intensity * (elapsed_time_min / 60.0)
-    factor = max_hr / SCORE_BASELINE_MAX_HR
-    factor = max(SCORE_MAX_HR_MIN_FACTOR, min(SCORE_MAX_HR_MAX_FACTOR, factor))
-    return integrated * factor
-
-
-def fit_score_scale(activities: list[dict]) -> float:
-    sum_x2 = 0.0
-    sum_xy = 0.0
-    sample_count = 0
-    for activity in activities:
-        actual = activity.get("exertion")
-        if actual is None:
-            actual = activity.get("reported_exertion")
-        if not isinstance(actual, (int, float)):
-            continue
-        base = compute_score_base(
-            activity.get("avg_hr"),
-            activity.get("max_hr"),
-            activity.get("elapsed_time_min"),
-        )
-        if base is None:
-            continue
-        sum_x2 += base * base
-        sum_xy += base * float(actual)
-        sample_count += 1
-    if sample_count < 2 or sum_x2 <= 0:
-        return DEFAULT_SCORE_SCALE
-    scale = sum_xy / sum_x2
-    if scale <= 0:
-        return DEFAULT_SCORE_SCALE
-    return max(SCORE_SCALE_MIN, min(SCORE_SCALE_MAX, scale))
-
-
-def estimate_exertion(
-    avg_hr: float | None,
-    max_hr: float | None,
-    elapsed_time_min: float | None,
-    scale: float,
-) -> float | None:
-    base = compute_score_base(avg_hr, max_hr, elapsed_time_min)
-    if base is None:
-        return None
-    score = base * scale
+    intensity = avg_hr / max_hr
+    score = intensity * (elapsed_time_min / 60.0) * 3.5
     score = max(0.0, min(5.0, score))
     return round(score, 2)
 
@@ -234,17 +184,14 @@ def main() -> None:
         for activity in activities:
             enriched = enrich_activity(activity, access_token)
             payload = slim(enriched)
-            override = overrides.get(str(payload.get("id")))
-            payload["exertion"] = override if override is not None else None
-            slimmed.append(payload)
-        scale = fit_score_scale(slimmed)
-        for payload in slimmed:
             payload["estimated_exertion"] = estimate_exertion(
                 payload.get("avg_hr"),
                 payload.get("max_hr"),
                 payload.get("elapsed_time_min"),
-                scale,
             )
+            override = overrides.get(str(payload.get("id")))
+            payload["exertion"] = override if override is not None else None
+            slimmed.append(payload)
         write_payload(slimmed)
     except requests.HTTPError as error:
         status_code = error.response.status_code if error.response else None
