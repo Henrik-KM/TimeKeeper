@@ -13,11 +13,22 @@ body {
   min-height: 100vh;
 }
 
-/* Keep the Start Timer card visible while scrolling the Timer section. */
+/* Timer helpers */
 #timer #startTimerPro {
   position: sticky;
   top: 1rem;
   z-index: 5;
+}
+
+#timer .running-timers-toolbar {
+  position: sticky;
+  /* If Start Timer is sticky, JS sets --timer-start-sticky-height so this toolbar stays below it. */
+  top: calc(1rem + var(--timer-start-sticky-height, 0px));
+  z-index: 4;
+  background: #ffffff;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 /* Sidebar */

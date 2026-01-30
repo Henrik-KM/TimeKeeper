@@ -5969,36 +5969,49 @@ function loadData() {
           const runningEntries = getRunningEntries();
           const runningDiv = document.getElementById('runningTimerPro');
           const startDiv = document.getElementById('startTimerPro');
+          const timerSection = document.getElementById('timer');
           // Clear any previous interval that updated timers
           clearInterval(timerInterval);
           if (runningEntries.length > 0) {
+            // If Start Timer is sticky, keep the running timers toolbar just below it.
+            try {
+              const startPos = startDiv ? getComputedStyle(startDiv).position : '';
+              const stickyHeight = startPos === 'sticky' && startDiv ? (startDiv.offsetHeight + 16) : 0;
+              if (timerSection) timerSection.style.setProperty('--timer-start-sticky-height', stickyHeight + 'px');
+            } catch (err) {
+              if (timerSection) timerSection.style.setProperty('--timer-start-sticky-height', '0px');
+            }
             // Show the running timers section
             runningDiv.style.display = '';
             // Keep the start form visible to allow starting additional timers
             startDiv.style.display = '';
             // Clear and rebuild the running timers list
             runningDiv.innerHTML = '';
+            // Sticky toolbar so it's hard to lose "Stop All Timers" while scrolling.
+            const toolbar = document.createElement('div');
+            toolbar.className = 'running-timers-toolbar';
             // Heading for running timers
             const heading = document.createElement('h3');
             heading.textContent = 'Running Timers';
             heading.style.margin = '0 0 0.5rem 0';
             heading.style.fontSize = '1.1rem';
             heading.style.fontWeight = '600';
-            runningDiv.appendChild(heading);
+            toolbar.appendChild(heading);
             // Display total earnings for all running timers
             const totalEarnedP = document.createElement('p');
             totalEarnedP.innerHTML = '<strong>Total Earned:</strong> <span id="runningTotalEarned"></span>';
             totalEarnedP.style.marginBottom = '0.5rem';
-            runningDiv.appendChild(totalEarnedP);
+            toolbar.appendChild(totalEarnedP);
             // Add a "Stop All Timers" button to allow stopping all timers at once
             const stopAllBtn = document.createElement('button');
             stopAllBtn.className = 'btn danger';
             stopAllBtn.textContent = 'Stop All Timers';
-            stopAllBtn.style.marginBottom = '0.75rem';
+            stopAllBtn.style.marginBottom = '0';
             stopAllBtn.addEventListener('click', () => {
               stopAllTimers();
             });
-            runningDiv.appendChild(stopAllBtn);
+            toolbar.appendChild(stopAllBtn);
+            runningDiv.appendChild(toolbar);
             // Render each running entry
             runningEntries.forEach(entry => {
               const project = data.projects.find(p => p.id === entry.projectId);
@@ -6189,6 +6202,7 @@ function loadData() {
             timerInterval = setInterval(tick, 1000);
           } else {
             // No running entries: hide running timer section and show start form
+            if (timerSection) timerSection.style.setProperty('--timer-start-sticky-height', '0px');
             runningDiv.style.display = 'none';
             runningDiv.innerHTML = '';
             startDiv.style.display = '';
