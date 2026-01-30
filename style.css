@@ -13,6 +13,13 @@ body {
   min-height: 100vh;
 }
 
+/* Keep the Start Timer card visible while scrolling the Timer section. */
+#timer #startTimerPro {
+  position: sticky;
+  top: 1rem;
+  z-index: 5;
+}
+
 /* Sidebar */
 .sidebar {
   position: fixed;
