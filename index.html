@@ -5978,31 +5978,27 @@ function loadData() {
             startDiv.style.display = '';
             // Clear and rebuild the running timers list
             runningDiv.innerHTML = '';
-            // Sticky header for running timers so "Stop All" doesn't scroll away.
-            const header = document.createElement('div');
-            header.className = 'running-timers-header';
             // Heading for running timers
             const heading = document.createElement('h3');
             heading.textContent = 'Running Timers';
             heading.style.margin = '0 0 0.5rem 0';
             heading.style.fontSize = '1.1rem';
             heading.style.fontWeight = '600';
-            header.appendChild(heading);
+            runningDiv.appendChild(heading);
             // Display total earnings for all running timers
             const totalEarnedP = document.createElement('p');
             totalEarnedP.innerHTML = '<strong>Total Earned:</strong> <span id="runningTotalEarned"></span>';
             totalEarnedP.style.marginBottom = '0.5rem';
-            header.appendChild(totalEarnedP);
+            runningDiv.appendChild(totalEarnedP);
             // Add a "Stop All Timers" button to allow stopping all timers at once
             const stopAllBtn = document.createElement('button');
             stopAllBtn.className = 'btn danger';
             stopAllBtn.textContent = 'Stop All Timers';
-            stopAllBtn.style.marginBottom = '0';
+            stopAllBtn.style.marginBottom = '0.75rem';
             stopAllBtn.addEventListener('click', () => {
               stopAllTimers();
             });
-            header.appendChild(stopAllBtn);
-            runningDiv.appendChild(header);
+            runningDiv.appendChild(stopAllBtn);
             // Render each running entry
             runningEntries.forEach(entry => {
               const project = data.projects.find(p => p.id === entry.projectId);

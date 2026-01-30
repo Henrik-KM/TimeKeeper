@@ -20,35 +20,6 @@ body {
   z-index: 5;
 }
 
-/* Timer page layout: keep Start Timer visible and let Running Timers use the remaining viewport. */
-#timer.section {
-  display: flex;
-  flex-direction: column;
-  /* Fill the visible page area; running timers will scroll within their card. */
-  height: calc(100vh - 2rem);
-  overflow: hidden;
-}
-#timer.section > h2 {
-  flex: 0 0 auto;
-}
-#timer #startTimerPro {
-  flex: 0 0 auto;
-}
-#timer #runningTimerPro {
-  flex: 1 1 auto;
-  overflow: auto;
-  margin-bottom: 0;
-}
-#timer #runningTimerPro .running-timers-header {
-  position: sticky;
-  top: 0;
-  z-index: 2;
-  background: #ffffff;
-  padding-bottom: 0.75rem;
-  margin-bottom: 0.75rem;
-  border-bottom: 1px solid #e2e8f0;
-}
-
 /* Sidebar */
 .sidebar {
   position: fixed;
