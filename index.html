@@ -770,6 +770,25 @@
           return computeWorkoutPlanExpectedTotal(plan, end) - computeWorkoutPlanExpectedTotal(plan, start);
         }
 
+        // Recalculate the required points for a slice by spreading the remaining plan points
+        // evenly across the remaining time (instead of rolling deficits into the next week only).
+        function computeWorkoutPlanRequiredSlice(plan, start, end, actualBeforeStart = null) {
+          if (!plan || !Number.isFinite(plan.totalPoints) || plan.totalPoints <= 0) return 0;
+          if (!(start instanceof Date) || isNaN(start) || !(end instanceof Date) || isNaN(end)) return 0;
+          const sliceStart = start < plan.start ? plan.start : start;
+          const sliceEnd = end > plan.endExclusive ? plan.endExclusive : end;
+          if (sliceEnd <= sliceStart) return 0;
+          const remainingMs = plan.endExclusive.getTime() - sliceStart.getTime();
+          if (!Number.isFinite(remainingMs) || remainingMs <= 0) return 0;
+          const actualBefore = Number.isFinite(actualBeforeStart)
+            ? actualBeforeStart
+            : computeWorkoutPlanActualTotal(plan, sliceStart);
+          const remainingPoints = Math.max(0, plan.totalPoints - actualBefore);
+          const sliceMs = sliceEnd.getTime() - sliceStart.getTime();
+          const required = remainingPoints * (sliceMs / remainingMs);
+          return Number.isFinite(required) && required > 0 ? required : 0;
+        }
+
         function computeWorkoutPlanActualTotal(plan, at) {
           if (!plan || !(plan.start instanceof Date) || isNaN(plan.start)) return 0;
           const atDate = at instanceof Date ? at : new Date(at);
@@ -837,9 +856,9 @@
           };
         }
         function computeWorkoutWeekPlan(options = {}) {
-          // Ensure any outstanding weekly rollovers are applied before computing the plan.
-          // This keeps the carryover/required points up-to-date even if the page has been
-          // open across a week boundary without a reload.
+          // Ensure any outstanding week finalizations are applied before computing the plan.
+          // This keeps fitness streaks/multipliers up-to-date even if the page has been open
+          // across a week boundary without a reload.
           processWorkoutWeekIfNeeded();
           const now = options.now instanceof Date ? options.now : new Date();
           const weekStart = options.weekStart instanceof Date ? new Date(options.weekStart) : getWeekStart(now);
@@ -868,9 +887,8 @@
               : 0;
           }
           const expectedWeekPoints = computeWorkoutPlanExpectedSlice(plan, weekStart, weekEnd);
-          const actualBeforeWeek = computeWorkoutPlanActualTotal(plan, weekStart);
-          const expectedAtWeekEnd = computeWorkoutPlanExpectedTotal(plan, weekEnd);
-          const requiredPoints = paused ? 0 : Math.max(0, expectedAtWeekEnd - actualBeforeWeek);
+          const actualBeforeWeek = computeWorkoutPlanActualTotal(plan, boundedStart);
+          const requiredPoints = paused ? 0 : computeWorkoutPlanRequiredSlice(plan, boundedStart, boundedEnd, actualBeforeWeek);
           const totalMs = weekEnd.getTime() - weekStart.getTime();
           let timeProgress = totalMs > 0 ? ((now.getTime() - weekStart.getTime()) / totalMs) * 100 : 0;
           if (timeProgress < 0) timeProgress = 0;
@@ -1426,9 +1444,9 @@
             : emptyWeekSummary;
 
           const expectedWeekPoints = computeWorkoutPlanExpectedSlice(plan, lastMonday, thisMonday);
-          const actualBeforeWeek = computeWorkoutPlanActualTotal(plan, lastMonday);
-          const expectedAtWeekEnd = computeWorkoutPlanExpectedTotal(plan, thisMonday);
-          const requiredPoints = wasPaused ? 0 : Math.max(0, expectedAtWeekEnd - actualBeforeWeek);
+          const actualBeforeWeek = computeWorkoutPlanActualTotal(plan, boundedStart);
+          const expectedAtWeekEnd = computeWorkoutPlanExpectedTotal(plan, boundedEnd);
+          const requiredPoints = wasPaused ? 0 : computeWorkoutPlanRequiredSlice(plan, boundedStart, boundedEnd, actualBeforeWeek);
           const actualPoints = weeklySummary.totalPoints;
           const actualAtWeekEnd = actualBeforeWeek + actualPoints;
           const scheduleDeltaEnd = actualAtWeekEnd - expectedAtWeekEnd;
@@ -4119,9 +4137,12 @@ function loadData() {
 
         let cachedStravaActivities = [];
         const STRAVA_SCORE_BASELINE_HR = 250;
-        const STRAVA_SCORE_DEFAULT_SCALE = 5;
+        // "Base" heart rate (roughly resting HR). Using avg/max above this baseline makes the score
+        // depend on "HR reserve" rather than absolute HR.
+        const STRAVA_SCORE_BASE_HR = 70;
+        const STRAVA_SCORE_DEFAULT_SCALE = 12;
         const STRAVA_SCORE_SCALE_MIN = 0.5;
-        const STRAVA_SCORE_SCALE_MAX = 10;
+        const STRAVA_SCORE_SCALE_MAX = 30;
         const STRAVA_SCORE_INTENSITY_EXP = 1.6;
         const STRAVA_SCORE_DURATION_EXP = 0.9;
         const STRAVA_SCORE_SPIKE_WEIGHT = 0.6;
@@ -4170,9 +4191,17 @@ function loadData() {
           if (!Number.isFinite(maxHr) || maxHr <= 0) {
             maxHr = avgHr;
           }
-          const intensity = avgHr / STRAVA_SCORE_BASELINE_HR;
+          const denom = STRAVA_SCORE_BASELINE_HR - STRAVA_SCORE_BASE_HR;
+          if (!Number.isFinite(denom) || denom <= 0) return null;
+          const avgAdj = avgHr - STRAVA_SCORE_BASE_HR;
+          let maxAdj = maxHr - STRAVA_SCORE_BASE_HR;
+          if (!Number.isFinite(avgAdj) || avgAdj <= 0) return null;
+          if (!Number.isFinite(maxAdj) || maxAdj <= 0) {
+            maxAdj = avgAdj;
+          }
+          const intensity = avgAdj / denom;
           const durationHours = elapsed / 60;
-          const spike = Math.max(0, Math.min(1, (maxHr - avgHr) / STRAVA_SCORE_BASELINE_HR));
+          const spike = Math.max(0, Math.min(1, (maxAdj - avgAdj) / denom));
           const quality = Math.pow(intensity, STRAVA_SCORE_INTENSITY_EXP);
           const duration = Math.pow(durationHours, STRAVA_SCORE_DURATION_EXP);
           const spikeFactor = 1 + STRAVA_SCORE_SPIKE_WEIGHT * spike;
@@ -5993,6 +6022,11 @@ function loadData() {
             totalEarnedP.innerHTML = '<strong>Total Earned:</strong> <span id="runningTotalEarned"></span>';
             totalEarnedP.style.marginBottom = '0.5rem';
             toolbar.appendChild(totalEarnedP);
+            // Display total effective elapsed time across all running timers (matches the per-timer "Elapsed" values).
+            const totalElapsedP = document.createElement('p');
+            totalElapsedP.innerHTML = '<strong>Total Elapsed:</strong> <span id="runningTotalElapsed"></span>';
+            totalElapsedP.style.marginBottom = '0.5rem';
+            toolbar.appendChild(totalElapsedP);
             // Add a "Stop All Timers" button to allow stopping all timers at once
             const stopAllBtn = document.createElement('button');
             stopAllBtn.className = 'btn danger';
@@ -6162,6 +6196,7 @@ function loadData() {
             const tick = () => {
               const now = new Date();
               let totalEarned = 0;
+              let totalElapsedSeconds = 0;
               runningEntries.forEach(entry => {
                 // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
                 const last = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
@@ -6169,6 +6204,7 @@ function loadData() {
                 const factor = entry.factor || computeConcurrencyFactor(runningEntries.length);
                 const extra = (now - last) / 1000 * factor;
                 const effective = prev + extra;
+                totalElapsedSeconds += effective;
                 // Update elapsed display
                 const elapsedSpan = document.getElementById('runningElapsed-' + entry.id);
                 if (elapsedSpan) elapsedSpan.textContent = formatDuration(Math.floor(effective));
@@ -6188,6 +6224,8 @@ function loadData() {
               // Update total earned across all running timers
               const totalSpan = document.getElementById('runningTotalEarned');
               if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned, 0);
+              const totalElapsedSpan = document.getElementById('runningTotalElapsed');
+              if (totalElapsedSpan) totalElapsedSpan.textContent = formatDuration(Math.floor(totalElapsedSeconds));
             };
             tick();
             timerInterval = setInterval(tick, 1000);
