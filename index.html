@@ -3512,6 +3512,19 @@ function loadData() {
             if (maxLen <= 3) return text.slice(0, Math.max(0, maxLen));
             return text.slice(0, maxLen - 3) + '...';
           };
+          // On mobile, give charts a minimum width and allow horizontal scrolling to avoid
+          // squished/stretched plots when there are many labels.
+          const wrapChartForMobile = (canvas, minWidth = 680) => {
+            if (!isMobile) return canvas;
+            const scroll = document.createElement('div');
+            scroll.style.overflowX = 'auto';
+            scroll.style.webkitOverflowScrolling = 'touch';
+            const inner = document.createElement('div');
+            inner.style.minWidth = minWidth + 'px';
+            inner.appendChild(canvas);
+            scroll.appendChild(inner);
+            return scroll;
+          };
           // Clear previous contents
           heatmapContainer.innerHTML = '';
           burndownContainer.innerHTML = '';
@@ -3621,7 +3634,7 @@ function loadData() {
             barCard.appendChild(barTitle);
             const barCanvas = document.createElement('canvas');
             barCanvas.height = isMobile ? Math.max(220, barLabels.length * 28) : 200;
-            barCard.appendChild(barCanvas);
+            barCard.appendChild(wrapChartForMobile(barCanvas));
             heatmapContainer.appendChild(barCard);
             const ctxBar = barCanvas.getContext('2d');
             const displayBarLabels = isMobile ? barLabels.map(label => truncateLabel(label, 18)) : barLabels;
@@ -3650,16 +3663,23 @@ function loadData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: isMobile ? 'y' : 'x',
+                layout: { padding: { left: 0, right: 0, top: 0, bottom: 0 } },
                 scales: isMobile
                   ? {
                     x: { beginAtZero: true, title: { display: true, text: 'Hours' } },
-                    y: { title: { display: false }, ticks: { autoSkip: false } }
+                    y: { title: { display: false }, ticks: { autoSkip: false, font: { size: 10 } } }
                   }
                   : {
                     x: { title: { display: false }, ticks: { autoSkip: false } },
                     y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
                   },
-                plugins: { legend: { display: true } }
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: isMobile ? { boxWidth: 10, font: { size: 10 } } : undefined
+                  }
+                }
               }
             });
           }
@@ -3692,8 +3712,8 @@ function loadData() {
             lineTitle.textContent = 'Daily Hours Trend (This Month)';
             lineCard.appendChild(lineTitle);
             const lineCanvas = document.createElement('canvas');
-            lineCanvas.height = 200;
-            lineCard.appendChild(lineCanvas);
+            lineCanvas.height = isMobile ? 260 : 200;
+            lineCard.appendChild(wrapChartForMobile(lineCanvas));
             heatmapContainer.appendChild(lineCard);
             const ctxLine = lineCanvas.getContext('2d');
             new Chart(ctxLine, {
@@ -3732,7 +3752,14 @@ function loadData() {
                   },
                   y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
                 },
-                plugins: { legend: { display: true }, tooltip: { mode: 'index', intersect: false } }
+                plugins: {
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: isMobile ? { boxWidth: 10, font: { size: 10 } } : undefined
+                  },
+                  tooltip: { mode: 'index', intersect: false }
+                }
               }
             });
           }
@@ -3784,8 +3811,8 @@ function loadData() {
             h4.textContent = project.name;
             projectCard.appendChild(h4);
             const canvas = document.createElement('canvas');
-            canvas.height = 150;
-            projectCard.appendChild(canvas);
+            canvas.height = isMobile ? 240 : 150;
+            projectCard.appendChild(wrapChartForMobile(canvas));
             burndownContainer.appendChild(projectCard);
             // Create Chart.js line chart
             const ctx = canvas.getContext('2d');
@@ -3839,6 +3866,23 @@ function loadData() {
           // ---------- Build Hours by Project bar chart ----------
           const hoursCanvas = document.getElementById('hoursByProjectChart');
           if (hoursCanvas) {
+            if (isMobile) {
+              const parent = hoursCanvas.parentElement;
+              const alreadyWrapped = parent && parent.classList && parent.classList.contains('chart-scroll-inner');
+              if (parent && !alreadyWrapped) {
+                const scroll = document.createElement('div');
+                scroll.className = 'chart-scroll';
+                scroll.style.overflowX = 'auto';
+                scroll.style.webkitOverflowScrolling = 'touch';
+                const inner = document.createElement('div');
+                inner.className = 'chart-scroll-inner';
+                inner.style.minWidth = '680px';
+                // Replace the canvas in-place with the scroll wrapper, then move the canvas inside.
+                parent.replaceChild(scroll, hoursCanvas);
+                inner.appendChild(hoursCanvas);
+                scroll.appendChild(inner);
+              }
+            }
             // Destroy existing chart if present
             if (window.hoursByProjectChart) {
               try { window.hoursByProjectChart.destroy(); } catch (err) {}
@@ -3882,17 +3926,22 @@ function loadData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 indexAxis: isMobile ? 'y' : 'x',
+                layout: { padding: { left: 0, right: 0, top: 0, bottom: 0 } },
                 scales: isMobile
                   ? {
                     x: { title: { display: true, text: 'Hours' }, beginAtZero: true },
-                    y: { title: { display: true, text: 'Project' }, ticks: { autoSkip: false } }
+                    y: { title: { display: true, text: 'Project' }, ticks: { autoSkip: false, font: { size: 10 } } }
                   }
                   : {
                     x: { title: { display: true, text: 'Project' } },
                     y: { title: { display: true, text: 'Hours' }, beginAtZero: true }
                   },
                 plugins: {
-                  legend: { display: true },
+                  legend: {
+                    display: true,
+                    position: 'bottom',
+                    labels: isMobile ? { boxWidth: 10, font: { size: 10 } } : undefined
+                  },
                   tooltip: { enabled: true }
                 }
               }
