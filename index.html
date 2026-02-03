@@ -6153,6 +6153,11 @@ function loadData() {
             totalElapsedP.innerHTML = '<strong>Total Elapsed:</strong> <span id="runningTotalElapsed"></span>';
             totalElapsedP.style.marginBottom = '0.5rem';
             toolbar.appendChild(totalElapsedP);
+            // Display the sum of all timer factors to make concurrency weighting visible at a glance.
+            const totalFactorP = document.createElement('p');
+            totalFactorP.innerHTML = '<strong>Total Factor:</strong> <span id="runningTotalFactor"></span>';
+            totalFactorP.style.marginBottom = '0.5rem';
+            toolbar.appendChild(totalFactorP);
             // Add a "Stop All Timers" button to allow stopping all timers at once
             const stopAllBtn = document.createElement('button');
             stopAllBtn.className = 'btn danger';
@@ -6323,6 +6328,7 @@ function loadData() {
               const now = new Date();
               let totalEarned = 0;
               let totalElapsedSeconds = 0;
+              let totalFactor = 0;
               runningEntries.forEach(entry => {
                 // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
                 const last = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
@@ -6331,6 +6337,7 @@ function loadData() {
                 const extra = (now - last) / 1000 * factor;
                 const effective = prev + extra;
                 totalElapsedSeconds += effective;
+                totalFactor += factor;
                 // Update elapsed display
                 const elapsedSpan = document.getElementById('runningElapsed-' + entry.id);
                 if (elapsedSpan) elapsedSpan.textContent = formatDuration(Math.floor(effective));
@@ -6352,6 +6359,8 @@ function loadData() {
               if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned, 0);
               const totalElapsedSpan = document.getElementById('runningTotalElapsed');
               if (totalElapsedSpan) totalElapsedSpan.textContent = formatDuration(Math.floor(totalElapsedSeconds));
+              const totalFactorSpan = document.getElementById('runningTotalFactor');
+              if (totalFactorSpan) totalFactorSpan.textContent = Math.round(totalFactor * 100) + '%';
             };
             tick();
             timerInterval = setInterval(tick, 1000);
