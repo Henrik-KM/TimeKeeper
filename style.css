@@ -14,17 +14,10 @@ body {
 }
 
 /* Timer helpers */
-#timer #startTimerPro {
-  position: sticky;
-  top: 1rem;
-  z-index: 5;
-}
-
 #timer .running-timers-toolbar {
   position: sticky;
-  /* If Start Timer is sticky, JS sets --timer-start-sticky-height so this toolbar stays below it. */
-  top: calc(1rem + var(--timer-start-sticky-height, 0px));
-  z-index: 4;
+  top: 0;
+  z-index: 2;
   background: #ffffff;
   padding-bottom: 0.75rem;
   margin-bottom: 0.75rem;
