@@ -3503,6 +3503,15 @@ function loadData() {
           const heatmapContainer = document.getElementById('heatmapContainer');
           const burndownContainer = document.getElementById('burndownContainer');
           if (!heatmapContainer || !burndownContainer) return;
+          const isMobile = typeof window !== 'undefined'
+            && typeof window.matchMedia === 'function'
+            && window.matchMedia('(max-width: 640px)').matches;
+          const truncateLabel = (label, maxLen = 18) => {
+            const text = String(label ?? '');
+            if (text.length <= maxLen) return text;
+            if (maxLen <= 3) return text.slice(0, Math.max(0, maxLen));
+            return text.slice(0, maxLen - 3) + '...';
+          };
           // Clear previous contents
           heatmapContainer.innerHTML = '';
           burndownContainer.innerHTML = '';
@@ -3611,14 +3620,15 @@ function loadData() {
             barTitle.textContent = 'Hours by Project (This Month)';
             barCard.appendChild(barTitle);
             const barCanvas = document.createElement('canvas');
-            barCanvas.height = 200;
+            barCanvas.height = isMobile ? Math.max(220, barLabels.length * 28) : 200;
             barCard.appendChild(barCanvas);
             heatmapContainer.appendChild(barCard);
             const ctxBar = barCanvas.getContext('2d');
+            const displayBarLabels = isMobile ? barLabels.map(label => truncateLabel(label, 18)) : barLabels;
             new Chart(ctxBar, {
               type: 'bar',
               data: {
-                labels: barLabels,
+                labels: displayBarLabels,
                 datasets: [
                   {
                     label: 'Hours Worked',
@@ -3639,16 +3649,16 @@ function loadData() {
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                  x: {
-                    title: { display: false },
-                    ticks: { autoSkip: false }
-                  },
-                  y: {
-                    beginAtZero: true,
-                    title: { display: true, text: 'Hours' }
+                indexAxis: isMobile ? 'y' : 'x',
+                scales: isMobile
+                  ? {
+                    x: { beginAtZero: true, title: { display: true, text: 'Hours' } },
+                    y: { title: { display: false }, ticks: { autoSkip: false } }
                   }
-                },
+                  : {
+                    x: { title: { display: false }, ticks: { autoSkip: false } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
+                  },
                 plugins: { legend: { display: true } }
               }
             });
@@ -3714,7 +3724,12 @@ function loadData() {
                 responsive: true,
                 maintainAspectRatio: false,
                 scales: {
-                  x: { title: { display: true, text: 'Day of Month' }, ticks: { autoSkip: false } },
+                  x: {
+                    title: { display: true, text: 'Day of Month' },
+                    ticks: isMobile
+                      ? { autoSkip: true, maxTicksLimit: 8, maxRotation: 0, minRotation: 0 }
+                      : { autoSkip: false }
+                  },
                   y: { beginAtZero: true, title: { display: true, text: 'Hours' } }
                 },
                 plugins: { legend: { display: true }, tooltip: { mode: 'index', intersect: false } }
@@ -3804,7 +3819,9 @@ function loadData() {
                 scales: {
                   x: {
                     title: { display: true, text: 'Date' },
-                    ticks: { maxRotation: 90, minRotation: 45 }
+                    ticks: isMobile
+                      ? { autoSkip: true, maxTicksLimit: 6, maxRotation: 0, minRotation: 0 }
+                      : { maxRotation: 90, minRotation: 45 }
                   },
                   y: {
                     title: { display: true, text: 'Hours' },
@@ -3837,11 +3854,13 @@ function loadData() {
               // Dynamic monthly target
               targetData.push(sp.monthlyTargetConst || 0);
             });
+            hoursCanvas.height = isMobile ? Math.max(220, labels.length * 28) : 200;
+            const displayLabels = isMobile ? labels.map(label => truncateLabel(label, 18)) : labels;
             const ctxHours = hoursCanvas.getContext('2d');
             window.hoursByProjectChart = new Chart(ctxHours, {
               type: 'bar',
               data: {
-                labels: labels,
+                labels: displayLabels,
                 datasets: [
                   {
                     label: 'Hours Worked',
@@ -3862,10 +3881,16 @@ function loadData() {
               options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                scales: {
-                  x: { title: { display: true, text: 'Project' } },
-                  y: { title: { display: true, text: 'Hours' }, beginAtZero: true }
-                },
+                indexAxis: isMobile ? 'y' : 'x',
+                scales: isMobile
+                  ? {
+                    x: { title: { display: true, text: 'Hours' }, beginAtZero: true },
+                    y: { title: { display: true, text: 'Project' }, ticks: { autoSkip: false } }
+                  }
+                  : {
+                    x: { title: { display: true, text: 'Project' } },
+                    y: { title: { display: true, text: 'Hours' }, beginAtZero: true }
+                  },
                 plugins: {
                   legend: { display: true },
                   tooltip: { enabled: true }
