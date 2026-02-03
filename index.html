@@ -3613,16 +3613,21 @@ function loadData() {
           heatmapContainer.appendChild(heatmapTable);
           // ---------- Build hours by project bar chart ----------
           // Compute total hours worked per project in the current month
-          const barLabels = [];
-          const barHours = [];
-          const barTargets = [];
-          data.projects.forEach(project => {
+          const monthByProject = data.projects.map(project => {
             const sp = computeProjectStats(project);
-            barLabels.push(project.name);
-            // Use monthlyHours for actual and monthlyTargetConst for target
-            barHours.push(sp.monthlyHours || 0);
-            barTargets.push(sp.monthlyTargetConst || 0);
-          });
+            const worked = sp.monthlyHours || 0;
+            const target = sp.monthlyTargetConst || 0;
+            return {
+              name: project.name,
+              worked,
+              target,
+              deficit: target - worked
+            };
+          }).filter(row => row.worked > 0 || row.target > 0);
+          monthByProject.sort((a, b) => (b.deficit - a.deficit) || a.name.localeCompare(b.name));
+          const barLabels = monthByProject.map(row => row.name);
+          const barHours = monthByProject.map(row => row.worked);
+          const barTargets = monthByProject.map(row => row.target);
           if (barLabels.length > 0) {
             const barCard = document.createElement('div');
             barCard.style.marginBottom = '1rem';
@@ -3691,14 +3696,11 @@ function loadData() {
           const dailyLabels = [];
           const dailyHoursData = [];
           const dailyTargetData = [];
+          const monthTargetTotal = monthByProject.reduce((sum, row) => sum + (row.target || 0), 0);
+          const dayTarget = daysInMonth > 0 ? (monthTargetTotal / daysInMonth) : 0;
           for (let d = 1; d <= daysInMonth; d++) {
             dailyLabels.push(d.toString());
             dailyHoursData.push(hoursPerDay[d] || 0);
-            // Sum monthly targets for all projects to compute aggregate monthly target and then average per day
-            const dayTarget = data.projects.reduce((sum, proj) => {
-              const ps = computeProjectStats(proj);
-              return sum + (ps.monthlyTargetConst || 0);
-            }, 0) / daysInMonth;
             dailyTargetData.push(dayTarget);
           }
           // Only render chart if there is at least one project
@@ -3772,34 +3774,37 @@ function loadData() {
           data.projects.forEach(project => {
             // Compute daily cumulative hours from project creation to now
             const createdAt = getProjectStartDate(project);
-            const deadline = new Date(project.deadline);
-            const today = new Date();
-            // Determine end date for chart: use min(today, deadline)
-            const endDate = today < deadline ? today : deadline;
+            const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
+            if (!deadlineEndExclusive) return;
+            const now = new Date();
+            const todayEndExclusive = addLocalDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 1);
+            // Show progress up to today. Expected values still respect the full schedule to the deadline.
+            const totalDaysShown = diffCalendarDays(createdAt, todayEndExclusive);
+            if (totalDaysShown <= 0) return;
             // Build date labels and cumulative actual hours and expected hours arrays
             const labels = [];
             const actualData = [];
             const expectedData = [];
-            const totalDays = Math.ceil((endDate - createdAt) / (1000 * 60 * 60 * 24)) || 1;
+            const totalProjectDays = Math.max(1, diffCalendarDays(createdAt, deadlineEndExclusive));
             // Create a map of cumulative hours keyed by date string
             const dailyHoursMap = {};
             data.entries.forEach(entry => {
               if (entry.isRunning || !entry.duration) return;
               if (entry.projectId !== project.id) return;
               const start = new Date(entry.startTime);
-              const dateStr = start.toISOString().split('T')[0];
-              dailyHoursMap[dateStr] = (dailyHoursMap[dateStr] || 0) + entry.duration / 3600;
+              const dateKey = formatLocalDateString(start);
+              dailyHoursMap[dateKey] = (dailyHoursMap[dateKey] || 0) + entry.duration / 3600;
             });
             let cumulative = 0;
-            for (let i = 0; i < totalDays; i++) {
-              const date = new Date(createdAt.getTime());
-              date.setDate(createdAt.getDate() + i);
-              const dateStr = date.toISOString().split('T')[0];
-              labels.push(dateStr);
-              cumulative += dailyHoursMap[dateStr] || 0;
+            for (let i = 0; i < totalDaysShown; i++) {
+              const date = addLocalDays(createdAt, i);
+              const dateKey = formatLocalDateString(date);
+              labels.push(dateKey);
+              cumulative += dailyHoursMap[dateKey] || 0;
               actualData.push(cumulative);
-              // Expected cumulative: linear expected burn from 0 to budget hours over total days
-              expectedData.push((project.budgetHours / totalDays) * (i + 1));
+              // Expected cumulative: linear burn-up to the full budget by the deadline.
+              const ratio = totalProjectDays > 0 ? Math.min((i + 1) / totalProjectDays, 1) : 0;
+              expectedData.push(project.budgetHours * ratio);
             }
             // Build canvas
             const projectCard = document.createElement('div');
@@ -3810,6 +3815,17 @@ function loadData() {
             h4.style.fontWeight = '600';
             h4.textContent = project.name;
             projectCard.appendChild(h4);
+
+            const usedHoursNow = actualData.length ? actualData[actualData.length - 1] : 0;
+            const expectedHoursNow = expectedData.length ? expectedData[expectedData.length - 1] : 0;
+            const scheduleDelta = expectedHoursNow - usedHoursNow;
+            const meta = document.createElement('div');
+            meta.style.margin = '0 0 0.5rem 0';
+            meta.style.fontSize = '0.85rem';
+            meta.style.color = '#475569';
+            meta.textContent = `Used ${usedHoursNow.toFixed(1)}h / ${project.budgetHours.toFixed(1)}h • Expected by now ${expectedHoursNow.toFixed(1)}h • ${scheduleDelta >= 0 ? 'Behind' : 'Ahead'} ${Math.abs(scheduleDelta).toFixed(1)}h`;
+            projectCard.appendChild(meta);
+
             const canvas = document.createElement('canvas');
             canvas.height = isMobile ? 240 : 150;
             projectCard.appendChild(wrapChartForMobile(canvas));
@@ -3887,17 +3903,9 @@ function loadData() {
             if (window.hoursByProjectChart) {
               try { window.hoursByProjectChart.destroy(); } catch (err) {}
             }
-            const labels = [];
-            const workedData = [];
-            const targetData = [];
-            data.projects.forEach(project => {
-              const sp = computeProjectStats(project);
-              labels.push(project.name);
-              // Hours worked this month
-              workedData.push(sp.monthlyHours || 0);
-              // Dynamic monthly target
-              targetData.push(sp.monthlyTargetConst || 0);
-            });
+            const labels = monthByProject.map(row => row.name);
+            const workedData = monthByProject.map(row => row.worked);
+            const remainingData = monthByProject.map(row => Math.max(0, (row.target || 0) - (row.worked || 0)));
             hoursCanvas.height = isMobile ? Math.max(220, labels.length * 28) : 200;
             const displayLabels = isMobile ? labels.map(label => truncateLabel(label, 18)) : labels;
             const ctxHours = hoursCanvas.getContext('2d');
@@ -3907,18 +3915,20 @@ function loadData() {
                 labels: displayLabels,
                 datasets: [
                   {
-                    label: 'Hours Worked',
+                    label: 'Worked',
                     data: workedData,
                     backgroundColor: 'rgba(59,130,246,0.6)',
                     borderColor: '#3b82f6',
-                    borderWidth: 1
+                    borderWidth: 1,
+                    stack: 'hours'
                   },
                   {
-                    label: 'Target Hours',
-                    data: targetData,
+                    label: 'Remaining (to target)',
+                    data: remainingData,
                     backgroundColor: 'rgba(203,213,224,0.6)',
                     borderColor: '#94a3b8',
-                    borderWidth: 1
+                    borderWidth: 1,
+                    stack: 'hours'
                   }
                 ]
               },
@@ -3929,12 +3939,12 @@ function loadData() {
                 layout: { padding: { left: 0, right: 0, top: 0, bottom: 0 } },
                 scales: isMobile
                   ? {
-                    x: { title: { display: true, text: 'Hours' }, beginAtZero: true },
-                    y: { title: { display: true, text: 'Project' }, ticks: { autoSkip: false, font: { size: 10 } } }
+                    x: { title: { display: true, text: 'Hours' }, beginAtZero: true, stacked: true },
+                    y: { title: { display: true, text: 'Project' }, ticks: { autoSkip: false, font: { size: 10 } }, stacked: true }
                   }
                   : {
-                    x: { title: { display: true, text: 'Project' } },
-                    y: { title: { display: true, text: 'Hours' }, beginAtZero: true }
+                    x: { title: { display: true, text: 'Project' }, stacked: true },
+                    y: { title: { display: true, text: 'Hours' }, beginAtZero: true, stacked: true }
                   },
                 plugins: {
                   legend: {
@@ -4106,14 +4116,13 @@ function loadData() {
           if (!hasDeadline) {
             return startDate <= referenceDate;
           }
-          // Parse deadline using the same helper as other dates, with a Date fallback.
-          const parsedDeadline =
-            parseLocalDateString(String(project.deadline)) || new Date(project.deadline);
+          const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
           // If deadline is still invalid, fall back to "ongoing if started" behavior.
-          if (!parsedDeadline || isNaN(parsedDeadline)) {
+          if (!deadlineEndExclusive || isNaN(deadlineEndExclusive)) {
             return startDate <= referenceDate;
           }
-          return startDate <= referenceDate && parsedDeadline >= referenceDate;
+          // Treat the deadline date as inclusive by comparing against an end-exclusive boundary.
+          return startDate <= referenceDate && referenceDate < deadlineEndExclusive;
         }
 
         function parseLocalDateString(value) {
@@ -4152,6 +4161,37 @@ function loadData() {
           const month = String(date.getMonth() + 1).padStart(2, '0');
           const day = String(date.getDate()).padStart(2, '0');
           return `${year}-${month}-${day}`;
+        }
+
+        function addLocalDays(date, days) {
+          if (!(date instanceof Date) || isNaN(date)) return null;
+          return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
+        }
+
+        function utcDayNumber(date) {
+          if (!(date instanceof Date) || isNaN(date)) return NaN;
+          const msPerDay = 24 * 60 * 60 * 1000;
+          return Math.floor(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / msPerDay);
+        }
+
+        function diffCalendarDays(startDay, endDay) {
+          const startNum = utcDayNumber(startDay);
+          const endNum = utcDayNumber(endDay);
+          if (!Number.isFinite(startNum) || !Number.isFinite(endNum)) return 0;
+          return endNum - startNum;
+        }
+
+        function getProjectDeadlineDay(project) {
+          if (!project) return null;
+          const hasDeadline = project.deadline != null && String(project.deadline).trim() !== '';
+          if (!hasDeadline) return null;
+          return parseLocalDateString(String(project.deadline));
+        }
+
+        function getProjectDeadlineEndExclusive(project) {
+          const deadlineDay = getProjectDeadlineDay(project);
+          if (!deadlineDay) return null;
+          return addLocalDays(deadlineDay, 1);
         }
 
         function clampUnitInterval(value) {
@@ -4575,15 +4615,21 @@ function loadData() {
           const totalHours = totalSeconds / 3600;
           const remainingHours = project.budgetHours - totalHours;
           const created = getProjectStartDate(project);
-          const deadline = new Date(project.deadline);
-          const daysPassed = Math.max(1, Math.round((now - created) / (1000 * 60 * 60 * 24)));
-          const daysLeft = Math.max(0, Math.round((deadline - now) / (1000 * 60 * 60 * 24)));
-          const projectNotStarted = created > now;
-          const avgDailyBurn = totalHours / daysPassed;
+          const deadlineDay = getProjectDeadlineDay(project);
+          const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
+          const todayEndExclusive = addLocalDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 1);
+          const projectNotStarted = now < created;
+          const totalProjectDays = deadlineEndExclusive
+            ? Math.max(1, diffCalendarDays(created, deadlineEndExclusive))
+            : 1;
+          let daysPassed = projectNotStarted ? 0 : diffCalendarDays(created, todayEndExclusive);
+          if (!Number.isFinite(daysPassed) || daysPassed < 0) daysPassed = 0;
+          if (daysPassed > totalProjectDays) daysPassed = totalProjectDays;
+          const daysLeft = Math.max(0, totalProjectDays - daysPassed);
+          const avgDailyBurn = totalHours / Math.max(1, daysPassed);
           const daysToExhaust = avgDailyBurn > 0 ? remainingHours / avgDailyBurn : Infinity;
           // Determine a more descriptive status for the project based on budget consumption and schedule
           // Calculate expected used hours based on how far through the project we are
-          const totalProjectDays = daysPassed + daysLeft;
           const expectedUsed = totalProjectDays > 0 ? project.budgetHours * (daysPassed / totalProjectDays) : totalHours;
           const totalExpectedToDate = projectNotStarted ? 0 : expectedUsed;
           const totalScheduleDeficit = totalExpectedToDate - totalHours;
@@ -4617,7 +4663,7 @@ function loadData() {
           // We base the daily budget on the total calendar days between project creation and deadline.
           // This yields a more realistic expected-to-date value than strictly using working days, which can
           // produce very small denominators when projects span long periods.
-          const totalDays = Math.ceil((deadline - created) / (1000 * 60 * 60 * 24)) || 1;
+          const totalDays = totalProjectDays || 1;
           const dailyBudget = project.budgetHours / totalDays;
           // Determine the start of the current week (Monday) and the start of the current month
           const startOfWeek = new Date(now);
@@ -4662,7 +4708,7 @@ function loadData() {
           // Monthly hours and last month hours
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-          const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+          const lastMonthEnd = monthStart;
           const monthlySeconds = entries.filter(e => new Date(e.startTime) >= monthStart)
             .reduce((sum, e) => sum + (e.duration || 0), 0);
           const monthlyHours = monthlySeconds / 3600;
@@ -4689,7 +4735,9 @@ function loadData() {
           const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
           // Determine remaining calendar months from the current month through the deadline (inclusive)
           const currentMonthIndex = now.getFullYear() * 12 + now.getMonth();
-          const deadlineMonthIndex = deadline.getFullYear() * 12 + deadline.getMonth();
+          const deadlineMonthIndex = deadlineDay
+            ? (deadlineDay.getFullYear() * 12 + deadlineDay.getMonth())
+            : currentMonthIndex;
           const monthsLeft = Math.max(1, (deadlineMonthIndex - currentMonthIndex + 1));
           // Spread the remaining hours evenly across the months left in the project.
           let monthlyTargetConst = remaining / monthsLeft;
@@ -4786,7 +4834,7 @@ function loadData() {
           const lastWeekEnd = new Date(weekStart);
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
           const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-          const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0);
+          const lastMonthEnd = monthStart;
           let todaySeconds = 0;
           let yesterdaySeconds = 0;
           let weekSeconds = 0;
@@ -4863,8 +4911,9 @@ function loadData() {
           const todayChange = yesterdayHours > 0 ? ((todayHours - yesterdayHours) / yesterdayHours) * 100 : null;
           const activeProjectsCount = activeProjects.length;
           const dueThisWeek = activeProjects.filter(p => {
-            const d = new Date(p.deadline);
-            const diffDays = Math.round((d - now) / (1000 * 60 * 60 * 24));
+            const deadlineDay = getProjectDeadlineDay(p);
+            if (!deadlineDay) return false;
+            const diffDays = diffCalendarDays(todayStart, deadlineDay);
             return diffDays >= 0 && diffDays <= 7;
           }).length;
           const monthProgress = monthTarget > 0 ? (monthHours / monthTarget) * 100 : 0;
@@ -5714,36 +5763,39 @@ function loadData() {
           }
           const project = data.projects.find(p => String(p.id) === String(projectId));
           if (!project) return;
-          // Build date range from project start to today (or deadline, whichever is earlier)
-          const startDate = getProjectStartDate(project);
-          const today = new Date();
-          const endDate = today < new Date(project.deadline) ? today : new Date(project.deadline);
-          const days = [];
-          for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
-            // copy date to avoid reference issues
-            days.push(new Date(d.getFullYear(), d.getMonth(), d.getDate()));
-          }
-          // Build labels and actual cumulative hours
+          const startDay = getProjectStartDate(project);
+          const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
+          if (!deadlineEndExclusive) return;
+          const now = new Date();
+          const todayEndExclusive = addLocalDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 1);
+          const totalProjectDays = Math.max(1, diffCalendarDays(startDay, deadlineEndExclusive));
+          const totalDaysShown = diffCalendarDays(startDay, todayEndExclusive);
+          if (totalDaysShown <= 0) return;
+
+          const pad2 = (value) => String(value).padStart(2, '0');
           const labels = [];
           const actual = [];
-          let cumulativeSeconds = 0;
-          days.forEach(day => {
-            labels.push(day.toISOString().slice(5, 10)); // 'MM-DD'
-            // Sum durations for entries up to this day (inclusive)
-            const dayEntries = data.entries.filter(e => {
-              return e.projectId === projectId && !e.isRunning && new Date(e.startTime) <= day;
-            });
-            cumulativeSeconds = dayEntries.reduce((sum, e) => sum + (e.duration || 0), 0);
-            actual.push((cumulativeSeconds / 3600));
-          });
-          // Expected cumulative line: linear interpolation from 0 to budget over total days until deadline
-          const totalProjectDays = (new Date(project.deadline) - startDate) / (1000 * 60 * 60 * 24);
           const expected = [];
-          days.forEach(day => {
-            const diff = (day - startDate) / (1000 * 60 * 60 * 24);
-            const ratio = totalProjectDays > 0 ? Math.min(diff / totalProjectDays, 1) : 0;
-            expected.push(project.budgetHours * ratio);
+
+          const dailyHoursMap = {};
+          data.entries.forEach(entry => {
+            if (entry.isRunning || !entry.duration) return;
+            if (entry.projectId !== project.id) return;
+            const start = new Date(entry.startTime);
+            const dayKey = formatLocalDateString(start);
+            dailyHoursMap[dayKey] = (dailyHoursMap[dayKey] || 0) + entry.duration / 3600;
           });
+
+          let cumulativeHours = 0;
+          for (let i = 0; i < totalDaysShown; i++) {
+            const day = addLocalDays(startDay, i);
+            const dayKey = formatLocalDateString(day);
+            cumulativeHours += dailyHoursMap[dayKey] || 0;
+            labels.push(`${pad2(day.getMonth() + 1)}-${pad2(day.getDate())}`);
+            actual.push(cumulativeHours);
+            const ratio = totalProjectDays > 0 ? Math.min((i + 1) / totalProjectDays, 1) : 0;
+            expected.push(project.budgetHours * ratio);
+          }
           // Create chart
           window.burndownChart = new Chart(ctx, {
             type: 'line',
