@@ -6153,6 +6153,10 @@ function loadData() {
             totalElapsedP.innerHTML = '<strong>Total Elapsed:</strong> <span id="runningTotalElapsed"></span>';
             totalElapsedP.style.marginBottom = '0.5rem';
             toolbar.appendChild(totalElapsedP);
+            const timeLeftTodayP = document.createElement('p');
+            timeLeftTodayP.innerHTML = '<strong>Time Left Today:</strong> <span id="runningTimeLeftToday"></span>';
+            timeLeftTodayP.style.marginBottom = '0.5rem';
+            toolbar.appendChild(timeLeftTodayP);
             // Display the sum of all timer factors to make concurrency weighting visible at a glance.
             const totalFactorP = document.createElement('p');
             totalFactorP.innerHTML = '<strong>Total Factor:</strong> <span id="runningTotalFactor"></span>';
@@ -6324,11 +6328,16 @@ function loadData() {
               runningDiv.appendChild(row);
             });
             // Start an interval that updates all running timers every second
+            const statsSnapshot = computeGlobalStats();
+            const dailyTargetHours = Math.max(0, Number(statsSnapshot.dailyTarget) || 0);
+            const completedTodayHours = Math.max(0, Number(statsSnapshot.todayHours) || 0);
             const tick = () => {
               const now = new Date();
+              const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
               let totalEarned = 0;
               let totalElapsedSeconds = 0;
               let totalFactor = 0;
+              let runningTodayEffectiveSeconds = 0;
               runningEntries.forEach(entry => {
                 // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
                 const last = entry.lastUpdateTime ? new Date(entry.lastUpdateTime) : new Date(entry.startTime);
@@ -6338,6 +6347,11 @@ function loadData() {
                 const effective = prev + extra;
                 totalElapsedSeconds += effective;
                 totalFactor += factor;
+                // For "Time Left Today", estimate only today's contribution from running timers.
+                const effectiveTodayStart = new Date(Math.max(new Date(entry.startTime).getTime(), todayStart.getTime()));
+                if (effectiveTodayStart < now) {
+                  runningTodayEffectiveSeconds += ((now - effectiveTodayStart) / 1000) * factor;
+                }
                 // Update elapsed display
                 const elapsedSpan = document.getElementById('runningElapsed-' + entry.id);
                 if (elapsedSpan) elapsedSpan.textContent = formatDuration(Math.floor(effective));
@@ -6359,6 +6373,11 @@ function loadData() {
               if (totalSpan) totalSpan.textContent = formatCurrency(totalEarned, 0);
               const totalElapsedSpan = document.getElementById('runningTotalElapsed');
               if (totalElapsedSpan) totalElapsedSpan.textContent = formatDuration(Math.floor(totalElapsedSeconds));
+              const todayProgressHours = completedTodayHours + (runningTodayEffectiveSeconds / 3600);
+              const remainingGoalHours = Math.max(0, dailyTargetHours - todayProgressHours);
+              const secondsLeft = totalFactor > 0 ? Math.ceil((remainingGoalHours / totalFactor) * 3600) : 0;
+              const timeLeftTodaySpan = document.getElementById('runningTimeLeftToday');
+              if (timeLeftTodaySpan) timeLeftTodaySpan.textContent = formatDuration(secondsLeft);
               const totalFactorSpan = document.getElementById('runningTotalFactor');
               if (totalFactorSpan) totalFactorSpan.textContent = Math.round(totalFactor * 100) + '%';
             };
