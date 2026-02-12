@@ -4371,14 +4371,14 @@ function loadData() {
             ? cachedStravaScoreScale
             : STRAVA_SCORE_DEFAULT_SCALE;
           const score = raw * scale;
-          const clamped = Math.max(0, Math.min(5, score));
+          const clamped = Math.max(0, score);
           return Math.round(clamped * 10) / 10;
         }
 
         function parseExertionValue(rawValue) {
           const value = Number.parseFloat(rawValue);
           if (!Number.isFinite(value)) return null;
-          const clamped = Math.max(0, Math.min(5, value));
+          const clamped = Math.max(0, value);
           return Math.round(clamped * 10) / 10;
         }
 
@@ -4481,18 +4481,25 @@ function loadData() {
             const exertionValue = document.createElement('input');
             exertionValue.type = 'number';
             exertionValue.min = '0';
-            exertionValue.max = '5';
             exertionValue.step = '0.1';
             exertionValue.inputMode = 'decimal';
             exertionValue.className = 'strava-exertion-value';
             const exertionRange = document.createElement('input');
             exertionRange.type = 'range';
             exertionRange.min = '0';
-            exertionRange.max = '5';
             exertionRange.step = '0.1';
             exertionRange.className = 'strava-exertion-range';
+            const ensureRangeUpperBound = (value) => {
+              const numeric = Number(value);
+              if (!Number.isFinite(numeric)) return;
+              const currentMax = Number.parseFloat(exertionRange.max);
+              const baseline = Number.isFinite(currentMax) && currentMax > 0 ? currentMax : 10;
+              const nextMax = Math.max(baseline, Math.ceil(numeric + 1));
+              exertionRange.max = String(nextMax);
+            };
             const fallbackExertion = actualExertion ?? activity.reported_exertion ?? displayEstimate;
             const startingValue = Number.isFinite(Number(fallbackExertion)) ? Number(fallbackExertion) : 0;
+            ensureRangeUpperBound(startingValue);
             exertionValue.value = formatExertion(startingValue);
             exertionRange.value = String(startingValue);
             const saveButton = document.createElement('button');
@@ -4508,6 +4515,7 @@ function loadData() {
               const parsed = parseExertionValue(exertionValue.value);
               if (parsed === null) return null;
               exertionValue.value = formatExertion(parsed);
+              ensureRangeUpperBound(parsed);
               exertionRange.value = String(parsed);
               return parsed;
             };
@@ -4528,7 +4536,7 @@ function loadData() {
             saveButton.addEventListener('click', () => {
               const parsed = syncFromValue();
               if (parsed === null) {
-                alert('Enter a value between 0 and 5.');
+                alert('Enter a value of 0 or higher.');
                 return;
               }
               saveStravaExertionOverride(activity.id, parsed);

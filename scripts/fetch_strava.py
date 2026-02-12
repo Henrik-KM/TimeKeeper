@@ -127,7 +127,7 @@ def estimate_exertion(
         return None
     intensity = avg_hr / max_hr
     score = intensity * (elapsed_time_min / 60.0) * 3.5
-    score = max(0.0, min(5.0, score))
+    score = max(0.0, score)
     return round(score, 2)
 
 
