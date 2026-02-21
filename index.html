@@ -1231,8 +1231,15 @@
           const makeWindowRegression = (months) => {
             const windowMs = months * 30 * msPerDay;
             const startTime = wealthHistory[wealthHistory.length - 1].time - windowMs;
-            const source = wealthHistory.filter(entry => entry.time >= startTime);
-            const chosen = source.length >= 2 ? source : wealthHistory;
+            const inWindow = wealthHistory.filter(entry => entry.time >= startTime);
+            const beforeWindow = wealthHistory.filter(entry => entry.time < startTime);
+            let chosen = inWindow;
+            if (beforeWindow.length && inWindow.length) {
+              chosen = [beforeWindow[beforeWindow.length - 1], ...inWindow];
+            }
+            if (chosen.length < 2) {
+              chosen = wealthHistory.slice(-Math.min(wealthHistory.length, 2));
+            }
             const baseTime = chosen[0].time;
             const input = chosen.map(entry => ({ x: (entry.time - baseTime) / msPerDay, y: entry.amount }));
             const fit = computeWealthRegression(input);
