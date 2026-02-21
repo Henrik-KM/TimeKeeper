@@ -1245,10 +1245,10 @@
             const fit = computeWealthRegression(input);
             return fit ? { fit, baseTime, months, points: chosen.length } : null;
           };
-          const getWindowPrediction = (windowModel, targetDate) => {
+          const getWindowProjectionFromLatest = (windowModel, targetDate) => {
             if (!windowModel || !windowModel.fit) return lastEntry.amount;
-            const x = (targetDate.getTime() - windowModel.baseTime) / msPerDay;
-            return windowModel.fit.intercept + windowModel.fit.slope * x;
+            const daysFromLatest = (targetDate.getTime() - lastEntry.time) / msPerDay;
+            return lastEntry.amount + windowModel.fit.slope * daysFromLatest;
           };
           const regression6m = makeWindowRegression(6);
           const regression12m = makeWindowRegression(12);
@@ -1311,8 +1311,8 @@
             }
           ];
           if (projectionData.length) {
-            const projection6mData = regression6m ? projectionData.map(p => ({ x: p.x, y: getWindowPrediction(regression6m, new Date(p.x)) })) : [];
-            const projection12mData = regression12m ? projectionData.map(p => ({ x: p.x, y: getWindowPrediction(regression12m, new Date(p.x)) })) : [];
+            const projection6mData = regression6m ? projectionData.map(p => ({ x: p.x, y: getWindowProjectionFromLatest(regression6m, new Date(p.x)) })) : [];
+            const projection12mData = regression12m ? projectionData.map(p => ({ x: p.x, y: getWindowProjectionFromLatest(regression12m, new Date(p.x)) })) : [];
             datasets.push(
               {
                 label: 'Projection band (± ~1σ)',
@@ -1444,8 +1444,8 @@
           const monthlySlope12m = regression12m ? regression12m.fit.slope * 30 : null;
           const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
           const horizonDate = new Date(horizonPoint.x || lastDate.getTime());
-          const projection6mAtHorizon = regression6m ? getWindowPrediction(regression6m, horizonDate) : null;
-          const projection12mAtHorizon = regression12m ? getWindowPrediction(regression12m, horizonDate) : null;
+          const projection6mAtHorizon = regression6m ? getWindowProjectionFromLatest(regression6m, horizonDate) : null;
+          const projection12mAtHorizon = regression12m ? getWindowProjectionFromLatest(regression12m, horizonDate) : null;
           summaryParts.push(`<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`);
           summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope, -1)} per month trend).`);
           summaryParts.push(`<strong>Savings pace comparison:</strong> 6m ${formatSignedCurrency(monthlySlope6m || 0, -1)}/month, 12m ${formatSignedCurrency(monthlySlope12m || 0, -1)}/month, baseline 18m ${formatSignedCurrency(monthlySlope, -1)}/month.`);
