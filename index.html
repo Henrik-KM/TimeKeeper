@@ -1228,31 +1228,43 @@
             .map(entry => ({ x: (entry.time - regressionBaseTime) / msPerDay, y: entry.amount }));
           const chartPoints = wealthHistory.map(entry => ({ x: entry.time, y: entry.amount }));
           const regression = computeWealthRegression(regressionInput);
-          const makeWindowRegression = (months) => {
+          const lastEntry = wealthHistory[wealthHistory.length - 1];
+          const estimateAmountAtTime = (targetTime) => {
+            if (!wealthHistory.length) return 0;
+            if (targetTime <= wealthHistory[0].time) return wealthHistory[0].amount;
+            if (targetTime >= lastEntry.time) return lastEntry.amount;
+            for (let i = 0; i < wealthHistory.length - 1; i++) {
+              const left = wealthHistory[i];
+              const right = wealthHistory[i + 1];
+              if (targetTime >= left.time && targetTime <= right.time) {
+                const span = right.time - left.time;
+                if (span <= 0) return right.amount;
+                const ratio = (targetTime - left.time) / span;
+                return left.amount + (right.amount - left.amount) * ratio;
+              }
+            }
+            return lastEntry.amount;
+          };
+          const makeWindowPace = (months) => {
             const windowMs = months * 30 * msPerDay;
-            const startTime = wealthHistory[wealthHistory.length - 1].time - windowMs;
-            const inWindow = wealthHistory.filter(entry => entry.time >= startTime);
-            const beforeWindow = wealthHistory.filter(entry => entry.time < startTime);
-            let chosen = inWindow;
-            if (beforeWindow.length && inWindow.length) {
-              chosen = [beforeWindow[beforeWindow.length - 1], ...inWindow];
-            }
-            if (chosen.length < 2) {
-              chosen = wealthHistory.slice(-Math.min(wealthHistory.length, 2));
-            }
-            const baseTime = chosen[0].time;
-            const input = chosen.map(entry => ({ x: (entry.time - baseTime) / msPerDay, y: entry.amount }));
-            const fit = computeWealthRegression(input);
-            return fit ? { fit, baseTime, months, points: chosen.length } : null;
+            const startTime = lastEntry.time - windowMs;
+            const startAmount = estimateAmountAtTime(startTime);
+            const elapsedDays = (lastEntry.time - startTime) / msPerDay;
+            if (elapsedDays <= 0) return null;
+            return {
+              months,
+              startTime,
+              startAmount,
+              slopePerDay: (lastEntry.amount - startAmount) / elapsedDays
+            };
           };
           const getWindowProjectionFromLatest = (windowModel, targetDate) => {
-            if (!windowModel || !windowModel.fit) return lastEntry.amount;
+            if (!windowModel) return lastEntry.amount;
             const daysFromLatest = (targetDate.getTime() - lastEntry.time) / msPerDay;
-            return lastEntry.amount + windowModel.fit.slope * daysFromLatest;
+            return lastEntry.amount + windowModel.slopePerDay * daysFromLatest;
           };
-          const regression6m = makeWindowRegression(6);
-          const regression12m = makeWindowRegression(12);
-          const lastEntry = wealthHistory[wealthHistory.length - 1];
+          const regression6m = makeWindowPace(6);
+          const regression12m = makeWindowPace(12);
           const lastDate = new Date(lastEntry.time);
           const formatWealth = (num, decimals = -1) => {
             const formatted = formatCurrency(num, decimals);
@@ -1440,8 +1452,8 @@
           });
           const summaryParts = [];
           const monthlySlope = regression ? regression.slope * 30 : 0;
-          const monthlySlope6m = regression6m ? regression6m.fit.slope * 30 : null;
-          const monthlySlope12m = regression12m ? regression12m.fit.slope * 30 : null;
+          const monthlySlope6m = regression6m ? regression6m.slopePerDay * 30 : null;
+          const monthlySlope12m = regression12m ? regression12m.slopePerDay * 30 : null;
           const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
           const horizonDate = new Date(horizonPoint.x || lastDate.getTime());
           const projection6mAtHorizon = regression6m ? getWindowProjectionFromLatest(regression6m, horizonDate) : null;
