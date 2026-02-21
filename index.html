@@ -1142,7 +1142,7 @@
             residualSum += Math.pow(p.y - pred, 2);
           });
           const residualStd = Math.sqrt(residualSum / Math.max(1, n - 2));
-          return { slope, intercept, meanX, meanY, residualStd, sumSqX };
+          return { slope, intercept, meanX, meanY, residualStd, sumSqX, count: n };
         }
         function addWealthHistoryEntry(dateStr, amountRaw, noteRaw = '') {
           const parsedDate = parseISODateOnly(dateStr);
@@ -1228,6 +1228,23 @@
             .map(entry => ({ x: (entry.time - regressionBaseTime) / msPerDay, y: entry.amount }));
           const chartPoints = wealthHistory.map(entry => ({ x: entry.time, y: entry.amount }));
           const regression = computeWealthRegression(regressionInput);
+          const makeWindowRegression = (months) => {
+            const windowMs = months * 30 * msPerDay;
+            const startTime = wealthHistory[wealthHistory.length - 1].time - windowMs;
+            const source = wealthHistory.filter(entry => entry.time >= startTime);
+            const chosen = source.length >= 2 ? source : wealthHistory;
+            const baseTime = chosen[0].time;
+            const input = chosen.map(entry => ({ x: (entry.time - baseTime) / msPerDay, y: entry.amount }));
+            const fit = computeWealthRegression(input);
+            return fit ? { fit, baseTime, months, points: chosen.length } : null;
+          };
+          const getWindowPrediction = (windowModel, targetDate) => {
+            if (!windowModel || !windowModel.fit) return lastEntry.amount;
+            const x = (targetDate.getTime() - windowModel.baseTime) / msPerDay;
+            return windowModel.fit.intercept + windowModel.fit.slope * x;
+          };
+          const regression6m = makeWindowRegression(6);
+          const regression12m = makeWindowRegression(12);
           const lastEntry = wealthHistory[wealthHistory.length - 1];
           const lastDate = new Date(lastEntry.time);
           const formatWealth = (num, decimals = -1) => {
@@ -1287,6 +1304,8 @@
             }
           ];
           if (projectionData.length) {
+            const projection6mData = regression6m ? projectionData.map(p => ({ x: p.x, y: getWindowPrediction(regression6m, new Date(p.x)) })) : [];
+            const projection12mData = regression12m ? projectionData.map(p => ({ x: p.x, y: getWindowPrediction(regression12m, new Date(p.x)) })) : [];
             datasets.push(
               {
                 label: 'Projection band (± ~1σ)',
@@ -1309,15 +1328,40 @@
                 borderWidth: 0
               },
               {
-                label: 'Projection',
+                label: 'Projection (18m trend)',
                 data: projectionData,
                 borderColor: '#0ea5e9',
                 backgroundColor: '#0ea5e9',
                 borderDash: [6, 4],
+                borderWidth: 2,
                 pointRadius: 0,
                 tension: 0.2
               }
             );
+            if (projection6mData.length) {
+              datasets.push({
+                label: 'Projection (6m pace)',
+                data: projection6mData,
+                borderColor: '#f97316',
+                backgroundColor: '#f97316',
+                borderDash: [2, 5],
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.15
+              });
+            }
+            if (projection12mData.length) {
+              datasets.push({
+                label: 'Projection (12m pace)',
+                data: projection12mData,
+                borderColor: '#a855f7',
+                backgroundColor: '#a855f7',
+                borderDash: [10, 4],
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.15
+              });
+            }
           }
           const goalDateParsed = parseLocalDateString(goal.date);
           const hasGoal = goal.amount > 0 && goalDateParsed instanceof Date && !isNaN(goalDateParsed);
@@ -1356,14 +1400,23 @@
                 },
                 y: {
                   title: { display: true, text: 'Total wealth (SEK)' },
+                  grace: '12%',
                   ticks: {
                     callback: (val) => formatCompactWealth(val),
-                    padding: 6
+                    padding: 8,
+                    maxTicksLimit: 7
                   }
                 }
               },
               plugins: {
-                legend: { position: 'bottom' },
+                legend: {
+                  position: 'bottom',
+                  labels: {
+                    boxWidth: 22,
+                    usePointStyle: true,
+                    filter: (item) => item.text !== 'Projection upper bound'
+                  }
+                },
                 tooltip: {
                   padding: 10,
                   callbacks: {
@@ -1380,11 +1433,19 @@
           });
           const summaryParts = [];
           const monthlySlope = regression ? regression.slope * 30 : 0;
+          const monthlySlope6m = regression6m ? regression6m.fit.slope * 30 : null;
+          const monthlySlope12m = regression12m ? regression12m.fit.slope * 30 : null;
           const horizonPoint = projectionData.length ? projectionData[projectionData.length - 1] : lastEntry;
+          const horizonDate = new Date(horizonPoint.x || lastDate.getTime());
+          const projection6mAtHorizon = regression6m ? getWindowPrediction(regression6m, horizonDate) : null;
+          const projection12mAtHorizon = regression12m ? getWindowPrediction(regression12m, horizonDate) : null;
           summaryParts.push(`<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`);
           summaryParts.push(`<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope, -1)} per month trend).`);
-          summaryParts.push(`<strong>Current savings pace:</strong> ${formatSignedCurrency(monthlySlope, -1)} per month based on the latest data.`);
-          summaryParts.push('<span class="muted">Projection trend uses the most recent 18 months of data for a closer fit.</span>');
+          summaryParts.push(`<strong>Savings pace comparison:</strong> 6m ${formatSignedCurrency(monthlySlope6m || 0, -1)}/month, 12m ${formatSignedCurrency(monthlySlope12m || 0, -1)}/month, baseline 18m ${formatSignedCurrency(monthlySlope, -1)}/month.`);
+          if (projection6mAtHorizon !== null && projection12mAtHorizon !== null) {
+            summaryParts.push(`<strong>Projection comparison by ${projectionHorizonDate.toLocaleDateString()}:</strong> 6m pace ${formatWealth(projection6mAtHorizon)}, 12m pace ${formatWealth(projection12mAtHorizon)}, baseline ${formatWealth(horizonPoint.y)}.`);
+          }
+          summaryParts.push('<span class="muted">Trend lines use rolling windows (6m, 12m, and 18m baseline) so you can compare recent acceleration vs longer-term pace.</span>');
           if (hasGoal) {
             const daysToGoal = Math.round((goalDateParsed.getTime() - lastDate.getTime()) / msPerDay);
             const goalProjection = getPrediction(goalDateParsed).value;
