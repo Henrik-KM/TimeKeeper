@@ -4345,20 +4345,75 @@ function loadData() {
         function getStravaExertionOverrides() {
           try {
             const raw = localStorage.getItem('stravaExertionOverrides');
-            return raw ? JSON.parse(raw) : {};
+            const parsed = raw ? JSON.parse(raw) : {};
+            if (!parsed || typeof parsed !== 'object') return {};
+            const normalized = {};
+            Object.keys(parsed).forEach(key => {
+              const record = normalizeStravaOverrideRecord(parsed[key]);
+              if (record) {
+                normalized[key] = record;
+              }
+            });
+            return normalized;
           } catch (error) {
             return {};
           }
         }
 
-        function saveStravaExertionOverride(activityId, value) {
+        function normalizeStravaOverrideRecord(value) {
+          if (value && typeof value === 'object' && !Array.isArray(value)) {
+            const record = {};
+            const exertion = parseExertionValue(value.exertion);
+            if (exertion !== null) {
+              record.exertion = exertion;
+            }
+            if (value.faulty === true) {
+              record.faulty = true;
+            }
+            return Object.keys(record).length ? record : null;
+          }
+          const exertion = parseExertionValue(value);
+          return exertion === null ? null : { exertion };
+        }
+
+        function saveStravaActivityOverride(activityId, updates = {}) {
           const overrides = getStravaExertionOverrides();
-          if (value === null || value === undefined) {
-            delete overrides[String(activityId)];
+          const key = String(activityId);
+          const next = Object.assign({}, overrides[key] || {});
+          if (Object.prototype.hasOwnProperty.call(updates, 'exertion')) {
+            const exertion = updates.exertion;
+            if (exertion === null || exertion === undefined) {
+              delete next.exertion;
+            } else {
+              const parsed = parseExertionValue(exertion);
+              if (parsed === null) {
+                delete next.exertion;
+              } else {
+                next.exertion = parsed;
+              }
+            }
+          }
+          if (Object.prototype.hasOwnProperty.call(updates, 'faulty')) {
+            if (updates.faulty) {
+              next.faulty = true;
+            } else {
+              delete next.faulty;
+            }
+          }
+          if (!Object.keys(next).length) {
+            delete overrides[key];
           } else {
-            overrides[String(activityId)] = value;
+            overrides[key] = next;
           }
           localStorage.setItem('stravaExertionOverrides', JSON.stringify(overrides));
+        }
+
+        function saveStravaExertionOverride(activityId, value) {
+          saveStravaActivityOverride(activityId, { exertion: value });
+        }
+
+        function setStravaActivityFaulty(activityId, faulty) {
+          saveStravaActivityOverride(activityId, { faulty });
         }
 
         function applyStravaExertionOverrides(activities) {
@@ -4368,8 +4423,21 @@ function loadData() {
             if (override === undefined) {
               return activity;
             }
-            return { ...activity, local_exertion: override };
+            const result = { ...activity };
+            if (Object.prototype.hasOwnProperty.call(override, 'exertion')) {
+              result.local_exertion = override.exertion;
+            }
+            if (override.faulty === true) {
+              result.local_faulty = true;
+            }
+            return result;
           });
+        }
+
+        function isStravaActivityFaulty(activity) {
+          if (!activity || typeof activity !== 'object') return false;
+          if (activity.local_faulty === true) return true;
+          return activity.faulty === true;
         }
 
         function computeStravaRawScore(activity) {
@@ -4419,6 +4487,7 @@ function loadData() {
           let denominator = 0;
           let samples = 0;
           activities.forEach(activity => {
+            if (isStravaActivityFaulty(activity)) return;
             const measured = getMeasuredStravaScore(activity);
             if (measured === null) return;
             const raw = computeStravaRawScore(activity);
@@ -4544,6 +4613,9 @@ function loadData() {
             if (actualExertion !== null && actualExertion !== undefined) {
               metaParts.push(`Actual Score ${formatExertion(actualExertion)}`);
             }
+            if (isStravaActivityFaulty(activity)) {
+              metaParts.push('Faulty HR excluded from fit');
+            }
             if (metaParts.length > 0) {
               metaParts.forEach(part => {
                 const pill = document.createElement('span');
@@ -4590,6 +4662,17 @@ function loadData() {
             clearButton.type = 'button';
             clearButton.className = 'btn secondary';
             clearButton.textContent = 'Clear';
+            const faultyButton = document.createElement('button');
+            faultyButton.type = 'button';
+            faultyButton.textContent = 'Faulty';
+            const syncFaultyButton = (faulty) => {
+              faultyButton.className = faulty ? 'btn danger' : 'btn secondary';
+              faultyButton.setAttribute('aria-pressed', faulty ? 'true' : 'false');
+              faultyButton.title = faulty
+                ? 'This workout is excluded from the HR-to-score fit.'
+                : 'Exclude this workout from the HR-to-score fit.';
+            };
+            syncFaultyButton(isStravaActivityFaulty(activity));
 
             const syncFromValue = () => {
               const parsed = parseExertionValue(exertionValue.value);
@@ -4632,12 +4715,20 @@ function loadData() {
               renderStravaActivities(updatedActivities);
               updateFitnessCards();
             });
+            faultyButton.addEventListener('click', () => {
+              setStravaActivityFaulty(activity.id, !isStravaActivityFaulty(activity));
+              const updatedActivities = applyStravaExertionOverrides(cachedStravaActivities);
+              refreshStravaScoreScale(updatedActivities);
+              renderStravaActivities(updatedActivities);
+              updateFitnessCards();
+            });
 
             exertionRow.appendChild(exertionLabel);
             exertionRow.appendChild(exertionRange);
             exertionRow.appendChild(exertionValue);
             exertionRow.appendChild(saveButton);
             exertionRow.appendChild(clearButton);
+            exertionRow.appendChild(faultyButton);
             item.appendChild(exertionRow);
             list.appendChild(item);
           });

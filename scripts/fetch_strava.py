@@ -102,19 +102,24 @@ def enrich_activity(activity: dict, access_token: str) -> dict:
     return activity
 
 
-def load_exertion_overrides() -> dict[str, float]:
+def load_exertion_overrides() -> dict[str, dict[str, float | bool]]:
     if not os.path.exists(OVERRIDES_FILE):
         return {}
     with open(OVERRIDES_FILE, "r", encoding="utf-8") as overrides_file:
         payload = json.load(overrides_file)
-    overrides: dict[str, float] = {}
+    overrides: dict[str, dict[str, float | bool]] = {}
     for key, value in payload.items():
+        record: dict[str, float | bool] = {}
         if isinstance(value, dict):
             exertion = value.get("exertion")
+            if isinstance(value.get("faulty"), bool) and value.get("faulty"):
+                record["faulty"] = True
         else:
             exertion = value
         if isinstance(exertion, (int, float)):
-            overrides[str(key)] = float(exertion)
+            record["exertion"] = float(exertion)
+        if record:
+            overrides[str(key)] = record
     return overrides
 
 
@@ -190,7 +195,8 @@ def main() -> None:
                 payload.get("elapsed_time_min"),
             )
             override = overrides.get(str(payload.get("id")))
-            payload["exertion"] = override if override is not None else None
+            payload["exertion"] = override.get("exertion") if override else None
+            payload["faulty"] = bool(override.get("faulty")) if override else False
             slimmed.append(payload)
         write_payload(slimmed)
     except requests.HTTPError as error:
