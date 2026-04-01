@@ -4248,6 +4248,89 @@ function loadData() {
           return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
         }
 
+        const ROLLING_PACE_DAYS = 30;
+
+        function startOfLocalDay(date) {
+          if (!(date instanceof Date) || isNaN(date)) return null;
+          return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+        }
+
+        function minDate(a, b) {
+          if (!(a instanceof Date) || isNaN(a)) return b instanceof Date && !isNaN(b) ? new Date(b) : null;
+          if (!(b instanceof Date) || isNaN(b)) return new Date(a);
+          return a <= b ? new Date(a) : new Date(b);
+        }
+
+        function maxDate(a, b) {
+          if (!(a instanceof Date) || isNaN(a)) return b instanceof Date && !isNaN(b) ? new Date(b) : null;
+          if (!(b instanceof Date) || isNaN(b)) return new Date(a);
+          return a >= b ? new Date(a) : new Date(b);
+        }
+
+        function sumEntryHours(entries, startInclusive = null, endExclusive = null) {
+          if (!Array.isArray(entries) || entries.length === 0) return 0;
+          let totalSeconds = 0;
+          entries.forEach(entry => {
+            if (!entry || !entry.duration) return;
+            const start = new Date(entry.startTime);
+            if (isNaN(start)) return;
+            if (startInclusive && start < startInclusive) return;
+            if (endExclusive && start >= endExclusive) return;
+            totalSeconds += entry.duration || 0;
+          });
+          return totalSeconds / 3600;
+        }
+
+        function getRollingWindowBounds(referenceDate = new Date(), days = ROLLING_PACE_DAYS) {
+          const endExclusive = addLocalDays(startOfLocalDay(referenceDate), 1);
+          const start = addLocalDays(endExclusive, -Math.max(1, days));
+          return { start, endExclusive };
+        }
+
+        function getProjectPlanningSnapshot(project, entries, snapshotDate) {
+          const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
+          const projectStart = getProjectStartDate(project);
+          const snapshotStart = maxDate(startOfLocalDay(snapshotDate), projectStart);
+          if (!deadlineEndExclusive || !snapshotStart || snapshotStart >= deadlineEndExclusive) {
+            return {
+              snapshotStart,
+              remainingHours: 0,
+              remainingWorkdays: 0,
+              dailyRate: 0
+            };
+          }
+          const workedBeforeSnapshot = sumEntryHours(entries, null, snapshotStart);
+          const remainingHours = Math.max(0, (project.budgetHours || 0) - workedBeforeSnapshot);
+          const remainingWorkdays = countWorkdays(snapshotStart, deadlineEndExclusive);
+          if (remainingHours <= 0 || remainingWorkdays <= 0) {
+            return {
+              snapshotStart,
+              remainingHours,
+              remainingWorkdays,
+              dailyRate: 0
+            };
+          }
+          return {
+            snapshotStart,
+            remainingHours,
+            remainingWorkdays,
+            dailyRate: remainingHours / remainingWorkdays
+          };
+        }
+
+        function getProjectPlannedHoursForPeriod(project, entries, snapshotDate, periodEndExclusive) {
+          const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
+          const snapshot = getProjectPlanningSnapshot(project, entries, snapshotDate);
+          if (!deadlineEndExclusive || !snapshot.snapshotStart || snapshot.dailyRate <= 0 || !periodEndExclusive) {
+            return 0;
+          }
+          const effectiveEnd = minDate(periodEndExclusive, deadlineEndExclusive);
+          if (!effectiveEnd || effectiveEnd <= snapshot.snapshotStart) return 0;
+          const workdaysInPeriod = countWorkdays(snapshot.snapshotStart, effectiveEnd);
+          if (workdaysInPeriod <= 0) return 0;
+          return snapshot.dailyRate * workdaysInPeriod;
+        }
+
         function utcDayNumber(date) {
           if (!(date instanceof Date) || isNaN(date)) return NaN;
           const msPerDay = 24 * 60 * 60 * 1000;
@@ -4790,13 +4873,13 @@ function loadData() {
         function computeProjectStats(project) {
           const now = new Date();
           const entries = data.entries.filter(e => e.projectId === project.id && !e.isRunning);
-          const totalSeconds = entries.reduce((sum, e) => sum + (e.duration || 0), 0);
-          const totalHours = totalSeconds / 3600;
+          const totalHours = sumEntryHours(entries);
           const remainingHours = project.budgetHours - totalHours;
           const created = getProjectStartDate(project);
           const deadlineDay = getProjectDeadlineDay(project);
           const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
           const todayEndExclusive = addLocalDays(new Date(now.getFullYear(), now.getMonth(), now.getDate()), 1);
+          const todayStart = startOfLocalDay(now);
           const projectNotStarted = now < created;
           const totalProjectDays = deadlineEndExclusive
             ? Math.max(1, diffCalendarDays(created, deadlineEndExclusive))
@@ -4872,73 +4955,41 @@ function loadData() {
           const diffToMondayWeek = (dayOfWeek + 6) % 7;
           const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - diffToMondayWeek);
           weekStart.setHours(0, 0, 0, 0);
+          const startNextWeek = addLocalDays(weekStart, 7);
           // Last week spans the 7 days prior to weekStart
           const lastWeekStart = new Date(weekStart);
           lastWeekStart.setDate(weekStart.getDate() - 7);
           const lastWeekEnd = new Date(weekStart);
-          const weeklySeconds = entries
-            .filter(e => new Date(e.startTime) >= weekStart)
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const weeklyHours = weeklySeconds / 3600;
-          const lastWeekSeconds = entries
-            .filter(e => new Date(e.startTime) >= lastWeekStart && new Date(e.startTime) < lastWeekEnd)
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const lastWeekHours = lastWeekSeconds / 3600;
+          const weeklyHours = sumEntryHours(entries, weekStart);
+          const lastWeekHours = sumEntryHours(entries, lastWeekStart, lastWeekEnd);
           // Monthly hours and last month hours
           const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+          const startNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
           const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
           const lastMonthEnd = monthStart;
-          const monthlySeconds = entries.filter(e => new Date(e.startTime) >= monthStart)
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const monthlyHours = monthlySeconds / 3600;
-          const lastMonthSeconds = entries.filter(e => new Date(e.startTime) >= lastMonthStart && new Date(e.startTime) < lastMonthEnd)
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const lastMonthHours = lastMonthSeconds / 3600;
+          const monthlyHours = sumEntryHours(entries, monthStart);
+          const lastMonthHours = sumEntryHours(entries, lastMonthStart, lastMonthEnd);
+          const rollingBounds = getRollingWindowBounds(now);
+          const rolling30Hours = sumEntryHours(entries, rollingBounds.start, rollingBounds.endExclusive);
           // Revenue
           const revenue = totalHours * project.hourlyRate;
           const weeklyRevenue = weeklyHours * project.hourlyRate;
           const lastWeekRevenue = lastWeekHours * project.hourlyRate;
           const monthlyRevenue = monthlyHours * project.hourlyRate;
           const lastMonthRevenue = lastMonthHours * project.hourlyRate;
-          // Calculate dynamic weekly and monthly targets for this project. The dynamic targets
-          // spread the remaining hours evenly across the remaining time. For the weekly target,
-          // we divide the remaining hours by the number of calendar weeks left (rounded up).
-          // For the monthly target, we divide the remaining hours by the number of calendar
-          // months left. If there are no remaining days (past deadline), we treat the count as
-          // at least one to avoid division by zero.
-          const remaining = Math.max(0, remainingHours);
-          // Compute the number of calendar weeks remaining until the project deadline. Previously this was
-          // used to spread remaining hours evenly, but to align the weekly target with the monthly plan we
-          // instead derive it from the monthly deficit and the number of working weeks left in the current
-          // calendar month. We still keep the generic weeksLeft calculation for reference.
-          const weeksLeft = Math.max(1, Math.ceil(daysLeft / 7));
-          // Determine remaining calendar months from the current month through the deadline (inclusive)
-          const currentMonthIndex = now.getFullYear() * 12 + now.getMonth();
-          const deadlineMonthIndex = deadlineDay
-            ? (deadlineDay.getFullYear() * 12 + deadlineDay.getMonth())
-            : currentMonthIndex;
-          const monthsLeft = Math.max(1, (deadlineMonthIndex - currentMonthIndex + 1));
-          // Spread the remaining hours evenly across the months left in the project.
-          let monthlyTargetConst = remaining / monthsLeft;
-          const firstDayOfThisMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          // Capture a monthly target snapshot as of the week's start so the weekly target remains stable
-          // throughout the week even as hours are logged. Always align the weekly target to the current
-          // calendar month so weeks that straddle a month boundary don't inherit the prior month's plan.
-          const weekStartForMonth = weekStart < firstDayOfThisMonth ? firstDayOfThisMonth : weekStart;
-          const monthlySecondsAtWeekStart = entries
-            .filter(e => {
-              const st = new Date(e.startTime);
-              return st >= firstDayOfThisMonth && st < weekStartForMonth;
-            })
-            .reduce((sum, e) => sum + (e.duration || 0), 0);
-          const monthlyHoursAtWeekStart = monthlySecondsAtWeekStart / 3600;
-          const monthlyRemainingAtWeekStart = Math.max(0, monthlyTargetConst - monthlyHoursAtWeekStart);
-          const startNextMonthFromWeekStart = new Date(firstDayOfThisMonth.getFullYear(), firstDayOfThisMonth.getMonth() + 1, 1);
-          const workDaysLeftFromWeekStart = countWorkdays(weekStartForMonth, startNextMonthFromWeekStart);
-          const workingWeeksLeftFromWeekStart = Math.max(1, Math.ceil(workDaysLeftFromWeekStart / 5));
-          const weeklyTargetConst = workingWeeksLeftFromWeekStart > 0 ? monthlyRemainingAtWeekStart / workingWeeksLeftFromWeekStart : 0;
+          // Planning targets are snapshot-based so they stay stable inside the
+          // current week/month instead of shifting whenever the calendar flips.
+          let weeklyTargetConst = getProjectPlannedHoursForPeriod(project, entries, weekStart, startNextWeek);
+          let monthlyTargetConst = getProjectPlannedHoursForPeriod(project, entries, monthStart, startNextMonth);
+          const todayPlanningSnapshot = getProjectPlanningSnapshot(project, entries, todayStart);
+          const rollingTargetStart = maxDate(rollingBounds.start, created);
+          const rollingWorkdays = rollingTargetStart
+            ? countWorkdays(rollingTargetStart, rollingBounds.endExclusive)
+            : 0;
+          const rolling30TargetConst = todayPlanningSnapshot.dailyRate * rollingWorkdays;
           if (projectNotStarted) {
             monthlyTargetConst = 0;
+            weeklyTargetConst = 0;
             return {
               totalHours,
               totalExpectedToDate,
@@ -4956,6 +5007,8 @@ function loadData() {
               lastWeekHours,
               monthlyHours,
               lastMonthHours,
+              rolling30Hours: 0,
+              rolling30TargetConst: 0,
               revenue,
               weeklyRevenue,
               lastWeekRevenue,
@@ -4982,6 +5035,8 @@ function loadData() {
             lastWeekHours,
             monthlyHours,
             lastMonthHours,
+            rolling30Hours,
+            rolling30TargetConst,
             revenue,
             weeklyRevenue,
             lastWeekRevenue,
@@ -5022,9 +5077,11 @@ function loadData() {
           let weekSecondsStartOfDay = 0;
           let monthSeconds = 0;
           let lastMonthSeconds = 0;
+          let rollingSeconds = 0;
           let totalRevenue = 0;
           let monthlyRevenue = 0;
           let lastMonthRevenue = 0;
+          let rollingRevenue = 0;
           // Revenue totals for today and this week (across all projects)
           let todayRevenue = 0;
           let yesterdayRevenue = 0;
@@ -5036,6 +5093,7 @@ function loadData() {
           // you should aim to work this week and this month across all projects.
           let weeklyTarget = 0;
           let monthTarget = 0;
+          let rollingTarget = 0;
           // We'll compute dailyTarget based on remaining monthly hours later
           let dailyTarget = 0;
           const activeProjects = data.projects.filter(project => isProjectActive(project, now));
@@ -5043,7 +5101,9 @@ function loadData() {
             const sp = computeProjectStats(project);
             weeklyTarget += sp.weeklyTargetConst || 0;
             monthTarget += sp.monthlyTargetConst || 0;
+            rollingTarget += sp.rolling30TargetConst || 0;
           });
+          const rollingBounds = getRollingWindowBounds(now);
           // Daily target will be computed later once monthHours is known.
           data.entries.forEach(entry => {
             if (entry.isRunning || !entry.duration) return;
@@ -5074,6 +5134,10 @@ function loadData() {
               lastMonthSeconds += entry.duration;
               lastMonthRevenue += hours * project.hourlyRate;
             }
+            if (start >= rollingBounds.start && start < rollingBounds.endExclusive) {
+              rollingSeconds += entry.duration;
+              rollingRevenue += hours * project.hourlyRate;
+            }
             totalRevenue += hours * project.hourlyRate;
             // Accumulate revenue for last week (previous 7 days before the current week)
             if (start >= lastWeekStart && start < lastWeekEnd) {
@@ -5085,7 +5149,9 @@ function loadData() {
           const weekHours = weekSeconds / 3600;
           const monthHours = monthSeconds / 3600;
           const lastMonthHours = lastMonthSeconds / 3600;
+          const rollingHours = rollingSeconds / 3600;
           const weeklyProgress = weeklyTarget > 0 ? (weekHours / weeklyTarget) * 100 : 0;
+          const rollingProgress = rollingTarget > 0 ? (rollingHours / rollingTarget) * 100 : 0;
           const revenueChange = lastMonthRevenue > 0 ? ((monthlyRevenue - lastMonthRevenue) / lastMonthRevenue) * 100 : null;
           const todayChange = yesterdayHours > 0 ? ((todayHours - yesterdayHours) / yesterdayHours) * 100 : null;
           const activeProjectsCount = activeProjects.length;
@@ -5136,6 +5202,10 @@ function loadData() {
             monthTarget,
             monthProgress,
             monthRevenue: monthlyRevenue,
+            rollingHours,
+            rollingTarget,
+            rollingProgress,
+            rollingRevenue,
             lastMonthRevenue,
             revenueChange,
             todayChange,
@@ -5205,20 +5275,6 @@ function loadData() {
           // Monthly time progress: compute fraction of working days elapsed in the current month. We count
           // only Monday–Friday as working days. Use countWorkdays() to determine the total number of
           // working days in the month and how many have elapsed so far. Weekends contribute nothing.
-          const startMonth = new Date(nowTime.getFullYear(), nowTime.getMonth(), 1);
-          const startNextMonth = new Date(nowTime.getFullYear(), nowTime.getMonth() + 1, 1);
-          const workDaysTotalMonth = countWorkdays(startMonth, startNextMonth);
-          const workDaysElapsedMonth = countWorkdays(startMonth, nowTime);
-          let monthlyTimeProgress = workDaysTotalMonth > 0 ? (workDaysElapsedMonth / workDaysTotalMonth) * 100 : 0;
-
-          // The per-project daily targets align with the global daily target snapshot,
-          // so no per-project monthly snapshot is needed here.
-          if (monthlyTimeProgress > 100) monthlyTimeProgress = 100;
-          // Precompute how many working days remain in the current month and current week. The value
-          // for the month is used for monthly recommendations elsewhere; the weekly value is used
-          // for calculating the recommended daily hours per project. If the result is zero, all
-          // remaining work is effectively overdue.
-          const workDaysLeftInMonth = countWorkdays(nowTime, startNextMonth);
           // Start of next week (Monday at 00:00) for computing remaining workdays this week
           const startNextWeek = new Date(startWeek.getTime() + 7 * 24 * 60 * 60 * 1000);
           const workDaysLeftInWeek = countWorkdays(nowTime, startNextWeek);
@@ -5226,11 +5282,8 @@ function loadData() {
           // Determine schedule status for weekly and monthly progress by comparing hours progress
           // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
           const weekHoursProgress = stats.weekTarget > 0 ? (stats.weekHours / stats.weekTarget) * 100 : 0;
-          const monthHoursProgress = stats.monthTarget > 0 ? (stats.monthHours / stats.monthTarget) * 100 : 0;
           const weekScheduleDiff = weekHoursProgress - weeklyTimeProgress;
-          const monthScheduleDiff = monthHoursProgress - monthlyTimeProgress;
           const weekScheduleLabel = weekScheduleDiff > 5 ? 'Ahead of schedule' : (weekScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
-          const monthScheduleLabel = monthScheduleDiff > 5 ? 'Ahead of schedule' : (monthScheduleDiff < -5 ? 'Behind schedule' : 'On schedule');
           const workoutPlan = computeWorkoutWeekPlan();
           const workoutScheduled = workoutPlan.requiredPoints;
           const workoutValue = workoutScheduled > 0
@@ -5289,16 +5342,12 @@ function loadData() {
               revenue: stats.weekRevenue || 0
             },
             {
-              title: 'This Month',
-              value: stats.monthHours.toFixed(1) + ' / ' + (stats.monthTarget ? stats.monthTarget.toFixed(1) : '0') + 'h',
-              progress: stats.monthProgress,
-              // Expected progress based on working days in the month
-              timeProgress: monthlyTimeProgress,
-              icon: '🗓',
-              progressLabel: (stats.monthProgress || 0).toFixed(1) + '% of monthly target in ' + monthlyTimeProgress.toFixed(1) + '% of the month',
-              scheduleLabel: monthScheduleLabel,
-              // Integrate monthly revenue into this card
-              revenue: stats.monthRevenue || 0
+              title: 'Rolling 30 Days',
+              value: stats.rollingHours.toFixed(1) + ' / ' + (stats.rollingTarget ? stats.rollingTarget.toFixed(1) : '0') + 'h',
+              progress: stats.rollingProgress,
+              icon: '30',
+              progressLabel: (stats.rollingProgress || 0).toFixed(1) + '% of required 30-day pace',
+              revenue: stats.rollingRevenue || 0
             },
             {
               title: 'Workout Progress',
@@ -5421,7 +5470,7 @@ function loadData() {
             // against the recommended daily hours for each project. For Week and Month, display
             // actual versus target hours and colour code based on whether the project is ahead
             // (green) or behind (red) relative to the expected progress so far.
-            if (card.title === "Today's Hours" || card.title === 'This Week' || card.title === 'This Month') {
+            if (card.title === "Today's Hours" || card.title === 'This Week' || card.title === 'Rolling 30 Days') {
               const list = document.createElement('div');
               list.style.marginTop = '0.5rem';
               perProjectStats.forEach(item => {
@@ -5460,9 +5509,8 @@ function loadData() {
                 const weeklyTargetStart = item.stats.weeklyTargetConst || 0;
                 const remainingWeekly = Math.max(0, weeklyTargetStart - projectWeekHoursStart);
                 const projectDailyTarget = workDaysLeftInWeek > 0 ? (remainingWeekly / workDaysLeftInWeek) : 0;
-                // For weekly and monthly expected to date, compute expected hours based on time progress
+                // For weekly expected to date, compute expected hours based on time progress
                 const expectedWeekSoFar = item.stats.weeklyTargetConst * (weeklyTimeProgress / 100);
-                const expectedMonthSoFar = item.stats.monthlyTargetConst * (monthlyTimeProgress / 100);
                 if (card.title === "Today's Hours") {
                   // For daily: show hours worked and daily target, colour green if on or ahead, else red
                   row.textContent = `${item.project.name}: ${projectTodayHours.toFixed(1)} / ${projectDailyTarget.toFixed(1)}h`;
@@ -5473,9 +5521,8 @@ function loadData() {
                   const onTrack = item.stats.weeklyHours >= expectedWeekSoFar - 0.01; // small tolerance
                   row.style.color = onTrack ? '#15803d' : '#b91c1c';
                 } else {
-                  // Month
-                  row.textContent = `${item.project.name}: ${item.stats.monthlyHours.toFixed(1)} / ${item.stats.monthlyTargetConst.toFixed(1)}h`;
-                  const onTrack = item.stats.monthlyHours >= expectedMonthSoFar - 0.01;
+                  row.textContent = `${item.project.name}: ${item.stats.rolling30Hours.toFixed(1)} / ${item.stats.rolling30TargetConst.toFixed(1)}h`;
+                  const onTrack = item.stats.rolling30Hours >= item.stats.rolling30TargetConst - 0.01;
                   row.style.color = onTrack ? '#15803d' : '#b91c1c';
                 }
                 list.appendChild(row);
@@ -5659,13 +5706,13 @@ function loadData() {
             nameDiv.style.fontWeight = '600';
             nameDiv.style.fontSize = '0.9rem';
             nameDiv.textContent = project.name;
-            // Add a star marker only for the monthly recommended project
+            // Add a star marker for the project that most needs attention right now.
             if (project.id === currentRecommendedMonthlyId) {
               const starM = document.createElement('span');
               starM.textContent = '★';
               starM.style.color = '#f97316';
               starM.style.marginLeft = '0.25rem';
-              starM.title = 'Recommended this month';
+              starM.title = 'Recommended pace project';
               nameDiv.appendChild(starM);
             }
             info.appendChild(nameDiv);
@@ -5760,7 +5807,7 @@ function loadData() {
           // Add responsive-table class for mobile-friendly styling
           table.classList.add('responsive-table');
           const thead = document.createElement('thead');
-          thead.innerHTML = '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>This Month</th><th>Revenue</th></tr>';
+          thead.innerHTML = '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>30-Day Pace</th><th>Revenue</th></tr>';
           table.appendChild(thead);
           const tbody = document.createElement('tbody');
           activeProjects.forEach(project => {
@@ -5782,7 +5829,7 @@ function loadData() {
               <td data-label="Status"><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
               <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
               <td data-label="Last Week">${stats.lastWeekHours.toFixed(1)}h</td>
-              <td data-label="This Month">${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</td>
+              <td data-label="30-Day Pace">${stats.rolling30Hours.toFixed(1)} / ${stats.rolling30TargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (pace)</td>
               <td data-label="Revenue">${formatCurrency(stats.revenue)}</td>
             `;
             tbody.appendChild(tr);
@@ -6072,8 +6119,8 @@ function loadData() {
                 <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</small>
               </div>
               <div style="margin:0.5rem 0;">
-                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.monthlyTargetConst ? (stats.monthlyHours / stats.monthlyTargetConst * 100) : 0}%"></div></div>
-                <small>This month: ${stats.monthlyHours.toFixed(1)} / ${stats.monthlyTargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (target)</small>
+                <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.rolling30TargetConst ? (stats.rolling30Hours / stats.rolling30TargetConst * 100) : 0}%"></div></div>
+                <small>30-day pace: ${stats.rolling30Hours.toFixed(1)} / ${stats.rolling30TargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Start Date:</strong> ${formatDate(project.startDate || project.createdAt)}</p>
               <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
@@ -6763,19 +6810,18 @@ function loadData() {
           // Never recommend (or auto-select) a project that already has a running timer,
           // since we prevent starting the same timer twice.
           const runningProjectIds = new Set(getRunningEntries().map(e => String(e.projectId)));
-          // Sort projects based on monthly budget urgency rather than alphabetically. We compute the
-          // deficit between the dynamic monthly target and the hours worked so far this month. Projects
-          // with larger positive deficits (i.e., those most behind on their monthly target) are shown
-          // first. Negative deficits (projects ahead of their monthly target) will appear later. If two
-          // projects have the same deficit, preserve original order. After sorting, if there is a
-          // recommended monthly project, move it to the top regardless of deficit (unless it is running).
+          // Sort projects based on the rolling pace gap rather than alphabetically. Projects
+          // with larger positive deficits are furthest behind the recent pace they need to hit.
+          // Negative deficits (ahead of pace) appear later. If two projects have the same
+          // deficit, preserve original order. After sorting, move the recommended project to
+          // the top unless it is already running.
           const sortedProjects = data.projects.slice().sort((a, b) => {
             let defA = 0; let defB = 0;
             try {
               const sa = computeProjectStats(a);
               const sb = computeProjectStats(b);
-              defA = (sa.monthlyTargetConst || 0) - (sa.monthlyHours || 0);
-              defB = (sb.monthlyTargetConst || 0) - (sb.monthlyHours || 0);
+              defA = (sa.rolling30TargetConst || 0) - (sa.rolling30Hours || 0);
+              defB = (sb.rolling30TargetConst || 0) - (sb.rolling30Hours || 0);
             } catch (err) {
               return 0;
             }
@@ -6806,13 +6852,13 @@ function loadData() {
             const o1 = document.createElement('option');
             o1.value = project.id;
             let label = project.name;
-            // If this project is the monthly recommended project, append a hint about how many hours are needed this month
+            // If this project is the recommended project, append a hint about the rolling pace gap.
             if (recommendedForTimerId && String(project.id) === String(recommendedForTimerId)) {
               try {
                 const sp = computeProjectStats(project);
-                let monthlyNeeded = (sp.monthlyTargetConst || 0) - (sp.monthlyHours || 0);
-                if (monthlyNeeded < 0) monthlyNeeded = 0;
-                label += ' (Recommended, needs ~' + monthlyNeeded.toFixed(1) + 'h this month)';
+                let rollingNeeded = (sp.rolling30TargetConst || 0) - (sp.rolling30Hours || 0);
+                if (rollingNeeded < 0) rollingNeeded = 0;
+                label += ' (Recommended, needs ~' + rollingNeeded.toFixed(1) + 'h to match pace)';
               } catch (err) {
                 label += ' (Recommended)';
               }
