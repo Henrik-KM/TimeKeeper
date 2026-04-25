@@ -1,6 +1,82 @@
 # TimeKeeper
 
-## Strava feed publishing (GitHub Pages)
+TimeKeeper is a static browser app for project time tracking, planning, workouts, finances, wealth tracking, backups, and Strava-fed recovery/exertion data.
+
+The deployed entrypoints remain:
+
+- `index.html`
+- `style.css`
+
+Saved browser data stays compatible with the existing `localStorage` schema. No bundler or framework is required.
+
+## Workspace layout
+
+```text
+TimeKeeper/
+|- index.html
+|- style.css
+|- src/
+|  |- main.mjs
+|  |- shared/
+|  |- features/
+|  `- styles/
+|- scripts/
+|- tests/
+|- assets/
+`- archive/legacy/
+```
+
+## Development
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Available commands:
+
+```bash
+npm run lint
+npm run format
+npm run format:check
+npm run typecheck
+npm run test:smoke
+npm run check
+```
+
+## Safety gates
+
+Use this sequence for structural refactors:
+
+1. `node --check src/main.mjs`
+2. `npm run lint`
+3. `npm run format:check`
+4. `npm run typecheck`
+5. `npm run test:smoke`
+6. Manual browser spot-check with persisted data loaded
+
+The Playwright smoke suite currently covers:
+
+- boot with saved data present
+- section navigation
+- project create/edit/delete
+- timer and manual entry flows
+- import/export
+- workout logging
+- finance and wealth rendering
+- Strava fallback rendering
+- backup/auto-sync unsupported state handling
+
+## Refactor notes
+
+- `index.html` now bootstraps `src/main.mjs` as a browser ES module.
+- Shared helpers live under `src/shared/`.
+- Extracted domain logic currently lives under `src/features/`.
+- `style.css` is the stable root stylesheet and now imports organized CSS slices from `src/styles/`.
+- Historical root-level snapshots and archives were moved into `archive/legacy/`.
+
+## Strava feed publishing
 
 This repo includes a GitHub Actions workflow that publishes a lightweight Strava JSON feed to `assets/strava.json`, which is rendered in the Workouts section of the app.
 
@@ -11,13 +87,9 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
 3. Add repository secrets in GitHub:
    - `STRAVA_CLIENT_ID`
    - `STRAVA_CLIENT_SECRET`
-
-4. Store the refresh token in `_private/strava_token.json`. The workflow will update
-   this file automatically if Strava rotates the refresh token.
+4. Store the refresh token in `_private/strava_token.json`.
 
 The workflow fetches all available activities by paging through the Strava API.
-
-Note: `_private/strava_token.json` contains a refresh token. Keep the repo private.
 
 ### Troubleshooting
 

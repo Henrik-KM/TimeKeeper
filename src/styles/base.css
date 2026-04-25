@@ -1,0 +1,74 @@
+/* Stylesheet for TimeTracker Pro */
+
+/* Reset and base typography */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu,
+    Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: #f1f5f9;
+  color: #334155;
+  min-height: 100vh;
+}
+
+/* Timer helpers */
+#timer .running-timers-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+  padding-bottom: 0.75rem;
+  margin-bottom: 0.75rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+#timer .timer-recommendation {
+  margin: 0 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.5rem;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+#timer .timer-recent {
+  margin: 0 0 0.75rem;
+}
+
+#timer .timer-hint-label {
+  margin-bottom: 0.35rem;
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+#timer .timer-chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+#timer .timer-chip {
+  border: 1px solid #cbd5e1;
+  border-radius: 999px;
+  background: #ffffff;
+  color: #334155;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.45rem 0.65rem;
+}
+
+#timer .timer-chip:hover {
+  border-color: #3b82f6;
+  color: #1d4ed8;
+}

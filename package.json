@@ -1,0 +1,20 @@
+{
+  "name": "timekeeper",
+  "private": true,
+  "scripts": {
+    "lint": "eslint . --ext .js,.mjs",
+    "format": "prettier --ignore-path .prettierignore --no-error-on-unmatched-pattern --write README.md package.json jsconfig.json playwright.config.cjs .eslintrc.cjs \"scripts/**/*.{js,mjs}\" \"tests/**/*.{js,mjs}\" \"src/**/*.{js,mjs,css,html,json,md}\"",
+    "format:check": "prettier --ignore-path .prettierignore --no-error-on-unmatched-pattern --check README.md package.json jsconfig.json playwright.config.cjs .eslintrc.cjs \"scripts/**/*.{js,mjs}\" \"tests/**/*.{js,mjs}\" \"src/**/*.{js,mjs,css,html,json,md}\"",
+    "typecheck": "tsc --project jsconfig.json --noEmit",
+    "test:smoke": "playwright test",
+    "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:smoke"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.48.2",
+    "@types/node": "^22.10.2",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

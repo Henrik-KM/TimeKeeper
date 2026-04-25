@@ -1,0 +1,522 @@
+/* Wealth dashboard styles */
+.wealth-goal-row {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+.wealth-label {
+  font-size: 0.85rem;
+  color: #475569;
+}
+.wealth-input {
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  min-width: 8rem;
+}
+.wealth-chart-wrapper {
+  margin: 0.75rem 0 0.5rem;
+  width: 100%;
+}
+.wealth-chart-wrapper canvas {
+  display: block;
+  width: 100% !important;
+  height: 400px !important;
+  max-width: 100%;
+}
+.wealth-summary {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  font-size: 0.9rem;
+  color: #0f172a;
+}
+.wealth-summary strong {
+  color: #0f172a;
+}
+.wealth-summary .muted {
+  color: #475569;
+}
+.wealth-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(280px, 1fr);
+  gap: 1rem;
+  align-items: start;
+  margin-bottom: 1.5rem;
+}
+.wealth-dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.wealth-add-card {
+  position: relative;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.wealth-add-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.card-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.card-subtitle {
+  margin: 0.15rem 0 0;
+  font-size: 0.9rem;
+  color: #475569;
+}
+.eyebrow {
+  margin: 0;
+  letter-spacing: 0.08em;
+  font-size: 0.75rem;
+  color: #475569;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+.wealth-entry-form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 0.5rem;
+  align-items: end;
+  margin-top: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+.wealth-entry-input {
+  width: 100%;
+  padding: 0.55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.95rem;
+  background: #fff;
+}
+.wealth-entry-submit {
+  width: 100%;
+  justify-self: flex-end;
+}
+.wealth-history-wrapper {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  overflow: hidden;
+}
+.wealth-history-scroll {
+  max-height: 420px;
+  overflow: auto;
+}
+.wealth-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.wealth-history-table th,
+.wealth-history-table td {
+  text-align: left;
+  padding: 0.6rem 0.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+.wealth-history-table th {
+  background: #e2e8f0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+.wealth-history-table tbody tr:nth-child(even) {
+  background: #f8fafc;
+}
+.wealth-history-table th:last-child,
+.wealth-history-table td:last-child {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.fitness-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.35rem;
+  margin-bottom: 0.5rem;
+}
+.fitness-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #475569;
+}
+.fitness-summary-row.muted {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.fitness-summary-label {
+  font-weight: 600;
+  color: #475569;
+}
+.fitness-summary-value {
+  font-weight: 600;
+  color: #0f172a;
+  text-align: right;
+}
+.fitness-summary-sub {
+  font-size: 0.75rem;
+  color: #475569;
+  margin: 0.25rem 0;
+}
+.fitness-pill-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0.35rem 0;
+}
+.fitness-pill {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: #e0e7ff;
+  color: #1e3a8a;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.2rem 0.6rem;
+}
+.fitness-pill.muted {
+  background: #e2e8f0;
+  color: #475569;
+}
+.fitness-pill.warm {
+  background: #fef3c7;
+  color: #b45309;
+}
+.fitness-impact-line {
+  font-size: 0.72rem;
+  color: #2563eb;
+}
+.fitness-credit-line {
+  font-size: 0.72rem;
+  color: #0f766e;
+}
+.fitness-settings-grid {
+  display: grid;
+  gap: 0.5rem;
+}
+.fitness-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+}
+.fitness-setting-row label {
+  flex: 1;
+  font-weight: 600;
+  color: #475569;
+}
+.fitness-setting-row input,
+.fitness-setting-row select {
+  flex: 1;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.375rem;
+  font-size: 0.8rem;
+}
+.treat-tag {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  background: #fce7f3;
+  color: #be185d;
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 0.15rem 0.4rem;
+}
+.treat-tag.muted {
+  background: #e2e8f0;
+  color: #475569;
+}
+.treat-note {
+  font-size: 0.7rem;
+  color: #7c3aed;
+  background: #ede9fe;
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.375rem;
+}
+.treat-note.archived {
+  margin-top: 0.25rem;
+  color: #6b21a8;
+  background: #f5f3ff;
+}
+.switch-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+
+.status-warning {
+  color: #b91c1c;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.status-muted {
+  color: #64748b;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+}
+
+.strava-feed {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+.strava-feed li {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.6rem;
+  padding: 0.6rem 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.strava-title {
+  font-weight: 600;
+  color: #0f172a;
+  text-decoration: none;
+}
+.strava-title:hover {
+  text-decoration: underline;
+}
+.strava-date {
+  font-size: 0.75rem;
+  color: #64748b;
+}
+.strava-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.strava-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 9999px;
+  background: #e0e7ff;
+  color: #1e3a8a;
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+.strava-exertion {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+}
+.strava-exertion-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+.strava-exertion-range {
+  flex: 1;
+  min-width: 140px;
+}
+.strava-exertion-value {
+  width: 4.5rem;
+  padding: 0.2rem 0.4rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.4rem;
+  font-size: 0.75rem;
+}
+.strava-exertion .btn {
+  padding: 0.2rem 0.6rem;
+  font-size: 0.7rem;
+}
+
+/* Project status overview */
+.project-list {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin-bottom: 2rem;
+}
+.project-list-header {
+  padding: 1rem;
+  border-bottom: 1px solid #e2e8f0;
+  font-weight: 600;
+}
+.project-item {
+  padding: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+}
+.project-item:last-child {
+  border-bottom: none;
+}
+.project-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.dot {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 9999px;
+  flex-shrink: 0;
+}
+.status-badge {
+  font-size: 0.75rem;
+  padding: 0.125rem 0.5rem;
+  border-radius: 0.5rem;
+  text-transform: capitalize;
+}
+.status-badge.green {
+  background-color: #dcfce7;
+  color: #15803d;
+}
+.status-badge.amber {
+  background-color: #fef3c7;
+  color: #92400e;
+}
+.status-badge.red {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Table */
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+th,
+td {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-size: 0.85rem;
+}
+th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  color: #475569;
+  border-bottom: 1px solid #e2e8f0;
+}
+tr:nth-child(even) td {
+  background-color: #f9fafb;
+}
+
+/* Responsive table for detailed breakdown: show each row as block on small screens */
+@media (max-width: 640px) {
+  table.responsive-table {
+    display: block;
+  }
+  table.responsive-table thead {
+    display: none;
+  }
+  table.responsive-table tbody,
+  table.responsive-table tr,
+  table.responsive-table td {
+    display: block;
+    width: 100%;
+  }
+  table.responsive-table tr {
+    margin-bottom: 1rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    background-color: #fff;
+    padding: 0.5rem;
+  }
+  table.responsive-table td {
+    text-align: left;
+    padding: 0.25rem 0;
+    border: none;
+  }
+  table.responsive-table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    display: inline-block;
+    width: 50%;
+    color: #475569;
+  }
+}
+
+/* Generic cards */
+.card {
+  background-color: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  padding: 1rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+/* Utility class for hidden elements */
+.hidden {
+  display: none;
+}
+
+/* Scatter chart sizing fix */
+#weeklyScatter,
+#monthlyScatter {
+  width: 100%;
+  height: 320px;
+  max-height: 360px;
+  min-height: 280px;
+}
+
+@media (max-width: 1024px) {
+  .wealth-grid {
+    grid-template-columns: 1fr;
+  }
+  .wealth-entry-form {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+  #wealthDashboardCard {
+    overflow-x: auto;
+  }
+  .wealth-goal-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    width: 100%;
+  }
+  .wealth-input,
+  .wealth-goal-row .btn {
+    width: 100%;
+  }
+  .wealth-chart-wrapper {
+    min-width: 680px;
+  }
+  .sidebar {
+    width: 100%;
+    height: auto;
+    position: relative;
+    border-right: none;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  .content {
+    margin-left: 0;
+    padding-top: 1rem;
+  }
+  .wealth-chart-wrapper canvas {
+    height: 520px !important;
+  }
+}
