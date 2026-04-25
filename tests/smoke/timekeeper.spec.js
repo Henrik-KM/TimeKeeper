@@ -77,7 +77,13 @@ function entryFixture(overrides = {}) {
     duration: hours * 3600,
     isRunning: false,
     createdAt:
-      overrides.createdAt || overrides.startTime || '2026-04-01T10:00:00.000'
+      overrides.createdAt || overrides.startTime || '2026-04-01T10:00:00.000',
+    ...(overrides.manualFactor !== undefined
+      ? { manualFactor: overrides.manualFactor }
+      : {}),
+    ...(overrides.focusFactor !== undefined
+      ? { focusFactor: overrides.focusFactor }
+      : {})
   };
 }
 
@@ -415,6 +421,95 @@ test('time left today counts initial elapsed time correctly at 50 percent focus'
   await page.locator('#startTimerBtnPro').click();
 
   await expect(page.locator('#runningTimeLeftToday')).toHaveText('2h 0m 0s');
+});
+
+test('recent timer chips preserve focus and start immediately', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-24T10:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'agent-project',
+        name: 'Agent Project',
+        budgetHours: 8,
+        startDate: '2026-04-24',
+        deadline: '2026-04-24'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'agent-previous',
+        projectId: 'agent-project',
+        startTime: '2026-04-23T09:00:00.000',
+        endTime: '2026-04-23T10:00:00.000',
+        createdAt: '2026-04-23T10:00:00.000',
+        hours: 1,
+        manualFactor: 0.5,
+        focusFactor: 0.5
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await expect(page.locator('#startFactorPro')).toContainText('150%');
+  await expect(page.locator('#startFactorPro')).toContainText('200%');
+
+  await page.getByRole('button', { name: 'Agent Project - 50%' }).click();
+
+  await expect(page.locator('[id^="runningFactor-"]').first()).toHaveText(
+    '50%'
+  );
+});
+
+test('focus blocker sends blocked websites once paid focus exceeds 50 percent', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-24T10:00:00');
+  await page.addInitScript(() => {
+    window['__focusWebhookUrls'] = [];
+    const record = (url) => {
+      window['__focusWebhookUrls'].push(String(url));
+    };
+    window.fetch = (url) => {
+      record(url);
+      return Promise.resolve(new Response('', { status: 204 }));
+    };
+    Object.defineProperty(navigator, 'sendBeacon', {
+      configurable: true,
+      value: (url) => {
+        record(url);
+        return true;
+      }
+    });
+  });
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'paid-project',
+        name: 'Paid Project',
+        budgetHours: 8,
+        startDate: '2026-04-24',
+        deadline: '2026-04-24'
+      })
+    ],
+    entries: []
+  });
+
+  await page.goto('/');
+  await page.locator('#timerProjectPro').selectOption('paid-project');
+  await page.locator('#startFactorPro').selectOption('1.5');
+  await page.locator('#startTimerBtnPro').click();
+
+  await expect
+    .poll(async () => {
+      return page.evaluate(() =>
+        (window['__focusWebhookUrls'] || []).join('\n')
+      );
+    })
+    .toMatch(
+      /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com/
+    );
 });
 
 test('auto-sync unsupported state still renders safely', async ({ page }) => {

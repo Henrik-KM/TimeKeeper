@@ -68,6 +68,18 @@ The Playwright smoke suite currently covers:
 - Strava fallback rendering
 - backup/auto-sync unsupported state handling
 
+## Focus Model
+
+Timer focus is stored as a multiplier on each entry:
+
+- `200%`: you plus two or more agents
+- `150%`: you plus one agent
+- `100%`: you actively focused on the project
+- `50%`: an agent working without your active focus
+- `25%`: an agent running while you are half-engaged or not monitoring it
+
+The external focus blocker is toggled through `http://127.0.0.1:8766/focus/start` and `/focus/stop` when total paid focus crosses 50%. The app includes the paid focus percentage plus a `blockedSites` query parameter currently containing Reddit and YouTube domains.
+
 ## Refactor notes
 
 - `index.html` now bootstraps `src/main.mjs` as a browser ES module.

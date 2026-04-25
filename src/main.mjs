@@ -1165,6 +1165,45 @@ import {
     if (n <= 1) return 1;
     return 1 / (1 + (n - 1) / 3);
   }
+  // Focus model:
+  // - 100% means you are actively focused on a project.
+  // - 50% means an agent is working while you are not actively focused there.
+  // - 150% means you and one agent are working together.
+  // - 200% means you and two or more agents are working together.
+  // - 25% means an agent is working while you are only half-engaged or not monitoring it.
+  const FOCUS_FACTOR_OPTIONS = [
+    { value: 2, label: '200% - you + 2+ agents' },
+    { value: 1.5, label: '150% - you + agent' },
+    { value: 1, label: '100% - you' },
+    { value: 0.75, label: '75%' },
+    { value: 0.5, label: '50% - agent' },
+    { value: 0.25, label: '25% - unmonitored agent' }
+  ];
+  function formatFocusPercent(factor) {
+    const parsed = Number(factor);
+    const safeFactor = Number.isFinite(parsed) ? parsed : 1;
+    return Math.round(safeFactor * 100) + '%';
+  }
+  function getEntryFocusFactor(entry, fallbackCount = 1) {
+    const candidates = [
+      entry && entry.focusFactor,
+      entry && entry.manualFactor,
+      entry && entry.factor,
+      computeConcurrencyFactor(fallbackCount)
+    ];
+    const value = candidates.find(
+      (candidate) => Number.isFinite(Number(candidate)) && Number(candidate) > 0
+    );
+    return Number.isFinite(Number(value)) ? Number(value) : 1;
+  }
+  function appendFocusFactorOptions(selectEl) {
+    FOCUS_FACTOR_OPTIONS.forEach((option) => {
+      const opt = document.createElement('option');
+      opt.value = String(option.value);
+      opt.textContent = option.label;
+      selectEl.appendChild(opt);
+    });
+  }
   let data = loadData();
   ensureFitnessDefaults();
   ensureWorkoutData();
@@ -1501,26 +1540,60 @@ import {
   //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
   const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
   const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
+  const FOCUS_BLOCK_THRESHOLD = 0.5;
+  const FOCUS_BLOCKED_WEBSITES = [
+    'reddit.com',
+    'www.reddit.com',
+    'old.reddit.com',
+    'youtube.com',
+    'www.youtube.com',
+    'm.youtube.com',
+    'youtu.be'
+  ];
+
+  function buildFocusWebhookUrl(rawUrl, payload) {
+    if (!payload) return rawUrl;
+    try {
+      const url = new URL(rawUrl, window.location.href);
+      url.searchParams.set('action', payload.action);
+      url.searchParams.set(
+        'paidFocus',
+        String(Math.round(payload.paidFocus * 100))
+      );
+      url.searchParams.set(
+        'threshold',
+        String(Math.round(FOCUS_BLOCK_THRESHOLD * 100))
+      );
+      url.searchParams.set('blockedSites', FOCUS_BLOCKED_WEBSITES.join(','));
+      return url.toString();
+    } catch (err) {
+      return rawUrl;
+    }
+  }
 
   // Send a ping to each URL in the list. Uses navigator.sendBeacon where
   // available to avoid blocking the page; falls back to fetch otherwise.
-  function triggerWebhooks(urls) {
+  function triggerWebhooks(urls, payload = null) {
     urls.forEach((u) => {
+      const url = buildFocusWebhookUrl(u, payload);
       try {
-        navigator.sendBeacon(u);
+        fetch(url, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(
+          () => {
+            if (navigator.sendBeacon) navigator.sendBeacon(url);
+          }
+        );
       } catch (err) {
-        // sendBeacon may not support GET-only endpoints; fallback to fetch
-        fetch(u, { method: 'GET', mode: 'no-cors' }).catch(() => {});
+        if (navigator.sendBeacon) navigator.sendBeacon(url);
       }
     });
   }
 
   // Convenience wrappers to trigger start/stop webhooks.
-  function triggerFocusStart() {
-    triggerWebhooks(START_WEBHOOKS);
+  function triggerFocusStart(paidFocus) {
+    triggerWebhooks(START_WEBHOOKS, { action: 'start', paidFocus });
   }
-  function triggerFocusStop() {
-    triggerWebhooks(STOP_WEBHOOKS);
+  function triggerFocusStop(paidFocus) {
+    triggerWebhooks(STOP_WEBHOOKS, { action: 'stop', paidFocus });
   }
 
   // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
@@ -1543,13 +1616,15 @@ import {
           : e.factor || computeConcurrencyFactor(running.length);
       total += factor;
     });
-    // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal
-    if (!focusBlockerActive && total > 0.5) {
+    // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal.
+    // The webhook receives the paid focus total and the website block list so the local
+    // blocker can deny distracting domains while focused paid work is active.
+    if (!focusBlockerActive && total > FOCUS_BLOCK_THRESHOLD) {
       focusBlockerActive = true;
-      triggerFocusStart();
-    } else if (focusBlockerActive && total <= 0.5) {
+      triggerFocusStart(total);
+    } else if (focusBlockerActive && total <= FOCUS_BLOCK_THRESHOLD) {
       focusBlockerActive = false;
-      triggerFocusStop();
+      triggerFocusStop(total);
     }
   }
 
@@ -6199,18 +6274,7 @@ import {
         optDef.value = '';
         optDef.textContent = 'Auto';
         factorSelect.appendChild(optDef);
-        // Predefined override options
-        [
-          ['1', '100%'],
-          ['0.75', '75%'],
-          ['0.5', '50%'],
-          ['0.25', '25%']
-        ].forEach(([val, label]) => {
-          const opt = document.createElement('option');
-          opt.value = val;
-          opt.textContent = label;
-          factorSelect.appendChild(opt);
-        });
+        appendFocusFactorOptions(factorSelect);
         // Set current selection based on manualFactor
         if (entry.manualFactor) {
           factorSelect.value = String(entry.manualFactor);
@@ -6239,10 +6303,12 @@ import {
             entry.manualFactor = null;
             const count = getRunningEntries().length;
             entry.factor = computeConcurrencyFactor(count);
+            entry.focusFactor = entry.factor;
           } else {
             const fVal = parseFloat(v);
             entry.manualFactor = fVal;
             entry.factor = fVal;
+            entry.focusFactor = fVal;
           }
           saveData();
           // Refresh the timer section to apply the new factor
@@ -6466,6 +6532,7 @@ import {
     toStop.endTime = now.toISOString();
     toStop.duration = Math.floor(finalSeconds);
     toStop.isRunning = false;
+    toStop.focusFactor = getEntryFocusFactor(toStop, n);
     // Cleanup weighted fields (optional)
     delete toStop.effectiveSeconds;
     delete toStop.lastUpdateTime;
@@ -6478,6 +6545,7 @@ import {
     remaining.forEach((e) => {
       if (!e.manualFactor) {
         e.factor = newFactor;
+        e.focusFactor = newFactor;
       }
       e.lastUpdateTime = now.toISOString();
     });
@@ -6495,11 +6563,10 @@ import {
   // Chart instances for weekly and monthly scatter plots
   let weeklyScatterChart = null;
   let monthlyScatterChart = null;
-  document.getElementById('startTimerBtnPro').addEventListener('click', () => {
-    const projectId = document.getElementById('timerProjectPro').value;
-    // Hours already spent when starting the timer (pre-filled time)
-    const initialHours =
-      parseFloat(document.getElementById('timerInitialPro').value) || 0;
+  function startProjectTimer(
+    projectId,
+    { initialHours = 0, overrideFactor = null, resetStartControls = false } = {}
+  ) {
     if (!projectId) return;
     // Check if there's already a running timer for this project
     const runningEntries = getRunningEntries();
@@ -6516,8 +6583,12 @@ import {
     // Provide tactile feedback when starting a timer
     provideHaptic('long');
     const now = new Date();
-    // Determine override factor selected by the user (if any)
-    const overrideVal = document.getElementById('startFactorPro').value;
+    const parsedOverride =
+      overrideFactor === null || overrideFactor === ''
+        ? null
+        : Number(overrideFactor);
+    const hasOverride =
+      Number.isFinite(parsedOverride) && Number(parsedOverride) > 0;
     // Compute the new concurrency count including the new entry
     const newConcurrencyCount = runningEntries.length + 1;
     // Compute the concurrency factor that would apply if no override is used
@@ -6535,6 +6606,7 @@ import {
       // For timers without manual override, assign the new concurrency factor
       if (!e.manualFactor) {
         e.factor = autoFactor;
+        e.focusFactor = autoFactor;
       }
     });
     // Create new entry for the selected project
@@ -6542,8 +6614,8 @@ import {
     // Determine the factor for the new entry: manual override or auto
     let newEntryFactor;
     let newEntryManual = null;
-    if (overrideVal) {
-      newEntryFactor = parseFloat(overrideVal);
+    if (hasOverride) {
+      newEntryFactor = parsedOverride;
       newEntryManual = newEntryFactor;
     } else {
       newEntryFactor = autoFactor;
@@ -6561,12 +6633,15 @@ import {
       effectiveSeconds: initialHours * 3600,
       lastUpdateTime: now.toISOString(),
       factor: newEntryFactor,
+      focusFactor: newEntryFactor,
       manualFactor: newEntryManual
     };
     data.entries.push(newEntry);
-    // Reset initial input and focus factor selection
-    document.getElementById('timerInitialPro').value = '';
-    document.getElementById('startFactorPro').value = '';
+    if (resetStartControls) {
+      // Reset initial input and focus factor selection
+      document.getElementById('timerInitialPro').value = '';
+      document.getElementById('startFactorPro').value = '';
+    }
     saveData();
     // Update UI and timers
     updateProjectSelects();
@@ -6574,6 +6649,20 @@ import {
     updateDashboard();
     // After adding the new entry, update the focus blocker based on the new total factor
     updateFocusBlocker();
+    return true;
+  }
+
+  document.getElementById('startTimerBtnPro').addEventListener('click', () => {
+    const projectId = document.getElementById('timerProjectPro').value;
+    // Hours already spent when starting the timer (pre-filled time)
+    const initialHours =
+      parseFloat(document.getElementById('timerInitialPro').value) || 0;
+    const overrideFactor = document.getElementById('startFactorPro').value;
+    startProjectTimer(projectId, {
+      initialHours,
+      overrideFactor,
+      resetStartControls: true
+    });
   });
   document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
     stopAllTimers();
@@ -6612,6 +6701,7 @@ import {
       e.duration = rawDuration;
       e.endTime = now.toISOString();
       e.isRunning = false;
+      e.focusFactor = getEntryFocusFactor(e, n);
       delete e.effectiveSeconds;
       delete e.lastUpdateTime;
       delete e.factor;
@@ -6705,7 +6795,7 @@ import {
       const o1 = document.createElement('option');
       o1.value = project.id;
       let label = project.name;
-      // If this project is the recommended project, append a hint about the rolling pace gap.
+      // If this project is the recommended project, append a hint about today's remaining hours.
       if (
         recommendedForTimerId &&
         String(project.id) === String(recommendedForTimerId)
@@ -6787,7 +6877,7 @@ import {
     const recentEl = document.getElementById('recentTimersPro');
     if (!recentEl) return;
     recentEl.innerHTML = '';
-    const recentProjects = [];
+    const recentTimers = [];
     const seen = new Set();
     data.entries
       .slice()
@@ -6803,10 +6893,13 @@ import {
         );
         if (!project || runningProjectIds.has(String(project.id))) return;
         seen.add(String(project.id));
-        recentProjects.push(project);
+        recentTimers.push({
+          project,
+          focusFactor: getEntryFocusFactor(entry, 1)
+        });
       });
 
-    const startableRecent = recentProjects.slice(0, 4);
+    const startableRecent = recentTimers.slice(0, 4);
     if (!startableRecent.length) {
       recentEl.style.display = 'none';
       return;
@@ -6819,15 +6912,17 @@ import {
     recentEl.appendChild(label);
     const row = document.createElement('div');
     row.className = 'timer-chip-row';
-    startableRecent.forEach((project) => {
+    startableRecent.forEach(({ project, focusFactor }) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'timer-chip';
-      button.textContent = project.name;
-      button.title = 'Select ' + project.name;
+      button.textContent =
+        project.name + ' - ' + formatFocusPercent(focusFactor);
+      button.title =
+        'Start ' + project.name + ' at ' + formatFocusPercent(focusFactor);
       button.addEventListener('click', () => {
         timerSelect.value = project.id;
-        timerSelect.focus();
+        startProjectTimer(project.id, { overrideFactor: focusFactor });
       });
       row.appendChild(button);
     });
