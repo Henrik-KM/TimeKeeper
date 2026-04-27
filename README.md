@@ -80,6 +80,32 @@ Timer focus is stored as a multiplier on each entry:
 
 The external focus blocker is toggled through `http://127.0.0.1:8766/focus/start` and `/focus/stop` when total paid focus crosses 50%. The app includes the paid focus percentage plus a `blockedSites` query parameter currently containing Reddit and YouTube domains.
 
+### Enforcing Website Blocks
+
+Browser JavaScript cannot block other tabs or OS traffic by itself. TimeKeeper sends focus webhooks, and the local helper enforces them by editing the OS hosts file.
+
+On Windows:
+
+1. Open PowerShell as Administrator.
+2. Run `npm run focus:blocker` from this repo.
+3. Keep that terminal open while using TimeKeeper.
+4. Start a paid timer above 50% focus. The helper adds a marked TimeKeeper block to the hosts file and flushes DNS.
+5. Stop paid focus to remove the marked block.
+
+The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, and `youtu.be`; it is not a wildcard DNS filter.
+
+## Backup And Sync
+
+Auto sync is designed for a cloud-synced folder such as Google Drive, OneDrive, or Dropbox. Choose that folder from Import / Export -> Auto Data Sync.
+
+Each successful backup writes:
+
+- `timekeeper-data.json`: latest full data
+- `timekeeper-manifest.json`: metadata for inspection
+- `timekeeper-snapshots/timekeeper-data-<timestamp>.json`: versioned snapshots
+
+The app keeps the newest 30 snapshots, writes after a short debounce, runs a periodic one-minute safety flush, and attempts a final flush when the page is hidden or closed. Use `Backup Now` for an immediate write and `Restore Latest Backup` to reload `timekeeper-data.json` from the selected folder.
+
 ## Refactor notes
 
 - `index.html` now bootstraps `src/main.mjs` as a browser ES module.

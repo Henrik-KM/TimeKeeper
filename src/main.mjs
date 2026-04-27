@@ -989,6 +989,10 @@ import {
         groceryBudgetStartDate: null,
         backupDirName: null,
         lastBackupAt: null,
+        lastBackupFile: null,
+        lastBackupSnapshotAt: null,
+        backupRevision: 0,
+        updatedAt: null,
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
         wealthGoal: makeDefaultWealthGoal()
@@ -1112,6 +1116,11 @@ import {
         // Preserve additional persisted properties like backupDirName if present in saved data
         backupDirName: parsed.backupDirName || null,
         lastBackupAt: parsed.lastBackupAt || null,
+        lastBackupFile: parsed.lastBackupFile || null,
+        lastBackupSnapshotAt: parsed.lastBackupSnapshotAt || null,
+        backupRevision:
+          typeof parsed.backupRevision === 'number' ? parsed.backupRevision : 0,
+        updatedAt: parsed.updatedAt || null,
         fitness: applyFitnessDefaults(parsed.fitness),
         wealthHistory: Array.isArray(parsed.wealthHistory)
           ? parsed.wealthHistory.map(normalizeWealthEntry)
@@ -1147,16 +1156,26 @@ import {
         groceryBudgetStartDate: null,
         backupDirName: null,
         lastBackupAt: null,
+        lastBackupFile: null,
+        lastBackupSnapshotAt: null,
+        backupRevision: 0,
+        updatedAt: null,
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
         wealthGoal: makeDefaultWealthGoal()
       };
     }
   }
-  function saveData() {
+  function persistDataToLocalStorage() {
     localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
+  }
+  function saveData() {
+    data.updatedAt = new Date().toISOString();
+    data.backupRevision = (Number(data.backupRevision) || 0) + 1;
+    persistDataToLocalStorage();
     // Mark data as needing backup
     needsBackup = true;
+    scheduleBackupSoon();
   }
 
   // Compute concurrency factor based on the number of active timers.
@@ -1204,11 +1223,12 @@ import {
       selectEl.appendChild(opt);
     });
   }
-  let data = loadData();
-  ensureFitnessDefaults();
-  ensureWorkoutData();
-  ensureMonthlyRecurringPayments();
-  ensureWealthData();
+  const BACKUP_LATEST_FILENAME = 'timekeeper-data.json';
+  const BACKUP_MANIFEST_FILENAME = 'timekeeper-manifest.json';
+  const BACKUP_SNAPSHOT_DIR = 'timekeeper-snapshots';
+  const BACKUP_SNAPSHOT_KEEP = 30;
+  const AUTO_BACKUP_INTERVAL_MS = 60000;
+  const BACKUP_DEBOUNCE_MS = 12000;
   // Initialize backup and sync flags before they are referenced in saveData().
   // needsBackup tracks whether the data has changed and needs to be exported.
   // autoSyncEnabled indicates whether automatic export is enabled.
@@ -1216,6 +1236,8 @@ import {
   let needsBackup = false;
   let autoSyncEnabled = false;
   let backupDirHandle = null;
+  let backupInFlight = null;
+  let backupFlushTimer = null;
   // backupPermissionState tracks the permission status for writing backups using the File System Access API.
   // Possible states:
   //   'missing' - No backup directory has been selected yet.
@@ -1224,6 +1246,11 @@ import {
   //   'denied'  - Permission to write to the backup directory has been denied.
   let backupPermissionState = 'missing';
   let backupWarningMessage = '';
+  let data = loadData();
+  ensureFitnessDefaults();
+  ensureWorkoutData();
+  ensureMonthlyRecurringPayments();
+  ensureWealthData();
   // Flag to track whether to show all entries or only recent ones. If false,
   // entries older than approximately one month are hidden by default to keep
   // the list manageable. This can be toggled via a button in the Entries section.
@@ -3908,47 +3935,159 @@ import {
     URL.revokeObjectURL(url);
   }
 
-  // Save the current data to the user-selected backup directory. If no directory
-  // has been chosen yet, this function silently does nothing. When called,
-  // it writes the entire data object to a file named `timekeeper-data.json` in
-  // the chosen folder using the File System Access API.
-  async function saveBackupToDir() {
+  function makeBackupSnapshotName(timestamp = new Date()) {
+    return (
+      'timekeeper-data-' +
+      timestamp.toISOString().replace(/[:.]/g, '-') +
+      '.json'
+    );
+  }
+
+  async function writeTextFile(directoryHandle, fileName, text) {
+    const fileHandle = await directoryHandle.getFileHandle(fileName, {
+      create: true
+    });
+    const writable = await fileHandle.createWritable();
     try {
-      if (!backupDirHandle) {
-        backupPermissionState = 'missing';
-        disableAutoSyncWithWarning(
-          'Auto sync paused: select a backup folder to resume syncing.'
-        );
-        return;
-      }
-      const permissionState = await getBackupPermissionState(backupDirHandle);
-      backupPermissionState = permissionState;
-      if (permissionState !== 'granted') {
-        const message =
-          permissionState === 'prompt'
-            ? 'Auto sync paused: confirm access to your backup folder to resume syncing.'
-            : 'Auto sync disabled: permission to the backup folder was revoked.';
-        disableAutoSyncWithWarning(message);
-        return;
-      }
-      const fileHandle = await backupDirHandle.getFileHandle(
-        'timekeeper-data.json',
-        { create: true }
-      );
-      const writable = await fileHandle.createWritable();
-      await writable.write(JSON.stringify(data, null, 2));
+      await writable.write(text);
+    } finally {
       await writable.close();
-      data.lastBackupAt = new Date().toISOString();
-      localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
-      needsBackup = false;
-      backupWarningMessage = '';
-      updateAutoSyncStatus();
-    } catch (err) {
-      console.error('Saving backup failed:', err);
-      backupWarningMessage =
-        'Auto backup failed. Check the backup folder and try again.';
-      updateAutoSyncStatus();
     }
+  }
+
+  async function readTextFile(directoryHandle, fileName) {
+    const fileHandle = await directoryHandle.getFileHandle(fileName, {
+      create: false
+    });
+    const file = await fileHandle.getFile();
+    return file.text();
+  }
+
+  async function pruneBackupSnapshots(snapshotDirHandle) {
+    if (!snapshotDirHandle || !snapshotDirHandle.entries) return;
+    const files = [];
+    for await (const [name, handle] of snapshotDirHandle.entries()) {
+      if (
+        handle.kind === 'file' &&
+        /^timekeeper-data-\d{4}-\d{2}-\d{2}T.*\.json$/.test(name)
+      ) {
+        files.push(name);
+      }
+    }
+    files.sort().reverse();
+    const staleFiles = files.slice(BACKUP_SNAPSHOT_KEEP);
+    await Promise.all(
+      staleFiles.map((name) =>
+        snapshotDirHandle.removeEntry(name).catch(() => {})
+      )
+    );
+  }
+
+  function buildBackupManifest(snapshotFileName, timestampIso) {
+    return {
+      app: 'TimeKeeper',
+      schemaVersion: 2,
+      latestFile: BACKUP_LATEST_FILENAME,
+      snapshotDirectory: BACKUP_SNAPSHOT_DIR,
+      latestSnapshotFile: snapshotFileName,
+      writtenAt: timestampIso,
+      dataUpdatedAt: data.updatedAt || null,
+      backupRevision: Number(data.backupRevision) || 0,
+      projects: Array.isArray(data.projects) ? data.projects.length : 0,
+      entries: Array.isArray(data.entries) ? data.entries.length : 0
+    };
+  }
+
+  function scheduleBackupSoon() {
+    if (!autoSyncEnabled || !backupDirHandle) return;
+    if (backupFlushTimer) clearTimeout(backupFlushTimer);
+    backupFlushTimer = setTimeout(() => {
+      backupFlushTimer = null;
+      if (autoSyncEnabled && needsBackup) {
+        saveBackupToDir().catch((err) => {
+          console.error('Auto backup failed:', err);
+        });
+      }
+    }, BACKUP_DEBOUNCE_MS);
+  }
+
+  async function flushBackupNow() {
+    if (!autoSyncEnabled || !backupDirHandle || !needsBackup) return;
+    if (backupFlushTimer) {
+      clearTimeout(backupFlushTimer);
+      backupFlushTimer = null;
+    }
+    await saveBackupToDir();
+  }
+
+  // Save the current data to the user-selected backup directory. Each backup writes:
+  // - timekeeper-data.json for the latest state
+  // - timekeeper-manifest.json for quick inspection
+  // - a timestamped snapshot under timekeeper-snapshots/
+  async function saveBackupToDir() {
+    if (backupInFlight) return backupInFlight;
+    backupInFlight = (async () => {
+      try {
+        if (!backupDirHandle) {
+          backupPermissionState = 'missing';
+          disableAutoSyncWithWarning(
+            'Auto sync paused: select a backup folder to resume syncing.'
+          );
+          return false;
+        }
+        const permissionState = await getBackupPermissionState(backupDirHandle);
+        backupPermissionState = permissionState;
+        if (permissionState !== 'granted') {
+          const message =
+            permissionState === 'prompt'
+              ? 'Auto sync paused: confirm access to your backup folder to resume syncing.'
+              : 'Auto sync disabled: permission to the backup folder was revoked.';
+          disableAutoSyncWithWarning(message);
+          return false;
+        }
+        const backupTime = new Date();
+        const backupTimeIso = backupTime.toISOString();
+        const snapshotFileName = makeBackupSnapshotName(backupTime);
+        data.lastBackupAt = backupTimeIso;
+        data.lastBackupFile = BACKUP_LATEST_FILENAME;
+        data.lastBackupSnapshotAt = backupTimeIso;
+        const snapshotDirHandle = await backupDirHandle.getDirectoryHandle(
+          BACKUP_SNAPSHOT_DIR,
+          { create: true }
+        );
+        const backupJson = JSON.stringify(data, null, 2);
+        await writeTextFile(
+          backupDirHandle,
+          BACKUP_LATEST_FILENAME,
+          backupJson
+        );
+        await writeTextFile(snapshotDirHandle, snapshotFileName, backupJson);
+        await writeTextFile(
+          backupDirHandle,
+          BACKUP_MANIFEST_FILENAME,
+          JSON.stringify(
+            buildBackupManifest(snapshotFileName, backupTimeIso),
+            null,
+            2
+          )
+        );
+        await pruneBackupSnapshots(snapshotDirHandle);
+        persistDataToLocalStorage();
+        needsBackup = false;
+        backupWarningMessage = '';
+        updateAutoSyncStatus();
+        return true;
+      } catch (err) {
+        console.error('Saving backup failed:', err);
+        backupWarningMessage =
+          'Auto backup failed. Check the backup folder and try again.';
+        updateAutoSyncStatus();
+        return false;
+      } finally {
+        backupInFlight = null;
+      }
+    })();
+    return backupInFlight;
   }
 
   // Prompt the user to choose a backup directory using the File System Access API. When
@@ -3996,8 +4135,8 @@ import {
     }
   }
 
-  // Periodically export data if there have been changes.
-  // Runs every 10 minutes (600000 ms). Adjust interval as needed.
+  // Periodically export data if there have been changes. saveData() also
+  // schedules a short debounce, and pagehide/visibilitychange flush before exit.
   setInterval(() => {
     // Only perform automatic backups when auto sync is enabled. When a backup directory
     // is selected, data will be written to the file; otherwise, nothing happens.
@@ -4006,7 +4145,15 @@ import {
         console.error('Auto backup failed:', err);
       });
     }
-  }, 600000);
+  }, AUTO_BACKUP_INTERVAL_MS);
+  window.addEventListener('pagehide', () => {
+    flushBackupNow().catch(() => {});
+  });
+  document.addEventListener('visibilitychange', () => {
+    if (document.visibilityState === 'hidden') {
+      flushBackupNow().catch(() => {});
+    }
+  });
 
   // Navigation
   const navList = document.getElementById('navList');
@@ -7181,6 +7328,83 @@ import {
   }
 
   // Export / Import
+  function applyImportedData(imported) {
+    if (
+      !imported ||
+      !Array.isArray(imported.projects) ||
+      !Array.isArray(imported.entries)
+    ) {
+      throw new Error('Invalid data format');
+    }
+    const previousBackupDirName = data.backupDirName || null;
+    const previousLastBackupAt = data.lastBackupAt || null;
+    data = imported;
+    if (!data.backupDirName && previousBackupDirName) {
+      data.backupDirName = previousBackupDirName;
+    }
+    if (!data.lastBackupAt && previousLastBackupAt) {
+      data.lastBackupAt = previousLastBackupAt;
+    }
+    // Remove transient timer fields from imported entries.
+    data.entries.forEach((entry) => {
+      delete entry.effectiveSeconds;
+      delete entry.lastUpdateTime;
+      delete entry.factor;
+    });
+    let colorChanged = false;
+    data.projects.forEach((p) => {
+      if (!p.color) {
+        p.color = getUniqueColor();
+        colorChanged = true;
+      }
+    });
+    saveData();
+    if (colorChanged) {
+      persistDataToLocalStorage();
+    }
+    updateDashboard();
+    updateProjectsPage();
+    updateEntriesTable();
+    updateTimerSection();
+  }
+
+  async function restoreLatestBackupFromDir() {
+    try {
+      if (!backupDirHandle) {
+        backupWarningMessage =
+          'Choose a backup folder before restoring from backup.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const permissionGranted =
+        await ensureBackupPermissionWithPrompt(backupDirHandle);
+      if (!permissionGranted) {
+        backupWarningMessage =
+          'Permission to access the backup folder was not granted.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const text = await readTextFile(backupDirHandle, BACKUP_LATEST_FILENAME);
+      const imported = JSON.parse(text);
+      if (
+        !confirm(
+          'Restore the latest backup from the selected folder? This replaces the current local data.'
+        )
+      ) {
+        return false;
+      }
+      applyImportedData(imported);
+      alert('Latest backup restored successfully.');
+      return true;
+    } catch (err) {
+      console.error('Restore from backup failed:', err);
+      backupWarningMessage =
+        'Restore failed. Check that the backup folder contains timekeeper-data.json.';
+      updateAutoSyncStatus();
+      return false;
+    }
+  }
+
   document.getElementById('exportBtnPro').addEventListener('click', () => {
     // Use shared downloadData function for exports
     downloadData();
@@ -7193,39 +7417,7 @@ import {
       const text = await file.text();
       try {
         const imported = JSON.parse(text);
-        if (
-          !Array.isArray(imported.projects) ||
-          !Array.isArray(imported.entries)
-        ) {
-          alert('Invalid data format');
-          return;
-        }
-        data = imported;
-        // Remove any transient timer fields (effectiveSeconds, lastUpdateTime, factor) from imported entries
-        data.entries.forEach((entry) => {
-          delete entry.effectiveSeconds;
-          delete entry.lastUpdateTime;
-          delete entry.factor;
-        });
-        // Assign colors to projects without color and ensure uniqueness
-        let colorChanged = false;
-        data.projects.forEach((p) => {
-          if (!p.color) {
-            p.color = getUniqueColor();
-            colorChanged = true;
-          }
-        });
-        if (colorChanged) {
-          saveData();
-        } else {
-          // Save imported data even if colors did not change
-          saveData();
-        }
-        // Refresh UI
-        updateDashboard();
-        updateProjectsPage();
-        updateEntriesTable();
-        updateTimerSection();
+        applyImportedData(imported);
         alert('Data imported successfully');
       } catch (err) {
         alert('Failed to import: ' + err.message);
@@ -7255,6 +7447,9 @@ import {
   const autoSyncStatusElem = document.getElementById('autoSyncStatus');
   const autoSyncWarningElem = document.getElementById('autoSyncWarning');
   const lastBackupStatusElem = document.getElementById('lastBackupStatus');
+  const chooseBtn = document.getElementById('chooseBackupDirBtn');
+  const backupNowBtn = document.getElementById('backupNowBtn');
+  const restoreBackupBtn = document.getElementById('restoreBackupBtn');
   function syncAutoSyncToggleUI() {
     if (!autoSyncToggle) return;
     const shouldCheck =
@@ -7273,6 +7468,18 @@ import {
       ? backupDirHandle.name || data.backupDirName || ''
       : (data && data.backupDirName) || '';
     const folderUsable = hasHandle && backupPermissionState === 'granted';
+    if (backupNowBtn) {
+      backupNowBtn.disabled = !folderUsable;
+      backupNowBtn.title = folderUsable
+        ? 'Write latest data, manifest, and a timestamped snapshot now.'
+        : 'Select a backup folder first.';
+    }
+    if (restoreBackupBtn) {
+      restoreBackupBtn.disabled = !folderUsable;
+      restoreBackupBtn.title = folderUsable
+        ? 'Restore timekeeper-data.json from the selected backup folder.'
+        : 'Select a backup folder first.';
+    }
     if (autoSyncEnabled && folderUsable) {
       autoSyncStatusElem.textContent = backupName
         ? `Auto sync is ON – syncing to “${backupName}”.`
@@ -7324,7 +7531,8 @@ import {
         const relative = formatRelativeTime(data.lastBackupAt);
         const backupDate = new Date(data.lastBackupAt);
         if (!isNaN(backupDate)) {
-          lastBackupStatusElem.textContent = `Last backup: ${relative}`;
+          const snapshot = data.lastBackupSnapshotAt ? ' with snapshot' : '';
+          lastBackupStatusElem.textContent = `Last backup: ${relative}${snapshot}`;
           lastBackupStatusElem.title = backupDate.toLocaleString();
           lastBackupStatusElem.style.display = 'block';
         } else {
@@ -7376,7 +7584,6 @@ import {
   // auto sync is enabled and no directory is selected, clicking this button
   // will call chooseBackupDir(). If auto sync is disabled, this button remains
   // functional to allow the user to preselect a folder before enabling auto sync.
-  const chooseBtn = document.getElementById('chooseBackupDirBtn');
   const fsAccessSupported = !!window.showDirectoryPicker;
   if (!fsAccessSupported) {
     if (autoSyncToggle) {
@@ -7389,6 +7596,16 @@ import {
       chooseBtn.title =
         'Auto sync requires a browser that supports folder access.';
     }
+    if (backupNowBtn) {
+      backupNowBtn.disabled = true;
+      backupNowBtn.title =
+        'Auto sync requires a browser that supports folder access.';
+    }
+    if (restoreBackupBtn) {
+      restoreBackupBtn.disabled = true;
+      restoreBackupBtn.title =
+        'Auto sync requires a browser that supports folder access.';
+    }
     backupWarningMessage =
       'Auto sync unavailable: your browser does not support choosing folders.';
     updateAutoSyncStatus();
@@ -7396,6 +7613,17 @@ import {
   if (chooseBtn) {
     chooseBtn.addEventListener('click', () => {
       chooseBackupDir({ activateSync: true });
+    });
+  }
+  if (backupNowBtn) {
+    backupNowBtn.addEventListener('click', async () => {
+      const ok = await saveBackupToDir();
+      if (ok) alert('Backup written successfully.');
+    });
+  }
+  if (restoreBackupBtn) {
+    restoreBackupBtn.addEventListener('click', () => {
+      restoreLatestBackupFromDir();
     });
   }
 })();

@@ -524,6 +524,8 @@ test('auto-sync unsupported state still renders safely', async ({ page }) => {
   await page.goto('/');
   await gotoSection(page, 'importExport', 'Import / Export');
   await expect(page.locator('#autoSyncToggle')).toBeDisabled();
+  await expect(page.locator('#backupNowBtn')).toBeDisabled();
+  await expect(page.locator('#restoreBackupBtn')).toBeDisabled();
   await expect(page.locator('#autoSyncWarning')).toContainText(
     'Auto sync unavailable'
   );

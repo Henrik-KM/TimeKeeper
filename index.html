@@ -194,7 +194,11 @@
           <p id="autoSyncWarning" class="status-warning" style="display:none;"></p>
           <p id="lastBackupStatus" class="status-muted" style="display:none;"></p>
         <!-- Button to choose backup directory when enabling auto sync -->
-        <button id="chooseBackupDirBtn" class="btn secondary" style="margin-top:0.5rem;">Set Backup Folder</button>
+        <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
+          <button id="chooseBackupDirBtn" class="btn secondary">Set Backup Folder</button>
+          <button id="backupNowBtn" class="btn secondary">Backup Now</button>
+          <button id="restoreBackupBtn" class="btn secondary">Restore Latest Backup</button>
+        </div>
         </div>
       </section>
 
