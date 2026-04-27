@@ -132,9 +132,22 @@
             <div style="display:flex; gap:0.5rem;">
               <button id="addManualEntryBtnPro" class="btn secondary">Add Manual Entry</button>
               <!-- Toggle button to switch between showing recent entries and all entries -->
-              <button id="toggleEntriesViewBtn" class="btn secondary">Show Recent</button>
+              <button id="toggleEntriesViewBtn" class="btn secondary">Show All</button>
             </div>
           </div>
+          <div class="entry-toolbar">
+            <label class="entry-filter">
+              <span>Project</span>
+              <select id="entryProjectFilter">
+                <option value="">All projects</option>
+              </select>
+            </label>
+            <label class="entry-filter entry-filter-search">
+              <span>Search</span>
+              <input id="entrySearchInput" type="search" placeholder="Description, project, or client" autocomplete="off" />
+            </label>
+          </div>
+          <div id="entrySummaryPro" class="entry-summary" aria-live="polite"></div>
           <div id="manualEntryFormPro" class="hidden" style="margin-top:1rem;">
             <h4 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">New Manual Entry</h4>
             <form id="manualFormPro" style="display:flex; flex-direction:column; gap:0.5rem;">

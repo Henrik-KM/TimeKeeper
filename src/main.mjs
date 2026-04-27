@@ -1255,6 +1255,8 @@ import {
   // entries older than approximately one month are hidden by default to keep
   // the list manageable. This can be toggled via a button in the Entries section.
   let showAllEntries = false;
+  let entryProjectFilter = '';
+  let entrySearchQuery = '';
 
   // -------------------------------------------------------------------------
   //  Haptic feedback and simple audio cues
@@ -4951,7 +4953,7 @@ import {
     data.entries.forEach((entry) => {
       if (entry.isRunning || !entry.duration) return;
       const start = new Date(entry.startTime);
-      const project = data.projects.find((p) => p.id === entry.projectId);
+      const project = getEntryProject(entry);
       const hours = entry.duration / 3600;
       if (!project) return;
       if (start >= todayStart) {
@@ -6866,15 +6868,29 @@ import {
   function updateProjectSelects() {
     const timerSelect = document.getElementById('timerProjectPro');
     const manualSelect = document.getElementById('manualProjectPro');
+    const entryFilterSelect = document.getElementById('entryProjectFilter');
     const startBtn = document.getElementById('startTimerBtnPro');
     timerSelect.innerHTML = '';
     manualSelect.innerHTML = '';
+    if (entryFilterSelect) {
+      const selectedFilter = entryProjectFilter || entryFilterSelect.value;
+      entryFilterSelect.innerHTML = '';
+      const allOption = document.createElement('option');
+      allOption.value = '';
+      allOption.textContent = 'All projects';
+      entryFilterSelect.appendChild(allOption);
+      entryProjectFilter = selectedFilter;
+    }
     if (data.projects.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
       opt.textContent = '-- no projects --';
       timerSelect.appendChild(opt);
       manualSelect.appendChild(opt.cloneNode(true));
+      if (entryFilterSelect) {
+        entryProjectFilter = '';
+        entryFilterSelect.value = '';
+      }
       startBtn.disabled = true;
       renderTimerHints(timerSelect, null, new Map(), new Set());
       return;
@@ -6964,7 +6980,22 @@ import {
       o2.value = project.id;
       o2.textContent = project.name;
       manualSelect.appendChild(o2);
+      if (entryFilterSelect) {
+        const o3 = document.createElement('option');
+        o3.value = project.id;
+        o3.textContent = project.name;
+        entryFilterSelect.appendChild(o3);
+      }
     });
+    if (entryFilterSelect) {
+      const filterStillExists = data.projects.some(
+        (p) => String(p.id) === String(entryProjectFilter)
+      );
+      if (entryProjectFilter && !filterStillExists) {
+        entryProjectFilter = '';
+      }
+      entryFilterSelect.value = entryProjectFilter;
+    }
     // Disable timer options for projects that already have a running timer
     timerSelect.querySelectorAll('option').forEach((opt) => {
       opt.disabled = runningProjectIds.has(String(opt.value));
@@ -7142,12 +7173,30 @@ import {
   // showing all entries, it reads "Show Recent". Clicking the button
   // toggles the view and re-renders the entries table.
   const toggleEntriesBtn = document.getElementById('toggleEntriesViewBtn');
+  function updateEntriesViewToggleLabel() {
+    if (!toggleEntriesBtn) return;
+    toggleEntriesBtn.textContent = showAllEntries ? 'Show Recent' : 'Show All';
+  }
   if (toggleEntriesBtn) {
+    updateEntriesViewToggleLabel();
     toggleEntriesBtn.addEventListener('click', () => {
       showAllEntries = !showAllEntries;
-      toggleEntriesBtn.textContent = showAllEntries
-        ? 'Show Recent'
-        : 'Show All';
+      updateEntriesViewToggleLabel();
+      updateEntriesTable();
+    });
+  }
+  const entryProjectFilterSelect =
+    document.getElementById('entryProjectFilter');
+  if (entryProjectFilterSelect) {
+    entryProjectFilterSelect.addEventListener('change', () => {
+      entryProjectFilter = entryProjectFilterSelect.value || '';
+      updateEntriesTable();
+    });
+  }
+  const entrySearchInput = document.getElementById('entrySearchInput');
+  if (entrySearchInput) {
+    entrySearchInput.addEventListener('input', () => {
+      entrySearchQuery = entrySearchInput.value.trim().toLowerCase();
       updateEntriesTable();
     });
   }
@@ -7183,32 +7232,99 @@ import {
     updateProjectsPage();
   }
 
+  function getEntryProject(entry) {
+    return (
+      data.projects.find((p) => String(p.id) === String(entry.projectId)) ||
+      null
+    );
+  }
+
+  function getEntriesForCurrentView() {
+    let entriesToShow = data.entries;
+    if (!showAllEntries) {
+      const cutoff = new Date();
+      cutoff.setDate(cutoff.getDate() - 30);
+      entriesToShow = entriesToShow.filter((entry) => {
+        const startDate = new Date(entry.startTime);
+        const endDate = entry.endTime ? new Date(entry.endTime) : startDate;
+        return startDate >= cutoff || endDate >= cutoff;
+      });
+    }
+    if (entryProjectFilter) {
+      entriesToShow = entriesToShow.filter(
+        (entry) => String(entry.projectId) === String(entryProjectFilter)
+      );
+    }
+    if (entrySearchQuery) {
+      entriesToShow = entriesToShow.filter((entry) => {
+        const project = getEntryProject(entry);
+        const searchable = [
+          project ? project.name : '',
+          project ? project.client : '',
+          entry.description || ''
+        ]
+          .join(' ')
+          .toLowerCase();
+        return searchable.includes(entrySearchQuery);
+      });
+    }
+    return entriesToShow;
+  }
+
+  function renderEntrySummary(entriesToShow) {
+    const summaryEl = document.getElementById('entrySummaryPro');
+    if (!summaryEl) return;
+    summaryEl.innerHTML = '';
+    const totalHours = entriesToShow.reduce(
+      (sum, entry) => sum + ((entry.duration || 0) / 3600 || 0),
+      0
+    );
+    const totalEarned = entriesToShow.reduce((sum, entry) => {
+      const project = getEntryProject(entry);
+      const hours = (entry.duration || 0) / 3600 || 0;
+      return sum + (project ? hours * (Number(project.hourlyRate) || 0) : 0);
+    }, 0);
+    const scopeText = showAllEntries ? 'All time' : 'Last 30 days';
+    const labels = [
+      `${entriesToShow.length} ${entriesToShow.length === 1 ? 'entry' : 'entries'}`,
+      `${formatDuration(Math.round(totalHours * 3600))} tracked`,
+      `${formatCurrency(totalEarned)} billable`,
+      scopeText
+    ];
+    labels.forEach((label) => {
+      const pill = document.createElement('span');
+      pill.className = 'entry-summary-pill';
+      pill.textContent = label;
+      summaryEl.appendChild(pill);
+    });
+  }
+
+  function appendEntryCell(row, label, value) {
+    const cell = document.createElement('td');
+    cell.dataset.label = label;
+    cell.textContent = value;
+    row.appendChild(cell);
+    return cell;
+  }
+
   // Entries table
   function updateEntriesTable() {
     const tbody = document.getElementById('entriesTableBodyPro');
     tbody.innerHTML = '';
-    if (data.entries.length === 0) {
+    const entriesToShow = getEntriesForCurrentView();
+    renderEntrySummary(entriesToShow);
+    if (data.entries.length === 0 || entriesToShow.length === 0) {
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 7;
-      td.textContent = 'No entries yet.';
+      td.textContent =
+        data.entries.length === 0
+          ? 'No entries yet.'
+          : 'No entries match the current filters.';
       td.style.textAlign = 'center';
       tr.appendChild(td);
       tbody.appendChild(tr);
       return;
-    }
-    // Decide which entries to show. If showAllEntries is false, only include entries
-    // whose start or end times are within the past 30 days. Otherwise include all.
-    let entriesToShow = data.entries;
-    if (!showAllEntries) {
-      const cutoff = new Date();
-      // Set cutoff to 30 days ago
-      cutoff.setDate(cutoff.getDate() - 30);
-      entriesToShow = data.entries.filter((e) => {
-        const startDate = new Date(e.startTime);
-        const endDate = e.endTime ? new Date(e.endTime) : startDate;
-        return startDate >= cutoff || endDate >= cutoff;
-      });
     }
     // sort by start time desc
     const sorted = [...entriesToShow].sort(
@@ -7216,20 +7332,34 @@ import {
     );
     sorted.forEach((entry) => {
       const tr = document.createElement('tr');
-      const project = data.projects.find((p) => p.id === entry.projectId);
+      const project = getEntryProject(entry);
       const hours = entry.duration ? entry.duration / 3600 : 0;
       const total = project ? hours * project.hourlyRate : 0;
-      tr.innerHTML = `
-              <td>${project ? project.name : ''}</td>
-              <td>${entry.description || ''}</td>
-              <td>${formatDateTime(entry.startTime)}</td>
-              <td>${entry.endTime ? formatDateTime(entry.endTime) : entry.isRunning ? '—' : ''}</td>
-              <td>${entry.duration ? formatDuration(entry.duration) : entry.isRunning ? 'Running…' : ''}</td>
-              <td>${formatCurrency(total)}</td>
-              <td></td>
-            `;
+      appendEntryCell(tr, 'Project', project ? project.name : '');
+      appendEntryCell(tr, 'Description', entry.description || '');
+      appendEntryCell(tr, 'Start', formatDateTime(entry.startTime));
+      appendEntryCell(
+        tr,
+        'End',
+        entry.endTime
+          ? formatDateTime(entry.endTime)
+          : entry.isRunning
+            ? '-'
+            : ''
+      );
+      appendEntryCell(
+        tr,
+        'Duration',
+        entry.duration
+          ? formatDuration(entry.duration)
+          : entry.isRunning
+            ? 'Running...'
+            : ''
+      );
+      appendEntryCell(tr, 'Total', formatCurrency(total));
+      const actionsTd = appendEntryCell(tr, 'Actions', '');
       // Action cell: add nudge and snap controls plus delete button
-      const actionsTd = tr.lastElementChild;
+      actionsTd.className = 'entry-actions';
       // −5m button
       const minusBtn = document.createElement('button');
       minusBtn.className = 'btn secondary';
