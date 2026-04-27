@@ -362,14 +362,15 @@ test('entries render saved descriptions without executing markup', async ({
 
   await page.goto('/');
   await gotoSection(page, 'entries', 'Time Entries');
-  await page.waitForTimeout(200);
 
-  await expect
-    .poll(() => page.evaluate(() => window['__timekeeperXssFired']))
-    .toBe(false);
   await expect(page.locator('#entriesTableBodyPro')).toContainText(
     '<svg onload'
   );
+  await expect
+    .poll(() => page.evaluate(() => window['__timekeeperXssFired']), {
+      timeout: 2000
+    })
+    .toBe(false);
 });
 
 test('workout, finances, wealth, and Strava fallback paths still render', async ({
