@@ -273,6 +273,105 @@ test('import and export still work', async ({ page }) => {
   ).toBeVisible();
 });
 
+test('entry filters summarize visible work and match project/search text', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'alpha',
+        name: 'Alpha Project',
+        client: 'Acme',
+        hourlyRate: 100
+      }),
+      projectFixture({
+        id: 'beta',
+        name: 'Beta Project',
+        client: 'Beta Co',
+        hourlyRate: 200
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'alpha-entry',
+        projectId: 'alpha',
+        description: 'Design review',
+        startTime: '2026-04-25T09:00:00.000',
+        endTime: '2026-04-25T11:00:00.000',
+        hours: 2
+      }),
+      entryFixture({
+        id: 'beta-entry',
+        projectId: 'beta',
+        description: 'Admin follow up',
+        startTime: '2026-04-25T12:00:00.000',
+        endTime: '2026-04-25T13:00:00.000',
+        hours: 1
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'entries', 'Time Entries');
+
+  await expect(page.locator('#toggleEntriesViewBtn')).toHaveText('Show All');
+  await expect(page.locator('#entrySummaryPro')).toContainText('2 entries');
+  await expect(page.locator('#entrySummaryPro')).toContainText('3h 0m 0s');
+  await expect(page.locator('#entrySummaryPro')).toContainText('400.0 kr');
+
+  await page.locator('#entryProjectFilter').selectOption('alpha');
+  await expect(page.locator('#entrySummaryPro')).toContainText('1 entry');
+  await expect(page.getByText('Design review')).toBeVisible();
+  await expect(page.getByText('Admin follow up')).not.toBeVisible();
+
+  await page.locator('#entrySearchInput').fill('acme');
+  await expect(page.getByText('Design review')).toBeVisible();
+  await page.locator('#entrySearchInput').fill('missing');
+  await expect(
+    page.getByText('No entries match the current filters.')
+  ).toBeVisible();
+});
+
+test('entries render saved descriptions without executing markup', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await page.addInitScript(() => {
+    window['__timekeeperXssFired'] = false;
+  });
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'unsafe-project',
+        name: 'Unsafe Project',
+        client: 'Client'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'unsafe-entry',
+        projectId: 'unsafe-project',
+        description: '<svg onload="window.__timekeeperXssFired=true"></svg>',
+        startTime: '2026-04-25T09:00:00.000',
+        endTime: '2026-04-25T10:00:00.000',
+        hours: 1
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'entries', 'Time Entries');
+  await page.waitForTimeout(200);
+
+  await expect
+    .poll(() => page.evaluate(() => window['__timekeeperXssFired']))
+    .toBe(false);
+  await expect(page.locator('#entriesTableBodyPro')).toContainText(
+    '<svg onload'
+  );
+});
+
 test('workout, finances, wealth, and Strava fallback paths still render', async ({
   page
 }) => {
