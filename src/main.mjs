@@ -4698,10 +4698,12 @@ import {
       : 0;
     const rolling30TargetConst =
       todayPlanningSnapshot.dailyRate * rollingWorkdays;
-    const rolling30SurplusHours =
-      rolling30TargetConst > 0
-        ? Math.max(0, rolling30Hours - rolling30TargetConst)
-        : 0;
+    const rolling30SurplusHours = getProjectRollingSurplusAtWeekStart(
+      project,
+      entries,
+      created,
+      weekStart
+    );
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
     weeklyTargetConst = Math.max(0, weeklyTargetConst - rolling30SurplusHours);
     if (projectNotStarted) {
@@ -4809,6 +4811,36 @@ import {
       (entry) => entry.projectId === projectId && !entry.isRunning
     );
     return sumEntryHours(projectEntries, start, end);
+  }
+
+  function getProjectRollingSurplusAtWeekStart(
+    project,
+    entries,
+    created,
+    weekStart
+  ) {
+    const rollingEndExclusive = weekStart;
+    const rollingStart = addLocalDays(rollingEndExclusive, -30);
+    const effectiveRollingStart = maxDate(rollingStart, created);
+    if (
+      !effectiveRollingStart ||
+      !rollingEndExclusive ||
+      effectiveRollingStart >= rollingEndExclusive
+    ) {
+      return 0;
+    }
+    const rollingHoursBeforeWeek = sumEntryHours(
+      entries,
+      effectiveRollingStart,
+      rollingEndExclusive
+    );
+    const rollingTargetBeforeWeek = getProjectPlannedHoursForPeriod(
+      project,
+      entries,
+      effectiveRollingStart,
+      rollingEndExclusive
+    );
+    return Math.max(0, rollingHoursBeforeWeek - rollingTargetBeforeWeek);
   }
 
   function getProjectDailyPlan(project, stats, context) {

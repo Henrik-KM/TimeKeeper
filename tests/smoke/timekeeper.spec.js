@@ -497,6 +497,55 @@ test('timer recommendation uses the project with the most hours left today', asy
   );
 });
 
+test('daily and weekly targets stay fixed while logging time during the day', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-24T10:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'stable-project',
+        name: 'Stable Project',
+        budgetHours: 80,
+        startDate: '2026-04-01',
+        deadline: '2026-05-31'
+      })
+    ],
+    entries: []
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const todayValue = page
+    .locator('.stat-card')
+    .filter({ hasText: "Today's Hours" })
+    .locator('.stat-value');
+  const weekValue = page
+    .locator('.stat-card')
+    .filter({ hasText: 'This Week' })
+    .locator('.stat-value');
+  const beforeTodayTarget = (await todayValue.textContent())
+    .split('/')[1]
+    .trim();
+  const beforeWeekTarget = (await weekValue.textContent()).split('/')[1].trim();
+
+  await gotoSection(page, 'entries', 'Time Entries');
+  await page.locator('#addManualEntryBtnPro').click();
+  await page.locator('#manualProjectPro').selectOption('stable-project');
+  await page.locator('#manualHoursPro').fill('2');
+  await page.locator('#manualFormPro button[type="submit"]').click();
+
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const afterTodayTarget = (await todayValue.textContent())
+    .split('/')[1]
+    .trim();
+  const afterWeekTarget = (await weekValue.textContent()).split('/')[1].trim();
+
+  expect(afterTodayTarget).toBe(beforeTodayTarget);
+  expect(afterWeekTarget).toBe(beforeWeekTarget);
+});
+
 test('time left today counts initial elapsed time correctly at 50 percent focus', async ({
   page
 }) => {
