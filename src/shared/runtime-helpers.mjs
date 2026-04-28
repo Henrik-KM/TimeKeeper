@@ -18,7 +18,7 @@ export function parseLocalDateString(value) {
   if (typeof value !== 'string') return null;
   const trimmed = value.trim();
   if (!trimmed) return null;
-  const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})/);
+  const match = trimmed.match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:$|[T\s])/);
   if (match) {
     const year = Number(match[1]);
     const month = Number(match[2]);
@@ -32,7 +32,9 @@ export function parseLocalDateString(value) {
       date.setHours(0, 0, 0, 0);
       return date;
     }
+    return null;
   }
+  if (/^\d{4}-\d{1,2}-\d{1,2}/.test(trimmed)) return null;
 
   const fallback = new Date(trimmed);
   if (isValidDate(fallback)) {
