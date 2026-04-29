@@ -4,8 +4,8 @@ from datetime import datetime, timezone
 
 import requests
 
-CLIENT_ID = os.environ["STRAVA_CLIENT_ID"]
-CLIENT_SECRET = os.environ["STRAVA_CLIENT_SECRET"]
+CLIENT_ID = os.environ.get("STRAVA_CLIENT_ID", "").strip()
+CLIENT_SECRET = os.environ.get("STRAVA_CLIENT_SECRET", "").strip()
 PER_PAGE = 200
 
 OUTFILE = "assets/strava.json"
@@ -13,24 +13,34 @@ TOKEN_FILE = "_private/strava_token.json"
 OVERRIDES_FILE = "assets/strava_overrides.json"
 
 
-def load_refresh_token() -> tuple[str, bool]:
+class StravaConfigurationError(RuntimeError):
+    pass
+
+
+def load_refresh_token() -> str:
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, "r", encoding="utf-8") as token_file:
             payload = json.load(token_file)
             token = payload.get("refresh_token")
             if token:
-                return token, True
-    return os.environ["STRAVA_REFRESH_TOKEN"], False
+                return token
+    token = os.environ.get("STRAVA_REFRESH_TOKEN", "").strip()
+    if token:
+        return token
+    raise StravaConfigurationError(
+        f"Missing Strava refresh token. Restore {TOKEN_FILE} or add "
+        "STRAVA_REFRESH_TOKEN as a GitHub Actions secret."
+    )
 
 
 def persist_refresh_token(refresh_token: str) -> None:
-    outdir = os.path.dirname(TOKEN_FILE)
-    if outdir:
-        os.makedirs(outdir, exist_ok=True)
     payload = {
         "refresh_token": refresh_token,
         "updated_utc": datetime.now(timezone.utc).isoformat(),
     }
+    outdir = os.path.dirname(TOKEN_FILE)
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
     with open(TOKEN_FILE, "w", encoding="utf-8") as output_file:
         json.dump(payload, output_file, ensure_ascii=False, indent=2)
         output_file.write("\n")
@@ -179,9 +189,13 @@ def write_payload(activities: list[dict], error: str | None = None) -> None:
 
 def main() -> None:
     try:
-        refresh_token, token_from_file = load_refresh_token()
+        if not CLIENT_ID or not CLIENT_SECRET:
+            raise StravaConfigurationError(
+                "Missing STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET."
+            )
+        refresh_token = load_refresh_token()
         access_token, next_refresh_token = refresh_access_token(refresh_token)
-        if next_refresh_token and (not token_from_file or next_refresh_token != refresh_token):
+        if next_refresh_token and next_refresh_token != refresh_token:
             persist_refresh_token(next_refresh_token)
         overrides = load_exertion_overrides()
         activities = get_all_activities(access_token)
@@ -207,13 +221,16 @@ def main() -> None:
                 "has activity:read_all scope and that the STRAVA_* secrets are valid."
             )
             print(message)
-            write_payload([], error=message)
-            return
+            raise SystemExit(1) from error
         # Handle other HTTP errors by writing an error payload instead of crashing
         message = f"HTTP error while fetching Strava data: {error}"
         print(message)
         write_payload([], error=message)
         return
+    except StravaConfigurationError as error:
+        message = str(error)
+        print(message)
+        raise SystemExit(1) from error
     except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
         # Catch other errors (connection issues, JSON problems, missing keys, etc.)
         message = f"Unexpected error while fetching Strava data: {error}"

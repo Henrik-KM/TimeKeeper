@@ -127,8 +127,14 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
    - `STRAVA_CLIENT_SECRET`
 4. Store the refresh token in `_private/strava_token.json`.
 
+```json
+{
+  "refresh_token": "your-refresh-token"
+}
+```
+
 The workflow fetches all available activities by paging through the Strava API.
 
 ### Troubleshooting
 
-If the workflow logs show `401 Unauthorized`, verify that the refresh token has `activity:read_all` scope and that the secrets match your Strava app credentials.
+If the workflow logs show `Missing Strava refresh token`, restore `_private/strava_token.json`. If the logs show `401 Unauthorized`, generate a fresh refresh token with `activity:read_all` scope and update `_private/strava_token.json`.
