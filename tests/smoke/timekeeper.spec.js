@@ -177,6 +177,7 @@ test('can create edit and delete a project, then run timer and manual entry flow
     'Acme Updated',
     '180',
     '125',
+    'deadline',
     '2026-04-01',
     '2026-09-30',
     '15'
@@ -212,6 +213,34 @@ test('can create edit and delete a project, then run timer and manual entry flow
   await gotoSection(page, 'projects', 'Projects');
   await page.locator('.delete-btn').first().click();
   await expect(page.getByText('No projects yet.')).toBeVisible();
+});
+
+test('can create a weekly pace project without a deadline', async ({
+  page
+}) => {
+  await seedLocalStorage(page);
+  await page.goto('/');
+
+  await gotoSection(page, 'projects', 'Projects');
+
+  await page.locator('#projectNamePro').fill('Support Retainer');
+  await page.locator('#projectClientPro').fill('Acme');
+  await page.locator('#projectScheduleTypePro').selectOption('weekly');
+  await page.locator('#projectWeeklyHoursPro').fill('12');
+  await page.locator('#projectRatePro').fill('150');
+  await page.locator('#projectStartDatePro').fill('2026-04-01');
+  await page.locator('#projectFormPro button[type="submit"]').click();
+
+  const card = page
+    .getByRole('heading', { name: 'Support Retainer', exact: true })
+    .locator('..');
+  await expect(card).toContainText('12.0h/week');
+  await expect(card).toContainText('Deadline: None');
+
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(page.locator('#timerProjectPro')).toContainText(
+    'Support Retainer'
+  );
 });
 
 test('import and export still work', async ({ page }) => {

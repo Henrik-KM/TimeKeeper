@@ -18,8 +18,10 @@ import {
   getProjectPlanningSnapshot,
   getProjectPlannedHoursForPeriod,
   getProjectStartDate,
+  getProjectWeeklyExpectedHours,
   getRollingWindowBounds,
   isProjectActive,
+  isWeeklyPaceProject,
   maxDate,
   parseLocalDateString,
   startOfLocalDay,
@@ -962,6 +964,25 @@ import {
     const obj = project && typeof project === 'object' ? { ...project } : {};
     if (!obj.id) obj.id = uuid();
     if (!obj.createdAt) obj.createdAt = new Date().toISOString();
+    const explicitType =
+      typeof obj.scheduleType === 'string' ? obj.scheduleType : '';
+    const weeklyHours = Number(obj.weeklyExpectedHours);
+    obj.scheduleType =
+      explicitType === 'weekly' ||
+      (!obj.deadline && Number.isFinite(weeklyHours) && weeklyHours > 0)
+        ? 'weekly'
+        : 'deadline';
+    obj.weeklyExpectedHours =
+      obj.scheduleType === 'weekly' && Number.isFinite(weeklyHours)
+        ? Math.max(0, weeklyHours)
+        : 0;
+    if (obj.scheduleType === 'weekly') {
+      obj.deadline = '';
+      const budgetHours = Number(obj.budgetHours);
+      obj.budgetHours = Number.isFinite(budgetHours)
+        ? Math.max(0, budgetHours)
+        : 0;
+    }
     const parsedStart = parseLocalDateString(obj.startDate || obj.createdAt);
     obj.startDate = parsedStart ? formatLocalDateString(parsedStart) : '';
     return obj;
@@ -4673,6 +4694,60 @@ import {
     const lastWeekRevenue = lastWeekHours * project.hourlyRate;
     const monthlyRevenue = monthlyHours * project.hourlyRate;
     const lastMonthRevenue = lastMonthHours * project.hourlyRate;
+    if (isWeeklyPaceProject(project)) {
+      const weeklyTargetConst = getProjectPlannedHoursForPeriod(
+        project,
+        entries,
+        weekStart,
+        startNextWeek
+      );
+      const monthlyTargetConst = getProjectPlannedHoursForPeriod(
+        project,
+        entries,
+        monthStart,
+        startNextMonth
+      );
+      const rollingTargetStart = maxDate(rollingBounds.start, created);
+      const rollingWorkdays = rollingTargetStart
+        ? countWorkdays(rollingTargetStart, rollingBounds.endExclusive)
+        : 0;
+      const rolling30TargetConst =
+        (getProjectWeeklyExpectedHours(project) / 5) * rollingWorkdays;
+      const weeklyRemaining = Math.max(0, weeklyTargetConst - weeklyHours);
+      return {
+        totalHours,
+        totalExpectedToDate: weeklyTargetConst,
+        totalScheduleDeficit: weeklyRemaining,
+        remainingHours: weeklyRemaining,
+        usedPct:
+          weeklyTargetConst > 0 ? (weeklyHours / weeklyTargetConst) * 100 : 0,
+        daysLeft: Infinity,
+        daysPassed,
+        status: weeklyRemaining > 0.01 ? 'behind-schedule' : 'on-track',
+        statusColor: weeklyRemaining > 0.01 ? 'red' : 'green',
+        reason:
+          weeklyRemaining > 0.01
+            ? 'Below the expected weekly pace.'
+            : 'On weekly pace.',
+        weeklyExpected: weeklyTargetConst,
+        monthlyExpected: monthlyTargetConst,
+        weeklyHours,
+        lastWeekHours,
+        monthlyHours,
+        lastMonthHours,
+        rolling30Hours,
+        rolling30TargetConst,
+        revenue,
+        weeklyRevenue,
+        lastWeekRevenue,
+        monthlyRevenue,
+        lastMonthRevenue,
+        weeklyTargetConst,
+        weeklyTargetBeforeRollingCredit: weeklyTargetConst,
+        rolling30SurplusHours: 0,
+        monthlyTargetConst
+      };
+    }
     // Planning targets are snapshot-based so they stay stable inside the
     // current week/month instead of shifting whenever the calendar flips.
     let weeklyTargetConst = getProjectPlannedHoursForPeriod(
@@ -5661,9 +5736,9 @@ import {
       hoursDiv.style.color = '#64748b';
       hoursDiv.textContent =
         stats.totalHours.toFixed(1) +
-        'h / ' +
-        project.budgetHours.toFixed(1) +
-        'h';
+        (isWeeklyPaceProject(project)
+          ? `h total • ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h this week`
+          : 'h / ' + project.budgetHours.toFixed(1) + 'h');
       info.appendChild(hoursDiv);
       item.appendChild(info);
       // progress bar container showing expected progress (black) and hours worked (blue) as two stacked bars
@@ -5676,9 +5751,11 @@ import {
       // Calculate expected progress through the project (days passed / total days)
       const totalProjectDaysProg = stats.daysPassed + stats.daysLeft;
       const timeProg =
-        totalProjectDaysProg > 0
+        totalProjectDaysProg > 0 && Number.isFinite(totalProjectDaysProg)
           ? (stats.daysPassed / totalProjectDaysProg) * 100
-          : 0;
+          : stats.weeklyTargetConst > 0
+            ? (stats.weeklyHours / stats.weeklyTargetConst) * 100
+            : 0;
       const usedProg = stats.usedPct;
       // Hours worked progress bar (blue) shown on top
       const hoursBar = document.createElement('div');
@@ -5776,7 +5853,7 @@ import {
               <td data-label="Project">${project.name}</td>
               <td data-label="Client">${project.client || '-'}</td>
               <td data-label="Hours">${stats.totalHours.toFixed(1)}h</td>
-              <td data-label="Budget">${project.budgetHours.toFixed(1)}h</td>
+              <td data-label="Budget">${isWeeklyPaceProject(project) ? `${getProjectWeeklyExpectedHours(project).toFixed(1)}h/week` : `${project.budgetHours.toFixed(1)}h`}</td>
               <td data-label="Status"><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
               <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
               <td data-label="Last Week">${stats.lastWeekHours.toFixed(1)}h</td>
@@ -6062,21 +6139,34 @@ import {
         statusLabel = 'Behind Schedule';
       else if (stats.status === 'tight') statusLabel = 'Tight';
       else statusLabel = 'On Track';
+      const isWeeklyProject = isWeeklyPaceProject(project);
+      const expectedProgressPct =
+        stats.daysPassed + stats.daysLeft > 0 && Number.isFinite(stats.daysLeft)
+          ? (stats.daysPassed / (stats.daysPassed + stats.daysLeft)) * 100
+          : stats.weeklyTargetConst > 0
+            ? Math.min(100, (stats.weeklyHours / stats.weeklyTargetConst) * 100)
+            : 0;
+      const budgetLine = isWeeklyProject
+        ? `<p style="margin:0 0 0.25rem 0;"><strong>Expected:</strong> ${getProjectWeeklyExpectedHours(project).toFixed(1)}h/week @ ${formatCurrency(project.hourlyRate)}</p>`
+        : `<p style="margin:0 0 0.25rem 0;"><strong>Budget:</strong> ${project.budgetHours.toFixed(1)}h @ ${formatCurrency(project.hourlyRate)}</p>`;
+      const deadlineLine = isWeeklyProject
+        ? '<p style="margin:0.25rem 0;"><strong>Deadline:</strong> None</p>'
+        : `<p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>`;
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
               <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">${project.name}</h3>
               <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${project.client || '-'}</p>
-              <p style="margin:0 0 0.25rem 0;"><strong>Budget:</strong> ${project.budgetHours.toFixed(1)}h @ ${formatCurrency(project.hourlyRate)}</p>
+              ${budgetLine}
               <div style="margin:0.5rem 0;">
                 <!-- Dual progress bars showing actual hours vs expected timeline progress -->
                 <div style="display:flex; flex-direction:column; gap:0.2rem; margin-bottom:0.25rem;">
                   <!-- Actual hours consumed (blue) -->
                   <div class="progress-bar"><div class="fill" style="width:${Math.min(100, stats.usedPct).toFixed(1)}%;"></div></div>
                   <!-- Expected progress based on time elapsed relative to deadline (black) -->
-                  <div class="progress-bar"><div class="fill" style="width:${(stats.daysPassed + stats.daysLeft > 0 ? (stats.daysPassed / (stats.daysPassed + stats.daysLeft)) * 100 : 0).toFixed(1)}%; background-color:#000000;"></div></div>
+                  <div class="progress-bar"><div class="fill" style="width:${expectedProgressPct.toFixed(1)}%; background-color:#000000;"></div></div>
                 </div>
-                <small>${stats.totalHours.toFixed(1)}h used (${stats.usedPct.toFixed(1)}%) &bullet; Expected ${stats.daysPassed + stats.daysLeft > 0 ? ((stats.daysPassed / (stats.daysPassed + stats.daysLeft)) * 100).toFixed(1) : '0'}%</small>
+                <small>${stats.totalHours.toFixed(1)}h logged${isWeeklyProject ? ` &bullet; ${stats.weeklyHours.toFixed(1)}h this week` : ` (${stats.usedPct.toFixed(1)}%) &bullet; Expected ${expectedProgressPct.toFixed(1)}%`}</small>
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyTargetConst ? (stats.weeklyHours / stats.weeklyTargetConst) * 100 : 0}%"></div></div>
@@ -6087,7 +6177,7 @@ import {
                 <small>30-day pace: ${stats.rolling30Hours.toFixed(1)} / ${stats.rolling30TargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''}</small>
               </div>
               <p style="margin:0.25rem 0;"><strong>Start Date:</strong> ${formatDate(project.startDate || project.createdAt)}</p>
-              <p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>
+              ${deadlineLine}
               <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
               <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
                 <button class="btn secondary edit-btn" data-id="${project.id}">Edit</button>
@@ -6113,6 +6203,28 @@ import {
         );
         const newRate = parseFloat(newRateStr);
         if (isNaN(newRate)) return;
+        const currentScheduleType = isWeeklyPaceProject(project)
+          ? 'weekly'
+          : 'deadline';
+        const newScheduleTypeRaw = prompt(
+          'Project Type (deadline or weekly):',
+          currentScheduleType
+        );
+        if (!newScheduleTypeRaw) return;
+        const newScheduleType =
+          newScheduleTypeRaw.trim().toLowerCase() === 'weekly'
+            ? 'weekly'
+            : 'deadline';
+        let newWeeklyExpectedHours = 0;
+        if (newScheduleType === 'weekly') {
+          const weeklyStr = prompt(
+            'Expected Hours / Week:',
+            String(getProjectWeeklyExpectedHours(project) || 0)
+          );
+          if (weeklyStr === null) return;
+          newWeeklyExpectedHours = parseFloat(weeklyStr);
+          if (!Number.isFinite(newWeeklyExpectedHours)) return;
+        }
         const currentStartDate =
           project.startDate ||
           formatLocalDateString(getProjectStartDate(project));
@@ -6121,8 +6233,11 @@ import {
           currentStartDate
         );
         if (!newStartDate) return;
-        const newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
-        if (!newDeadline) return;
+        let newDeadline = '';
+        if (newScheduleType === 'deadline') {
+          newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
+          if (!newDeadline) return;
+        }
         // Prompt for rounding preference (minutes) and update roundingMinutes
         const newRoundingStr = prompt(
           'Rounding (minutes – 0 for none, 5, 10, 15):',
@@ -6139,9 +6254,14 @@ import {
         project.name = newName.trim();
         project.client = newClient ? newClient.trim() : null;
         project.budgetHours = newBudget;
+        project.scheduleType = newScheduleType;
+        project.weeklyExpectedHours =
+          newScheduleType === 'weekly'
+            ? Math.max(0, newWeeklyExpectedHours)
+            : 0;
         project.hourlyRate = newRate;
         project.startDate = newStartDate;
-        project.deadline = newDeadline;
+        project.deadline = newScheduleType === 'deadline' ? newDeadline : '';
         saveData();
         updateProjectsPage();
         updateProjectSelects();
@@ -6163,26 +6283,85 @@ import {
   }
 
   // Create new project
+  function updateProjectFormScheduleFields() {
+    const typeInput = document.getElementById('projectScheduleTypePro');
+    const budgetInput = document.getElementById('projectBudgetPro');
+    const weeklyInput = document.getElementById('projectWeeklyHoursPro');
+    const deadlineInput = document.getElementById('projectDeadlinePro');
+    const isWeekly = typeInput && typeInput.value === 'weekly';
+    if (budgetInput) {
+      budgetInput.required = !isWeekly;
+      budgetInput.style.display = isWeekly ? 'none' : '';
+      const budgetLabel = document.querySelector(
+        'label[for="projectBudgetPro"]'
+      );
+      if (budgetLabel) budgetLabel.style.display = isWeekly ? 'none' : '';
+    }
+    if (weeklyInput) {
+      weeklyInput.required = !!isWeekly;
+      weeklyInput.style.display = isWeekly ? '' : 'none';
+      const weeklyLabel = document.querySelector(
+        'label[for="projectWeeklyHoursPro"]'
+      );
+      if (weeklyLabel) weeklyLabel.style.display = isWeekly ? '' : 'none';
+    }
+    if (deadlineInput) {
+      deadlineInput.required = !isWeekly;
+      deadlineInput.style.display = isWeekly ? 'none' : '';
+      const deadlineLabel = document.querySelector(
+        'label[for="projectDeadlinePro"]'
+      );
+      if (deadlineLabel) deadlineLabel.style.display = isWeekly ? 'none' : '';
+    }
+  }
+  const projectScheduleTypeInput = document.getElementById(
+    'projectScheduleTypePro'
+  );
+  if (projectScheduleTypeInput) {
+    projectScheduleTypeInput.addEventListener(
+      'change',
+      updateProjectFormScheduleFields
+    );
+    updateProjectFormScheduleFields();
+  }
   document.getElementById('projectFormPro').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('projectNamePro').value.trim();
     const client = document.getElementById('projectClientPro').value.trim();
-    const budget = parseFloat(
-      document.getElementById('projectBudgetPro').value
+    const scheduleType =
+      document.getElementById('projectScheduleTypePro')?.value === 'weekly'
+        ? 'weekly'
+        : 'deadline';
+    const budgetInputValue = document.getElementById('projectBudgetPro').value;
+    const budget = parseFloat(budgetInputValue);
+    const weeklyExpectedHours = parseFloat(
+      document.getElementById('projectWeeklyHoursPro')?.value || ''
     );
     const rate = parseFloat(document.getElementById('projectRatePro').value);
     const startDateInput = document.getElementById('projectStartDatePro').value;
     const deadline = document.getElementById('projectDeadlinePro').value;
-    if (!name || !deadline) return;
+    if (!name) return;
+    if (scheduleType === 'deadline' && (!deadline || !Number.isFinite(budget)))
+      return;
+    if (scheduleType === 'weekly' && !Number.isFinite(weeklyExpectedHours))
+      return;
     const startDate = startDateInput || formatLocalDateString(new Date());
     const newProject = {
       id: uuid(),
       name,
       client: client || null,
-      budgetHours: budget,
+      scheduleType,
+      budgetHours:
+        scheduleType === 'deadline'
+          ? budget
+          : Number.isFinite(budget)
+            ? Math.max(0, budget)
+            : 0,
+      weeklyExpectedHours:
+        scheduleType === 'weekly' ? Math.max(0, weeklyExpectedHours) : 0,
       hourlyRate: rate,
       startDate,
-      deadline,
+      deadline: scheduleType === 'deadline' ? deadline : '',
       createdAt: new Date().toISOString(),
       color: getUniqueColor(),
       isActive: true,
@@ -6193,6 +6372,7 @@ import {
     data.projects.push(newProject);
     saveData();
     e.target.reset();
+    updateProjectFormScheduleFields();
     updateProjectsPage();
     updateProjectSelects();
     updateDashboard();

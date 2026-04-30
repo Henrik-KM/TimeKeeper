@@ -139,8 +139,21 @@ export function getProjectDeadlineEndExclusive(project) {
   return addLocalDays(deadlineDay, 1);
 }
 
+export function isWeeklyPaceProject(project) {
+  return project && project.scheduleType === 'weekly';
+}
+
+export function getProjectWeeklyExpectedHours(project) {
+  if (!isWeeklyPaceProject(project)) return 0;
+  const hours = Number(project.weeklyExpectedHours);
+  return Number.isFinite(hours) && hours > 0 ? hours : 0;
+}
+
 export function isProjectActive(project, referenceDate = new Date()) {
   const startDate = getProjectStartDate(project);
+  if (isWeeklyPaceProject(project)) {
+    return startDate <= referenceDate;
+  }
   const hasDeadline =
     project.deadline != null && String(project.deadline).trim() !== '';
   if (!hasDeadline) {
@@ -163,6 +176,17 @@ export function getRollingWindowBounds(
 }
 
 export function getProjectPlanningSnapshot(project, entries, snapshotDate) {
+  const weeklyExpectedHours = getProjectWeeklyExpectedHours(project);
+  if (weeklyExpectedHours > 0) {
+    const projectStart = getProjectStartDate(project);
+    const snapshotStart = maxDate(startOfLocalDay(snapshotDate), projectStart);
+    return {
+      snapshotStart,
+      remainingHours: weeklyExpectedHours,
+      remainingWorkdays: 5,
+      dailyRate: weeklyExpectedHours / 5
+    };
+  }
   const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
   const projectStart = getProjectStartDate(project);
   const snapshotStart = maxDate(startOfLocalDay(snapshotDate), projectStart);
@@ -206,6 +230,16 @@ export function getProjectPlannedHoursForPeriod(
   snapshotDate,
   periodEndExclusive
 ) {
+  const weeklyExpectedHours = getProjectWeeklyExpectedHours(project);
+  if (weeklyExpectedHours > 0) {
+    const projectStart = getProjectStartDate(project);
+    const snapshotStart = maxDate(startOfLocalDay(snapshotDate), projectStart);
+    if (!snapshotStart || !periodEndExclusive) return 0;
+    const effectiveEnd = periodEndExclusive;
+    if (effectiveEnd <= snapshotStart) return 0;
+    const workdaysInPeriod = countWorkdays(snapshotStart, effectiveEnd);
+    return (weeklyExpectedHours / 5) * Math.max(0, workdaysInPeriod);
+  }
   const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
   const snapshot = getProjectPlanningSnapshot(project, entries, snapshotDate);
   if (
