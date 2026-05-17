@@ -686,7 +686,7 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
       );
     })
     .toMatch(
-      /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com/
+      /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com.*music\.youtube\.com.*i\.ytimg\.com/
     );
 });
 

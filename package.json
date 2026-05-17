@@ -3,11 +3,13 @@
   "private": true,
   "scripts": {
     "focus:blocker": "node scripts/focus-blocker.mjs",
+    "focus:blocker:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-focus-blocker.ps1",
+    "focus:blocker:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/uninstall-focus-blocker.ps1",
     "lint": "eslint . --ext .js,.mjs",
     "format": "prettier --ignore-path .prettierignore --no-error-on-unmatched-pattern --write README.md package.json jsconfig.json playwright.config.cjs .eslintrc.cjs \"scripts/**/*.{js,mjs}\" \"tests/**/*.{js,mjs}\" \"src/**/*.{js,mjs,css,html,json,md}\"",
     "format:check": "prettier --ignore-path .prettierignore --no-error-on-unmatched-pattern --check README.md package.json jsconfig.json playwright.config.cjs .eslintrc.cjs \"scripts/**/*.{js,mjs}\" \"tests/**/*.{js,mjs}\" \"src/**/*.{js,mjs,css,html,json,md}\"",
     "typecheck": "tsc --project jsconfig.json --noEmit",
-    "test:unit": "node --test tests/unit/**/*.test.mjs",
+    "test:unit": "node --test tests/unit",
     "test:smoke": "playwright test",
     "check": "npm run lint && npm run format:check && npm run typecheck && npm run test:unit && npm run test:smoke"
   },

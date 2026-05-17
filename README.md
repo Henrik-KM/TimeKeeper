@@ -87,12 +87,15 @@ Browser JavaScript cannot block other tabs or OS traffic by itself. TimeKeeper s
 On Windows:
 
 1. Open PowerShell as Administrator.
-2. Run `npm run focus:blocker` from this repo.
-3. Keep that terminal open while using TimeKeeper.
+2. For a one-off session, run `npm run focus:blocker` from this repo and keep that terminal open.
+3. For normal desktop use, run `npm run focus:blocker:install` once from the Administrator shell. This installs a `TimeKeeper Focus Blocker` scheduled task that starts at Windows logon with elevated hosts-file access.
 4. Start a paid timer above 50% focus. The helper adds a marked TimeKeeper block to the hosts file and flushes DNS.
 5. Stop paid focus to remove the marked block.
+6. To remove the background helper, run `npm run focus:blocker:uninstall` from an Administrator shell.
 
-The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, and `youtu.be`; it is not a wildcard DNS filter.
+The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, `music.youtube.com`, `youtu.be`, and `i.ytimg.com`; it is not a wildcard DNS filter. Add extra comma-separated domains with `TIMEKEEPER_FOCUS_EXTRA_SITES`. The helper exposes `http://127.0.0.1:8766/focus/status` for checking whether the desktop block is currently active.
+
+When using the hosted HTTPS app, Chrome may deny direct background requests to `127.0.0.1`. TimeKeeper falls back to a short-lived localhost popup bridge for user-initiated timer start/stop/focus changes. If the desktop block does not toggle, allow popups for the TimeKeeper site or run the app locally.
 
 ## Backup And Sync
 
