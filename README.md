@@ -78,7 +78,7 @@ Timer focus is stored as a multiplier on each entry:
 - `50%`: an agent working without your active focus
 - `25%`: an agent running while you are half-engaged or not monitoring it
 
-The external focus blocker is toggled through `http://127.0.0.1:8766/focus/start` and `/focus/stop` when total paid focus crosses 50%. The app includes the paid focus percentage plus a `blockedSites` query parameter currently containing Reddit and YouTube domains.
+The external focus blocker is toggled through `/focus/start` and `/focus/stop` when total paid focus crosses 50%. The app includes the paid focus percentage plus a `blockedSites` query parameter currently containing Reddit and YouTube domains.
 
 ### Enforcing Website Blocks
 
@@ -95,7 +95,21 @@ On Windows:
 
 The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, `music.youtube.com`, `youtu.be`, and `i.ytimg.com`; it is not a wildcard DNS filter. Add extra comma-separated domains with `TIMEKEEPER_FOCUS_EXTRA_SITES`. The helper exposes `http://127.0.0.1:8766/focus/status` for checking whether the desktop block is currently active.
 
-When using the hosted HTTPS app, Chrome may deny direct background requests to `127.0.0.1`. TimeKeeper falls back to a short-lived localhost popup bridge for user-initiated timer start/stop/focus changes. If the desktop block does not toggle, allow popups for the TimeKeeper site or run the app locally.
+For Android-phone-to-Windows-desktop blocking, install the helper in LAN mode:
+
+```powershell
+npm run focus:blocker:install -- -ListenOnLan
+```
+
+Then open `http://<this-PC-LAN-IP>:8766/` on the Android phone and use TimeKeeper from that address instead of GitHub Pages. The helper serves the same app and the `/focus/*` blocker endpoints from one origin, so the phone can start/stop the Windows desktop block without a popup or `127.0.0.1` confusion. If Windows prompts for firewall access, allow private networks.
+
+When using the hosted HTTPS app, Chrome may deny background requests from the page to `127.0.0.1`. For hosted use, enable Auto Data Sync in TimeKeeper and install the helper with the backup folder:
+
+```powershell
+npm run focus:blocker:install -- -BackupDir "C:\path\to\your\TimeKeeperBackupFolder"
+```
+
+The helper watches `timekeeper-data.json` in that folder and applies the desktop block from the saved running timers, so no popup or browser-localhost bridge is needed. Timer start/stop/focus changes flush the backup immediately when Auto Data Sync is enabled.
 
 ## Backup And Sync
 

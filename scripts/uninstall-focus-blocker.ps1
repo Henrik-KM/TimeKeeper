@@ -1,5 +1,6 @@
 $ErrorActionPreference = 'Stop'
 $TaskName = 'TimeKeeper Focus Blocker'
+$FirewallRuleName = 'TimeKeeper Focus Blocker 8766'
 
 try {
   Invoke-WebRequest `
@@ -17,4 +18,9 @@ try {
 }
 
 Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false
+if (Get-Command Remove-NetFirewallRule -ErrorAction SilentlyContinue) {
+  Remove-NetFirewallRule `
+    -DisplayName $FirewallRuleName `
+    -ErrorAction SilentlyContinue
+}
 Write-Output "Uninstalled scheduled task: $TaskName"
