@@ -17,6 +17,9 @@ const defaultFocusThreshold = Number(
 const defaultDataPollMs = Number(
   process.env.TIMEKEEPER_FOCUS_DATA_POLL_MS || 3000
 );
+const defaultRelayPollMs = Number(
+  process.env.TIMEKEEPER_FOCUS_RELAY_POLL_MS || 15000
+);
 const markerStart = '# TimeKeeper focus block START';
 const markerEnd = '# TimeKeeper focus block END';
 const staticAppFiles = new Set(['/', '/index.html', '/style.css']);
@@ -224,6 +227,79 @@ function getConfiguredDataFilePath() {
   return null;
 }
 
+function getConfiguredFocusRelay() {
+  const relayUrl = (process.env.TIMEKEEPER_FOCUS_RELAY_URL || '').trim();
+  const owner = (process.env.TIMEKEEPER_FOCUS_RELAY_OWNER || '').trim();
+  const repo = (process.env.TIMEKEEPER_FOCUS_RELAY_REPO || '').trim();
+  const filePath = (
+    process.env.TIMEKEEPER_FOCUS_RELAY_PATH || 'assets/focus-state.json'
+  ).trim();
+  const branch = (process.env.TIMEKEEPER_FOCUS_RELAY_BRANCH || 'main').trim();
+  const token = (process.env.TIMEKEEPER_FOCUS_RELAY_TOKEN || '').trim();
+  if (relayUrl) return { relayUrl, token };
+  if (owner && repo && filePath) {
+    return { owner, repo, filePath, branch, token };
+  }
+  return null;
+}
+
+function buildGithubContentsApiUrl(config) {
+  const filePath = String(config.filePath || '')
+    .split('/')
+    .filter(Boolean)
+    .map(encodeURIComponent)
+    .join('/');
+  return `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${filePath}?ref=${encodeURIComponent(config.branch || 'main')}`;
+}
+
+export function decodeGitHubContentsPayload(payload) {
+  if (
+    payload &&
+    payload.encoding === 'base64' &&
+    typeof payload.content === 'string'
+  ) {
+    const json = Buffer.from(payload.content.replace(/\s/g, ''), 'base64')
+      .toString('utf8')
+      .trim();
+    return JSON.parse(json);
+  }
+  return payload;
+}
+
+export function getFocusRelayBlockDecision(
+  payload,
+  {
+    now = Date.now(),
+    threshold = defaultFocusThreshold,
+    defaults = getConfiguredDefaultBlockedSites()
+  } = {}
+) {
+  const relay = payload && typeof payload === 'object' ? payload : {};
+  const paidFocus = Number.isFinite(Number(relay.paidFocusFactor))
+    ? Number(relay.paidFocusFactor)
+    : Number(relay.paidFocusPercent) / 100;
+  const expiresAt = relay.expiresAt ? Date.parse(relay.expiresAt) : NaN;
+  const active =
+    relay.active === true &&
+    Number.isFinite(paidFocus) &&
+    paidFocus > threshold &&
+    Number.isFinite(expiresAt) &&
+    expiresAt > now;
+  return {
+    active,
+    paidFocus: Number.isFinite(paidFocus) ? paidFocus : 0,
+    expired: Number.isFinite(expiresAt) ? expiresAt <= now : true,
+    blockedSites: active
+      ? uniqueDomains([
+          ...defaults,
+          ...(Array.isArray(relay.blockedSites) ? relay.blockedSites : [])
+        ])
+      : [],
+    updatedAt: relay.updatedAt || null,
+    expiresAt: relay.expiresAt || null
+  };
+}
+
 export function getConfiguredDefaultBlockedSites() {
   const extra = process.env.TIMEKEEPER_FOCUS_EXTRA_SITES || '';
   return uniqueDomains([
@@ -354,6 +430,122 @@ export function getFocusDataMonitorState() {
   return { ...focusDataMonitorState };
 }
 
+const focusRelayMonitorState = {
+  enabled: false,
+  source: null,
+  active: false,
+  paidFocus: 0,
+  expired: true,
+  lastCheckedAt: null,
+  lastUpdatedAt: null,
+  expiresAt: null,
+  lastError: null
+};
+
+export function getFocusRelayMonitorState() {
+  return { ...focusRelayMonitorState };
+}
+
+async function fetchFocusRelayPayload(config) {
+  const url = config.relayUrl || buildGithubContentsApiUrl(config);
+  const headers = {
+    Accept: 'application/vnd.github+json'
+  };
+  if (config.token) {
+    headers.Authorization = `Bearer ${config.token}`;
+    headers['X-GitHub-Api-Version'] = '2022-11-28';
+  }
+  const response = await fetch(url, { headers, cache: 'no-store' });
+  if (!response.ok) {
+    throw new Error(`Focus relay fetch failed: HTTP ${response.status}`);
+  }
+  const payload = await response.json();
+  return decodeGitHubContentsPayload(payload);
+}
+
+async function syncBlockFromFocusRelay({
+  config,
+  threshold = defaultFocusThreshold,
+  defaults = getConfiguredDefaultBlockedSites(),
+  flush = true
+}) {
+  focusRelayMonitorState.enabled = true;
+  focusRelayMonitorState.source = config.relayUrl
+    ? config.relayUrl
+    : `${config.owner}/${config.repo}/${config.filePath}`;
+  focusRelayMonitorState.lastCheckedAt = new Date().toISOString();
+  try {
+    const payload = await fetchFocusRelayPayload(config);
+    const decision = getFocusRelayBlockDecision(payload, {
+      threshold,
+      defaults
+    });
+    const wasActive = focusRelayMonitorState.active;
+    focusRelayMonitorState.active = decision.active;
+    focusRelayMonitorState.paidFocus = decision.paidFocus;
+    focusRelayMonitorState.expired = decision.expired;
+    focusRelayMonitorState.lastUpdatedAt = decision.updatedAt;
+    focusRelayMonitorState.expiresAt = decision.expiresAt;
+    focusRelayMonitorState.lastError = null;
+    await setBlockEnabled(decision.active, decision.blockedSites || defaults, {
+      flush
+    });
+    if (decision.active !== wasActive) {
+      logEvent(
+        decision.active
+          ? `focus relay enabled site block; paidFocus=${Math.round(decision.paidFocus * 100)}`
+          : 'focus relay disabled site block'
+      );
+    }
+  } catch (error) {
+    focusRelayMonitorState.lastError = formatPermissionHint(error);
+    if (focusRelayMonitorState.active) {
+      await setBlockEnabled(false, defaults, { flush });
+      focusRelayMonitorState.active = false;
+      focusRelayMonitorState.paidFocus = 0;
+      focusRelayMonitorState.expired = true;
+      logEvent('focus relay disabled site block because relay is unavailable');
+    }
+  }
+}
+
+export function startFocusRelayMonitor({
+  config = getConfiguredFocusRelay(),
+  pollMs = defaultRelayPollMs,
+  threshold = defaultFocusThreshold,
+  defaults = getConfiguredDefaultBlockedSites(),
+  flush = true
+} = {}) {
+  if (!config) {
+    focusRelayMonitorState.enabled = false;
+    focusRelayMonitorState.source = null;
+    focusRelayMonitorState.lastError = 'No focus relay configured.';
+    return { stop() {} };
+  }
+  focusRelayMonitorState.enabled = true;
+  focusRelayMonitorState.source = config.relayUrl
+    ? config.relayUrl
+    : `${config.owner}/${config.repo}/${config.filePath}`;
+  logEvent(`watching focus relay: ${focusRelayMonitorState.source}`);
+  const sync = () => {
+    syncBlockFromFocusRelay({
+      config,
+      threshold,
+      defaults,
+      flush
+    }).catch((error) => {
+      focusRelayMonitorState.lastError = formatPermissionHint(error);
+    });
+  };
+  sync();
+  const interval = setInterval(sync, Math.max(5000, pollMs));
+  return {
+    stop() {
+      clearInterval(interval);
+    }
+  };
+}
+
 async function syncBlockFromDataFile({
   dataFilePath,
   threshold = defaultFocusThreshold,
@@ -472,6 +664,7 @@ export function createFocusBlockerServer({
           hostsPath,
           defaultBlockedSites: defaults,
           dataMonitor: getFocusDataMonitorState(),
+          focusRelayMonitor: getFocusRelayMonitorState(),
           ...readBlockState(content)
         });
         return;
@@ -539,6 +732,7 @@ export function startFocusBlockerServer({
 } = {}) {
   const server = createFocusBlockerServer({ host, port });
   startFocusDataMonitor();
+  startFocusRelayMonitor();
   process.on('SIGINT', cleanupAndExit);
   process.on('SIGTERM', cleanupAndExit);
   server.listen(port, host, () => {

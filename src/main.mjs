@@ -1587,11 +1587,14 @@ import {
   //  Focus webhook endpoints are resolved at runtime. When the app is served
   //  by the desktop helper on port 8766, calls go to the same origin so an
   //  Android browser can control the Windows hosts-file blocker over LAN.
-  const LOCAL_FOCUS_BLOCKER_BASE_URL = 'http://127.0.0.1:8766';
   const FOCUS_HELPER_PORT = '8766';
   const FOCUS_BLOCKER_BASE_URL_STORAGE_KEY = 'timekeeperFocusBlockerBaseUrls';
+  const FOCUS_RELAY_CONFIG_STORAGE_KEY = 'timekeeperFocusRelayConfig';
+  const FOCUS_RELAY_DEVICE_ID_STORAGE_KEY = 'timekeeperFocusRelayDeviceId';
   const FOCUS_BLOCK_THRESHOLD = 0.5;
   const FOCUS_BLOCKER_HEARTBEAT_MS = 60000;
+  const FOCUS_RELAY_ACTIVE_TTL_MS = 10 * 60 * 1000;
+  const FOCUS_RELAY_MIN_PUBLISH_MS = 2 * 60 * 1000;
   const FOCUS_BLOCKED_WEBSITES = [
     'reddit.com',
     'www.reddit.com',
@@ -1609,6 +1612,7 @@ import {
     'www.ytimg.com',
     'i.ytimg.com'
   ];
+  let focusRelayLastPublishAt = 0;
 
   function normalizeFocusBlockerBaseUrl(rawUrl) {
     const trimmed = String(rawUrl || '').trim();
@@ -1643,8 +1647,6 @@ import {
       window.location.port === FOCUS_HELPER_PORT;
     if (servedByFocusHelper) {
       urls.push(window.location.origin);
-    } else {
-      urls.push(LOCAL_FOCUS_BLOCKER_BASE_URL);
     }
     return [...new Set(urls)];
   }
@@ -1653,6 +1655,211 @@ import {
     return getFocusBlockerBaseUrls().map(
       (baseUrl) => `${baseUrl}/focus/${action}`
     );
+  }
+
+  function inferGithubRelayDefaults() {
+    const defaults = {
+      owner: '',
+      repo: '',
+      path: 'assets/focus-state.json',
+      branch: 'main',
+      token: '',
+      enabled: false
+    };
+    const match = window.location.hostname.match(/^([^.]+)\.github\.io$/i);
+    if (match) {
+      defaults.owner = match[1];
+      const pathParts = window.location.pathname.split('/').filter(Boolean);
+      defaults.repo = pathParts[0] || `${match[1]}.github.io`;
+    }
+    return defaults;
+  }
+
+  function getFocusRelayConfig() {
+    const defaults = inferGithubRelayDefaults();
+    try {
+      const saved = JSON.parse(
+        localStorage.getItem(FOCUS_RELAY_CONFIG_STORAGE_KEY) || '{}'
+      );
+      return {
+        ...defaults,
+        ...saved,
+        owner: String(saved.owner || defaults.owner || '').trim(),
+        repo: String(saved.repo || defaults.repo || '').trim(),
+        path: String(saved.path || defaults.path).trim(),
+        branch: String(saved.branch || defaults.branch).trim(),
+        token: String(saved.token || '').trim(),
+        enabled: saved.enabled === true
+      };
+    } catch {
+      return defaults;
+    }
+  }
+
+  function saveFocusRelayConfig(config) {
+    const next = {
+      enabled: !!config.enabled,
+      owner: String(config.owner || '').trim(),
+      repo: String(config.repo || '').trim(),
+      path: String(config.path || 'assets/focus-state.json').trim(),
+      branch: String(config.branch || 'main').trim(),
+      token: String(config.token || '').trim()
+    };
+    localStorage.setItem(FOCUS_RELAY_CONFIG_STORAGE_KEY, JSON.stringify(next));
+    return next;
+  }
+
+  function isFocusRelayConfigUsable(config) {
+    return !!(
+      config &&
+      config.enabled &&
+      config.owner &&
+      config.repo &&
+      config.path &&
+      config.branch &&
+      config.token
+    );
+  }
+
+  function getFocusRelayDeviceId() {
+    let deviceId = localStorage.getItem(FOCUS_RELAY_DEVICE_ID_STORAGE_KEY);
+    if (!deviceId) {
+      deviceId =
+        window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : `timekeeper-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      localStorage.setItem(FOCUS_RELAY_DEVICE_ID_STORAGE_KEY, deviceId);
+    }
+    return deviceId;
+  }
+
+  function encodeBase64Utf8(text) {
+    const bytes = new TextEncoder().encode(text);
+    let binary = '';
+    bytes.forEach((byte) => {
+      binary += String.fromCharCode(byte);
+    });
+    return window.btoa(binary);
+  }
+
+  function buildGithubContentsApiUrl(config) {
+    const filePath = String(config.path || '')
+      .split('/')
+      .filter(Boolean)
+      .map(encodeURIComponent)
+      .join('/');
+    return `https://api.github.com/repos/${encodeURIComponent(config.owner)}/${encodeURIComponent(config.repo)}/contents/${filePath}`;
+  }
+
+  function buildFocusRelayPayload(action, paidFocus) {
+    const now = Date.now();
+    const active = action === 'start' && paidFocus > FOCUS_BLOCK_THRESHOLD;
+    return {
+      schemaVersion: 1,
+      app: 'TimeKeeper',
+      active,
+      action,
+      paidFocusFactor: Number(paidFocus.toFixed(4)),
+      paidFocusPercent: Math.round(paidFocus * 100),
+      thresholdFactor: FOCUS_BLOCK_THRESHOLD,
+      thresholdPercent: Math.round(FOCUS_BLOCK_THRESHOLD * 100),
+      updatedAt: new Date(now).toISOString(),
+      expiresAt: new Date(
+        active ? now + FOCUS_RELAY_ACTIVE_TTL_MS : now
+      ).toISOString(),
+      blockedSites: FOCUS_BLOCKED_WEBSITES,
+      deviceId: getFocusRelayDeviceId()
+    };
+  }
+
+  async function publishGithubFocusRelay(config, payload) {
+    const url = buildGithubContentsApiUrl(config);
+    const headers = {
+      Accept: 'application/vnd.github+json',
+      Authorization: `Bearer ${config.token}`,
+      'Content-Type': 'application/json',
+      'X-GitHub-Api-Version': '2022-11-28'
+    };
+    let sha = null;
+    const current = await fetch(
+      `${url}?ref=${encodeURIComponent(config.branch)}`,
+      { headers, cache: 'no-store' }
+    );
+    if (current.ok) {
+      const currentPayload = await current.json();
+      sha = currentPayload.sha || null;
+    } else if (current.status !== 404) {
+      throw new Error(`GitHub relay read failed: ${current.status}`);
+    }
+
+    const body = {
+      message: `Update TimeKeeper focus relay: ${payload.active ? 'active' : 'inactive'}`,
+      content: encodeBase64Utf8(JSON.stringify(payload, null, 2)),
+      branch: config.branch
+    };
+    if (sha) body.sha = sha;
+
+    const response = await fetch(url, {
+      method: 'PUT',
+      headers,
+      body: JSON.stringify(body)
+    });
+    if (!response.ok && response.status === 409) {
+      const retryCurrent = await fetch(
+        `${url}?ref=${encodeURIComponent(config.branch)}`,
+        { headers, cache: 'no-store' }
+      );
+      if (retryCurrent.ok) {
+        const retryPayload = await retryCurrent.json();
+        body.sha = retryPayload.sha;
+        const retry = await fetch(url, {
+          method: 'PUT',
+          headers,
+          body: JSON.stringify(body)
+        });
+        if (retry.ok) return retry.json();
+      }
+    }
+    if (!response.ok) {
+      throw new Error(`GitHub relay write failed: ${response.status}`);
+    }
+    return response.json();
+  }
+
+  function setFocusRelayStatus(message, isError = false) {
+    const status = document.getElementById('focusRelayStatus');
+    if (!status) return;
+    status.textContent = message || '';
+    status.style.display = message ? 'block' : 'none';
+    status.style.color = isError ? '#b91c1c' : '#64748b';
+  }
+
+  function publishFocusRelayState(action, paidFocus, options = {}) {
+    const config = getFocusRelayConfig();
+    if (!isFocusRelayConfigUsable(config)) return;
+    const now = Date.now();
+    const active = action === 'start' && paidFocus > FOCUS_BLOCK_THRESHOLD;
+    if (
+      active &&
+      !options.force &&
+      now - focusRelayLastPublishAt < FOCUS_RELAY_MIN_PUBLISH_MS
+    ) {
+      return;
+    }
+    const payload = buildFocusRelayPayload(action, paidFocus);
+    focusRelayLastPublishAt = now;
+    publishGithubFocusRelay(config, payload)
+      .then(() => {
+        setFocusRelayStatus(
+          payload.active
+            ? `Relay active: ${payload.paidFocusPercent}% focus.`
+            : 'Relay inactive.'
+        );
+      })
+      .catch((err) => {
+        console.error('Focus relay publish failed:', err);
+        setFocusRelayStatus(err.message || 'Focus relay publish failed.', true);
+      });
   }
 
   function buildFocusWebhookUrl(rawUrl, payload) {
@@ -1698,12 +1905,14 @@ import {
       action: 'start',
       paidFocus
     });
+    publishFocusRelayState('start', paidFocus);
   }
   function triggerFocusStop(paidFocus) {
     triggerWebhooks(getFocusWebhookUrls('stop'), {
       action: 'stop',
       paidFocus
     });
+    publishFocusRelayState('stop', paidFocus, { force: true });
   }
 
   // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
@@ -7871,6 +8080,68 @@ import {
   const chooseBtn = document.getElementById('chooseBackupDirBtn');
   const backupNowBtn = document.getElementById('backupNowBtn');
   const restoreBackupBtn = document.getElementById('restoreBackupBtn');
+  const focusRelayEnabledElem = document.getElementById('focusRelayEnabled');
+  const focusRelayOwnerElem = document.getElementById('focusRelayOwner');
+  const focusRelayRepoElem = document.getElementById('focusRelayRepo');
+  const focusRelayPathElem = document.getElementById('focusRelayPath');
+  const focusRelayBranchElem = document.getElementById('focusRelayBranch');
+  const focusRelayTokenElem = document.getElementById('focusRelayToken');
+  const focusRelaySaveBtn = document.getElementById('focusRelaySaveBtn');
+  const focusRelayTestBtn = document.getElementById('focusRelayTestBtn');
+
+  function populateFocusRelaySettings() {
+    const config = getFocusRelayConfig();
+    if (focusRelayEnabledElem) focusRelayEnabledElem.checked = config.enabled;
+    if (focusRelayOwnerElem) focusRelayOwnerElem.value = config.owner;
+    if (focusRelayRepoElem) focusRelayRepoElem.value = config.repo;
+    if (focusRelayPathElem) focusRelayPathElem.value = config.path;
+    if (focusRelayBranchElem) focusRelayBranchElem.value = config.branch;
+    if (focusRelayTokenElem) focusRelayTokenElem.value = config.token;
+    setFocusRelayStatus(
+      isFocusRelayConfigUsable(config)
+        ? 'GitHub relay is configured.'
+        : 'GitHub relay is not configured.'
+    );
+  }
+
+  function readFocusRelaySettingsFromUi() {
+    return saveFocusRelayConfig({
+      enabled: !!(focusRelayEnabledElem && focusRelayEnabledElem.checked),
+      owner: focusRelayOwnerElem ? focusRelayOwnerElem.value : '',
+      repo: focusRelayRepoElem ? focusRelayRepoElem.value : '',
+      path: focusRelayPathElem ? focusRelayPathElem.value : '',
+      branch: focusRelayBranchElem ? focusRelayBranchElem.value : '',
+      token: focusRelayTokenElem ? focusRelayTokenElem.value : ''
+    });
+  }
+
+  populateFocusRelaySettings();
+  if (focusRelaySaveBtn) {
+    focusRelaySaveBtn.addEventListener('click', () => {
+      const config = readFocusRelaySettingsFromUi();
+      setFocusRelayStatus(
+        isFocusRelayConfigUsable(config)
+          ? 'GitHub relay saved.'
+          : 'Relay saved but missing required fields.',
+        !isFocusRelayConfigUsable(config)
+      );
+    });
+  }
+  if (focusRelayTestBtn) {
+    focusRelayTestBtn.addEventListener('click', () => {
+      const config = readFocusRelaySettingsFromUi();
+      if (!isFocusRelayConfigUsable(config)) {
+        setFocusRelayStatus(
+          'Relay test needs owner, repo, path, branch, and token.',
+          true
+        );
+        return;
+      }
+      setFocusRelayStatus('Publishing relay test...');
+      publishFocusRelayState('stop', 0, { force: true });
+    });
+  }
+
   function syncAutoSyncToggleUI() {
     if (!autoSyncToggle) return;
     const shouldCheck =

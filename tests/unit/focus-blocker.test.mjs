@@ -8,7 +8,9 @@ import test from 'node:test';
 import {
   computePaidFocusFromTimekeeperData,
   createFocusBlockerServer,
+  decodeGitHubContentsPayload,
   defaultBlockedSites,
+  getFocusRelayBlockDecision,
   parseBlockedSites,
   readBlockState,
   removeExistingBlock,
@@ -133,6 +135,48 @@ test('computePaidFocusFromTimekeeperData sums running paid timer focus', () => {
   });
 
   assert.equal(paidFocus, 1.5);
+});
+
+test('decodeGitHubContentsPayload reads base64 relay JSON', () => {
+  const payload = decodeGitHubContentsPayload({
+    encoding: 'base64',
+    content: Buffer.from(
+      JSON.stringify({ active: true, paidFocusFactor: 1.5 }),
+      'utf8'
+    ).toString('base64')
+  });
+
+  assert.deepEqual(payload, { active: true, paidFocusFactor: 1.5 });
+});
+
+test('getFocusRelayBlockDecision requires active unexpired paid focus', () => {
+  const now = Date.parse('2026-05-17T10:00:00.000Z');
+  const active = getFocusRelayBlockDecision(
+    {
+      active: true,
+      paidFocusFactor: 1.5,
+      updatedAt: '2026-05-17T09:59:00.000Z',
+      expiresAt: '2026-05-17T10:10:00.000Z',
+      blockedSites: ['example.com']
+    },
+    { now, defaults: ['reddit.com'] }
+  );
+
+  assert.equal(active.active, true);
+  assert.equal(active.paidFocus, 1.5);
+  assert.ok(active.blockedSites.includes('reddit.com'));
+  assert.ok(active.blockedSites.includes('example.com'));
+
+  const expired = getFocusRelayBlockDecision(
+    {
+      active: true,
+      paidFocusFactor: 1.5,
+      expiresAt: '2026-05-17T09:59:00.000Z'
+    },
+    { now, defaults: ['reddit.com'] }
+  );
+  assert.equal(expired.active, false);
+  assert.deepEqual(expired.blockedSites, []);
 });
 
 test('removeExistingBlock handles repeated managed sections', () => {
