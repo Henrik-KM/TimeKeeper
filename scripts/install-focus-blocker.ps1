@@ -3,12 +3,6 @@ param(
   [string]$BackupDir,
   [string]$ExtraSites,
   [string]$Host,
-  [string]$RelayUrl,
-  [string]$RelayOwner,
-  [string]$RelayRepo,
-  [string]$RelayPath = 'assets/focus-state.json',
-  [string]$RelayBranch = 'main',
-  [string]$RelayToken,
   [switch]$ListenOnLan,
   [switch]$NoFirewallRule,
   [switch]$NoStart
@@ -38,12 +32,6 @@ if ($DataFile -and $BackupDir) {
 if ($Host -and $ListenOnLan) {
   throw 'Use either -Host or -ListenOnLan, not both.'
 }
-if ($RelayUrl -and ($RelayOwner -or $RelayRepo)) {
-  throw 'Use either -RelayUrl or -RelayOwner/-RelayRepo, not both.'
-}
-if (($RelayOwner -and -not $RelayRepo) -or ($RelayRepo -and -not $RelayOwner)) {
-  throw 'Use both -RelayOwner and -RelayRepo for a GitHub relay.'
-}
 
 if ($DataFile) {
   $DataFile = (Resolve-Path $DataFile).Path
@@ -57,14 +45,7 @@ if ($ListenOnLan) {
 } elseif ($Host) {
   $ResolvedHost = $Host
 }
-if (
-  $DataFile -or
-  $BackupDir -or
-  $ExtraSites -or
-  $ResolvedHost -or
-  $RelayUrl -or
-  ($RelayOwner -and $RelayRepo)
-) {
+if ($DataFile -or $BackupDir -or $ExtraSites -or $ResolvedHost) {
   New-Item -ItemType Directory -Force -Path $ConfigDir | Out-Null
   $Config = [ordered]@{}
   if ($DataFile) {
@@ -78,18 +59,6 @@ if (
   }
   if ($ResolvedHost) {
     $Config.host = $ResolvedHost
-  }
-  if ($RelayUrl) {
-    $Config.relayUrl = $RelayUrl
-  }
-  if ($RelayOwner -and $RelayRepo) {
-    $Config.relayOwner = $RelayOwner
-    $Config.relayRepo = $RelayRepo
-    $Config.relayPath = $RelayPath
-    $Config.relayBranch = $RelayBranch
-  }
-  if ($RelayToken) {
-    $Config.relayToken = $RelayToken
   }
   $Config | ConvertTo-Json | Set-Content -Path $ConfigPath -Encoding utf8
   Write-Output "Wrote focus blocker config: $ConfigPath"
@@ -164,9 +133,6 @@ if ($ResolvedHost -eq '0.0.0.0') {
   foreach ($Address in $LanAddresses) {
     Write-Output "Candidate phone URL: http://$($Address.IPAddress):8766/"
   }
-}
-if ($RelayUrl -or ($RelayOwner -and $RelayRepo)) {
-  Write-Output 'Focus relay enabled. The helper will poll GitHub for phone focus state.'
 }
 if ($NoStart) {
   Write-Output 'The task will start at next logon.'

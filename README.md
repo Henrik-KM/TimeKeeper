@@ -95,22 +95,7 @@ On Windows:
 
 The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, `music.youtube.com`, `youtu.be`, and `i.ytimg.com`; it is not a wildcard DNS filter. Add extra comma-separated domains with `TIMEKEEPER_FOCUS_EXTRA_SITES`. The helper exposes `http://127.0.0.1:8766/focus/status` for checking whether the desktop block is currently active.
 
-For GitHub Pages on Android controlling the Windows desktop, use the GitHub focus relay. In TimeKeeper, open Import / Export -> Desktop Focus Relay and save:
-
-- owner and repo for the GitHub Pages repository
-- `assets/focus-state.json` as the relay path
-- the branch GitHub Pages publishes from
-- a GitHub token that can write repository contents
-
-Then install the desktop helper with the same relay target:
-
-```powershell
-npm run focus:blocker:install -- -RelayOwner "<owner>" -RelayRepo "<repo>" -RelayPath "assets/focus-state.json" -RelayBranch "main"
-```
-
-The phone writes focus state to GitHub over HTTPS. The desktop helper polls that state and edits the Windows hosts file locally. The hosted GitHub Pages copy intentionally does not call `127.0.0.1` by default; on Android, `127.0.0.1` is the phone itself, not the Windows desktop.
-
-For local LAN use, install the helper in LAN mode:
+For Android-phone-to-Windows-desktop blocking, install the helper in LAN mode:
 
 ```powershell
 npm run focus:blocker:install -- -ListenOnLan

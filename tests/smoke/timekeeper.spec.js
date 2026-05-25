@@ -1,21 +1,12 @@
 const { expect, test } = require('@playwright/test');
 
-function seedLocalStorage(page, payload = null, extraLocalStorage = {}) {
-  return page.addInitScript(
-    ({ initialPayload, extraValues }) => {
-      localStorage.clear();
-      if (initialPayload) {
-        localStorage.setItem(
-          'timekeeperDataPro',
-          JSON.stringify(initialPayload)
-        );
-      }
-      Object.entries(extraValues || {}).forEach(([key, value]) => {
-        localStorage.setItem(key, String(value));
-      });
-    },
-    { initialPayload: payload, extraValues: extraLocalStorage }
-  );
+function seedLocalStorage(page, payload = null) {
+  return page.addInitScript((initialPayload) => {
+    localStorage.clear();
+    if (initialPayload) {
+      localStorage.setItem('timekeeperDataPro', JSON.stringify(initialPayload));
+    }
+  }, payload);
 }
 
 function freezeTime(page, isoString) {
@@ -670,65 +661,6 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
       }
     });
   });
-  await seedLocalStorage(
-    page,
-    {
-      projects: [
-        projectFixture({
-          id: 'paid-project',
-          name: 'Paid Project',
-          budgetHours: 8,
-          startDate: '2026-04-24',
-          deadline: '2026-04-24'
-        })
-      ],
-      entries: []
-    },
-    {
-      timekeeperFocusBlockerBaseUrls: 'http://127.0.0.1:8766'
-    }
-  );
-
-  await page.goto('/');
-  await page.locator('#timerProjectPro').selectOption('paid-project');
-  await page.locator('#startFactorPro').selectOption('1.5');
-  await page.locator('#startTimerBtnPro').click();
-
-  await expect
-    .poll(async () => {
-      return page.evaluate(() =>
-        (window['__focusWebhookUrls'] || []).join('\n')
-      );
-    })
-    .toMatch(
-      /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com.*music\.youtube\.com.*i\.ytimg\.com/
-    );
-});
-
-test('hosted app does not call phone-local localhost blocker by default', async ({
-  page
-}) => {
-  await freezeTime(page, '2026-04-24T10:00:00');
-  await page.addInitScript(() => {
-    window['__focusWebhookUrls'] = [];
-    const record = (url) => {
-      const value = String(url);
-      if (value.includes('/focus/')) {
-        window['__focusWebhookUrls'].push(value);
-      }
-    };
-    window.fetch = (url) => {
-      record(url);
-      return Promise.resolve(new Response('', { status: 204 }));
-    };
-    Object.defineProperty(navigator, 'sendBeacon', {
-      configurable: true,
-      value: (url) => {
-        record(url);
-        return true;
-      }
-    });
-  });
   await seedLocalStorage(page, {
     projects: [
       projectFixture({
@@ -749,108 +681,13 @@ test('hosted app does not call phone-local localhost blocker by default', async 
 
   await expect
     .poll(async () => {
-      return page.evaluate(() => window['__focusWebhookUrls'] || []);
+      return page.evaluate(() =>
+        (window['__focusWebhookUrls'] || []).join('\n')
+      );
     })
-    .toEqual([]);
-});
-
-test('GitHub Pages app can publish focus state to GitHub relay', async ({
-  page
-}) => {
-  await freezeTime(page, '2026-04-24T10:00:00');
-  await page.addInitScript(() => {
-    window['__focusRelayCalls'] = [];
-    window.fetch = (url, init = {}) => {
-      const value = String(url);
-      if (value.includes('api.github.com/repos/owner/repo/contents/')) {
-        window['__focusRelayCalls'].push({
-          url: value,
-          method: init.method || 'GET',
-          body: init.body || ''
-        });
-        if ((init.method || 'GET') === 'PUT') {
-          return Promise.resolve(
-            new Response(JSON.stringify({ content: { sha: 'next-sha' } }), {
-              status: 200,
-              headers: { 'Content-Type': 'application/json' }
-            })
-          );
-        }
-        return Promise.resolve(new Response('{}', { status: 404 }));
-      }
-      return Promise.resolve(new Response('', { status: 204 }));
-    };
-  });
-  await seedLocalStorage(
-    page,
-    {
-      projects: [
-        projectFixture({
-          id: 'paid-project',
-          name: 'Paid Project',
-          budgetHours: 8,
-          startDate: '2026-04-24',
-          deadline: '2026-04-24'
-        })
-      ],
-      entries: []
-    },
-    {
-      timekeeperFocusRelayConfig: JSON.stringify({
-        enabled: true,
-        owner: 'owner',
-        repo: 'repo',
-        path: 'assets/focus-state.json',
-        branch: 'main',
-        token: 'test-token'
-      })
-    }
-  );
-
-  await page.goto('/');
-  await page.locator('#timerProjectPro').selectOption('paid-project');
-  await page.locator('#startFactorPro').selectOption('1.5');
-  await page.locator('#startTimerBtnPro').click();
-
-  await expect
-    .poll(async () => {
-      return page.evaluate(() => {
-        const put = (window['__focusRelayCalls'] || []).find(
-          (call) => call.method === 'PUT'
-        );
-        if (!put) return null;
-        const body = JSON.parse(put.body);
-        const text = new TextDecoder().decode(
-          Uint8Array.from(atob(body.content), (char) => char.charCodeAt(0))
-        );
-        return {
-          url: put.url,
-          payload: JSON.parse(text)
-        };
-      });
-    })
-    .not.toBeNull();
-
-  const relayPayload = await page.evaluate(() => {
-    const put = (window['__focusRelayCalls'] || []).find(
-      (call) => call.method === 'PUT'
+    .toMatch(
+      /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com.*music\.youtube\.com.*i\.ytimg\.com/
     );
-    const body = JSON.parse(put.body);
-    const text = new TextDecoder().decode(
-      Uint8Array.from(atob(body.content), (char) => char.charCodeAt(0))
-    );
-    return {
-      url: put.url,
-      payload: JSON.parse(text)
-    };
-  });
-
-  expect(relayPayload.url).toContain(
-    'https://api.github.com/repos/owner/repo/contents/assets/focus-state.json'
-  );
-  expect(relayPayload.payload.active).toBe(true);
-  expect(relayPayload.payload.paidFocusPercent).toBe(150);
-  expect(relayPayload.payload.blockedSites).toContain('reddit.com');
 });
 
 test('auto-sync unsupported state still renders safely', async ({ page }) => {

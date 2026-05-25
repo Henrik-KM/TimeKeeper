@@ -21,24 +21,6 @@ if (Test-Path $ConfigPath) {
   if ($Config.host) {
     $env:TIMEKEEPER_FOCUS_HOST = [string]$Config.host
   }
-  if ($Config.relayUrl) {
-    $env:TIMEKEEPER_FOCUS_RELAY_URL = [string]$Config.relayUrl
-  }
-  if ($Config.relayOwner) {
-    $env:TIMEKEEPER_FOCUS_RELAY_OWNER = [string]$Config.relayOwner
-  }
-  if ($Config.relayRepo) {
-    $env:TIMEKEEPER_FOCUS_RELAY_REPO = [string]$Config.relayRepo
-  }
-  if ($Config.relayPath) {
-    $env:TIMEKEEPER_FOCUS_RELAY_PATH = [string]$Config.relayPath
-  }
-  if ($Config.relayBranch) {
-    $env:TIMEKEEPER_FOCUS_RELAY_BRANCH = [string]$Config.relayBranch
-  }
-  if ($Config.relayToken) {
-    $env:TIMEKEEPER_FOCUS_RELAY_TOKEN = [string]$Config.relayToken
-  }
 }
 
 if ($Check) {
@@ -53,14 +35,6 @@ if ($Check) {
   }
   if ($env:TIMEKEEPER_FOCUS_HOST) {
     Write-Output "Host: $env:TIMEKEEPER_FOCUS_HOST"
-  }
-  if ($env:TIMEKEEPER_FOCUS_RELAY_URL) {
-    Write-Output "Relay URL: $env:TIMEKEEPER_FOCUS_RELAY_URL"
-  }
-  if ($env:TIMEKEEPER_FOCUS_RELAY_OWNER -and $env:TIMEKEEPER_FOCUS_RELAY_REPO) {
-    Write-Output "Relay repo: $env:TIMEKEEPER_FOCUS_RELAY_OWNER/$env:TIMEKEEPER_FOCUS_RELAY_REPO"
-    Write-Output "Relay path: $env:TIMEKEEPER_FOCUS_RELAY_PATH"
-    Write-Output "Relay branch: $env:TIMEKEEPER_FOCUS_RELAY_BRANCH"
   }
   exit 0
 }
