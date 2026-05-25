@@ -207,8 +207,8 @@ export function createFocusBlockerServer({
         const paidFocus = Number(url.searchParams.get('paidFocus'));
         const threshold = Number(url.searchParams.get('threshold'));
         const shouldBlock =
-          !Number.isFinite(paidFocus) ||
-          !Number.isFinite(threshold) ||
+          Number.isFinite(paidFocus) &&
+          Number.isFinite(threshold) &&
           paidFocus > threshold;
         const result = await setBlockEnabled(shouldBlock, blockedSites, {
           hostsPath,

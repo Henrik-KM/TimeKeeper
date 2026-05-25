@@ -698,6 +698,52 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
     .toEqual([]);
 });
 
+test('focus blocker sends stop when paid focus is zero', async ({ page }) => {
+  await freezeTime(page, '2026-04-24T10:00:00');
+  await page.addInitScript(() => {
+    window['__focusWebhookUrls'] = [];
+    window.fetch = (url) => {
+      const value = String(url);
+      if (value.includes('/focus/')) {
+        window['__focusWebhookUrls'].push(value);
+      }
+      return Promise.resolve(new Response('', { status: 204 }));
+    };
+    Object.defineProperty(navigator, 'sendBeacon', {
+      configurable: true,
+      value: (url) => {
+        const value = String(url);
+        if (value.includes('/focus/')) {
+          window['__focusWebhookUrls'].push(value);
+        }
+        return true;
+      }
+    });
+  });
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'paid-project',
+        name: 'Paid Project',
+        budgetHours: 8,
+        startDate: '2026-04-24',
+        deadline: '2026-04-24'
+      })
+    ],
+    entries: []
+  });
+
+  await page.goto('/');
+
+  await expect
+    .poll(async () => {
+      return page.evaluate(() =>
+        (window['__focusWebhookUrls'] || []).join('\n')
+      );
+    })
+    .toMatch(/\/focus\/stop.*paidFocus=0.*threshold=50/);
+});
+
 test('auto-sync unsupported state still renders safely', async ({ page }) => {
   await page.addInitScript(() => {
     localStorage.clear();

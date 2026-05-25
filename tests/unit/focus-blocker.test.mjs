@@ -158,6 +158,47 @@ test('HTTP start, status, and stop operate on a configured hosts file', async ()
   }
 });
 
+test('HTTP start only blocks with explicit paid focus above threshold', async () => {
+  const { hostsPath } = await makeHostsFile();
+  const server = createFocusBlockerServer({
+    hostsPath,
+    flush: false,
+    defaults: ['reddit.com', 'youtube.com']
+  });
+
+  await new Promise((resolve) => {
+    server.listen({ port: 0, host: '127.0.0.1' }, () => resolve());
+  });
+  const address = server.address();
+  if (!address || typeof address === 'string') {
+    throw new Error('Expected server to listen on a TCP address.');
+  }
+  const baseUrl = `http://127.0.0.1:${address.port}`;
+
+  try {
+    const missingFocus = await requestJson(`${baseUrl}/focus/start`);
+    assert.equal(missingFocus.status, 200);
+    assert.equal(missingFocus.body.active, false);
+
+    const atThreshold = await requestJson(
+      `${baseUrl}/focus/start?paidFocus=50&threshold=50`
+    );
+    assert.equal(atThreshold.status, 200);
+    assert.equal(atThreshold.body.active, false);
+
+    const belowThreshold = await requestJson(
+      `${baseUrl}/focus/start?paidFocus=0&threshold=50`
+    );
+    assert.equal(belowThreshold.status, 200);
+    assert.equal(belowThreshold.body.active, false);
+
+    const content = await fs.readFile(hostsPath, 'utf8');
+    assert.equal(readBlockState(content).active, false);
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
 test('HTTP OPTIONS preflight allows browser local-network requests', async () => {
   const { hostsPath } = await makeHostsFile();
   const server = createFocusBlockerServer({ hostsPath, flush: false });

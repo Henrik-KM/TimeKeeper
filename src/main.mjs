@@ -1675,7 +1675,7 @@ import {
 
   // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
   // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
-  let focusBlockerActive = false;
+  let focusBlockerActive = null;
   let focusBlockerLastStartAt = 0;
   function updateFocusBlocker() {
     // Sum the factors of all running timers, excluding unpaid projects.
@@ -1695,19 +1695,26 @@ import {
     // The webhook receives the paid focus total and the website block list so the local
     // blocker can deny distracting domains while focused paid work is active.
     const shouldHeartbeat =
-      focusBlockerActive &&
+      focusBlockerActive === true &&
       total > FOCUS_BLOCK_THRESHOLD &&
       Date.now() - focusBlockerLastStartAt >= FOCUS_BLOCKER_HEARTBEAT_MS;
+    const shouldStopHeartbeat =
+      focusBlockerActive === false &&
+      total <= FOCUS_BLOCK_THRESHOLD &&
+      Date.now() - focusBlockerLastStartAt >= FOCUS_BLOCKER_HEARTBEAT_MS;
     if (
-      (!focusBlockerActive && total > FOCUS_BLOCK_THRESHOLD) ||
+      (focusBlockerActive !== true && total > FOCUS_BLOCK_THRESHOLD) ||
       shouldHeartbeat
     ) {
       focusBlockerActive = true;
       focusBlockerLastStartAt = Date.now();
       triggerFocusStart(total);
-    } else if (focusBlockerActive && total <= FOCUS_BLOCK_THRESHOLD) {
+    } else if (
+      (focusBlockerActive !== false && total <= FOCUS_BLOCK_THRESHOLD) ||
+      shouldStopHeartbeat
+    ) {
       focusBlockerActive = false;
-      focusBlockerLastStartAt = 0;
+      focusBlockerLastStartAt = Date.now();
       triggerFocusStop(total);
     }
   }
