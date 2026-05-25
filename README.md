@@ -95,7 +95,7 @@ On Windows:
 
 The helper only edits the section between `# TimeKeeper focus block START` and `# TimeKeeper focus block END`. Hosts-file blocking works for exact domains such as `reddit.com`, `www.reddit.com`, `youtube.com`, `music.youtube.com`, `youtu.be`, and `i.ytimg.com`; it is not a wildcard DNS filter. Add extra comma-separated domains with `TIMEKEEPER_FOCUS_EXTRA_SITES`. The helper exposes `http://127.0.0.1:8766/focus/status` for checking whether the desktop block is currently active.
 
-When using the hosted HTTPS app, Chrome may deny direct background requests to `127.0.0.1`. TimeKeeper falls back to a short-lived localhost popup bridge for user-initiated timer start/stop/focus changes. If the desktop block does not toggle, allow popups for the TimeKeeper site or run the app locally.
+When using the hosted HTTPS app, Chrome may deny direct background requests to `127.0.0.1`. TimeKeeper sends the focus webhook silently and never opens a visible localhost tab.
 
 ## Backup And Sync
 

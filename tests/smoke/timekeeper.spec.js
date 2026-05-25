@@ -646,8 +646,13 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
   await freezeTime(page, '2026-04-24T10:00:00');
   await page.addInitScript(() => {
     window['__focusWebhookUrls'] = [];
+    window['__focusWindowOpens'] = [];
     const record = (url) => {
       window['__focusWebhookUrls'].push(String(url));
+    };
+    window.open = (url) => {
+      window['__focusWindowOpens'].push(String(url));
+      return null;
     };
     window.fetch = (url) => {
       record(url);
@@ -688,6 +693,9 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
     .toMatch(
       /\/focus\/start.*paidFocus=150.*blockedSites=.*reddit\.com.*youtube\.com.*music\.youtube\.com.*i\.ytimg\.com/
     );
+  await expect
+    .poll(async () => page.evaluate(() => window['__focusWindowOpens'] || []))
+    .toEqual([]);
 });
 
 test('auto-sync unsupported state still renders safely', async ({ page }) => {

@@ -1590,7 +1590,6 @@ import {
   //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
   const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
   const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
-  const FOCUS_POPUP_BRIDGE_STORAGE_KEY = 'timekeeperFocusPopupBridgeEnabled';
   const FOCUS_BLOCK_THRESHOLD = 0.5;
   const FOCUS_BLOCKER_HEARTBEAT_MS = 60000;
   const FOCUS_BLOCKED_WEBSITES = [
@@ -1610,6 +1609,7 @@ import {
     'www.ytimg.com',
     'i.ytimg.com'
   ];
+  const focusWebhookImages = new Set();
 
   function buildFocusWebhookUrl(rawUrl, payload) {
     if (!payload) return rawUrl;
@@ -1631,120 +1631,53 @@ import {
     }
   }
 
-  function isLocalWebhookUrl(rawUrl) {
-    try {
-      const url = new URL(rawUrl, window.location.href);
-      return (
-        url.hostname === '127.0.0.1' ||
-        url.hostname === 'localhost' ||
-        url.hostname === '[::1]'
-      );
-    } catch (err) {
-      return false;
-    }
-  }
-
-  function shouldUseFocusPopupBridge(rawUrl) {
-    const pageHost = window.location.hostname;
-    const pageIsLocal =
-      pageHost === '127.0.0.1' ||
-      pageHost === 'localhost' ||
-      pageHost === '[::1]';
-    return (
-      window.location.protocol === 'https:' &&
-      !pageIsLocal &&
-      isLocalWebhookUrl(rawUrl)
-    );
-  }
-
-  function openFocusPopupBridge(url) {
-    try {
-      const bridge = window.open(
-        url,
-        'timekeeperFocusBridge',
-        'popup,width=420,height=260,left=80,top=80'
-      );
-      if (bridge) {
-        setTimeout(() => {
-          try {
-            bridge.close();
-          } catch (err) {
-            // Ignore popup close errors; the webhook navigation already fired.
-          }
-        }, 1200);
-      }
-    } catch (err) {
-      // Popup fallback is best-effort. The fetch path below may still work.
-    }
-  }
-
-  function isFocusPopupBridgeEnabled() {
-    return localStorage.getItem(FOCUS_POPUP_BRIDGE_STORAGE_KEY) === 'true';
-  }
-
-  function triggerHiddenWebhookGet(url) {
+  function triggerImageWebhookGet(url) {
     try {
       const img = new Image();
       img.referrerPolicy = 'no-referrer';
+      focusWebhookImages.add(img);
       img.src = url;
       setTimeout(() => {
         img.src = '';
+        focusWebhookImages.delete(img);
       }, 5000);
     } catch (err) {
       // Hidden GET is best-effort; fetch/sendBeacon may already have worked.
-    }
-    try {
-      const frame = document.createElement('iframe');
-      frame.style.display = 'none';
-      frame.referrerPolicy = 'no-referrer';
-      frame.src = url;
-      document.body.appendChild(frame);
-      setTimeout(() => {
-        frame.remove();
-      }, 5000);
-    } catch (err) {
-      // Hidden iframe fallback is best-effort.
     }
   }
 
   // Send a ping to each URL in the list. Uses navigator.sendBeacon where
   // available to avoid blocking the page; falls back to fetch otherwise.
-  function triggerWebhooks(urls, payload = null, options = {}) {
+  function triggerWebhooks(urls, payload = null) {
     urls.forEach((u) => {
       const url = buildFocusWebhookUrl(u, payload);
-      const canUsePopupBridge =
-        options.allowPopupBridge &&
-        shouldUseFocusPopupBridge(url) &&
-        isFocusPopupBridgeEnabled();
       try {
-        fetch(url, { method: 'GET', mode: 'cors', keepalive: true }).catch(
+        fetch(url, { method: 'GET', mode: 'no-cors', keepalive: true }).catch(
           () => {
             if (navigator.sendBeacon) navigator.sendBeacon(url);
-            triggerHiddenWebhookGet(url);
-            if (canUsePopupBridge) openFocusPopupBridge(url);
+            triggerImageWebhookGet(url);
           }
         );
       } catch (err) {
         if (navigator.sendBeacon) navigator.sendBeacon(url);
-        triggerHiddenWebhookGet(url);
-        if (canUsePopupBridge) openFocusPopupBridge(url);
+        triggerImageWebhookGet(url);
       }
     });
   }
 
   // Convenience wrappers to trigger start/stop webhooks.
-  function triggerFocusStart(paidFocus, options = {}) {
-    triggerWebhooks(START_WEBHOOKS, { action: 'start', paidFocus }, options);
+  function triggerFocusStart(paidFocus) {
+    triggerWebhooks(START_WEBHOOKS, { action: 'start', paidFocus });
   }
-  function triggerFocusStop(paidFocus, options = {}) {
-    triggerWebhooks(STOP_WEBHOOKS, { action: 'stop', paidFocus }, options);
+  function triggerFocusStop(paidFocus) {
+    triggerWebhooks(STOP_WEBHOOKS, { action: 'stop', paidFocus });
   }
 
   // Track whether the focus blocker (external MacroDroid/Windows scripts) is currently active.
   // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
   let focusBlockerActive = false;
   let focusBlockerLastStartAt = 0;
-  function updateFocusBlocker(options = {}) {
+  function updateFocusBlocker() {
     // Sum the factors of all running timers, excluding unpaid projects.
     const running = getRunningEntries();
     let total = 0;
@@ -1771,11 +1704,11 @@ import {
     ) {
       focusBlockerActive = true;
       focusBlockerLastStartAt = Date.now();
-      triggerFocusStart(total, options);
+      triggerFocusStart(total);
     } else if (focusBlockerActive && total <= FOCUS_BLOCK_THRESHOLD) {
       focusBlockerActive = false;
       focusBlockerLastStartAt = 0;
-      triggerFocusStop(total, options);
+      triggerFocusStop(total);
     }
   }
   setInterval(updateFocusBlocker, FOCUS_BLOCKER_HEARTBEAT_MS);
@@ -6777,7 +6710,7 @@ import {
           // Refresh the timer section to apply the new factor
           updateTimerSection();
           // Recompute focus blocker activation in case total factor changed
-          updateFocusBlocker({ allowPopupBridge: true });
+          updateFocusBlocker();
         });
         overrideP.appendChild(factorSelect);
         row.appendChild(overrideP);
@@ -7020,7 +6953,7 @@ import {
     // Do not immediately save backup here; periodic auto‑sync will handle exporting
     // Recompute focus blocker activation after stopping this timer. If the total
     // factor has dropped below or equal to 50%, the blocker will be disabled.
-    updateFocusBlocker({ allowPopupBridge: true });
+    updateFocusBlocker();
   }
   let timerInterval = null;
   // Chart instances for weekly and monthly scatter plots
@@ -7111,7 +7044,7 @@ import {
     updateTimerSection();
     updateDashboard();
     // After adding the new entry, update the focus blocker based on the new total factor
-    updateFocusBlocker({ allowPopupBridge: true });
+    updateFocusBlocker();
     return true;
   }
 
@@ -7175,7 +7108,7 @@ import {
     updateEntriesTable();
     // Do not immediately save backup here; periodic auto‑sync will handle exporting
     // After stopping all timers, recompute focus blocker activation based on total factor
-    updateFocusBlocker({ allowPopupBridge: true });
+    updateFocusBlocker();
   }
 
   // Update project selects for timer and manual forms
