@@ -1590,6 +1590,7 @@ import {
   //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
   const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
   const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
+  const FOCUS_POPUP_BRIDGE_STORAGE_KEY = 'timekeeperFocusPopupBridgeEnabled';
   const FOCUS_BLOCK_THRESHOLD = 0.5;
   const FOCUS_BLOCKER_HEARTBEAT_MS = 60000;
   const FOCUS_BLOCKED_WEBSITES = [
@@ -1677,22 +1678,56 @@ import {
     }
   }
 
+  function isFocusPopupBridgeEnabled() {
+    return localStorage.getItem(FOCUS_POPUP_BRIDGE_STORAGE_KEY) === 'true';
+  }
+
+  function triggerHiddenWebhookGet(url) {
+    try {
+      const img = new Image();
+      img.referrerPolicy = 'no-referrer';
+      img.src = url;
+      setTimeout(() => {
+        img.src = '';
+      }, 5000);
+    } catch (err) {
+      // Hidden GET is best-effort; fetch/sendBeacon may already have worked.
+    }
+    try {
+      const frame = document.createElement('iframe');
+      frame.style.display = 'none';
+      frame.referrerPolicy = 'no-referrer';
+      frame.src = url;
+      document.body.appendChild(frame);
+      setTimeout(() => {
+        frame.remove();
+      }, 5000);
+    } catch (err) {
+      // Hidden iframe fallback is best-effort.
+    }
+  }
+
   // Send a ping to each URL in the list. Uses navigator.sendBeacon where
   // available to avoid blocking the page; falls back to fetch otherwise.
   function triggerWebhooks(urls, payload = null, options = {}) {
     urls.forEach((u) => {
       const url = buildFocusWebhookUrl(u, payload);
-      if (options.allowPopupBridge && shouldUseFocusPopupBridge(url)) {
-        openFocusPopupBridge(url);
-      }
+      const canUsePopupBridge =
+        options.allowPopupBridge &&
+        shouldUseFocusPopupBridge(url) &&
+        isFocusPopupBridgeEnabled();
       try {
         fetch(url, { method: 'GET', mode: 'cors', keepalive: true }).catch(
           () => {
             if (navigator.sendBeacon) navigator.sendBeacon(url);
+            triggerHiddenWebhookGet(url);
+            if (canUsePopupBridge) openFocusPopupBridge(url);
           }
         );
       } catch (err) {
         if (navigator.sendBeacon) navigator.sendBeacon(url);
+        triggerHiddenWebhookGet(url);
+        if (canUsePopupBridge) openFocusPopupBridge(url);
       }
     });
   }
