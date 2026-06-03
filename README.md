@@ -136,8 +136,18 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
 }
 ```
 
-The workflow fetches all available activities by paging through the Strava API.
+The workflow fetches all available activities by paging through the Strava API. If Strava rejects a refresh but `assets/strava.json` already contains activities, the script preserves the existing feed so the app does not go blank.
+
+### Free export import
+
+Strava users can still download their own activity archive for free. To update TimeKeeper without an API subscription, download the Strava export zip and run:
+
+```bash
+python scripts/import_strava_export.py path/to/strava-export.zip
+```
+
+The importer reads `activities.csv`, merges it with any existing `assets/strava.json` details, applies local exertion overrides, and writes the same JSON feed used by the app. Commit and push `assets/strava.json` afterward to publish it to GitHub Pages.
 
 ### Troubleshooting
 
-If the workflow logs show `Missing Strava refresh token`, restore `_private/strava_token.json`. If the logs show `401 Unauthorized`, generate a fresh refresh token with `activity:read_all` scope and update `_private/strava_token.json`.
+If the workflow logs show `Missing Strava refresh token`, restore `_private/strava_token.json`. If the logs show `401 Unauthorized`, generate a fresh refresh token with `activity:read_all` scope and update `_private/strava_token.json`, or use the free export import path instead.

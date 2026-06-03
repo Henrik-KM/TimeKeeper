@@ -2276,6 +2276,29 @@ import {
         return !isNaN(dt) && dt >= monday && dt < nextMonday;
       })
       .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const weeklyStravaEntries = applyStravaExertionOverrides(
+      Array.isArray(window.stravaActivitiesCache)
+        ? window.stravaActivitiesCache
+        : []
+    )
+      .filter((activity) => {
+        if (!activity || !activity.start_date) return false;
+        const dt = new Date(activity.start_date);
+        return !isNaN(dt) && dt >= monday && dt < nextMonday;
+      })
+      .sort((a, b) => new Date(b.start_date) - new Date(a.start_date));
+    const weeklyActivityRows = [
+      ...weeklyEntries.map((entry) => ({
+        source: 'manual',
+        timestamp: entry.timestamp,
+        entry
+      })),
+      ...weeklyStravaEntries.map((activity) => ({
+        source: 'strava',
+        timestamp: activity.start_date,
+        activity
+      }))
+    ].sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
     const weeklyPlan = computeWorkoutWeekPlan({
       fitness: fitnessData,
       pointsInfo: weeklyPointsInfo,
@@ -2391,8 +2414,7 @@ import {
       header.style.alignItems = 'center';
       header.style.marginBottom = '0.5rem';
       const headerInfo = document.createElement('div');
-      const totalWorkoutCount =
-        weeklyEntries.length + (weeklyPointsInfo.counts.strava || 0);
+      const totalWorkoutCount = weeklyActivityRows.length;
       if (weeklyPlan.paused) {
         headerInfo.textContent = `This week: ${totalWorkoutCount} workout${totalWorkoutCount === 1 ? '' : 's'} • Week paused`;
       } else {
@@ -2417,7 +2439,7 @@ import {
       pauseLabel.appendChild(pauseText);
       header.appendChild(pauseLabel);
       entriesContent.appendChild(header);
-      if (weeklyEntries.length === 0) {
+      if (weeklyActivityRows.length === 0) {
         const empty = document.createElement('p');
         empty.className = 'muted';
         empty.textContent = pausedThisWeek
@@ -2425,7 +2447,52 @@ import {
           : 'No workouts logged yet this week.';
         entriesContent.appendChild(empty);
       } else {
-        weeklyEntries.forEach((entry) => {
+        weeklyActivityRows.forEach((activityRow) => {
+          if (activityRow.source === 'strava') {
+            const activity = activityRow.activity;
+            const row = document.createElement('div');
+            row.className = 'workout-entry-row';
+            row.style.display = 'flex';
+            row.style.justifyContent = 'space-between';
+            row.style.alignItems = 'center';
+            row.style.borderBottom = '1px solid #e2e8f0';
+            row.style.padding = '0.5rem 0';
+            const info = document.createElement('div');
+            const name = document.createElement('strong');
+            name.textContent = activity.name || 'Strava activity';
+            info.appendChild(name);
+            const score = resolveStravaExertion(
+              activity,
+              cachedStravaScoreScale
+            );
+            const details = [
+              'Strava',
+              activity.type || 'Activity',
+              score === null ? 'Unscored' : `${formatExertion(score)} pts`,
+              formatWorkoutTimestamp(activity.start_date)
+            ].filter(Boolean);
+            info.appendChild(
+              document.createTextNode(` - ${details.join(' - ')}`)
+            );
+            row.appendChild(info);
+            const actions = document.createElement('div');
+            actions.style.display = 'flex';
+            actions.style.gap = '0.4rem';
+            if (activity.url) {
+              const openLink = document.createElement('a');
+              openLink.className = 'btn secondary';
+              openLink.textContent = 'Open';
+              openLink.href = activity.url;
+              openLink.target = '_blank';
+              openLink.rel = 'noopener noreferrer';
+              openLink.style.fontSize = '0.75rem';
+              actions.appendChild(openLink);
+            }
+            row.appendChild(actions);
+            entriesContent.appendChild(row);
+            return;
+          }
+          const entry = activityRow.entry;
           const row = document.createElement('div');
           row.className = 'workout-entry-row';
           row.style.display = 'flex';
@@ -4253,8 +4320,41 @@ import {
   });
 
   // Shared runtime helpers imported from ./shared/runtime-helpers.mjs.
+  const STRAVA_FEED_CACHE_KEY = 'timekeeperStravaFeedCache';
   let cachedStravaActivities = [];
   let cachedStravaScoreScale = STRAVA_SCORE_DEFAULT_SCALE;
+
+  function getCachedStravaFeedPayload() {
+    try {
+      const raw = localStorage.getItem(STRAVA_FEED_CACHE_KEY);
+      const parsed = raw ? JSON.parse(raw) : null;
+      if (!parsed || typeof parsed !== 'object') return null;
+      if (!Array.isArray(parsed.activities) || parsed.activities.length === 0) {
+        return null;
+      }
+      return parsed;
+    } catch (error) {
+      return null;
+    }
+  }
+
+  function saveCachedStravaFeedPayload(data) {
+    if (!data || typeof data !== 'object') return;
+    const activities = Array.isArray(data.activities) ? data.activities : [];
+    if (activities.length === 0) return;
+    try {
+      localStorage.setItem(
+        STRAVA_FEED_CACHE_KEY,
+        JSON.stringify({
+          updated_utc: data.updated_utc || null,
+          cached_utc: new Date().toISOString(),
+          activities
+        })
+      );
+    } catch (error) {
+      // Cache failures should not break workout rendering.
+    }
+  }
 
   function getStravaExertionOverrides() {
     try {
@@ -4529,6 +4629,7 @@ import {
         refreshStravaScoreScale(updatedActivities);
         renderStravaActivities(updatedActivities);
         updateFitnessCards();
+        updateTodoSection();
       });
       clearButton.addEventListener('click', () => {
         saveStravaExertionOverride(activity.id, null);
@@ -4538,6 +4639,7 @@ import {
         refreshStravaScoreScale(updatedActivities);
         renderStravaActivities(updatedActivities);
         updateFitnessCards();
+        updateTodoSection();
       });
       faultyButton.addEventListener('click', () => {
         setStravaActivityFaulty(activity.id, !isStravaActivityFaulty(activity));
@@ -4547,6 +4649,7 @@ import {
         refreshStravaScoreScale(updatedActivities);
         renderStravaActivities(updatedActivities);
         updateFitnessCards();
+        updateTodoSection();
       });
 
       exertionRow.appendChild(exertionLabel);
@@ -4564,6 +4667,41 @@ import {
     const status = document.getElementById('stravaFeedStatus');
     const list = document.getElementById('stravaFeedList');
     if (!status || !list) return;
+    const renderPayload = (data, options = {}) => {
+      const activities = Array.isArray(data?.activities) ? data.activities : [];
+      const error =
+        typeof data?.error === 'string' && data.error.trim()
+          ? data.error.trim()
+          : '';
+      if (activities.length === 0) {
+        status.textContent =
+          error ||
+          (options.fromCache
+            ? 'No cached Strava activities available yet.'
+            : 'No activities available yet.');
+        list.innerHTML = '';
+        return false;
+      }
+      const updatedText = data.updated_utc
+        ? `${options.fromCache ? 'Cached' : 'Updated'} ${formatRelativeTime(data.updated_utc)}`
+        : options.fromCache
+          ? 'Using cached activities'
+          : 'Latest activities';
+      status.textContent = error
+        ? `${updatedText} - latest refresh failed: ${error}`
+        : updatedText;
+      cachedStravaActivities = activities;
+      window.stravaActivitiesCache = activities;
+      const updatedActivities = applyStravaExertionOverrides(activities);
+      refreshStravaScoreScale(updatedActivities);
+      renderStravaActivities(updatedActivities);
+      updateFitnessCards();
+      updateTodoSection();
+      if (!options.fromCache) {
+        saveCachedStravaFeedPayload(data);
+      }
+      return true;
+    };
     status.textContent = 'Loading latest activities...';
     list.innerHTML = '';
     try {
@@ -4572,27 +4710,19 @@ import {
         throw new Error('Unable to load Strava feed.');
       }
       const data = await response.json();
-      if (data.error) {
-        status.textContent = data.error;
-        return;
+      if (!renderPayload(data)) {
+        const cached = getCachedStravaFeedPayload();
+        if (cached) {
+          renderPayload(cached, { fromCache: true });
+        }
       }
-      const activities = Array.isArray(data.activities) ? data.activities : [];
-      if (activities.length === 0) {
-        status.textContent = 'No activities available yet.';
-        return;
-      }
-      status.textContent = data.updated_utc
-        ? `Updated ${formatRelativeTime(data.updated_utc)}`
-        : 'Latest activities';
-      cachedStravaActivities = activities;
-      window.stravaActivitiesCache = activities;
-      const updatedActivities = applyStravaExertionOverrides(activities);
-      refreshStravaScoreScale(updatedActivities);
-      renderStravaActivities(updatedActivities);
-      updateFitnessCards();
     } catch (error) {
+      const cached = getCachedStravaFeedPayload();
+      if (cached && renderPayload(cached, { fromCache: true })) {
+        return;
+      }
       status.textContent =
-        'Strava feed not available yet. Run the GitHub Action to publish activities.';
+        'Strava feed not available yet. Run the GitHub Action or import a Strava export to publish activities.';
     }
   }
 

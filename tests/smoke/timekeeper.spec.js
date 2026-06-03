@@ -103,6 +103,7 @@ function queuePromptResponses(page, responses) {
 }
 
 test('boots with saved data and navigation still works', async ({ page }) => {
+  await freezeTime(page, '2026-04-23T12:00:00');
   await seedLocalStorage(page, {
     projects: [
       {
@@ -436,6 +437,131 @@ test('workout, finances, wealth, and Strava fallback paths still render', async 
   await page.locator('#wealthEntryNote').fill('Deposit');
   await page.locator('#wealthEntryForm button[type="submit"]').click();
   await expect(page.getByText('Deposit')).toBeVisible();
+});
+
+test('weekly workouts include Strava activities from the feed', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-06-03T12:00:00');
+  await seedLocalStorage(page);
+  await page.route('**/assets/strava.json', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        updated_utc: '2026-06-03T08:00:00Z',
+        activities: [
+          {
+            id: 18739736076,
+            name: 'Lunch Weight Training',
+            type: 'WeightTraining',
+            start_date: '2026-06-01T09:12:25Z',
+            elapsed_time_min: 60.3,
+            avg_hr: 147,
+            max_hr: 186,
+            exertion: 3.8,
+            url: 'https://www.strava.com/activities/18739736076'
+          }
+        ],
+        error: null
+      })
+    });
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'todo', 'Workouts');
+
+  const weeklyCard = page.locator('#workoutEntriesContent');
+  await expect(weeklyCard).toContainText('This week: 1 workout');
+  await expect(weeklyCard).toContainText('Lunch Weight Training');
+  await expect(weeklyCard).toContainText('Strava');
+  await expect(weeklyCard).not.toContainText('No workouts logged yet');
+});
+
+test('Strava feed renders stale activities when refresh reports an error', async ({
+  page
+}) => {
+  await seedLocalStorage(page);
+  await page.route('**/assets/strava.json', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        updated_utc: '2026-06-01T08:00:00Z',
+        activities: [
+          {
+            id: 18739736076,
+            name: 'Lunch Weight Training',
+            type: 'WeightTraining',
+            start_date: '2026-06-01T09:12:25Z',
+            elapsed_time_min: 60.3,
+            avg_hr: 147,
+            max_hr: 186,
+            exertion: 3.8,
+            url: 'https://www.strava.com/activities/18739736076'
+          }
+        ],
+        error: 'Strava refresh failed'
+      })
+    });
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'todo', 'Workouts');
+
+  await expect(page.locator('#stravaFeedStatus')).toContainText(
+    'latest refresh failed'
+  );
+  await expect(page.locator('#stravaFeedList')).toContainText(
+    'Lunch Weight Training'
+  );
+});
+
+test('Strava feed falls back to browser cache when the published feed is empty', async ({
+  page
+}) => {
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem(
+      'timekeeperStravaFeedCache',
+      JSON.stringify({
+        updated_utc: '2026-06-01T08:00:00Z',
+        cached_utc: '2026-06-03T08:00:00Z',
+        activities: [
+          {
+            id: 18739736076,
+            name: 'Cached Weight Training',
+            type: 'WeightTraining',
+            start_date: '2026-06-01T09:12:25Z',
+            elapsed_time_min: 60.3,
+            avg_hr: 147,
+            max_hr: 186,
+            exertion: 3.8,
+            url: 'https://www.strava.com/activities/18739736076'
+          }
+        ]
+      })
+    );
+  });
+  await page.route('**/assets/strava.json', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        updated_utc: '2026-06-03T08:00:00Z',
+        activities: [],
+        error: 'Strava refresh failed'
+      })
+    });
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'todo', 'Workouts');
+
+  await expect(page.locator('#stravaFeedStatus')).toContainText('Cached');
+  await expect(page.locator('#stravaFeedList')).toContainText(
+    'Cached Weight Training'
+  );
 });
 
 test('weekly project targets spend rolling 30-day surplus before showing behind', async ({

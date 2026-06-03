@@ -46,6 +46,22 @@ def persist_refresh_token(refresh_token: str) -> None:
         output_file.write("\n")
 
 
+def read_existing_payload() -> dict | None:
+    if not os.path.exists(OUTFILE):
+        return None
+    try:
+        with open(OUTFILE, "r", encoding="utf-8") as existing_file:
+            payload = json.load(existing_file)
+    except (OSError, json.JSONDecodeError):
+        return None
+    if not isinstance(payload, dict):
+        return None
+    activities = payload.get("activities")
+    if not isinstance(activities, list) or not activities:
+        return None
+    return payload
+
+
 def refresh_access_token(refresh_token: str) -> tuple[str, str | None]:
     response = requests.post(
         "https://www.strava.com/oauth/token",
@@ -187,6 +203,19 @@ def write_payload(activities: list[dict], error: str | None = None) -> None:
         output_file.write("\n")
 
 
+def preserve_existing_payload(message: str) -> bool:
+    existing = read_existing_payload()
+    if not existing:
+        return False
+    count = len(existing.get("activities") or [])
+    updated = existing.get("updated_utc") or "unknown"
+    print(
+        f"{message} Keeping existing {OUTFILE} with {count} "
+        f"activities from {updated}."
+    )
+    return True
+
+
 def main() -> None:
     try:
         if not CLIENT_ID or not CLIENT_SECRET:
@@ -221,21 +250,25 @@ def main() -> None:
                 "has activity:read_all scope and that the STRAVA_* secrets are valid."
             )
             print(message)
+            if preserve_existing_payload(message):
+                return
             raise SystemExit(1) from error
-        # Handle other HTTP errors by writing an error payload instead of crashing
         message = f"HTTP error while fetching Strava data: {error}"
         print(message)
-        write_payload([], error=message)
+        if not preserve_existing_payload(message):
+            write_payload([], error=message)
         return
     except StravaConfigurationError as error:
         message = str(error)
         print(message)
+        if preserve_existing_payload(message):
+            return
         raise SystemExit(1) from error
     except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
-        # Catch other errors (connection issues, JSON problems, missing keys, etc.)
         message = f"Unexpected error while fetching Strava data: {error}"
         print(message)
-        write_payload([], error=message)
+        if not preserve_existing_payload(message):
+            write_payload([], error=message)
         return
 
 
