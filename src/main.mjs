@@ -28,6 +28,7 @@ import {
   sumEntryHours
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
+import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import {
   computeWealthRegression,
   getDefaultWealthHistory,
@@ -44,6 +45,7 @@ import {
   parseExertionValue,
   resolveStravaExertion
 } from './features/strava/core.mjs';
+import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,
@@ -61,6 +63,7 @@ import {
   makeDefaultWorkouts,
   normalizeIntensity,
   normalizeWeekKey,
+  parseCustomIntensity,
   parseDateTimeInput,
   parseISODateOnly,
   sanitizeCustomPoints,
@@ -123,7 +126,6 @@ import {
     computeWorkoutPlanExpectedTotal,
     computeWorkoutPlanRequiredSlice,
     computeWorkoutWeekPlan,
-    getIntensityPromptDefault,
     getIntensitySummary,
     getWorkoutPointPlan,
     migrateLegacyTodosToWorkouts
@@ -313,6 +315,39 @@ import {
     updateTodoSection();
     return entry;
   }
+
+  function parseWorkoutIntensityInput(value) {
+    const raw = String(value || '').trim();
+    if (!raw) return null;
+    const normalized = normalizeIntensity(raw);
+    if (['intense', 'medium', 'light'].includes(normalized)) {
+      return normalized;
+    }
+    if (normalized.startsWith('custom:')) {
+      const customValue = sanitizeCustomPoints(normalized.slice(7));
+      return customValue === null ? null : makeCustomIntensity(customValue);
+    }
+    const customValue = sanitizeCustomPoints(raw);
+    return customValue === null ? null : makeCustomIntensity(customValue);
+  }
+
+  function getWorkoutIntensityOptions(currentIntensity) {
+    const normalized = normalizeIntensity(currentIntensity);
+    const options = [
+      { value: 'intense', label: 'Intense' },
+      { value: 'medium', label: 'Medium' },
+      { value: 'light', label: 'Light' }
+    ];
+    if (normalized.startsWith('custom:')) {
+      const customPoints = parseCustomIntensity(normalized);
+      options.push({
+        value: normalized,
+        label: `Custom (${formatCustomIntensityValue(customPoints)})`
+      });
+    }
+    return options;
+  }
+
   function deleteWorkoutEntry(entryId) {
     const workouts = ensureWorkoutData();
     const idx = workouts.entries.findIndex((e) => e.id === entryId);
@@ -373,12 +408,19 @@ import {
       deleteBtn.style.padding = '0.25rem 0.5rem';
       deleteBtn.style.fontSize = '0.85rem';
       deleteBtn.textContent = 'Delete';
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Delete this data point?')) {
-          deleteWealthHistoryEntry(entry.id);
-          updateWealthDashboard();
-          renderWealthHistoryTable();
-        }
+      deleteBtn.addEventListener('click', async () => {
+        const ok = await requestConfirm({
+          title: 'Delete Wealth Point',
+          message: 'Delete this wealth data point?',
+          confirmLabel: 'Delete',
+          danger: true
+        });
+        if (!ok) return;
+        const snapshot = cloneData();
+        deleteWealthHistoryEntry(entry.id);
+        updateWealthDashboard();
+        renderWealthHistoryTable();
+        offerUndo('Wealth point deleted.', snapshot);
       });
       actionsCell.appendChild(deleteBtn);
       row.appendChild(actionsCell);
@@ -547,7 +589,7 @@ import {
         : [];
       datasets.push(
         {
-          label: 'Projection band (± ~1σ)',
+          label: 'Projection band (+/- ~1 sigma)',
           data: lowerBand,
           borderColor: 'rgba(59,130,246,0.1)',
           backgroundColor: 'rgba(59,130,246,0.12)',
@@ -956,9 +998,52 @@ import {
       ' kr',
       ''
     );
-    return (value >= 0 ? '+' : '−') + formatted + ' SEK';
+    return (value >= 0 ? '+' : '-') + formatted + ' SEK';
   }
   // Load and save data
+
+  const DEFAULT_FOCUS_BLOCKED_WEBSITES = [
+    'reddit.com',
+    'www.reddit.com',
+    'old.reddit.com',
+    'youtube.com',
+    'www.youtube.com',
+    'm.youtube.com',
+    'music.youtube.com',
+    'youtu.be',
+    'youtube-nocookie.com',
+    'www.youtube-nocookie.com',
+    'youtubei.googleapis.com',
+    'youtube.googleapis.com',
+    'ytimg.com',
+    'www.ytimg.com',
+    'i.ytimg.com'
+  ];
+
+  function normalizeFocusBlockedSite(raw) {
+    const cleaned = String(raw || '')
+      .trim()
+      .toLowerCase()
+      .replace(/^https?:\/\//, '')
+      .split('/')[0]
+      .split(':')[0];
+    if (!cleaned) return null;
+    if (!/^([a-z0-9-]+\.)+[a-z0-9-]+$/.test(cleaned)) return null;
+    return cleaned;
+  }
+
+  function normalizeFocusBlockedSites(value, fallback = []) {
+    const rawItems = Array.isArray(value)
+      ? value
+      : String(value || '')
+          .split(/[\s,]+/)
+          .filter(Boolean);
+    const normalized = [
+      ...new Set(rawItems.map(normalizeFocusBlockedSite).filter(Boolean))
+    ];
+    if (normalized.length) return normalized;
+    return [...fallback];
+  }
 
   function normalizeProjectData(project) {
     const obj = project && typeof project === 'object' ? { ...project } : {};
@@ -983,9 +1068,54 @@ import {
         ? Math.max(0, budgetHours)
         : 0;
     }
+    obj.archived = obj.archived === true || obj.isActive === false;
+    obj.isActive = !obj.archived;
     const parsedStart = parseLocalDateString(obj.startDate || obj.createdAt);
     obj.startDate = parsedStart ? formatLocalDateString(parsedStart) : '';
     return obj;
+  }
+
+  function normalizeTimerPreset(preset) {
+    if (!preset || typeof preset !== 'object') return null;
+    const projectId = String(preset.projectId || '').trim();
+    if (!projectId) return null;
+    const focusFactor = Number(preset.focusFactor);
+    return {
+      id: preset.id || uuid(),
+      projectId,
+      description: String(preset.description || '').trim(),
+      focusFactor:
+        Number.isFinite(focusFactor) && focusFactor > 0 ? focusFactor : 1,
+      createdAt:
+        typeof preset.createdAt === 'string' && preset.createdAt
+          ? preset.createdAt
+          : new Date().toISOString(),
+      updatedAt:
+        typeof preset.updatedAt === 'string' && preset.updatedAt
+          ? preset.updatedAt
+          : typeof preset.createdAt === 'string' && preset.createdAt
+            ? preset.createdAt
+            : new Date().toISOString()
+    };
+  }
+
+  function normalizeTimerPresets(value) {
+    if (!Array.isArray(value)) return [];
+    const seen = new Set();
+    const normalized = [];
+    value.forEach((preset) => {
+      const item = normalizeTimerPreset(preset);
+      if (!item) return;
+      const key = [
+        String(item.projectId),
+        item.description.toLowerCase(),
+        String(item.focusFactor)
+      ].join('::');
+      if (seen.has(key)) return;
+      seen.add(key);
+      normalized.push(item);
+    });
+    return normalized;
   }
 
   function loadData() {
@@ -1012,8 +1142,11 @@ import {
         lastBackupAt: null,
         lastBackupFile: null,
         lastBackupSnapshotAt: null,
+        lastBackupVerifiedAt: null,
         backupRevision: 0,
         updatedAt: null,
+        timerPresets: [],
+        focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
         wealthGoal: makeDefaultWealthGoal()
@@ -1139,9 +1272,15 @@ import {
         lastBackupAt: parsed.lastBackupAt || null,
         lastBackupFile: parsed.lastBackupFile || null,
         lastBackupSnapshotAt: parsed.lastBackupSnapshotAt || null,
+        lastBackupVerifiedAt: parsed.lastBackupVerifiedAt || null,
         backupRevision:
           typeof parsed.backupRevision === 'number' ? parsed.backupRevision : 0,
         updatedAt: parsed.updatedAt || null,
+        timerPresets: normalizeTimerPresets(parsed.timerPresets),
+        focusBlockerSites: normalizeFocusBlockedSites(
+          parsed.focusBlockerSites,
+          DEFAULT_FOCUS_BLOCKED_WEBSITES
+        ),
         fitness: applyFitnessDefaults(parsed.fitness),
         wealthHistory: Array.isArray(parsed.wealthHistory)
           ? parsed.wealthHistory.map(normalizeWealthEntry)
@@ -1179,8 +1318,11 @@ import {
         lastBackupAt: null,
         lastBackupFile: null,
         lastBackupSnapshotAt: null,
+        lastBackupVerifiedAt: null,
         backupRevision: 0,
         updatedAt: null,
+        timerPresets: [],
+        focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
         wealthGoal: makeDefaultWealthGoal()
@@ -1199,43 +1341,406 @@ import {
     scheduleBackupSoon();
   }
 
-  // Compute concurrency factor based on the number of active timers.
-  // Factor decreases as more timers run simultaneously: for example, 1 timer=1.0, 2 timers=0.75, 3 timers=0.6.
-  function computeConcurrencyFactor(n) {
-    if (n <= 1) return 1;
-    return 1 / (1 + (n - 1) / 3);
+  function cloneData(value = data) {
+    return JSON.parse(JSON.stringify(value));
   }
+
+  function refreshAllViews() {
+    ensureFitnessDefaults();
+    ensureWorkoutData();
+    ensureMonthlyRecurringPayments();
+    ensureWealthData();
+    ensureTimerPresets();
+    updateProjectSelects();
+    updateEntriesTable();
+    updateProjectsPage();
+    updateDashboard();
+    updateTimerSection();
+    updateTodoSection();
+    updateGrocerySection();
+    updateWealthDashboard();
+    renderWealthHistoryTable();
+    updateFocusBlocker();
+    updateAutoSyncStatus();
+  }
+
+  function restoreDataSnapshot(snapshot) {
+    data = cloneData(snapshot);
+    persistDataToLocalStorage();
+    needsBackup = true;
+    scheduleBackupSoon();
+    refreshAllViews();
+  }
+
+  function offerUndo(message, snapshot) {
+    showToast(message, {
+      actionLabel: 'Undo',
+      onAction: () => {
+        restoreDataSnapshot(snapshot);
+        showToast('Undo applied.');
+      }
+    });
+  }
+
+  function ensureTimerPresets() {
+    data.timerPresets = normalizeTimerPresets(data.timerPresets);
+    return data.timerPresets;
+  }
+
+  function makeTimerPresetKey(projectId, description, focusFactor) {
+    return [
+      String(projectId || ''),
+      String(description || '')
+        .trim()
+        .toLowerCase(),
+      String(normalizeFocusFactor(focusFactor))
+    ].join('::');
+  }
+
+  function formatTimerPresetLabel(project, description, focusFactor) {
+    const focusText = formatFocusPercent(focusFactor);
+    return description
+      ? `${project.name} - ${description} - ${focusText}`
+      : `${project.name} - ${focusText}`;
+  }
+
+  function isValidDateValue(value) {
+    const date = new Date(value);
+    return !Number.isNaN(date.getTime());
+  }
+
+  function getLocalDataAudit(now = new Date()) {
+    const projectIds = new Set();
+    const duplicateProjectIds = new Set();
+    data.projects.forEach((project) => {
+      const id = String(project.id || '');
+      if (!id) return;
+      if (projectIds.has(id)) duplicateProjectIds.add(id);
+      projectIds.add(id);
+    });
+
+    const entryIds = new Set();
+    const duplicateEntryIds = new Set();
+    let orphanEntries = 0;
+    let invalidStoppedEntries = 0;
+    let invalidRunningEntries = 0;
+    let invalidFocusEntries = 0;
+    let staleRunningEntries = 0;
+    const todayStart = startOfLocalDay(now);
+
+    data.entries.forEach((entry) => {
+      const entryId = String(entry.id || '');
+      if (!entryId) {
+        duplicateEntryIds.add('(missing)');
+      } else if (entryIds.has(entryId)) {
+        duplicateEntryIds.add(entryId);
+      } else {
+        entryIds.add(entryId);
+      }
+
+      const projectId = String(entry.projectId || '');
+      if (!projectId || !projectIds.has(projectId)) {
+        orphanEntries += 1;
+      }
+
+      const startValid = isValidDateValue(entry.startTime);
+      if (entry.isRunning) {
+        if (!startValid) invalidRunningEntries += 1;
+        else if (new Date(entry.startTime) < todayStart) {
+          staleRunningEntries += 1;
+        }
+      } else {
+        const duration = Number(entry.duration);
+        const endValid = isValidDateValue(entry.endTime);
+        const start = startValid ? new Date(entry.startTime) : null;
+        const end = endValid ? new Date(entry.endTime) : null;
+        if (
+          !Number.isFinite(duration) ||
+          duration < 0 ||
+          !startValid ||
+          !endValid ||
+          (start && end && end <= start)
+        ) {
+          invalidStoppedEntries += 1;
+        }
+      }
+
+      const factorCandidates = [entry.focusFactor, entry.manualFactor].filter(
+        (candidate) => candidate !== undefined && candidate !== null
+      );
+      if (
+        factorCandidates.some(
+          (candidate) =>
+            !Number.isFinite(Number(candidate)) || Number(candidate) <= 0
+        )
+      ) {
+        invalidFocusEntries += 1;
+      }
+    });
+
+    const duplicateProjectCount = duplicateProjectIds.size;
+    const duplicateEntryCount = duplicateEntryIds.size;
+    const repairableCount =
+      duplicateProjectCount +
+      duplicateEntryCount +
+      orphanEntries +
+      invalidStoppedEntries +
+      invalidRunningEntries +
+      invalidFocusEntries;
+    const issueParts = [];
+    if (duplicateProjectCount)
+      issueParts.push(`${duplicateProjectCount} duplicate project IDs`);
+    if (duplicateEntryCount)
+      issueParts.push(`${duplicateEntryCount} duplicate entry IDs`);
+    if (orphanEntries) issueParts.push(`${orphanEntries} orphan entries`);
+    if (invalidStoppedEntries)
+      issueParts.push(`${invalidStoppedEntries} invalid stopped entries`);
+    if (invalidRunningEntries)
+      issueParts.push(`${invalidRunningEntries} invalid running entries`);
+    if (invalidFocusEntries)
+      issueParts.push(`${invalidFocusEntries} invalid focus values`);
+    if (staleRunningEntries)
+      issueParts.push(`${staleRunningEntries} running timers need review`);
+
+    return {
+      duplicateProjectCount,
+      duplicateEntryCount,
+      orphanEntries,
+      invalidStoppedEntries,
+      invalidRunningEntries,
+      invalidFocusEntries,
+      staleRunningEntries,
+      repairableCount,
+      totalIssues: repairableCount + staleRunningEntries,
+      issueParts
+    };
+  }
+
+  function repairLocalDataNow() {
+    let fixedCount = 0;
+    const seenProjectIds = new Set();
+    data.projects.forEach((project) => {
+      if (!project.id || seenProjectIds.has(String(project.id))) {
+        project.id = uuid();
+        fixedCount += 1;
+      }
+      seenProjectIds.add(String(project.id));
+    });
+    const projectIds = new Set(
+      data.projects.map((project) => String(project.id))
+    );
+    const seenEntryIds = new Set();
+    const repairedEntries = [];
+    data.entries.forEach((entry) => {
+      let changed = false;
+      if (!entry.id || seenEntryIds.has(String(entry.id))) {
+        entry.id = uuid();
+        changed = true;
+      }
+      seenEntryIds.add(String(entry.id));
+
+      if (!projectIds.has(String(entry.projectId || ''))) {
+        fixedCount += 1;
+        return;
+      }
+
+      const focusFactor = getEntryFocusFactor(entry, 1);
+      if (
+        entry.focusFactor !== undefined &&
+        entry.focusFactor !== null &&
+        (!Number.isFinite(Number(entry.focusFactor)) ||
+          Number(entry.focusFactor) <= 0)
+      ) {
+        entry.focusFactor = focusFactor;
+        changed = true;
+      }
+      if (
+        entry.manualFactor !== undefined &&
+        (!Number.isFinite(Number(entry.manualFactor)) ||
+          Number(entry.manualFactor) <= 0)
+      ) {
+        entry.manualFactor = focusFactor;
+        changed = true;
+      }
+
+      const start = new Date(entry.startTime);
+      const startValid = !Number.isNaN(start.getTime());
+      if (entry.isRunning) {
+        if (!startValid) {
+          fixedCount += 1;
+          return;
+        }
+        if (!entry.lastUpdateTime || !isValidDateValue(entry.lastUpdateTime)) {
+          entry.lastUpdateTime = new Date().toISOString();
+          changed = true;
+        }
+        repairedEntries.push(entry);
+        if (changed) fixedCount += 1;
+        return;
+      }
+
+      const duration = Number(entry.duration);
+      const end = new Date(entry.endTime);
+      const endValid = !Number.isNaN(end.getTime());
+      const durationValid = Number.isFinite(duration) && duration >= 0;
+      if (startValid && endValid && end > start) {
+        const computedDuration = Math.floor(
+          ((end.getTime() - start.getTime()) / 1000) * focusFactor
+        );
+        if (!durationValid || duration !== computedDuration) {
+          entry.duration = computedDuration;
+          changed = true;
+        }
+      } else if (startValid && durationValid) {
+        entry.endTime = new Date(
+          start.getTime() + (duration / focusFactor) * 1000
+        ).toISOString();
+        changed = true;
+      } else {
+        fixedCount += 1;
+        return;
+      }
+      delete entry.effectiveSeconds;
+      delete entry.lastUpdateTime;
+      delete entry.factor;
+      delete entry.pausedAt;
+      repairedEntries.push(entry);
+      if (changed) fixedCount += 1;
+    });
+    data.entries = repairedEntries;
+    return fixedCount;
+  }
+
+  async function repairLocalData() {
+    const audit = getLocalDataAudit();
+    if (!audit.repairableCount) {
+      showToast('No repairable local data issues found.');
+      return;
+    }
+    const ok = await requestConfirm({
+      title: 'Repair Local Data',
+      message:
+        `Repair ${audit.repairableCount} local data issue${audit.repairableCount === 1 ? '' : 's'}? ` +
+        'This removes entries without a project, fixes duplicate IDs, normalizes invalid focus values, and recalculates broken stopped-entry durations. Running timers that merely look old are left for review.',
+      confirmLabel: 'Repair Data',
+      danger: true
+    });
+    if (!ok) return;
+    const snapshot = cloneData();
+    const fixedCount = repairLocalDataNow();
+    saveData();
+    refreshAllViews();
+    offerUndo(
+      `Repaired ${fixedCount} local data issue${fixedCount === 1 ? '' : 's'}.`,
+      snapshot
+    );
+  }
+
   // Focus model:
   // - 100% means you are actively focused on a project.
   // - 50% means an agent is working while you are not actively focused there.
   // - 150% means you and one agent are working together.
   // - 200% means you and two or more agents are working together.
   // - 25% means an agent is working while you are only half-engaged or not monitoring it.
+  const DEFAULT_FOCUS_FACTOR = 1;
   const FOCUS_FACTOR_OPTIONS = [
-    { value: 2, label: '200% - you + 2+ agents' },
-    { value: 1.5, label: '150% - you + agent' },
     { value: 1, label: '100% - you' },
-    { value: 0.75, label: '75%' },
+    { value: 1.5, label: '150% - you + agent' },
+    { value: 2, label: '200% - you + 2+ agents' },
     { value: 0.5, label: '50% - agent' },
     { value: 0.25, label: '25% - unmonitored agent' }
   ];
+  function normalizeFocusFactor(value, fallback = DEFAULT_FOCUS_FACTOR) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+  }
   function formatFocusPercent(factor) {
     const parsed = Number(factor);
-    const safeFactor = Number.isFinite(parsed) ? parsed : 1;
+    const safeFactor = Number.isFinite(parsed) ? parsed : DEFAULT_FOCUS_FACTOR;
     return Math.round(safeFactor * 100) + '%';
   }
-  function getEntryFocusFactor(entry, fallbackCount = 1) {
+  function getEntryFocusFactor(entry, _fallbackCount = 1) {
     const candidates = [
       entry && entry.focusFactor,
       entry && entry.manualFactor,
       entry && entry.factor,
-      computeConcurrencyFactor(fallbackCount)
+      DEFAULT_FOCUS_FACTOR
     ];
     const value = candidates.find(
       (candidate) => Number.isFinite(Number(candidate)) && Number(candidate) > 0
     );
-    return Number.isFinite(Number(value)) ? Number(value) : 1;
+    return normalizeFocusFactor(value, DEFAULT_FOCUS_FACTOR);
   }
+
+  function getEntryActiveFactor(entry, _fallbackCount = 1) {
+    if (!entry) return DEFAULT_FOCUS_FACTOR;
+    const candidates = [entry.manualFactor, entry.focusFactor, entry.factor];
+    const value = candidates.find(
+      (candidate) => Number.isFinite(Number(candidate)) && Number(candidate) > 0
+    );
+    if (value !== undefined) return Number(value);
+    return DEFAULT_FOCUS_FACTOR;
+  }
+
+  function isTimerPaused(entry) {
+    return !!(entry && entry.pausedAt);
+  }
+
+  function getActiveRunningEntries() {
+    return getRunningEntries().filter((entry) => !isTimerPaused(entry));
+  }
+
+  function accumulateRunningEntry(entry, now = new Date(), runningCount = 1) {
+    if (!entry || !entry.isRunning || isTimerPaused(entry)) {
+      return getEntryActiveFactor(entry, runningCount);
+    }
+    const last = entry.lastUpdateTime
+      ? new Date(entry.lastUpdateTime)
+      : new Date(entry.startTime);
+    const elapsedSec = Math.max(0, (now - last) / 1000);
+    const factor = getEntryActiveFactor(entry, runningCount);
+    entry.effectiveSeconds =
+      (entry.effectiveSeconds || 0) + elapsedSec * factor;
+    entry.lastUpdateTime = now.toISOString();
+    return factor;
+  }
+
+  function rebalanceActiveRunningFactors(now = new Date()) {
+    const active = getActiveRunningEntries();
+    active.forEach((entry) => {
+      const factor = getEntryActiveFactor(entry, active.length);
+      entry.factor = factor;
+      entry.focusFactor = factor;
+      entry.lastUpdateTime = now.toISOString();
+    });
+  }
+
+  function getPaidFocusTotal() {
+    const running = getActiveRunningEntries();
+    let total = 0;
+    running.forEach((entry) => {
+      const project = data.projects.find(
+        (p) => String(p.id) === String(entry.projectId)
+      );
+      const hourlyRate = project ? Number(project.hourlyRate) : NaN;
+      const isUnpaid = Number.isFinite(hourlyRate) && hourlyRate <= 0;
+      if (isUnpaid) return;
+      total += getEntryFocusFactor(entry, running.length);
+    });
+    return total;
+  }
+
+  function toDateTimeInputValue(value) {
+    const dt = new Date(value);
+    if (Number.isNaN(dt.getTime())) return '';
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+    const hours = String(dt.getHours()).padStart(2, '0');
+    const minutes = String(dt.getMinutes()).padStart(2, '0');
+    return `${year}-${month}-${day}T${hours}:${minutes}`;
+  }
+
   function appendFocusFactorOptions(selectEl) {
     FOCUS_FACTOR_OPTIONS.forEach((option) => {
       const opt = document.createElement('option');
@@ -1243,6 +1748,54 @@ import {
       opt.textContent = option.label;
       selectEl.appendChild(opt);
     });
+  }
+  function escapeHtml(value) {
+    return String(value ?? '').replace(/[&<>"']/g, (char) => {
+      switch (char) {
+        case '&':
+          return '&amp;';
+        case '<':
+          return '&lt;';
+        case '>':
+          return '&gt;';
+        case '"':
+          return '&quot;';
+        case "'":
+          return '&#39;';
+        default:
+          return char;
+      }
+    });
+  }
+  function safeExternalUrl(rawUrl) {
+    try {
+      const parsed = new URL(String(rawUrl || ''), window.location.href);
+      if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+        return parsed.href;
+      }
+    } catch {}
+    return '';
+  }
+  function safeStatusColor(value) {
+    return ['green', 'amber', 'red'].includes(value) ? value : 'green';
+  }
+  function appendLabeledText(container, label, value) {
+    const strong = document.createElement('strong');
+    strong.textContent = label;
+    container.appendChild(strong);
+    container.appendChild(document.createTextNode(' ' + String(value ?? '')));
+  }
+  function ensureCurrentFocusOption(selectEl, factor) {
+    const value = String(normalizeFocusFactor(factor));
+    const exists = Array.from(selectEl.options).some(
+      (option) => option.value === value
+    );
+    if (exists) return value;
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = `${formatFocusPercent(value)} - current`;
+    selectEl.appendChild(opt);
+    return value;
   }
   const BACKUP_LATEST_FILENAME = 'timekeeper-data.json';
   const BACKUP_MANIFEST_FILENAME = 'timekeeper-manifest.json';
@@ -1259,6 +1812,10 @@ import {
   let backupDirHandle = null;
   let backupInFlight = null;
   let backupFlushTimer = null;
+  let backupSnapshotItems = [];
+  let backupSnapshotState = 'idle';
+  let backupSnapshotMessage = '';
+  let backupConflict = null;
   // backupPermissionState tracks the permission status for writing backups using the File System Access API.
   // Possible states:
   //   'missing' - No backup directory has been selected yet.
@@ -1276,8 +1833,12 @@ import {
   // entries older than approximately one month are hidden by default to keep
   // the list manageable. This can be toggled via a button in the Entries section.
   let showAllEntries = false;
+  let showArchivedProjects = false;
   let entryProjectFilter = '';
   let entrySearchQuery = '';
+  let entryDateFrom = '';
+  let entryDateTo = '';
+  const selectedEntryIds = new Set();
 
   // -------------------------------------------------------------------------
   //  Haptic feedback and simple audio cues
@@ -1353,7 +1914,7 @@ import {
         getReq.onsuccess = () => resolve(getReq.result || null);
         getReq.onerror = () => resolve(null);
       });
-    } catch (err) {
+    } catch {
       return null;
     }
   }
@@ -1469,11 +2030,11 @@ import {
       const whenValue = whenInput && whenInput.value ? whenInput.value : '';
       const whenDate = whenValue ? new Date(whenValue) : new Date();
       if (!name.trim()) {
-        alert('Workout name is required.');
+        showToast('Workout name is required.');
         return;
       }
       if (isNaN(whenDate)) {
-        alert('Please provide a valid date and time.');
+        showToast('Please provide a valid date and time.');
         return;
       }
       let intensityValue = intensityInput ? intensityInput.value : 'medium';
@@ -1482,7 +2043,7 @@ import {
         const raw = customIntensityInput ? customIntensityInput.value : '';
         const customPoints = sanitizeCustomPoints(raw);
         if (customPoints === null) {
-          alert(
+          showToast(
             'Please enter a valid custom intensity (positive number of points).'
           );
           return;
@@ -1578,6 +2139,9 @@ import {
       }
     }
     updateAutoSyncStatus();
+    if (backupDirHandle && backupPermissionState === 'granted') {
+      refreshBackupSnapshots({ quiet: true });
+    }
     updateFocusBlocker();
   });
 
@@ -1590,26 +2154,349 @@ import {
   //  webhooks are invoked; when all timers stop, the stop webhooks are invoked.
   const START_WEBHOOKS = ['http://127.0.0.1:8766/focus/start'];
   const STOP_WEBHOOKS = ['http://127.0.0.1:8766/focus/stop'];
+  const FOCUS_STATUS_URL = 'http://127.0.0.1:8766/focus/status';
+  const FOCUS_SELF_TEST_URL = 'http://127.0.0.1:8766/focus/self-test';
   const FOCUS_BLOCK_THRESHOLD = 0.5;
   const FOCUS_BLOCKER_HEARTBEAT_MS = 60000;
-  const FOCUS_BLOCKED_WEBSITES = [
-    'reddit.com',
-    'www.reddit.com',
-    'old.reddit.com',
-    'youtube.com',
-    'www.youtube.com',
-    'm.youtube.com',
-    'music.youtube.com',
-    'youtu.be',
-    'youtube-nocookie.com',
-    'www.youtube-nocookie.com',
-    'youtubei.googleapis.com',
-    'youtube.googleapis.com',
-    'ytimg.com',
-    'www.ytimg.com',
-    'i.ytimg.com'
-  ];
+  const FOCUS_STATUS_TIMEOUT_MS = 3000;
+  const FOCUS_BRIDGE_CONFIG_KEY = 'timekeeperFocusBridgeConfig';
+  const FOCUS_BRIDGE_PUBLISH_MS = 5 * 60 * 1000;
+  const FOCUS_BRIDGE_EXPIRES_MS = 15 * 60 * 1000;
   const focusWebhookImages = new Set();
+  let focusBridgeLastPublishAt = 0;
+  let focusBridgeLastPayloadKey = '';
+  let focusBridgePublishPromise = null;
+  let focusBridgeQueuedPublish = null;
+  let focusBridgeStatus = {
+    checkedAt: null,
+    pending: false,
+    publishedAt: null,
+    error: '',
+    apiUrl: ''
+  };
+
+  function normalizeGitHubPath(value) {
+    const path = String(value || 'assets/timekeeper-focus-state.json')
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/\/+/g, '/');
+    return path || 'assets/timekeeper-focus-state.json';
+  }
+
+  function normalizeFocusBridgeConfig(value = {}) {
+    const config = value && typeof value === 'object' ? value : {};
+    const repository = String(config.repository || '')
+      .trim()
+      .replace(/^https:\/\/github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '');
+    const [owner = '', repo = ''] = repository.split('/');
+    return {
+      enabled: config.enabled === true || config.enabled === 'github',
+      repository: owner && repo ? `${owner}/${repo}` : repository,
+      branch: String(config.branch || 'main').trim() || 'main',
+      path: normalizeGitHubPath(config.path),
+      token: String(config.token || '').trim()
+    };
+  }
+
+  function getFocusBridgeConfig() {
+    try {
+      return normalizeFocusBridgeConfig(
+        JSON.parse(localStorage.getItem(FOCUS_BRIDGE_CONFIG_KEY) || '{}')
+      );
+    } catch {
+      return normalizeFocusBridgeConfig();
+    }
+  }
+
+  function saveFocusBridgeConfig(config) {
+    localStorage.setItem(
+      FOCUS_BRIDGE_CONFIG_KEY,
+      JSON.stringify(normalizeFocusBridgeConfig(config))
+    );
+  }
+
+  function getGitHubApiPath(pathValue) {
+    return normalizeGitHubPath(pathValue)
+      .split('/')
+      .map((part) => encodeURIComponent(part))
+      .join('/');
+  }
+
+  function getFocusBridgeApiUrl(config = getFocusBridgeConfig()) {
+    const normalized = normalizeFocusBridgeConfig(config);
+    if (!normalized.repository || !normalized.repository.includes('/')) {
+      return '';
+    }
+    return `https://api.github.com/repos/${normalized.repository}/contents/${getGitHubApiPath(normalized.path)}?ref=${encodeURIComponent(normalized.branch)}`;
+  }
+
+  function encodeUtf8Base64(value) {
+    return btoa(unescape(encodeURIComponent(String(value))));
+  }
+
+  function buildFocusBridgeState(paidFocus) {
+    const now = new Date();
+    return {
+      version: 1,
+      source: 'timekeeper',
+      active: paidFocus > FOCUS_BLOCK_THRESHOLD,
+      paidFocusPercent: Math.round(paidFocus * 100),
+      thresholdPercent: Math.round(FOCUS_BLOCK_THRESHOLD * 100),
+      updatedAt: now.toISOString(),
+      expiresAt: new Date(
+        now.getTime() + FOCUS_BRIDGE_EXPIRES_MS
+      ).toISOString(),
+      blockedSites: getFocusBlockedWebsites()
+    };
+  }
+
+  function getFocusBridgePayloadKey(state) {
+    return JSON.stringify({
+      active: state.active,
+      paidFocusPercent: state.paidFocusPercent,
+      thresholdPercent: state.thresholdPercent,
+      blockedSites: state.blockedSites
+    });
+  }
+
+  async function githubJson(url, options = {}) {
+    const response = await fetch(url, {
+      ...options,
+      headers: {
+        Accept: 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+        ...(options.headers || {})
+      }
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const message =
+        payload && payload.message
+          ? payload.message
+          : `GitHub returned ${response.status}.`;
+      const error = new Error(message);
+      error.status = response.status;
+      throw error;
+    }
+    return payload;
+  }
+
+  async function publishGitHubFocusState(config, state) {
+    const apiUrl = getFocusBridgeApiUrl(config);
+    if (!apiUrl) {
+      throw new Error('Enter a GitHub repository as owner/repo.');
+    }
+    if (!config.token) {
+      throw new Error('Enter a GitHub token with contents write access.');
+    }
+    let sha = null;
+    try {
+      const existing = await githubJson(apiUrl, {
+        headers: { Authorization: `Bearer ${config.token}` }
+      });
+      sha = existing && existing.sha ? existing.sha : null;
+    } catch (error) {
+      if (error.status !== 404) throw error;
+    }
+    const content = `${JSON.stringify(state, null, 2)}\n`;
+    const body = {
+      message: 'Update TimeKeeper focus state [skip ci]',
+      content: encodeUtf8Base64(content),
+      branch: config.branch
+    };
+    if (sha) body.sha = sha;
+    await githubJson(apiUrl.replace(/\?.*$/, ''), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${config.token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    return apiUrl;
+  }
+
+  async function publishFocusBridgeState(paidFocus, { force = false } = {}) {
+    const config = getFocusBridgeConfig();
+    if (!config.enabled) return null;
+    const state = buildFocusBridgeState(paidFocus);
+    const payloadKey = getFocusBridgePayloadKey(state);
+    const now = Date.now();
+    if (
+      !force &&
+      payloadKey === focusBridgeLastPayloadKey &&
+      now - focusBridgeLastPublishAt < FOCUS_BRIDGE_PUBLISH_MS
+    ) {
+      return null;
+    }
+    if (focusBridgePublishPromise) {
+      focusBridgeQueuedPublish = { paidFocus, force };
+      return focusBridgePublishPromise;
+    }
+    focusBridgeStatus = {
+      ...focusBridgeStatus,
+      pending: true,
+      error: '',
+      checkedAt: new Date().toISOString()
+    };
+    updateFocusStatusPanel(paidFocus);
+    focusBridgePublishPromise = publishGitHubFocusState(config, state)
+      .then((apiUrl) => {
+        focusBridgeLastPublishAt = Date.now();
+        focusBridgeLastPayloadKey = payloadKey;
+        focusBridgeStatus = {
+          checkedAt: new Date().toISOString(),
+          pending: false,
+          publishedAt: new Date().toISOString(),
+          error: '',
+          apiUrl
+        };
+        updateFocusStatusPanel(paidFocus);
+        updateAppHealthPanel();
+        return apiUrl;
+      })
+      .catch((error) => {
+        focusBridgeStatus = {
+          checkedAt: new Date().toISOString(),
+          pending: false,
+          publishedAt: focusBridgeStatus.publishedAt,
+          error: error && error.message ? error.message : String(error),
+          apiUrl: getFocusBridgeApiUrl(config)
+        };
+        updateFocusStatusPanel(paidFocus);
+        updateAppHealthPanel();
+        return null;
+      })
+      .finally(() => {
+        focusBridgePublishPromise = null;
+        const queued = focusBridgeQueuedPublish;
+        focusBridgeQueuedPublish = null;
+        if (queued) {
+          publishFocusBridgeState(queued.paidFocus, {
+            force: queued.force
+          });
+        }
+      });
+    return focusBridgePublishPromise;
+  }
+
+  async function editFocusBridgeSettings() {
+    const config = getFocusBridgeConfig();
+    const values = await openFormDialog({
+      title: 'Focus Bridge',
+      fields: [
+        {
+          name: 'enabled',
+          label: 'Bridge',
+          type: 'select',
+          value: config.enabled ? 'github' : 'off',
+          options: [
+            { value: 'off', label: 'Off' },
+            { value: 'github', label: 'GitHub focus-state file' }
+          ]
+        },
+        {
+          name: 'repository',
+          label: 'Repository (owner/repo)',
+          value: config.repository,
+          placeholder: 'nrik-km/nrik-km.github.io'
+        },
+        {
+          name: 'branch',
+          label: 'Branch',
+          value: config.branch || 'main'
+        },
+        {
+          name: 'path',
+          label: 'State file path',
+          value: config.path || 'assets/timekeeper-focus-state.json'
+        },
+        {
+          name: 'token',
+          label: 'GitHub token',
+          type: 'password',
+          value: config.token,
+          placeholder: 'Fine-grained token with Contents read/write'
+        }
+      ],
+      submitLabel: 'Save Bridge'
+    });
+    if (!values) return;
+    const next = normalizeFocusBridgeConfig({
+      enabled: values.enabled,
+      repository: values.repository,
+      branch: values.branch,
+      path: values.path,
+      token: values.token
+    });
+    if (next.enabled && (!next.repository.includes('/') || !next.token)) {
+      showToast('Bridge needs an owner/repo and a GitHub token.');
+      return;
+    }
+    saveFocusBridgeConfig(next);
+    focusBridgeStatus = {
+      checkedAt: new Date().toISOString(),
+      pending: false,
+      publishedAt: null,
+      error: '',
+      apiUrl: getFocusBridgeApiUrl(next)
+    };
+    if (next.enabled) {
+      publishFocusBridgeState(getPaidFocusTotal(), { force: true });
+    }
+    updateFocusStatusPanel();
+    updateAppHealthPanel();
+    showToast(
+      next.enabled ? 'Focus bridge enabled.' : 'Focus bridge disabled.'
+    );
+  }
+
+  function getFocusBlockedWebsites() {
+    data.focusBlockerSites = normalizeFocusBlockedSites(
+      data.focusBlockerSites,
+      DEFAULT_FOCUS_BLOCKED_WEBSITES
+    );
+    return data.focusBlockerSites;
+  }
+
+  async function editFocusBlockedWebsites() {
+    const currentSites = getFocusBlockedWebsites();
+    const values = await openFormDialog({
+      title: 'Blocked Websites',
+      fields: [
+        {
+          name: 'blockedSites',
+          label: 'Domains or URLs, one per line or comma-separated',
+          type: 'textarea',
+          rows: 9,
+          value: currentSites.join('\n'),
+          required: true
+        }
+      ],
+      submitLabel: 'Save Sites'
+    });
+    if (!values) return;
+    const normalized = normalizeFocusBlockedSites(values.blockedSites, []);
+    if (!normalized.length) {
+      showToast('Add at least one valid domain.');
+      return;
+    }
+    data.focusBlockerSites = normalized;
+    saveData();
+    const paidFocus = getPaidFocusTotal();
+    if (paidFocus > FOCUS_BLOCK_THRESHOLD) {
+      focusBlockerActive = true;
+      focusBlockerLastStartAt = Date.now();
+      triggerFocusStart(paidFocus);
+      publishFocusBridgeState(paidFocus, { force: true });
+      queueFocusBlockerStatusCheck();
+    }
+    updateFocusStatusPanel(paidFocus);
+    updateAppHealthPanel();
+    showToast(`Blocked sites updated (${normalized.length}).`);
+  }
 
   function buildFocusWebhookUrl(rawUrl, payload) {
     if (!payload) return rawUrl;
@@ -1624,7 +2511,8 @@ import {
         'threshold',
         String(Math.round(FOCUS_BLOCK_THRESHOLD * 100))
       );
-      url.searchParams.set('blockedSites', FOCUS_BLOCKED_WEBSITES.join(','));
+      url.searchParams.set('blockedSites', getFocusBlockedWebsites().join(','));
+      url.searchParams.set('replaceDefaultSites', '1');
       return url.toString();
     } catch (err) {
       return rawUrl;
@@ -1677,20 +2565,617 @@ import {
   // The blocker should only be enabled when the sum of all running timer factors exceeds 0.5.
   let focusBlockerActive = null;
   let focusBlockerLastStartAt = 0;
-  function updateFocusBlocker() {
-    // Sum the factors of all running timers, excluding unpaid projects.
-    const running = getRunningEntries();
-    let total = 0;
-    running.forEach((e) => {
-      const project = data.projects.find(
-        (p) => String(p.id) === String(e.projectId)
-      );
-      const hourlyRate = project ? Number(project.hourlyRate) : NaN;
-      const isUnpaid = Number.isFinite(hourlyRate) && hourlyRate <= 0;
-      if (isUnpaid) return;
-      const factor = getEntryFocusFactor(e, running.length);
-      total += factor;
+  let focusBlockerStatusRequest = null;
+  let focusBlockerDesktopStatus = {
+    checkedAt: null,
+    reachable: null,
+    active: null,
+    blockedSites: [],
+    error: ''
+  };
+  let offlineShellStatus =
+    'serviceWorker' in navigator && window.location.protocol.startsWith('http')
+      ? 'pending'
+      : 'unsupported';
+  let offlineShellError = '';
+
+  function updateFocusStatusPanel(paidFocus = getPaidFocusTotal()) {
+    const focusStatus = document.getElementById('runningFocusStatus');
+    if (!focusStatus) return;
+    focusStatus.innerHTML = '';
+    const desiredActive = paidFocus > FOCUS_BLOCK_THRESHOLD;
+    const desiredLabel = desiredActive
+      ? focusBlockerActive === false
+        ? 'start pending'
+        : 'start requested'
+      : 'off';
+    const helperLabel =
+      focusBlockerDesktopStatus.reachable === null
+        ? 'not checked'
+        : focusBlockerDesktopStatus.reachable
+          ? focusBlockerDesktopStatus.active
+            ? `active (${focusBlockerDesktopStatus.blockedSites.length} sites)`
+            : 'reachable, not blocking'
+          : 'not reachable';
+    const summary = document.createElement('span');
+    summary.textContent = `Paid focus: ${formatFocusPercent(paidFocus)} - request: ${desiredLabel} - desktop: ${helperLabel}`;
+    focusStatus.appendChild(summary);
+    const configuredSites = getFocusBlockedWebsites();
+    const sitesSummary = document.createElement('span');
+    sitesSummary.className = 'status-muted';
+    sitesSummary.textContent = `Configured blocked sites: ${configuredSites.length}`;
+    sitesSummary.title = configuredSites.join(', ');
+    focusStatus.appendChild(sitesSummary);
+    const bridgeConfig = getFocusBridgeConfig();
+    const bridgeSummary = document.createElement('span');
+    bridgeSummary.className = focusBridgeStatus.error
+      ? 'status-warning'
+      : 'status-muted';
+    const bridgeLabel = !bridgeConfig.enabled
+      ? 'off'
+      : focusBridgeStatus.pending
+        ? 'publishing'
+        : focusBridgeStatus.error
+          ? `error: ${focusBridgeStatus.error}`
+          : focusBridgeStatus.publishedAt
+            ? `published ${formatRelativeTime(focusBridgeStatus.publishedAt)}`
+            : 'enabled';
+    bridgeSummary.textContent = `Focus bridge: ${bridgeLabel}`;
+    bridgeSummary.title =
+      focusBridgeStatus.apiUrl || getFocusBridgeApiUrl(bridgeConfig) || '';
+    focusStatus.appendChild(bridgeSummary);
+    if (focusBlockerDesktopStatus.error) {
+      const error = document.createElement('span');
+      error.className = 'status-warning';
+      error.textContent = focusBlockerDesktopStatus.error;
+      focusStatus.appendChild(error);
+    }
+    const checkButton = document.createElement('button');
+    checkButton.type = 'button';
+    checkButton.className = 'btn secondary';
+    checkButton.textContent = 'Check Desktop Blocker';
+    checkButton.addEventListener('click', () => {
+      checkFocusBlockerStatus({ quiet: false });
     });
+    focusStatus.appendChild(checkButton);
+    const editSitesButton = document.createElement('button');
+    editSitesButton.type = 'button';
+    editSitesButton.className = 'btn secondary';
+    editSitesButton.textContent = 'Edit Blocked Sites';
+    editSitesButton.addEventListener('click', () => {
+      editFocusBlockedWebsites();
+    });
+    focusStatus.appendChild(editSitesButton);
+    const bridgeButton = document.createElement('button');
+    bridgeButton.type = 'button';
+    bridgeButton.className = 'btn secondary';
+    bridgeButton.textContent = 'Focus Bridge';
+    bridgeButton.title =
+      'Publish focus state to GitHub so the Windows helper can poll it from this desktop.';
+    bridgeButton.addEventListener('click', () => {
+      editFocusBridgeSettings();
+    });
+    focusStatus.appendChild(bridgeButton);
+    const publishBridgeButton = document.createElement('button');
+    publishBridgeButton.type = 'button';
+    publishBridgeButton.className = 'btn secondary';
+    publishBridgeButton.textContent = 'Publish Bridge';
+    publishBridgeButton.disabled =
+      !bridgeConfig.enabled || focusBridgeStatus.pending;
+    publishBridgeButton.addEventListener('click', () => {
+      publishFocusBridgeState(getPaidFocusTotal(), { force: true });
+    });
+    focusStatus.appendChild(publishBridgeButton);
+    const selfTestButton = document.createElement('button');
+    selfTestButton.type = 'button';
+    selfTestButton.className = 'btn secondary';
+    selfTestButton.textContent = 'Self-Test Blocker';
+    selfTestButton.title =
+      'Temporarily writes and removes a harmless managed hosts-file block to verify desktop permissions.';
+    selfTestButton.addEventListener('click', () => {
+      runDesktopBlockerSelfTest({ quiet: false });
+    });
+    focusStatus.appendChild(selfTestButton);
+    const testButton = document.createElement('button');
+    testButton.type = 'button';
+    testButton.className = 'btn secondary';
+    testButton.textContent = 'Test Blocker';
+    testButton.disabled = !desiredActive;
+    testButton.title = desiredActive
+      ? 'Send a focus start request, then verify the desktop helper status.'
+      : 'Start paid focus above 50% to test desktop blocking.';
+    testButton.addEventListener('click', () => {
+      const currentPaidFocus = getPaidFocusTotal();
+      if (currentPaidFocus <= FOCUS_BLOCK_THRESHOLD) {
+        showToast('Start paid focus above 50% before testing the blocker.');
+        return;
+      }
+      triggerFocusStart(currentPaidFocus);
+      publishFocusBridgeState(currentPaidFocus, { force: true });
+      window.setTimeout(() => {
+        checkFocusBlockerStatus({ quiet: false });
+      }, 800);
+    });
+    focusStatus.appendChild(testButton);
+  }
+
+  async function checkFocusBlockerStatus({ quiet = true } = {}) {
+    if (focusBlockerStatusRequest) return focusBlockerStatusRequest;
+    const controller =
+      typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(() => controller.abort(), FOCUS_STATUS_TIMEOUT_MS)
+      : null;
+    focusBlockerDesktopStatus = {
+      ...focusBlockerDesktopStatus,
+      error: '',
+      pending: true
+    };
+    updateFocusStatusPanel();
+    focusBlockerStatusRequest = fetch(FOCUS_STATUS_URL, {
+      method: 'GET',
+      cache: 'no-store',
+      signal: controller ? controller.signal : undefined
+    })
+      .then(async (response) => {
+        if (!response.ok) {
+          throw new Error(`Desktop helper returned ${response.status}.`);
+        }
+        const payload = await response.json();
+        focusBlockerDesktopStatus = {
+          checkedAt: new Date().toISOString(),
+          reachable: true,
+          active: payload && payload.active === true,
+          blockedSites: Array.isArray(payload?.blockedSites)
+            ? payload.blockedSites
+            : [],
+          error: ''
+        };
+        if (!quiet) {
+          showToast(
+            focusBlockerDesktopStatus.active
+              ? 'Desktop blocker is active.'
+              : 'Desktop helper is reachable but not currently blocking.'
+          );
+        }
+        return focusBlockerDesktopStatus;
+      })
+      .catch(() => {
+        focusBlockerDesktopStatus = {
+          checkedAt: new Date().toISOString(),
+          reachable: false,
+          active: false,
+          blockedSites: [],
+          error:
+            'Desktop helper not reachable. Start the focus blocker scheduled task or run npm run focus:blocker as Administrator.'
+        };
+        if (!quiet) {
+          showToast(focusBlockerDesktopStatus.error);
+        }
+        return focusBlockerDesktopStatus;
+      })
+      .finally(() => {
+        if (timeoutId) window.clearTimeout(timeoutId);
+        focusBlockerStatusRequest = null;
+        updateFocusStatusPanel();
+        updateAppHealthPanel();
+      });
+    return focusBlockerStatusRequest;
+  }
+
+  async function runDesktopBlockerSelfTest({ quiet = false } = {}) {
+    const controller =
+      typeof AbortController !== 'undefined' ? new AbortController() : null;
+    const timeoutId = controller
+      ? window.setTimeout(() => controller.abort(), FOCUS_STATUS_TIMEOUT_MS)
+      : null;
+    try {
+      const response = await fetch(FOCUS_SELF_TEST_URL, {
+        method: 'GET',
+        cache: 'no-store',
+        signal: controller ? controller.signal : undefined
+      });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok || payload?.ok === false) {
+        throw new Error(
+          payload?.error || `Desktop helper returned ${response.status}.`
+        );
+      }
+      focusBlockerDesktopStatus = {
+        checkedAt: new Date().toISOString(),
+        reachable: true,
+        active: payload.restoredActive === true,
+        blockedSites: Array.isArray(payload.restoredBlockedSites)
+          ? payload.restoredBlockedSites
+          : [],
+        error: ''
+      };
+      if (!quiet) {
+        showToast('Desktop blocker self-test passed.');
+      }
+      updateFocusStatusPanel();
+      updateAppHealthPanel();
+      return payload;
+    } catch (error) {
+      focusBlockerDesktopStatus = {
+        checkedAt: new Date().toISOString(),
+        reachable: false,
+        active: false,
+        blockedSites: [],
+        error:
+          error && error.message
+            ? error.message
+            : 'Desktop blocker self-test failed.'
+      };
+      if (!quiet) {
+        showToast(
+          `Desktop blocker self-test failed: ${focusBlockerDesktopStatus.error}`
+        );
+      }
+      updateFocusStatusPanel();
+      updateAppHealthPanel();
+      return null;
+    } finally {
+      if (timeoutId) window.clearTimeout(timeoutId);
+    }
+  }
+
+  function makeHealthBadge(label, tone = 'amber') {
+    const badge = document.createElement('span');
+    badge.className = `status-badge ${tone}`;
+    badge.textContent = label;
+    return badge;
+  }
+
+  function getStoredDataSizeLabel() {
+    try {
+      const raw = localStorage.getItem('timekeeperDataPro') || '';
+      if (!raw) return 'empty';
+      const bytes = new Blob([raw]).size;
+      if (bytes < 1024) return `${bytes} B`;
+      return `${(bytes / 1024).toFixed(1)} KB`;
+    } catch {
+      return 'unknown size';
+    }
+  }
+
+  function getAppHealthItems() {
+    const localAudit = getLocalDataAudit();
+    const localDataHasRepairableIssues = localAudit.repairableCount > 0;
+    const localDataNeedsReview =
+      !localDataHasRepairableIssues && localAudit.staleRunningEntries > 0;
+    const localDataStatus = localDataHasRepairableIssues
+      ? 'Issues'
+      : localDataNeedsReview
+        ? 'Review'
+        : 'Saved';
+    const localDataTone = localDataHasRepairableIssues
+      ? 'red'
+      : localDataNeedsReview
+        ? 'amber'
+        : 'green';
+    const localDataDetail =
+      `${data.projects.length} projects, ${data.entries.length} entries, revision ${Number(data.backupRevision) || 0}, ${getStoredDataSizeLabel()}.` +
+      (localAudit.totalIssues ? ` ${localAudit.issueParts.join('; ')}.` : '');
+    const localDataActions = [];
+    if (localDataHasRepairableIssues) {
+      localDataActions.push({
+        label: 'Repair Data',
+        onClick: () => repairLocalData()
+      });
+    }
+    if (localAudit.staleRunningEntries > 0) {
+      localDataActions.push({
+        label: 'Review Timers',
+        onClick: () => activateSection('timer')
+      });
+    }
+    const backupName = backupDirHandle
+      ? backupDirHandle.name || data.backupDirName || ''
+      : data.backupDirName || '';
+    const updatedAt = data.updatedAt ? new Date(data.updatedAt) : null;
+    const backupAt = data.lastBackupAt ? new Date(data.lastBackupAt) : null;
+    const verifiedAt = data.lastBackupVerifiedAt
+      ? new Date(data.lastBackupVerifiedAt)
+      : null;
+    const hasVerifiedBackup = verifiedAt && !Number.isNaN(verifiedAt.getTime());
+    const backupIsStale =
+      needsBackup ||
+      (updatedAt &&
+        !Number.isNaN(updatedAt.getTime()) &&
+        (!backupAt ||
+          Number.isNaN(backupAt.getTime()) ||
+          updatedAt.getTime() > backupAt.getTime()));
+    const folderAccessSupported = !!window.showDirectoryPicker;
+    let backupLabel = 'Off';
+    let backupTone = 'amber';
+    let backupDetail = 'Choose a cloud-synced folder for automatic backups.';
+    if (backupConflict) {
+      backupLabel = 'Conflict';
+      backupTone = 'red';
+      backupDetail = formatBackupConflictWarning(backupConflict);
+    } else if (!folderAccessSupported) {
+      backupLabel = 'Manual';
+      backupDetail = 'Folder auto-sync is unavailable in this browser.';
+    } else if (autoSyncEnabled && backupDirHandle) {
+      if (backupPermissionState === 'granted') {
+        backupLabel = backupIsStale ? 'Pending' : 'Synced';
+        backupTone = backupIsStale ? 'amber' : 'green';
+        backupDetail = data.lastBackupAt
+          ? `Last backup ${formatRelativeTime(data.lastBackupAt)}${backupName ? ` to ${backupName}` : ''}.`
+          : 'Backup is enabled; first write is pending.';
+        if (hasVerifiedBackup) {
+          backupDetail += ` Verified ${formatRelativeTime(data.lastBackupVerifiedAt)}.`;
+        }
+      } else {
+        backupLabel = 'Needs access';
+        backupTone = 'red';
+        backupDetail = backupName
+          ? `Re-authorize ${backupName} to resume backups.`
+          : 'Re-authorize the backup folder to resume backups.';
+      }
+    } else if (backupDirHandle && backupPermissionState === 'granted') {
+      backupLabel = 'Ready';
+      backupTone = 'amber';
+      backupDetail = backupName
+        ? `${backupName} is selected, but auto-sync is off.`
+        : 'A backup folder is selected, but auto-sync is off.';
+    } else if (autoSyncEnabled) {
+      backupLabel = 'Broken';
+      backupTone = 'red';
+      backupDetail = 'Auto-sync is on, but no writable backup folder is ready.';
+    }
+
+    const snapshotLabel = data.lastBackupSnapshotAt ? 'Current' : 'Missing';
+    const snapshotTone = data.lastBackupSnapshotAt ? 'green' : 'amber';
+    const snapshotDetail = data.lastBackupSnapshotAt
+      ? `Latest snapshot ${formatRelativeTime(data.lastBackupSnapshotAt)}.`
+      : 'No timestamped snapshot has been written yet.';
+
+    const cachedPayload = getCachedStravaFeedPayload();
+    const stravaCount = cachedStravaActivities.length;
+    const stravaUpdated =
+      cachedPayload && cachedPayload.updated_utc
+        ? formatRelativeTime(cachedPayload.updated_utc)
+        : '';
+    const stravaError =
+      cachedPayload && typeof cachedPayload.error === 'string'
+        ? cachedPayload.error.trim()
+        : '';
+    const stravaLabel =
+      stravaCount > 0 ? (stravaError ? 'Stale' : 'Loaded') : 'Empty';
+    const stravaTone =
+      stravaCount > 0 ? (stravaError ? 'amber' : 'green') : 'red';
+    const stravaDetail =
+      stravaCount > 0
+        ? `${stravaCount} activities${stravaUpdated ? `, updated ${stravaUpdated}` : ''}${stravaError ? `; latest refresh failed: ${stravaError}` : ''}.`
+        : 'Import a Strava export or publish assets/strava.json.';
+
+    const paidFocus = getPaidFocusTotal();
+    const desiredFocusBlock = paidFocus > FOCUS_BLOCK_THRESHOLD;
+    const helperChecked = !!focusBlockerDesktopStatus.checkedAt;
+    let blockerLabel = 'Idle';
+    let blockerTone = 'green';
+    let blockerDetail = `Paid focus ${formatFocusPercent(paidFocus)}.`;
+    if (desiredFocusBlock) {
+      if (
+        focusBlockerDesktopStatus.reachable &&
+        focusBlockerDesktopStatus.active
+      ) {
+        blockerLabel = 'Active';
+        blockerTone = 'green';
+        blockerDetail = `Blocking ${focusBlockerDesktopStatus.blockedSites.length} sites at ${formatFocusPercent(paidFocus)} paid focus.`;
+      } else if (focusBlockerDesktopStatus.reachable === false) {
+        blockerLabel = 'Offline';
+        blockerTone = 'red';
+        blockerDetail = focusBlockerDesktopStatus.error;
+      } else if (
+        focusBlockerDesktopStatus.reachable &&
+        !focusBlockerDesktopStatus.active
+      ) {
+        blockerLabel = 'Not blocking';
+        blockerTone = 'red';
+        blockerDetail = `Helper is reachable but not active at ${formatFocusPercent(paidFocus)} paid focus.`;
+      } else {
+        blockerLabel = 'Check';
+        blockerTone = 'amber';
+        blockerDetail = `Paid focus ${formatFocusPercent(paidFocus)} should activate the desktop blocker.`;
+      }
+    } else if (focusBlockerDesktopStatus.active) {
+      blockerLabel = 'Unexpected';
+      blockerTone = 'red';
+      blockerDetail = `Desktop helper still reports active while paid focus is ${formatFocusPercent(paidFocus)}.`;
+    } else if (helperChecked) {
+      blockerDetail = focusBlockerDesktopStatus.reachable
+        ? `Helper checked ${formatRelativeTime(focusBlockerDesktopStatus.checkedAt)}.`
+        : focusBlockerDesktopStatus.error;
+      blockerTone = focusBlockerDesktopStatus.reachable ? 'green' : 'amber';
+    }
+
+    const bridgeConfig = getFocusBridgeConfig();
+    let bridgeLabel = 'Off';
+    let bridgeTone = 'amber';
+    let bridgeDetail =
+      'Enable the GitHub focus bridge when Android/GitHub Pages should control this desktop.';
+    if (bridgeConfig.enabled) {
+      bridgeLabel = 'Ready';
+      bridgeDetail =
+        focusBridgeStatus.apiUrl || getFocusBridgeApiUrl(bridgeConfig);
+      if (focusBridgeStatus.pending) {
+        bridgeLabel = 'Publishing';
+        bridgeTone = 'amber';
+      } else if (focusBridgeStatus.error) {
+        bridgeLabel = 'Error';
+        bridgeTone = 'red';
+        bridgeDetail = focusBridgeStatus.error;
+      } else if (focusBridgeStatus.publishedAt) {
+        bridgeLabel = 'Published';
+        bridgeTone = 'green';
+        bridgeDetail = `Last published ${formatRelativeTime(focusBridgeStatus.publishedAt)}. Desktop helper should poll ${focusBridgeStatus.apiUrl || getFocusBridgeApiUrl(bridgeConfig)}.`;
+      }
+    }
+
+    let offlineLabel = 'Pending';
+    let offlineTone = 'amber';
+    let offlineDetail = 'Offline app cache is not ready yet.';
+    if (offlineShellStatus === 'active') {
+      offlineLabel = 'Ready';
+      offlineTone = 'green';
+      offlineDetail =
+        'Installed app shell is controlled by the service worker.';
+    } else if (offlineShellStatus === 'ready-after-reload') {
+      offlineLabel = 'Ready';
+      offlineTone = 'amber';
+      offlineDetail =
+        'Offline cache is installed and will control the next reload.';
+    } else if (offlineShellStatus === 'unsupported') {
+      offlineLabel = 'Unavailable';
+      offlineDetail =
+        'Open the app over HTTP(S) in a service-worker capable browser.';
+    } else if (offlineShellStatus === 'failed') {
+      offlineLabel = 'Failed';
+      offlineTone = 'red';
+      offlineDetail =
+        offlineShellError || 'Service worker registration failed.';
+    } else if (offlineShellStatus === 'registering') {
+      offlineLabel = 'Installing';
+      offlineDetail = 'Offline app cache registration is in progress.';
+    }
+
+    return [
+      {
+        label: 'Local Data',
+        status: localDataStatus,
+        tone: localDataTone,
+        detail: localDataDetail,
+        actions: localDataActions
+      },
+      {
+        label: 'Backup Sync',
+        status: backupLabel,
+        tone: backupTone,
+        detail: backupDetail,
+        actions: [
+          {
+            label: 'Verify',
+            onClick: () => verifyBackupRoundTrip()
+          }
+        ]
+      },
+      {
+        label: 'Snapshots',
+        status: snapshotLabel,
+        tone: snapshotTone,
+        detail: snapshotDetail
+      },
+      {
+        label: 'Strava Feed',
+        status: stravaLabel,
+        tone: stravaTone,
+        detail: stravaDetail
+      },
+      {
+        label: 'Desktop Blocker',
+        status: blockerLabel,
+        tone: blockerTone,
+        detail: blockerDetail,
+        actions: [
+          {
+            label: 'Check Blocker',
+            onClick: () => checkFocusBlockerStatus({ quiet: false })
+          },
+          {
+            label: 'Self-Test',
+            onClick: () => runDesktopBlockerSelfTest({ quiet: false })
+          }
+        ]
+      },
+      {
+        label: 'Focus Bridge',
+        status: bridgeLabel,
+        tone: bridgeTone,
+        detail: bridgeDetail,
+        actions: [
+          {
+            label: 'Configure',
+            onClick: () => editFocusBridgeSettings()
+          },
+          {
+            label: 'Publish',
+            onClick: () =>
+              publishFocusBridgeState(getPaidFocusTotal(), { force: true })
+          }
+        ]
+      },
+      {
+        label: 'Offline App',
+        status: offlineLabel,
+        tone: offlineTone,
+        detail: offlineDetail
+      }
+    ];
+  }
+
+  function updateAppHealthPanel() {
+    const panel = document.getElementById('appHealthPanel');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'app-health-header';
+    const headingGroup = document.createElement('div');
+    const heading = document.createElement('h3');
+    heading.textContent = 'App Health';
+    const subheading = document.createElement('p');
+    subheading.textContent =
+      'Backup, Strava, blocker, offline cache, and local data status.';
+    headingGroup.appendChild(heading);
+    headingGroup.appendChild(subheading);
+    header.appendChild(headingGroup);
+    panel.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'app-health-grid';
+    getAppHealthItems().forEach((item) => {
+      const row = document.createElement('div');
+      row.className = 'app-health-item';
+      const copy = document.createElement('div');
+      copy.className = 'app-health-copy';
+      const label = document.createElement('div');
+      label.className = 'app-health-label';
+      label.textContent = item.label;
+      const detail = document.createElement('div');
+      detail.className = 'app-health-detail';
+      detail.textContent = item.detail;
+      copy.appendChild(label);
+      copy.appendChild(detail);
+      row.appendChild(copy);
+      row.appendChild(makeHealthBadge(item.status, item.tone));
+      if (Array.isArray(item.actions) && item.actions.length) {
+        const actions = document.createElement('div');
+        actions.className = 'app-health-actions';
+        item.actions.forEach((actionDef) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'btn secondary';
+          button.textContent = actionDef.label;
+          button.addEventListener('click', actionDef.onClick);
+          actions.appendChild(button);
+        });
+        row.appendChild(actions);
+      }
+      grid.appendChild(row);
+    });
+    panel.appendChild(grid);
+  }
+
+  function queueFocusBlockerStatusCheck() {
+    window.setTimeout(() => {
+      checkFocusBlockerStatus({ quiet: true });
+    }, 800);
+  }
+
+  function updateFocusBlocker() {
+    const total = getPaidFocusTotal();
     // Activate blocker if we cross the 50% threshold, deactivate if we drop below or equal.
     // The webhook receives the paid focus total and the website block list so the local
     // blocker can deny distracting domains while focused paid work is active.
@@ -1706,17 +3191,25 @@ import {
       (focusBlockerActive !== true && total > FOCUS_BLOCK_THRESHOLD) ||
       shouldHeartbeat
     ) {
+      const forceBridgePublish = focusBlockerActive !== true;
       focusBlockerActive = true;
       focusBlockerLastStartAt = Date.now();
       triggerFocusStart(total);
+      publishFocusBridgeState(total, { force: forceBridgePublish });
+      queueFocusBlockerStatusCheck();
     } else if (
       (focusBlockerActive !== false && total <= FOCUS_BLOCK_THRESHOLD) ||
       shouldStopHeartbeat
     ) {
+      const forceBridgePublish = focusBlockerActive !== false;
       focusBlockerActive = false;
       focusBlockerLastStartAt = Date.now();
       triggerFocusStop(total);
+      publishFocusBridgeState(total, { force: forceBridgePublish });
+      queueFocusBlockerStatusCheck();
     }
+    updateFocusStatusPanel(total);
+    updateAppHealthPanel();
   }
   setInterval(updateFocusBlocker, FOCUS_BLOCKER_HEARTBEAT_MS);
 
@@ -1784,7 +3277,7 @@ import {
     };
     const formatSignedCredits = (value) => {
       if (!Number.isFinite(value) || value === 0) return '0 credits';
-      const prefix = value >= 0 ? '+' : '−';
+      const prefix = value >= 0 ? '+' : '-';
       return prefix + Math.abs(value).toFixed(0) + ' credits';
     };
     if (summaryEl) {
@@ -1811,20 +3304,20 @@ import {
       }
       createRow(
         'Current multiplier',
-        currentMultiplier.toFixed(2) + '×',
+        currentMultiplier.toFixed(2) + 'x',
         'Weekly budget ' + formatAmount(currentBudget)
       );
       const projectedDelta = projectedBudget - weeklyBaseBudget;
       createRow(
         'Projected (if week ended today)',
-        projectedMultiplier.toFixed(2) + '×',
-        `${formatSignedCurrency(projectedDelta)} • ${formatSignedCredits(projectedCredits)}`
+        projectedMultiplier.toFixed(2) + 'x',
+        `${formatSignedCurrency(projectedDelta)} | ${formatSignedCredits(projectedCredits)}`
       );
       const nextDelta = nextBudget - weeklyBaseBudget;
       let nextSub = formatSignedCurrency(nextDelta);
       if (lastWeek) {
         if (lastWeek.paused) {
-          nextSub += ' • Last week paused';
+          nextSub += ' | Last week paused';
         } else {
           const lastPoints = Number.isFinite(lastWeek.totalPoints)
             ? lastWeek.totalPoints
@@ -1839,7 +3332,7 @@ import {
             lastRequired > 0
               ? `${formatPoints(lastPoints)} / ${formatPoints(lastRequired)} pts`
               : `${formatPoints(lastPoints)} pts`;
-          nextSub += ` • Last week ${scheduledLabel} scheduled`;
+          nextSub += ` | Last week ${scheduledLabel} scheduled`;
           if (lastExpected !== null) {
             nextSub += ` (baseline ${formatPoints(lastExpected)} pts)`;
           }
@@ -1849,21 +3342,21 @@ import {
           ) {
             nextSub +=
               lastWeek.scheduleDeltaEnd >= 0
-                ? ` • Ahead by ${formatPoints(lastWeek.scheduleDeltaEnd)} pts overall`
-                : ` • Behind by ${formatPoints(Math.abs(lastWeek.scheduleDeltaEnd))} pts overall`;
+                ? ` | Ahead by ${formatPoints(lastWeek.scheduleDeltaEnd)} pts overall`
+                : ` | Behind by ${formatPoints(Math.abs(lastWeek.scheduleDeltaEnd))} pts overall`;
           }
           if (
             Number.isFinite(lastWeek.creditsEarned) &&
             lastWeek.creditsEarned !== 0
           ) {
-            nextSub += ' • ' + formatSignedCredits(lastWeek.creditsEarned);
+            nextSub += ' | ' + formatSignedCredits(lastWeek.creditsEarned);
           }
         }
       }
       if (pausedThisWeek) {
-        nextSub += ' • This week paused';
+        nextSub += ' | This week paused';
       }
-      createRow('Next week (locked)', nextMultiplier.toFixed(2) + '×', nextSub);
+      createRow('Next week (locked)', nextMultiplier.toFixed(2) + 'x', nextSub);
 
       const planValue =
         workoutPlan.planTotalPoints > 0
@@ -1891,7 +3384,7 @@ import {
           planSubParts.push('On track');
         }
       }
-      createRow('Workout plan', planValue, planSubParts.join(' • '));
+      createRow('Workout plan', planValue, planSubParts.join(' | '));
 
       const scheduledPoints = workoutPlan.requiredPoints;
       const pointsValue =
@@ -1925,7 +3418,7 @@ import {
         const creditGain = formatSignedCredits(projectedCredits);
         pointsSubParts.push(`Potential ${budgetGain}, ${creditGain}`);
       }
-      const pointsSub = pointsSubParts.join(' • ');
+      const pointsSub = pointsSubParts.join(' | ');
       createRow('Points this week', pointsValue, pointsSub);
       const intensityParts = [];
       [
@@ -1961,7 +3454,7 @@ import {
       createRow(
         'Activity mix',
         intensityParts.length
-          ? intensityParts.join(' • ')
+          ? intensityParts.join(' | ')
           : 'No activities logged yet',
         null
       );
@@ -1985,7 +3478,7 @@ import {
         const streakPill = document.createElement('span');
         streakPill.className = 'fitness-pill warm';
         streakPill.textContent =
-          '🔥 Streak ' +
+          'Streak ' +
           fitness.streakCount +
           ' week' +
           (fitness.streakCount === 1 ? '' : 's');
@@ -2014,7 +3507,7 @@ import {
         boostValue.textContent = 'Unlocked: +' + boostPercent + '% on Treats';
       } else if (boostUnlocked) {
         boostValue.textContent =
-          'Unlocked – waiting for weekend (+' + boostPercent + '%)';
+          'Unlocked - waiting for weekend (+' + boostPercent + '%)';
       } else if (pausedThisWeek) {
         boostValue.textContent = 'Paused this week';
       } else {
@@ -2328,7 +3821,14 @@ import {
           row.style.padding = '0.4rem 0';
           row.style.borderBottom = '1px solid #e2e8f0';
           const info = document.createElement('div');
-          info.innerHTML = `<strong>${preset.name}</strong> • ${getIntensitySummary(preset.intensity)}`;
+          const name = document.createElement('strong');
+          name.textContent = preset.name;
+          info.appendChild(name);
+          info.appendChild(
+            document.createTextNode(
+              ` - ${getIntensitySummary(preset.intensity)}`
+            )
+          );
           row.appendChild(info);
           const actions = document.createElement('div');
           actions.style.display = 'flex';
@@ -2349,20 +3849,38 @@ import {
           editBtn.className = 'btn secondary';
           editBtn.textContent = 'Edit';
           editBtn.style.fontSize = '0.75rem';
-          editBtn.addEventListener('click', () => {
-            const newName = prompt('Preset name', preset.name || '');
-            if (newName === null) return;
-            const trimmed = newName.trim();
+          editBtn.addEventListener('click', async () => {
+            const values = await openFormDialog({
+              title: 'Edit Workout Preset',
+              fields: [
+                {
+                  name: 'name',
+                  label: 'Preset Name',
+                  value: preset.name || '',
+                  required: true
+                },
+                {
+                  name: 'intensity',
+                  label: 'Intensity',
+                  type: 'select',
+                  value: normalizeIntensity(preset.intensity),
+                  options: getWorkoutIntensityOptions(preset.intensity)
+                }
+              ],
+              submitLabel: 'Save Preset'
+            });
+            if (!values) return;
+            const trimmed = values.name.trim();
             if (!trimmed) {
-              alert('Preset name cannot be empty.');
+              showToast('Preset name cannot be empty.');
               return;
             }
-            const newIntensity = prompt(
-              'Intensity (intense / medium / light / custom points)',
-              getIntensityPromptDefault(preset.intensity)
-            );
-            if (newIntensity === null) return;
-            const normalized = normalizeIntensity(newIntensity);
+            const normalized = parseWorkoutIntensityInput(values.intensity);
+            if (!normalized) {
+              showToast('Choose a valid workout intensity.');
+              return;
+            }
+            const snapshot = cloneData();
             const existing = workouts.presets.find(
               (p) =>
                 p.id !== preset.id &&
@@ -2386,19 +3904,27 @@ import {
             saveData();
             updateFitnessCards();
             updateTodoSection();
+            offerUndo('Workout preset updated.', snapshot);
           });
           actions.appendChild(editBtn);
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'btn danger';
           deleteBtn.textContent = 'Delete';
           deleteBtn.style.fontSize = '0.75rem';
-          deleteBtn.addEventListener('click', () => {
-            if (!confirm('Delete this preset? Existing entries stay recorded.'))
-              return;
+          deleteBtn.addEventListener('click', async () => {
+            const ok = await requestConfirm({
+              title: 'Delete Preset',
+              message: 'Delete this preset? Existing entries stay recorded.',
+              confirmLabel: 'Delete',
+              danger: true
+            });
+            if (!ok) return;
+            const snapshot = cloneData();
             deleteWorkoutPreset(preset.id);
             saveData();
             updateFitnessCards();
             updateTodoSection();
+            offerUndo('Workout preset deleted.', snapshot);
           });
           actions.appendChild(deleteBtn);
           row.appendChild(actions);
@@ -2416,9 +3942,9 @@ import {
       const headerInfo = document.createElement('div');
       const totalWorkoutCount = weeklyActivityRows.length;
       if (weeklyPlan.paused) {
-        headerInfo.textContent = `This week: ${totalWorkoutCount} workout${totalWorkoutCount === 1 ? '' : 's'} • Week paused`;
+        headerInfo.textContent = `This week: ${totalWorkoutCount} workout${totalWorkoutCount === 1 ? '' : 's'} | Week paused`;
       } else {
-        headerInfo.textContent = `This week: ${totalWorkoutCount} workout${totalWorkoutCount === 1 ? '' : 's'} • ${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(weeklyPlan.requiredPoints)} pts scheduled`;
+        headerInfo.textContent = `This week: ${totalWorkoutCount} workout${totalWorkoutCount === 1 ? '' : 's'} | ${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(weeklyPlan.requiredPoints)} pts scheduled`;
       }
       header.appendChild(headerInfo);
       const pauseLabel = document.createElement('label');
@@ -2443,7 +3969,7 @@ import {
         const empty = document.createElement('p');
         empty.className = 'muted';
         empty.textContent = pausedThisWeek
-          ? 'Week paused – no workouts required.'
+          ? 'Week paused - no workouts required.'
           : 'No workouts logged yet this week.';
         entriesContent.appendChild(empty);
       } else {
@@ -2478,11 +4004,12 @@ import {
             const actions = document.createElement('div');
             actions.style.display = 'flex';
             actions.style.gap = '0.4rem';
-            if (activity.url) {
+            const activityUrl = safeExternalUrl(activity.url);
+            if (activityUrl) {
               const openLink = document.createElement('a');
               openLink.className = 'btn secondary';
               openLink.textContent = 'Open';
-              openLink.href = activity.url;
+              openLink.href = activityUrl;
               openLink.target = '_blank';
               openLink.rel = 'noopener noreferrer';
               openLink.style.fontSize = '0.75rem';
@@ -2501,7 +4028,14 @@ import {
           row.style.borderBottom = '1px solid #e2e8f0';
           row.style.padding = '0.5rem 0';
           const info = document.createElement('div');
-          info.innerHTML = `<strong>${entry.name}</strong> • ${getIntensitySummary(entry.intensity)} • ${formatWorkoutTimestamp(entry.timestamp)}`;
+          const name = document.createElement('strong');
+          name.textContent = entry.name;
+          info.appendChild(name);
+          info.appendChild(
+            document.createTextNode(
+              ` - ${getIntensitySummary(entry.intensity)} - ${formatWorkoutTimestamp(entry.timestamp)}`
+            )
+          );
           row.appendChild(info);
           const actions = document.createElement('div');
           actions.style.display = 'flex';
@@ -2510,50 +4044,97 @@ import {
           editBtn.className = 'btn secondary';
           editBtn.textContent = 'Edit';
           editBtn.style.fontSize = '0.75rem';
-          editBtn.addEventListener('click', () => {
-            const newName = prompt('Workout name', entry.name || '');
-            if (newName === null) return;
-            const trimmed = newName.trim();
+          editBtn.addEventListener('click', async () => {
+            const normalizedIntensity = normalizeIntensity(entry.intensity);
+            const customPoints = parseCustomIntensity(normalizedIntensity);
+            const values = await openFormDialog({
+              title: 'Edit Workout',
+              fields: [
+                {
+                  name: 'name',
+                  label: 'Workout Name',
+                  value: entry.name || '',
+                  required: true
+                },
+                {
+                  name: 'intensity',
+                  label: 'Intensity',
+                  type: 'select',
+                  value: customPoints === null ? normalizedIntensity : 'custom',
+                  options: [
+                    { value: 'intense', label: 'Intense' },
+                    { value: 'medium', label: 'Medium' },
+                    { value: 'light', label: 'Light' },
+                    { value: 'custom', label: 'Custom points' }
+                  ]
+                },
+                {
+                  name: 'customPoints',
+                  label: 'Custom Points',
+                  type: 'number',
+                  min: 0.01,
+                  step: 0.01,
+                  value:
+                    customPoints === null
+                      ? ''
+                      : formatCustomIntensityValue(customPoints),
+                  visibleWhen: (controls) =>
+                    controls.intensity && controls.intensity.value === 'custom'
+                },
+                {
+                  name: 'timestamp',
+                  label: 'When',
+                  type: 'datetime-local',
+                  value: formatTimestampForInput(entry.timestamp),
+                  required: true
+                }
+              ],
+              submitLabel: 'Save Workout'
+            });
+            if (!values) return;
+            const trimmed = values.name.trim();
             if (!trimmed) {
-              alert('Workout name cannot be empty.');
+              showToast('Workout name cannot be empty.');
               return;
             }
-            const newIntensity = prompt(
-              'Intensity (intense / medium / light / custom points)',
-              getIntensityPromptDefault(entry.intensity)
-            );
-            if (newIntensity === null) return;
-            const timeDefault = formatTimestampForInput(
-              entry.timestamp
-            ).replace('T', ' ');
-            const newTimeRaw = prompt(
-              'When? (YYYY-MM-DD HH:MM, leave blank to keep current)',
-              timeDefault
-            );
-            if (newTimeRaw === null) return;
-            let newTimestamp = entry.timestamp;
-            if (newTimeRaw.trim()) {
-              const parsed = parseDateTimeInput(newTimeRaw);
-              if (!parsed) {
-                alert('Invalid date or time.');
+            let newIntensity = values.intensity;
+            if (newIntensity === 'custom') {
+              const customValue = sanitizeCustomPoints(values.customPoints);
+              if (customValue === null) {
+                showToast('Enter valid custom workout points.');
                 return;
               }
-              newTimestamp = parsed.toISOString();
+              newIntensity = makeCustomIntensity(customValue);
             }
+            const parsed = parseDateTimeInput(values.timestamp);
+            if (!parsed) {
+              showToast('Invalid date or time.');
+              return;
+            }
+            const snapshot = cloneData();
             updateWorkoutEntry(entry.id, {
               name: trimmed,
               intensity: newIntensity,
-              timestamp: newTimestamp
+              timestamp: parsed.toISOString()
             });
+            offerUndo('Workout updated.', snapshot);
           });
           actions.appendChild(editBtn);
           const deleteBtn = document.createElement('button');
           deleteBtn.className = 'btn danger';
           deleteBtn.textContent = 'Delete';
           deleteBtn.style.fontSize = '0.75rem';
-          deleteBtn.addEventListener('click', () => {
-            if (!confirm('Delete this workout entry?')) return;
+          deleteBtn.addEventListener('click', async () => {
+            const ok = await requestConfirm({
+              title: 'Delete Workout',
+              message: 'Delete this workout entry?',
+              confirmLabel: 'Delete',
+              danger: true
+            });
+            if (!ok) return;
+            const snapshot = cloneData();
             deleteWorkoutEntry(entry.id);
+            offerUndo('Workout deleted.', snapshot);
           });
           actions.appendChild(deleteBtn);
           row.appendChild(actions);
@@ -2695,7 +4276,7 @@ import {
           ' kr',
           ' SEK'
         );
-        info.textContent = `${payment.name || 'Recurring payment'} – ${amountLabel}`;
+        info.textContent = `${payment.name || 'Recurring payment'} - ${amountLabel}`;
         li.appendChild(info);
 
         const actions = document.createElement('div');
@@ -2706,28 +4287,45 @@ import {
         editBtn.className = 'btn secondary';
         editBtn.style.fontSize = '0.7rem';
         editBtn.textContent = 'Edit';
-        editBtn.addEventListener('click', () => {
-          const newName = prompt('Payment name', payment.name || '');
-          if (newName === null) return;
-          const trimmedName = newName.trim();
+        editBtn.addEventListener('click', async () => {
+          const values = await openFormDialog({
+            title: 'Edit Recurring Payment',
+            fields: [
+              {
+                name: 'name',
+                label: 'Payment Name',
+                value: payment.name || '',
+                required: true
+              },
+              {
+                name: 'amount',
+                label: 'Monthly Amount (SEK)',
+                type: 'number',
+                min: 0,
+                step: 0.01,
+                value: payment.amount || 0,
+                required: true
+              }
+            ],
+            submitLabel: 'Save Payment'
+          });
+          if (!values) return;
+          const trimmedName = values.name.trim();
           if (!trimmedName) {
-            alert('Payment name cannot be empty.');
+            showToast('Payment name cannot be empty.');
             return;
           }
-          const newAmountStr = prompt(
-            'Monthly amount (SEK)',
-            String(payment.amount || 0)
-          );
-          if (newAmountStr === null) return;
-          const newAmount = parseFloat(newAmountStr);
+          const newAmount = parseFloat(values.amount);
           if (!Number.isFinite(newAmount) || newAmount < 0) {
-            alert('Enter a valid amount.');
+            showToast('Enter a valid amount.');
             return;
           }
+          const snapshot = cloneData();
           payment.name = trimmedName;
           payment.amount = newAmount;
           saveData();
           updateGrocerySection();
+          offerUndo('Recurring payment updated.', snapshot);
         });
         actions.appendChild(editBtn);
 
@@ -2735,13 +4333,21 @@ import {
         deleteBtn.className = 'btn danger';
         deleteBtn.style.fontSize = '0.7rem';
         deleteBtn.textContent = 'Delete';
-        deleteBtn.addEventListener('click', () => {
-          if (!confirm('Remove this recurring payment?')) return;
+        deleteBtn.addEventListener('click', async () => {
+          const ok = await requestConfirm({
+            title: 'Remove Payment',
+            message: 'Remove this recurring payment?',
+            confirmLabel: 'Remove',
+            danger: true
+          });
+          if (!ok) return;
+          const snapshot = cloneData();
           data.monthlyRecurringPayments = data.monthlyRecurringPayments.filter(
             (p) => p.id !== payment.id
           );
           saveData();
           updateGrocerySection();
+          offerUndo('Recurring payment removed.', snapshot);
         });
         actions.appendChild(deleteBtn);
 
@@ -2768,7 +4374,7 @@ import {
         rowArch.style.display = 'flex';
         rowArch.style.justifyContent = 'space-between';
         rowArch.style.alignItems = 'center';
-        // Details span: name – cost – frequency – purchase date
+        // Details span: name - cost - frequency - purchase date
         const detailsSpan = document.createElement('span');
         let dateStr = '';
         const freq =
@@ -2797,14 +4403,14 @@ import {
           let creditNote = `original ${originalString}`;
           const appliedCreditsNum = Number(archItem.appliedCredits);
           if (Number.isFinite(appliedCreditsNum) && appliedCreditsNum > 0) {
-            creditNote += `, credits −${formatCurrency(appliedCreditsNum, -1).replace(' kr', ' SEK')}`;
+            creditNote += `, credits -${formatCurrency(appliedCreditsNum, -1).replace(' kr', ' SEK')}`;
           }
           parts.push(creditNote);
         }
         const freqLabel = freq.charAt(0).toUpperCase() + freq.slice(1);
         parts.push(freqLabel);
         if (dateStr) parts.push(dateStr);
-        detailsSpan.textContent = parts.join(' – ');
+        detailsSpan.textContent = parts.join(' - ');
         rowArch.appendChild(detailsSpan);
         if (archItem.boostApplied && archItem.boostPercentApplied) {
           const boostNote = document.createElement('div');
@@ -2827,15 +4433,29 @@ import {
         editArchBtn.className = 'btn secondary';
         editArchBtn.textContent = 'Edit';
         editArchBtn.style.fontSize = '0.7rem';
-        editArchBtn.addEventListener('click', () => {
-          // Prompt for new cost
-          let newCostStr = prompt(
-            'Edit cost of this item (SEK)',
-            String(archItem.cost || 0)
-          );
-          if (newCostStr === null) return;
-          let newCostVal = parseFloat(newCostStr);
-          if (isNaN(newCostVal)) newCostVal = 0;
+        editArchBtn.addEventListener('click', async () => {
+          const values = await openFormDialog({
+            title: 'Edit Purchase',
+            fields: [
+              {
+                name: 'cost',
+                label: 'Cost (SEK)',
+                type: 'number',
+                min: 0,
+                step: 0.01,
+                value: archItem.cost || 0,
+                required: true
+              }
+            ],
+            submitLabel: 'Save Purchase'
+          });
+          if (!values) return;
+          const newCostVal = parseFloat(values.cost);
+          if (!Number.isFinite(newCostVal) || newCostVal < 0) {
+            showToast('Enter a valid cost.');
+            return;
+          }
+          const snapshot = cloneData();
           archItem.cost = newCostVal;
           // Update purchase date to now if none exists
           if (!archItem.purchasedDate) {
@@ -2843,6 +4463,7 @@ import {
           }
           saveData();
           updateGrocerySection();
+          offerUndo('Purchase updated.', snapshot);
           if (typeof provideHaptic === 'function') {
             provideHaptic('beep');
           }
@@ -2853,10 +4474,19 @@ import {
         deleteArchBtn.className = 'btn danger';
         deleteArchBtn.textContent = 'Delete';
         deleteArchBtn.style.fontSize = '0.7rem';
-        deleteArchBtn.addEventListener('click', () => {
+        deleteArchBtn.addEventListener('click', async () => {
+          const ok = await requestConfirm({
+            title: 'Delete Purchase',
+            message: 'Delete this archived purchase?',
+            confirmLabel: 'Delete',
+            danger: true
+          });
+          if (!ok) return;
+          const snapshot = cloneData();
           data.groceries.splice(archIndex, 1);
           saveData();
           updateGrocerySection();
+          offerUndo('Archived purchase deleted.', snapshot);
         });
         btnGroupArch.appendChild(deleteArchBtn);
         rowArch.appendChild(btnGroupArch);
@@ -2951,7 +4581,7 @@ import {
     multiplierLine.textContent =
       'Fitness Multiplier next week: ' +
       nextMultiplier.toFixed(2) +
-      '× (' +
+      'x (' +
       formatSignedCurrency(nextWeekBudget - weeklyBaseWithCarry) +
       ')';
     summaryCard.appendChild(multiplierLine);
@@ -2987,33 +4617,59 @@ import {
     editBudgetsBtn.className = 'btn secondary';
     editBudgetsBtn.style.fontSize = '0.75rem';
     editBudgetsBtn.textContent = 'Edit Budgets';
-    editBudgetsBtn.addEventListener('click', () => {
-      const w = prompt(
-        'Weekly budget (SEK)',
-        String(data.groceryBudgetWeekly || 0)
-      );
-      const m = prompt(
-        'Monthly budget (SEK)',
-        String(data.groceryBudgetMonthly || 0)
-      );
-      const b = prompt(
-        'Biannual budget (SEK)',
-        String(data.groceryBudgetBiYearly || 0)
-      );
-      if (w !== null) {
-        const val = parseFloat(w);
-        if (!isNaN(val)) data.groceryBudgetWeekly = val;
+    editBudgetsBtn.addEventListener('click', async () => {
+      const values = await openFormDialog({
+        title: 'Edit Grocery Budgets',
+        fields: [
+          {
+            name: 'weekly',
+            label: 'Weekly Budget (SEK)',
+            type: 'number',
+            min: 0,
+            step: 1,
+            value: data.groceryBudgetWeekly || 0
+          },
+          {
+            name: 'monthly',
+            label: 'Monthly Budget (SEK)',
+            type: 'number',
+            min: 0,
+            step: 1,
+            value: data.groceryBudgetMonthly || 0
+          },
+          {
+            name: 'biannual',
+            label: 'Biannual Budget (SEK)',
+            type: 'number',
+            min: 0,
+            step: 1,
+            value: data.groceryBudgetBiYearly || 0
+          }
+        ],
+        submitLabel: 'Save Budgets'
+      });
+      if (!values) return;
+      const weekly = parseFloat(values.weekly);
+      const monthly = parseFloat(values.monthly);
+      const biannual = parseFloat(values.biannual);
+      if (
+        !Number.isFinite(weekly) ||
+        weekly < 0 ||
+        !Number.isFinite(monthly) ||
+        monthly < 0 ||
+        !Number.isFinite(biannual) ||
+        biannual < 0
+      ) {
+        showToast('Enter valid non-negative budgets.');
+        return;
       }
-      if (m !== null) {
-        const val = parseFloat(m);
-        if (!isNaN(val)) data.groceryBudgetMonthly = val;
-      }
-      if (b !== null) {
-        const val = parseFloat(b);
-        if (!isNaN(val)) data.groceryBudgetBiYearly = val;
-      }
+      const snapshot = cloneData();
+      data.groceryBudgetWeekly = weekly;
+      data.groceryBudgetMonthly = monthly;
+      data.groceryBudgetBiYearly = biannual;
       saveData();
       updateGrocerySection();
+      offerUndo('Grocery budgets updated.', snapshot);
     });
     controlsDiv.appendChild(editBudgetsBtn);
     // Edit start date button
@@ -3021,18 +4677,32 @@ import {
     editStartBtn.className = 'btn secondary';
     editStartBtn.style.fontSize = '0.75rem';
     editStartBtn.textContent = 'Set Start Date';
-    editStartBtn.addEventListener('click', () => {
-      const d = prompt(
-        'Start date for biannual budget periods (YYYY-MM-DD)',
-        data.groceryBudgetStartDate || ''
-      );
-      if (!d) return;
-      const parsed = parseLocalDateString(d);
-      if (!parsed) return;
+    editStartBtn.addEventListener('click', async () => {
+      const values = await openFormDialog({
+        title: 'Set Budget Start Date',
+        fields: [
+          {
+            name: 'startDate',
+            label: 'Start Date',
+            type: 'date',
+            value: data.groceryBudgetStartDate || '',
+            required: true
+          }
+        ],
+        submitLabel: 'Save Date'
+      });
+      if (!values) return;
+      const parsed = parseLocalDateString(values.startDate);
+      if (!parsed) {
+        showToast('Enter a valid start date.');
+        return;
+      }
       const normalized = formatLocalDateString(parsed);
       if (data.groceryBudgetStartDate !== normalized) {
+        const snapshot = cloneData();
         data.groceryBudgetStartDate = normalized;
         saveData();
+        offerUndo('Budget start date updated.', snapshot);
       }
       updateGrocerySection();
     });
@@ -3102,14 +4772,32 @@ import {
       buyBtn.className = 'btn';
       buyBtn.textContent = 'Buy';
       buyBtn.style.fontSize = '0.7rem';
-      buyBtn.addEventListener('click', () => {
-        // Prompt for cost
-        let costStr = prompt('Enter cost of this item (SEK)', '0');
-        if (costStr === null) return;
-        let costVal = parseFloat(costStr);
-        if (isNaN(costVal)) costVal = 0;
+      buyBtn.addEventListener('click', async () => {
+        const values = await openFormDialog({
+          title: 'Log Purchase',
+          fields: [
+            {
+              name: 'cost',
+              label: 'Cost (SEK)',
+              type: 'number',
+              min: 0,
+              step: 0.01,
+              value: 0,
+              required: true
+            }
+          ],
+          submitLabel: 'Buy'
+        });
+        if (!values) return;
+        const parsedCost = parseFloat(values.cost);
+        if (!Number.isFinite(parsedCost) || parsedCost < 0) {
+          showToast('Enter a valid cost.');
+          return;
+        }
+        const snapshot = cloneData();
+        let costVal = parsedCost;
         const fitnessData = ensureFitnessDefaults();
-        let originalCost = costVal;
+        const originalCost = costVal;
         let creditsUsed = 0;
         let boostCreditsUsed = 0;
         let boostPercentApplied = 0;
@@ -3157,6 +4845,7 @@ import {
         if (typeof updateTodoSection === 'function') {
           updateTodoSection();
         }
+        offerUndo('Purchase logged.', snapshot);
         if (typeof provideHaptic === 'function') {
           provideHaptic('beep');
         }
@@ -3167,41 +4856,62 @@ import {
       editBtn.className = 'btn secondary';
       editBtn.textContent = 'Edit';
       editBtn.style.fontSize = '0.7rem';
-      editBtn.addEventListener('click', () => {
-        const newName = prompt('Edit item name', item.name);
-        if (newName !== null) {
-          item.name = newName.trim();
+      editBtn.addEventListener('click', async () => {
+        const values = await openFormDialog({
+          title: 'Edit Grocery Item',
+          fields: [
+            {
+              name: 'name',
+              label: 'Item Name',
+              value: item.name || '',
+              required: true
+            },
+            {
+              name: 'frequency',
+              label: 'Frequency',
+              type: 'select',
+              value: freq,
+              options: [
+                { value: 'weekly', label: 'Weekly' },
+                { value: 'monthly', label: 'Monthly' },
+                { value: 'biannual', label: 'Biannual' }
+              ]
+            },
+            {
+              name: 'category',
+              label: 'Category',
+              type: 'select',
+              value: item.category || 'standard',
+              options: [
+                { value: 'standard', label: 'Standard' },
+                { value: 'treat', label: 'Treat' },
+                { value: 'essential', label: 'Essential' }
+              ]
+            }
+          ],
+          submitLabel: 'Save Item'
+        });
+        if (!values) return;
+        const trimmedName = values.name.trim();
+        if (!trimmedName) {
+          showToast('Item name is required.');
+          return;
         }
-        const newFreq = prompt(
-          'Frequency (weekly/monthly/biannual)',
-          item.frequency
-        );
-        if (newFreq !== null) {
-          const cleanedFreq = newFreq.trim().toLowerCase();
-          if (
-            cleanedFreq === 'weekly' ||
-            cleanedFreq === 'monthly' ||
-            cleanedFreq === 'biannual'
-          ) {
-            item.frequency = cleanedFreq;
-          }
-        }
-        const newCategory = prompt(
-          'Category (standard/treat/essential)',
-          item.category || 'standard'
-        );
-        if (newCategory) {
-          const cleaned = newCategory.toLowerCase();
-          if (
-            cleaned === 'standard' ||
-            cleaned === 'treat' ||
-            cleaned === 'essential'
-          ) {
-            item.category = cleaned;
-          }
-        }
+        const snapshot = cloneData();
+        item.name = trimmedName;
+        item.frequency = ['weekly', 'monthly', 'biannual'].includes(
+          values.frequency
+        )
+          ? values.frequency
+          : 'weekly';
+        item.category = ['standard', 'treat', 'essential'].includes(
+          values.category
+        )
+          ? values.category
+          : 'standard';
         saveData();
         updateGrocerySection();
+        offerUndo('Grocery item updated.', snapshot);
       });
       btnGroup.appendChild(editBtn);
       // Delete button
@@ -3209,10 +4919,19 @@ import {
       delBtn.className = 'btn danger';
       delBtn.textContent = 'Delete';
       delBtn.style.fontSize = '0.7rem';
-      delBtn.addEventListener('click', () => {
+      delBtn.addEventListener('click', async () => {
+        const ok = await requestConfirm({
+          title: 'Delete Grocery Item',
+          message: 'Delete this grocery item?',
+          confirmLabel: 'Delete',
+          danger: true
+        });
+        if (!ok) return;
+        const snapshot = cloneData();
         data.groceries.splice(index, 1);
         saveData();
         updateGrocerySection();
+        offerUndo('Grocery item deleted.', snapshot);
       });
       btnGroup.appendChild(delBtn);
       row.appendChild(btnGroup);
@@ -3224,7 +4943,7 @@ import {
           note.textContent = 'Treat item';
         } else if (boostActive) {
           note.textContent =
-            'Weekend Boost applied: −' + boostPercentDisplay + '% from credits';
+            'Weekend Boost applied: -' + boostPercentDisplay + '% from credits';
         } else if (boostUnlocked) {
           note.textContent =
             'Weekend Boost unlocked: +' +
@@ -3232,7 +4951,7 @@ import {
             '% on Treats this weekend';
         } else {
           note.textContent =
-            'Treat item – unlock +' + boostPercentDisplay + '% by Friday 18:00';
+            'Treat item - unlock +' + boostPercentDisplay + '% by Friday 18:00';
         }
         li.appendChild(note);
       }
@@ -3887,7 +5606,7 @@ import {
       meta.style.margin = '0 0 0.5rem 0';
       meta.style.fontSize = '0.85rem';
       meta.style.color = '#475569';
-      meta.textContent = `Used ${usedHoursNow.toFixed(1)}h / ${project.budgetHours.toFixed(1)}h • Expected by now ${expectedHoursNow.toFixed(1)}h • ${scheduleDelta >= 0 ? 'Behind' : 'Ahead'} ${Math.abs(scheduleDelta).toFixed(1)}h`;
+      meta.textContent = `Used ${usedHoursNow.toFixed(1)}h / ${project.budgetHours.toFixed(1)}h | Expected by now ${expectedHoursNow.toFixed(1)}h | ${scheduleDelta >= 0 ? 'Behind' : 'Ahead'} ${Math.abs(scheduleDelta).toFixed(1)}h`;
       projectCard.appendChild(meta);
 
       const canvas = document.createElement('canvas');
@@ -4095,6 +5814,331 @@ import {
     return file.text();
   }
 
+  function parseBackupSnapshotTimestamp(fileName) {
+    const match = String(fileName || '').match(
+      /^timekeeper-data-(\d{4}-\d{2}-\d{2})T(\d{2})-(\d{2})-(\d{2})-(\d{3})Z\.json$/
+    );
+    if (!match) return null;
+    const [, date, hours, minutes, seconds, millis] = match;
+    const parsed = new Date(
+      `${date}T${hours}:${minutes}:${seconds}.${millis}Z`
+    );
+    return Number.isNaN(parsed.getTime()) ? null : parsed;
+  }
+
+  function getBackupDataSummary(payload) {
+    const projects = Array.isArray(payload?.projects)
+      ? payload.projects.length
+      : 0;
+    const entries = Array.isArray(payload?.entries)
+      ? payload.entries.length
+      : 0;
+    const revision = Number(payload?.backupRevision) || 0;
+    const updatedAt =
+      typeof payload?.updatedAt === 'string' && payload.updatedAt
+        ? payload.updatedAt
+        : null;
+    return { projects, entries, revision, updatedAt };
+  }
+
+  function normalizeBackupSummary(summary) {
+    if (!summary || typeof summary !== 'object') return null;
+    const revision = Number(summary.revision);
+    const projects = Number(summary.projects);
+    const entries = Number(summary.entries);
+    const updatedAt =
+      typeof summary.updatedAt === 'string' && summary.updatedAt
+        ? summary.updatedAt
+        : typeof summary.dataUpdatedAt === 'string' && summary.dataUpdatedAt
+          ? summary.dataUpdatedAt
+          : null;
+    const writtenAt =
+      typeof summary.writtenAt === 'string' && summary.writtenAt
+        ? summary.writtenAt
+        : null;
+    return {
+      source: summary.source || 'backup',
+      revision: Number.isFinite(revision) ? revision : 0,
+      projects: Number.isFinite(projects) ? projects : 0,
+      entries: Number.isFinite(entries) ? entries : 0,
+      updatedAt,
+      writtenAt
+    };
+  }
+
+  async function readLatestBackupSummary(directoryHandle = backupDirHandle) {
+    if (!directoryHandle) return null;
+    try {
+      const manifest = JSON.parse(
+        await readTextFile(directoryHandle, BACKUP_MANIFEST_FILENAME)
+      );
+      const summary = normalizeBackupSummary({
+        source: BACKUP_MANIFEST_FILENAME,
+        revision: manifest.backupRevision,
+        projects: manifest.projects,
+        entries: manifest.entries,
+        updatedAt: manifest.dataUpdatedAt,
+        writtenAt: manifest.writtenAt
+      });
+      if (summary) return summary;
+    } catch {
+      // Older backups may not have a manifest; fall back to the latest data file.
+    }
+    try {
+      const latest = JSON.parse(
+        await readTextFile(directoryHandle, BACKUP_LATEST_FILENAME)
+      );
+      return normalizeBackupSummary({
+        source: BACKUP_LATEST_FILENAME,
+        ...getBackupDataSummary(latest),
+        writtenAt: latest.lastBackupAt || null
+      });
+    } catch {
+      return null;
+    }
+  }
+
+  function getNewerBackupConflict(summary, localData = data) {
+    const backupSummary = normalizeBackupSummary(summary);
+    if (!backupSummary) return null;
+    const localRevision = Number(localData?.backupRevision) || 0;
+    const localProjects = Array.isArray(localData?.projects)
+      ? localData.projects.length
+      : 0;
+    const localEntries = Array.isArray(localData?.entries)
+      ? localData.entries.length
+      : 0;
+    const localUpdatedAt =
+      typeof localData?.updatedAt === 'string' && localData.updatedAt
+        ? localData.updatedAt
+        : null;
+    const remoteUpdatedTime = backupSummary.updatedAt
+      ? new Date(backupSummary.updatedAt).getTime()
+      : NaN;
+    const localUpdatedTime = localUpdatedAt
+      ? new Date(localUpdatedAt).getTime()
+      : NaN;
+    let reason = '';
+    if (backupSummary.revision > localRevision) {
+      reason = 'revision';
+    } else if (
+      backupSummary.revision >= localRevision &&
+      Number.isFinite(remoteUpdatedTime) &&
+      (!Number.isFinite(localUpdatedTime) ||
+        remoteUpdatedTime > localUpdatedTime + 1000)
+    ) {
+      reason = 'updatedAt';
+    } else if (
+      backupSummary.revision >= localRevision &&
+      localProjects + localEntries === 0 &&
+      backupSummary.projects + backupSummary.entries > 0
+    ) {
+      reason = 'non-empty-backup';
+    }
+    if (!reason) return null;
+    return {
+      ...backupSummary,
+      reason,
+      localRevision,
+      localUpdatedAt,
+      localProjects,
+      localEntries
+    };
+  }
+
+  async function detectBackupConflict(directoryHandle = backupDirHandle) {
+    const summary = await readLatestBackupSummary(directoryHandle);
+    return getNewerBackupConflict(summary);
+  }
+
+  const BACKUP_CONFLICT_WARNING_PREFIX = 'Backup folder has newer data';
+
+  function formatBackupConflictWarning(conflict = backupConflict) {
+    if (!conflict) return '';
+    const revisionText = `revision ${conflict.revision}`;
+    const changedText = conflict.updatedAt
+      ? `, changed ${formatRelativeTime(conflict.updatedAt)}`
+      : '';
+    return `${BACKUP_CONFLICT_WARNING_PREFIX} (${revisionText}${changedText}). Restore Latest Backup before syncing, or use Backup Now and confirm overwrite.`;
+  }
+
+  function setBackupConflict(conflict) {
+    backupConflict = conflict || null;
+    if (backupConflict) {
+      backupWarningMessage = formatBackupConflictWarning(backupConflict);
+    } else if (
+      backupWarningMessage &&
+      backupWarningMessage.startsWith(BACKUP_CONFLICT_WARNING_PREFIX)
+    ) {
+      backupWarningMessage = '';
+    }
+  }
+
+  function formatBackupSnapshotLabel(item) {
+    if (item.timestamp && !Number.isNaN(item.timestamp.getTime())) {
+      return item.timestamp.toLocaleString();
+    }
+    return item.name;
+  }
+
+  async function getBackupSnapshotDirHandle({ create = false } = {}) {
+    if (!backupDirHandle) return null;
+    try {
+      return await backupDirHandle.getDirectoryHandle(BACKUP_SNAPSHOT_DIR, {
+        create
+      });
+    } catch (err) {
+      return null;
+    }
+  }
+
+  async function readBackupSnapshotSummaries() {
+    const snapshotDirHandle = await getBackupSnapshotDirHandle();
+    if (!snapshotDirHandle || !snapshotDirHandle.entries) return [];
+    const items = [];
+    for await (const [name, handle] of snapshotDirHandle.entries()) {
+      if (
+        handle.kind !== 'file' ||
+        !/^timekeeper-data-\d{4}-\d{2}-\d{2}T.*\.json$/.test(name)
+      ) {
+        continue;
+      }
+      const timestamp = parseBackupSnapshotTimestamp(name);
+      let summary = { projects: 0, entries: 0, revision: 0, updatedAt: null };
+      try {
+        const text = await readTextFile(snapshotDirHandle, name);
+        summary = getBackupDataSummary(JSON.parse(text));
+      } catch {
+        // Keep the snapshot visible even if its summary cannot be read.
+      }
+      items.push({ name, timestamp, ...summary });
+    }
+    items.sort((a, b) => {
+      const timeA = a.timestamp ? a.timestamp.getTime() : 0;
+      const timeB = b.timestamp ? b.timestamp.getTime() : 0;
+      if (timeA !== timeB) return timeB - timeA;
+      return String(b.name).localeCompare(String(a.name));
+    });
+    return items;
+  }
+
+  function renderBackupSnapshotsPanel() {
+    const panel = document.getElementById('backupSnapshotsPanel');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const header = document.createElement('div');
+    header.className = 'backup-snapshots-header';
+    const title = document.createElement('h4');
+    title.textContent = 'Snapshot History';
+    header.appendChild(title);
+    const refreshBtn = document.createElement('button');
+    refreshBtn.type = 'button';
+    refreshBtn.className = 'btn secondary';
+    refreshBtn.textContent =
+      backupSnapshotState === 'loading' ? 'Refreshing...' : 'Refresh Snapshots';
+    refreshBtn.disabled =
+      backupSnapshotState === 'loading' ||
+      !backupDirHandle ||
+      backupPermissionState !== 'granted';
+    refreshBtn.addEventListener('click', () => {
+      refreshBackupSnapshots({ quiet: false });
+    });
+    header.appendChild(refreshBtn);
+    panel.appendChild(header);
+
+    const defaultMessage = !backupDirHandle
+      ? 'Select a backup folder to view timestamped snapshots.'
+      : backupPermissionState !== 'granted'
+        ? 'Grant backup folder access to view snapshots.'
+        : '';
+    const visibleMessage = backupSnapshotMessage || defaultMessage;
+    if (visibleMessage) {
+      const message = document.createElement('p');
+      message.className =
+        backupSnapshotState === 'error' ? 'status-warning' : 'status-muted';
+      message.textContent = visibleMessage;
+      panel.appendChild(message);
+    }
+
+    if (backupSnapshotItems.length === 0) return;
+    const list = document.createElement('ul');
+    list.className = 'backup-snapshot-list';
+    backupSnapshotItems.slice(0, BACKUP_SNAPSHOT_KEEP).forEach((item) => {
+      const row = document.createElement('li');
+      row.className = 'backup-snapshot-row';
+      const meta = document.createElement('div');
+      meta.className = 'backup-snapshot-meta';
+      const name = document.createElement('strong');
+      name.textContent = formatBackupSnapshotLabel(item);
+      meta.appendChild(name);
+      const detail = document.createElement('span');
+      detail.className = 'status-muted';
+      detail.textContent = `${item.projects} projects, ${item.entries} entries, revision ${item.revision || 0}`;
+      meta.appendChild(detail);
+      if (item.updatedAt) {
+        const updated = document.createElement('span');
+        updated.className = 'status-muted';
+        updated.textContent = `Data changed ${formatRelativeTime(item.updatedAt)}`;
+        meta.appendChild(updated);
+      }
+      row.appendChild(meta);
+      const restoreBtn = document.createElement('button');
+      restoreBtn.type = 'button';
+      restoreBtn.className = 'btn secondary';
+      restoreBtn.textContent = 'Restore Snapshot';
+      restoreBtn.addEventListener('click', () => {
+        restoreBackupSnapshotFromDir(item.name);
+      });
+      row.appendChild(restoreBtn);
+      list.appendChild(row);
+    });
+    panel.appendChild(list);
+  }
+
+  async function refreshBackupSnapshots({ quiet = true } = {}) {
+    if (!backupDirHandle) {
+      backupSnapshotItems = [];
+      backupSnapshotState = 'idle';
+      backupSnapshotMessage = 'Select a backup folder to view snapshots.';
+      renderBackupSnapshotsPanel();
+      return [];
+    }
+    const permissionGranted =
+      await ensureBackupPermissionWithPrompt(backupDirHandle);
+    if (!permissionGranted) {
+      backupSnapshotItems = [];
+      backupSnapshotState = 'error';
+      backupSnapshotMessage =
+        'Permission to access the backup folder was not granted.';
+      renderBackupSnapshotsPanel();
+      return [];
+    }
+    backupSnapshotState = 'loading';
+    backupSnapshotMessage = 'Loading backup snapshots...';
+    renderBackupSnapshotsPanel();
+    try {
+      const items = await readBackupSnapshotSummaries();
+      backupSnapshotItems = items;
+      backupSnapshotState = 'ready';
+      backupSnapshotMessage = items.length
+        ? `${items.length} snapshot${items.length === 1 ? '' : 's'} available.`
+        : 'No timestamped snapshots found yet.';
+      renderBackupSnapshotsPanel();
+      if (!quiet && items.length === 0) {
+        showToast('No backup snapshots found yet.');
+      }
+      return items;
+    } catch (err) {
+      console.error('Reading backup snapshots failed:', err);
+      backupSnapshotItems = [];
+      backupSnapshotState = 'error';
+      backupSnapshotMessage =
+        'Could not read backup snapshots from the selected folder.';
+      renderBackupSnapshotsPanel();
+      return [];
+    }
+  }
+
   async function pruneBackupSnapshots(snapshotDirHandle) {
     if (!snapshotDirHandle || !snapshotDirHandle.entries) return;
     const files = [];
@@ -4130,6 +6174,117 @@ import {
     };
   }
 
+  function assertBackupPayloadMatchesCurrent(payload, sourceLabel) {
+    if (!payload || typeof payload !== 'object') {
+      throw new Error(`${sourceLabel} is not a JSON object.`);
+    }
+    if (!Array.isArray(payload.projects) || !Array.isArray(payload.entries)) {
+      throw new Error(`${sourceLabel} is missing projects or entries.`);
+    }
+    const expectedRevision = Number(data.backupRevision) || 0;
+    const actualRevision = Number(payload.backupRevision) || 0;
+    if (actualRevision !== expectedRevision) {
+      throw new Error(
+        `${sourceLabel} revision ${actualRevision} does not match local revision ${expectedRevision}.`
+      );
+    }
+    if (payload.projects.length !== data.projects.length) {
+      throw new Error(
+        `${sourceLabel} project count does not match local data.`
+      );
+    }
+    if (payload.entries.length !== data.entries.length) {
+      throw new Error(`${sourceLabel} entry count does not match local data.`);
+    }
+  }
+
+  function assertBackupManifestMatchesCurrent(manifest) {
+    if (!manifest || typeof manifest !== 'object') {
+      throw new Error('Backup manifest is not a JSON object.');
+    }
+    if (manifest.latestFile !== BACKUP_LATEST_FILENAME) {
+      throw new Error('Backup manifest points at the wrong latest file.');
+    }
+    if (manifest.snapshotDirectory !== BACKUP_SNAPSHOT_DIR) {
+      throw new Error('Backup manifest points at the wrong snapshot folder.');
+    }
+    const expectedRevision = Number(data.backupRevision) || 0;
+    const actualRevision = Number(manifest.backupRevision) || 0;
+    if (actualRevision !== expectedRevision) {
+      throw new Error(
+        `Backup manifest revision ${actualRevision} does not match local revision ${expectedRevision}.`
+      );
+    }
+    if (Number(manifest.projects) !== data.projects.length) {
+      throw new Error(
+        'Backup manifest project count does not match local data.'
+      );
+    }
+    if (Number(manifest.entries) !== data.entries.length) {
+      throw new Error('Backup manifest entry count does not match local data.');
+    }
+  }
+
+  async function verifyBackupRoundTrip({ promptOnConflict = true } = {}) {
+    try {
+      if (!backupDirHandle) {
+        backupPermissionState = 'missing';
+        backupWarningMessage =
+          'Choose a backup folder before verifying backup.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const permissionGranted =
+        await ensureBackupPermissionWithPrompt(backupDirHandle);
+      if (!permissionGranted) {
+        backupWarningMessage =
+          'Permission to access the backup folder was not granted.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const saved = await saveBackupToDir({ promptOnConflict });
+      if (!saved) return false;
+
+      const latest = JSON.parse(
+        await readTextFile(backupDirHandle, BACKUP_LATEST_FILENAME)
+      );
+      assertBackupPayloadMatchesCurrent(latest, BACKUP_LATEST_FILENAME);
+
+      const manifest = JSON.parse(
+        await readTextFile(backupDirHandle, BACKUP_MANIFEST_FILENAME)
+      );
+      assertBackupManifestMatchesCurrent(manifest);
+
+      if (!manifest.latestSnapshotFile) {
+        throw new Error('Backup manifest does not list a latest snapshot.');
+      }
+      const snapshotDirHandle = await getBackupSnapshotDirHandle();
+      if (!snapshotDirHandle) {
+        throw new Error('Backup snapshot folder could not be opened.');
+      }
+      const snapshot = JSON.parse(
+        await readTextFile(snapshotDirHandle, manifest.latestSnapshotFile)
+      );
+      assertBackupPayloadMatchesCurrent(snapshot, manifest.latestSnapshotFile);
+
+      data.lastBackupVerifiedAt = new Date().toISOString();
+      persistDataToLocalStorage();
+      backupWarningMessage = '';
+      updateAutoSyncStatus();
+      showToast('Backup verified successfully.');
+      return true;
+    } catch (err) {
+      console.error('Backup verification failed:', err);
+      backupWarningMessage =
+        err && err.message
+          ? `Backup verification failed: ${err.message}`
+          : 'Backup verification failed. Check the backup folder and try again.';
+      updateAutoSyncStatus();
+      showToast('Backup verification failed.');
+      return false;
+    }
+  }
+
   function scheduleBackupSoon() {
     if (!autoSyncEnabled || !backupDirHandle) return;
     if (backupFlushTimer) clearTimeout(backupFlushTimer);
@@ -4156,7 +6311,10 @@ import {
   // - timekeeper-data.json for the latest state
   // - timekeeper-manifest.json for quick inspection
   // - a timestamped snapshot under timekeeper-snapshots/
-  async function saveBackupToDir() {
+  async function saveBackupToDir({
+    force = false,
+    promptOnConflict = false
+  } = {}) {
     if (backupInFlight) return backupInFlight;
     backupInFlight = (async () => {
       try {
@@ -4176,6 +6334,31 @@ import {
               : 'Auto sync disabled: permission to the backup folder was revoked.';
           disableAutoSyncWithWarning(message);
           return false;
+        }
+        const conflict = force ? null : await detectBackupConflict();
+        if (conflict) {
+          if (promptOnConflict) {
+            const ok = await requestConfirm({
+              title: 'Overwrite Newer Backup',
+              message:
+                formatBackupConflictWarning(conflict) +
+                ' Overwriting replaces the latest backup file in the selected folder.',
+              confirmLabel: 'Overwrite Backup',
+              danger: true
+            });
+            if (!ok) {
+              setBackupConflict(conflict);
+              updateAutoSyncStatus();
+              return false;
+            }
+          } else {
+            setBackupConflict(conflict);
+            autoSyncEnabled = false;
+            localStorage.setItem('autoSyncEnabledPro', 'false');
+            needsBackup = true;
+            updateAutoSyncStatus();
+            return false;
+          }
         }
         const backupTime = new Date();
         const backupTimeIso = backupTime.toISOString();
@@ -4206,8 +6389,12 @@ import {
         await pruneBackupSnapshots(snapshotDirHandle);
         persistDataToLocalStorage();
         needsBackup = false;
+        setBackupConflict(null);
         backupWarningMessage = '';
         updateAutoSyncStatus();
+        refreshBackupSnapshots({ quiet: true }).catch((err) => {
+          console.error('Refreshing backup snapshots failed:', err);
+        });
         return true;
       } catch (err) {
         console.error('Saving backup failed:', err);
@@ -4246,6 +6433,21 @@ import {
       backupPermissionState = 'granted';
       await saveBackupDirHandle(dirHandle);
       data.backupDirName = dirHandle.name || null;
+      const conflict = await detectBackupConflict(dirHandle);
+      if (conflict) {
+        persistDataToLocalStorage();
+        setBackupConflict(conflict);
+        if (activateSync) {
+          autoSyncEnabled = false;
+          localStorage.setItem('autoSyncEnabledPro', 'false');
+          const toggle = document.getElementById('autoSyncToggle');
+          if (toggle) toggle.checked = false;
+        }
+        updateAutoSyncStatus();
+        await refreshBackupSnapshots({ quiet: true });
+        return false;
+      }
+      setBackupConflict(null);
       saveData();
       if (activateSync) {
         autoSyncEnabled = true;
@@ -4258,6 +6460,7 @@ import {
       if (autoSyncEnabled || activateSync) {
         await saveBackupToDir();
       }
+      await refreshBackupSnapshots({ quiet: true });
       return true;
     } catch (err) {
       console.error('Backup folder not selected:', err);
@@ -4317,6 +6520,177 @@ import {
         updateAnalyticsSection();
       }
     });
+  });
+
+  function activateSection(sectionId) {
+    const item = navList.querySelector(`li[data-section="${sectionId}"]`);
+    if (item) item.click();
+  }
+
+  function buildCommandResults(query) {
+    const normalized = query.trim().toLowerCase();
+    const sectionCommands = [
+      ['timer', 'Open Timer'],
+      ['dashboard', 'Open Dashboard'],
+      ['projects', 'Open Projects'],
+      ['entries', 'Open Entries'],
+      ['importExport', 'Open Backup / Import'],
+      ['todo', 'Open Workouts'],
+      ['grocery', 'Open Finances'],
+      ['analytics', 'Open Reports']
+    ].map(([sectionId, label]) => ({
+      label,
+      meta: 'Navigate',
+      action: () => activateSection(sectionId)
+    }));
+    const projectCommands = getActiveProjects().flatMap((project) => [
+      {
+        label: `Start timer: ${project.name}`,
+        meta: 'Timer',
+        action: () => {
+          activateSection('timer');
+          startProjectTimer(project.id, { overrideFactor: null });
+        }
+      },
+      {
+        label: `Show project: ${project.name}`,
+        meta: project.client || 'Project',
+        action: () => activateSection('projects')
+      }
+    ]);
+    const pinnedTimerCommands = ensureTimerPresets()
+      .map((preset) => {
+        const project = data.projects.find(
+          (candidate) => String(candidate.id) === String(preset.projectId)
+        );
+        if (!project || isProjectArchived(project)) return null;
+        return {
+          label: `Start pinned timer: ${formatTimerPresetLabel(
+            project,
+            preset.description,
+            preset.focusFactor
+          )}`,
+          meta: 'Pinned Timer',
+          action: () => {
+            activateSection('timer');
+            startProjectTimer(project.id, {
+              description: preset.description,
+              overrideFactor: preset.focusFactor
+            });
+          }
+        };
+      })
+      .filter(Boolean);
+    const utilityCommands = [
+      {
+        label: 'Backup now',
+        meta: 'Backup',
+        action: () => {
+          activateSection('importExport');
+          const button = document.getElementById('backupNowBtn');
+          if (button && !button.disabled) button.click();
+        }
+      },
+      {
+        label: 'Verify backup',
+        meta: 'Backup',
+        action: () => {
+          activateSection('importExport');
+          const button = document.getElementById('verifyBackupBtn');
+          if (button && !button.disabled) button.click();
+        }
+      },
+      {
+        label: 'Export data',
+        meta: 'Backup',
+        action: () => downloadData()
+      }
+    ];
+    return [
+      ...sectionCommands,
+      ...pinnedTimerCommands,
+      ...projectCommands,
+      ...utilityCommands
+    ]
+      .filter((command) =>
+        [command.label, command.meta]
+          .join(' ')
+          .toLowerCase()
+          .includes(normalized)
+      )
+      .slice(0, 12);
+  }
+
+  function openCommandPalette() {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop';
+    const panel = document.createElement('div');
+    panel.className = 'modal-panel command-palette';
+    const body = document.createElement('div');
+    body.className = 'modal-body';
+    const input = document.createElement('input');
+    input.className = 'command-input';
+    input.type = 'search';
+    input.placeholder = 'Search commands, projects, or sections';
+    const list = document.createElement('div');
+    list.className = 'command-list';
+    const close = () => backdrop.remove();
+    const render = () => {
+      list.innerHTML = '';
+      const results = buildCommandResults(input.value);
+      if (!results.length) {
+        const empty = document.createElement('p');
+        empty.className = 'status-muted';
+        empty.textContent = 'No commands found.';
+        list.appendChild(empty);
+        return;
+      }
+      results.forEach((result) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'command-result';
+        const label = document.createElement('span');
+        label.textContent = result.label;
+        const meta = document.createElement('span');
+        meta.className = 'status-muted';
+        meta.textContent = result.meta;
+        button.appendChild(label);
+        button.appendChild(meta);
+        button.addEventListener('click', () => {
+          close();
+          result.action();
+        });
+        list.appendChild(button);
+      });
+    };
+    input.addEventListener('input', render);
+    input.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') close();
+      if (event.key === 'Enter') {
+        const first = buildCommandResults(input.value)[0];
+        if (first) {
+          close();
+          first.action();
+        }
+      }
+    });
+    backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) close();
+    });
+    body.appendChild(input);
+    body.appendChild(list);
+    panel.appendChild(body);
+    backdrop.appendChild(panel);
+    document.body.appendChild(backdrop);
+    render();
+    input.focus();
+  }
+
+  document.addEventListener('keydown', (event) => {
+    if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+      event.preventDefault();
+      openCommandPalette();
+    }
   });
 
   // Shared runtime helpers imported from ./shared/runtime-helpers.mjs.
@@ -4461,11 +6835,12 @@ import {
     activities.forEach((activity) => {
       const item = document.createElement('li');
       const header = document.createElement('div');
-      const title = document.createElement(activity.url ? 'a' : 'span');
+      const activityUrl = safeExternalUrl(activity.url);
+      const title = document.createElement(activityUrl ? 'a' : 'span');
       title.className = 'strava-title';
       title.textContent = activity.name || 'Untitled activity';
-      if (activity.url) {
-        title.href = activity.url;
+      if (activityUrl) {
+        title.href = activityUrl;
         title.target = '_blank';
         title.rel = 'noopener noreferrer';
       }
@@ -4619,7 +6994,7 @@ import {
       saveButton.addEventListener('click', () => {
         const parsed = syncFromValue();
         if (parsed === null) {
-          alert('Enter a value of 0 or higher.');
+          showToast('Enter a value of 0 or higher.');
           return;
         }
         saveStravaExertionOverride(activity.id, parsed);
@@ -4697,6 +7072,7 @@ import {
       renderStravaActivities(updatedActivities);
       updateFitnessCards();
       updateTodoSection();
+      updateAppHealthPanel();
       if (!options.fromCache) {
         saveCachedStravaFeedPayload(data);
       }
@@ -4723,6 +7099,7 @@ import {
       }
       status.textContent =
         'Strava feed not available yet. Run the GitHub Action or import a Strava export to publish activities.';
+      updateAppHealthPanel();
     }
   }
 
@@ -5171,7 +7548,7 @@ import {
       now.getMonth(),
       now.getDate() - 1
     );
-    // Start of this week (Monday 00:00) – the weekly period resets on Mondays. We calculate
+    // Start of this week (Monday 00:00) - the weekly period resets on Mondays. We calculate
     // the date of Monday in the current week and use it to accumulate weekly hours
     // and revenue. If today is Monday, weekStart will be today; if today is Tuesday,
     // weekStart will be yesterday, and so on.
@@ -5211,7 +7588,7 @@ import {
     let lastWeekRevenue = 0;
     // Dynamic weekly and monthly targets for all projects. We recalculate each project's
     // weekly and monthly targets based on remaining hours and remaining time until
-    // deadline. The sum of these per‑project targets represents the number of hours
+    // deadline. The sum of these per-project targets represents the number of hours
     // you should aim to work this week and this month across all projects.
     let weeklyTarget = 0;
     let monthTarget = 0;
@@ -5326,7 +7703,7 @@ import {
     // of the day using monthly remaining hours at the start of the day.
     const weekHoursStartOfDay = weekSecondsStartOfDay / 3600;
     // Use the weekly target snapshot (computed from each project's week-start plan) so the
-    // daily target aligns with the "This Week" card and does not drop to zero mid‑week.
+    // daily target aligns with the "This Week" card and does not drop to zero mid-week.
     const weeklyTargetStartOfDay = weeklyTarget;
     // The weekly remaining hours at the start of the day is the difference between this snapshot
     // weekly target and the hours already worked this week before today.
@@ -5410,7 +7787,7 @@ import {
     // Weekly time progress: compute fraction of the 5-day work week that has elapsed.
     const weeklyTimeProgress = weekContext.weeklyTimeProgress;
     // Monthly time progress: compute fraction of working days elapsed in the current month. We count
-    // only Monday–Friday as working days. Use countWorkdays() to determine the total number of
+    // only Monday-Friday as working days. Use countWorkdays() to determine the total number of
     // working days in the month and how many have elapsed so far. Weekends contribute nothing.
     // Determine schedule status for weekly and monthly progress by comparing hours progress
     // to time progress. If the hours progress (worked/target) exceeds time progress, the user is ahead.
@@ -5436,7 +7813,7 @@ import {
       ? 0
       : Math.min(100, Math.max(0, workoutPlan.timeProgress));
     const workoutProgressLabel = workoutPlan.paused
-      ? 'Week paused – no workouts required'
+      ? 'Week paused - no workouts required'
       : `${workoutProgressPercent.toFixed(1)}% of weekly schedule in ${workoutTimeProgress.toFixed(1)}% of the week`;
     let workoutScheduleLabel = workoutPlan.paused ? 'Week paused' : 'On track';
     if (!workoutPlan.paused) {
@@ -5471,7 +7848,7 @@ import {
           (stats.dailyTarget ? stats.dailyTarget.toFixed(1) : '0') +
           'h',
         // Remove change label and comparison to yesterday per user request
-        icon: '⏱',
+        icon: 'Day',
         // Revenue for today shown on this card
         revenue: stats.todayRevenue || 0
       },
@@ -5485,7 +7862,7 @@ import {
         progress: stats.weeklyProgress,
         // Expected progress based on working days in the week
         timeProgress: weeklyTimeProgress,
-        icon: '📅',
+        icon: 'Week',
         // Progress label expresses hours progress relative to target and time progress relative to the week
         progressLabel:
           (stats.weeklyProgress || 0).toFixed(1) +
@@ -5515,7 +7892,7 @@ import {
         value: workoutValue,
         progress: workoutProgressPercent,
         timeProgress: workoutTimeProgress,
-        icon: '💪',
+        icon: 'Fit',
         progressLabel: workoutProgressLabel,
         scheduleLabel: workoutScheduleLabel,
         metaLabel: workoutMetaLabel
@@ -5629,7 +8006,7 @@ import {
         revenueDiv.style.color = '#475569';
         div.appendChild(revenueDiv);
       }
-      // Append per‑project breakdowns underneath each card. For Today, display today's hours
+      // Append per-project breakdowns underneath each card. For Today, display today's hours
       // against the recommended daily hours for each project. For Week and Month, display
       // actual versus target hours and colour code based on whether the project is ahead
       // (green) or behind (red) relative to the expected progress so far.
@@ -5675,6 +8052,7 @@ import {
       statsGrid.appendChild(div);
     });
     // Project status overview and detailed breakdown
+    updateAppHealthPanel();
     renderProjectOverview();
     renderDetailedBreakdown();
     // Render daily hours heatmap and update burndown chart
@@ -5896,7 +8274,7 @@ import {
       // Add a star marker for the project that most needs attention right now.
       if (project.id === currentRecommendedMonthlyId) {
         const starM = document.createElement('span');
-        starM.textContent = '★';
+        starM.textContent = '*';
         starM.style.color = '#f97316';
         starM.style.marginLeft = '0.25rem';
         starM.title = 'Recommended pace project';
@@ -5909,7 +8287,7 @@ import {
       hoursDiv.textContent =
         stats.totalHours.toFixed(1) +
         (isWeeklyPaceProject(project)
-          ? `h total • ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h this week`
+          ? `h total | ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h this week`
           : 'h / ' + project.budgetHours.toFixed(1) + 'h');
       info.appendChild(hoursDiv);
       item.appendChild(info);
@@ -6021,12 +8399,18 @@ import {
         statusLabel = 'Behind Schedule';
       else if (stats.status === 'tight') statusLabel = 'Tight';
       else statusLabel = 'On Track';
+      const projectName = escapeHtml(project.name);
+      const projectClient = escapeHtml(project.client || '-');
+      const statusColor = safeStatusColor(stats.statusColor);
+      const statusTitle = stats.reason
+        ? ` title="${escapeHtml(stats.reason)}"`
+        : '';
       tr.innerHTML = `
-              <td data-label="Project">${project.name}</td>
-              <td data-label="Client">${project.client || '-'}</td>
+              <td data-label="Project">${projectName}</td>
+              <td data-label="Client">${projectClient}</td>
               <td data-label="Hours">${stats.totalHours.toFixed(1)}h</td>
               <td data-label="Budget">${isWeeklyPaceProject(project) ? `${getProjectWeeklyExpectedHours(project).toFixed(1)}h/week` : `${project.budgetHours.toFixed(1)}h`}</td>
-              <td data-label="Status"><span class="status-badge ${stats.statusColor}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></td>
+              <td data-label="Status"><span class="status-badge ${statusColor}"${statusTitle}>${statusLabel}</span></td>
               <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
               <td data-label="Last Week">${stats.lastWeekHours.toFixed(1)}h</td>
               <td data-label="30-Day Pace">${stats.rolling30Hours.toFixed(1)} / ${stats.rolling30TargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (pace)</td>
@@ -6291,6 +8675,165 @@ import {
     updateProjectSelects();
     renderProjectsPageList();
   }
+
+  function isProjectArchived(project) {
+    return !!(project && (project.archived || project.isActive === false));
+  }
+
+  function getActiveProjects() {
+    return data.projects.filter((project) => !isProjectArchived(project));
+  }
+
+  function getProjectScheduleType(project) {
+    return isWeeklyPaceProject(project) ? 'weekly' : 'deadline';
+  }
+
+  function getProjectDialogFields(project) {
+    const scheduleType = getProjectScheduleType(project);
+    const rounding = Number.isFinite(Number(project.roundingMinutes))
+      ? String(project.roundingMinutes)
+      : '0';
+    const roundingOptions = [
+      { value: '0', label: 'None' },
+      { value: '5', label: '5 minutes' },
+      { value: '10', label: '10 minutes' },
+      { value: '15', label: '15 minutes' }
+    ];
+    if (!roundingOptions.some((option) => option.value === rounding)) {
+      roundingOptions.push({ value: rounding, label: `${rounding} minutes` });
+    }
+    return [
+      {
+        name: 'name',
+        label: 'Project Name',
+        value: project.name || '',
+        required: true
+      },
+      {
+        name: 'client',
+        label: 'Client',
+        value: project.client || ''
+      },
+      {
+        name: 'scheduleType',
+        label: 'Project Type',
+        type: 'select',
+        value: scheduleType,
+        options: [
+          { value: 'deadline', label: 'Deadline budget' },
+          { value: 'weekly', label: 'Weekly pace, no deadline' }
+        ]
+      },
+      {
+        name: 'budgetHours',
+        label: 'Budget Hours',
+        type: 'number',
+        min: 0,
+        step: 0.1,
+        value: project.budgetHours || 0,
+        visibleWhen: (controls) =>
+          controls.scheduleType && controls.scheduleType.value === 'deadline'
+      },
+      {
+        name: 'weeklyExpectedHours',
+        label: 'Expected Hours / Week',
+        type: 'number',
+        min: 0,
+        step: 0.1,
+        value: getProjectWeeklyExpectedHours(project) || 0,
+        visibleWhen: (controls) =>
+          controls.scheduleType && controls.scheduleType.value === 'weekly'
+      },
+      {
+        name: 'hourlyRate',
+        label: 'Hourly Rate',
+        type: 'number',
+        min: 0,
+        step: 0.01,
+        value: project.hourlyRate || 0,
+        required: true
+      },
+      {
+        name: 'startDate',
+        label: 'Start Date',
+        type: 'date',
+        value:
+          project.startDate ||
+          formatLocalDateString(getProjectStartDate(project))
+      },
+      {
+        name: 'deadline',
+        label: 'Deadline',
+        type: 'date',
+        value: project.deadline || '',
+        visibleWhen: (controls) =>
+          controls.scheduleType && controls.scheduleType.value === 'deadline'
+      },
+      {
+        name: 'roundingMinutes',
+        label: 'Rounding',
+        type: 'select',
+        value: rounding,
+        options: roundingOptions
+      }
+    ];
+  }
+
+  function applyProjectDialogValues(project, values) {
+    const name = String(values.name || '').trim();
+    const scheduleType =
+      values.scheduleType === 'weekly' ? 'weekly' : 'deadline';
+    const budgetHours = Number(values.budgetHours);
+    const weeklyExpectedHours = Number(values.weeklyExpectedHours);
+    const hourlyRate = Number(values.hourlyRate);
+    const startDate = String(values.startDate || '').trim();
+    const deadline = String(values.deadline || '').trim();
+    const roundingMinutes = Number.parseInt(values.roundingMinutes, 10);
+    if (!name) {
+      showToast('Project name is required.');
+      return false;
+    }
+    if (!Number.isFinite(hourlyRate) || hourlyRate < 0) {
+      showToast('Enter a valid hourly rate.');
+      return false;
+    }
+    if (startDate && !parseLocalDateString(startDate)) {
+      showToast('Enter a valid start date.');
+      return false;
+    }
+    if (scheduleType === 'deadline') {
+      if (!Number.isFinite(budgetHours) || budgetHours < 0) {
+        showToast('Enter valid budget hours.');
+        return false;
+      }
+      if (!deadline || !parseLocalDateString(deadline)) {
+        showToast('Enter a valid deadline.');
+        return false;
+      }
+    }
+    if (
+      scheduleType === 'weekly' &&
+      (!Number.isFinite(weeklyExpectedHours) || weeklyExpectedHours < 0)
+    ) {
+      showToast('Enter valid expected weekly hours.');
+      return false;
+    }
+    project.name = name;
+    project.client = String(values.client || '').trim() || null;
+    project.scheduleType = scheduleType;
+    project.budgetHours =
+      scheduleType === 'deadline' ? Math.max(0, budgetHours) : 0;
+    project.weeklyExpectedHours =
+      scheduleType === 'weekly' ? Math.max(0, weeklyExpectedHours) : 0;
+    project.hourlyRate = hourlyRate;
+    project.startDate = startDate || formatLocalDateString(new Date());
+    project.deadline = scheduleType === 'deadline' ? deadline : '';
+    project.roundingMinutes = Number.isFinite(roundingMinutes)
+      ? roundingMinutes
+      : 0;
+    return true;
+  }
+
   function renderProjectsPageList() {
     const container = document.getElementById('projectsPageList');
     container.innerHTML = '';
@@ -6300,7 +8843,17 @@ import {
       container.appendChild(p);
       return;
     }
-    data.projects.forEach((project) => {
+    const projectsToRender = data.projects.filter(
+      (project) => showArchivedProjects || !isProjectArchived(project)
+    );
+    if (projectsToRender.length === 0) {
+      const p = document.createElement('p');
+      p.textContent =
+        'No active projects. Show archived projects to review older work.';
+      container.appendChild(p);
+      return;
+    }
+    projectsToRender.forEach((project) => {
       const stats = computeProjectStats(project);
       // Determine if this project is the recommended one for this week or month
       const isRecommendedMonthly = project.id === currentRecommendedMonthlyId;
@@ -6318,6 +8871,15 @@ import {
           : stats.weeklyTargetConst > 0
             ? Math.min(100, (stats.weeklyHours / stats.weeklyTargetConst) * 100)
             : 0;
+      const projectIdAttr = escapeHtml(project.id);
+      const projectName = escapeHtml(project.name);
+      const projectClient = escapeHtml(project.client || '-');
+      const statusColor = isProjectArchived(project)
+        ? 'amber'
+        : safeStatusColor(stats.statusColor);
+      const statusTitle = stats.reason
+        ? ` title="${escapeHtml(stats.reason)}"`
+        : '';
       const budgetLine = isWeeklyProject
         ? `<p style="margin:0 0 0.25rem 0;"><strong>Expected:</strong> ${getProjectWeeklyExpectedHours(project).toFixed(1)}h/week @ ${formatCurrency(project.hourlyRate)}</p>`
         : `<p style="margin:0 0 0.25rem 0;"><strong>Budget:</strong> ${project.budgetHours.toFixed(1)}h @ ${formatCurrency(project.hourlyRate)}</p>`;
@@ -6327,8 +8889,8 @@ import {
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
-              <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">${project.name}</h3>
-              <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${project.client || '-'}</p>
+              <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">${projectName}</h3>
+              <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${projectClient}</p>
               ${budgetLine}
               <div style="margin:0.5rem 0;">
                 <!-- Dual progress bars showing actual hours vs expected timeline progress -->
@@ -6350,105 +8912,57 @@ import {
               </div>
               <p style="margin:0.25rem 0;"><strong>Start Date:</strong> ${formatDate(project.startDate || project.createdAt)}</p>
               ${deadlineLine}
-              <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${stats.statusColor || 'green'}"${stats.reason ? ` title="${stats.reason}"` : ''}>${statusLabel}</span></p>
+              <p style="margin:0.25rem 0;"><strong>Status:</strong> <span class="status-badge ${statusColor}"${statusTitle}>${isProjectArchived(project) ? 'Archived' : statusLabel}</span></p>
               <div style="display:flex; gap:0.5rem; margin-top:0.5rem;">
-                <button class="btn secondary edit-btn" data-id="${project.id}">Edit</button>
-                <button class="btn danger delete-btn" data-id="${project.id}">Delete</button>
+                <button class="btn secondary edit-btn" data-id="${projectIdAttr}">Edit</button>
+                <button class="btn secondary archive-btn" data-id="${projectIdAttr}">${isProjectArchived(project) ? 'Restore' : 'Archive'}</button>
+                <button class="btn danger delete-btn" data-id="${projectIdAttr}">Delete</button>
               </div>
             `;
       // Edit button handler
       const editBtn = card.querySelector('.edit-btn');
-      editBtn.addEventListener('click', () => {
-        // Prompt the user for new project details
-        const newName = prompt('Project Name:', project.name);
-        if (!newName) return;
-        const newClient = prompt('Client (optional):', project.client || '');
-        const newBudgetStr = prompt(
-          'Budget Hours:',
-          project.budgetHours.toFixed(1)
-        );
-        const newBudget = parseFloat(newBudgetStr);
-        if (isNaN(newBudget)) return;
-        const newRateStr = prompt(
-          'Hourly Rate:',
-          project.hourlyRate.toFixed(2)
-        );
-        const newRate = parseFloat(newRateStr);
-        if (isNaN(newRate)) return;
-        const currentScheduleType = isWeeklyPaceProject(project)
-          ? 'weekly'
-          : 'deadline';
-        const newScheduleTypeRaw = prompt(
-          'Project Type (deadline or weekly):',
-          currentScheduleType
-        );
-        if (!newScheduleTypeRaw) return;
-        const newScheduleType =
-          newScheduleTypeRaw.trim().toLowerCase() === 'weekly'
-            ? 'weekly'
-            : 'deadline';
-        let newWeeklyExpectedHours = 0;
-        if (newScheduleType === 'weekly') {
-          const weeklyStr = prompt(
-            'Expected Hours / Week:',
-            String(getProjectWeeklyExpectedHours(project) || 0)
-          );
-          if (weeklyStr === null) return;
-          newWeeklyExpectedHours = parseFloat(weeklyStr);
-          if (!Number.isFinite(newWeeklyExpectedHours)) return;
-        }
-        const currentStartDate =
-          project.startDate ||
-          formatLocalDateString(getProjectStartDate(project));
-        const newStartDate = prompt(
-          'Start Date (YYYY-MM-DD):',
-          currentStartDate
-        );
-        if (!newStartDate) return;
-        let newDeadline = '';
-        if (newScheduleType === 'deadline') {
-          newDeadline = prompt('Deadline (YYYY-MM-DD):', project.deadline);
-          if (!newDeadline) return;
-        }
-        // Prompt for rounding preference (minutes) and update roundingMinutes
-        const newRoundingStr = prompt(
-          'Rounding (minutes – 0 for none, 5, 10, 15):',
-          project.roundingMinutes != null
-            ? project.roundingMinutes.toString()
-            : '0'
-        );
-        const newRoundingInt = parseInt(newRoundingStr, 10);
-        // If the user cancels or enters invalid number, leave rounding unchanged
-        if (!isNaN(newRoundingInt)) {
-          project.roundingMinutes = newRoundingInt;
-        }
-        // Update project fields
-        project.name = newName.trim();
-        project.client = newClient ? newClient.trim() : null;
-        project.budgetHours = newBudget;
-        project.scheduleType = newScheduleType;
-        project.weeklyExpectedHours =
-          newScheduleType === 'weekly'
-            ? Math.max(0, newWeeklyExpectedHours)
-            : 0;
-        project.hourlyRate = newRate;
-        project.startDate = newStartDate;
-        project.deadline = newScheduleType === 'deadline' ? newDeadline : '';
+      editBtn.addEventListener('click', async () => {
+        const values = await openFormDialog({
+          title: 'Edit Project',
+          fields: getProjectDialogFields(project),
+          submitLabel: 'Save Project'
+        });
+        if (!values) return;
+        const snapshot = cloneData();
+        if (!applyProjectDialogValues(project, values)) return;
         saveData();
-        updateProjectsPage();
-        updateProjectSelects();
-        updateDashboard();
+        refreshAllViews();
+        offerUndo('Project updated.', snapshot);
+      });
+      const archiveBtn = card.querySelector('.archive-btn');
+      archiveBtn.addEventListener('click', () => {
+        const snapshot = cloneData();
+        const archived = !isProjectArchived(project);
+        project.archived = archived;
+        project.isActive = !archived;
+        saveData();
+        refreshAllViews();
+        offerUndo(
+          archived ? 'Project archived.' : 'Project restored.',
+          snapshot
+        );
       });
       // Delete button handler
       const deleteBtn = card.querySelector('.delete-btn');
-      deleteBtn.addEventListener('click', () => {
-        if (confirm('Delete this project and its entries?')) {
-          data.projects = data.projects.filter((p) => p.id !== project.id);
-          data.entries = data.entries.filter((e) => e.projectId !== project.id);
-          saveData();
-          updateProjectsPage();
-          updateDashboard();
-        }
+      deleteBtn.addEventListener('click', async () => {
+        const ok = await requestConfirm({
+          title: 'Delete Project',
+          message: 'Delete this project and all of its entries?',
+          confirmLabel: 'Delete',
+          danger: true
+        });
+        if (!ok) return;
+        const snapshot = cloneData();
+        data.projects = data.projects.filter((p) => p.id !== project.id);
+        data.entries = data.entries.filter((e) => e.projectId !== project.id);
+        saveData();
+        refreshAllViews();
+        offerUndo('Project deleted.', snapshot);
       });
       container.appendChild(card);
     });
@@ -6496,6 +9010,16 @@ import {
     );
     updateProjectFormScheduleFields();
   }
+  const showArchivedProjectsToggle = document.getElementById(
+    'showArchivedProjectsToggle'
+  );
+  if (showArchivedProjectsToggle) {
+    showArchivedProjectsToggle.checked = showArchivedProjects;
+    showArchivedProjectsToggle.addEventListener('change', () => {
+      showArchivedProjects = showArchivedProjectsToggle.checked;
+      updateProjectsPage();
+    });
+  }
   document.getElementById('projectFormPro').addEventListener('submit', (e) => {
     e.preventDefault();
     const name = document.getElementById('projectNamePro').value.trim();
@@ -6537,6 +9061,7 @@ import {
       createdAt: new Date().toISOString(),
       color: getUniqueColor(),
       isActive: true,
+      archived: false,
       // Store rounding preference for this project; roundingMinutes is the interval in minutes (0 means no rounding)
       roundingMinutes:
         parseInt(document.getElementById('projectRoundingPro').value, 10) || 0
@@ -6559,12 +9084,12 @@ import {
       const name = nameInput.value.trim();
       const amount = parseFloat(amountInput.value);
       if (!name) {
-        alert('Please enter a payment name.');
+        showToast('Please enter a payment name.');
         nameInput.focus();
         return;
       }
       if (!Number.isFinite(amount) || amount < 0) {
-        alert('Enter a valid amount.');
+        showToast('Enter a valid amount.');
         amountInput.focus();
         return;
       }
@@ -6585,7 +9110,7 @@ import {
       const categorySelect = document.getElementById('groceryCategory');
       const name = nameInput.value.trim();
       if (!name) {
-        alert('Please enter an item name.');
+        showToast('Please enter an item name.');
         nameInput.focus();
         return;
       }
@@ -6658,7 +9183,7 @@ import {
       const noteVal = wealthEntryNoteInput ? wealthEntryNoteInput.value : '';
       const result = addWealthHistoryEntry(dateVal, amountVal, noteVal);
       if (!result.ok) {
-        alert(
+        showToast(
           result.reason === 'date'
             ? 'Enter a valid date.'
             : 'Enter a valid amount.'
@@ -6710,6 +9235,28 @@ import {
     // Return an array of all entries that are currently running
     return data.entries.filter((e) => e.isRunning);
   }
+
+  const TIMER_LONG_RUNNING_WARNING_MS = 4 * 60 * 60 * 1000;
+
+  function getRunningTimerWarnings(entry, now = new Date()) {
+    if (!entry || !entry.startTime) return [];
+    const start = new Date(entry.startTime);
+    if (Number.isNaN(start.getTime())) return [];
+    const warnings = [];
+    if (start < startOfLocalDay(now)) {
+      warnings.push(
+        'Started before today. Check whether this timer was left running overnight.'
+      );
+    }
+    const wallClockMs = now.getTime() - start.getTime();
+    if (!isTimerPaused(entry) && wallClockMs >= TIMER_LONG_RUNNING_WARNING_MS) {
+      warnings.push(
+        `Running for ${formatDuration(Math.floor(wallClockMs / 1000))} wall-clock. Check it is still active.`
+      );
+    }
+    return warnings;
+  }
+
   function updateTimerSection() {
     const runningEntries = getRunningEntries();
     const runningDiv = document.getElementById('runningTimerPro');
@@ -6750,12 +9297,16 @@ import {
         '<strong>Time Left Today:</strong> <span id="runningTimeLeftToday"></span>';
       timeLeftTodayP.style.marginBottom = '0.5rem';
       toolbar.appendChild(timeLeftTodayP);
-      // Display the sum of all timer factors to make concurrency weighting visible at a glance.
+      // Display the sum of all active focus factors.
       const totalFactorP = document.createElement('p');
       totalFactorP.innerHTML =
-        '<strong>Total Factor:</strong> <span id="runningTotalFactor"></span>';
+        '<strong>Total Focus:</strong> <span id="runningTotalFactor"></span>';
       totalFactorP.style.marginBottom = '0.5rem';
       toolbar.appendChild(totalFactorP);
+      const focusStatusPanel = document.createElement('div');
+      focusStatusPanel.className = 'focus-status-panel';
+      focusStatusPanel.id = 'runningFocusStatus';
+      toolbar.appendChild(focusStatusPanel);
       // Add a "Stop All Timers" button to allow stopping all timers at once
       const stopAllBtn = document.createElement('button');
       stopAllBtn.className = 'btn danger';
@@ -6770,17 +9321,33 @@ import {
       runningEntries.forEach((entry) => {
         const project = data.projects.find((p) => p.id === entry.projectId);
         const row = document.createElement('div');
+        row.className = 'timer-running-row';
         row.style.marginBottom = '0.75rem';
         // Project name
         const nameP = document.createElement('p');
-        nameP.innerHTML =
-          '<strong>Project:</strong> ' + (project ? project.name : '');
+        appendLabeledText(nameP, 'Project:', project ? project.name : '');
         row.appendChild(nameP);
+        if (entry.description) {
+          const descriptionP = document.createElement('p');
+          appendLabeledText(descriptionP, 'Description:', entry.description);
+          row.appendChild(descriptionP);
+        }
         // Started time
         const startP = document.createElement('p');
-        startP.innerHTML =
-          '<strong>Started:</strong> ' + formatDateTime(entry.startTime);
+        appendLabeledText(startP, 'Started:', formatDateTime(entry.startTime));
         row.appendChild(startP);
+        const timerWarnings = getRunningTimerWarnings(entry);
+        if (timerWarnings.length) {
+          const warningList = document.createElement('div');
+          warningList.className = 'timer-warning';
+          warningList.setAttribute('role', 'status');
+          timerWarnings.forEach((warningText) => {
+            const warning = document.createElement('div');
+            warning.textContent = warningText;
+            warningList.appendChild(warning);
+          });
+          row.appendChild(warningList);
+        }
         // Elapsed time
         const elapsedP = document.createElement('p');
         elapsedP.innerHTML = '<strong>Elapsed:</strong> ';
@@ -6789,7 +9356,7 @@ import {
         elapsedSpan.textContent = '';
         elapsedP.appendChild(elapsedSpan);
         row.appendChild(elapsedP);
-        // Factor display (e.g. 100%, 75%)
+        // Factor display (for example, 100%, 150%, or 50%).
         const factorP = document.createElement('p');
         factorP.innerHTML = '<strong>Factor:</strong> ';
         const factorSpan = document.createElement('span');
@@ -6797,52 +9364,27 @@ import {
         factorSpan.textContent = '';
         factorP.appendChild(factorSpan);
         row.appendChild(factorP);
-        // Factor override selector. Allows the user to override the concurrency factor
+        // Focus selector. Timer focus is explicit; it no longer changes automatically
+        // when multiple timers are running.
         const overrideP = document.createElement('p');
-        overrideP.innerHTML = '<strong>Override:</strong> ';
+        overrideP.innerHTML = '<strong>Focus:</strong> ';
         const factorSelect = document.createElement('select');
         factorSelect.style.marginLeft = '0.25rem';
-        // Default option for automatic concurrency (no override)
-        const optDef = document.createElement('option');
-        optDef.value = '';
-        optDef.textContent = 'Auto';
-        factorSelect.appendChild(optDef);
         appendFocusFactorOptions(factorSelect);
-        // Set current selection based on manualFactor
-        if (entry.manualFactor) {
-          factorSelect.value = String(entry.manualFactor);
-        } else {
-          factorSelect.value = '';
-        }
+        factorSelect.value = ensureCurrentFocusOption(
+          factorSelect,
+          getEntryActiveFactor(entry, getRunningEntries().length)
+        );
         factorSelect.addEventListener('change', () => {
           const v = factorSelect.value;
           // Before changing the factor, accumulate time elapsed since last update
           const now = new Date();
-          const lastUpdate = entry.lastUpdateTime
-            ? new Date(entry.lastUpdateTime)
-            : new Date(entry.startTime);
-          const elapsedSec = (now - lastUpdate) / 1000;
-          // Use current factor (manual override or concurrency) to update effective seconds
-          const currentFactor =
-            entry.factor ||
-            computeConcurrencyFactor(getRunningEntries().length);
-          entry.effectiveSeconds =
-            (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
-          // Update last update timestamp to now
-          entry.lastUpdateTime = now.toISOString();
-          // Apply new override or restore automatic factor
-          if (!v) {
-            // Remove override: restore concurrency factor based on current running count
-            entry.manualFactor = null;
-            const count = getRunningEntries().length;
-            entry.factor = computeConcurrencyFactor(count);
-            entry.focusFactor = entry.factor;
-          } else {
-            const fVal = parseFloat(v);
-            entry.manualFactor = fVal;
-            entry.factor = fVal;
-            entry.focusFactor = fVal;
-          }
+          accumulateRunningEntry(entry, now, getRunningEntries().length);
+          const fVal = normalizeFocusFactor(v);
+          entry.manualFactor = fVal;
+          entry.factor = fVal;
+          entry.focusFactor = fVal;
+          rebalanceActiveRunningFactors(now);
           saveData();
           // Refresh the timer section to apply the new factor
           updateTimerSection();
@@ -6872,19 +9414,11 @@ import {
         minusBtn.addEventListener('click', () => {
           // Compute elapsed time since last update and update effective seconds first
           const now = new Date();
-          const lastUpdate = entry.lastUpdateTime
-            ? new Date(entry.lastUpdateTime)
-            : new Date(entry.startTime);
-          const elapsedSec = (now - lastUpdate) / 1000;
-          // Use current factor (manual override or concurrency) to update effective seconds
-          const currentFactor =
-            entry.manualFactor != null
-              ? entry.manualFactor
-              : entry.factor ||
-                computeConcurrencyFactor(getRunningEntries().length);
-          entry.effectiveSeconds =
-            (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
-          entry.lastUpdateTime = now.toISOString();
+          const currentFactor = accumulateRunningEntry(
+            entry,
+            now,
+            getRunningEntries().length
+          );
           // Subtract 5 minutes of actual time from effectiveSeconds taking into account factor
           const delta = 300 * currentFactor;
           entry.effectiveSeconds = Math.max(
@@ -6905,18 +9439,11 @@ import {
         plusBtn.addEventListener('click', () => {
           // Compute elapsed time since last update and update effective seconds first
           const now = new Date();
-          const lastUpdate = entry.lastUpdateTime
-            ? new Date(entry.lastUpdateTime)
-            : new Date(entry.startTime);
-          const elapsedSec = (now - lastUpdate) / 1000;
-          const currentFactor =
-            entry.manualFactor != null
-              ? entry.manualFactor
-              : entry.factor ||
-                computeConcurrencyFactor(getRunningEntries().length);
-          entry.effectiveSeconds =
-            (entry.effectiveSeconds || 0) + elapsedSec * currentFactor;
-          entry.lastUpdateTime = now.toISOString();
+          const currentFactor = accumulateRunningEntry(
+            entry,
+            now,
+            getRunningEntries().length
+          );
           // Add 5 minutes of actual time to effectiveSeconds, scaled by factor
           const delta = 300 * currentFactor;
           entry.effectiveSeconds = (entry.effectiveSeconds || 0) + delta;
@@ -6926,6 +9453,45 @@ import {
         });
         nudgeDiv.appendChild(plusBtn);
         row.appendChild(nudgeDiv);
+        const runningControls = document.createElement('div');
+        runningControls.className = 'timer-actions';
+        const projectSwitch = document.createElement('select');
+        const currentOption = document.createElement('option');
+        currentOption.value = entry.projectId;
+        currentOption.textContent = project ? project.name : 'Current project';
+        projectSwitch.appendChild(currentOption);
+        getActiveProjects().forEach((candidate) => {
+          if (String(candidate.id) === String(entry.projectId)) return;
+          const option = document.createElement('option');
+          option.value = candidate.id;
+          option.textContent = candidate.name;
+          projectSwitch.appendChild(option);
+        });
+        projectSwitch.value = entry.projectId;
+        projectSwitch.title = 'Switch this running timer to another project';
+        projectSwitch.addEventListener('change', () => {
+          switchRunningTimerProject(entry.id, projectSwitch.value);
+        });
+        runningControls.appendChild(projectSwitch);
+        const pauseBtn = document.createElement('button');
+        pauseBtn.className = 'btn secondary';
+        pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
+        pauseBtn.addEventListener('click', () => {
+          if (isTimerPaused(entry)) {
+            resumeTimer(entry.id);
+          } else {
+            pauseTimer(entry.id);
+          }
+        });
+        runningControls.appendChild(pauseBtn);
+        const editTimerBtn = document.createElement('button');
+        editTimerBtn.className = 'btn secondary';
+        editTimerBtn.textContent = 'Edit';
+        editTimerBtn.addEventListener('click', () => {
+          editRunningTimer(entry.id);
+        });
+        runningControls.appendChild(editTimerBtn);
+        row.appendChild(runningControls);
         // Stop button
         const stopBtn = document.createElement('button');
         stopBtn.className = 'btn danger';
@@ -6959,16 +9525,16 @@ import {
         let runningTodayEffectiveSeconds = 0;
         runningEntries.forEach((entry) => {
           // Compute effective elapsed time: accumulate effectiveSeconds plus time since last update times current factor
+          const paused = isTimerPaused(entry);
           const last = entry.lastUpdateTime
             ? new Date(entry.lastUpdateTime)
             : new Date(entry.startTime);
           const prev = entry.effectiveSeconds || 0;
-          const factor =
-            entry.factor || computeConcurrencyFactor(runningEntries.length);
-          const extra = ((now - last) / 1000) * factor;
+          const factor = getEntryActiveFactor(entry, runningEntries.length);
+          const extra = paused ? 0 : ((now - last) / 1000) * factor;
           const effective = prev + extra;
           totalElapsedSeconds += effective;
-          totalFactor += factor;
+          if (!paused) totalFactor += factor;
           // For "Time Left Today", estimate only today's contribution from running timers.
           const entryStart = new Date(entry.startTime);
           if (entryStart >= todayStart) {
@@ -6984,7 +9550,9 @@ import {
             'runningElapsed-' + entry.id
           );
           if (elapsedSpan)
-            elapsedSpan.textContent = formatDuration(Math.floor(effective));
+            elapsedSpan.textContent =
+              formatDuration(Math.floor(effective)) +
+              (paused ? ' (paused)' : '');
           // Update factor display as percentage
           const factorSpan = document.getElementById(
             'runningFactor-' + entry.id
@@ -7027,6 +9595,7 @@ import {
         const totalFactorSpan = document.getElementById('runningTotalFactor');
         if (totalFactorSpan)
           totalFactorSpan.textContent = Math.round(totalFactor * 100) + '%';
+        updateFocusStatusPanel(getPaidFocusTotal());
       };
       tick();
       timerInterval = setInterval(tick, 1000);
@@ -7038,6 +9607,139 @@ import {
     }
     // update project selects
     updateProjectSelects();
+  }
+
+  function pauseTimer(entryId) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry || isTimerPaused(entry)) return;
+    const now = new Date();
+    accumulateRunningEntry(entry, now, getRunningEntries().length);
+    entry.pausedAt = now.toISOString();
+    rebalanceActiveRunningFactors(now);
+    saveData();
+    updateTimerSection();
+    updateFocusBlocker();
+  }
+
+  function resumeTimer(entryId) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry || !isTimerPaused(entry)) return;
+    const now = new Date();
+    delete entry.pausedAt;
+    entry.lastUpdateTime = now.toISOString();
+    rebalanceActiveRunningFactors(now);
+    saveData();
+    updateTimerSection();
+    updateFocusBlocker();
+  }
+
+  function switchRunningTimerProject(entryId, projectId) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry || !projectId) return;
+    if (
+      getRunningEntries().some(
+        (other) =>
+          other.id !== entryId && String(other.projectId) === String(projectId)
+      )
+    ) {
+      showToast('A timer is already running for that project.');
+      updateTimerSection();
+      return;
+    }
+    const now = new Date();
+    const snapshot = cloneData();
+    accumulateRunningEntry(entry, now, getRunningEntries().length);
+    entry.projectId = projectId;
+    entry.lastUpdateTime = now.toISOString();
+    saveData();
+    refreshAllViews();
+    offerUndo('Timer moved to another project.', snapshot);
+  }
+
+  async function editRunningTimer(entryId) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry) return;
+    const currentFactor = getEntryActiveFactor(
+      entry,
+      getRunningEntries().length
+    );
+    const factorOptions = FOCUS_FACTOR_OPTIONS.map((option) => ({
+      value: String(option.value),
+      label: option.label
+    }));
+    if (
+      !factorOptions.some((option) => option.value === String(currentFactor))
+    ) {
+      factorOptions.push({
+        value: String(currentFactor),
+        label: `${formatFocusPercent(currentFactor)} - current`
+      });
+    }
+    const values = await openFormDialog({
+      title: 'Edit Running Timer',
+      fields: [
+        {
+          name: 'description',
+          label: 'Description',
+          value: entry.description || ''
+        },
+        {
+          name: 'startTime',
+          label: 'Start Time',
+          type: 'datetime-local',
+          value: toDateTimeInputValue(entry.startTime),
+          required: true
+        },
+        {
+          name: 'focusFactor',
+          label: 'Focus',
+          type: 'select',
+          value: String(currentFactor),
+          options: factorOptions
+        }
+      ],
+      submitLabel: 'Save Timer'
+    });
+    if (!values) return;
+    const parsedStart = parseDateTimeInput(values.startTime);
+    if (!parsedStart) {
+      showToast('Enter a valid start time.');
+      return;
+    }
+    const now = new Date();
+    if (parsedStart > now) {
+      showToast('Start time cannot be in the future.');
+      return;
+    }
+    const snapshot = cloneData();
+    const previousFactor = getEntryActiveFactor(
+      entry,
+      getRunningEntries().length
+    );
+    entry.description = String(values.description || '').trim();
+    entry.startTime = parsedStart.toISOString();
+    entry.lastUpdateTime = isTimerPaused(entry)
+      ? entry.lastUpdateTime || now.toISOString()
+      : now.toISOString();
+    const selectedFactor = normalizeFocusFactor(values.focusFactor);
+    entry.manualFactor = selectedFactor;
+    entry.factor = selectedFactor;
+    entry.focusFactor = selectedFactor;
+    if (!isTimerPaused(entry)) {
+      const activeFactor = getEntryActiveFactor(
+        entry,
+        getRunningEntries().length
+      );
+      entry.effectiveSeconds =
+        Math.max(0, (now - parsedStart) / 1000) * activeFactor;
+    } else {
+      entry.effectiveSeconds =
+        entry.effectiveSeconds ||
+        Math.max(0, (now - parsedStart) / 1000) * previousFactor;
+    }
+    saveData();
+    refreshAllViews();
+    offerUndo('Timer updated.', snapshot);
   }
 
   // Stop a single running timer by id
@@ -7052,13 +9754,7 @@ import {
     const n = runningEntries.length;
     // First update effective seconds for all running entries using their current factor
     runningEntries.forEach((e) => {
-      const last = e.lastUpdateTime
-        ? new Date(e.lastUpdateTime)
-        : new Date(e.startTime);
-      const elapsedSec = (now - last) / 1000;
-      const prevFactor = e.factor || computeConcurrencyFactor(n);
-      e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
-      e.lastUpdateTime = now.toISOString();
+      accumulateRunningEntry(e, now, n);
     });
     // Finalize the stopped entry
     const finalSeconds = toStop.effectiveSeconds || 0;
@@ -7070,16 +9766,11 @@ import {
     delete toStop.effectiveSeconds;
     delete toStop.lastUpdateTime;
     delete toStop.factor;
-    // Compute new concurrency factor for remaining running timers after removal
+    delete toStop.pausedAt;
     const remaining = runningEntries.filter((e) => e.id !== entryId);
-    const newCount = remaining.length;
-    const newFactor = computeConcurrencyFactor(newCount);
-    // Update remaining running entries: assign new factor only if no manual override
     remaining.forEach((e) => {
-      if (!e.manualFactor) {
-        e.factor = newFactor;
-        e.focusFactor = newFactor;
-      }
+      e.factor = getEntryActiveFactor(e, remaining.length || 1);
+      e.focusFactor = e.factor;
       e.lastUpdateTime = now.toISOString();
     });
     // Persist and refresh
@@ -7087,7 +9778,7 @@ import {
     updateTimerSection();
     updateDashboard();
     updateEntriesTable();
-    // Do not immediately save backup here; periodic auto‑sync will handle exporting
+    // Do not immediately save backup here; periodic auto-sync will handle exporting
     // Recompute focus blocker activation after stopping this timer. If the total
     // factor has dropped below or equal to 50%, the blocker will be disabled.
     updateFocusBlocker();
@@ -7098,14 +9789,26 @@ import {
   let monthlyScatterChart = null;
   function startProjectTimer(
     projectId,
-    { initialHours = 0, overrideFactor = null, resetStartControls = false } = {}
+    {
+      description = '',
+      initialHours = 0,
+      overrideFactor = null,
+      resetStartControls = false
+    } = {}
   ) {
     if (!projectId) return;
+    const projectToStart = data.projects.find(
+      (project) => String(project.id) === String(projectId)
+    );
+    if (!projectToStart || isProjectArchived(projectToStart)) {
+      showToast('Restore the project before starting a timer.');
+      return;
+    }
     // Check if there's already a running timer for this project
     const runningEntries = getRunningEntries();
     // Prevent starting multiple timers for the same project. Compare string representations of IDs to avoid mismatches.
     if (runningEntries.some((e) => String(e.projectId) === String(projectId))) {
-      alert(
+      showToast(
         'A timer is already running for this project. You cannot start another timer for the same project.'
       );
       return;
@@ -7116,48 +9819,17 @@ import {
     // Provide tactile feedback when starting a timer
     provideHaptic('long');
     const now = new Date();
-    const parsedOverride =
-      overrideFactor === null || overrideFactor === ''
-        ? null
-        : Number(overrideFactor);
-    const hasOverride =
-      Number.isFinite(parsedOverride) && Number(parsedOverride) > 0;
-    // Compute the new concurrency count including the new entry
-    const newConcurrencyCount = runningEntries.length + 1;
-    // Compute the concurrency factor that would apply if no override is used
-    const autoFactor = computeConcurrencyFactor(newConcurrencyCount);
-    // Update all existing running entries: accumulate effective seconds and set new factor
+    const newEntryFactor = normalizeFocusFactor(overrideFactor);
+    // Update all existing running entries without mutating their explicit focus.
     runningEntries.forEach((e) => {
-      const last = e.lastUpdateTime
-        ? new Date(e.lastUpdateTime)
-        : new Date(e.startTime);
-      const elapsedSec = (now - last) / 1000;
-      const prevFactor =
-        e.factor || computeConcurrencyFactor(runningEntries.length);
-      e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
-      e.lastUpdateTime = now.toISOString();
-      // For timers without manual override, assign the new concurrency factor
-      if (!e.manualFactor) {
-        e.factor = autoFactor;
-        e.focusFactor = autoFactor;
-      }
+      accumulateRunningEntry(e, now, runningEntries.length);
     });
     // Create new entry for the selected project
     const realStart = new Date(now.getTime() - initialHours * 3600 * 1000);
-    // Determine the factor for the new entry: manual override or auto
-    let newEntryFactor;
-    let newEntryManual = null;
-    if (hasOverride) {
-      newEntryFactor = parsedOverride;
-      newEntryManual = newEntryFactor;
-    } else {
-      newEntryFactor = autoFactor;
-      newEntryManual = null;
-    }
     const newEntry = {
       id: uuid(),
       projectId,
-      description: '',
+      description: String(description || '').trim(),
       startTime: realStart.toISOString(),
       endTime: null,
       duration: null,
@@ -7167,13 +9839,15 @@ import {
       lastUpdateTime: now.toISOString(),
       factor: newEntryFactor,
       focusFactor: newEntryFactor,
-      manualFactor: newEntryManual
+      manualFactor: newEntryFactor
     };
     data.entries.push(newEntry);
     if (resetStartControls) {
       // Reset initial input and focus factor selection
+      document.getElementById('timerDescriptionPro').value = '';
       document.getElementById('timerInitialPro').value = '';
-      document.getElementById('startFactorPro').value = '';
+      document.getElementById('startFactorPro').value =
+        String(DEFAULT_FOCUS_FACTOR);
     }
     saveData();
     // Update UI and timers
@@ -7187,16 +9861,24 @@ import {
 
   document.getElementById('startTimerBtnPro').addEventListener('click', () => {
     const projectId = document.getElementById('timerProjectPro').value;
+    const description = document.getElementById('timerDescriptionPro').value;
     // Hours already spent when starting the timer (pre-filled time)
     const initialHours =
       parseFloat(document.getElementById('timerInitialPro').value) || 0;
     const overrideFactor = document.getElementById('startFactorPro').value;
     startProjectTimer(projectId, {
+      description,
       initialHours,
       overrideFactor,
       resetStartControls: true
     });
   });
+  const pinTimerPresetBtn = document.getElementById('pinTimerPresetBtnPro');
+  if (pinTimerPresetBtn) {
+    pinTimerPresetBtn.addEventListener('click', () => {
+      pinCurrentTimerPreset();
+    });
+  }
   document.getElementById('stopTimerBtnPro').addEventListener('click', () => {
     stopAllTimers();
   });
@@ -7209,13 +9891,7 @@ import {
     const n = runningList.length;
     // Update effective seconds for all entries using their current factors
     runningList.forEach((e) => {
-      const last = e.lastUpdateTime
-        ? new Date(e.lastUpdateTime)
-        : new Date(e.startTime);
-      const elapsedSec = (now - last) / 1000;
-      const prevFactor = e.factor || computeConcurrencyFactor(n);
-      e.effectiveSeconds = (e.effectiveSeconds || 0) + elapsedSec * prevFactor;
-      e.lastUpdateTime = now.toISOString();
+      accumulateRunningEntry(e, now, n);
     });
     // Finalize each entry: set duration, endTime, isRunning
     runningList.forEach((e) => {
@@ -7238,14 +9914,85 @@ import {
       delete e.effectiveSeconds;
       delete e.lastUpdateTime;
       delete e.factor;
+      delete e.pausedAt;
     });
     saveData();
     updateTimerSection();
     updateDashboard();
     updateEntriesTable();
-    // Do not immediately save backup here; periodic auto‑sync will handle exporting
+    // Do not immediately save backup here; periodic auto-sync will handle exporting
     // After stopping all timers, recompute focus blocker activation based on total factor
     updateFocusBlocker();
+  }
+
+  function getStartFormTimerPreset() {
+    const projectSelect = document.getElementById('timerProjectPro');
+    const descriptionInput = document.getElementById('timerDescriptionPro');
+    const factorSelect = document.getElementById('startFactorPro');
+    const projectId = projectSelect ? projectSelect.value : '';
+    const project = data.projects.find(
+      (candidate) => String(candidate.id) === String(projectId)
+    );
+    if (!project || isProjectArchived(project)) return null;
+    return {
+      project,
+      projectId: project.id,
+      description: String(
+        descriptionInput ? descriptionInput.value : ''
+      ).trim(),
+      focusFactor: normalizeFocusFactor(factorSelect ? factorSelect.value : 1)
+    };
+  }
+
+  function pinCurrentTimerPreset() {
+    const preset = getStartFormTimerPreset();
+    if (!preset) {
+      showToast('Choose an active project before pinning a timer.');
+      return;
+    }
+    ensureTimerPresets();
+    const now = new Date().toISOString();
+    const key = makeTimerPresetKey(
+      preset.projectId,
+      preset.description,
+      preset.focusFactor
+    );
+    const existing = data.timerPresets.find(
+      (item) =>
+        makeTimerPresetKey(
+          item.projectId,
+          item.description,
+          item.focusFactor
+        ) === key
+    );
+    if (existing) {
+      existing.updatedAt = now;
+    } else {
+      data.timerPresets.unshift({
+        id: uuid(),
+        projectId: preset.projectId,
+        description: preset.description,
+        focusFactor: preset.focusFactor,
+        createdAt: now,
+        updatedAt: now
+      });
+    }
+    saveData();
+    updateProjectSelects();
+    showToast(existing ? 'Pinned timer updated.' : 'Timer pinned.');
+  }
+
+  function removeTimerPreset(presetId) {
+    ensureTimerPresets();
+    const snapshot = cloneData();
+    const before = data.timerPresets.length;
+    data.timerPresets = data.timerPresets.filter(
+      (preset) => String(preset.id) !== String(presetId)
+    );
+    if (data.timerPresets.length === before) return;
+    saveData();
+    updateProjectSelects();
+    offerUndo('Pinned timer removed.', snapshot);
   }
 
   // Update project selects for timer and manual forms
@@ -7254,6 +10001,7 @@ import {
     const manualSelect = document.getElementById('manualProjectPro');
     const entryFilterSelect = document.getElementById('entryProjectFilter');
     const startBtn = document.getElementById('startTimerBtnPro');
+    const pinTimerPresetBtn = document.getElementById('pinTimerPresetBtnPro');
     timerSelect.innerHTML = '';
     manualSelect.innerHTML = '';
     if (entryFilterSelect) {
@@ -7263,19 +10011,41 @@ import {
       allOption.value = '';
       allOption.textContent = 'All projects';
       entryFilterSelect.appendChild(allOption);
+      data.projects.forEach((project) => {
+        const option = document.createElement('option');
+        option.value = project.id;
+        option.textContent = isProjectArchived(project)
+          ? `${project.name} (archived)`
+          : project.name;
+        entryFilterSelect.appendChild(option);
+      });
       entryProjectFilter = selectedFilter;
     }
-    if (data.projects.length === 0) {
+    const activeProjects = getActiveProjects();
+    if (entryFilterSelect) {
+      const filterStillExists = data.projects.some(
+        (p) => String(p.id) === String(entryProjectFilter)
+      );
+      if (entryProjectFilter && !filterStillExists) {
+        entryProjectFilter = '';
+      }
+      entryFilterSelect.value = entryProjectFilter;
+    }
+    if (activeProjects.length === 0) {
       const opt = document.createElement('option');
       opt.value = '';
-      opt.textContent = '-- no projects --';
+      opt.textContent =
+        data.projects.length === 0
+          ? '-- no projects --'
+          : '-- no active projects --';
       timerSelect.appendChild(opt);
       manualSelect.appendChild(opt.cloneNode(true));
-      if (entryFilterSelect) {
+      if (entryFilterSelect && data.projects.length === 0) {
         entryProjectFilter = '';
         entryFilterSelect.value = '';
       }
       startBtn.disabled = true;
+      if (pinTimerPresetBtn) pinTimerPresetBtn.disabled = true;
       renderTimerHints(timerSelect, null, new Map(), new Set());
       return;
     }
@@ -7285,7 +10055,7 @@ import {
       getRunningEntries().map((e) => String(e.projectId))
     );
     const weekContext = getCurrentWeekPlanningContext();
-    const projectOptionData = data.projects.map((project, index) => {
+    const projectOptionData = activeProjects.map((project, index) => {
       const stats = computeProjectStats(project);
       const dailyPlan = getProjectDailyPlan(project, stats, weekContext);
       return { project, stats, dailyPlan, index };
@@ -7364,22 +10134,8 @@ import {
       o2.value = project.id;
       o2.textContent = project.name;
       manualSelect.appendChild(o2);
-      if (entryFilterSelect) {
-        const o3 = document.createElement('option');
-        o3.value = project.id;
-        o3.textContent = project.name;
-        entryFilterSelect.appendChild(o3);
-      }
     });
-    if (entryFilterSelect) {
-      const filterStillExists = data.projects.some(
-        (p) => String(p.id) === String(entryProjectFilter)
-      );
-      if (entryProjectFilter && !filterStillExists) {
-        entryProjectFilter = '';
-      }
-      entryFilterSelect.value = entryProjectFilter;
-    }
+    if (entryFilterSelect) entryFilterSelect.value = entryProjectFilter;
     // Disable timer options for projects that already have a running timer
     timerSelect.querySelectorAll('option').forEach((opt) => {
       opt.disabled = runningProjectIds.has(String(opt.value));
@@ -7400,6 +10156,7 @@ import {
       (o) => o.value && !o.disabled
     );
     startBtn.disabled = !hasStartable;
+    if (pinTimerPresetBtn) pinTimerPresetBtn.disabled = !hasStartable;
     renderTimerHints(
       timerSelect,
       recommendedForTimerId,
@@ -7439,6 +10196,26 @@ import {
     const recentEl = document.getElementById('recentTimersPro');
     if (!recentEl) return;
     recentEl.innerHTML = '';
+    const startablePinned = ensureTimerPresets()
+      .map((preset) => {
+        const project = data.projects.find(
+          (candidate) => String(candidate.id) === String(preset.projectId)
+        );
+        return project
+          ? {
+              id: preset.id,
+              project,
+              description: String(preset.description || '').trim(),
+              focusFactor: normalizeFocusFactor(preset.focusFactor)
+            }
+          : null;
+      })
+      .filter(
+        (preset) =>
+          preset &&
+          !isProjectArchived(preset.project) &&
+          !runningProjectIds.has(String(preset.project.id))
+      );
     const recentTimers = [];
     const seen = new Set();
     data.entries
@@ -7449,46 +10226,96 @@ import {
         return bTime - aTime;
       })
       .forEach((entry) => {
-        if (seen.has(String(entry.projectId))) return;
         const project = data.projects.find(
           (p) => String(p.id) === String(entry.projectId)
         );
-        if (!project || runningProjectIds.has(String(project.id))) return;
-        seen.add(String(project.id));
+        if (
+          !project ||
+          isProjectArchived(project) ||
+          runningProjectIds.has(String(project.id))
+        )
+          return;
+        const description = String(entry.description || '').trim();
+        const focusFactor = getEntryFocusFactor(entry, 1);
+        const key = [
+          String(project.id),
+          description.toLowerCase(),
+          String(focusFactor)
+        ].join('::');
+        if (seen.has(key)) return;
+        seen.add(key);
         recentTimers.push({
           project,
-          focusFactor: getEntryFocusFactor(entry, 1)
+          description,
+          focusFactor
         });
       });
 
     const startableRecent = recentTimers.slice(0, 4);
-    if (!startableRecent.length) {
+    if (!startablePinned.length && !startableRecent.length) {
       recentEl.style.display = 'none';
       return;
     }
 
     recentEl.style.display = '';
-    const label = document.createElement('div');
-    label.className = 'timer-hint-label';
-    label.textContent = 'Recent timers';
-    recentEl.appendChild(label);
-    const row = document.createElement('div');
-    row.className = 'timer-chip-row';
-    startableRecent.forEach(({ project, focusFactor }) => {
+    const appendStartButton = (row, { project, description, focusFactor }) => {
+      const focusText = formatFocusPercent(focusFactor);
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'timer-chip';
-      button.textContent =
-        project.name + ' - ' + formatFocusPercent(focusFactor);
+      button.textContent = formatTimerPresetLabel(
+        project,
+        description,
+        focusFactor
+      );
       button.title =
-        'Start ' + project.name + ' at ' + formatFocusPercent(focusFactor);
+        'Start ' +
+        project.name +
+        (description ? ' - ' + description : '') +
+        ' at ' +
+        focusText;
       button.addEventListener('click', () => {
         timerSelect.value = project.id;
-        startProjectTimer(project.id, { overrideFactor: focusFactor });
+        startProjectTimer(project.id, {
+          description,
+          overrideFactor: focusFactor
+        });
       });
       row.appendChild(button);
-    });
-    recentEl.appendChild(row);
+      return button;
+    };
+    const appendSection = (title, items, { pinned = false } = {}) => {
+      if (!items.length) return;
+      const label = document.createElement('div');
+      label.className = 'timer-hint-label';
+      label.textContent = title;
+      recentEl.appendChild(label);
+      const row = document.createElement('div');
+      row.className = 'timer-chip-row';
+      items.forEach((item) => {
+        if (!pinned) {
+          appendStartButton(row, item);
+          return;
+        }
+        const group = document.createElement('div');
+        group.className = 'timer-chip-group';
+        appendStartButton(group, item);
+        const unpinButton = document.createElement('button');
+        unpinButton.type = 'button';
+        unpinButton.className = 'timer-chip-unpin';
+        unpinButton.textContent = 'Unpin';
+        unpinButton.title = 'Remove pinned timer';
+        unpinButton.addEventListener('click', () => {
+          removeTimerPreset(item.id);
+        });
+        group.appendChild(unpinButton);
+        row.appendChild(group);
+      });
+      recentEl.appendChild(row);
+    };
+
+    appendSection('Pinned timers', startablePinned, { pinned: true });
+    appendSection('Recent timers', startableRecent);
   }
 
   // Manual entry add/cancel
@@ -7503,43 +10330,106 @@ import {
       document.getElementById('manualEntryFormPro').classList.add('hidden');
       document.getElementById('manualFormPro').reset();
     });
+
+  function applyProjectRoundingToWallSeconds(wallSeconds, project) {
+    const roundingMinutes = Number(project && project.roundingMinutes);
+    if (!Number.isFinite(roundingMinutes) || roundingMinutes <= 0) {
+      return Math.floor(wallSeconds);
+    }
+    const minutesVal = wallSeconds / 60;
+    const roundedMinutes =
+      Math.round(minutesVal / roundingMinutes) * roundingMinutes;
+    return Math.max(0, Math.floor(roundedMinutes * 60));
+  }
+
   document.getElementById('manualFormPro').addEventListener('submit', (e) => {
     e.preventDefault();
     const projectId = document.getElementById('manualProjectPro').value;
     const description = document
       .getElementById('manualDescriptionPro')
       .value.trim();
-    const hoursVal = parseFloat(
-      document.getElementById('manualHoursPro').value
+    const startValue = document.getElementById('manualStartPro').value;
+    const endValue = document.getElementById('manualEndPro').value;
+    const hoursInput = document.getElementById('manualHoursPro');
+    const hoursVal = parseFloat(hoursInput.value);
+    const focusFactor = normalizeFocusFactor(
+      document.getElementById('manualFactorPro').value
     );
-    if (!projectId || isNaN(hoursVal) || hoursVal <= 0) return;
+    if (!projectId) return;
     const now = new Date();
-    // Apply rounding based on project preferences. If the project specifies a rounding interval (minutes),
-    // we round the hours to the nearest interval before converting to seconds.
-    let adjustedHours = hoursVal;
     const projForRound = data.projects.find(
       (p) => String(p.id) === String(projectId)
     );
-    if (
-      projForRound &&
-      projForRound.roundingMinutes &&
-      projForRound.roundingMinutes > 0
-    ) {
-      const rounding = projForRound.roundingMinutes;
-      const minutesVal = hoursVal * 60;
-      const roundedMinutes = Math.round(minutesVal / rounding) * rounding;
-      adjustedHours = roundedMinutes / 60;
+    const hasStart = !!startValue;
+    const hasEnd = !!endValue;
+    const hasHours = Number.isFinite(hoursVal) && hoursVal > 0;
+    const parsedStart = hasStart ? parseDateTimeInput(startValue) : null;
+    const parsedEnd = hasEnd ? parseDateTimeInput(endValue) : null;
+    if (hasStart && !parsedStart) {
+      showToast('Enter a valid manual start time.');
+      return;
     }
-    const durationSeconds = Math.floor(adjustedHours * 3600);
-    // start time is computed as end time minus duration
-    const startTime = new Date(now.getTime() - durationSeconds * 1000);
+    if (hasEnd && !parsedEnd) {
+      showToast('Enter a valid manual end time.');
+      return;
+    }
+    if (!hasHours && !(parsedStart && parsedEnd)) {
+      showToast('Enter hours or both start and end times.');
+      return;
+    }
+
+    let startTime;
+    let endTime;
+    let wallSeconds;
+    if (parsedStart && parsedEnd) {
+      if (parsedEnd <= parsedStart) {
+        showToast('Manual end time must be after start time.');
+        return;
+      }
+      if (parsedEnd > now) {
+        showToast('Manual end time cannot be in the future.');
+        return;
+      }
+      startTime = parsedStart;
+      endTime = parsedEnd;
+      wallSeconds = (parsedEnd - parsedStart) / 1000;
+    } else {
+      wallSeconds = hoursVal * 3600;
+      wallSeconds = applyProjectRoundingToWallSeconds(
+        wallSeconds,
+        projForRound
+      );
+      if (parsedStart) {
+        startTime = parsedStart;
+        endTime = new Date(startTime.getTime() + wallSeconds * 1000);
+      } else if (parsedEnd) {
+        endTime = parsedEnd;
+        startTime = new Date(endTime.getTime() - wallSeconds * 1000);
+      } else {
+        endTime = now;
+        startTime = new Date(endTime.getTime() - wallSeconds * 1000);
+      }
+      if (endTime > now) {
+        showToast('Manual end time cannot be in the future.');
+        return;
+      }
+    }
+
+    wallSeconds = applyProjectRoundingToWallSeconds(wallSeconds, projForRound);
+    const durationSeconds = Math.floor(wallSeconds * focusFactor);
+    if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
+      showToast('Manual entry duration must be greater than zero.');
+      return;
+    }
     const newEntry = {
       id: uuid(),
       projectId,
       description,
       startTime: startTime.toISOString(),
-      endTime: now.toISOString(),
+      endTime: endTime.toISOString(),
       duration: durationSeconds,
+      focusFactor,
+      manualFactor: focusFactor,
       isRunning: false,
       createdAt: now.toISOString()
     };
@@ -7584,8 +10474,45 @@ import {
       updateEntriesTable();
     });
   }
+  const entryDateFromInput = document.getElementById('entryDateFromInput');
+  const entryDateToInput = document.getElementById('entryDateToInput');
+  const entryDateClearBtn = document.getElementById('entryDateClearBtn');
+  function syncEntryDateFilterControls() {
+    if (entryDateFromInput && entryDateFromInput.value !== entryDateFrom) {
+      entryDateFromInput.value = entryDateFrom;
+    }
+    if (entryDateToInput && entryDateToInput.value !== entryDateTo) {
+      entryDateToInput.value = entryDateTo;
+    }
+    if (entryDateClearBtn) {
+      entryDateClearBtn.disabled = !entryDateFrom && !entryDateTo;
+    }
+  }
+  if (entryDateFromInput) {
+    entryDateFromInput.addEventListener('change', () => {
+      entryDateFrom = entryDateFromInput.value || '';
+      syncEntryDateFilterControls();
+      updateEntriesTable();
+    });
+  }
+  if (entryDateToInput) {
+    entryDateToInput.addEventListener('change', () => {
+      entryDateTo = entryDateToInput.value || '';
+      syncEntryDateFilterControls();
+      updateEntriesTable();
+    });
+  }
+  if (entryDateClearBtn) {
+    entryDateClearBtn.addEventListener('click', () => {
+      entryDateFrom = '';
+      entryDateTo = '';
+      syncEntryDateFilterControls();
+      updateEntriesTable();
+    });
+  }
+  syncEntryDateFilterControls();
 
-  // Nudge buttons for manual entry: adjust hours by ±5 minutes
+  // Nudge buttons for manual entry: adjust hours by +/-5 minutes
   const minusBtn = document.getElementById('manualMinus5Btn');
   const plusBtn = document.getElementById('manualPlus5Btn');
   if (minusBtn && plusBtn) {
@@ -7609,11 +10536,258 @@ import {
 
   // Delete entry
   function deleteEntry(id) {
+    const snapshot = cloneData();
     data.entries = data.entries.filter((e) => e.id !== id);
+    selectedEntryIds.delete(String(id));
     saveData();
-    updateEntriesTable();
-    updateDashboard();
-    updateProjectsPage();
+    refreshAllViews();
+    offerUndo('Entry deleted.', snapshot);
+  }
+
+  function duplicateStoppedEntry(entryId) {
+    const entry = data.entries.find(
+      (candidate) => String(candidate.id) === String(entryId)
+    );
+    if (!entry || entry.isRunning) {
+      showToast('Only stopped entries can be duplicated.');
+      return;
+    }
+    const snapshot = cloneData();
+    const nowIso = new Date().toISOString();
+    const duplicate = {
+      ...entry,
+      id: uuid(),
+      createdAt: nowIso,
+      isRunning: false
+    };
+    duplicate.focusFactor = getEntryFocusFactor(entry, 1);
+    duplicate.manualFactor = duplicate.focusFactor;
+    delete duplicate.effectiveSeconds;
+    delete duplicate.lastUpdateTime;
+    delete duplicate.factor;
+    delete duplicate.pausedAt;
+    data.entries.push(duplicate);
+    saveData();
+    refreshAllViews();
+    offerUndo('Entry duplicated.', snapshot);
+  }
+
+  async function splitStoppedEntry(entryId) {
+    const entry = data.entries.find(
+      (candidate) => String(candidate.id) === String(entryId)
+    );
+    if (!entry || entry.isRunning) {
+      showToast('Only stopped entries can be split.');
+      return;
+    }
+    const start = new Date(entry.startTime);
+    const end = new Date(entry.endTime);
+    if (
+      Number.isNaN(start.getTime()) ||
+      Number.isNaN(end.getTime()) ||
+      end <= start
+    ) {
+      showToast(
+        'Entry needs valid start and end times before it can be split.'
+      );
+      return;
+    }
+    const midpoint = new Date(
+      start.getTime() + (end.getTime() - start.getTime()) / 2
+    );
+    const values = await openFormDialog({
+      title: 'Split Entry',
+      fields: [
+        {
+          name: 'splitTime',
+          label: 'Split Time',
+          type: 'datetime-local',
+          value: toDateTimeInputValue(midpoint),
+          required: true
+        },
+        {
+          name: 'firstDescription',
+          label: 'First Description',
+          value: entry.description || ''
+        },
+        {
+          name: 'secondDescription',
+          label: 'Second Description',
+          value: entry.description || ''
+        }
+      ],
+      submitLabel: 'Split Entry'
+    });
+    if (!values) return;
+    const splitTime = parseDateTimeInput(values.splitTime);
+    if (!splitTime || splitTime <= start || splitTime >= end) {
+      showToast('Split time must be between the entry start and end.');
+      return;
+    }
+    const focusFactor = getEntryFocusFactor(entry, 1);
+    const firstDuration = Math.floor(
+      ((splitTime.getTime() - start.getTime()) / 1000) * focusFactor
+    );
+    const secondDuration = Math.floor(
+      ((end.getTime() - splitTime.getTime()) / 1000) * focusFactor
+    );
+    if (firstDuration <= 0 || secondDuration <= 0) {
+      showToast('Split would create an empty entry.');
+      return;
+    }
+    const snapshot = cloneData();
+    const secondEntry = {
+      ...entry,
+      id: uuid(),
+      description: String(values.secondDescription || '').trim(),
+      startTime: splitTime.toISOString(),
+      endTime: end.toISOString(),
+      duration: secondDuration,
+      createdAt: new Date().toISOString(),
+      isRunning: false,
+      focusFactor,
+      manualFactor: focusFactor
+    };
+    delete secondEntry.effectiveSeconds;
+    delete secondEntry.lastUpdateTime;
+    delete secondEntry.factor;
+    delete secondEntry.pausedAt;
+    entry.description = String(values.firstDescription || '').trim();
+    entry.endTime = splitTime.toISOString();
+    entry.duration = firstDuration;
+    entry.focusFactor = focusFactor;
+    entry.manualFactor = focusFactor;
+    entry.isRunning = false;
+    delete entry.effectiveSeconds;
+    delete entry.lastUpdateTime;
+    delete entry.factor;
+    delete entry.pausedAt;
+    data.entries.push(secondEntry);
+    saveData();
+    refreshAllViews();
+    offerUndo('Entry split.', snapshot);
+  }
+
+  async function editStoppedEntry(entryId) {
+    const entry = data.entries.find((candidate) => candidate.id === entryId);
+    if (!entry) return;
+    if (entry.isRunning) {
+      editRunningTimer(entryId);
+      return;
+    }
+    const currentProject = getEntryProject(entry);
+    const projectOptions = [];
+    if (currentProject) {
+      projectOptions.push({
+        value: currentProject.id,
+        label: `${currentProject.name}${isProjectArchived(currentProject) ? ' (archived)' : ''}`
+      });
+    }
+    getActiveProjects().forEach((project) => {
+      if (currentProject && String(project.id) === String(currentProject.id)) {
+        return;
+      }
+      projectOptions.push({ value: project.id, label: project.name });
+    });
+    const currentFactor = getEntryFocusFactor(entry, 1);
+    const factorOptions = FOCUS_FACTOR_OPTIONS.map((option) => ({
+      value: String(option.value),
+      label: option.label
+    }));
+    if (
+      !factorOptions.some((option) => option.value === String(currentFactor))
+    ) {
+      factorOptions.push({
+        value: String(currentFactor),
+        label: `${formatFocusPercent(currentFactor)} - current`
+      });
+    }
+    const values = await openFormDialog({
+      title: 'Edit Entry',
+      fields: [
+        {
+          name: 'projectId',
+          label: 'Project',
+          type: 'select',
+          value: currentProject ? currentProject.id : '',
+          options: projectOptions,
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          value: entry.description || ''
+        },
+        {
+          name: 'startTime',
+          label: 'Start Time',
+          type: 'datetime-local',
+          value: toDateTimeInputValue(entry.startTime),
+          required: true
+        },
+        {
+          name: 'endTime',
+          label: 'End Time',
+          type: 'datetime-local',
+          value: toDateTimeInputValue(entry.endTime),
+          required: true
+        },
+        {
+          name: 'focusFactor',
+          label: 'Focus',
+          type: 'select',
+          value: String(currentFactor),
+          options: factorOptions
+        }
+      ],
+      submitLabel: 'Save Entry'
+    });
+    if (!values) return;
+    const project = data.projects.find(
+      (candidate) => String(candidate.id) === String(values.projectId)
+    );
+    if (!project) {
+      showToast('Choose a valid project.');
+      return;
+    }
+    const parsedStart = parseDateTimeInput(values.startTime);
+    const parsedEnd = parseDateTimeInput(values.endTime);
+    if (!parsedStart) {
+      showToast('Enter a valid start time.');
+      return;
+    }
+    if (!parsedEnd) {
+      showToast('Enter a valid end time.');
+      return;
+    }
+    if (parsedEnd <= parsedStart) {
+      showToast('End time must be after start time.');
+      return;
+    }
+    if (parsedEnd > new Date()) {
+      showToast('End time cannot be in the future.');
+      return;
+    }
+    const focusFactor = normalizeFocusFactor(values.focusFactor);
+    const snapshot = cloneData();
+    entry.projectId = project.id;
+    entry.description = String(values.description || '').trim();
+    entry.startTime = parsedStart.toISOString();
+    entry.endTime = parsedEnd.toISOString();
+    entry.duration = Math.floor(
+      Math.max(0, (parsedEnd.getTime() - parsedStart.getTime()) / 1000) *
+        focusFactor
+    );
+    entry.focusFactor = focusFactor;
+    entry.manualFactor = focusFactor;
+    entry.isRunning = false;
+    delete entry.effectiveSeconds;
+    delete entry.lastUpdateTime;
+    delete entry.factor;
+    delete entry.pausedAt;
+    saveData();
+    refreshAllViews();
+    offerUndo('Entry updated.', snapshot);
   }
 
   function getEntryProject(entry) {
@@ -7623,9 +10797,41 @@ import {
     );
   }
 
+  function getEntryDateRangeFilter() {
+    const fromDate = entryDateFrom ? parseLocalDateString(entryDateFrom) : null;
+    const toDate = entryDateTo ? parseLocalDateString(entryDateTo) : null;
+    return {
+      fromDate,
+      toExclusive: toDate ? addLocalDays(toDate, 1) : null,
+      hasDateFilter: !!(fromDate || toDate)
+    };
+  }
+
+  function entryOverlapsDateRange(entry, fromDate, toExclusive) {
+    const startDate = new Date(entry.startTime);
+    if (Number.isNaN(startDate.getTime())) return false;
+    const rawEndDate = entry.endTime ? new Date(entry.endTime) : startDate;
+    const endDate =
+      !Number.isNaN(rawEndDate.getTime()) && rawEndDate >= startDate
+        ? rawEndDate
+        : startDate;
+    if (fromDate && endDate < fromDate) return false;
+    if (toExclusive && startDate >= toExclusive) return false;
+    return true;
+  }
+
+  function formatEntryDateRangeLabel(fromDate, toExclusive) {
+    const fromLabel = fromDate ? formatLocalDateString(fromDate) : 'start';
+    const toLabel = toExclusive
+      ? formatLocalDateString(addLocalDays(toExclusive, -1))
+      : 'end';
+    return `Date range ${fromLabel} - ${toLabel}`;
+  }
+
   function getEntriesForCurrentView() {
     let entriesToShow = data.entries;
-    if (!showAllEntries) {
+    const { fromDate, toExclusive, hasDateFilter } = getEntryDateRangeFilter();
+    if (!showAllEntries && !hasDateFilter) {
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 30);
       entriesToShow = entriesToShow.filter((entry) => {
@@ -7633,6 +10839,11 @@ import {
         const endDate = entry.endTime ? new Date(entry.endTime) : startDate;
         return startDate >= cutoff || endDate >= cutoff;
       });
+    }
+    if (hasDateFilter) {
+      entriesToShow = entriesToShow.filter((entry) =>
+        entryOverlapsDateRange(entry, fromDate, toExclusive)
+      );
     }
     if (entryProjectFilter) {
       entriesToShow = entriesToShow.filter(
@@ -7668,7 +10879,12 @@ import {
       const hours = (entry.duration || 0) / 3600 || 0;
       return sum + (project ? hours * (Number(project.hourlyRate) || 0) : 0);
     }, 0);
-    const scopeText = showAllEntries ? 'All time' : 'Last 30 days';
+    const { fromDate, toExclusive, hasDateFilter } = getEntryDateRangeFilter();
+    const scopeText = hasDateFilter
+      ? formatEntryDateRangeLabel(fromDate, toExclusive)
+      : showAllEntries
+        ? 'All time'
+        : 'Last 30 days';
     const labels = [
       `${entriesToShow.length} ${entriesToShow.length === 1 ? 'entry' : 'entries'}`,
       `${formatDuration(Math.round(totalHours * 3600))} tracked`,
@@ -7691,16 +10907,246 @@ import {
     return cell;
   }
 
+  function escapeCsv(value) {
+    const text = String(value ?? '');
+    if (/[",\r\n]/.test(text)) {
+      return `"${text.replace(/"/g, '""')}"`;
+    }
+    return text;
+  }
+
+  function downloadCsv(rows, filePrefix) {
+    const csv = rows.map((row) => row.map(escapeCsv).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filePrefix}-${formatLocalDateString(new Date())}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportEntriesCsv(entries) {
+    const rows = [
+      [
+        'Project',
+        'Client',
+        'Description',
+        'Start',
+        'End',
+        'Duration Hours',
+        'Focus',
+        'Total'
+      ]
+    ];
+    entries.forEach((entry) => {
+      const project = getEntryProject(entry);
+      const hours = (entry.duration || 0) / 3600 || 0;
+      const total = project ? hours * (Number(project.hourlyRate) || 0) : 0;
+      rows.push([
+        project ? project.name : '',
+        project ? project.client || '' : '',
+        entry.description || '',
+        entry.startTime || '',
+        entry.endTime || '',
+        hours.toFixed(3),
+        formatFocusPercent(getEntryFocusFactor(entry, 1)),
+        total.toFixed(2)
+      ]);
+    });
+    downloadCsv(rows, 'timekeeper-entries');
+  }
+
+  function exportEntrySummaryCsv(entries) {
+    const grouped = new Map();
+    entries.forEach((entry) => {
+      const project = getEntryProject(entry);
+      const projectId = project ? String(project.id) : 'missing-project';
+      const projectName = project ? project.name : '';
+      const client = project ? project.client || '' : '';
+      const rate = project ? Number(project.hourlyRate) || 0 : 0;
+      const key = [client, projectId, projectName, String(rate)].join('::');
+      const hours = (entry.duration || 0) / 3600 || 0;
+      const current = grouped.get(key) || {
+        client,
+        project: projectName,
+        rate,
+        entries: 0,
+        hours: 0,
+        total: 0
+      };
+      current.entries += 1;
+      current.hours += hours;
+      current.total += hours * rate;
+      grouped.set(key, current);
+    });
+    const rows = [
+      ['Client', 'Project', 'Entries', 'Duration Hours', 'Hourly Rate', 'Total']
+    ];
+    Array.from(grouped.values())
+      .sort((a, b) => {
+        const clientCompare = a.client.localeCompare(b.client, undefined, {
+          sensitivity: 'base'
+        });
+        if (clientCompare !== 0) return clientCompare;
+        return a.project.localeCompare(b.project, undefined, {
+          sensitivity: 'base'
+        });
+      })
+      .forEach((item) => {
+        rows.push([
+          item.client,
+          item.project,
+          String(item.entries),
+          item.hours.toFixed(3),
+          item.rate.toFixed(2),
+          item.total.toFixed(2)
+        ]);
+      });
+    const grandHours = Array.from(grouped.values()).reduce(
+      (sum, item) => sum + item.hours,
+      0
+    );
+    const grandTotal = Array.from(grouped.values()).reduce(
+      (sum, item) => sum + item.total,
+      0
+    );
+    rows.push([
+      'Total',
+      '',
+      String(entries.length),
+      grandHours.toFixed(3),
+      '',
+      grandTotal.toFixed(2)
+    ]);
+    downloadCsv(rows, 'timekeeper-entry-summary');
+  }
+
+  function pruneSelectedEntryIds() {
+    const existing = new Set(data.entries.map((entry) => String(entry.id)));
+    Array.from(selectedEntryIds).forEach((id) => {
+      if (!existing.has(String(id))) selectedEntryIds.delete(id);
+    });
+  }
+
+  function renderEntryBulkActions(entriesToShow) {
+    const bulkEl = document.getElementById('entryBulkActions');
+    if (!bulkEl) return;
+    pruneSelectedEntryIds();
+    bulkEl.innerHTML = '';
+    const visibleIds = entriesToShow.map((entry) => String(entry.id));
+    const selectedVisible = entriesToShow.filter((entry) =>
+      selectedEntryIds.has(String(entry.id))
+    );
+    const count = selectedVisible.length;
+    const label = document.createElement('span');
+    label.textContent = count
+      ? `${count} selected`
+      : `${entriesToShow.length} visible`;
+    bulkEl.appendChild(label);
+    const selectAllBtn = document.createElement('button');
+    selectAllBtn.type = 'button';
+    selectAllBtn.className = 'btn secondary';
+    selectAllBtn.textContent = 'Select Visible';
+    selectAllBtn.disabled = entriesToShow.length === 0;
+    selectAllBtn.addEventListener('click', () => {
+      visibleIds.forEach((id) => selectedEntryIds.add(id));
+      updateEntriesTable();
+    });
+    bulkEl.appendChild(selectAllBtn);
+    const clearBtn = document.createElement('button');
+    clearBtn.type = 'button';
+    clearBtn.className = 'btn secondary';
+    clearBtn.textContent = 'Clear';
+    clearBtn.disabled = count === 0;
+    clearBtn.addEventListener('click', () => {
+      selectedEntryIds.clear();
+      updateEntriesTable();
+    });
+    bulkEl.appendChild(clearBtn);
+    const moveSelect = document.createElement('select');
+    const movePlaceholder = document.createElement('option');
+    movePlaceholder.value = '';
+    movePlaceholder.textContent = 'Move to project...';
+    moveSelect.appendChild(movePlaceholder);
+    getActiveProjects().forEach((project) => {
+      const option = document.createElement('option');
+      option.value = project.id;
+      option.textContent = project.name;
+      moveSelect.appendChild(option);
+    });
+    moveSelect.disabled = count === 0;
+    moveSelect.addEventListener('change', () => {
+      const projectId = moveSelect.value;
+      if (!projectId) return;
+      const snapshot = cloneData();
+      data.entries.forEach((entry) => {
+        if (selectedEntryIds.has(String(entry.id))) {
+          entry.projectId = projectId;
+        }
+      });
+      selectedEntryIds.clear();
+      saveData();
+      refreshAllViews();
+      offerUndo('Entries moved.', snapshot);
+    });
+    bulkEl.appendChild(moveSelect);
+    const deleteBtn = document.createElement('button');
+    deleteBtn.type = 'button';
+    deleteBtn.className = 'btn danger';
+    deleteBtn.textContent = 'Delete Selected';
+    deleteBtn.disabled = count === 0;
+    deleteBtn.addEventListener('click', async () => {
+      const ok = await requestConfirm({
+        title: 'Delete Entries',
+        message: `Delete ${count} selected ${count === 1 ? 'entry' : 'entries'}?`,
+        confirmLabel: 'Delete',
+        danger: true
+      });
+      if (!ok) return;
+      const snapshot = cloneData();
+      data.entries = data.entries.filter(
+        (entry) => !selectedEntryIds.has(String(entry.id))
+      );
+      selectedEntryIds.clear();
+      saveData();
+      refreshAllViews();
+      offerUndo('Entries deleted.', snapshot);
+    });
+    bulkEl.appendChild(deleteBtn);
+    const exportVisibleBtn = document.createElement('button');
+    exportVisibleBtn.type = 'button';
+    exportVisibleBtn.className = 'btn secondary';
+    exportVisibleBtn.textContent = 'Export Visible CSV';
+    exportVisibleBtn.disabled = entriesToShow.length === 0;
+    exportVisibleBtn.addEventListener('click', () => {
+      exportEntriesCsv(entriesToShow);
+    });
+    bulkEl.appendChild(exportVisibleBtn);
+    const exportSummaryBtn = document.createElement('button');
+    exportSummaryBtn.type = 'button';
+    exportSummaryBtn.className = 'btn secondary';
+    exportSummaryBtn.textContent = 'Export Summary CSV';
+    exportSummaryBtn.disabled = entriesToShow.length === 0;
+    exportSummaryBtn.addEventListener('click', () => {
+      exportEntrySummaryCsv(entriesToShow);
+    });
+    bulkEl.appendChild(exportSummaryBtn);
+  }
+
   // Entries table
   function updateEntriesTable() {
     const tbody = document.getElementById('entriesTableBodyPro');
     tbody.innerHTML = '';
     const entriesToShow = getEntriesForCurrentView();
     renderEntrySummary(entriesToShow);
+    renderEntryBulkActions(entriesToShow);
     if (data.entries.length === 0 || entriesToShow.length === 0) {
       const tr = document.createElement('tr');
       const td = document.createElement('td');
-      td.colSpan = 7;
+      td.colSpan = 9;
       td.textContent =
         data.entries.length === 0
           ? 'No entries yet.'
@@ -7719,6 +11165,17 @@ import {
       const project = getEntryProject(entry);
       const hours = entry.duration ? entry.duration / 3600 : 0;
       const total = project ? hours * project.hourlyRate : 0;
+      const selectTd = appendEntryCell(tr, 'Select', '');
+      selectTd.className = 'entry-select-cell';
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.checked = selectedEntryIds.has(String(entry.id));
+      checkbox.addEventListener('change', () => {
+        if (checkbox.checked) selectedEntryIds.add(String(entry.id));
+        else selectedEntryIds.delete(String(entry.id));
+        renderEntryBulkActions(entriesToShow);
+      });
+      selectTd.appendChild(checkbox);
       appendEntryCell(tr, 'Project', project ? project.name : '');
       appendEntryCell(tr, 'Description', entry.description || '');
       appendEntryCell(tr, 'Start', formatDateTime(entry.startTime));
@@ -7740,16 +11197,21 @@ import {
             ? 'Running...'
             : ''
       );
+      appendEntryCell(
+        tr,
+        'Focus',
+        formatFocusPercent(getEntryFocusFactor(entry, 1))
+      );
       appendEntryCell(tr, 'Total', formatCurrency(total));
       const actionsTd = appendEntryCell(tr, 'Actions', '');
       // Action cell: add nudge and snap controls plus delete button
       actionsTd.className = 'entry-actions';
-      // −5m button
+      // -5m button
       const minusBtn = document.createElement('button');
       minusBtn.className = 'btn secondary';
       minusBtn.style.padding = '0.25rem 0.5rem';
       minusBtn.style.fontSize = '0.7rem';
-      minusBtn.textContent = '−5m';
+      minusBtn.textContent = '-5m';
       minusBtn.addEventListener('click', () => {
         // Provide quick beep feedback
         provideHaptic('beep');
@@ -7826,6 +11288,41 @@ import {
         snapSelect.value = '';
       });
       actionsTd.appendChild(snapSelect);
+      const editBtn = document.createElement('button');
+      editBtn.type = 'button';
+      editBtn.className = 'btn secondary';
+      editBtn.style.padding = '0.25rem 0.5rem';
+      editBtn.style.fontSize = '0.7rem';
+      editBtn.style.marginLeft = '0.25rem';
+      editBtn.textContent = 'Edit';
+      editBtn.addEventListener('click', () => {
+        editStoppedEntry(entry.id);
+      });
+      actionsTd.appendChild(editBtn);
+      const splitBtn = document.createElement('button');
+      splitBtn.type = 'button';
+      splitBtn.className = 'btn secondary';
+      splitBtn.style.padding = '0.25rem 0.5rem';
+      splitBtn.style.fontSize = '0.7rem';
+      splitBtn.style.marginLeft = '0.25rem';
+      splitBtn.textContent = 'Split';
+      splitBtn.disabled = !!entry.isRunning || !entry.endTime;
+      splitBtn.addEventListener('click', () => {
+        splitStoppedEntry(entry.id);
+      });
+      actionsTd.appendChild(splitBtn);
+      const duplicateBtn = document.createElement('button');
+      duplicateBtn.type = 'button';
+      duplicateBtn.className = 'btn secondary';
+      duplicateBtn.style.padding = '0.25rem 0.5rem';
+      duplicateBtn.style.fontSize = '0.7rem';
+      duplicateBtn.style.marginLeft = '0.25rem';
+      duplicateBtn.textContent = 'Duplicate';
+      duplicateBtn.disabled = !!entry.isRunning;
+      duplicateBtn.addEventListener('click', () => {
+        duplicateStoppedEntry(entry.id);
+      });
+      actionsTd.appendChild(duplicateBtn);
       // Delete button
       const delBtn = document.createElement('button');
       delBtn.className = 'btn danger';
@@ -7833,8 +11330,15 @@ import {
       delBtn.style.fontSize = '0.7rem';
       delBtn.style.marginLeft = '0.25rem';
       delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', () => {
-        if (confirm('Delete this entry?')) deleteEntry(entry.id);
+      delBtn.addEventListener('click', async () => {
+        const ok = await requestConfirm({
+          title: 'Delete Entry',
+          message: 'Delete this time entry?',
+          confirmLabel: 'Delete',
+          danger: true
+        });
+        if (!ok) return;
+        deleteEntry(entry.id);
       });
       actionsTd.appendChild(delBtn);
       tbody.appendChild(tr);
@@ -7852,6 +11356,7 @@ import {
     }
     const previousBackupDirName = data.backupDirName || null;
     const previousLastBackupAt = data.lastBackupAt || null;
+    const previousLastBackupVerifiedAt = data.lastBackupVerifiedAt || null;
     data = imported;
     if (!data.backupDirName && previousBackupDirName) {
       data.backupDirName = previousBackupDirName;
@@ -7859,6 +11364,14 @@ import {
     if (!data.lastBackupAt && previousLastBackupAt) {
       data.lastBackupAt = previousLastBackupAt;
     }
+    if (!data.lastBackupVerifiedAt && previousLastBackupVerifiedAt) {
+      data.lastBackupVerifiedAt = previousLastBackupVerifiedAt;
+    }
+    data.focusBlockerSites = normalizeFocusBlockedSites(
+      data.focusBlockerSites,
+      DEFAULT_FOCUS_BLOCKED_WEBSITES
+    );
+    data.timerPresets = normalizeTimerPresets(data.timerPresets);
     // Remove transient timer fields from imported entries.
     data.entries.forEach((entry) => {
       delete entry.effectiveSeconds;
@@ -7900,20 +11413,72 @@ import {
       }
       const text = await readTextFile(backupDirHandle, BACKUP_LATEST_FILENAME);
       const imported = JSON.parse(text);
-      if (
-        !confirm(
-          'Restore the latest backup from the selected folder? This replaces the current local data.'
-        )
-      ) {
-        return false;
-      }
+      const ok = await requestConfirm({
+        title: 'Restore Latest Backup',
+        message:
+          'Restore the latest backup from the selected folder? This replaces the current local data.',
+        confirmLabel: 'Restore',
+        danger: true
+      });
+      if (!ok) return false;
+      const snapshot = cloneData();
+      setBackupConflict(null);
       applyImportedData(imported);
-      alert('Latest backup restored successfully.');
+      offerUndo('Latest backup restored.', snapshot);
+      await refreshBackupSnapshots({ quiet: true });
       return true;
     } catch (err) {
       console.error('Restore from backup failed:', err);
       backupWarningMessage =
         'Restore failed. Check that the backup folder contains timekeeper-data.json.';
+      updateAutoSyncStatus();
+      return false;
+    }
+  }
+
+  async function restoreBackupSnapshotFromDir(fileName) {
+    try {
+      if (!backupDirHandle) {
+        backupWarningMessage =
+          'Choose a backup folder before restoring a snapshot.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const permissionGranted =
+        await ensureBackupPermissionWithPrompt(backupDirHandle);
+      if (!permissionGranted) {
+        backupWarningMessage =
+          'Permission to access the backup folder was not granted.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const snapshotDirHandle = await getBackupSnapshotDirHandle();
+      if (!snapshotDirHandle) {
+        backupWarningMessage =
+          'No timestamped backup snapshot folder was found.';
+        updateAutoSyncStatus();
+        return false;
+      }
+      const text = await readTextFile(snapshotDirHandle, fileName);
+      const imported = JSON.parse(text);
+      const ok = await requestConfirm({
+        title: 'Restore Backup Snapshot',
+        message:
+          'Restore this timestamped backup snapshot? This replaces the current local data.',
+        confirmLabel: 'Restore',
+        danger: true
+      });
+      if (!ok) return false;
+      const snapshot = cloneData();
+      setBackupConflict(null);
+      applyImportedData(imported);
+      offerUndo('Backup snapshot restored.', snapshot);
+      await refreshBackupSnapshots({ quiet: true });
+      return true;
+    } catch (err) {
+      console.error('Restore backup snapshot failed:', err);
+      backupWarningMessage =
+        'Snapshot restore failed. Refresh snapshots and try again.';
       updateAutoSyncStatus();
       return false;
     }
@@ -7931,12 +11496,67 @@ import {
       const text = await file.text();
       try {
         const imported = JSON.parse(text);
+        const snapshot = cloneData();
         applyImportedData(imported);
-        alert('Data imported successfully');
+        offerUndo('Data imported successfully.', snapshot);
       } catch (err) {
-        alert('Failed to import: ' + err.message);
+        showToast('Failed to import: ' + err.message);
       }
     });
+  const stravaImportInput = document.getElementById('stravaImportInput');
+  if (stravaImportInput) {
+    stravaImportInput.addEventListener('change', async (event) => {
+      const file = event.target.files[0];
+      if (!file) return;
+      try {
+        const text = await file.text();
+        const lowerName = String(file.name || '').toLowerCase();
+        const isCsv =
+          lowerName.endsWith('.csv') ||
+          file.type === 'text/csv' ||
+          text.trimStart().toLowerCase().startsWith('activity id,');
+        const payload = isCsv
+          ? buildStravaPayloadFromCsv(text, {
+              sourceName: file.name || 'activities.csv',
+              existingActivities: cachedStravaActivities
+            })
+          : JSON.parse(text);
+        const activities = Array.isArray(payload?.activities)
+          ? payload.activities
+          : null;
+        if (!activities || activities.length === 0) {
+          throw new Error(
+            isCsv
+              ? 'No activities found in the Strava CSV export.'
+              : 'Expected a JSON file with an activities array.'
+          );
+        }
+        const importedPayload = {
+          ...payload,
+          updated_utc: payload.updated_utc || new Date().toISOString(),
+          source: payload.source || `browser-import:${file.name}`
+        };
+        cachedStravaActivities = activities;
+        window.stravaActivitiesCache = activities;
+        saveCachedStravaFeedPayload(importedPayload);
+        const updatedActivities = applyStravaExertionOverrides(activities);
+        refreshStravaScoreScale(updatedActivities);
+        renderStravaActivities(updatedActivities);
+        const status = document.getElementById('stravaFeedStatus');
+        if (status) {
+          status.textContent = `Imported ${activities.length} Strava activities from ${file.name}.`;
+        }
+        updateFitnessCards(true);
+        updateTodoSection();
+        updateAppHealthPanel();
+        showToast('Strava activities imported.');
+      } catch (error) {
+        showToast(`Strava import failed: ${error.message}`);
+      } finally {
+        event.target.value = '';
+      }
+    });
+  }
 
   // Initial render
   updateProjectSelects();
@@ -7945,6 +11565,34 @@ import {
   updateDashboard();
   updateTimerSection();
   loadStravaFeed();
+  if (
+    'serviceWorker' in navigator &&
+    window.location.protocol.startsWith('http')
+  ) {
+    offlineShellStatus = 'registering';
+    updateAppHealthPanel();
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      offlineShellStatus = 'active';
+      offlineShellError = '';
+      updateAppHealthPanel();
+    });
+    navigator.serviceWorker
+      .register('./service-worker.js')
+      .then(() => navigator.serviceWorker.ready)
+      .then(() => {
+        offlineShellStatus = navigator.serviceWorker.controller
+          ? 'active'
+          : 'ready-after-reload';
+        offlineShellError = '';
+        updateAppHealthPanel();
+      })
+      .catch((error) => {
+        offlineShellStatus = 'failed';
+        offlineShellError = error && error.message ? error.message : '';
+        console.warn('Service worker registration failed:', error);
+        updateAppHealthPanel();
+      });
+  }
   // Programmatically activate the Timer tab on first load. This ensures the Timer
   // section is displayed instead of the Dashboard when the page is opened. We
   // simulate a click on the Timer navigation item which will trigger the
@@ -7963,6 +11611,7 @@ import {
   const lastBackupStatusElem = document.getElementById('lastBackupStatus');
   const chooseBtn = document.getElementById('chooseBackupDirBtn');
   const backupNowBtn = document.getElementById('backupNowBtn');
+  const verifyBackupBtn = document.getElementById('verifyBackupBtn');
   const restoreBackupBtn = document.getElementById('restoreBackupBtn');
   function syncAutoSyncToggleUI() {
     if (!autoSyncToggle) return;
@@ -7988,35 +11637,45 @@ import {
         ? 'Write latest data, manifest, and a timestamped snapshot now.'
         : 'Select a backup folder first.';
     }
+    if (verifyBackupBtn) {
+      verifyBackupBtn.disabled = !folderUsable;
+      verifyBackupBtn.title = folderUsable
+        ? 'Write latest backup data, then read back the latest file, manifest, and snapshot.'
+        : 'Select a backup folder first.';
+    }
     if (restoreBackupBtn) {
       restoreBackupBtn.disabled = !folderUsable;
       restoreBackupBtn.title = folderUsable
         ? 'Restore timekeeper-data.json from the selected backup folder.'
         : 'Select a backup folder first.';
     }
-    if (autoSyncEnabled && folderUsable) {
+    if (backupConflict && folderUsable) {
       autoSyncStatusElem.textContent = backupName
-        ? `Auto sync is ON – syncing to “${backupName}”.`
-        : 'Auto sync is ON – syncing to your backup folder.';
+        ? `Auto sync is paused - "${backupName}" has newer backup data.`
+        : 'Auto sync is paused because the backup folder has newer data.';
+    } else if (autoSyncEnabled && folderUsable) {
+      autoSyncStatusElem.textContent = backupName
+        ? `Auto sync is ON - syncing to "${backupName}".`
+        : 'Auto sync is ON - syncing to your backup folder.';
     } else if (
       autoSyncEnabled &&
       hasHandle &&
       backupPermissionState !== 'granted'
     ) {
       autoSyncStatusElem.textContent = backupName
-        ? `Auto sync is ON but access to “${backupName}” must be re-authorized.`
+        ? `Auto sync is ON but access to "${backupName}" must be re-authorized.`
         : 'Auto sync is ON but access to the backup folder must be re-authorized.';
     } else if (autoSyncEnabled) {
       autoSyncStatusElem.textContent =
         'Auto sync is ON but no backup folder is available.';
     } else if (!autoSyncEnabled && folderUsable) {
       autoSyncStatusElem.textContent = backupName
-        ? `Auto sync is OFF – backup folder “${backupName}” is ready.`
-        : 'Auto sync is OFF – backup folder is ready.';
+        ? `Auto sync is OFF - backup folder "${backupName}" is ready.`
+        : 'Auto sync is OFF - backup folder is ready.';
     } else if (!autoSyncEnabled && hasHandle) {
       autoSyncStatusElem.textContent = backupName
-        ? `Auto sync is OFF – allow access to “${backupName}” to resume.`
-        : 'Auto sync is OFF – allow access to the backup folder to resume.';
+        ? `Auto sync is OFF - allow access to "${backupName}" to resume.`
+        : 'Auto sync is OFF - allow access to the backup folder to resume.';
     } else {
       autoSyncStatusElem.textContent =
         'Auto sync is OFF. No backup folder selected.';
@@ -8028,7 +11687,7 @@ import {
           warning = 'Select a backup folder to keep automatic backups running.';
         } else if (backupPermissionState === 'prompt') {
           warning = backupName
-            ? `Grant TimeKeeper access to “${backupName}” to keep automatic backups running.`
+            ? `Grant TimeKeeper access to "${backupName}" to keep automatic backups running.`
             : 'Grant TimeKeeper access to your backup folder to keep automatic backups running.';
         }
       }
@@ -8046,7 +11705,10 @@ import {
         const backupDate = new Date(data.lastBackupAt);
         if (!isNaN(backupDate)) {
           const snapshot = data.lastBackupSnapshotAt ? ' with snapshot' : '';
-          lastBackupStatusElem.textContent = `Last backup: ${relative}${snapshot}`;
+          const verified = data.lastBackupVerifiedAt
+            ? `, verified ${formatRelativeTime(data.lastBackupVerifiedAt)}`
+            : '';
+          lastBackupStatusElem.textContent = `Last backup: ${relative}${snapshot}${verified}`;
           lastBackupStatusElem.title = backupDate.toLocaleString();
           lastBackupStatusElem.style.display = 'block';
         } else {
@@ -8054,7 +11716,7 @@ import {
           lastBackupStatusElem.style.display = 'none';
         }
       } else if (autoSyncEnabled && folderUsable) {
-        lastBackupStatusElem.textContent = 'Last backup: pending…';
+        lastBackupStatusElem.textContent = 'Last backup: pending...';
         lastBackupStatusElem.title = '';
         lastBackupStatusElem.style.display = 'block';
       } else {
@@ -8062,6 +11724,66 @@ import {
         lastBackupStatusElem.style.display = 'none';
       }
     }
+    const backupHealthPanel = document.getElementById('backupHealthPanel');
+    if (backupHealthPanel) {
+      backupHealthPanel.innerHTML = '';
+      const updatedAt =
+        data && data.updatedAt ? new Date(data.updatedAt) : null;
+      const backupAt =
+        data && data.lastBackupAt ? new Date(data.lastBackupAt) : null;
+      const backupIsStale =
+        needsBackup ||
+        (updatedAt &&
+          !Number.isNaN(updatedAt.getTime()) &&
+          (!backupAt ||
+            Number.isNaN(backupAt.getTime()) ||
+            updatedAt.getTime() > backupAt.getTime()));
+      const items = [
+        ['Revision', String(Number(data.backupRevision) || 0)],
+        [
+          'Local change',
+          data.updatedAt ? formatRelativeTime(data.updatedAt) : 'none recorded'
+        ],
+        [
+          'Last backup',
+          data.lastBackupAt ? formatRelativeTime(data.lastBackupAt) : 'never'
+        ],
+        [
+          'Snapshot',
+          data.lastBackupSnapshotAt
+            ? formatRelativeTime(data.lastBackupSnapshotAt)
+            : 'none'
+        ],
+        [
+          'Verified',
+          data.lastBackupVerifiedAt
+            ? formatRelativeTime(data.lastBackupVerifiedAt)
+            : 'never'
+        ],
+        [
+          'Folder',
+          backupName
+            ? `${backupName} (${backupPermissionState})`
+            : backupPermissionState
+        ]
+      ];
+      items.forEach(([label, value]) => {
+        const pill = document.createElement('span');
+        pill.className = 'entry-summary-pill';
+        pill.textContent = `${label}: ${value}`;
+        backupHealthPanel.appendChild(pill);
+      });
+      if (backupIsStale || backupConflict) {
+        const warning = document.createElement('span');
+        warning.className = 'status-warning';
+        warning.textContent = backupConflict
+          ? 'Newer backup detected'
+          : 'Unsynced local changes';
+        backupHealthPanel.appendChild(warning);
+      }
+    }
+    renderBackupSnapshotsPanel();
+    updateAppHealthPanel();
   }
   if (autoSyncToggle) {
     updateAutoSyncStatus();
@@ -8075,7 +11797,8 @@ import {
         }
         if (!ensured || !backupDirHandle) {
           disableAutoSyncWithWarning(
-            'Permission to the backup folder is required to enable auto sync.'
+            backupWarningMessage ||
+              'Permission to the backup folder is required to enable auto sync.'
           );
           return;
         }
@@ -8115,6 +11838,11 @@ import {
       backupNowBtn.title =
         'Auto sync requires a browser that supports folder access.';
     }
+    if (verifyBackupBtn) {
+      verifyBackupBtn.disabled = true;
+      verifyBackupBtn.title =
+        'Auto sync requires a browser that supports folder access.';
+    }
     if (restoreBackupBtn) {
       restoreBackupBtn.disabled = true;
       restoreBackupBtn.title =
@@ -8131,8 +11859,13 @@ import {
   }
   if (backupNowBtn) {
     backupNowBtn.addEventListener('click', async () => {
-      const ok = await saveBackupToDir();
-      if (ok) alert('Backup written successfully.');
+      const ok = await saveBackupToDir({ promptOnConflict: true });
+      if (ok) showToast('Backup written successfully.');
+    });
+  }
+  if (verifyBackupBtn) {
+    verifyBackupBtn.addEventListener('click', () => {
+      verifyBackupRoundTrip();
     });
   }
   if (restoreBackupBtn) {

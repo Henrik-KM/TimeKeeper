@@ -3,14 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>TimeKeeper Pro – Offline</title>
+    <meta name="theme-color" content="#2563eb" />
+    <link rel="manifest" href="manifest.webmanifest" />
+    <title>TimeKeeper Pro - Offline</title>
     <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="stylesheet" href="style.css">
   </head>
   <body>
     <div class="sidebar">
-      <div class="logo">TimeTracker&nbsp;Pro</div>
+      <div class="logo">TimeKeeper&nbsp;Pro</div>
       <ul id="navList">
         <!-- Set Dashboard tab without active class; we will programmatically activate the Timer tab on load -->
         <li data-section="dashboard" class="active">Dashboard</li>
@@ -28,6 +30,7 @@
       <section id="dashboard" class="section">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
         <div class="stats-grid" id="statsGrid"></div>
+        <div id="appHealthPanel" class="app-health-panel"></div>
         <div id="projectOverview"></div>
         <div id="detailedBreakdown"></div>
 
@@ -36,11 +39,11 @@
 
         <!-- Scatter charts for project progress -->
         <div class="card" id="weeklyScatterCard">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Weekly (Expected vs Actual)</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress - Weekly (Expected vs Actual)</h3>
           <canvas id="weeklyScatter" height="320"></canvas>
         </div>
         <div class="card" id="monthlyScatterCard">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress – Monthly (Expected vs Actual)</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Project Progress - Monthly (Expected vs Actual)</h3>
           <canvas id="monthlyScatter" height="320"></canvas>
         </div>
 
@@ -66,21 +69,22 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Start Timer</h3>
           <label for="timerProjectPro" style="margin-bottom:0.25rem; font-weight:500;">Project</label>
           <select id="timerProjectPro" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
+          <label for="timerDescriptionPro" style="margin-bottom:0.25rem; font-weight:500;">Description (optional)</label>
+          <input id="timerDescriptionPro" type="text" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="What are you working on?" />
           <label for="timerInitialPro" style="margin-bottom:0.25rem; font-weight:500;">Hours already spent (optional)</label>
           <input id="timerInitialPro" type="number" min="0" step="0.1" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 0.5" />
           <!-- Allow the user to choose the initial focus factor when starting a timer -->
-          <label for="startFactorPro" style="margin-bottom:0.25rem; font-weight:500;">Focus factor</label>
+          <label for="startFactorPro" style="margin-bottom:0.25rem; font-weight:500;">Focus</label>
           <select id="startFactorPro" style="padding:0.5rem; margin-bottom:0.5rem; width:100%; border:1px solid #cbd5e1; border-radius:0.375rem;">
-            <option value="">Auto</option>
-            <option value="2">200% - you + 2+ agents</option>
+            <option value="1" selected>100% - you</option>
             <option value="1.5">150% - you + agent</option>
-            <option value="1">100% - you</option>
-            <option value="0.75">75%</option>
+            <option value="2">200% - you + 2+ agents</option>
             <option value="0.5">50% - agent</option>
             <option value="0.25">25% - unmonitored agent</option>
           </select>
           <div id="timerRecommendationPro" class="timer-recommendation" aria-live="polite"></div>
           <div id="recentTimersPro" class="timer-recent"></div>
+          <button id="pinTimerPresetBtnPro" type="button" class="btn secondary" style="padding:0.5rem 0.9rem; font-size:0.9rem; margin:0 0.5rem 0.5rem 0;">Pin Timer</button>
           <button id="startTimerBtnPro" class="btn primary" disabled style="padding:0.75rem 1.5rem; font-size:1rem;">Start</button>
         </div>
         <div id="runningTimerPro" class="card" style="display:none;">
@@ -128,6 +132,10 @@
             <button type="submit" class="btn primary" style="align-self:flex-start;">Add Project</button>
           </form>
         </div>
+        <label class="switch-label" style="margin:0.5rem 0 1rem;">
+          <input type="checkbox" id="showArchivedProjectsToggle" />
+          <span>Show archived projects</span>
+        </label>
         <div id="projectsPageList"></div>
       </section>
       <!-- Entries Section -->
@@ -153,8 +161,18 @@
               <span>Search</span>
               <input id="entrySearchInput" type="search" placeholder="Description, project, or client" autocomplete="off" />
             </label>
+            <label class="entry-filter">
+              <span>From</span>
+              <input id="entryDateFromInput" type="date" />
+            </label>
+            <label class="entry-filter">
+              <span>To</span>
+              <input id="entryDateToInput" type="date" />
+            </label>
+            <button id="entryDateClearBtn" type="button" class="btn secondary">Clear Dates</button>
           </div>
           <div id="entrySummaryPro" class="entry-summary" aria-live="polite"></div>
+          <div id="entryBulkActions" class="entry-bulk-actions" aria-live="polite"></div>
           <div id="manualEntryFormPro" class="hidden" style="margin-top:1rem;">
             <h4 style="margin:0 0 0.5rem 0; font-size:1rem; font-weight:600;">New Manual Entry</h4>
             <form id="manualFormPro" style="display:flex; flex-direction:column; gap:0.5rem;">
@@ -162,13 +180,25 @@
               <select id="manualProjectPro" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;"></select>
               <label for="manualDescriptionPro" style="font-weight:500;">Description (optional)</label>
               <input id="manualDescriptionPro" type="text" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-              <label for="manualHoursPro" style="font-weight:500;">Hours</label>
-              <!-- Hours input with nudge buttons for ±5 minutes -->
+              <label for="manualStartPro" style="font-weight:500;">Start Time (optional)</label>
+              <input id="manualStartPro" type="datetime-local" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+              <label for="manualEndPro" style="font-weight:500;">End Time (optional)</label>
+              <input id="manualEndPro" type="datetime-local" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
+              <label for="manualHoursPro" style="font-weight:500;">Wall-Clock Hours</label>
+              <!-- Hours input with nudge buttons for +/-5 minutes -->
               <div style="display:flex; align-items:center; gap:0.5rem;">
                 <input id="manualHoursPro" type="number" min="0" step="0.1" style="flex:1; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" placeholder="e.g. 2" />
                 <button type="button" id="manualMinus5Btn" class="btn secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">-5m</button>
                 <button type="button" id="manualPlus5Btn" class="btn secondary" style="padding:0.25rem 0.5rem; font-size:0.75rem;">+5m</button>
               </div>
+              <label for="manualFactorPro" style="font-weight:500;">Focus</label>
+              <select id="manualFactorPro" style="padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
+                <option value="1" selected>100% - you</option>
+                <option value="1.5">150% - you + agent</option>
+                <option value="2">200% - you + 2+ agents</option>
+                <option value="0.5">50% - agent</option>
+                <option value="0.25">25% - unmonitored agent</option>
+              </select>
               <button type="submit" class="btn primary" style="align-self:flex-start;">Save Entry</button>
               <button type="button" id="cancelManualBtnPro" class="btn secondary" style="align-self:flex-start;">Cancel</button>
             </form>
@@ -177,11 +207,13 @@
             <table>
               <thead>
                 <tr>
+                  <th>Select</th>
                   <th>Project</th>
                   <th>Description</th>
                   <th>Start</th>
                   <th>End</th>
                   <th>Duration</th>
+                  <th>Focus</th>
                   <th>Total</th>
                   <th>Actions</th>
                 </tr>
@@ -202,6 +234,11 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Import Data</h3>
           <input id="importInputPro" type="file" accept="application/json" />
         </div>
+        <div class="card" style="margin-top:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Strava Export Import</h3>
+          <p class="status-muted">Import TimeKeeper-compatible Strava JSON or the activities.csv file from Strava's free data export.</p>
+          <input id="stravaImportInput" type="file" accept="application/json,.json,text/csv,.csv" />
+        </div>
 
         <!-- Auto Sync card: allows toggling automatic periodic export of data -->
         <div class="card" style="margin-top:1rem;">
@@ -213,12 +250,15 @@
           <p id="autoSyncStatus" style="font-size:0.8rem; color:#64748b; margin-top:0.5rem;"></p>
           <p id="autoSyncWarning" class="status-warning" style="display:none;"></p>
           <p id="lastBackupStatus" class="status-muted" style="display:none;"></p>
+          <div id="backupHealthPanel" class="backup-health-panel"></div>
         <!-- Button to choose backup directory when enabling auto sync -->
         <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
           <button id="chooseBackupDirBtn" class="btn secondary">Set Backup Folder</button>
           <button id="backupNowBtn" class="btn secondary">Backup Now</button>
+          <button id="verifyBackupBtn" class="btn secondary">Verify Backup</button>
           <button id="restoreBackupBtn" class="btn secondary">Restore Latest Backup</button>
         </div>
+          <div id="backupSnapshotsPanel" class="backup-snapshots-panel"></div>
         </div>
       </section>
 

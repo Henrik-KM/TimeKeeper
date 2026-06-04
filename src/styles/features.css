@@ -552,6 +552,10 @@ tr:nth-child(even) td {
 
 /* Responsive adjustments */
 @media (max-width: 640px) {
+  #grocery .card {
+    margin-bottom: 1rem;
+    padding: 0.875rem;
+  }
   #wealthDashboardCard {
     overflow-x: auto;
   }
@@ -566,6 +570,49 @@ tr:nth-child(even) td {
   }
   .wealth-chart-wrapper {
     min-width: 680px;
+  }
+  .wealth-history-table {
+    min-width: 560px;
+  }
+  .wealth-history-scroll {
+    max-height: none;
+    overflow-x: auto;
+  }
+  #grocery form {
+    flex-direction: column;
+    align-items: stretch !important;
+  }
+  #grocery input,
+  #grocery select,
+  #grocery .btn {
+    width: 100% !important;
+  }
+  #grocery .wealth-summary {
+    font-size: 0.95rem;
+    line-height: 1.45;
+  }
+  #monthlyRecurringList li,
+  #weeklyGroceryList li,
+  #monthlyGroceryList li,
+  #biannualGroceryList li,
+  #archivedGroceryList li {
+    align-items: stretch !important;
+  }
+  #monthlyRecurringList li > div,
+  #weeklyGroceryList li > div,
+  #monthlyGroceryList li > div,
+  #biannualGroceryList li > div,
+  #archivedGroceryList li > div {
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+  #monthlyRecurringList .btn,
+  #weeklyGroceryList .btn,
+  #monthlyGroceryList .btn,
+  #biannualGroceryList .btn,
+  #archivedGroceryList .btn {
+    flex: 1 1 auto;
+    min-height: 2.25rem;
   }
   .sidebar {
     width: 100%;

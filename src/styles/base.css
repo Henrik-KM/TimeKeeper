@@ -1,4 +1,4 @@
-/* Stylesheet for TimeTracker Pro */
+/* Stylesheet for TimeKeeper Pro */
 
 /* Reset and base typography */
 *,
@@ -71,4 +71,356 @@ body {
 #timer .timer-chip:hover {
   border-color: #3b82f6;
   color: #1d4ed8;
+}
+
+#timer .timer-chip-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+#timer .timer-chip-unpin {
+  border: 1px solid #fecaca;
+  border-radius: 999px;
+  background: #fff;
+  color: #b91c1c;
+  cursor: pointer;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.4rem 0.55rem;
+}
+
+#timer .timer-chip-unpin:hover {
+  background: #fef2f2;
+  border-color: #f87171;
+}
+
+.app-toast-region {
+  position: fixed;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.app-toast {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.16);
+  color: #0f172a;
+  font-size: 0.9rem;
+}
+
+.app-toast button,
+.modal-actions button {
+  white-space: nowrap;
+}
+
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.42);
+}
+
+.modal-panel {
+  width: min(42rem, 100%);
+  max-height: min(44rem, calc(100vh - 2rem));
+  overflow: auto;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.28);
+}
+
+.modal-header,
+.modal-body,
+.modal-actions {
+  padding: 1rem;
+}
+
+.modal-header {
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-title {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.modal-body {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.modal-field {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.modal-field label {
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.modal-field input,
+.modal-field select,
+.modal-field textarea,
+.command-input {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+  font: inherit;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.entry-bulk-actions,
+.backup-health-panel,
+.focus-status-panel {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0.5rem 0;
+  padding: 0.6rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+  font-size: 0.85rem;
+}
+
+.backup-snapshots-panel {
+  display: grid;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #ffffff;
+  font-size: 0.85rem;
+}
+
+.backup-snapshots-header,
+.backup-snapshot-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.backup-snapshots-header h4 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 0.95rem;
+}
+
+.backup-snapshot-list {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.backup-snapshot-row {
+  padding: 0.5rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.45rem;
+  background: #f8fafc;
+}
+
+.backup-snapshot-meta {
+  display: grid;
+  gap: 0.15rem;
+}
+
+.app-health-panel {
+  display: grid;
+  gap: 0.75rem;
+  margin: -0.75rem 0 1.5rem;
+  padding: 0.85rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.app-health-header,
+.app-health-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.app-health-header h3 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 1rem;
+}
+
+.app-health-header p {
+  margin: 0.2rem 0 0;
+  color: #64748b;
+  font-size: 0.8rem;
+}
+
+.app-health-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.5rem;
+}
+
+.app-health-item {
+  align-items: flex-start;
+  padding: 0.6rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.app-health-copy {
+  display: grid;
+  gap: 0.15rem;
+  min-width: 0;
+}
+
+.app-health-label {
+  color: #0f172a;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.app-health-detail {
+  color: #64748b;
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.app-health-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.entry-select-cell {
+  width: 1%;
+  white-space: nowrap;
+}
+
+.timer-running-row {
+  display: grid;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.timer-warning {
+  display: grid;
+  gap: 0.25rem;
+  padding: 0.5rem 0.6rem;
+  border: 1px solid #fca5a5;
+  border-radius: 0.45rem;
+  background: #fef2f2;
+  color: #991b1b;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.timer-running-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem;
+}
+
+.timer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.command-palette {
+  width: min(44rem, 100%);
+}
+
+.command-list {
+  display: grid;
+  gap: 0.35rem;
+  max-height: 24rem;
+  overflow: auto;
+}
+
+.command-result {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.45rem;
+  background: #fff;
+  text-align: left;
+  cursor: pointer;
+}
+
+.command-result:hover {
+  border-color: #3b82f6;
+}
+
+@media (max-width: 720px) {
+  .app-toast-region {
+    right: 0.5rem;
+    bottom: 0.5rem;
+    width: calc(100vw - 1rem);
+  }
+
+  .modal-actions {
+    flex-direction: column-reverse;
+  }
+
+  .modal-actions .btn {
+    width: 100%;
+  }
+
+  .backup-snapshots-header,
+  .backup-snapshot-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .app-health-panel {
+    margin-top: -0.5rem;
+  }
+
+  .app-health-header,
+  .app-health-item {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }

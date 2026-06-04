@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "focus:blocker": "node scripts/focus-blocker.mjs",
+    "focus:blocker:self-test": "node scripts/focus-blocker.mjs --self-test",
     "focus:blocker:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-focus-blocker.ps1",
     "focus:blocker:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/uninstall-focus-blocker.ps1",
     "lint": "eslint . --ext .js,.mjs",
