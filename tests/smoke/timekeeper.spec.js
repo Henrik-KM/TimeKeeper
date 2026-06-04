@@ -1412,7 +1412,7 @@ test('Strava feed falls back to browser cache when the published feed is empty',
   );
 });
 
-test('weekly project targets spend rolling 30-day surplus before showing behind', async ({
+test('weekly project targets follow the project daily rate without rolling surplus credit', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-24T12:00:00');
@@ -1447,10 +1447,10 @@ test('weekly project targets spend rolling 30-day surplus before showing behind'
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
 
-  await expect(page.locator('#statsGrid')).toContainText('Anders: 2.0 / 0.0h');
+  await expect(page.locator('#statsGrid')).toContainText('Anders: 2.0 / 8.3h');
 });
 
-test('timer recommendation uses the project with the most hours left today', async ({
+test('timer recommendation uses remaining project hours over workdays left', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-24T12:00:00');
@@ -1462,6 +1462,14 @@ test('timer recommendation uses the project with the most hours left today', asy
         budgetHours: 100,
         startDate: '2026-04-01',
         deadline: '2026-05-31'
+      }),
+      projectFixture({
+        id: 'iflai',
+        name: 'IFLAI',
+        budgetHours: 100,
+        startDate: '2026-04-01',
+        deadline: '2026-05-31',
+        color: '#16a34a'
       }),
       projectFixture({
         id: 'beta',
@@ -1486,6 +1494,13 @@ test('timer recommendation uses the project with the most hours left today', asy
         startTime: '2026-04-22T09:00:00.000',
         endTime: '2026-04-22T11:00:00.000',
         hours: 2
+      }),
+      entryFixture({
+        id: 'iflai-prior-work',
+        projectId: 'iflai',
+        startTime: '2026-04-10T09:00:00.000',
+        endTime: '2026-04-10T11:00:00.000',
+        hours: 20
       })
     ]
   });
@@ -1493,10 +1508,10 @@ test('timer recommendation uses the project with the most hours left today', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /Beta.*Recommended.*today/
+    /IFLAI.*Recommended.*needs ~3\.1h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    /Recommended: Beta .*h left today/
+    'Recommended: IFLAI - 3.1h left today'
   );
 });
 

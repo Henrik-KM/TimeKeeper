@@ -7117,7 +7117,6 @@ import {
       new Date(now.getFullYear(), now.getMonth(), now.getDate()),
       1
     );
-    const todayStart = startOfLocalDay(now);
     const projectNotStarted = now < created;
     const totalProjectDays = deadlineEndExclusive
       ? Math.max(1, diffCalendarDays(created, deadlineEndExclusive))
@@ -7311,25 +7310,17 @@ import {
       monthStart,
       startNextMonth
     );
-    const todayPlanningSnapshot = getProjectPlanningSnapshot(
-      project,
-      entries,
-      todayStart
-    );
     const rollingTargetStart = maxDate(rollingBounds.start, created);
-    const rollingWorkdays = rollingTargetStart
-      ? countWorkdays(rollingTargetStart, rollingBounds.endExclusive)
+    const rolling30TargetConst = rollingTargetStart
+      ? getProjectPlannedHoursForPeriod(
+          project,
+          entries,
+          rollingTargetStart,
+          rollingBounds.endExclusive
+        )
       : 0;
-    const rolling30TargetConst =
-      todayPlanningSnapshot.dailyRate * rollingWorkdays;
-    const rolling30SurplusHours = getProjectRollingSurplusAtWeekStart(
-      project,
-      entries,
-      created,
-      weekStart
-    );
+    const rolling30SurplusHours = 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
-    weeklyTargetConst = Math.max(0, weeklyTargetConst - rolling30SurplusHours);
     if (projectNotStarted) {
       monthlyTargetConst = 0;
       weeklyTargetConst = 0;
@@ -7437,39 +7428,12 @@ import {
     return sumEntryHours(projectEntries, start, end);
   }
 
-  function getProjectRollingSurplusAtWeekStart(
-    project,
-    entries,
-    created,
-    weekStart
-  ) {
-    const rollingEndExclusive = weekStart;
-    const rollingStart = addLocalDays(rollingEndExclusive, -30);
-    const effectiveRollingStart = maxDate(rollingStart, created);
-    if (
-      !effectiveRollingStart ||
-      !rollingEndExclusive ||
-      effectiveRollingStart >= rollingEndExclusive
-    ) {
-      return 0;
-    }
-    const rollingHoursBeforeWeek = sumEntryHours(
-      entries,
-      effectiveRollingStart,
-      rollingEndExclusive
-    );
-    const rollingTargetBeforeWeek = getProjectPlannedHoursForPeriod(
-      project,
-      entries,
-      effectiveRollingStart,
-      rollingEndExclusive
-    );
-    return Math.max(0, rollingHoursBeforeWeek - rollingTargetBeforeWeek);
-  }
-
   function getProjectDailyPlan(project, stats, context) {
     const weekContext = context || getCurrentWeekPlanningContext();
     const projectStats = stats || computeProjectStats(project);
+    const entries = data.entries.filter(
+      (entry) => entry.projectId === project.id && !entry.isRunning
+    );
     const todayHours = getProjectCompletedHoursForPeriod(
       project.id,
       weekContext.todayStart,
@@ -7484,14 +7448,14 @@ import {
       0,
       Number(projectStats.weeklyTargetConst) || 0
     );
-    const remainingAtStartOfDay = Math.max(
-      0,
-      weeklyTarget - weekHoursBeforeToday
+    const todayIsWorkday =
+      countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
+    const todaySnapshot = getProjectPlanningSnapshot(
+      project,
+      entries,
+      weekContext.todayStart
     );
-    const dailyTarget =
-      weekContext.workDaysLeftInWeek > 0
-        ? remainingAtStartOfDay / weekContext.workDaysLeftInWeek
-        : 0;
+    const dailyTarget = todayIsWorkday ? todaySnapshot.dailyRate : 0;
     return {
       todayHours,
       dailyTarget,
@@ -7572,9 +7536,6 @@ import {
     let todaySeconds = 0;
     let yesterdaySeconds = 0;
     let weekSeconds = 0;
-    // Track weekly seconds accrued before today so the daily target can be
-    // calculated based on the week's remaining hours at the start of the day.
-    let weekSecondsStartOfDay = 0;
     let monthSeconds = 0;
     let rollingSeconds = 0;
     let totalRevenue = 0;
@@ -7593,19 +7554,19 @@ import {
     let weeklyTarget = 0;
     let monthTarget = 0;
     let rollingTarget = 0;
-    // We'll compute dailyTarget based on remaining monthly hours later
     let dailyTarget = 0;
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, now)
     );
+    const weekContext = getCurrentWeekPlanningContext(now);
     activeProjects.forEach((project) => {
       const sp = computeProjectStats(project);
       weeklyTarget += sp.weeklyTargetConst || 0;
       monthTarget += sp.monthlyTargetConst || 0;
       rollingTarget += sp.rolling30TargetConst || 0;
+      dailyTarget += getProjectDailyPlan(project, sp, weekContext).dailyTarget;
     });
     const rollingBounds = getRollingWindowBounds(now);
-    // Daily target will be computed later once monthHours is known.
     data.entries.forEach((entry) => {
       if (entry.isRunning || !entry.duration) return;
       const start = new Date(entry.startTime);
@@ -7623,10 +7584,6 @@ import {
       if (start >= weekStart) {
         weekSeconds += entry.duration;
         weekRevenue += hours * project.hourlyRate;
-        // Count weekly seconds before today separately for computing the daily target.
-        if (start < todayStart) {
-          weekSecondsStartOfDay += entry.duration;
-        }
       }
       if (start >= monthStart) {
         monthSeconds += entry.duration;
@@ -7694,32 +7651,6 @@ import {
         ? ((todayRevenue - yesterdayRevenue) / yesterdayRevenue) * 100
         : null;
 
-    // --- Daily Target Calculation ---
-    // We want the daily target to remain constant throughout a given day. To accomplish this,
-    // we base it on the weekly target and hours remaining at the *start* of the day. The weekly
-    // target itself changes as you work, since monthly remaining hours shrink. If we used the
-    // current weekly target, the daily target would shrink during the day as you record more
-    // hours, which is confusing. Instead, we compute a weekly target snapshot for the start
-    // of the day using monthly remaining hours at the start of the day.
-    const weekHoursStartOfDay = weekSecondsStartOfDay / 3600;
-    // Use the weekly target snapshot (computed from each project's week-start plan) so the
-    // daily target aligns with the "This Week" card and does not drop to zero mid-week.
-    const weeklyTargetStartOfDay = weeklyTarget;
-    // The weekly remaining hours at the start of the day is the difference between this snapshot
-    // weekly target and the hours already worked this week before today.
-    const weeklyRemainingStart = weeklyTargetStartOfDay - weekHoursStartOfDay;
-    // Determine the start of next week (Monday at 00:00) by adding 7 days to the current weekStart.
-    const startNextWeekDT = new Date(
-      weekStart.getTime() + 7 * 24 * 60 * 60 * 1000
-    );
-    // Count working days remaining in this week (including today) by using todayStart. Using
-    // todayStart ensures that partial days are counted as a full day for the target distribution.
-    const workDaysLeftInWeekDT = countWorkdays(todayStart, startNextWeekDT);
-    let computedDailyTarget = 0;
-    if (weeklyRemainingStart > 0 && workDaysLeftInWeekDT > 0) {
-      computedDailyTarget = weeklyRemainingStart / workDaysLeftInWeekDT;
-    }
-    dailyTarget = computedDailyTarget;
     return {
       todayHours,
       yesterdayHours,
