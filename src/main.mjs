@@ -2597,15 +2597,27 @@ import {
             ? `active (${focusBlockerDesktopStatus.blockedSites.length} sites)`
             : 'reachable, not blocking'
           : 'not reachable';
-    const summary = document.createElement('span');
-    summary.textContent = `Paid focus: ${formatFocusPercent(paidFocus)} - request: ${desiredLabel} - desktop: ${helperLabel}`;
-    focusStatus.appendChild(summary);
+    const details = document.createElement('details');
+    details.className = 'focus-status-details';
+    const summary = document.createElement('summary');
+    summary.className = 'focus-status-summary';
+    const title = document.createElement('span');
+    title.className = 'focus-status-title';
+    title.textContent = `Desktop blocker: ${helperLabel}`;
+    const meta = document.createElement('span');
+    meta.className = desiredActive ? 'status-warning' : 'status-muted';
+    meta.textContent = `Paid focus: ${formatFocusPercent(paidFocus)} - request: ${desiredLabel}`;
+    summary.appendChild(title);
+    summary.appendChild(meta);
+    details.appendChild(summary);
+    const body = document.createElement('div');
+    body.className = 'focus-status-body';
     const configuredSites = getFocusBlockedWebsites();
     const sitesSummary = document.createElement('span');
     sitesSummary.className = 'status-muted';
     sitesSummary.textContent = `Configured blocked sites: ${configuredSites.length}`;
     sitesSummary.title = configuredSites.join(', ');
-    focusStatus.appendChild(sitesSummary);
+    body.appendChild(sitesSummary);
     const bridgeConfig = getFocusBridgeConfig();
     const bridgeSummary = document.createElement('span');
     bridgeSummary.className = focusBridgeStatus.error
@@ -2623,13 +2635,15 @@ import {
     bridgeSummary.textContent = `Focus bridge: ${bridgeLabel}`;
     bridgeSummary.title =
       focusBridgeStatus.apiUrl || getFocusBridgeApiUrl(bridgeConfig) || '';
-    focusStatus.appendChild(bridgeSummary);
+    body.appendChild(bridgeSummary);
     if (focusBlockerDesktopStatus.error) {
       const error = document.createElement('span');
       error.className = 'status-warning';
       error.textContent = focusBlockerDesktopStatus.error;
-      focusStatus.appendChild(error);
+      body.appendChild(error);
     }
+    const actions = document.createElement('div');
+    actions.className = 'focus-status-actions';
     const checkButton = document.createElement('button');
     checkButton.type = 'button';
     checkButton.className = 'btn secondary';
@@ -2637,7 +2651,7 @@ import {
     checkButton.addEventListener('click', () => {
       checkFocusBlockerStatus({ quiet: false });
     });
-    focusStatus.appendChild(checkButton);
+    actions.appendChild(checkButton);
     const editSitesButton = document.createElement('button');
     editSitesButton.type = 'button';
     editSitesButton.className = 'btn secondary';
@@ -2645,7 +2659,7 @@ import {
     editSitesButton.addEventListener('click', () => {
       editFocusBlockedWebsites();
     });
-    focusStatus.appendChild(editSitesButton);
+    actions.appendChild(editSitesButton);
     const bridgeButton = document.createElement('button');
     bridgeButton.type = 'button';
     bridgeButton.className = 'btn secondary';
@@ -2655,7 +2669,7 @@ import {
     bridgeButton.addEventListener('click', () => {
       editFocusBridgeSettings();
     });
-    focusStatus.appendChild(bridgeButton);
+    actions.appendChild(bridgeButton);
     const publishBridgeButton = document.createElement('button');
     publishBridgeButton.type = 'button';
     publishBridgeButton.className = 'btn secondary';
@@ -2665,7 +2679,7 @@ import {
     publishBridgeButton.addEventListener('click', () => {
       publishFocusBridgeState(getPaidFocusTotal(), { force: true });
     });
-    focusStatus.appendChild(publishBridgeButton);
+    actions.appendChild(publishBridgeButton);
     const selfTestButton = document.createElement('button');
     selfTestButton.type = 'button';
     selfTestButton.className = 'btn secondary';
@@ -2675,7 +2689,7 @@ import {
     selfTestButton.addEventListener('click', () => {
       runDesktopBlockerSelfTest({ quiet: false });
     });
-    focusStatus.appendChild(selfTestButton);
+    actions.appendChild(selfTestButton);
     const testButton = document.createElement('button');
     testButton.type = 'button';
     testButton.className = 'btn secondary';
@@ -2696,7 +2710,10 @@ import {
         checkFocusBlockerStatus({ quiet: false });
       }, 800);
     });
-    focusStatus.appendChild(testButton);
+    actions.appendChild(testButton);
+    body.appendChild(actions);
+    details.appendChild(body);
+    focusStatus.appendChild(details);
   }
 
   async function checkFocusBlockerStatus({ quiet = true } = {}) {
@@ -3120,22 +3137,27 @@ import {
     const panel = document.getElementById('appHealthPanel');
     if (!panel) return;
     panel.innerHTML = '';
-    const header = document.createElement('div');
-    header.className = 'app-health-header';
-    const headingGroup = document.createElement('div');
-    const heading = document.createElement('h3');
+    const items = getAppHealthItems();
+    const needsAttention = items.filter((item) => item.tone !== 'green');
+    const details = document.createElement('details');
+    details.className = 'app-health-details';
+    const summary = document.createElement('summary');
+    summary.className = 'app-health-summary';
+    const heading = document.createElement('span');
+    heading.className = 'app-health-summary-title';
     heading.textContent = 'App Health';
-    const subheading = document.createElement('p');
-    subheading.textContent =
-      'Backup, Strava, blocker, offline cache, and local data status.';
-    headingGroup.appendChild(heading);
-    headingGroup.appendChild(subheading);
-    header.appendChild(headingGroup);
-    panel.appendChild(header);
+    const summaryText = document.createElement('span');
+    summaryText.className = 'app-health-summary-text';
+    summaryText.textContent = needsAttention.length
+      ? `${needsAttention.length} check${needsAttention.length === 1 ? '' : 's'} need attention`
+      : 'All checks OK';
+    summary.appendChild(heading);
+    summary.appendChild(summaryText);
+    details.appendChild(summary);
 
     const grid = document.createElement('div');
     grid.className = 'app-health-grid';
-    getAppHealthItems().forEach((item) => {
+    items.forEach((item) => {
       const row = document.createElement('div');
       row.className = 'app-health-item';
       const copy = document.createElement('div');
@@ -3165,7 +3187,8 @@ import {
       }
       grid.appendChild(row);
     });
-    panel.appendChild(grid);
+    details.appendChild(grid);
+    panel.appendChild(details);
   }
 
   function queueFocusBlockerStatusCheck() {
@@ -9199,6 +9222,9 @@ import {
       runningDiv.style.display = '';
       // Keep the start form visible to allow starting additional timers
       startDiv.style.display = '';
+      if (startDiv.parentNode === runningDiv.parentNode) {
+        startDiv.parentNode.insertBefore(runningDiv, startDiv);
+      }
       // Clear and rebuild the running timers list
       runningDiv.innerHTML = '';
       // Sticky toolbar so it's hard to lose "Stop All Timers" while scrolling.
@@ -9248,6 +9274,7 @@ import {
       });
       toolbar.appendChild(stopAllBtn);
       runningDiv.appendChild(toolbar);
+      updateFocusStatusPanel(getPaidFocusTotal());
       // Render each running entry
       runningEntries.forEach((entry) => {
         const project = data.projects.find((p) => p.id === entry.projectId);
@@ -9526,7 +9553,6 @@ import {
         const totalFactorSpan = document.getElementById('runningTotalFactor');
         if (totalFactorSpan)
           totalFactorSpan.textContent = Math.round(totalFactor * 100) + '%';
-        updateFocusStatusPanel(getPaidFocusTotal());
       };
       tick();
       timerInterval = setInterval(tick, 1000);
@@ -9535,6 +9561,9 @@ import {
       runningDiv.style.display = 'none';
       runningDiv.innerHTML = '';
       startDiv.style.display = '';
+      if (startDiv.parentNode === runningDiv.parentNode) {
+        startDiv.parentNode.insertBefore(startDiv, runningDiv);
+      }
     }
     // update project selects
     updateProjectSelects();

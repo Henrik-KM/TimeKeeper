@@ -198,8 +198,7 @@ body {
 }
 
 .entry-bulk-actions,
-.backup-health-panel,
-.focus-status-panel {
+.backup-health-panel {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -210,6 +209,49 @@ body {
   border-radius: 0.5rem;
   background: #f8fafc;
   font-size: 0.85rem;
+}
+
+.focus-status-panel {
+  margin: 0.4rem 0 0.6rem;
+  font-size: 0.85rem;
+}
+
+.focus-status-details {
+  border: 1px solid #e2e8f0;
+  border-radius: 0.5rem;
+  background: #f8fafc;
+}
+
+.focus-status-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.5rem 0.65rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.focus-status-summary::-webkit-details-marker {
+  display: none;
+}
+
+.focus-status-title {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.focus-status-body {
+  display: grid;
+  gap: 0.5rem;
+  padding: 0 0.65rem 0.65rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.focus-status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
 }
 
 .backup-snapshots-panel {
@@ -258,17 +300,17 @@ body {
 }
 
 .app-health-panel {
-  display: grid;
-  gap: 0.75rem;
-  margin: -0.75rem 0 1.5rem;
-  padding: 0.85rem;
+  margin: 1rem 0 0;
+}
+
+.app-health-details {
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
-.app-health-header,
+.app-health-summary,
 .app-health-item {
   display: flex;
   align-items: center;
@@ -276,14 +318,23 @@ body {
   gap: 0.75rem;
 }
 
-.app-health-header h3 {
-  margin: 0;
-  color: #0f172a;
-  font-size: 1rem;
+.app-health-summary {
+  padding: 0.65rem 0.85rem;
+  cursor: pointer;
+  list-style: none;
 }
 
-.app-health-header p {
-  margin: 0.2rem 0 0;
+.app-health-summary::-webkit-details-marker {
+  display: none;
+}
+
+.app-health-summary-title {
+  color: #0f172a;
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.app-health-summary-text {
   color: #64748b;
   font-size: 0.8rem;
 }
@@ -292,6 +343,8 @@ body {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
   gap: 0.5rem;
+  padding: 0.75rem;
+  border-top: 1px solid #e2e8f0;
 }
 
 .app-health-item {
@@ -414,11 +467,34 @@ body {
     flex-direction: column;
   }
 
-  .app-health-panel {
-    margin-top: -0.5rem;
+  #timer .running-timers-toolbar {
+    position: static;
+    padding-bottom: 0.55rem;
+    margin-bottom: 0.55rem;
   }
 
-  .app-health-header,
+  #timer .card {
+    margin-bottom: 1rem;
+    padding: 0.875rem;
+  }
+
+  #timer .timer-running-row {
+    padding: 0.65rem;
+  }
+
+  #timer .timer-actions,
+  #timer .focus-status-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #timer .timer-actions .btn,
+  #timer .timer-actions select,
+  #timer .focus-status-actions .btn {
+    width: 100%;
+  }
+
+  .app-health-summary,
   .app-health-item {
     align-items: stretch;
     flex-direction: column;

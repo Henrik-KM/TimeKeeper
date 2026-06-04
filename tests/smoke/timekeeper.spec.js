@@ -60,6 +60,12 @@ async function gotoSection(page, sectionId, headingText) {
   }
 }
 
+async function expandDetails(container, summaryText) {
+  const details = container.locator('details').filter({ hasText: summaryText });
+  await details.locator('summary').click();
+  await expect(details).toHaveAttribute('open', '');
+}
+
 function projectFixture(overrides = {}) {
   return {
     id: overrides.id || 'project',
@@ -195,8 +201,9 @@ test('dashboard app health summarizes data, backup, Strava, blocker, and offline
   await expect(health).toContainText('Strava Feed');
   await expect(health).toContainText('1 activities');
   await expect(health).toContainText('Desktop Blocker');
-  await expect(health).toContainText('Self-Test');
   await expect(health).toContainText('Offline App');
+  await expandDetails(health, 'App Health');
+  await expect(health).toContainText('Self-Test');
 });
 
 test('dashboard app health can repair local data integrity issues', async ({
@@ -301,6 +308,7 @@ test('dashboard app health can repair local data integrity issues', async ({
   await expect(health).toContainText('Local Data');
   await expect(health).toContainText('Issues');
   await expect(health).toContainText('orphan entries');
+  await expandDetails(health, 'App Health');
   await expect(
     health.getByRole('button', { name: 'Repair Data' })
   ).toBeVisible();
@@ -343,6 +351,7 @@ test('dashboard app health can repair local data integrity issues', async ({
 
   await expect(health).toContainText('Review');
   await expect(health).toContainText('running timers need review');
+  await expandDetails(health, 'App Health');
   await health.getByRole('button', { name: 'Review Timers' }).click();
   await expect(
     page.getByRole('heading', { name: 'Timer', exact: true })
@@ -1828,11 +1837,12 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
   await expect
     .poll(async () => page.evaluate(() => window['__focusWindowOpens'] || []))
     .toEqual([]);
+  await expandDetails(page.locator('#runningFocusStatus'), 'Desktop blocker');
   await expect(
     page.getByRole('button', { name: 'Check Desktop Blocker' })
   ).toBeVisible();
   await expect(page.locator('#runningFocusStatus')).toContainText(
-    'desktop: active (2 sites)'
+    'Desktop blocker: active (2 sites)'
   );
 });
 
@@ -2005,6 +2015,7 @@ test('focus blocker can edit blocked websites and resend the active block', asyn
     )
     .toContain('reddit.com');
 
+  await expandDetails(page.locator('#runningFocusStatus'), 'Desktop blocker');
   await page.getByRole('button', { name: 'Edit Blocked Sites' }).click();
   const dialog = page.getByRole('dialog', { name: 'Blocked Websites' });
   await expect(dialog).toBeVisible();
