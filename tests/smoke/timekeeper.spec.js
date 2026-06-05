@@ -1421,7 +1421,7 @@ test('Strava feed falls back to browser cache when the published feed is empty',
   );
 });
 
-test('weekly project targets follow the project daily rate without rolling surplus credit', async ({
+test('weekly and rolling targets include current daily remaining hours', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-24T12:00:00');
@@ -1456,7 +1456,10 @@ test('weekly project targets follow the project daily rate without rolling surpl
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
 
-  await expect(page.locator('#statsGrid')).toContainText('Anders: 2.0 / 8.3h');
+  const statsGrid = page.locator('#statsGrid');
+  await expect(statsGrid).toContainText('Anders: 0.0 / 1.8h');
+  await expect(statsGrid).toContainText('Anders: 2.0 / 3.8h');
+  await expect(statsGrid).toContainText('Anders: 52.0 / 53.8h');
 });
 
 test('timer recommendation uses remaining project hours over workdays left', async ({

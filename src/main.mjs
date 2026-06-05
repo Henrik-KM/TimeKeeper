@@ -7140,6 +7140,7 @@ import {
       new Date(now.getFullYear(), now.getMonth(), now.getDate()),
       1
     );
+    const todayStart = startOfLocalDay(now);
     const projectNotStarted = now < created;
     const totalProjectDays = deadlineEndExclusive
       ? Math.max(1, diffCalendarDays(created, deadlineEndExclusive))
@@ -7319,13 +7320,15 @@ import {
         monthlyTargetConst
       };
     }
-    // Planning targets are snapshot-based so they stay stable inside the
-    // current week/month instead of shifting whenever the calendar flips.
-    let weeklyTargetConst = getProjectPlannedHoursForPeriod(
+    // Window targets keep completed history before today, then apply the same
+    // current daily rate used by the Today card for today and the rest of the
+    // window. That keeps Today, This Week, and Rolling 30 Days consistent.
+    let weeklyTargetConst = getProjectCurrentPaceWindowTarget(
       project,
       entries,
       weekStart,
-      startNextWeek
+      startNextWeek,
+      todayStart
     );
     let monthlyTargetConst = getProjectPlannedHoursForPeriod(
       project,
@@ -7333,15 +7336,13 @@ import {
       monthStart,
       startNextMonth
     );
-    const rollingTargetStart = maxDate(rollingBounds.start, created);
-    const rolling30TargetConst = rollingTargetStart
-      ? getProjectPlannedHoursForPeriod(
-          project,
-          entries,
-          rollingTargetStart,
-          rollingBounds.endExclusive
-        )
-      : 0;
+    const rolling30TargetConst = getProjectCurrentPaceWindowTarget(
+      project,
+      entries,
+      rollingBounds.start,
+      rollingBounds.endExclusive,
+      todayStart
+    );
     const rolling30SurplusHours = 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
     if (projectNotStarted) {
@@ -7449,6 +7450,43 @@ import {
       (entry) => entry.projectId === projectId && !entry.isRunning
     );
     return sumEntryHours(projectEntries, start, end);
+  }
+
+  function getProjectCurrentPaceWindowTarget(
+    project,
+    entries,
+    periodStart,
+    periodEndExclusive,
+    currentDayStart = startOfLocalDay(new Date())
+  ) {
+    const effectiveStart = maxDate(periodStart, getProjectStartDate(project));
+    if (!effectiveStart || !periodEndExclusive) return 0;
+    if (periodEndExclusive <= effectiveStart) return 0;
+    if (isWeeklyPaceProject(project)) {
+      return getProjectPlannedHoursForPeriod(
+        project,
+        entries,
+        effectiveStart,
+        periodEndExclusive
+      );
+    }
+    const planStart = maxDate(effectiveStart, currentDayStart);
+    if (!planStart || planStart >= periodEndExclusive) {
+      return sumEntryHours(entries, effectiveStart, periodEndExclusive);
+    }
+    const completedBeforePlanStart =
+      planStart > effectiveStart
+        ? sumEntryHours(entries, effectiveStart, planStart)
+        : 0;
+    return (
+      completedBeforePlanStart +
+      getProjectPlannedHoursForPeriod(
+        project,
+        entries,
+        planStart,
+        periodEndExclusive
+      )
+    );
   }
 
   function getProjectDailyPlan(project, stats, context) {
