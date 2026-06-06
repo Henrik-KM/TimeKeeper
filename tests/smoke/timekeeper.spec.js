@@ -1462,6 +1462,53 @@ test('weekly and rolling targets include current daily remaining hours', async (
   await expect(statsGrid).toContainText('Anders: 52.0 / 53.8h');
 });
 
+test('weekend daily target is zero while weekly and rolling targets stay relevant', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-25T10:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'anders',
+        name: 'Anders',
+        budgetHours: 100,
+        startDate: '2026-04-01',
+        deadline: '2026-05-31'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'anders-rolling-work',
+        projectId: 'anders',
+        startTime: '2026-04-10T09:00:00.000',
+        endTime: '2026-04-10T11:00:00.000',
+        hours: 50
+      }),
+      entryFixture({
+        id: 'anders-week-work',
+        projectId: 'anders',
+        startTime: '2026-04-22T09:00:00.000',
+        endTime: '2026-04-22T11:00:00.000',
+        hours: 2
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const todayCard = page.locator('.stat-card').filter({
+    hasText: "Today's Hours"
+  });
+  const weekCard = page.locator('.stat-card').filter({ hasText: 'This Week' });
+  const rollingCard = page
+    .locator('.stat-card')
+    .filter({ hasText: 'Rolling 30 Days' });
+  await expect(todayCard).toContainText('Anders: 0.0 / 0.0h');
+  await expect(weekCard).toContainText('Anders: 2.0 / 3.8h');
+  await expect(rollingCard).toContainText('Anders: 52.0 / 53.8h');
+});
+
 test('timer recommendation uses remaining project hours over workdays left', async ({
   page
 }) => {

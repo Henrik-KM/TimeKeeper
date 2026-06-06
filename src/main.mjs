@@ -7323,12 +7323,13 @@ import {
     // Window targets keep completed history before today, then apply the same
     // current daily rate used by the Today card for today and the rest of the
     // window. That keeps Today, This Week, and Rolling 30 Days consistent.
+    const windowPaceStart = getCurrentPaceAnchorStart(todayStart);
     let weeklyTargetConst = getProjectCurrentPaceWindowTarget(
       project,
       entries,
       weekStart,
       startNextWeek,
-      todayStart
+      windowPaceStart
     );
     let monthlyTargetConst = getProjectPlannedHoursForPeriod(
       project,
@@ -7341,7 +7342,7 @@ import {
       entries,
       rollingBounds.start,
       rollingBounds.endExclusive,
-      todayStart
+      windowPaceStart
     );
     const rolling30SurplusHours = 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
@@ -7487,6 +7488,14 @@ import {
         periodEndExclusive
       )
     );
+  }
+
+  function getCurrentPaceAnchorStart(dayStart = startOfLocalDay(new Date())) {
+    const anchor = startOfLocalDay(dayStart);
+    const day = anchor.getDay();
+    if (day === 6) return addLocalDays(anchor, -1);
+    if (day === 0) return addLocalDays(anchor, -2);
+    return anchor;
   }
 
   function getProjectDailyPlan(project, stats, context) {
