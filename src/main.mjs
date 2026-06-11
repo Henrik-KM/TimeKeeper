@@ -15,7 +15,6 @@ import {
   formatRelativeTime,
   getProjectDeadlineDay,
   getProjectDeadlineEndExclusive,
-  getProjectPlanningSnapshot,
   getProjectPlannedHoursForPeriod,
   getProjectStartDate,
   getProjectWeeklyExpectedHours,
@@ -7140,7 +7139,6 @@ import {
       new Date(now.getFullYear(), now.getMonth(), now.getDate()),
       1
     );
-    const todayStart = startOfLocalDay(now);
     const projectNotStarted = now < created;
     const totalProjectDays = deadlineEndExclusive
       ? Math.max(1, diffCalendarDays(created, deadlineEndExclusive))
@@ -7320,16 +7318,13 @@ import {
         monthlyTargetConst
       };
     }
-    // Window targets keep completed history before today, then apply the same
-    // current daily rate used by the Today card for today and the rest of the
-    // window. That keeps Today, This Week, and Rolling 30 Days consistent.
-    const windowPaceStart = getCurrentPaceAnchorStart(todayStart);
-    let weeklyTargetConst = getProjectCurrentPaceWindowTarget(
+    // Period targets are anchored to the period start. They should not move
+    // during the week/month just because yesterday was over or under target.
+    let weeklyTargetConst = getProjectPlannedHoursForPeriod(
       project,
       entries,
       weekStart,
-      startNextWeek,
-      windowPaceStart
+      startNextWeek
     );
     let monthlyTargetConst = getProjectPlannedHoursForPeriod(
       project,
@@ -7337,13 +7332,15 @@ import {
       monthStart,
       startNextMonth
     );
-    const rolling30TargetConst = getProjectCurrentPaceWindowTarget(
-      project,
-      entries,
-      rollingBounds.start,
-      rollingBounds.endExclusive,
-      windowPaceStart
-    );
+    const rollingTargetStart = maxDate(rollingBounds.start, created);
+    const rolling30TargetConst = rollingTargetStart
+      ? getProjectPlannedHoursForPeriod(
+          project,
+          entries,
+          rollingTargetStart,
+          rollingBounds.endExclusive
+        )
+      : 0;
     const rolling30SurplusHours = 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
     if (projectNotStarted) {
@@ -7453,57 +7450,9 @@ import {
     return sumEntryHours(projectEntries, start, end);
   }
 
-  function getProjectCurrentPaceWindowTarget(
-    project,
-    entries,
-    periodStart,
-    periodEndExclusive,
-    currentDayStart = startOfLocalDay(new Date())
-  ) {
-    const effectiveStart = maxDate(periodStart, getProjectStartDate(project));
-    if (!effectiveStart || !periodEndExclusive) return 0;
-    if (periodEndExclusive <= effectiveStart) return 0;
-    if (isWeeklyPaceProject(project)) {
-      return getProjectPlannedHoursForPeriod(
-        project,
-        entries,
-        effectiveStart,
-        periodEndExclusive
-      );
-    }
-    const planStart = maxDate(effectiveStart, currentDayStart);
-    if (!planStart || planStart >= periodEndExclusive) {
-      return sumEntryHours(entries, effectiveStart, periodEndExclusive);
-    }
-    const completedBeforePlanStart =
-      planStart > effectiveStart
-        ? sumEntryHours(entries, effectiveStart, planStart)
-        : 0;
-    return (
-      completedBeforePlanStart +
-      getProjectPlannedHoursForPeriod(
-        project,
-        entries,
-        planStart,
-        periodEndExclusive
-      )
-    );
-  }
-
-  function getCurrentPaceAnchorStart(dayStart = startOfLocalDay(new Date())) {
-    const anchor = startOfLocalDay(dayStart);
-    const day = anchor.getDay();
-    if (day === 6) return addLocalDays(anchor, -1);
-    if (day === 0) return addLocalDays(anchor, -2);
-    return anchor;
-  }
-
   function getProjectDailyPlan(project, stats, context) {
     const weekContext = context || getCurrentWeekPlanningContext();
     const projectStats = stats || computeProjectStats(project);
-    const entries = data.entries.filter(
-      (entry) => entry.projectId === project.id && !entry.isRunning
-    );
     const todayHours = getProjectCompletedHoursForPeriod(
       project.id,
       weekContext.todayStart,
@@ -7520,12 +7469,14 @@ import {
     );
     const todayIsWorkday =
       countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
-    const todaySnapshot = getProjectPlanningSnapshot(
-      project,
-      entries,
-      weekContext.todayStart
+    const remainingAtStartOfDay = Math.max(
+      0,
+      weeklyTarget - weekHoursBeforeToday
     );
-    const dailyTarget = todayIsWorkday ? todaySnapshot.dailyRate : 0;
+    const dailyTarget =
+      todayIsWorkday && weekContext.workDaysLeftInWeek > 0
+        ? remainingAtStartOfDay / weekContext.workDaysLeftInWeek
+        : 0;
     return {
       todayHours,
       dailyTarget,

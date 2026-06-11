@@ -1421,7 +1421,7 @@ test('Strava feed falls back to browser cache when the published feed is empty',
   );
 });
 
-test('weekly and rolling targets include current daily remaining hours', async ({
+test('daily target catches up against the fixed weekly target', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-24T12:00:00');
@@ -1457,9 +1457,42 @@ test('weekly and rolling targets include current daily remaining hours', async (
   await gotoSection(page, 'dashboard', 'Dashboard');
 
   const statsGrid = page.locator('#statsGrid');
-  await expect(statsGrid).toContainText('Anders: 0.0 / 1.8h');
-  await expect(statsGrid).toContainText('Anders: 2.0 / 3.8h');
-  await expect(statsGrid).toContainText('Anders: 52.0 / 53.8h');
+  await expect(statsGrid).toContainText('Anders: 0.0 / 6.3h');
+  await expect(statsGrid).toContainText('Anders: 2.0 / 8.3h');
+  await expect(statsGrid).toContainText('Anders: 52.0 / 41.9h');
+});
+
+test('missed Monday hours are spread over the remaining week', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-21T10:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'weekly-catchup',
+        name: 'Weekly Catchup',
+        budgetHours: 35,
+        startDate: '2026-04-20',
+        deadline: '2026-04-24'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'monday-shortfall',
+        projectId: 'weekly-catchup',
+        startTime: '2026-04-20T09:00:00.000',
+        endTime: '2026-04-20T12:00:00.000',
+        hours: 3
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const statsGrid = page.locator('#statsGrid');
+  await expect(statsGrid).toContainText('Weekly Catchup: 0.0 / 8.0h');
+  await expect(statsGrid).toContainText('Weekly Catchup: 3.0 / 35.0h');
 });
 
 test('weekend daily target is zero while weekly and rolling targets stay relevant', async ({
@@ -1505,8 +1538,8 @@ test('weekend daily target is zero while weekly and rolling targets stay relevan
     .locator('.stat-card')
     .filter({ hasText: 'Rolling 30 Days' });
   await expect(todayCard).toContainText('Anders: 0.0 / 0.0h');
-  await expect(weekCard).toContainText('Anders: 2.0 / 3.8h');
-  await expect(rollingCard).toContainText('Anders: 52.0 / 53.8h');
+  await expect(weekCard).toContainText('Anders: 2.0 / 8.3h');
+  await expect(rollingCard).toContainText('Anders: 52.0 / 41.9h');
 });
 
 test('timer recommendation uses remaining project hours over workdays left', async ({
@@ -1567,10 +1600,10 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*needs ~3\.1h today/
+    /IFLAI.*Recommended.*needs ~13\.3h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 3.1h left today'
+    'Recommended: IFLAI - 13.3h left today'
   );
 });
 
