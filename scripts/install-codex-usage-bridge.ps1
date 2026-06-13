@@ -5,11 +5,12 @@ param(
 $ErrorActionPreference = 'Stop'
 $TaskName = 'TimeKeeper Codex Usage Bridge'
 $ScriptPath = Join-Path $PSScriptRoot 'run-codex-usage-bridge.ps1'
+$HiddenLauncherPath = Join-Path $PSScriptRoot 'run-codex-usage-bridge-hidden.vbs'
 
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -Check
 
-$ResolvedScriptPath = (Resolve-Path $ScriptPath).Path
-$TaskCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ResolvedScriptPath`""
+$ResolvedHiddenLauncherPath = (Resolve-Path $HiddenLauncherPath).Path
+$TaskCommand = "wscript.exe //B //Nologo `"$ResolvedHiddenLauncherPath`""
 
 & schtasks.exe `
   /Create `
