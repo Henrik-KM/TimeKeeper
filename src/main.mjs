@@ -1044,6 +1044,89 @@ import {
     return [...fallback];
   }
 
+  const CODEX_INTEGRATION_TOKEN_KEY = 'timekeeperCodexIntegrationToken';
+  const CODEX_DEFAULT_REPOSITORY = 'Henrik-KM/TimeKeeper';
+  const CODEX_DEFAULT_BRANCH = 'main';
+  const CODEX_DEFAULT_CONFIG_PATH = 'assets/timekeeper-codex-config.json';
+  const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
+  const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
+  const CODEX_FOCUS_FACTOR = 0.5;
+
+  function normalizeGitHubRepository(value = '') {
+    const repository = String(value || '')
+      .trim()
+      .replace(/^https:\/\/github\.com\//i, '')
+      .replace(/\.git$/i, '')
+      .replace(/^\/+|\/+$/g, '');
+    const [owner = '', repo = ''] = repository.split('/');
+    return owner && repo ? `${owner}/${repo}` : repository;
+  }
+
+  function normalizeCodexPath(value, fallback) {
+    const path = String(value || fallback || '')
+      .trim()
+      .replace(/^\/+/, '')
+      .replace(/\/+/g, '/');
+    return path || fallback;
+  }
+
+  function normalizeCodexMappings(value = []) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((mapping) => {
+        const obj = mapping && typeof mapping === 'object' ? mapping : {};
+        const match = String(obj.match || obj.repoName || '').trim();
+        if (!match) return null;
+        const projectId =
+          obj.projectId === null ? null : String(obj.projectId || '').trim();
+        return {
+          matchType:
+            obj.matchType === 'pathIncludes' ? 'pathIncludes' : 'repoName',
+          match,
+          projectId: projectId || null
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function makeDefaultCodexIntegration() {
+    return {
+      enabled: false,
+      repository: CODEX_DEFAULT_REPOSITORY,
+      branch: CODEX_DEFAULT_BRANCH,
+      configPath: CODEX_DEFAULT_CONFIG_PATH,
+      inboxPath: CODEX_DEFAULT_INBOX_PATH,
+      mappings: [],
+      importedCodexRecordIds: [],
+      lastImportAt: null,
+      lastImportSummary: null
+    };
+  }
+
+  function normalizeCodexIntegration(value = {}) {
+    const config = value && typeof value === 'object' ? value : {};
+    const defaults = makeDefaultCodexIntegration();
+    const importedIds = Array.isArray(config.importedCodexRecordIds)
+      ? config.importedCodexRecordIds.map((id) => String(id)).filter(Boolean)
+      : [];
+    return {
+      enabled: config.enabled === true,
+      repository:
+        normalizeGitHubRepository(config.repository) || defaults.repository,
+      branch:
+        String(config.branch || defaults.branch).trim() || defaults.branch,
+      configPath: normalizeCodexPath(config.configPath, defaults.configPath),
+      inboxPath: normalizeCodexPath(config.inboxPath, defaults.inboxPath),
+      mappings: normalizeCodexMappings(config.mappings),
+      importedCodexRecordIds: [...new Set(importedIds)].slice(-1000),
+      lastImportAt: config.lastImportAt || null,
+      lastImportSummary:
+        config.lastImportSummary && typeof config.lastImportSummary === 'object'
+          ? config.lastImportSummary
+          : null
+    };
+  }
+
   function normalizeProjectData(project) {
     const obj = project && typeof project === 'object' ? { ...project } : {};
     if (!obj.id) obj.id = uuid();
@@ -1145,6 +1228,7 @@ import {
         backupRevision: 0,
         updatedAt: null,
         timerPresets: [],
+        codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
@@ -1276,6 +1360,7 @@ import {
           typeof parsed.backupRevision === 'number' ? parsed.backupRevision : 0,
         updatedAt: parsed.updatedAt || null,
         timerPresets: normalizeTimerPresets(parsed.timerPresets),
+        codexIntegration: normalizeCodexIntegration(parsed.codexIntegration),
         focusBlockerSites: normalizeFocusBlockedSites(
           parsed.focusBlockerSites,
           DEFAULT_FOCUS_BLOCKED_WEBSITES
@@ -1321,6 +1406,7 @@ import {
         backupRevision: 0,
         updatedAt: null,
         timerPresets: [],
+        codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
         wealthHistory: getDefaultWealthHistory(),
@@ -1345,6 +1431,7 @@ import {
   }
 
   function refreshAllViews() {
+    data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
     ensureFitnessDefaults();
     ensureWorkoutData();
     ensureMonthlyRecurringPayments();
@@ -1361,6 +1448,7 @@ import {
     renderWealthHistoryTable();
     updateFocusBlocker();
     updateAutoSyncStatus();
+    updateCodexIntegrationPanel();
   }
 
   function restoreDataSnapshot(snapshot) {
@@ -2173,6 +2261,15 @@ import {
     error: '',
     apiUrl: ''
   };
+  let codexImportPromise = null;
+  let codexImportTimer = null;
+  let codexImportRuntimeStatus = {
+    pending: false,
+    checkedAt: null,
+    error: '',
+    imported: 0,
+    skipped: 0
+  };
 
   function normalizeGitHubPath(value) {
     const path = String(value || 'assets/timekeeper-focus-state.json')
@@ -2450,6 +2547,524 @@ import {
     showToast(
       next.enabled ? 'Focus bridge enabled.' : 'Focus bridge disabled.'
     );
+  }
+
+  function getCodexIntegrationConfig() {
+    data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
+    return data.codexIntegration;
+  }
+
+  function getCodexIntegrationToken() {
+    return String(localStorage.getItem(CODEX_INTEGRATION_TOKEN_KEY) || '');
+  }
+
+  function saveCodexIntegrationToken(token) {
+    const normalized = String(token || '').trim();
+    if (normalized) {
+      localStorage.setItem(CODEX_INTEGRATION_TOKEN_KEY, normalized);
+    } else {
+      localStorage.removeItem(CODEX_INTEGRATION_TOKEN_KEY);
+    }
+  }
+
+  function getCodexProjectName(projectId) {
+    if (projectId === null) return 'None';
+    const project = data.projects.find(
+      (item) => String(item.id) === String(projectId)
+    );
+    return project ? project.name : String(projectId || 'None');
+  }
+
+  function findCodexProjectId(label) {
+    const value = String(label || '').trim();
+    if (!value || /^none$/i.test(value)) return null;
+    const byId = data.projects.find((project) => String(project.id) === value);
+    if (byId) return String(byId.id);
+    const byName = data.projects.find(
+      (project) =>
+        String(project.name || '').toLowerCase() === value.toLowerCase()
+    );
+    if (byName) return String(byName.id);
+    throw new Error(`Unknown TimeKeeper project "${value}".`);
+  }
+
+  function getDefaultCodexMappings() {
+    const defaults = [];
+    const add = (match, projectName) => {
+      const project = data.projects.find(
+        (item) =>
+          String(item.name || '').toLowerCase() ===
+          String(projectName).toLowerCase()
+      );
+      if (project) {
+        defaults.push({
+          matchType: 'repoName',
+          match,
+          projectId: String(project.id)
+        });
+      }
+    };
+    add('VWR-AutoInv', 'IFLAI');
+    add('particle_iden', 'Anders');
+    defaults.push({
+      matchType: 'repoName',
+      match: 'TimeKeeper',
+      projectId: null
+    });
+    return defaults;
+  }
+
+  function codexMappingsToText(mappings = []) {
+    const rows = mappings.length ? mappings : getDefaultCodexMappings();
+    return rows
+      .map((mapping) => {
+        const projectName = getCodexProjectName(mapping.projectId);
+        return `${mapping.match} = ${projectName}`;
+      })
+      .join('\n');
+  }
+
+  function parseCodexMappingsText(text) {
+    const rows = [];
+    String(text || '')
+      .split(/\r?\n/)
+      .forEach((line) => {
+        const trimmed = line.trim();
+        if (!trimmed || trimmed.startsWith('#')) return;
+        const match = /^(.*?)\s*(?:=>|=|,)\s*(.*?)$/.exec(trimmed);
+        if (!match) {
+          throw new Error(
+            `Mapping "${trimmed}" should look like repo = Project.`
+          );
+        }
+        const repoName = match[1].trim();
+        const projectLabel = match[2].trim();
+        if (!repoName)
+          throw new Error('Codex repo mapping is missing a repo name.');
+        rows.push({
+          matchType: 'repoName',
+          match: repoName,
+          projectId: findCodexProjectId(projectLabel)
+        });
+      });
+    return normalizeCodexMappings(rows);
+  }
+
+  function getCodexGitHubPathApiUrl(
+    pathValue,
+    config = getCodexIntegrationConfig()
+  ) {
+    const repository = normalizeGitHubRepository(config.repository);
+    if (!repository || !repository.includes('/')) return '';
+    const apiPath = normalizeCodexPath(pathValue, '')
+      .split('/')
+      .map((part) => encodeURIComponent(part))
+      .join('/');
+    return `https://api.github.com/repos/${repository}/contents/${apiPath}?ref=${encodeURIComponent(config.branch || CODEX_DEFAULT_BRANCH)}`;
+  }
+
+  function getCodexAuthHeaders() {
+    const token = getCodexIntegrationToken();
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
+  function decodeUtf8Base64(value) {
+    const binary = atob(String(value || '').replace(/\s+/g, ''));
+    const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+    return new TextDecoder().decode(bytes);
+  }
+
+  function buildCodexPublishedConfig() {
+    const config = getCodexIntegrationConfig();
+    return {
+      version: 1,
+      source: 'timekeeper',
+      enabled: config.enabled,
+      updatedAt: new Date().toISOString(),
+      mappings: normalizeCodexMappings(config.mappings)
+    };
+  }
+
+  async function putGitHubJsonFile(pathValue, payload, message) {
+    const config = getCodexIntegrationConfig();
+    const token = getCodexIntegrationToken();
+    const apiUrl = getCodexGitHubPathApiUrl(pathValue, config);
+    if (!apiUrl) throw new Error('Enter a GitHub repository as owner/repo.');
+    if (!token) {
+      throw new Error('Enter a GitHub token with Contents read/write access.');
+    }
+    let sha = null;
+    try {
+      const existing = await githubJson(apiUrl, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      sha = existing && existing.sha ? existing.sha : null;
+    } catch (error) {
+      if (error.status !== 404) throw error;
+    }
+    const body = {
+      message,
+      content: encodeUtf8Base64(`${JSON.stringify(payload, null, 2)}\n`),
+      branch: config.branch
+    };
+    if (sha) body.sha = sha;
+    await githubJson(apiUrl.replace(/\?.*$/, ''), {
+      method: 'PUT',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify(body)
+    });
+    return apiUrl;
+  }
+
+  async function publishCodexIntegrationConfig() {
+    const config = getCodexIntegrationConfig();
+    if (!config.enabled) {
+      showToast('Enable Codex import before publishing config.');
+      return null;
+    }
+    const payload = buildCodexPublishedConfig();
+    if (!payload.mappings.length) {
+      showToast('Add at least one Codex project mapping.');
+      return null;
+    }
+    try {
+      const apiUrl = await putGitHubJsonFile(
+        config.configPath,
+        payload,
+        'Update TimeKeeper Codex config [skip ci]'
+      );
+      codexImportRuntimeStatus = {
+        ...codexImportRuntimeStatus,
+        checkedAt: new Date().toISOString(),
+        error: ''
+      };
+      updateCodexIntegrationPanel();
+      showToast('Codex config published.');
+      return apiUrl;
+    } catch (error) {
+      codexImportRuntimeStatus = {
+        ...codexImportRuntimeStatus,
+        checkedAt: new Date().toISOString(),
+        error: error && error.message ? error.message : String(error)
+      };
+      updateCodexIntegrationPanel();
+      showToast(
+        `Codex config publish failed: ${codexImportRuntimeStatus.error}`
+      );
+      return null;
+    }
+  }
+
+  async function editCodexIntegrationSettings() {
+    const config = getCodexIntegrationConfig();
+    const values = await openFormDialog({
+      title: 'Codex Integration',
+      fields: [
+        {
+          name: 'enabled',
+          label: 'Codex import',
+          type: 'select',
+          value: config.enabled ? 'on' : 'off',
+          options: [
+            { value: 'off', label: 'Off' },
+            { value: 'on', label: 'On' }
+          ]
+        },
+        {
+          name: 'repository',
+          label: 'Repository (owner/repo)',
+          value: config.repository || CODEX_DEFAULT_REPOSITORY
+        },
+        {
+          name: 'branch',
+          label: 'Branch',
+          value: config.branch || CODEX_DEFAULT_BRANCH
+        },
+        {
+          name: 'configPath',
+          label: 'Config file path',
+          value: config.configPath || CODEX_DEFAULT_CONFIG_PATH
+        },
+        {
+          name: 'inboxPath',
+          label: 'Inbox folder path',
+          value: config.inboxPath || CODEX_DEFAULT_INBOX_PATH
+        },
+        {
+          name: 'token',
+          label: 'GitHub token',
+          type: 'password',
+          value: getCodexIntegrationToken(),
+          placeholder: 'Fine-grained token with Contents read/write'
+        },
+        {
+          name: 'mappings',
+          label: 'Mappings, one per line: Codex repo = TimeKeeper project',
+          type: 'textarea',
+          rows: 6,
+          value: codexMappingsToText(config.mappings)
+        }
+      ],
+      submitLabel: 'Save Codex'
+    });
+    if (!values) return;
+    let mappings;
+    try {
+      mappings = parseCodexMappingsText(values.mappings);
+    } catch (error) {
+      showToast(error.message || String(error));
+      return;
+    }
+    const next = normalizeCodexIntegration({
+      ...config,
+      enabled: values.enabled === 'on',
+      repository: values.repository,
+      branch: values.branch,
+      configPath: values.configPath,
+      inboxPath: values.inboxPath,
+      mappings
+    });
+    if (next.enabled && !next.repository.includes('/')) {
+      showToast('Codex integration needs a GitHub repository as owner/repo.');
+      return;
+    }
+    data.codexIntegration = next;
+    saveCodexIntegrationToken(values.token);
+    saveData();
+    updateCodexIntegrationPanel();
+    scheduleCodexAutoImport();
+    showToast(
+      next.enabled ? 'Codex import enabled.' : 'Codex import disabled.'
+    );
+  }
+
+  function getCodexExistingExternalIds() {
+    const ids = new Set(getCodexIntegrationConfig().importedCodexRecordIds);
+    data.entries.forEach((entry) => {
+      if (entry && entry.externalId) ids.add(String(entry.externalId));
+    });
+    return ids;
+  }
+
+  function isTodayCodexRecord(
+    record,
+    todayStart = startOfLocalDay(new Date())
+  ) {
+    const start = new Date(record?.startTime || '');
+    return !Number.isNaN(start.getTime()) && start >= todayStart;
+  }
+
+  function getActiveCodexProject(projectId) {
+    return data.projects.find(
+      (project) =>
+        String(project.id) === String(projectId) && !isProjectArchived(project)
+    );
+  }
+
+  function importCodexInboxPayloads(payloads = []) {
+    const config = getCodexIntegrationConfig();
+    const importedIds = getCodexExistingExternalIds();
+    const todayStart = startOfLocalDay(new Date());
+    let imported = 0;
+    let skipped = 0;
+    const nowIso = new Date().toISOString();
+    payloads.forEach((payload) => {
+      const records = Array.isArray(payload?.records) ? payload.records : [];
+      records.forEach((record) => {
+        const recordId = String(record?.id || '').trim();
+        const projectId = String(record?.timekeeperProjectId || '').trim();
+        const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
+        const start = new Date(record?.startTime || '');
+        const end = new Date(record?.endTime || '');
+        if (
+          !recordId ||
+          importedIds.has(recordId) ||
+          !isTodayCodexRecord(record, todayStart) ||
+          !projectId ||
+          !getActiveCodexProject(projectId) ||
+          !Number.isFinite(effectiveSeconds) ||
+          effectiveSeconds <= 0 ||
+          Number.isNaN(start.getTime()) ||
+          Number.isNaN(end.getTime()) ||
+          end <= start
+        ) {
+          skipped += 1;
+          return;
+        }
+        data.entries.push({
+          id: uuid(),
+          projectId,
+          description: String(record.description || 'Codex work').trim(),
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          duration: effectiveSeconds,
+          focusFactor: CODEX_FOCUS_FACTOR,
+          manualFactor: CODEX_FOCUS_FACTOR,
+          isRunning: false,
+          createdAt: nowIso,
+          source: 'codex',
+          externalId: recordId
+        });
+        importedIds.add(recordId);
+        imported += 1;
+      });
+    });
+    config.importedCodexRecordIds = [...importedIds].slice(-1000);
+    config.lastImportAt = nowIso;
+    config.lastImportSummary = { imported, skipped };
+    codexImportRuntimeStatus = {
+      pending: false,
+      checkedAt: nowIso,
+      error: '',
+      imported,
+      skipped
+    };
+    if (imported > 0) {
+      saveData();
+      refreshAllViews();
+    } else {
+      updateCodexIntegrationPanel();
+    }
+    return { imported, skipped };
+  }
+
+  async function fetchCodexInboxPayloads() {
+    const config = getCodexIntegrationConfig();
+    const directoryUrl = getCodexGitHubPathApiUrl(config.inboxPath, config);
+    if (!directoryUrl)
+      throw new Error('Enter a GitHub repository as owner/repo.');
+    const directoryPayload = await githubJson(directoryUrl, {
+      headers: getCodexAuthHeaders()
+    }).catch((error) => {
+      if (error.status === 404) return [];
+      throw error;
+    });
+    const items = Array.isArray(directoryPayload) ? directoryPayload : [];
+    const jsonItems = items.filter(
+      (item) =>
+        item &&
+        item.type === 'file' &&
+        String(item.name || '')
+          .toLowerCase()
+          .endsWith('.json')
+    );
+    const payloads = [];
+    await Promise.all(
+      jsonItems.map(async (item) => {
+        const itemPayload = await githubJson(item.url, {
+          headers: getCodexAuthHeaders()
+        });
+        payloads.push(JSON.parse(decodeUtf8Base64(itemPayload.content)));
+      })
+    );
+    return payloads;
+  }
+
+  async function importCodexUsage({ quiet = false } = {}) {
+    const config = getCodexIntegrationConfig();
+    if (!config.enabled) {
+      updateCodexIntegrationPanel();
+      return { imported: 0, skipped: 0 };
+    }
+    if (codexImportPromise) return codexImportPromise;
+    codexImportRuntimeStatus = {
+      ...codexImportRuntimeStatus,
+      pending: true,
+      checkedAt: new Date().toISOString(),
+      error: ''
+    };
+    updateCodexIntegrationPanel();
+    codexImportPromise = fetchCodexInboxPayloads()
+      .then((payloads) => {
+        const result = importCodexInboxPayloads(payloads);
+        if (!quiet && result.imported > 0) {
+          showToast(
+            `Imported ${result.imported} Codex entr${result.imported === 1 ? 'y' : 'ies'}.`
+          );
+        } else if (!quiet) {
+          showToast('No new Codex entries.');
+        }
+        return result;
+      })
+      .catch((error) => {
+        codexImportRuntimeStatus = {
+          ...codexImportRuntimeStatus,
+          pending: false,
+          checkedAt: new Date().toISOString(),
+          error: error && error.message ? error.message : String(error)
+        };
+        updateCodexIntegrationPanel();
+        if (!quiet)
+          showToast(`Codex import failed: ${codexImportRuntimeStatus.error}`);
+        return { imported: 0, skipped: 0 };
+      })
+      .finally(() => {
+        codexImportPromise = null;
+        updateCodexIntegrationPanel();
+      });
+    return codexImportPromise;
+  }
+
+  function scheduleCodexAutoImport() {
+    if (codexImportTimer) {
+      clearInterval(codexImportTimer);
+      codexImportTimer = null;
+    }
+    const config = getCodexIntegrationConfig();
+    if (!config.enabled) {
+      updateCodexIntegrationPanel();
+      return;
+    }
+    importCodexUsage({ quiet: true });
+    codexImportTimer = setInterval(() => {
+      importCodexUsage({ quiet: true });
+    }, CODEX_IMPORT_INTERVAL_MS);
+    updateCodexIntegrationPanel();
+  }
+
+  function updateCodexIntegrationPanel() {
+    const status = document.getElementById('codexIntegrationStatus');
+    const summary = document.getElementById('codexIntegrationSummary');
+    const publishBtn = document.getElementById('codexPublishConfigBtn');
+    const importBtn = document.getElementById('codexImportNowBtn');
+    const config = getCodexIntegrationConfig();
+    if (publishBtn) publishBtn.disabled = !config.enabled;
+    if (importBtn)
+      importBtn.disabled = !config.enabled || codexImportRuntimeStatus.pending;
+    if (status) {
+      if (!config.enabled) {
+        status.textContent = 'Codex import is OFF.';
+      } else if (codexImportRuntimeStatus.pending) {
+        status.textContent = 'Codex import is checking GitHub...';
+      } else if (codexImportRuntimeStatus.error) {
+        status.textContent = `Codex import error: ${codexImportRuntimeStatus.error}`;
+      } else if (config.lastImportAt) {
+        status.textContent = `Codex import ON - last checked ${formatRelativeTime(config.lastImportAt)}.`;
+      } else {
+        status.textContent =
+          'Codex import ON - waiting for desktop inbox data.';
+      }
+    }
+    if (!summary) return;
+    summary.innerHTML = '';
+    const mappings = config.mappings.length
+      ? config.mappings
+      : getDefaultCodexMappings();
+    mappings.slice(0, 6).forEach((mapping) => {
+      const pill = document.createElement('span');
+      pill.className = 'health-pill';
+      pill.textContent = `${mapping.match}: ${getCodexProjectName(mapping.projectId)}`;
+      summary.appendChild(pill);
+    });
+    if (config.lastImportSummary) {
+      const pill = document.createElement('span');
+      pill.className = 'health-pill';
+      pill.textContent = `Last import: ${config.lastImportSummary.imported || 0} new, ${config.lastImportSummary.skipped || 0} skipped`;
+      summary.appendChild(pill);
+    }
   }
 
   function getFocusBlockedWebsites() {
@@ -11330,6 +11945,7 @@ import {
       DEFAULT_FOCUS_BLOCKED_WEBSITES
     );
     data.timerPresets = normalizeTimerPresets(data.timerPresets);
+    data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
     // Remove transient timer fields from imported entries.
     data.entries.forEach((entry) => {
       delete entry.effectiveSeconds;
@@ -11351,6 +11967,7 @@ import {
     updateProjectsPage();
     updateEntriesTable();
     updateTimerSection();
+    updateCodexIntegrationPanel();
   }
 
   async function restoreLatestBackupFromDir() {
@@ -11515,6 +12132,26 @@ import {
       }
     });
   }
+  const codexConfigBtn = document.getElementById('codexConfigBtn');
+  const codexPublishConfigBtn = document.getElementById(
+    'codexPublishConfigBtn'
+  );
+  const codexImportNowBtn = document.getElementById('codexImportNowBtn');
+  if (codexConfigBtn) {
+    codexConfigBtn.addEventListener('click', () => {
+      editCodexIntegrationSettings();
+    });
+  }
+  if (codexPublishConfigBtn) {
+    codexPublishConfigBtn.addEventListener('click', () => {
+      publishCodexIntegrationConfig();
+    });
+  }
+  if (codexImportNowBtn) {
+    codexImportNowBtn.addEventListener('click', () => {
+      importCodexUsage();
+    });
+  }
 
   // Initial render
   updateProjectSelects();
@@ -11522,6 +12159,8 @@ import {
   updateProjectsPage();
   updateDashboard();
   updateTimerSection();
+  updateCodexIntegrationPanel();
+  scheduleCodexAutoImport();
   loadStravaFeed();
   if (
     'serviceWorker' in navigator &&

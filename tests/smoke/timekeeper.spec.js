@@ -2034,6 +2034,137 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
+test('Codex GitHub inbox imports today mapped records once without exporting the token', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-06-13T12:00:00');
+  const inboxPayload = {
+    version: 1,
+    source: 'timekeeper-codex-bridge',
+    machineId: 'desktop-a',
+    updatedAt: '2026-06-13T10:00:00.000Z',
+    records: [
+      {
+        id: 'codex-today',
+        threadId: 'thread-today',
+        projectKey: 'VWR-AutoInv',
+        timekeeperProjectId: 'iflai',
+        startTime: '2026-06-13T08:00:00.000Z',
+        endTime: '2026-06-13T08:30:00.000Z',
+        wallSeconds: 1800,
+        focusFactor: 0.5,
+        effectiveSeconds: 900,
+        description: 'Codex: VWR automation'
+      },
+      {
+        id: 'codex-yesterday',
+        threadId: 'thread-yesterday',
+        projectKey: 'VWR-AutoInv',
+        timekeeperProjectId: 'iflai',
+        startTime: '2026-06-12T08:00:00.000Z',
+        endTime: '2026-06-12T08:30:00.000Z',
+        wallSeconds: 1800,
+        focusFactor: 0.5,
+        effectiveSeconds: 900,
+        description: 'Codex: old work'
+      }
+    ]
+  };
+  const encodedInbox = Buffer.from(JSON.stringify(inboxPayload)).toString(
+    'base64'
+  );
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'iflai',
+        name: 'IFLAI',
+        budgetHours: 8,
+        startDate: '2026-06-13',
+        deadline: '2026-06-30'
+      })
+    ],
+    entries: [],
+    codexIntegration: {
+      enabled: true,
+      repository: 'Henrik-KM/TimeKeeper',
+      branch: 'main',
+      configPath: 'assets/timekeeper-codex-config.json',
+      inboxPath: 'assets/timekeeper-codex-inbox',
+      mappings: [{ match: 'VWR-AutoInv', projectId: 'iflai' }],
+      importedCodexRecordIds: []
+    }
+  });
+  await page.addInitScript((inboxContent) => {
+    localStorage.setItem('timekeeperCodexIntegrationToken', 'ghp_codex_test');
+    window.fetch = (url) => {
+      const value = String(url);
+      if (
+        value.includes(
+          'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox?ref=main'
+        )
+      ) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify([
+              {
+                type: 'file',
+                name: 'desktop-a.json',
+                url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json'
+              }
+            ]),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          )
+        );
+      }
+      if (value.includes('timekeeper-codex-inbox/desktop-a.json')) {
+        return Promise.resolve(
+          new Response(JSON.stringify({ content: inboxContent }), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        );
+      }
+      return Promise.resolve(new Response('{}', { status: 404 }));
+    };
+  }, encodedInbox);
+
+  await page.goto('/');
+  await gotoSection(page, 'importExport', 'Import / Export');
+
+  await expect
+    .poll(async () =>
+      page.evaluate(() => {
+        const data = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return data.entries.length;
+      })
+    )
+    .toBe(1);
+  let data = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(data.entries[0]).toMatchObject({
+    projectId: 'iflai',
+    description: 'Codex: VWR automation',
+    duration: 900,
+    focusFactor: 0.5,
+    manualFactor: 0.5,
+    source: 'codex',
+    externalId: 'codex-today'
+  });
+  expect(JSON.stringify(data)).not.toContain('ghp_codex_test');
+
+  await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
+  await page.getByRole('button', { name: 'Import Now' }).click();
+  data = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(data.entries).toHaveLength(1);
+  expect(JSON.stringify(data)).not.toContain('codex-yesterday');
+});
+
 test('focus blocker can edit blocked websites and resend the active block', async ({
   page
 }) => {

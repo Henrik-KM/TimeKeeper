@@ -239,6 +239,16 @@
           <p class="status-muted">Import TimeKeeper-compatible Strava JSON or the activities.csv file from Strava's free data export.</p>
           <input id="stravaImportInput" type="file" accept="application/json,.json,text/csv,.csv" />
         </div>
+        <div class="card" style="margin-top:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Codex Integration</h3>
+          <p id="codexIntegrationStatus" class="status-muted">Codex import is not configured.</p>
+          <div id="codexIntegrationSummary" class="codex-integration-summary"></div>
+          <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
+            <button id="codexConfigBtn" class="btn secondary" type="button">Configure Codex</button>
+            <button id="codexPublishConfigBtn" class="btn secondary" type="button">Publish Config</button>
+            <button id="codexImportNowBtn" class="btn secondary" type="button">Import Now</button>
+          </div>
+        </div>
 
         <!-- Auto Sync card: allows toggling automatic periodic export of data -->
         <div class="card" style="margin-top:1rem;">

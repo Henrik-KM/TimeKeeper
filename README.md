@@ -141,6 +141,41 @@ npm run focus:blocker -- --state-url="https://api.github.com/repos/OWNER/REPO/co
 
 Remote focus states expire after 15 minutes in the app and are treated as stale by the helper, so an abandoned phone/browser session clears the desktop block instead of leaving the PC offline indefinitely.
 
+## Codex Usage Bridge
+
+TimeKeeper can import Codex desktop work as 50% project time. The Android/GitHub Pages app cannot read Windows Codex logs directly, so each Windows desktop runs a small scheduled helper that scans local Codex session JSONL files, publishes sanitized usage records to a GitHub inbox, and exits.
+
+The helper never publishes prompts, tool output, or full local paths. It publishes repo/thread metadata, active timestamps, and effective seconds only. It also ignores Codex activity before the local start of the current day, so older sessions that are already accounted for do not get imported again.
+
+Setup:
+
+1. In TimeKeeper, open Import / Export -> Codex Integration.
+2. Map Codex repo names to TimeKeeper projects, for example `VWR-AutoInv = IFLAI`, `particle_iden = Anders`, and `TimeKeeper = None`.
+3. Add a fine-grained GitHub token with Contents read/write access and choose `Publish Config`.
+4. On each Windows desktop, set the same token for the helper:
+
+```powershell
+[Environment]::SetEnvironmentVariable('TIMEKEEPER_CODEX_TOKEN', 'github_pat_...', 'User')
+```
+
+5. Install the scheduled task once from this repo:
+
+```powershell
+npm run codex:bridge:install
+```
+
+The task runs at logon and every 5 minutes, scans only today's changed Codex session files under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. To run it manually:
+
+```bash
+npm run codex:bridge
+```
+
+To uninstall the scheduled task:
+
+```powershell
+npm run codex:bridge:uninstall
+```
+
 ## Backup And Sync
 
 Auto sync is designed for a cloud-synced folder such as Google Drive, OneDrive, or Dropbox. Choose that folder from Import / Export -> Auto Data Sync.
