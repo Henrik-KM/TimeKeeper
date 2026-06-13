@@ -25,7 +25,7 @@ $RepeatTrigger = New-ScheduledTaskTrigger `
 $Principal = New-ScheduledTaskPrincipal `
   -UserId $UserId `
   -LogonType Interactive `
-  -RunLevel LeastPrivilege
+  -RunLevel Limited
 $Settings = New-ScheduledTaskSettingsSet `
   -AllowStartIfOnBatteries `
   -DontStopIfGoingOnBatteries `
