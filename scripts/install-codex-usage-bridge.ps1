@@ -8,46 +8,30 @@ $ScriptPath = Join-Path $PSScriptRoot 'run-codex-usage-bridge.ps1'
 
 & powershell.exe -NoProfile -ExecutionPolicy Bypass -File $ScriptPath -Check
 
-$UserId = if ($env:USERDOMAIN) {
-  "$env:USERDOMAIN\$env:USERNAME"
-} else {
-  $env:USERNAME
-}
-$Action = New-ScheduledTaskAction `
-  -Execute 'powershell.exe' `
-  -Argument "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ScriptPath`""
-$LogonTrigger = New-ScheduledTaskTrigger -AtLogOn
-$RepeatTrigger = New-ScheduledTaskTrigger `
-  -Once `
-  -At (Get-Date).Date `
-  -RepetitionInterval (New-TimeSpan -Minutes 5) `
-  -RepetitionDuration (New-TimeSpan -Days 3650)
-$Principal = New-ScheduledTaskPrincipal `
-  -UserId $UserId `
-  -LogonType Interactive `
-  -RunLevel Limited
-$Settings = New-ScheduledTaskSettingsSet `
-  -AllowStartIfOnBatteries `
-  -DontStopIfGoingOnBatteries `
-  -MultipleInstances IgnoreNew `
-  -ExecutionTimeLimit (New-TimeSpan -Minutes 2) `
-  -Hidden
+$ResolvedScriptPath = (Resolve-Path $ScriptPath).Path
+$TaskCommand = "powershell.exe -NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -File `"$ResolvedScriptPath`""
 
-Register-ScheduledTask `
-  -TaskName $TaskName `
-  -Action $Action `
-  -Trigger @($LogonTrigger, $RepeatTrigger) `
-  -Principal $Principal `
-  -Settings $Settings `
-  -Force | Out-Null
+& schtasks.exe `
+  /Create `
+  /TN $TaskName `
+  /SC MINUTE `
+  /MO 5 `
+  /TR $TaskCommand `
+  /F | Out-Null
+if ($LASTEXITCODE -ne 0) {
+  throw "Failed to create scheduled task: $TaskName"
+}
 
 if (-not $NoStart) {
-  Start-ScheduledTask -TaskName $TaskName
+  & schtasks.exe /Run /TN $TaskName | Out-Null
+  if ($LASTEXITCODE -ne 0) {
+    throw "Failed to start scheduled task: $TaskName"
+  }
 }
 
 Write-Output "Installed scheduled task: $TaskName"
 if ($NoStart) {
-  Write-Output 'The task will start at next logon and then repeat every 5 minutes.'
+  Write-Output 'The task will repeat every 5 minutes.'
 } else {
   Write-Output 'The task was started and will repeat every 5 minutes.'
 }
