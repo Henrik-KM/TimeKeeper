@@ -2164,6 +2164,136 @@ test('Codex GitHub inbox imports today tracked records once without exporting th
   expect(JSON.stringify(data)).not.toContain('codex-yesterday');
 });
 
+test('Codex config publish retries after a stale GitHub sha', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-06-15T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'iflai',
+        name: 'IFLAI',
+        budgetHours: 8,
+        startDate: '2026-06-15',
+        deadline: '2026-06-30'
+      }),
+      {
+        ...projectFixture({
+          id: 'polish',
+          name: 'Polish',
+          budgetHours: 8,
+          startDate: '2026-06-15',
+          deadline: '2026-06-30'
+        }),
+        archived: true
+      }
+    ],
+    entries: [],
+    codexIntegration: {
+      enabled: true,
+      repository: 'Henrik-KM/TimeKeeper',
+      branch: 'main',
+      configPath: 'assets/timekeeper-codex-config.json',
+      inboxPath: 'assets/timekeeper-codex-inbox',
+      importedCodexRecordIds: []
+    }
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem('timekeeperCodexIntegrationToken', 'ghp_codex_test');
+    window['__codexConfigBodies'] = [];
+    let configGetCount = 0;
+    window.fetch = (url, options = {}) => {
+      const value = String(url);
+      const method = String(options.method || 'GET').toUpperCase();
+      if (
+        value.includes(
+          'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox?ref=main'
+        )
+      ) {
+        return Promise.resolve(
+          new Response(JSON.stringify([]), {
+            status: 200,
+            headers: { 'Content-Type': 'application/json' }
+          })
+        );
+      }
+      if (
+        value.includes(
+          'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-config.json'
+        )
+      ) {
+        if (method === 'PUT') {
+          const body = JSON.parse(String(options.body || '{}'));
+          window['__codexConfigBodies'].push(body);
+          if (window['__codexConfigBodies'].length === 1) {
+            return Promise.resolve(
+              new Response(
+                JSON.stringify({
+                  message: 'sha does not match',
+                  errors: [{ message: 'JSON sha does not match current file' }]
+                }),
+                {
+                  status: 409,
+                  headers: { 'Content-Type': 'application/json' }
+                }
+              )
+            );
+          }
+          return Promise.resolve(
+            new Response(JSON.stringify({ content: { sha: 'written-sha' } }), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            })
+          );
+        }
+        configGetCount += 1;
+        return Promise.resolve(
+          new Response(
+            JSON.stringify({
+              sha: configGetCount === 1 ? 'stale-sha' : 'fresh-sha'
+            }),
+            {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            }
+          )
+        );
+      }
+      return Promise.resolve(new Response('{}', { status: 404 }));
+    };
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'importExport', 'Import / Export');
+  await page.getByRole('button', { name: 'Publish Config' }).click();
+
+  await expect
+    .poll(async () =>
+      page.evaluate(() => (window['__codexConfigBodies'] || []).length)
+    )
+    .toBe(2);
+  const bodies = await page.evaluate(() => window['__codexConfigBodies'] || []);
+  expect(bodies[0].sha).toBe('stale-sha');
+  expect(bodies[1].sha).toBe('fresh-sha');
+  const publishedConfig = JSON.parse(
+    Buffer.from(bodies[1].content, 'base64').toString('utf8')
+  );
+  expect(publishedConfig).toMatchObject({
+    version: 2,
+    matchMode: 'github-parent-folder',
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }]
+  });
+  expect(JSON.stringify(publishedConfig)).not.toContain('Polish');
+  await expect(page.locator('#codexIntegrationStatus')).not.toContainText(
+    'error'
+  );
+  await expect
+    .poll(async () =>
+      page.evaluate(() => localStorage.getItem('timekeeperDataPro') || '')
+    )
+    .not.toContain('ghp_codex_test');
+});
+
 test('focus blocker can edit blocked websites and resend the active block', async ({
   page
 }) => {

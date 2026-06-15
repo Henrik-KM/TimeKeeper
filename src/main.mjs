@@ -2357,23 +2357,51 @@ import {
     });
   }
 
+  function getGitHubErrorMessage(payload, status) {
+    const base =
+      payload && payload.message
+        ? payload.message
+        : `GitHub returned ${status}.`;
+    const details = Array.isArray(payload?.errors)
+      ? payload.errors
+          .map((item) =>
+            String(
+              item?.message ||
+                [item?.resource, item?.field, item?.code]
+                  .filter(Boolean)
+                  .join(' ')
+            ).trim()
+          )
+          .filter(Boolean)
+      : [];
+    return [base, ...details].join(' ');
+  }
+
+  function isGitHubShaMismatchError(error) {
+    return (
+      error &&
+      (error.status === 409 ||
+        (error.status === 422 &&
+          /sha|does not match|not match/i.test(error.message || '')))
+    );
+  }
+
   async function githubJson(url, options = {}) {
+    const { headers = {}, ...requestOptions } = options;
     const response = await fetch(url, {
-      ...options,
+      cache: 'no-store',
+      ...requestOptions,
       headers: {
         Accept: 'application/vnd.github+json',
         'X-GitHub-Api-Version': '2022-11-28',
-        ...(options.headers || {})
+        ...headers
       }
     });
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const message =
-        payload && payload.message
-          ? payload.message
-          : `GitHub returned ${response.status}.`;
-      const error = new Error(message);
+      const error = new Error(getGitHubErrorMessage(payload, response.status));
       error.status = response.status;
+      error.payload = payload;
       throw error;
     }
     return payload;
@@ -2387,30 +2415,39 @@ import {
     if (!config.token) {
       throw new Error('Enter a GitHub token with contents write access.');
     }
-    let sha = null;
-    try {
-      const existing = await githubJson(apiUrl, {
-        headers: { Authorization: `Bearer ${config.token}` }
-      });
-      sha = existing && existing.sha ? existing.sha : null;
-    } catch (error) {
-      if (error.status !== 404) throw error;
-    }
+    const putUrl = apiUrl.replace(/\?.*$/, '');
     const content = `${JSON.stringify(state, null, 2)}\n`;
-    const body = {
-      message: 'Update TimeKeeper focus state [skip ci]',
-      content: encodeUtf8Base64(content),
-      branch: config.branch
-    };
-    if (sha) body.sha = sha;
-    await githubJson(apiUrl.replace(/\?.*$/, ''), {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${config.token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      let sha = null;
+      try {
+        const existing = await githubJson(apiUrl, {
+          headers: { Authorization: `Bearer ${config.token}` }
+        });
+        sha = existing && existing.sha ? existing.sha : null;
+      } catch (error) {
+        if (error.status !== 404) throw error;
+      }
+      const body = {
+        message: 'Update TimeKeeper focus state [skip ci]',
+        content: encodeUtf8Base64(content),
+        branch: config.branch
+      };
+      if (sha) body.sha = sha;
+      try {
+        await githubJson(putUrl, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${config.token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        return apiUrl;
+      } catch (error) {
+        if (attempt === 0 && isGitHubShaMismatchError(error)) continue;
+        throw error;
+      }
+    }
     return apiUrl;
   }
 
@@ -2658,29 +2695,39 @@ import {
     if (!token) {
       throw new Error('Enter a GitHub token with Contents read/write access.');
     }
-    let sha = null;
-    try {
-      const existing = await githubJson(apiUrl, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      sha = existing && existing.sha ? existing.sha : null;
-    } catch (error) {
-      if (error.status !== 404) throw error;
+    const putUrl = apiUrl.replace(/\?.*$/, '');
+    const content = encodeUtf8Base64(`${JSON.stringify(payload, null, 2)}\n`);
+    for (let attempt = 0; attempt < 2; attempt += 1) {
+      let sha = null;
+      try {
+        const existing = await githubJson(apiUrl, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        sha = existing && existing.sha ? existing.sha : null;
+      } catch (error) {
+        if (error.status !== 404) throw error;
+      }
+      const body = {
+        message,
+        content,
+        branch: config.branch
+      };
+      if (sha) body.sha = sha;
+      try {
+        await githubJson(putUrl, {
+          method: 'PUT',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(body)
+        });
+        return apiUrl;
+      } catch (error) {
+        if (attempt === 0 && isGitHubShaMismatchError(error)) continue;
+        throw error;
+      }
     }
-    const body = {
-      message,
-      content: encodeUtf8Base64(`${JSON.stringify(payload, null, 2)}\n`),
-      branch: config.branch
-    };
-    if (sha) body.sha = sha;
-    await githubJson(apiUrl.replace(/\?.*$/, ''), {
-      method: 'PUT',
-      headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify(body)
-    });
     return apiUrl;
   }
 

@@ -112,6 +112,7 @@ function getGitHubApiUrl(repository, filePath, branch) {
  */
 async function githubJson(url, { token = '', ...options } = {}) {
   const response = await fetch(url, {
+    cache: 'no-store',
     ...options,
     headers: {
       Accept: 'application/vnd.github+json',
@@ -122,13 +123,38 @@ async function githubJson(url, { token = '', ...options } = {}) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
-    const error = Object.assign(
-      new Error(payload?.message || `GitHub returned ${response.status}`),
-      { status: response.status }
-    );
+    const details = Array.isArray(payload?.errors)
+      ? payload.errors
+          .map((item) =>
+            String(
+              item?.message ||
+                [item?.resource, item?.field, item?.code]
+                  .filter(Boolean)
+                  .join(' ')
+            ).trim()
+          )
+          .filter(Boolean)
+      : [];
+    const message = [
+      payload?.message || `GitHub returned ${response.status}`,
+      ...details
+    ].join(' ');
+    const error = Object.assign(new Error(message), {
+      status: response.status,
+      payload
+    });
     throw error;
   }
   return payload;
+}
+
+function isGitHubShaMismatchError(error) {
+  return (
+    error &&
+    (error.status === 409 ||
+      (error.status === 422 &&
+        /sha|does not match|not match/i.test(error.message || '')))
+  );
 }
 
 function decodeGitHubContent(payload) {
@@ -233,37 +259,47 @@ async function putGitHubJsonFile({ options, pathValue, payload, message }) {
     );
   }
   const apiUrl = getGitHubApiUrl(options.repository, pathValue, options.branch);
-  let sha = null;
-  try {
-    const existing = await githubJson(apiUrl, { token: options.token });
-    sha = existing?.sha || null;
-  } catch (error) {
-    if (
-      !(
-        error &&
-        typeof error === 'object' &&
-        'status' in error &&
-        error.status === 404
-      )
-    ) {
+  const putUrl = apiUrl.replace(/\?.*$/, '');
+  const content = Buffer.from(
+    `${JSON.stringify(payload, null, 2)}\n`,
+    'utf8'
+  ).toString('base64');
+  for (let attempt = 0; attempt < 2; attempt += 1) {
+    let sha = null;
+    try {
+      const existing = await githubJson(apiUrl, { token: options.token });
+      sha = existing?.sha || null;
+    } catch (error) {
+      if (
+        !(
+          error &&
+          typeof error === 'object' &&
+          'status' in error &&
+          error.status === 404
+        )
+      ) {
+        throw error;
+      }
+    }
+    const body = {
+      message,
+      content,
+      branch: options.branch
+    };
+    if (sha) body.sha = sha;
+    try {
+      await githubJson(putUrl, {
+        token: options.token,
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      return apiUrl;
+    } catch (error) {
+      if (attempt === 0 && isGitHubShaMismatchError(error)) continue;
       throw error;
     }
   }
-  const body = {
-    message,
-    content: Buffer.from(
-      `${JSON.stringify(payload, null, 2)}\n`,
-      'utf8'
-    ).toString('base64'),
-    branch: options.branch
-  };
-  if (sha) body.sha = sha;
-  await githubJson(apiUrl.replace(/\?.*$/, ''), {
-    token: options.token,
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
   return apiUrl;
 }
 
