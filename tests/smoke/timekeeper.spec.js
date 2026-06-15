@@ -1593,7 +1593,17 @@ test('timer recommendation uses remaining project hours over workdays left', asy
         startTime: '2026-04-10T09:00:00.000',
         endTime: '2026-04-10T11:00:00.000',
         hours: 20
-      })
+      }),
+      {
+        ...entryFixture({
+          id: 'iflai-codex-today',
+          projectId: 'iflai',
+          startTime: '2026-04-24T08:00:00.000',
+          endTime: '2026-04-24T11:20:00.000',
+          hours: 10 / 3
+        }),
+        source: 'codex'
+      }
     ]
   });
 

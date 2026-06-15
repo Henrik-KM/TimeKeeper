@@ -7751,12 +7751,24 @@ import {
     }
   }
 
-  // Compute statistics per project
-  function computeProjectStats(project) {
-    const now = new Date();
-    const entries = data.entries.filter(
-      (e) => e.projectId === project.id && !e.isRunning
+  function isCodexTimeEntry(entry) {
+    return String(entry?.source || '').toLowerCase() === 'codex';
+  }
+
+  function getCompletedProjectEntries(projectId, options = {}) {
+    const includeCodexEntries = options.includeCodexEntries !== false;
+    return data.entries.filter(
+      (entry) =>
+        entry.projectId === projectId &&
+        !entry.isRunning &&
+        (includeCodexEntries || !isCodexTimeEntry(entry))
     );
+  }
+
+  // Compute statistics per project
+  function computeProjectStats(project, options = {}) {
+    const now = new Date();
+    const entries = getCompletedProjectEntries(project.id, options);
     const totalHours = sumEntryHours(entries);
     const remainingHours = project.budgetHours - totalHours;
     const created = getProjectStartDate(project);
@@ -8069,25 +8081,30 @@ import {
     };
   }
 
-  function getProjectCompletedHoursForPeriod(projectId, start, end) {
-    const projectEntries = data.entries.filter(
-      (entry) => entry.projectId === projectId && !entry.isRunning
-    );
+  function getProjectCompletedHoursForPeriod(
+    projectId,
+    start,
+    end,
+    options = {}
+  ) {
+    const projectEntries = getCompletedProjectEntries(projectId, options);
     return sumEntryHours(projectEntries, start, end);
   }
 
-  function getProjectDailyPlan(project, stats, context) {
+  function getProjectDailyPlan(project, stats, context, options = {}) {
     const weekContext = context || getCurrentWeekPlanningContext();
-    const projectStats = stats || computeProjectStats(project);
+    const projectStats = stats || computeProjectStats(project, options);
     const todayHours = getProjectCompletedHoursForPeriod(
       project.id,
       weekContext.todayStart,
-      weekContext.todayEnd
+      weekContext.todayEnd,
+      options
     );
     const weekHoursBeforeToday = getProjectCompletedHoursForPeriod(
       project.id,
       weekContext.startWeek,
-      weekContext.todayStart
+      weekContext.todayStart,
+      options
     );
     const weeklyTarget = Math.max(
       0,
@@ -10639,9 +10656,15 @@ import {
       getRunningEntries().map((e) => String(e.projectId))
     );
     const weekContext = getCurrentWeekPlanningContext();
+    const timerRecommendationOptions = { includeCodexEntries: false };
     const projectOptionData = activeProjects.map((project, index) => {
-      const stats = computeProjectStats(project);
-      const dailyPlan = getProjectDailyPlan(project, stats, weekContext);
+      const stats = computeProjectStats(project, timerRecommendationOptions);
+      const dailyPlan = getProjectDailyPlan(
+        project,
+        stats,
+        weekContext,
+        timerRecommendationOptions
+      );
       return { project, stats, dailyPlan, index };
     });
     const dailyPlanByProjectId = new Map(
