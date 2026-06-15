@@ -37,6 +37,38 @@ export function getRepoNameFromCwd(cwd = '') {
   return path.basename(normalized.replace(/[\\/]+$/g, ''));
 }
 
+export function getGitHubProjectPathInfo(cwd = '') {
+  const normalized = String(cwd || '').trim();
+  if (!normalized) return null;
+  const parts = normalized
+    .replace(/[\\/]+$/g, '')
+    .split(/[\\/]+/)
+    .filter(Boolean);
+  const gitHubIndex = parts
+    .map((part) => part.toLowerCase())
+    .lastIndexOf('github');
+  if (gitHubIndex < 0) return null;
+  const projectFolder = parts[gitHubIndex + 1] || '';
+  const repoName = parts[gitHubIndex + 2] || '';
+  if (!projectFolder || !repoName) return null;
+  return { projectFolder, repoName };
+}
+
+export function normalizeTrackedProjects(projects = []) {
+  if (!Array.isArray(projects)) return [];
+  return projects
+    .map((project) => {
+      const obj = project && typeof project === 'object' ? project : {};
+      const name = String(obj.name || obj.projectName || '').trim();
+      const projectId = String(
+        obj.projectId || obj.timekeeperProjectId || obj.id || ''
+      ).trim();
+      if (!name || !projectId) return null;
+      return { name, projectId };
+    })
+    .filter(Boolean);
+}
+
 export function normalizeCodexMappings(mappings = []) {
   if (!Array.isArray(mappings)) return [];
   return mappings
@@ -72,6 +104,37 @@ export function findCodexMappingForCwd(cwd = '', mappings = []) {
     return lowerRepoName === lowerMatch;
   });
   return mapping ? { ...mapping, repoName } : null;
+}
+
+export function findTrackedProjectForCwd(
+  cwd = '',
+  trackedProjects = [],
+  fallbackMappings = []
+) {
+  const pathInfo = getGitHubProjectPathInfo(cwd);
+  const normalizedProjects = normalizeTrackedProjects(trackedProjects);
+  if (pathInfo) {
+    const lowerProjectFolder = pathInfo.projectFolder.toLowerCase();
+    const project = normalizedProjects.find(
+      (candidate) => candidate.name.toLowerCase() === lowerProjectFolder
+    );
+    if (project) {
+      return {
+        matchType: 'githubParentFolder',
+        match: pathInfo.projectFolder,
+        projectId: project.projectId,
+        projectName: project.name,
+        repoName: pathInfo.repoName
+      };
+    }
+    if (normalizedProjects.length) return null;
+  }
+  const mapping = findCodexMappingForCwd(cwd, fallbackMappings);
+  if (!mapping) return null;
+  return {
+    ...mapping,
+    projectName: ''
+  };
 }
 
 export function parseCodexJsonl(text = '') {
@@ -180,6 +243,7 @@ export function makeCodexRecordId(parts = []) {
 /**
  * @param {{
  *   text?: string,
+ *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
  *   dayStart?: Date,
@@ -192,6 +256,7 @@ export function makeCodexRecordId(parts = []) {
  */
 export function buildCodexUsageRecordsFromSessionText({
   text,
+  trackedProjects,
   mappings,
   threadNamesById = new Map(),
   dayStart = getLocalDayStart(),
@@ -203,8 +268,12 @@ export function buildCodexUsageRecordsFromSessionText({
 } = {}) {
   const events = parseCodexJsonl(text);
   const meta = getCodexSessionMeta(events);
-  const mapping = findCodexMappingForCwd(meta.cwd, mappings);
-  if (!mapping || !mapping.projectId) return [];
+  const projectMatch = findTrackedProjectForCwd(
+    meta.cwd,
+    trackedProjects,
+    mappings
+  );
+  if (!projectMatch || !projectMatch.projectId) return [];
   const timestamps = getSessionEventTimestamps(events, dayStart);
   const spans = buildActiveSpans(timestamps, { idleGapMs, matureMs, now });
   const threadName = threadNamesById.get(meta.id) || '';
@@ -218,14 +287,15 @@ export function buildCodexUsageRecordsFromSessionText({
       return {
         id: makeCodexRecordId([
           meta.id || sourceFile,
-          mapping.projectId,
+          projectMatch.projectId,
           startIso,
           endIso,
           wallSeconds
         ]),
         threadId: meta.id || null,
-        projectKey: mapping.repoName,
-        timekeeperProjectId: mapping.projectId,
+        projectKey: projectMatch.repoName,
+        timekeeperProjectId: projectMatch.projectId,
+        timekeeperProjectName: projectMatch.projectName || '',
         startTime: startIso,
         endTime: endIso,
         wallSeconds,
@@ -233,7 +303,7 @@ export function buildCodexUsageRecordsFromSessionText({
         effectiveSeconds,
         description: threadName
           ? `Codex: ${threadName}`
-          : `Codex: ${mapping.repoName}`
+          : `Codex: ${projectMatch.repoName}`
       };
     })
     .filter(Boolean);

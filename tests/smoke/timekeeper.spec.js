@@ -2034,7 +2034,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
-test('Codex GitHub inbox imports today mapped records once without exporting the token', async ({
+test('Codex GitHub inbox imports today tracked records once without exporting the token', async ({
   page
 }) => {
   await freezeTime(page, '2026-06-13T12:00:00');
@@ -2048,7 +2048,7 @@ test('Codex GitHub inbox imports today mapped records once without exporting the
         id: 'codex-today',
         threadId: 'thread-today',
         projectKey: 'VWR-AutoInv',
-        timekeeperProjectId: 'iflai',
+        timekeeperProjectName: 'IFLAI',
         startTime: '2026-06-13T08:00:00.000Z',
         endTime: '2026-06-13T08:30:00.000Z',
         wallSeconds: 1800,
@@ -2060,7 +2060,7 @@ test('Codex GitHub inbox imports today mapped records once without exporting the
         id: 'codex-yesterday',
         threadId: 'thread-yesterday',
         projectKey: 'VWR-AutoInv',
-        timekeeperProjectId: 'iflai',
+        timekeeperProjectName: 'IFLAI',
         startTime: '2026-06-12T08:00:00.000Z',
         endTime: '2026-06-12T08:30:00.000Z',
         wallSeconds: 1800,
@@ -2090,7 +2090,6 @@ test('Codex GitHub inbox imports today mapped records once without exporting the
       branch: 'main',
       configPath: 'assets/timekeeper-codex-config.json',
       inboxPath: 'assets/timekeeper-codex-inbox',
-      mappings: [{ match: 'VWR-AutoInv', projectId: 'iflai' }],
       importedCodexRecordIds: []
     }
   });

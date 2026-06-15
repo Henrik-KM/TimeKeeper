@@ -290,6 +290,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
       records.push(
         ...buildCodexUsageRecordsFromSessionText({
           text,
+          trackedProjects: config.trackedProjects || config.projects || [],
           mappings: config.mappings || [],
           threadNamesById,
           dayStart,

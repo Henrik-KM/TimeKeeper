@@ -1,23 +1,40 @@
 {
-  "version": 1,
+  "version": 2,
   "source": "timekeeper",
   "enabled": true,
-  "updatedAt": "2026-06-13T14:06:58.882Z",
-  "mappings": [
+  "updatedAt": "2026-06-15T00:00:00.000Z",
+  "matchMode": "github-parent-folder",
+  "focusFactor": 0.5,
+  "trackedProjects": [
     {
-      "matchType": "repoName",
-      "match": "VWR-AutoInv",
+      "name": "IFLAI",
       "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c"
     },
     {
-      "matchType": "repoName",
-      "match": "particle_iden",
+      "name": "Anders",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d"
+    }
+  ],
+  "mappings": [
+    {
+      "matchType": "pathIncludes",
+      "match": "GitHub\\IFLAI\\",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c"
+    },
+    {
+      "matchType": "pathIncludes",
+      "match": "GitHub/IFLAI/",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c"
+    },
+    {
+      "matchType": "pathIncludes",
+      "match": "GitHub\\Anders\\",
       "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d"
     },
     {
-      "matchType": "repoName",
-      "match": "TimeKeeper",
-      "projectId": null
+      "matchType": "pathIncludes",
+      "match": "GitHub/Anders/",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d"
     }
   ]
 }

@@ -3,7 +3,8 @@ import test from 'node:test';
 
 import {
   buildCodexUsageRecordsFromSessionText,
-  findCodexMappingForCwd
+  findTrackedProjectForCwd,
+  getGitHubProjectPathInfo
 } from '../../scripts/codex-usage-core.mjs';
 
 function jsonl(events) {
@@ -29,9 +30,42 @@ function session({ cwd, id = 'thread-1', timestamps = [] }) {
   ]);
 }
 
-test('maps Codex cwd by repo name', () => {
-  const mapping = findCodexMappingForCwd(
-    'C:\\Users\\ccx55\\OneDrive\\Documents\\GitHub\\IFLAI\\VWR-AutoInv',
+test('maps Codex cwd by TimeKeeper project parent folder', () => {
+  const cwd =
+    'C:\\Users\\ccx55\\OneDrive\\Documents\\GitHub\\IFLAI\\VWR-AutoInv\\src';
+  const pathInfo = getGitHubProjectPathInfo(cwd);
+  const mapping = findTrackedProjectForCwd(cwd, [
+    { name: 'IFLAI', projectId: 'iflai' },
+    { name: 'Anders', projectId: 'anders' }
+  ]);
+
+  assert.deepEqual(pathInfo, {
+    projectFolder: 'IFLAI',
+    repoName: 'VWR-AutoInv'
+  });
+  assert.equal(mapping.repoName, 'VWR-AutoInv');
+  assert.equal(mapping.projectName, 'IFLAI');
+  assert.equal(mapping.projectId, 'iflai');
+});
+
+test('ignores GitHub parent folders that are not TimeKeeper projects', () => {
+  const records = buildCodexUsageRecordsFromSessionText({
+    text: session({
+      cwd: 'C:\\Users\\ccx55\\OneDrive\\Documents\\GitHub\\Polish\\Drafting',
+      timestamps: ['2026-06-13T09:00:00.000Z', '2026-06-13T09:05:00.000Z']
+    }),
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+    dayStart: new Date('2026-06-13T00:00:00.000Z'),
+    now: new Date('2026-06-13T10:00:00.000Z')
+  });
+
+  assert.deepEqual(records, []);
+});
+
+test('keeps legacy repo mappings as a fallback when no project list exists', () => {
+  const mapping = findTrackedProjectForCwd(
+    'C:\\Users\\ccx55\\OneDrive\\Documents\\Code\\VWR-AutoInv',
+    [],
     [{ match: 'VWR-AutoInv', projectId: 'iflai' }]
   );
 
@@ -49,7 +83,7 @@ test('ignores Codex activity before the configured day start', () => {
         '2026-06-13T08:10:00.000Z'
       ]
     }),
-    mappings: [{ match: 'VWR-AutoInv', projectId: 'iflai' }],
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
     threadNamesById: new Map([['thread-1', 'Plan POU vision demo']]),
     dayStart: new Date('2026-06-13T00:00:00.000Z'),
     now: new Date('2026-06-13T08:40:00.000Z')
@@ -59,6 +93,8 @@ test('ignores Codex activity before the configured day start', () => {
   assert.equal(records[0].startTime, '2026-06-13T08:00:00.000Z');
   assert.equal(records[0].wallSeconds, 600);
   assert.equal(records[0].effectiveSeconds, 300);
+  assert.equal(records[0].projectKey, 'VWR-AutoInv');
+  assert.equal(records[0].timekeeperProjectName, 'IFLAI');
   assert.equal(records[0].description, 'Codex: Plan POU vision demo');
   assert.equal(JSON.stringify(records).includes('prompt text'), false);
 });
@@ -74,7 +110,7 @@ test('splits active Codex spans across idle gaps', () => {
         '2026-06-13T09:40:00.000Z'
       ]
     }),
-    mappings: [{ match: 'particle_iden', projectId: 'anders' }],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
     dayStart: new Date('2026-06-13T00:00:00.000Z'),
     now: new Date('2026-06-13T10:00:00.000Z')
   });
@@ -90,13 +126,16 @@ test('splits active Codex spans across idle gaps', () => {
   );
 });
 
-test('does not emit records for projects mapped to None', () => {
+test('does not emit records for repos directly under GitHub root', () => {
   const records = buildCodexUsageRecordsFromSessionText({
     text: session({
       cwd: 'C:\\Users\\ccx55\\OneDrive\\Documents\\GitHub\\TimeKeeper',
       timestamps: ['2026-06-13T09:00:00.000Z', '2026-06-13T09:05:00.000Z']
     }),
-    mappings: [{ match: 'TimeKeeper', projectId: null }],
+    trackedProjects: [
+      { name: 'IFLAI', projectId: 'iflai' },
+      { name: 'Anders', projectId: 'anders' }
+    ],
     dayStart: new Date('2026-06-13T00:00:00.000Z'),
     now: new Date('2026-06-13T10:00:00.000Z')
   });

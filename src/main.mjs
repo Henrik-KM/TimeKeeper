@@ -2567,87 +2567,48 @@ import {
     }
   }
 
-  function getCodexProjectName(projectId) {
-    if (projectId === null) return 'None';
-    const project = data.projects.find(
-      (item) => String(item.id) === String(projectId)
-    );
-    return project ? project.name : String(projectId || 'None');
-  }
-
-  function findCodexProjectId(label) {
-    const value = String(label || '').trim();
-    if (!value || /^none$/i.test(value)) return null;
-    const byId = data.projects.find((project) => String(project.id) === value);
-    if (byId) return String(byId.id);
-    const byName = data.projects.find(
-      (project) =>
-        String(project.name || '').toLowerCase() === value.toLowerCase()
-    );
-    if (byName) return String(byName.id);
-    throw new Error(`Unknown TimeKeeper project "${value}".`);
-  }
-
-  function getDefaultCodexMappings() {
-    const defaults = [];
-    const add = (match, projectName) => {
-      const project = data.projects.find(
-        (item) =>
-          String(item.name || '').toLowerCase() ===
-          String(projectName).toLowerCase()
-      );
-      if (project) {
-        defaults.push({
-          matchType: 'repoName',
-          match,
-          projectId: String(project.id)
-        });
-      }
-    };
-    add('VWR-AutoInv', 'IFLAI');
-    add('particle_iden', 'Anders');
-    defaults.push({
-      matchType: 'repoName',
-      match: 'TimeKeeper',
-      projectId: null
+  function getCodexTrackedProjects() {
+    const seen = new Set();
+    const projects = [];
+    data.projects.forEach((project) => {
+      const name = String(project?.name || '').trim();
+      const projectId = String(project?.id || '').trim();
+      if (!name || !projectId || isProjectArchived(project)) return;
+      const key = name.toLowerCase();
+      if (seen.has(key)) return;
+      seen.add(key);
+      projects.push({ name, projectId });
     });
-    return defaults;
+    return projects;
   }
 
-  function codexMappingsToText(mappings = []) {
-    const rows = mappings.length ? mappings : getDefaultCodexMappings();
-    return rows
-      .map((mapping) => {
-        const projectName = getCodexProjectName(mapping.projectId);
-        return `${mapping.match} = ${projectName}`;
-      })
-      .join('\n');
+  function getCodexLegacyPathMappings(projects = getCodexTrackedProjects()) {
+    return projects.flatMap((project) => [
+      {
+        matchType: 'pathIncludes',
+        match: `GitHub\\${project.name}\\`,
+        projectId: project.projectId
+      },
+      {
+        matchType: 'pathIncludes',
+        match: `GitHub/${project.name}/`,
+        projectId: project.projectId
+      }
+    ]);
   }
 
-  function parseCodexMappingsText(text) {
-    const rows = [];
-    String(text || '')
-      .split(/\r?\n/)
-      .forEach((line) => {
-        const trimmed = line.trim();
-        if (!trimmed || trimmed.startsWith('#')) return;
-        const match = /^(.*?)\s*(?:=>|=|,)\s*(.*?)$/.exec(trimmed);
-        if (!match) {
-          throw new Error(
-            `Mapping "${trimmed}" should look like repo = Project.`
-          );
-        }
-        const repoName = match[1].trim();
-        const projectLabel = match[2].trim();
-        if (!repoName)
-          throw new Error('Codex repo mapping is missing a repo name.');
-        rows.push({
-          matchType: 'repoName',
-          match: repoName,
-          projectId: findCodexProjectId(projectLabel)
-        });
-      });
-    return normalizeCodexMappings(rows);
+  function findCodexProjectByName(name) {
+    const value = String(name || '')
+      .trim()
+      .toLowerCase();
+    if (!value) return null;
+    return data.projects.find(
+      (project) =>
+        !isProjectArchived(project) &&
+        String(project.name || '')
+          .trim()
+          .toLowerCase() === value
+    );
   }
 
   function getCodexGitHubPathApiUrl(
@@ -2676,12 +2637,16 @@ import {
 
   function buildCodexPublishedConfig() {
     const config = getCodexIntegrationConfig();
+    const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 1,
+      version: 2,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
-      mappings: normalizeCodexMappings(config.mappings)
+      matchMode: 'github-parent-folder',
+      focusFactor: CODEX_FOCUS_FACTOR,
+      trackedProjects,
+      mappings: getCodexLegacyPathMappings(trackedProjects)
     };
   }
 
@@ -2726,8 +2691,8 @@ import {
       return null;
     }
     const payload = buildCodexPublishedConfig();
-    if (!payload.mappings.length) {
-      showToast('Add at least one Codex project mapping.');
+    if (!payload.trackedProjects.length) {
+      showToast('Add at least one active TimeKeeper project.');
       return null;
     }
     try {
@@ -2799,33 +2764,18 @@ import {
           type: 'password',
           value: getCodexIntegrationToken(),
           placeholder: 'Fine-grained token with Contents read/write'
-        },
-        {
-          name: 'mappings',
-          label: 'Mappings, one per line: Codex repo = TimeKeeper project',
-          type: 'textarea',
-          rows: 6,
-          value: codexMappingsToText(config.mappings)
         }
       ],
       submitLabel: 'Save Codex'
     });
     if (!values) return;
-    let mappings;
-    try {
-      mappings = parseCodexMappingsText(values.mappings);
-    } catch (error) {
-      showToast(error.message || String(error));
-      return;
-    }
     const next = normalizeCodexIntegration({
       ...config,
       enabled: values.enabled === 'on',
       repository: values.repository,
       branch: values.branch,
       configPath: values.configPath,
-      inboxPath: values.inboxPath,
-      mappings
+      inboxPath: values.inboxPath
     });
     if (next.enabled && !next.repository.includes('/')) {
       showToast('Codex integration needs a GitHub repository as owner/repo.');
@@ -2875,7 +2825,11 @@ import {
       const records = Array.isArray(payload?.records) ? payload.records : [];
       records.forEach((record) => {
         const recordId = String(record?.id || '').trim();
-        const projectId = String(record?.timekeeperProjectId || '').trim();
+        let projectId = String(record?.timekeeperProjectId || '').trim();
+        const namedProject = projectId
+          ? null
+          : findCodexProjectByName(record?.timekeeperProjectName);
+        if (namedProject) projectId = String(namedProject.id);
         const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
         const start = new Date(record?.startTime || '');
         const end = new Date(record?.endTime || '');
@@ -3050,15 +3004,25 @@ import {
     }
     if (!summary) return;
     summary.innerHTML = '';
-    const mappings = config.mappings.length
-      ? config.mappings
-      : getDefaultCodexMappings();
-    mappings.slice(0, 6).forEach((mapping) => {
+    const trackedProjects = getCodexTrackedProjects();
+    if (!trackedProjects.length) {
+      const pill = document.createElement('span');
+      pill.className = 'health-pill warn';
+      pill.textContent = 'No active TimeKeeper projects';
+      summary.appendChild(pill);
+    }
+    trackedProjects.slice(0, 6).forEach((project) => {
       const pill = document.createElement('span');
       pill.className = 'health-pill';
-      pill.textContent = `${mapping.match}: ${getCodexProjectName(mapping.projectId)}`;
+      pill.textContent = `GitHub/${project.name}/...`;
       summary.appendChild(pill);
     });
+    if (trackedProjects.length > 6) {
+      const pill = document.createElement('span');
+      pill.className = 'health-pill';
+      pill.textContent = `+${trackedProjects.length - 6} more projects`;
+      summary.appendChild(pill);
+    }
     if (config.lastImportSummary) {
       const pill = document.createElement('span');
       pill.className = 'health-pill';
