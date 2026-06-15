@@ -242,11 +242,11 @@ export function makeCodexRecordId(parts = []) {
 
 /**
  * @param {{
- *   text?: string,
+ *   meta?: { id?: string, cwd?: string },
+ *   timestamps?: Array<Date>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
- *   dayStart?: Date,
  *   now?: Date,
  *   idleGapMs?: number,
  *   matureMs?: number,
@@ -254,27 +254,24 @@ export function makeCodexRecordId(parts = []) {
  *   sourceFile?: string
  * }} options
  */
-export function buildCodexUsageRecordsFromSessionText({
-  text,
+export function buildCodexUsageRecordsFromSessionData({
+  meta = {},
+  timestamps = [],
   trackedProjects,
   mappings,
   threadNamesById = new Map(),
-  dayStart = getLocalDayStart(),
   now = new Date(),
   idleGapMs = DEFAULT_IDLE_GAP_MS,
   matureMs = DEFAULT_MATURE_MS,
   focusFactor = DEFAULT_CODEX_FOCUS_FACTOR,
   sourceFile = ''
 } = {}) {
-  const events = parseCodexJsonl(text);
-  const meta = getCodexSessionMeta(events);
   const projectMatch = findTrackedProjectForCwd(
     meta.cwd,
     trackedProjects,
     mappings
   );
   if (!projectMatch || !projectMatch.projectId) return [];
-  const timestamps = getSessionEventTimestamps(events, dayStart);
   const spans = buildActiveSpans(timestamps, { idleGapMs, matureMs, now });
   const threadName = threadNamesById.get(meta.id) || '';
   return spans
@@ -307,4 +304,47 @@ export function buildCodexUsageRecordsFromSessionText({
       };
     })
     .filter(Boolean);
+}
+
+/**
+ * @param {{
+ *   text?: string,
+ *   trackedProjects?: Array<object>,
+ *   mappings?: Array<object>,
+ *   threadNamesById?: Map<string, string>,
+ *   dayStart?: Date,
+ *   now?: Date,
+ *   idleGapMs?: number,
+ *   matureMs?: number,
+ *   focusFactor?: number,
+ *   sourceFile?: string
+ * }} options
+ */
+export function buildCodexUsageRecordsFromSessionText({
+  text,
+  trackedProjects,
+  mappings,
+  threadNamesById = new Map(),
+  dayStart = getLocalDayStart(),
+  now = new Date(),
+  idleGapMs = DEFAULT_IDLE_GAP_MS,
+  matureMs = DEFAULT_MATURE_MS,
+  focusFactor = DEFAULT_CODEX_FOCUS_FACTOR,
+  sourceFile = ''
+} = {}) {
+  const events = parseCodexJsonl(text);
+  const meta = getCodexSessionMeta(events);
+  const timestamps = getSessionEventTimestamps(events, dayStart);
+  return buildCodexUsageRecordsFromSessionData({
+    meta,
+    timestamps,
+    trackedProjects,
+    mappings,
+    threadNamesById,
+    now,
+    idleGapMs,
+    matureMs,
+    focusFactor,
+    sourceFile
+  });
 }

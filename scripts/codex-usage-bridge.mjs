@@ -1,13 +1,15 @@
-import { promises as fs } from 'node:fs';
+import { createReadStream, promises as fs } from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
+import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 
 import {
-  buildCodexUsageRecordsFromSessionText,
+  buildCodexUsageRecordsFromSessionData,
   getDefaultMachineId,
   getLocalDayStart,
+  parseTimestamp,
   sanitizeMachineId
 } from './codex-usage-core.mjs';
 
@@ -237,6 +239,49 @@ async function listSessionFilesChangedSince(root, cutoff) {
   return files.sort();
 }
 
+function getJsonLineTimestamp(line) {
+  const match = /"timestamp"\s*:\s*"([^"]+)"/.exec(line);
+  return parseTimestamp(match?.[1]);
+}
+
+async function readCodexSessionSummary(filePath, dayStart) {
+  const minTime = dayStart instanceof Date ? dayStart.getTime() : null;
+  const meta = { id: '', cwd: '', timestamp: null };
+  const timestamps = [];
+  let firstTimestamp = null;
+  let lastTimestampMs = null;
+  const lineReader = readline.createInterface({
+    input: createReadStream(filePath, { encoding: 'utf8' }),
+    crlfDelay: Infinity
+  });
+  for await (const line of lineReader) {
+    if (!line) continue;
+    const timestamp = getJsonLineTimestamp(line);
+    if (timestamp && !firstTimestamp) firstTimestamp = timestamp;
+    if (/"type"\s*:\s*"session_meta"/.test(line)) {
+      try {
+        const event = JSON.parse(line);
+        const payload = event?.payload || {};
+        meta.id = String(payload.id || meta.id || '').trim();
+        meta.cwd = String(payload.cwd || meta.cwd || '').trim();
+        meta.timestamp =
+          parseTimestamp(payload.timestamp) || timestamp || meta.timestamp;
+      } catch {
+        // Ignore malformed or partially-written metadata lines.
+      }
+    }
+    if (timestamp && (minTime === null || timestamp.getTime() >= minTime)) {
+      const timestampMs = timestamp.getTime();
+      if (timestampMs !== lastTimestampMs) {
+        timestamps.push(timestamp);
+        lastTimestampMs = timestampMs;
+      }
+    }
+  }
+  if (!meta.timestamp) meta.timestamp = firstTimestamp;
+  return { meta, timestamps };
+}
+
 async function readJsonFile(filePath, fallback) {
   try {
     return JSON.parse(await fs.readFile(filePath, 'utf8'));
@@ -322,14 +367,13 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
   const records = [];
   await Promise.all(
     files.map(async (filePath) => {
-      const text = await fs.readFile(filePath, 'utf8');
+      const summary = await readCodexSessionSummary(filePath, dayStart);
       records.push(
-        ...buildCodexUsageRecordsFromSessionText({
-          text,
+        ...buildCodexUsageRecordsFromSessionData({
+          ...summary,
           trackedProjects: config.trackedProjects || config.projects || [],
           mappings: config.mappings || [],
           threadNamesById,
-          dayStart,
           now,
           sourceFile: filePath
         })

@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  buildCodexUsageRecordsFromSessionData,
   buildCodexUsageRecordsFromSessionText,
   findTrackedProjectForCwd,
   getGitHubProjectPathInfo
@@ -71,6 +72,27 @@ test('keeps legacy repo mappings as a fallback when no project list exists', () 
 
   assert.equal(mapping.repoName, 'VWR-AutoInv');
   assert.equal(mapping.projectId, 'iflai');
+});
+
+test('builds Codex records from streamed session summary data', () => {
+  const records = buildCodexUsageRecordsFromSessionData({
+    meta: {
+      id: 'thread-streamed',
+      cwd: 'C:\\Users\\ccx55\\OneDrive\\Documents\\GitHub\\Anders\\particle_iden'
+    },
+    timestamps: [
+      new Date('2026-06-13T09:00:00.000Z'),
+      new Date('2026-06-13T09:05:00.000Z')
+    ],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
+    now: new Date('2026-06-13T09:30:00.000Z')
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].projectKey, 'particle_iden');
+  assert.equal(records[0].timekeeperProjectId, 'anders');
+  assert.equal(records[0].wallSeconds, 300);
+  assert.equal(records[0].effectiveSeconds, 150);
 });
 
 test('ignores Codex activity before the configured day start', () => {
