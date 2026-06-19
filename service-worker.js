@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v1';
+const CACHE_NAME = 'timekeeper-app-v2';
 const APP_SHELL = [
   './',
   './index.html',
@@ -22,6 +22,7 @@ const APP_SHELL = [
   './src/styles/layout.css',
   './assets/strava.json',
   './assets/strava_overrides.json',
+  './assets/timekeeper-icon.svg',
   './manifest.webmanifest'
 ];
 
@@ -47,6 +48,12 @@ sw.addEventListener('activate', (event) => {
       )
       .then(() => sw.clients.claim())
   );
+});
+
+sw.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    sw.skipWaiting();
+  }
 });
 
 sw.addEventListener('fetch', (event) => {

@@ -7,5 +7,26 @@
   "display": "standalone",
   "background_color": "#f8fafc",
   "theme_color": "#2563eb",
-  "icons": []
+  "icons": [
+    {
+      "src": "assets/timekeeper-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Start Timer",
+      "short_name": "Timer",
+      "url": "./index.html#timer",
+      "description": "Open TimeKeeper on the timer screen."
+    },
+    {
+      "name": "Log Entry",
+      "short_name": "Log",
+      "url": "./index.html#entries",
+      "description": "Open TimeKeeper on the entries screen."
+    }
+  ]
 }

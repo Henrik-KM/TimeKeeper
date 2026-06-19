@@ -1062,6 +1062,149 @@ test('entry filters summarize visible work and match project/search text', async
   ).toBeVisible();
 });
 
+test('QoL quick log saved billing views and reminder controls work', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'alpha',
+        name: 'Alpha Project',
+        client: 'Acme',
+        hourlyRate: 100
+      }),
+      projectFixture({
+        id: 'beta',
+        name: 'Beta Project',
+        client: 'Beta Co',
+        hourlyRate: 200
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'beta-entry',
+        projectId: 'beta',
+        description: 'Admin follow up',
+        startTime: '2026-04-25T12:00:00.000',
+        endTime: '2026-04-25T13:00:00.000',
+        hours: 1
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await expect(page.locator('#todayCommandPanel')).toContainText('Today');
+  await expect(page.locator('#todayCommandPanel')).toContainText('Quick Log');
+
+  await gotoSection(page, 'entries', 'Time Entries');
+  await page
+    .locator('#quickLogInput')
+    .fill('1.5h Alpha Project planning yesterday');
+  await page.locator('#quickLogForm button[type="submit"]').click();
+  await expect(page.locator('#entriesTableBodyPro')).toContainText('planning');
+
+  const quickEntry = await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+    return saved.entries.find((entry) => entry.description === 'planning');
+  });
+  expect(quickEntry.projectId).toBe('alpha');
+  expect(quickEntry.duration).toBe(5400);
+  expect(quickEntry.endTime).toContain('2026-04-25');
+
+  await page.locator('#entryProjectFilter').selectOption('alpha');
+  await page.locator('#saveBillingViewBtn').click();
+  const saveDialog = page.getByRole('dialog', { name: 'Save Billing View' });
+  await saveDialog.locator('#name').fill('Alpha billing');
+  await saveDialog.getByRole('button', { name: 'Save View' }).click();
+
+  await page.locator('#entryProjectFilter').selectOption('beta');
+  await expect(page.locator('#entriesTableBodyPro')).toContainText(
+    'Admin follow up'
+  );
+  await page.locator('#billingPresetSelect').selectOption({
+    label: 'Alpha billing'
+  });
+  await expect(page.locator('#entriesTableBodyPro')).toContainText('planning');
+  await expect(page.locator('#entriesTableBodyPro')).not.toContainText(
+    'Admin follow up'
+  );
+
+  await page.locator('#billingPresetSelect').selectOption({
+    label: 'This month'
+  });
+  await expect(page.locator('#entryDateFromInput')).toHaveValue('2026-04-01');
+  await expect(page.locator('#entryDateToInput')).toHaveValue('2026-04-30');
+
+  await gotoSection(page, 'importExport', 'Import / Export');
+  await expect(page.locator('#pwaStatusPanel')).toContainText('Offline app');
+  await expect(page.locator('#reminderStatus')).toContainText(
+    'Notification permission'
+  );
+  await page.locator('#reminderTimerMinutes').fill('180');
+  await page.locator('#reminderTimerMinutes').dispatchEvent('change');
+  const reminderSettings = await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+    return saved.reminderSettings;
+  });
+  expect(reminderSettings.staleTimerMinutes).toBe(180);
+});
+
+test('mobile entries use bottom navigation and card rows', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'alpha',
+        name: 'Alpha Project',
+        client: 'Acme'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'alpha-entry',
+        projectId: 'alpha',
+        description: 'Mobile card work',
+        startTime: '2026-04-25T09:00:00.000',
+        endTime: '2026-04-25T10:00:00.000',
+        hours: 1
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'entries', 'Time Entries');
+  await expect(page.locator('#quickLogInput')).toBeVisible();
+  await expect(page.locator('#entriesTableBodyPro')).toContainText(
+    'Mobile card work'
+  );
+
+  const layout = await page.evaluate(() => {
+    const sidebarStyle = getComputedStyle(document.querySelector('.sidebar'));
+    const rowStyle = getComputedStyle(
+      document.querySelector('#entriesTableBodyPro tr')
+    );
+    const actionCellStyle = getComputedStyle(
+      document.querySelector('#entriesTableBodyPro .entry-actions')
+    );
+    return {
+      sidebarPosition: sidebarStyle.position,
+      sidebarBottom: sidebarStyle.bottom,
+      rowDisplay: rowStyle.display,
+      actionDisplay: actionCellStyle.display,
+      scrollWidth: document.documentElement.scrollWidth,
+      viewportWidth: window.innerWidth
+    };
+  });
+
+  expect(layout.sidebarPosition).toBe('fixed');
+  expect(layout.sidebarBottom).toBe('0px');
+  expect(layout.rowDisplay).toBe('block');
+  expect(layout.actionDisplay).toBe('flex');
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
+});
+
 test('entries render saved descriptions without executing markup', async ({
   page
 }) => {

@@ -629,3 +629,315 @@ tr:nth-child(even) td {
     height: 520px !important;
   }
 }
+
+.today-command-panel {
+  display: grid;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.85rem;
+  border: 1px solid #dbeafe;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.today-command-header,
+.today-command-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.today-command-title {
+  color: #0f172a;
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.today-command-meta {
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.today-command-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+  gap: 0.5rem;
+}
+
+.today-command-item {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.55rem;
+  background: #f8fafc;
+}
+
+.today-command-item span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.today-command-item strong {
+  color: #0f172a;
+  font-size: 0.88rem;
+}
+
+.today-command-item.warm {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.today-command-item.risk {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.today-command-item.muted {
+  background: #f1f5f9;
+}
+
+.today-command-actions {
+  justify-content: flex-start;
+}
+
+.quick-log-form {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0.75rem 0;
+  padding: 0.7rem;
+  border: 1px solid #dbeafe;
+  border-radius: 0.6rem;
+  background: #eff6ff;
+}
+
+.quick-log-form label,
+.billing-view-toolbar label {
+  color: #475569;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.quick-log-row,
+.billing-view-toolbar {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.quick-log-row input {
+  flex: 1 1 18rem;
+  min-width: 0;
+  padding: 0.55rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+}
+
+.billing-view-toolbar {
+  margin: 0 0 0.75rem;
+  padding: 0.6rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 0.55rem;
+  background: #f8fafc;
+}
+
+.billing-view-toolbar select {
+  flex: 1 1 12rem;
+  min-width: 0;
+  padding: 0.5rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+}
+
+.pwa-status-panel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.reminder-settings {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  align-items: center;
+}
+
+.reminder-settings label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: #475569;
+  font-size: 0.85rem;
+  font-weight: 650;
+}
+
+.reminder-settings input[type='number'] {
+  width: 5rem;
+  padding: 0.45rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.45rem;
+}
+
+@media (max-width: 640px) {
+  .sidebar {
+    position: fixed;
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 800;
+    width: 100%;
+    padding: 0.35rem 0.45rem calc(0.35rem + env(safe-area-inset-bottom));
+    border-top: 1px solid #dbe3ef;
+    border-right: none;
+    border-bottom: none;
+    background: rgba(248, 250, 252, 0.96);
+    backdrop-filter: blur(10px);
+  }
+
+  .sidebar .logo {
+    display: none;
+  }
+
+  .sidebar ul {
+    display: flex;
+    gap: 0.35rem;
+    overflow-x: auto;
+    padding-bottom: 0.1rem;
+    scrollbar-width: none;
+  }
+
+  .sidebar ul::-webkit-scrollbar {
+    display: none;
+  }
+
+  .sidebar li {
+    flex: 0 0 auto;
+    min-width: 4.8rem;
+    justify-content: center;
+    border-radius: 999px;
+    padding: 0.55rem 0.7rem;
+    font-size: 0.78rem;
+    white-space: nowrap;
+  }
+
+  .content {
+    margin-left: 0;
+    padding: 0.75rem 0.75rem 6.25rem;
+  }
+
+  .today-command-panel {
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .today-command-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .today-command-actions .btn,
+  .quick-log-row .btn,
+  .quick-log-row input,
+  .billing-view-toolbar .btn,
+  .billing-view-toolbar select,
+  .reminder-settings .btn {
+    width: 100%;
+  }
+
+  .quick-log-row,
+  .billing-view-toolbar,
+  .reminder-settings {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  #entries .card {
+    padding: 0.85rem;
+  }
+
+  #entries .card > div:first-child {
+    align-items: stretch !important;
+    flex-direction: column;
+  }
+
+  #entries .card > div:first-child > div {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  #entries .card > div:first-child .btn {
+    width: 100%;
+  }
+
+  #entries .entry-table {
+    display: block;
+  }
+
+  #entries .entry-table thead {
+    display: none;
+  }
+
+  #entries .entry-table tbody,
+  #entries .entry-table tr,
+  #entries .entry-table td {
+    display: block;
+    width: 100%;
+  }
+
+  #entries .entry-table tr {
+    margin-bottom: 0.85rem;
+    padding: 0.75rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.65rem;
+    background: #ffffff;
+  }
+
+  #entries .entry-table tr:nth-child(even) td {
+    background: transparent;
+  }
+
+  #entries .entry-table td {
+    display: grid;
+    grid-template-columns: minmax(5.5rem, 38%) minmax(0, 1fr);
+    gap: 0.5rem;
+    padding: 0.35rem 0;
+    border: none;
+    font-size: 0.88rem;
+  }
+
+  #entries .entry-table td::before {
+    content: attr(data-label);
+    color: #64748b;
+    font-weight: 750;
+  }
+
+  #entries .entry-table .entry-select-cell {
+    grid-template-columns: minmax(5.5rem, 38%) auto;
+  }
+
+  #entries .entry-table .entry-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding-top: 0.5rem;
+  }
+
+  #entries .entry-table .entry-actions::before {
+    flex: 0 0 100%;
+  }
+
+  #entries .entry-table .entry-actions .btn,
+  #entries .entry-table .entry-actions select {
+    flex: 1 1 7rem;
+    margin-left: 0 !important;
+  }
+}

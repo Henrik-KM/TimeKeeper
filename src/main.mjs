@@ -1200,6 +1200,59 @@ import {
     return normalized;
   }
 
+  function normalizeReminderSettings(value = {}) {
+    const input = value && typeof value === 'object' ? value : {};
+    const staleTimerMinutes = Number(input.staleTimerMinutes);
+    const backupAgeHours = Number(input.backupAgeHours);
+    return {
+      enabled: input.enabled === true,
+      staleTimerMinutes:
+        Number.isFinite(staleTimerMinutes) && staleTimerMinutes >= 15
+          ? Math.min(1440, Math.round(staleTimerMinutes))
+          : 240,
+      backupAgeHours:
+        Number.isFinite(backupAgeHours) && backupAgeHours >= 1
+          ? Math.min(168, Math.round(backupAgeHours))
+          : 24
+    };
+  }
+
+  function normalizeBillingViews(value = []) {
+    if (!Array.isArray(value)) return [];
+    const seen = new Set();
+    return value
+      .map((view) => {
+        const item = view && typeof view === 'object' ? view : {};
+        const name = String(item.name || '').trim();
+        if (!name) return null;
+        const filters =
+          item.filters && typeof item.filters === 'object' ? item.filters : {};
+        const id = item.id || uuid();
+        return {
+          id,
+          name,
+          filters: {
+            projectId: String(filters.projectId || ''),
+            search: String(filters.search || ''),
+            from: String(filters.from || ''),
+            to: String(filters.to || ''),
+            showAll: filters.showAll === true
+          },
+          createdAt:
+            typeof item.createdAt === 'string' && item.createdAt
+              ? item.createdAt
+              : new Date().toISOString()
+        };
+      })
+      .filter((view) => {
+        if (!view) return false;
+        const key = view.name.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+  }
+
   function loadData() {
     const raw = localStorage.getItem('timekeeperDataPro');
     if (!raw) {
@@ -1228,6 +1281,8 @@ import {
         backupRevision: 0,
         updatedAt: null,
         timerPresets: [],
+        entryBillingViews: [],
+        reminderSettings: normalizeReminderSettings(),
         codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
@@ -1360,6 +1415,8 @@ import {
           typeof parsed.backupRevision === 'number' ? parsed.backupRevision : 0,
         updatedAt: parsed.updatedAt || null,
         timerPresets: normalizeTimerPresets(parsed.timerPresets),
+        entryBillingViews: normalizeBillingViews(parsed.entryBillingViews),
+        reminderSettings: normalizeReminderSettings(parsed.reminderSettings),
         codexIntegration: normalizeCodexIntegration(parsed.codexIntegration),
         focusBlockerSites: normalizeFocusBlockedSites(
           parsed.focusBlockerSites,
@@ -1406,6 +1463,8 @@ import {
         backupRevision: 0,
         updatedAt: null,
         timerPresets: [],
+        entryBillingViews: [],
+        reminderSettings: normalizeReminderSettings(),
         codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
         fitness: makeDefaultFitness(),
@@ -1437,6 +1496,8 @@ import {
     ensureMonthlyRecurringPayments();
     ensureWealthData();
     ensureTimerPresets();
+    ensureBillingViews();
+    ensureReminderSettings();
     updateProjectSelects();
     updateEntriesTable();
     updateProjectsPage();
@@ -1449,6 +1510,9 @@ import {
     updateFocusBlocker();
     updateAutoSyncStatus();
     updateCodexIntegrationPanel();
+    updateReminderSettingsPanel();
+    updatePwaStatusPanel();
+    renderTodayCommandPanel();
   }
 
   function restoreDataSnapshot(snapshot) {
@@ -1472,6 +1536,16 @@ import {
   function ensureTimerPresets() {
     data.timerPresets = normalizeTimerPresets(data.timerPresets);
     return data.timerPresets;
+  }
+
+  function ensureBillingViews() {
+    data.entryBillingViews = normalizeBillingViews(data.entryBillingViews);
+    return data.entryBillingViews;
+  }
+
+  function ensureReminderSettings() {
+    data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
+    return data.reminderSettings;
   }
 
   function makeTimerPresetKey(projectId, description, focusFactor) {
@@ -1926,6 +2000,11 @@ import {
   let entryDateFrom = '';
   let entryDateTo = '';
   const selectedEntryIds = new Set();
+  let pendingInstallPrompt = null;
+  let pendingServiceWorkerRegistration = null;
+  let reloadAfterServiceWorkerUpdate = false;
+  let lastReminderKey = '';
+  let lastReminderAt = 0;
 
   // -------------------------------------------------------------------------
   //  Haptic feedback and simple audio cues
@@ -8667,6 +8746,7 @@ import {
     renderHeatmap();
     updateBurndownSelect();
     // Previously there was a separate Recommendations card here. It has been removed in favor of integrating suggestions directly into other sections.
+    renderTodayCommandPanel();
 
     // Prepare data for weekly and monthly scatter charts
     const weeklyDatasets = [];
@@ -10221,6 +10301,7 @@ import {
     }
     // update project selects
     updateProjectSelects();
+    renderTodayCommandPanel();
   }
 
   function pauseTimer(entryId) {
@@ -10957,24 +11038,27 @@ import {
     return Math.max(0, Math.floor(roundedMinutes * 60));
   }
 
-  document.getElementById('manualFormPro').addEventListener('submit', (e) => {
-    e.preventDefault();
-    const projectId = document.getElementById('manualProjectPro').value;
-    const description = document
-      .getElementById('manualDescriptionPro')
-      .value.trim();
-    const startValue = document.getElementById('manualStartPro').value;
-    const endValue = document.getElementById('manualEndPro').value;
-    const hoursInput = document.getElementById('manualHoursPro');
-    const hoursVal = parseFloat(hoursInput.value);
-    const focusFactor = normalizeFocusFactor(
-      document.getElementById('manualFactorPro').value
-    );
-    if (!projectId) return;
-    const now = new Date();
-    const projForRound = data.projects.find(
+  function createManualEntry({
+    projectId,
+    description = '',
+    startValue = '',
+    endValue = '',
+    hoursValue = '',
+    focusFactor = DEFAULT_FOCUS_FACTOR,
+    now = new Date()
+  } = {}) {
+    if (!projectId) {
+      showToast('Choose a project before logging time.');
+      return null;
+    }
+    const project = data.projects.find(
       (p) => String(p.id) === String(projectId)
     );
+    if (!project) {
+      showToast('Choose a valid project.');
+      return null;
+    }
+    const hoursVal = Number(hoursValue);
     const hasStart = !!startValue;
     const hasEnd = !!endValue;
     const hasHours = Number.isFinite(hoursVal) && hoursVal > 0;
@@ -10982,15 +11066,15 @@ import {
     const parsedEnd = hasEnd ? parseDateTimeInput(endValue) : null;
     if (hasStart && !parsedStart) {
       showToast('Enter a valid manual start time.');
-      return;
+      return null;
     }
     if (hasEnd && !parsedEnd) {
       showToast('Enter a valid manual end time.');
-      return;
+      return null;
     }
     if (!hasHours && !(parsedStart && parsedEnd)) {
       showToast('Enter hours or both start and end times.');
-      return;
+      return null;
     }
 
     let startTime;
@@ -10999,21 +11083,18 @@ import {
     if (parsedStart && parsedEnd) {
       if (parsedEnd <= parsedStart) {
         showToast('Manual end time must be after start time.');
-        return;
+        return null;
       }
       if (parsedEnd > now) {
         showToast('Manual end time cannot be in the future.');
-        return;
+        return null;
       }
       startTime = parsedStart;
       endTime = parsedEnd;
       wallSeconds = (parsedEnd - parsedStart) / 1000;
     } else {
       wallSeconds = hoursVal * 3600;
-      wallSeconds = applyProjectRoundingToWallSeconds(
-        wallSeconds,
-        projForRound
-      );
+      wallSeconds = applyProjectRoundingToWallSeconds(wallSeconds, project);
       if (parsedStart) {
         startTime = parsedStart;
         endTime = new Date(startTime.getTime() + wallSeconds * 1000);
@@ -11026,36 +11107,149 @@ import {
       }
       if (endTime > now) {
         showToast('Manual end time cannot be in the future.');
-        return;
+        return null;
       }
     }
 
-    wallSeconds = applyProjectRoundingToWallSeconds(wallSeconds, projForRound);
-    const durationSeconds = Math.floor(wallSeconds * focusFactor);
+    wallSeconds = applyProjectRoundingToWallSeconds(wallSeconds, project);
+    const normalizedFocus = normalizeFocusFactor(focusFactor);
+    const durationSeconds = Math.floor(wallSeconds * normalizedFocus);
     if (!Number.isFinite(durationSeconds) || durationSeconds <= 0) {
       showToast('Manual entry duration must be greater than zero.');
-      return;
+      return null;
     }
     const newEntry = {
       id: uuid(),
       projectId,
-      description,
+      description: String(description || '').trim(),
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       duration: durationSeconds,
-      focusFactor,
-      manualFactor: focusFactor,
+      focusFactor: normalizedFocus,
+      manualFactor: normalizedFocus,
       isRunning: false,
       createdAt: now.toISOString()
     };
     data.entries.push(newEntry);
     saveData();
+    refreshAllViews();
+    return newEntry;
+  }
+
+  function parseQuickLogDate(rawText) {
+    const text = String(rawText || '').trim();
+    const dateMatch = text.match(/\s+(\d{4}-\d{2}-\d{2}|today|yesterday)$/i);
+    if (!dateMatch) return { text, endTime: new Date() };
+    const token = dateMatch[1].toLowerCase();
+    const rest = text.slice(0, dateMatch.index).trim();
+    if (token === 'today') return { text: rest, endTime: new Date() };
+    const endTime = new Date();
+    if (token === 'yesterday') {
+      endTime.setDate(endTime.getDate() - 1);
+      endTime.setHours(17, 0, 0, 0);
+      return { text: rest, endTime };
+    }
+    const parsed = parseLocalDateString(token);
+    if (!parsed) return { text, endTime: new Date() };
+    parsed.setHours(17, 0, 0, 0);
+    return { text: rest, endTime: parsed };
+  }
+
+  function parseQuickLogInput(value) {
+    const match = String(value || '').match(
+      /^\s*(\d+(?:\.\d+)?)\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)\s+(.+?)\s*$/i
+    );
+    if (!match) {
+      return {
+        ok: false,
+        reason: 'Use a format like "1.5h Project name description yesterday".'
+      };
+    }
+    const amount = Number(match[1]);
+    const unit = match[2].toLowerCase();
+    const hours = unit.startsWith('m') ? amount / 60 : amount;
+    if (!Number.isFinite(hours) || hours <= 0) {
+      return { ok: false, reason: 'Quick log duration must be positive.' };
+    }
+    const dated = parseQuickLogDate(match[3]);
+    const candidates = getActiveProjects()
+      .slice()
+      .sort((a, b) => String(b.name).length - String(a.name).length);
+    const normalizedText = dated.text.toLowerCase();
+    const project = candidates.find((candidate) => {
+      const name = String(candidate.name || '')
+        .trim()
+        .toLowerCase();
+      if (!name) return false;
+      return normalizedText === name || normalizedText.startsWith(name + ' ');
+    });
+    if (!project) {
+      return {
+        ok: false,
+        reason: 'Start the quick log text with an active project name.'
+      };
+    }
+    const description = dated.text.slice(String(project.name).length).trim();
+    return {
+      ok: true,
+      project,
+      description,
+      hours,
+      endTime: dated.endTime
+    };
+  }
+
+  document.getElementById('manualFormPro').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const projectId = document.getElementById('manualProjectPro').value;
+    const description = document
+      .getElementById('manualDescriptionPro')
+      .value.trim();
+    const startValue = document.getElementById('manualStartPro').value;
+    const endValue = document.getElementById('manualEndPro').value;
+    const focusFactor = normalizeFocusFactor(
+      document.getElementById('manualFactorPro').value
+    );
+    const entry = createManualEntry({
+      projectId,
+      description,
+      startValue,
+      endValue,
+      hoursValue: document.getElementById('manualHoursPro').value,
+      focusFactor
+    });
+    if (!entry) return;
     e.target.reset();
     document.getElementById('manualEntryFormPro').classList.add('hidden');
-    updateEntriesTable();
-    updateDashboard();
-    updateProjectsPage();
+    showToast('Manual entry logged.');
   });
+
+  const quickLogForm = document.getElementById('quickLogForm');
+  const quickLogInput = document.getElementById('quickLogInput');
+  if (quickLogForm && quickLogInput) {
+    quickLogForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const parsed = parseQuickLogInput(quickLogInput.value);
+      if (!parsed.ok) {
+        showToast(parsed.reason);
+        return;
+      }
+      const endValue = toDateTimeInputValue(parsed.endTime);
+      const entry = createManualEntry({
+        projectId: parsed.project.id,
+        description: parsed.description,
+        endValue,
+        hoursValue: parsed.hours,
+        focusFactor: DEFAULT_FOCUS_FACTOR,
+        now: new Date()
+      });
+      if (!entry) return;
+      quickLogInput.value = '';
+      showToast(
+        `Logged ${parsed.hours.toFixed(2)}h to ${parsed.project.name}.`
+      );
+    });
+  }
 
   // Toggle between showing all entries and only recent entries (last 30 days). When
   // showing only recent entries, the button text reads "Show All". When
@@ -11092,6 +11286,9 @@ import {
   const entryDateFromInput = document.getElementById('entryDateFromInput');
   const entryDateToInput = document.getElementById('entryDateToInput');
   const entryDateClearBtn = document.getElementById('entryDateClearBtn');
+  const billingPresetSelect = document.getElementById('billingPresetSelect');
+  const saveBillingViewBtn = document.getElementById('saveBillingViewBtn');
+  const deleteBillingViewBtn = document.getElementById('deleteBillingViewBtn');
   function syncEntryDateFilterControls() {
     if (entryDateFromInput && entryDateFromInput.value !== entryDateFrom) {
       entryDateFromInput.value = entryDateFrom;
@@ -11102,6 +11299,358 @@ import {
     if (entryDateClearBtn) {
       entryDateClearBtn.disabled = !entryDateFrom && !entryDateTo;
     }
+  }
+
+  function getRecommendedProjectForToday() {
+    const nowTime = new Date();
+    const activeProjects = data.projects.filter((project) =>
+      isProjectActive(project, nowTime)
+    );
+    if (!activeProjects.length) return null;
+    const perProjectStats = activeProjects.map((project) => ({
+      project,
+      stats: computeProjectStats(project)
+    }));
+    const weekContext = getCurrentWeekPlanningContext(nowTime);
+    const dailyPlanByProjectId = new Map(
+      perProjectStats.map((item) => [
+        String(item.project.id),
+        getProjectDailyPlan(item.project, item.stats, weekContext)
+      ])
+    );
+    const recommendation = getRecommendedProjectEntry(
+      perProjectStats,
+      dailyPlanByProjectId
+    );
+    if (!recommendation) return null;
+    return {
+      ...recommendation,
+      dailyPlan: dailyPlanByProjectId.get(String(recommendation.project.id))
+    };
+  }
+
+  function getBackupFreshnessLabel() {
+    if (backupConflict) return 'Backup conflict';
+    if (!data.lastBackupAt) return 'Backup not set';
+    return `Backup ${formatRelativeTime(data.lastBackupAt)}`;
+  }
+
+  function renderTodayCommandPanel() {
+    const panel = document.getElementById('todayCommandPanel');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const runningEntries = getRunningEntries();
+    const activeEntries = getActiveRunningEntries();
+    const stats = computeGlobalStats();
+    const recommendation = getRecommendedProjectForToday();
+    const audit = getLocalDataAudit();
+    const settings = ensureReminderSettings();
+
+    const header = document.createElement('div');
+    header.className = 'today-command-header';
+    const title = document.createElement('div');
+    title.className = 'today-command-title';
+    title.textContent = 'Today';
+    header.appendChild(title);
+    const meta = document.createElement('div');
+    meta.className = 'today-command-meta';
+    meta.textContent = `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`;
+    header.appendChild(meta);
+    panel.appendChild(header);
+
+    const grid = document.createElement('div');
+    grid.className = 'today-command-grid';
+    const addItem = (label, value, tone = '') => {
+      const item = document.createElement('div');
+      item.className = `today-command-item${tone ? ` ${tone}` : ''}`;
+      const itemLabel = document.createElement('span');
+      itemLabel.textContent = label;
+      const itemValue = document.createElement('strong');
+      itemValue.textContent = value;
+      item.appendChild(itemLabel);
+      item.appendChild(itemValue);
+      grid.appendChild(item);
+    };
+    addItem(
+      'Timers',
+      runningEntries.length
+        ? `${activeEntries.length}/${runningEntries.length} active`
+        : 'none',
+      runningEntries.length ? 'warm' : ''
+    );
+    addItem(
+      'Next',
+      recommendation
+        ? `${recommendation.project.name} ${formatRecommendationHours(recommendation.dailyPlan?.remainingToday)}h`
+        : 'caught up'
+    );
+    addItem(
+      'Backup',
+      getBackupFreshnessLabel(),
+      backupConflict || !data.lastBackupAt ? 'risk' : ''
+    );
+    addItem(
+      'Reminders',
+      settings.enabled ? 'on' : 'off',
+      settings.enabled ? '' : 'muted'
+    );
+    if (audit.staleRunningEntries > 0) {
+      addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
+    }
+    panel.appendChild(grid);
+
+    const actions = document.createElement('div');
+    actions.className = 'today-command-actions';
+    if (
+      recommendation &&
+      !runningEntries.some(
+        (entry) => String(entry.projectId) === String(recommendation.project.id)
+      )
+    ) {
+      const startBtn = document.createElement('button');
+      startBtn.type = 'button';
+      startBtn.className = 'btn primary';
+      startBtn.textContent = 'Start Recommended';
+      startBtn.addEventListener('click', () => {
+        activateSection('timer');
+        startProjectTimer(recommendation.project.id, {
+          overrideFactor: DEFAULT_FOCUS_FACTOR
+        });
+      });
+      actions.appendChild(startBtn);
+    }
+    if (runningEntries.length) {
+      const stopBtn = document.createElement('button');
+      stopBtn.type = 'button';
+      stopBtn.className = 'btn danger';
+      stopBtn.textContent = 'Stop All';
+      stopBtn.addEventListener('click', () => {
+        activateSection('timer');
+        stopAllTimers();
+      });
+      actions.appendChild(stopBtn);
+    }
+    const quickLogBtn = document.createElement('button');
+    quickLogBtn.type = 'button';
+    quickLogBtn.className = 'btn secondary';
+    quickLogBtn.textContent = 'Quick Log';
+    quickLogBtn.addEventListener('click', () => {
+      activateSection('entries');
+      const input = document.getElementById('quickLogInput');
+      if (input) input.focus();
+    });
+    actions.appendChild(quickLogBtn);
+    const backupBtn = document.createElement('button');
+    backupBtn.type = 'button';
+    backupBtn.className = 'btn secondary';
+    backupBtn.textContent = 'Backup';
+    backupBtn.addEventListener('click', () => {
+      activateSection('importExport');
+      const button = document.getElementById('backupNowBtn');
+      if (button && !button.disabled) button.click();
+    });
+    actions.appendChild(backupBtn);
+    panel.appendChild(actions);
+  }
+
+  function formatDateInputValue(date) {
+    return formatLocalDateString(startOfLocalDay(date));
+  }
+
+  function getMonthBounds(offset = 0) {
+    const now = new Date();
+    const start = new Date(now.getFullYear(), now.getMonth() + offset, 1);
+    const end = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0);
+    return {
+      from: formatDateInputValue(start),
+      to: formatDateInputValue(end)
+    };
+  }
+
+  function getWeekBounds(offset = 0) {
+    const now = startOfLocalDay(new Date());
+    const day = now.getDay() || 7;
+    const monday = new Date(now);
+    monday.setDate(now.getDate() - day + 1 + offset * 7);
+    const sunday = new Date(monday);
+    sunday.setDate(monday.getDate() + 6);
+    return {
+      from: formatDateInputValue(monday),
+      to: formatDateInputValue(sunday)
+    };
+  }
+
+  function getCurrentEntryFilterSnapshot() {
+    return {
+      projectId: entryProjectFilter,
+      search: entrySearchQuery,
+      from: entryDateFrom,
+      to: entryDateTo,
+      showAll: showAllEntries
+    };
+  }
+
+  function applyEntryFilterSnapshot(filters = {}) {
+    entryProjectFilter = String(filters.projectId || '');
+    entrySearchQuery = String(filters.search || '')
+      .trim()
+      .toLowerCase();
+    entryDateFrom = String(filters.from || '');
+    entryDateTo = String(filters.to || '');
+    showAllEntries = filters.showAll === true;
+    if (entryProjectFilterSelect)
+      entryProjectFilterSelect.value = entryProjectFilter;
+    if (entrySearchInput) entrySearchInput.value = entrySearchQuery;
+    syncEntryDateFilterControls();
+    updateEntriesViewToggleLabel();
+    updateEntriesTable();
+  }
+
+  function applyBuiltinBillingView(value) {
+    let bounds = null;
+    if (value === 'this-month') bounds = getMonthBounds(0);
+    else if (value === 'last-month') bounds = getMonthBounds(-1);
+    else if (value === 'this-week') bounds = getWeekBounds(0);
+    else if (value === 'last-week') bounds = getWeekBounds(-1);
+    if (!bounds) return false;
+    applyEntryFilterSnapshot({
+      ...getCurrentEntryFilterSnapshot(),
+      from: bounds.from,
+      to: bounds.to,
+      showAll: true
+    });
+    return true;
+  }
+
+  function syncBillingPresetControls() {
+    if (!billingPresetSelect) return;
+    const currentValue = billingPresetSelect.value;
+    billingPresetSelect.innerHTML = '';
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Choose view...';
+    billingPresetSelect.appendChild(placeholder);
+    [
+      ['builtin:this-month', 'This month'],
+      ['builtin:last-month', 'Last month'],
+      ['builtin:this-week', 'This week'],
+      ['builtin:last-week', 'Last week']
+    ].forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      billingPresetSelect.appendChild(option);
+    });
+    const savedGroup = document.createElement('optgroup');
+    savedGroup.label = 'Saved views';
+    ensureBillingViews().forEach((view) => {
+      const option = document.createElement('option');
+      option.value = `saved:${view.id}`;
+      option.textContent = view.name;
+      savedGroup.appendChild(option);
+    });
+    billingPresetSelect.appendChild(savedGroup);
+    if (
+      currentValue &&
+      Array.from(billingPresetSelect.options).some(
+        (option) => option.value === currentValue
+      )
+    ) {
+      billingPresetSelect.value = currentValue;
+    }
+    if (deleteBillingViewBtn) {
+      deleteBillingViewBtn.disabled =
+        !billingPresetSelect.value ||
+        !billingPresetSelect.value.startsWith('saved:');
+    }
+  }
+
+  async function saveCurrentBillingView() {
+    const values = await openFormDialog({
+      title: 'Save Billing View',
+      fields: [
+        {
+          name: 'name',
+          label: 'View Name',
+          value: '',
+          placeholder: 'June Acme billing',
+          required: true
+        }
+      ],
+      submitLabel: 'Save View'
+    });
+    if (!values) return;
+    const name = String(values.name || '').trim();
+    if (!name) {
+      showToast('Enter a name for the billing view.');
+      return;
+    }
+    const snapshot = cloneData();
+    const views = ensureBillingViews();
+    const existing = views.find(
+      (view) => view.name.toLowerCase() === name.toLowerCase()
+    );
+    const item = existing || {
+      id: uuid(),
+      name,
+      createdAt: new Date().toISOString()
+    };
+    item.name = name;
+    item.filters = getCurrentEntryFilterSnapshot();
+    if (!existing) views.push(item);
+    data.entryBillingViews = views;
+    saveData();
+    syncBillingPresetControls();
+    offerUndo(
+      existing ? 'Billing view updated.' : 'Billing view saved.',
+      snapshot
+    );
+  }
+
+  function deleteSelectedBillingView() {
+    if (
+      !billingPresetSelect ||
+      !billingPresetSelect.value.startsWith('saved:')
+    ) {
+      return;
+    }
+    const id = billingPresetSelect.value.slice('saved:'.length);
+    const snapshot = cloneData();
+    const before = ensureBillingViews().length;
+    data.entryBillingViews = ensureBillingViews().filter(
+      (view) => String(view.id) !== id
+    );
+    if (data.entryBillingViews.length === before) return;
+    saveData();
+    syncBillingPresetControls();
+    offerUndo('Billing view deleted.', snapshot);
+  }
+
+  if (billingPresetSelect) {
+    billingPresetSelect.addEventListener('change', () => {
+      const value = billingPresetSelect.value;
+      if (value.startsWith('builtin:')) {
+        applyBuiltinBillingView(value.slice('builtin:'.length));
+      } else if (value.startsWith('saved:')) {
+        const id = value.slice('saved:'.length);
+        const view = ensureBillingViews().find(
+          (candidate) => String(candidate.id) === id
+        );
+        if (view) applyEntryFilterSnapshot(view.filters);
+      }
+      syncBillingPresetControls();
+    });
+    syncBillingPresetControls();
+  }
+  if (saveBillingViewBtn) {
+    saveBillingViewBtn.addEventListener('click', () => {
+      saveCurrentBillingView();
+    });
+  }
+  if (deleteBillingViewBtn) {
+    deleteBillingViewBtn.addEventListener('click', () => {
+      deleteSelectedBillingView();
+    });
   }
   if (entryDateFromInput) {
     entryDateFromInput.addEventListener('change', () => {
@@ -11756,8 +12305,10 @@ import {
     const tbody = document.getElementById('entriesTableBodyPro');
     tbody.innerHTML = '';
     const entriesToShow = getEntriesForCurrentView();
+    syncBillingPresetControls();
     renderEntrySummary(entriesToShow);
     renderEntryBulkActions(entriesToShow);
+    renderTodayCommandPanel();
     if (data.entries.length === 0 || entriesToShow.length === 0) {
       const tr = document.createElement('tr');
       const td = document.createElement('td');
@@ -11987,6 +12538,8 @@ import {
       DEFAULT_FOCUS_BLOCKED_WEBSITES
     );
     data.timerPresets = normalizeTimerPresets(data.timerPresets);
+    data.entryBillingViews = normalizeBillingViews(data.entryBillingViews);
+    data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
     // Remove transient timer fields from imported entries.
     data.entries.forEach((entry) => {
@@ -12101,6 +12654,251 @@ import {
     }
   }
 
+  function getNotificationPermissionLabel() {
+    if (!('Notification' in window)) return 'not supported';
+    return Notification.permission;
+  }
+
+  function showBrowserNotification(title, body) {
+    if (!('Notification' in window) || Notification.permission !== 'granted') {
+      showToast(body || title);
+      return false;
+    }
+    try {
+      new Notification(title, {
+        body,
+        icon: 'assets/timekeeper-icon.svg',
+        badge: 'assets/timekeeper-icon.svg'
+      });
+      return true;
+    } catch {
+      showToast(body || title);
+      return false;
+    }
+  }
+
+  function updateReminderSettingsPanel() {
+    const settings = ensureReminderSettings();
+    const toggle = document.getElementById('reminderEnableToggle');
+    const timerInput = document.getElementById('reminderTimerMinutes');
+    const backupInput = document.getElementById('reminderBackupHours');
+    const status = document.getElementById('reminderStatus');
+    const testBtn = document.getElementById('testReminderBtn');
+    if (toggle && toggle.checked !== settings.enabled) {
+      toggle.checked = settings.enabled;
+    }
+    if (timerInput && timerInput.value !== String(settings.staleTimerMinutes)) {
+      timerInput.value = String(settings.staleTimerMinutes);
+    }
+    if (backupInput && backupInput.value !== String(settings.backupAgeHours)) {
+      backupInput.value = String(settings.backupAgeHours);
+    }
+    const supported = 'Notification' in window;
+    if (toggle) toggle.disabled = !supported;
+    if (testBtn) testBtn.disabled = !supported;
+    if (status) {
+      status.textContent = supported
+        ? `Notification permission: ${getNotificationPermissionLabel()}. Timer reminders after ${settings.staleTimerMinutes}m; backup reminders after ${settings.backupAgeHours}h.`
+        : 'Browser notifications are not available in this browser.';
+    }
+  }
+
+  async function setReminderEnabled(enabled) {
+    const settings = ensureReminderSettings();
+    if (
+      enabled &&
+      'Notification' in window &&
+      Notification.permission === 'default'
+    ) {
+      const permission = await Notification.requestPermission();
+      if (permission !== 'granted') {
+        settings.enabled = false;
+        saveData();
+        updateReminderSettingsPanel();
+        showToast('Reminder permission was not granted.');
+        return;
+      }
+    }
+    if (
+      enabled &&
+      (!('Notification' in window) || Notification.permission === 'denied')
+    ) {
+      settings.enabled = false;
+      saveData();
+      updateReminderSettingsPanel();
+      showToast('Browser reminders are unavailable.');
+      return;
+    }
+    settings.enabled = enabled;
+    saveData();
+    updateReminderSettingsPanel();
+    renderTodayCommandPanel();
+  }
+
+  function updateReminderNumberSetting(key, value) {
+    const settings = ensureReminderSettings();
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed) || parsed <= 0) return;
+    settings[key] = parsed;
+    data.reminderSettings = normalizeReminderSettings(settings);
+    saveData();
+    updateReminderSettingsPanel();
+    renderTodayCommandPanel();
+  }
+
+  function maybeSendReminder(key, title, body) {
+    const now = Date.now();
+    if (lastReminderKey === key && now - lastReminderAt < 30 * 60 * 1000) {
+      return;
+    }
+    if (showBrowserNotification(title, body)) {
+      lastReminderKey = key;
+      lastReminderAt = now;
+    }
+  }
+
+  function checkReminderConditions() {
+    const settings = ensureReminderSettings();
+    if (
+      !settings.enabled ||
+      !('Notification' in window) ||
+      Notification.permission !== 'granted'
+    ) {
+      return;
+    }
+    const now = new Date();
+    const staleTimer = getRunningEntries()
+      .map((entry) => ({
+        entry,
+        minutes: (now - new Date(entry.startTime)) / 60000
+      }))
+      .filter((item) => Number.isFinite(item.minutes))
+      .sort((a, b) => b.minutes - a.minutes)[0];
+    if (staleTimer && staleTimer.minutes >= settings.staleTimerMinutes) {
+      const project = getEntryProject(staleTimer.entry);
+      maybeSendReminder(
+        `timer:${staleTimer.entry.id}`,
+        'TimeKeeper timer review',
+        `${project ? project.name : 'A timer'} has been running for ${Math.round(staleTimer.minutes)} minutes.`
+      );
+      return;
+    }
+    const backupTime = data.lastBackupVerifiedAt || data.lastBackupAt || '';
+    const backupAgeHours = backupTime
+      ? (now - new Date(backupTime)) / 3600000
+      : Infinity;
+    if (backupAgeHours >= settings.backupAgeHours) {
+      maybeSendReminder(
+        'backup',
+        'TimeKeeper backup reminder',
+        data.lastBackupAt
+          ? `Last backup was ${formatRelativeTime(data.lastBackupAt)}.`
+          : 'No backup has been recorded yet.'
+      );
+    }
+  }
+
+  function updatePwaStatusPanel() {
+    const panel = document.getElementById('pwaStatusPanel');
+    if (!panel) return;
+    panel.innerHTML = '';
+    const items = [];
+    items.push(
+      'serviceWorker' in navigator
+        ? `Offline app: ${offlineShellStatus}`
+        : 'Offline app: unavailable'
+    );
+    items.push(
+      pendingInstallPrompt ? 'Install: ready' : 'Install: browser managed'
+    );
+    if (
+      pendingServiceWorkerRegistration &&
+      pendingServiceWorkerRegistration.waiting
+    ) {
+      items.push('Update: ready');
+    }
+    items.forEach((text) => {
+      const pill = document.createElement('span');
+      pill.className = 'entry-summary-pill';
+      pill.textContent = text;
+      panel.appendChild(pill);
+    });
+    if (pendingInstallPrompt) {
+      const installBtn = document.createElement('button');
+      installBtn.type = 'button';
+      installBtn.className = 'btn secondary';
+      installBtn.textContent = 'Install App';
+      installBtn.addEventListener('click', async () => {
+        const promptEvent = pendingInstallPrompt;
+        pendingInstallPrompt = null;
+        updatePwaStatusPanel();
+        promptEvent.prompt();
+        await promptEvent.userChoice.catch(() => null);
+      });
+      panel.appendChild(installBtn);
+    }
+    if (
+      pendingServiceWorkerRegistration &&
+      pendingServiceWorkerRegistration.waiting
+    ) {
+      const updateBtn = document.createElement('button');
+      updateBtn.type = 'button';
+      updateBtn.className = 'btn primary';
+      updateBtn.textContent = 'Update App';
+      updateBtn.addEventListener('click', () => {
+        reloadAfterServiceWorkerUpdate = true;
+        pendingServiceWorkerRegistration.waiting.postMessage({
+          type: 'SKIP_WAITING'
+        });
+      });
+      panel.appendChild(updateBtn);
+    }
+  }
+
+  const reminderEnableToggle = document.getElementById('reminderEnableToggle');
+  if (reminderEnableToggle) {
+    reminderEnableToggle.addEventListener('change', () => {
+      setReminderEnabled(reminderEnableToggle.checked);
+    });
+  }
+  const reminderTimerMinutes = document.getElementById('reminderTimerMinutes');
+  if (reminderTimerMinutes) {
+    reminderTimerMinutes.addEventListener('change', () => {
+      updateReminderNumberSetting(
+        'staleTimerMinutes',
+        reminderTimerMinutes.value
+      );
+    });
+  }
+  const reminderBackupHours = document.getElementById('reminderBackupHours');
+  if (reminderBackupHours) {
+    reminderBackupHours.addEventListener('change', () => {
+      updateReminderNumberSetting('backupAgeHours', reminderBackupHours.value);
+    });
+  }
+  const testReminderBtn = document.getElementById('testReminderBtn');
+  if (testReminderBtn) {
+    testReminderBtn.addEventListener('click', async () => {
+      if ('Notification' in window && Notification.permission === 'default') {
+        await Notification.requestPermission();
+      }
+      showBrowserNotification(
+        'TimeKeeper reminder test',
+        'Browser reminders are ready.'
+      );
+      updateReminderSettingsPanel();
+    });
+  }
+  updateReminderSettingsPanel();
+  updatePwaStatusPanel();
+  setInterval(checkReminderConditions, 60000);
+
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    pendingInstallPrompt = event;
+    updatePwaStatusPanel();
+  });
+
   document.getElementById('exportBtnPro').addEventListener('click', () => {
     // Use shared downloadData function for exports
     downloadData();
@@ -12211,25 +13009,59 @@ import {
     offlineShellStatus = 'registering';
     updateAppHealthPanel();
     navigator.serviceWorker.addEventListener('controllerchange', () => {
+      if (reloadAfterServiceWorkerUpdate) {
+        window.location.reload();
+        return;
+      }
       offlineShellStatus = 'active';
       offlineShellError = '';
       updateAppHealthPanel();
+      updatePwaStatusPanel();
     });
     navigator.serviceWorker
       .register('./service-worker.js')
-      .then(() => navigator.serviceWorker.ready)
-      .then(() => {
+      .then((registration) => {
+        pendingServiceWorkerRegistration = registration;
+        if (registration.waiting) updatePwaStatusPanel();
+        registration.addEventListener('updatefound', () => {
+          const installing = registration.installing;
+          if (!installing) return;
+          installing.addEventListener('statechange', () => {
+            if (
+              installing.state === 'installed' &&
+              navigator.serviceWorker.controller
+            ) {
+              pendingServiceWorkerRegistration = registration;
+              updatePwaStatusPanel();
+              showToast('App update available.', {
+                actionLabel: 'Update',
+                onAction: () => {
+                  if (registration.waiting) {
+                    reloadAfterServiceWorkerUpdate = true;
+                    registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+                  }
+                }
+              });
+            }
+          });
+        });
+        return navigator.serviceWorker.ready;
+      })
+      .then((registration) => {
+        pendingServiceWorkerRegistration = registration;
         offlineShellStatus = navigator.serviceWorker.controller
           ? 'active'
           : 'ready-after-reload';
         offlineShellError = '';
         updateAppHealthPanel();
+        updatePwaStatusPanel();
       })
       .catch((error) => {
         offlineShellStatus = 'failed';
         offlineShellError = error && error.message ? error.message : '';
         console.warn('Service worker registration failed:', error);
         updateAppHealthPanel();
+        updatePwaStatusPanel();
       });
   }
   // Programmatically activate the Timer tab on first load. This ensures the Timer

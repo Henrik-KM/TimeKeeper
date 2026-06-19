@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#2563eb" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <link rel="icon" href="assets/timekeeper-icon.svg" type="image/svg+xml" />
     <link rel="manifest" href="manifest.webmanifest" />
     <title>TimeKeeper Pro - Offline</title>
     <!-- Chart.js for graphs -->
@@ -26,6 +28,7 @@
       </ul>
     </div>
     <div class="content">
+      <div id="todayCommandPanel" class="today-command-panel" aria-live="polite"></div>
       <!-- Dashboard Section -->
       <section id="dashboard" class="section">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
@@ -150,6 +153,13 @@
               <button id="toggleEntriesViewBtn" class="btn secondary">Show All</button>
             </div>
           </div>
+          <form id="quickLogForm" class="quick-log-form">
+            <label for="quickLogInput">Quick log</label>
+            <div class="quick-log-row">
+              <input id="quickLogInput" type="text" placeholder="1.5h Project name work done yesterday" autocomplete="off" />
+              <button id="quickLogSubmitBtn" type="submit" class="btn primary">Log</button>
+            </div>
+          </form>
           <div class="entry-toolbar">
             <label class="entry-filter">
               <span>Project</span>
@@ -170,6 +180,14 @@
               <input id="entryDateToInput" type="date" />
             </label>
             <button id="entryDateClearBtn" type="button" class="btn secondary">Clear Dates</button>
+          </div>
+          <div class="billing-view-toolbar">
+            <label for="billingPresetSelect">Billing views</label>
+            <select id="billingPresetSelect">
+              <option value="">Choose view...</option>
+            </select>
+            <button id="saveBillingViewBtn" type="button" class="btn secondary">Save View</button>
+            <button id="deleteBillingViewBtn" type="button" class="btn secondary">Delete View</button>
           </div>
           <div id="entrySummaryPro" class="entry-summary" aria-live="polite"></div>
           <div id="entryBulkActions" class="entry-bulk-actions" aria-live="polite"></div>
@@ -204,7 +222,7 @@
             </form>
           </div>
           <div style="overflow-x:auto;">
-            <table>
+            <table id="entriesTablePro" class="entry-table">
               <thead>
                 <tr>
                   <th>Select</th>
@@ -269,6 +287,28 @@
           <button id="restoreBackupBtn" class="btn secondary">Restore Latest Backup</button>
         </div>
           <div id="backupSnapshotsPanel" class="backup-snapshots-panel"></div>
+        </div>
+        <div class="card" style="margin-top:1rem;">
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">App Install &amp; Reminders</h3>
+          <div id="pwaStatusPanel" class="pwa-status-panel"></div>
+          <div class="reminder-settings">
+            <label class="switch-label">
+              <input type="checkbox" id="reminderEnableToggle" />
+              <span>Enable browser reminders</span>
+            </label>
+            <label>
+              <span>Timer reminder after</span>
+              <input id="reminderTimerMinutes" type="number" min="15" step="15" />
+              <span>minutes</span>
+            </label>
+            <label>
+              <span>Backup reminder after</span>
+              <input id="reminderBackupHours" type="number" min="1" step="1" />
+              <span>hours</span>
+            </label>
+            <button id="testReminderBtn" type="button" class="btn secondary">Test Reminder</button>
+          </div>
+          <p id="reminderStatus" class="status-muted"></p>
         </div>
       </section>
 
