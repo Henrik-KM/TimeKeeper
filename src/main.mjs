@@ -7752,7 +7752,20 @@ import {
   }
 
   function isCodexTimeEntry(entry) {
-    return String(entry?.source || '').toLowerCase() === 'codex';
+    const source = String(entry?.source || '')
+      .trim()
+      .toLowerCase();
+    if (source.includes('codex')) return true;
+    const externalId = String(entry?.externalId || '')
+      .trim()
+      .toLowerCase();
+    if (externalId.startsWith('codex-') || externalId.startsWith('codex:')) {
+      return true;
+    }
+    const description = String(entry?.description || '')
+      .trim()
+      .toLowerCase();
+    return description.startsWith('codex:');
   }
 
   function getCompletedProjectEntries(projectId, options = {}) {
@@ -10656,15 +10669,9 @@ import {
       getRunningEntries().map((e) => String(e.projectId))
     );
     const weekContext = getCurrentWeekPlanningContext();
-    const timerRecommendationOptions = { includeCodexEntries: false };
     const projectOptionData = activeProjects.map((project, index) => {
-      const stats = computeProjectStats(project, timerRecommendationOptions);
-      const dailyPlan = getProjectDailyPlan(
-        project,
-        stats,
-        weekContext,
-        timerRecommendationOptions
-      );
+      const stats = computeProjectStats(project);
+      const dailyPlan = getProjectDailyPlan(project, stats, weekContext);
       return { project, stats, dailyPlan, index };
     });
     const dailyPlanByProjectId = new Map(
@@ -10833,6 +10840,7 @@ import {
         return bTime - aTime;
       })
       .forEach((entry) => {
+        if (isCodexTimeEntry(entry)) return;
         const project = data.projects.find(
           (p) => String(p.id) === String(entry.projectId)
         );

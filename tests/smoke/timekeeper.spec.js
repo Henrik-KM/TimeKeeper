@@ -1566,7 +1566,7 @@ test('timer recommendation uses remaining project hours over workdays left', asy
       projectFixture({
         id: 'beta',
         name: 'Beta',
-        budgetHours: 60,
+        budgetHours: 20,
         startDate: '2026-04-01',
         deadline: '2026-05-31',
         color: '#dc2626'
@@ -1610,10 +1610,10 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*needs ~13\.3h today/
+    /IFLAI.*Recommended.*needs ~10\.0h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 13.3h left today'
+    'Recommended: IFLAI - 10.0h left today'
   );
 });
 
@@ -1761,6 +1761,35 @@ test('recent timer chips preserve focus and start immediately', async ({
         manualFactor: 0.5,
         focusFactor: 0.5
       }),
+      {
+        ...entryFixture({
+          id: 'agent-codex-latest',
+          projectId: 'agent-project',
+          description: 'Codex: recent imported agent work',
+          startTime: '2026-04-24T08:00:00.000',
+          endTime: '2026-04-24T09:00:00.000',
+          createdAt: '2026-04-24T09:00:00.000',
+          hours: 1,
+          manualFactor: 0.5,
+          focusFactor: 0.5
+        }),
+        source: 'codex',
+        externalId: 'codex-latest'
+      },
+      {
+        ...entryFixture({
+          id: 'agent-codex-legacy',
+          projectId: 'agent-project',
+          description: 'Codex: legacy imported work',
+          startTime: '2026-04-24T07:00:00.000',
+          endTime: '2026-04-24T08:00:00.000',
+          createdAt: '2026-04-24T08:00:00.000',
+          hours: 1,
+          manualFactor: 0.5,
+          focusFactor: 0.5
+        }),
+        externalId: 'codex-legacy'
+      },
       entryFixture({
         id: 'agent-older',
         projectId: 'agent-project',
@@ -1787,6 +1816,12 @@ test('recent timer chips preserve focus and start immediately', async ({
   await expect(
     page.getByRole('button', { name: 'Agent Project - Draft prompt - 100%' })
   ).toBeVisible();
+  await expect(page.locator('#recentTimersPro')).not.toContainText(
+    'Codex: recent imported agent work'
+  );
+  await expect(page.locator('#recentTimersPro')).not.toContainText(
+    'Codex: legacy imported work'
+  );
 
   await page
     .getByRole('button', {
