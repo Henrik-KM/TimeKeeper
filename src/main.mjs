@@ -10690,6 +10690,205 @@ import {
     offerUndo('Pinned timer removed.', snapshot);
   }
 
+  function getStartableTimerProject(projectId, runningProjectIds) {
+    const project = data.projects.find(
+      (candidate) => String(candidate.id) === String(projectId)
+    );
+    if (!project || isProjectArchived(project)) return null;
+    if (runningProjectIds.has(String(project.id))) return null;
+    return project;
+  }
+
+  function getTimerShortcutKey({
+    project,
+    projectId,
+    description,
+    focusFactor
+  }) {
+    return makeTimerPresetKey(
+      project ? project.id : projectId,
+      description,
+      focusFactor
+    );
+  }
+
+  function getPinnedTimerShortcuts(runningProjectIds) {
+    return ensureTimerPresets()
+      .map((preset) => {
+        const project = getStartableTimerProject(
+          preset.projectId,
+          runningProjectIds
+        );
+        if (!project) return null;
+        return {
+          id: preset.id,
+          source: 'pinned',
+          project,
+          description: String(preset.description || '').trim(),
+          focusFactor: normalizeFocusFactor(preset.focusFactor)
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function getRecentTimerShortcuts(
+    runningProjectIds,
+    { limit = 4, excludeKeys = new Set() } = {}
+  ) {
+    const shortcuts = [];
+    const seen = new Set(excludeKeys);
+    data.entries
+      .slice()
+      .sort((a, b) => {
+        const aTime = new Date(a.createdAt || a.startTime || 0).getTime();
+        const bTime = new Date(b.createdAt || b.startTime || 0).getTime();
+        return bTime - aTime;
+      })
+      .forEach((entry) => {
+        if (shortcuts.length >= limit) return;
+        if (entry.isRunning || isCodexTimeEntry(entry)) return;
+        const project = getStartableTimerProject(
+          entry.projectId,
+          runningProjectIds
+        );
+        if (!project) return;
+        const description = String(entry.description || '').trim();
+        const focusFactor = getEntryFocusFactor(entry, 1);
+        const shortcut = {
+          source: 'recent',
+          project,
+          description,
+          focusFactor
+        };
+        const key = getTimerShortcutKey(shortcut);
+        if (seen.has(key)) return;
+        seen.add(key);
+        shortcuts.push(shortcut);
+      });
+    return shortcuts;
+  }
+
+  function getMostUsedTimerShortcuts(
+    runningProjectIds,
+    { limit = 3, excludeKeys = new Set() } = {}
+  ) {
+    const groups = new Map();
+    data.entries.forEach((entry) => {
+      if (entry.isRunning || isCodexTimeEntry(entry)) return;
+      const project = getStartableTimerProject(
+        entry.projectId,
+        runningProjectIds
+      );
+      if (!project) return;
+      const description = String(entry.description || '').trim();
+      const focusFactor = getEntryFocusFactor(entry, 1);
+      const shortcut = {
+        source: 'used',
+        project,
+        description,
+        focusFactor
+      };
+      const key = getTimerShortcutKey(shortcut);
+      if (excludeKeys.has(key)) return;
+      const entryTime = new Date(
+        entry.createdAt || entry.endTime || entry.startTime || 0
+      ).getTime();
+      const duration = Number(entry.duration) || 0;
+      const existing = groups.get(key);
+      if (existing) {
+        existing.count += 1;
+        existing.duration += duration;
+        existing.lastTime = Math.max(existing.lastTime, entryTime || 0);
+      } else {
+        groups.set(key, {
+          ...shortcut,
+          count: 1,
+          duration,
+          lastTime: entryTime || 0
+        });
+      }
+    });
+    return Array.from(groups.values())
+      .sort((a, b) => {
+        if (b.count !== a.count) return b.count - a.count;
+        if (b.duration !== a.duration) return b.duration - a.duration;
+        return b.lastTime - a.lastTime;
+      })
+      .slice(0, limit);
+  }
+
+  function getStartableTimerShortcuts({
+    recommendation = null,
+    runningProjectIds = null,
+    limit = 3
+  } = {}) {
+    const runningIds =
+      runningProjectIds ||
+      new Set(getRunningEntries().map((entry) => String(entry.projectId)));
+    const shortcuts = [];
+    const seen = new Set();
+    const addShortcut = (shortcut) => {
+      if (!shortcut || shortcuts.length >= limit) return;
+      const key = getTimerShortcutKey(shortcut);
+      if (seen.has(key)) return;
+      seen.add(key);
+      shortcuts.push(shortcut);
+    };
+
+    if (recommendation && recommendation.project) {
+      const project = getStartableTimerProject(
+        recommendation.project.id,
+        runningIds
+      );
+      if (project) {
+        addShortcut({
+          source: 'recommended',
+          project,
+          description: '',
+          focusFactor: DEFAULT_FOCUS_FACTOR
+        });
+      }
+    }
+
+    getPinnedTimerShortcuts(runningIds).forEach(addShortcut);
+    getMostUsedTimerShortcuts(runningIds, {
+      limit,
+      excludeKeys: seen
+    }).forEach(addShortcut);
+    getRecentTimerShortcuts(runningIds, {
+      limit,
+      excludeKeys: seen
+    }).forEach(addShortcut);
+
+    if (shortcuts.length < limit) {
+      getActiveProjects().forEach((project) => {
+        const startableProject = getStartableTimerProject(
+          project.id,
+          runningIds
+        );
+        if (!startableProject) return;
+        addShortcut({
+          source: 'project',
+          project: startableProject,
+          description: '',
+          focusFactor: DEFAULT_FOCUS_FACTOR
+        });
+      });
+    }
+    return shortcuts;
+  }
+
+  function startTimerShortcut(shortcut, { navigate = false } = {}) {
+    if (!shortcut || !shortcut.project) return;
+    if (navigate) activateSection('timer');
+    const timerSelect = document.getElementById('timerProjectPro');
+    if (timerSelect) timerSelect.value = shortcut.project.id;
+    return startProjectTimer(shortcut.project.id, {
+      description: shortcut.description,
+      overrideFactor: shortcut.focusFactor
+    });
+  }
+
   // Update project selects for timer and manual forms
   function updateProjectSelects() {
     const timerSelect = document.getElementById('timerProjectPro');
@@ -10891,63 +11090,12 @@ import {
     const recentEl = document.getElementById('recentTimersPro');
     if (!recentEl) return;
     recentEl.innerHTML = '';
-    const startablePinned = ensureTimerPresets()
-      .map((preset) => {
-        const project = data.projects.find(
-          (candidate) => String(candidate.id) === String(preset.projectId)
-        );
-        return project
-          ? {
-              id: preset.id,
-              project,
-              description: String(preset.description || '').trim(),
-              focusFactor: normalizeFocusFactor(preset.focusFactor)
-            }
-          : null;
-      })
-      .filter(
-        (preset) =>
-          preset &&
-          !isProjectArchived(preset.project) &&
-          !runningProjectIds.has(String(preset.project.id))
-      );
-    const recentTimers = [];
-    const seen = new Set();
-    data.entries
-      .slice()
-      .sort((a, b) => {
-        const aTime = new Date(a.createdAt || a.startTime || 0).getTime();
-        const bTime = new Date(b.createdAt || b.startTime || 0).getTime();
-        return bTime - aTime;
-      })
-      .forEach((entry) => {
-        if (isCodexTimeEntry(entry)) return;
-        const project = data.projects.find(
-          (p) => String(p.id) === String(entry.projectId)
-        );
-        if (
-          !project ||
-          isProjectArchived(project) ||
-          runningProjectIds.has(String(project.id))
-        )
-          return;
-        const description = String(entry.description || '').trim();
-        const focusFactor = getEntryFocusFactor(entry, 1);
-        const key = [
-          String(project.id),
-          description.toLowerCase(),
-          String(focusFactor)
-        ].join('::');
-        if (seen.has(key)) return;
-        seen.add(key);
-        recentTimers.push({
-          project,
-          description,
-          focusFactor
-        });
-      });
-
-    const startableRecent = recentTimers.slice(0, 4);
+    const startablePinned = getPinnedTimerShortcuts(runningProjectIds);
+    const pinnedKeys = new Set(startablePinned.map(getTimerShortcutKey));
+    const startableRecent = getRecentTimerShortcuts(runningProjectIds, {
+      limit: 4,
+      excludeKeys: pinnedKeys
+    });
     if (!startablePinned.length && !startableRecent.length) {
       recentEl.style.display = 'none';
       return;
@@ -10971,11 +11119,7 @@ import {
         ' at ' +
         focusText;
       button.addEventListener('click', () => {
-        timerSelect.value = project.id;
-        startProjectTimer(project.id, {
-          description,
-          overrideFactor: focusFactor
-        });
+        startTimerShortcut({ project, description, focusFactor });
       });
       row.appendChild(button);
       return button;
@@ -11399,26 +11543,51 @@ import {
     }
     panel.appendChild(grid);
 
+    const quickTimerShortcuts = getStartableTimerShortcuts({
+      recommendation,
+      runningProjectIds: new Set(
+        runningEntries.map((entry) => String(entry.projectId))
+      ),
+      limit: 3
+    });
+    if (quickTimerShortcuts.length) {
+      const shortcutPanel = document.createElement('div');
+      shortcutPanel.className = 'today-timer-shortcuts';
+      const shortcutHeader = document.createElement('div');
+      shortcutHeader.className = 'today-timer-shortcuts-header';
+      shortcutHeader.textContent = 'Quick timers';
+      shortcutPanel.appendChild(shortcutHeader);
+      const shortcutRow = document.createElement('div');
+      shortcutRow.className = 'today-timer-shortcut-row';
+      quickTimerShortcuts.forEach((shortcut) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = `today-timer-shortcut${shortcut.source === 'recommended' ? ' primary' : ''}`;
+        button.textContent =
+          shortcut.source === 'recommended'
+            ? `Next: ${shortcut.project.name}`
+            : formatTimerPresetLabel(
+                shortcut.project,
+                shortcut.description,
+                shortcut.focusFactor
+              );
+        button.title =
+          'Start ' +
+          shortcut.project.name +
+          (shortcut.description ? ' - ' + shortcut.description : '') +
+          ' at ' +
+          formatFocusPercent(shortcut.focusFactor);
+        button.addEventListener('click', () => {
+          startTimerShortcut(shortcut, { navigate: true });
+        });
+        shortcutRow.appendChild(button);
+      });
+      shortcutPanel.appendChild(shortcutRow);
+      panel.appendChild(shortcutPanel);
+    }
+
     const actions = document.createElement('div');
     actions.className = 'today-command-actions';
-    if (
-      recommendation &&
-      !runningEntries.some(
-        (entry) => String(entry.projectId) === String(recommendation.project.id)
-      )
-    ) {
-      const startBtn = document.createElement('button');
-      startBtn.type = 'button';
-      startBtn.className = 'btn primary';
-      startBtn.textContent = 'Start Recommended';
-      startBtn.addEventListener('click', () => {
-        activateSection('timer');
-        startProjectTimer(recommendation.project.id, {
-          overrideFactor: DEFAULT_FOCUS_FACTOR
-        });
-      });
-      actions.appendChild(startBtn);
-    }
     if (runningEntries.length) {
       const stopBtn = document.createElement('button');
       stopBtn.type = 'button';
@@ -11430,27 +11599,9 @@ import {
       });
       actions.appendChild(stopBtn);
     }
-    const quickLogBtn = document.createElement('button');
-    quickLogBtn.type = 'button';
-    quickLogBtn.className = 'btn secondary';
-    quickLogBtn.textContent = 'Quick Log';
-    quickLogBtn.addEventListener('click', () => {
-      activateSection('entries');
-      const input = document.getElementById('quickLogInput');
-      if (input) input.focus();
-    });
-    actions.appendChild(quickLogBtn);
-    const backupBtn = document.createElement('button');
-    backupBtn.type = 'button';
-    backupBtn.className = 'btn secondary';
-    backupBtn.textContent = 'Backup';
-    backupBtn.addEventListener('click', () => {
-      activateSection('importExport');
-      const button = document.getElementById('backupNowBtn');
-      if (button && !button.disabled) button.click();
-    });
-    actions.appendChild(backupBtn);
-    panel.appendChild(actions);
+    if (actions.childElementCount) {
+      panel.appendChild(actions);
+    }
   }
 
   function formatDateInputValue(date) {

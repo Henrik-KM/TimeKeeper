@@ -707,6 +707,50 @@ tr:nth-child(even) td {
   justify-content: flex-start;
 }
 
+.today-timer-shortcuts {
+  display: grid;
+  gap: 0.4rem;
+}
+
+.today-timer-shortcuts-header {
+  color: #475569;
+  font-size: 0.76rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.today-timer-shortcut-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10.5rem, 1fr));
+  gap: 0.45rem;
+}
+
+.today-timer-shortcut {
+  min-height: 2.65rem;
+  padding: 0.55rem 0.65rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.55rem;
+  background: #ffffff;
+  color: #1e293b;
+  cursor: pointer;
+  font-size: 0.86rem;
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+  text-align: left;
+}
+
+.today-timer-shortcut:hover {
+  border-color: #2563eb;
+  color: #1d4ed8;
+}
+
+.today-timer-shortcut.primary {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
 .quick-log-form {
   display: grid;
   gap: 0.35rem;
@@ -842,6 +886,10 @@ tr:nth-child(even) td {
 
   .today-command-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .today-timer-shortcut-row {
+    grid-template-columns: 1fr;
   }
 
   .today-command-actions .btn,

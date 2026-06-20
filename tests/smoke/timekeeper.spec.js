@@ -474,7 +474,10 @@ test('project archive hides projects from new timers until restored', async ({
   await page.goto('/');
 
   await gotoSection(page, 'projects', 'Projects');
-  await page.getByRole('button', { name: 'Archive' }).click();
+  const projectsSection = page.locator('#projects');
+  await projectsSection
+    .getByRole('button', { name: 'Archive', exact: true })
+    .click();
   await expect(
     page.getByText(
       'No active projects. Show archived projects to review older work.'
@@ -488,7 +491,9 @@ test('project archive hides projects from new timers until restored', async ({
 
   await gotoSection(page, 'projects', 'Projects');
   await page.locator('#showArchivedProjectsToggle').check();
-  await page.getByRole('button', { name: 'Restore' }).click();
+  await projectsSection
+    .getByRole('button', { name: 'Restore', exact: true })
+    .click();
   await expect(
     page.getByRole('heading', { name: 'Archive Me', exact: true })
   ).toBeVisible();
@@ -1090,12 +1095,58 @@ test('QoL quick log saved billing views and reminder controls work', async ({
         endTime: '2026-04-25T13:00:00.000',
         hours: 1
       })
+    ],
+    timerPresets: [
+      {
+        id: 'alpha-preset',
+        projectId: 'alpha',
+        description: 'Planning sprint',
+        focusFactor: 1.5,
+        createdAt: '2026-04-25T09:00:00.000Z',
+        updatedAt: '2026-04-25T09:00:00.000Z'
+      }
     ]
   });
 
   await page.goto('/');
   await expect(page.locator('#todayCommandPanel')).toContainText('Today');
-  await expect(page.locator('#todayCommandPanel')).toContainText('Quick Log');
+  await expect(page.locator('#todayCommandPanel')).toContainText(
+    'Quick timers'
+  );
+  await expect(
+    page
+      .locator('#todayCommandPanel')
+      .getByRole('button', { name: 'Quick Log' })
+  ).toHaveCount(0);
+  await expect(
+    page.locator('#todayCommandPanel').getByRole('button', { name: 'Backup' })
+  ).toHaveCount(0);
+  await expect(
+    page.locator('#todayCommandPanel').getByRole('button', {
+      name: 'Alpha Project - Planning sprint - 150%'
+    })
+  ).toBeVisible();
+  await expect(
+    page.locator('#todayCommandPanel').getByRole('button', {
+      name: 'Beta Project - Admin follow up - 100%'
+    })
+  ).toBeVisible();
+  await page
+    .locator('#todayCommandPanel')
+    .getByRole('button', {
+      name: 'Alpha Project - Planning sprint - 150%'
+    })
+    .click();
+  await expect(
+    page.getByRole('heading', { name: 'Timer', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('[id^="runningFactor-"]').first()).toHaveText(
+    '150%'
+  );
+  await expect(page.locator('#runningTimerPro')).toContainText(
+    'Planning sprint'
+  );
+  await page.getByRole('button', { name: 'Stop All Timers' }).click();
 
   await gotoSection(page, 'entries', 'Time Entries');
   await page
@@ -1950,23 +2001,25 @@ test('recent timer chips preserve focus and start immediately', async ({
   await page.goto('/');
   await expect(page.locator('#startFactorPro')).toContainText('150%');
   await expect(page.locator('#startFactorPro')).toContainText('200%');
+  const recentTimers = page.locator('#recentTimersPro');
 
   await expect(
-    page.getByRole('button', {
+    recentTimers.getByRole('button', {
       name: 'Agent Project - Review agent output - 50%'
     })
   ).toBeVisible();
   await expect(
-    page.getByRole('button', { name: 'Agent Project - Draft prompt - 100%' })
+    recentTimers.getByRole('button', {
+      name: 'Agent Project - Draft prompt - 100%'
+    })
   ).toBeVisible();
-  await expect(page.locator('#recentTimersPro')).not.toContainText(
+  await expect(recentTimers).not.toContainText(
     'Codex: recent imported agent work'
   );
-  await expect(page.locator('#recentTimersPro')).not.toContainText(
-    'Codex: legacy imported work'
-  );
+  await expect(recentTimers).not.toContainText('Codex: legacy imported work');
 
   await page
+    .locator('#recentTimersPro')
     .getByRole('button', {
       name: 'Agent Project - Review agent output - 50%'
     })
