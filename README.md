@@ -145,7 +145,7 @@ Remote focus states expire after 15 minutes in the app and are treated as stale 
 
 TimeKeeper can import Codex desktop work as 50% project time. The Android/GitHub Pages app cannot read Windows Codex logs directly, so each Windows desktop runs a small scheduled helper that scans local Codex session JSONL files, publishes sanitized usage records to a GitHub inbox, and exits.
 
-The helper never publishes prompts, tool output, or full local paths. It publishes repo/thread metadata, active timestamps, and effective seconds only. It also ignores Codex activity before the local start of the current day, so older sessions that are already accounted for do not get imported again.
+The helper never publishes prompts, tool output, or full local paths. It publishes repo/thread metadata, active timestamps, and effective seconds only. It scans the current day plus the previous six local calendar days. Stable record IDs prevent entries that were already imported from being added again.
 
 Setup:
 
@@ -164,7 +164,7 @@ Setup:
 npm run codex:bridge:install
 ```
 
-The task runs at logon and every 5 minutes, scans only today's changed Codex session files under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. To run it manually:
+The task runs at logon and every 5 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. To run it manually:
 
 ```bash
 npm run codex:bridge

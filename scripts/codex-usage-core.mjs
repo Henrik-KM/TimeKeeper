@@ -5,6 +5,7 @@ import path from 'node:path';
 export const DEFAULT_CODEX_FOCUS_FACTOR = 0.5;
 export const DEFAULT_IDLE_GAP_MS = 15 * 60 * 1000;
 export const DEFAULT_MATURE_MS = 17 * 60 * 1000;
+export const DEFAULT_CODEX_LOOKBACK_DAYS = 7;
 
 export function getLocalDayStart(referenceDate = new Date()) {
   return new Date(
@@ -12,6 +13,16 @@ export function getLocalDayStart(referenceDate = new Date()) {
     referenceDate.getMonth(),
     referenceDate.getDate()
   );
+}
+
+export function getLocalLookbackStart(
+  referenceDate = new Date(),
+  days = DEFAULT_CODEX_LOOKBACK_DAYS
+) {
+  const normalizedDays = Math.max(1, Math.floor(Number(days) || 1));
+  const start = getLocalDayStart(referenceDate);
+  start.setDate(start.getDate() - (normalizedDays - 1));
+  return start;
 }
 
 export function sanitizeMachineId(value = '') {

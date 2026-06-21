@@ -1050,6 +1050,7 @@ import {
   const CODEX_DEFAULT_CONFIG_PATH = 'assets/timekeeper-codex-config.json';
   const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
   const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
+  const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_FOCUS_FACTOR = 0.5;
 
   function normalizeGitHubRepository(value = '') {
@@ -2925,12 +2926,19 @@ import {
     return ids;
   }
 
-  function isTodayCodexRecord(
+  function getCodexImportWindowStart(referenceDate = new Date()) {
+    return addLocalDays(
+      startOfLocalDay(referenceDate),
+      -(CODEX_IMPORT_LOOKBACK_DAYS - 1)
+    );
+  }
+
+  function isCodexRecordInImportWindow(
     record,
-    todayStart = startOfLocalDay(new Date())
+    windowStart = getCodexImportWindowStart()
   ) {
     const start = new Date(record?.startTime || '');
-    return !Number.isNaN(start.getTime()) && start >= todayStart;
+    return !Number.isNaN(start.getTime()) && start >= windowStart;
   }
 
   function getActiveCodexProject(projectId) {
@@ -2943,7 +2951,7 @@ import {
   function importCodexInboxPayloads(payloads = []) {
     const config = getCodexIntegrationConfig();
     const importedIds = getCodexExistingExternalIds();
-    const todayStart = startOfLocalDay(new Date());
+    const windowStart = getCodexImportWindowStart();
     let imported = 0;
     let skipped = 0;
     const nowIso = new Date().toISOString();
@@ -2962,7 +2970,7 @@ import {
         if (
           !recordId ||
           importedIds.has(recordId) ||
-          !isTodayCodexRecord(record, todayStart) ||
+          !isCodexRecordInImportWindow(record, windowStart) ||
           !projectId ||
           !getActiveCodexProject(projectId) ||
           !Number.isFinite(effectiveSeconds) ||

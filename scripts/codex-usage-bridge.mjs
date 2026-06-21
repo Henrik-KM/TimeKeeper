@@ -7,8 +7,10 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildCodexUsageRecordsFromSessionData,
+  DEFAULT_CODEX_LOOKBACK_DAYS,
   getDefaultMachineId,
   getLocalDayStart,
+  getLocalLookbackStart,
   parseTimestamp,
   sanitizeMachineId
 } from './codex-usage-core.mjs';
@@ -244,8 +246,8 @@ function getJsonLineTimestamp(line) {
   return parseTimestamp(match?.[1]);
 }
 
-async function readCodexSessionSummary(filePath, dayStart) {
-  const minTime = dayStart instanceof Date ? dayStart.getTime() : null;
+async function readCodexSessionSummary(filePath, windowStart) {
+  const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
   const meta = { id: '', cwd: '', timestamp: null };
   const timestamps = [];
   let firstTimestamp = null;
@@ -359,15 +361,16 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
   }
   const now = new Date();
   const dayStart = getLocalDayStart(now);
+  const rangeStart = getLocalLookbackStart(now);
   const files = await listSessionFilesChangedSince(
     options.sessionsDir,
-    dayStart
+    rangeStart
   );
   const threadNamesById = await loadThreadNames(options.sessionIndexPath);
   const records = [];
   await Promise.all(
     files.map(async (filePath) => {
-      const summary = await readCodexSessionSummary(filePath, dayStart);
+      const summary = await readCodexSessionSummary(filePath, rangeStart);
       records.push(
         ...buildCodexUsageRecordsFromSessionData({
           ...summary,
@@ -389,6 +392,8 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     machineId: options.machineId,
     updatedAt: now.toISOString(),
     dayStart: dayStart.toISOString(),
+    rangeStart: rangeStart.toISOString(),
+    lookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
     records: uniqueRecords
   };
 }
@@ -401,7 +406,10 @@ export async function runCodexUsageBridge(rawArgs = parseArgs()) {
     return payload;
   }
   const state = await readJsonFile(options.statePath, {});
-  const payloadKey = JSON.stringify(payload.records.map((record) => record.id));
+  const payloadKey = JSON.stringify({
+    rangeStart: payload.rangeStart,
+    recordIds: payload.records.map((record) => record.id)
+  });
   if (!options.force && state.lastPayloadKey === payloadKey) {
     process.stdout.write(
       `Codex bridge unchanged: ${payload.records.length} records for ${options.machineId}\n`

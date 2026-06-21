@@ -2275,7 +2275,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
-test('Codex GitHub inbox imports today tracked records once without exporting the token', async ({
+test('Codex GitHub inbox imports seven recent days once without exporting the token', async ({
   page
 }) => {
   await freezeTime(page, '2026-06-13T12:00:00');
@@ -2307,7 +2307,19 @@ test('Codex GitHub inbox imports today tracked records once without exporting th
         wallSeconds: 1800,
         focusFactor: 0.5,
         effectiveSeconds: 900,
-        description: 'Codex: old work'
+        description: 'Codex: recent work'
+      },
+      {
+        id: 'codex-too-old',
+        threadId: 'thread-too-old',
+        projectKey: 'VWR-AutoInv',
+        timekeeperProjectName: 'IFLAI',
+        startTime: '2026-06-06T08:00:00.000Z',
+        endTime: '2026-06-06T08:30:00.000Z',
+        wallSeconds: 1800,
+        focusFactor: 0.5,
+        effectiveSeconds: 900,
+        description: 'Codex: too old'
       }
     ]
   };
@@ -2381,19 +2393,30 @@ test('Codex GitHub inbox imports today tracked records once without exporting th
         return data.entries.length;
       })
     )
-    .toBe(1);
+    .toBe(2);
   let data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
-  expect(data.entries[0]).toMatchObject({
-    projectId: 'iflai',
-    description: 'Codex: VWR automation',
-    duration: 900,
-    focusFactor: 0.5,
-    manualFactor: 0.5,
-    source: 'codex',
-    externalId: 'codex-today'
-  });
+  expect(data.entries).toContainEqual(
+    expect.objectContaining({
+      projectId: 'iflai',
+      description: 'Codex: VWR automation',
+      duration: 900,
+      focusFactor: 0.5,
+      manualFactor: 0.5,
+      source: 'codex',
+      externalId: 'codex-today'
+    })
+  );
+  expect(data.entries).toContainEqual(
+    expect.objectContaining({
+      projectId: 'iflai',
+      description: 'Codex: recent work',
+      duration: 900,
+      source: 'codex',
+      externalId: 'codex-yesterday'
+    })
+  );
   expect(JSON.stringify(data)).not.toContain('ghp_codex_test');
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
@@ -2401,8 +2424,8 @@ test('Codex GitHub inbox imports today tracked records once without exporting th
   data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
-  expect(data.entries).toHaveLength(1);
-  expect(JSON.stringify(data)).not.toContain('codex-yesterday');
+  expect(data.entries).toHaveLength(2);
+  expect(JSON.stringify(data)).not.toContain('codex-too-old');
 });
 
 test('Codex config publish retries after a stale GitHub sha', async ({

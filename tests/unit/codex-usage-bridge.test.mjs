@@ -5,7 +5,8 @@ import {
   buildCodexUsageRecordsFromSessionData,
   buildCodexUsageRecordsFromSessionText,
   findTrackedProjectForCwd,
-  getGitHubProjectPathInfo
+  getGitHubProjectPathInfo,
+  getLocalLookbackStart
 } from '../../scripts/codex-usage-core.mjs';
 
 function jsonl(events) {
@@ -30,6 +31,16 @@ function session({ cwd, id = 'thread-1', timestamps = [] }) {
     }))
   ]);
 }
+
+test('starts the seven-day lookback at local midnight six days ago', () => {
+  const rangeStart = getLocalLookbackStart(new Date(2026, 5, 13, 12, 30));
+
+  assert.equal(rangeStart.getFullYear(), 2026);
+  assert.equal(rangeStart.getMonth(), 5);
+  assert.equal(rangeStart.getDate(), 7);
+  assert.equal(rangeStart.getHours(), 0);
+  assert.equal(rangeStart.getMinutes(), 0);
+});
 
 test('maps Codex cwd by TimeKeeper project parent folder', () => {
   const cwd =
