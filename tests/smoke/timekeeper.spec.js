@@ -1128,6 +1128,10 @@ test('QoL quick log saved billing views and reminder controls work', async ({
   });
 
   await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: 'Timer', exact: true })
+  ).toBeVisible();
+  await gotoSection(page, 'dashboard', 'Dashboard');
   await expect(page.locator('#todayCommandPanel')).toContainText('Today');
   await expect(page.locator('#todayCommandPanel')).toContainText(
     'Quick timers'
@@ -1471,6 +1475,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   });
 
   const manifest = JSON.parse(await readFile('manifest.webmanifest', 'utf8'));
+  expect(manifest.start_url).toBe('./index.html#timer');
   expect(manifest.shortcuts.map((shortcut) => shortcut.name)).toEqual(
     expect.arrayContaining([
       'Open Today',
@@ -1488,13 +1493,10 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Dashboard', exact: true })
+    page.getByRole('heading', { name: 'Timer', exact: true })
   ).toBeVisible();
   const syncStatus = page.locator('#mobileSyncStatus');
-  await expect(syncStatus).toBeVisible();
-  await expect(syncStatus).toContainText(
-    /Backed up|Needs backup|Unsupported|Conflict/
-  );
+  await expect(syncStatus).toBeHidden();
 
   const nowBar = page.locator('#mobileNowBar');
   await expect(nowBar).toBeVisible();
@@ -1505,14 +1507,17 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await nowBar.getByRole('button', { name: 'Resume' }).click();
   await expect(nowBar.getByRole('button', { name: 'Pause' })).toBeVisible();
 
+  await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Cleanup');
+  await expect(commandPanel).toContainText('Target');
+  await expect(commandPanel).toContainText('Favorites');
   await expect(commandPanel).toContainText('Favorite timers');
+  await expect(commandPanel).not.toContainText('Cleanup');
+  await expect(commandPanel).not.toContainText('Backup');
+  await expect(commandPanel).not.toContainText('Recent entries');
   await expect(commandPanel).toContainText(
     'Pinned Project - Pinned pass - 150%'
   );
-  await expect(commandPanel).toContainText('Recent entries');
-  await expect(commandPanel).toContainText('Last Project');
 
   const favoriteRow = commandPanel
     .locator('.mobile-favorite-timer')
@@ -1557,15 +1562,8 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       endDate: '2026-04-25'
     });
 
-  await commandPanel.getByRole('button', { name: 'Review yesterday' }).click();
-  const reviewDialog = page.getByRole('dialog', { name: 'Review yesterday' });
-  await expect(reviewDialog).toBeVisible();
-  await expect(reviewDialog).toContainText('Missing descriptions');
-  await expect(reviewDialog).toContainText('is missing a description.');
-  await expect(reviewDialog).toContainText('Used Project is');
-  await reviewDialog.getByRole('button', { name: 'Close' }).last().click();
-
-  await commandPanel.getByRole('button', { name: 'Sync setup' }).click();
+  await gotoSection(page, 'importExport', 'Import / Export');
+  await page.getByRole('button', { name: 'Sync Setup' }).click();
   const syncDialog = page.getByRole('dialog', { name: 'Sync setup' });
   await expect(syncDialog).toBeVisible();
   await expect(syncDialog).toContainText('Choose folder');

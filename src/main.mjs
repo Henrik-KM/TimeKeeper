@@ -7707,6 +7707,24 @@ import {
         label: 'Export data',
         meta: 'Backup',
         action: () => downloadData()
+      },
+      {
+        label: 'Sync setup',
+        meta: 'Backup',
+        action: () => {
+          activateSection('importExport');
+          openMobileSyncWizard();
+        }
+      },
+      {
+        label: 'Review yesterday',
+        meta: 'Entries',
+        action: () => openEntryReviewSheet('yesterday')
+      },
+      {
+        label: 'Review this week',
+        meta: 'Entries',
+        action: () => openEntryReviewSheet('week')
       }
     ];
     return [
@@ -12479,48 +12497,8 @@ import {
   function renderMobileSyncStatus() {
     const panel = document.getElementById('mobileSyncStatus');
     if (!panel) return;
-    const sync = getMobileSyncState();
-    panel.className = `mobile-sync-status ${sync.state}`;
     panel.innerHTML = '';
-    const copy = document.createElement('button');
-    copy.type = 'button';
-    copy.className = 'mobile-sync-copy';
-    copy.addEventListener('click', () => activateSection('importExport'));
-    const label = document.createElement('strong');
-    label.textContent = sync.label;
-    const detail = document.createElement('span');
-    detail.textContent = `${sync.detail} - ${getPwaMobileDetail()}`;
-    copy.appendChild(label);
-    copy.appendChild(detail);
-    panel.appendChild(copy);
-    if (
-      pendingServiceWorkerRegistration &&
-      pendingServiceWorkerRegistration.waiting
-    ) {
-      const updateBtn = document.createElement('button');
-      updateBtn.type = 'button';
-      updateBtn.className = 'btn primary';
-      updateBtn.textContent = 'Update';
-      updateBtn.addEventListener('click', triggerServiceWorkerUpdate);
-      panel.appendChild(updateBtn);
-    } else {
-      const backupBtn = document.createElement('button');
-      backupBtn.type = 'button';
-      backupBtn.className = 'btn secondary';
-      backupBtn.textContent = 'Sync';
-      backupBtn.addEventListener('click', () =>
-        activateSection('importExport')
-      );
-      panel.appendChild(backupBtn);
-    }
-  }
-
-  function getRecentStoppedEntries(limit = 3) {
-    return data.entries
-      .filter((entry) => !entry.isRunning && !isCodexTimeEntry(entry))
-      .slice()
-      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
-      .slice(0, limit);
+    panel.className = 'mobile-sync-status hidden';
   }
 
   function renderMobileFavoriteTimers(container, runningProjectIds) {
@@ -12562,32 +12540,6 @@ import {
         row.appendChild(button);
       });
       list.appendChild(row);
-    });
-    section.appendChild(list);
-    container.appendChild(section);
-  }
-
-  function renderMobileRecentEntries(container) {
-    const entries = getRecentStoppedEntries(3);
-    if (!entries.length) return;
-    const section = document.createElement('div');
-    section.className = 'mobile-today-section';
-    const title = document.createElement('div');
-    title.className = 'mobile-today-section-title';
-    title.textContent = 'Recent entries';
-    section.appendChild(title);
-    const list = document.createElement('div');
-    list.className = 'mobile-recent-entry-list';
-    entries.forEach((entry) => {
-      const project = getEntryProject(entry);
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = 'mobile-recent-entry';
-      button.textContent = `${project ? project.name : 'Unknown'} - ${formatDuration(entry.duration || 0)}${entry.description ? ` - ${entry.description}` : ''}`;
-      button.addEventListener('click', () => {
-        openEntryActionSheet(entry.id);
-      });
-      list.appendChild(button);
     });
     section.appendChild(list);
     container.appendChild(section);
@@ -12810,19 +12762,15 @@ import {
     runningEntries,
     activeEntries,
     stats,
-    recommendation,
-    settings
+    recommendation
   }) {
     if (!isMobileViewport()) return false;
     panel.classList.add('mobile-today-panel');
     const running = runningEntries[0] || null;
     const runningProject = running ? getEntryProject(running) : null;
-    const review = getEntryReviewData('yesterday');
-    const cleanupCount =
-      review.missingDescriptions.length +
-      review.longEntries.length +
-      review.staleRunning.length +
-      review.emptyDays.length;
+    const favoriteCount = getPinnedTimerShortcuts(
+      new Set(runningEntries.map((entry) => String(entry.projectId)))
+    ).length;
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -12881,20 +12829,16 @@ import {
       }
     );
     appendTodayCard(
-      'Backup',
-      getBackupFreshnessLabel(),
-      backupConflict || !data.lastBackupAt ? 'risk' : '',
-      openMobileSyncWizard
+      'Target',
+      `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`,
+      '',
+      () => activateSection('timer')
     );
     appendTodayCard(
-      'Cleanup',
-      cleanupCount
-        ? `${cleanupCount} review issue${cleanupCount === 1 ? '' : 's'}`
-        : settings.enabled
-          ? 'Ready'
-          : 'Reminders off',
-      cleanupCount ? 'risk' : '',
-      () => openEntryReviewSheet('yesterday')
+      'Favorites',
+      favoriteCount ? `${favoriteCount} pinned` : 'Pin from Timer',
+      favoriteCount ? '' : 'muted',
+      () => activateSection('timer')
     );
     panel.appendChild(primary);
 
@@ -12902,13 +12846,7 @@ import {
     actions.className = 'mobile-today-actions';
     [
       ['Quick log', 'primary', () => openMobileQuickLogSheet()],
-      [
-        'Review yesterday',
-        'secondary',
-        () => openEntryReviewSheet('yesterday')
-      ],
-      ['Review this week', 'secondary', () => openEntryReviewSheet('week')],
-      ['Sync setup', 'secondary', openMobileSyncWizard]
+      ['Timer', 'secondary', () => activateSection('timer')]
     ].forEach(([label, variant, action]) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -12923,7 +12861,6 @@ import {
       runningEntries.map((entry) => String(entry.projectId))
     );
     renderMobileFavoriteTimers(panel, runningProjectIds);
-    renderMobileRecentEntries(panel);
     return true;
   }
 
@@ -14931,8 +14868,7 @@ import {
   }
 
   function applyLaunchRoute() {
-    const sectionId =
-      getSectionFromHash() || (isMobileViewport() ? 'dashboard' : 'timer');
+    const sectionId = getSectionFromHash() || 'timer';
     activateSection(sectionId);
     if (window.location.hash.toLowerCase() === '#quick-log') {
       window.setTimeout(() => openMobileQuickLogSheet(), 0);
@@ -14950,6 +14886,7 @@ import {
   const chooseBtn = document.getElementById('chooseBackupDirBtn');
   const backupNowBtn = document.getElementById('backupNowBtn');
   const verifyBackupBtn = document.getElementById('verifyBackupBtn');
+  const mobileSyncSetupBtn = document.getElementById('mobileSyncSetupBtn');
   const restoreBackupBtn = document.getElementById('restoreBackupBtn');
   function syncAutoSyncToggleUI() {
     if (!autoSyncToggle) return;
@@ -15206,6 +15143,9 @@ import {
     verifyBackupBtn.addEventListener('click', () => {
       verifyBackupRoundTrip();
     });
+  }
+  if (mobileSyncSetupBtn) {
+    mobileSyncSetupBtn.addEventListener('click', openMobileSyncWizard);
   }
   if (restoreBackupBtn) {
     restoreBackupBtn.addEventListener('click', () => {
