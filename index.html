@@ -17,7 +17,7 @@
       <div class="logo">TimeKeeper&nbsp;Pro</div>
       <ul id="navList">
         <!-- Set Dashboard tab without active class; we will programmatically activate the Timer tab on load -->
-        <li data-section="dashboard" class="active">Dashboard</li>
+        <li data-section="dashboard" class="active">Today</li>
         <li data-section="timer">Timer</li>
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
@@ -29,6 +29,7 @@
     </div>
     <div class="content">
       <div id="todayCommandPanel" class="today-command-panel" aria-live="polite"></div>
+      <div id="mobileSyncStatus" class="mobile-sync-status" aria-live="polite"></div>
       <!-- Dashboard Section -->
       <section id="dashboard" class="section">
         <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Dashboard</h2>
@@ -180,6 +181,7 @@
               <input id="entryDateToInput" type="date" />
             </label>
             <button id="entryDateClearBtn" type="button" class="btn secondary">Clear Dates</button>
+            <div id="entryDateQuickFilters" class="entry-date-quick-filters" aria-label="Quick date filters"></div>
           </div>
           <div class="billing-view-toolbar">
             <label for="billingPresetSelect">Billing views</label>
@@ -501,6 +503,7 @@
         </div>
       </section>
     </div>
+    <div id="mobileNowBar" class="mobile-now-bar hidden" aria-live="polite"></div>
     <script type="module" src="src/main.mjs"></script>
   </body>
 </html>

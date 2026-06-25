@@ -531,6 +531,24 @@ textarea {
     width: calc(100vw - 1rem);
   }
 
+  .modal-backdrop {
+    align-items: flex-end;
+    padding: 0.5rem 0.5rem 0;
+  }
+
+  .modal-panel {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: calc(100dvh - 0.5rem);
+    max-height: calc(100dvh - 0.5rem);
+    border-radius: 0.85rem 0.85rem 0 0;
+  }
+
+  .modal-body {
+    overflow: auto;
+  }
+
   .modal-actions {
     flex-direction: column-reverse;
   }

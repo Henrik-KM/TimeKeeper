@@ -1484,6 +1484,7 @@ import {
     // Mark data as needing backup
     needsBackup = true;
     scheduleBackupSoon();
+    renderMobileSyncStatus();
   }
 
   function cloneData(value = data) {
@@ -1514,6 +1515,7 @@ import {
     updateReminderSettingsPanel();
     updatePwaStatusPanel();
     renderTodayCommandPanel();
+    renderMobileSyncStatus();
   }
 
   function restoreDataSnapshot(snapshot) {
@@ -2004,6 +2006,11 @@ import {
   let pendingInstallPrompt = null;
   let pendingServiceWorkerRegistration = null;
   let reloadAfterServiceWorkerUpdate = false;
+  let offlineShellStatus =
+    'serviceWorker' in navigator && window.location.protocol.startsWith('http')
+      ? 'pending'
+      : 'unsupported';
+  let offlineShellError = '';
   let lastReminderKey = '';
   let lastReminderAt = 0;
 
@@ -3285,12 +3292,6 @@ import {
     blockedSites: [],
     error: ''
   };
-  let offlineShellStatus =
-    'serviceWorker' in navigator && window.location.protocol.startsWith('http')
-      ? 'pending'
-      : 'unsupported';
-  let offlineShellError = '';
-
   function updateFocusStatusPanel(paidFocus = getPaidFocusTotal()) {
     const focusStatus = document.getElementById('runningFocusStatus');
     if (!focusStatus) return;
@@ -6505,6 +6506,37 @@ import {
     }
   }
 
+  function applyMobileChartCollapses() {
+    const chartCards = Array.from(
+      document.querySelectorAll(
+        '#dashboard #weeklyScatterCard, #dashboard #monthlyScatterCard, #dashboard #heatmapCard, #dashboard #burndownCard, #analytics > .card'
+      )
+    );
+    chartCards.forEach((card) => {
+      card.classList.add('mobile-chart-card');
+      let toggle = card.querySelector(':scope > .mobile-chart-toggle');
+      if (!toggle) {
+        toggle = document.createElement('button');
+        toggle.type = 'button';
+        toggle.className = 'btn secondary mobile-chart-toggle';
+        toggle.addEventListener('click', () => {
+          const open = !card.classList.contains('mobile-chart-open');
+          card.classList.toggle('mobile-chart-open', open);
+          toggle.textContent = open ? 'Close chart' : 'Open chart';
+        });
+        const heading = card.querySelector('h3, h4');
+        if (heading && heading.nextSibling) {
+          card.insertBefore(toggle, heading.nextSibling);
+        } else {
+          card.insertBefore(toggle, card.firstChild);
+        }
+      }
+      if (!card.classList.contains('mobile-chart-open')) {
+        toggle.textContent = 'Open chart';
+      }
+    });
+  }
+
   // Download the current data to a JSON file. Uses the same filename
   // each time so the browser can overwrite older backups.
   function downloadData() {
@@ -7225,42 +7257,128 @@ import {
     }
   });
 
+  function isMobileViewport() {
+    return (
+      typeof window !== 'undefined' &&
+      typeof window.matchMedia === 'function' &&
+      window.matchMedia('(max-width: 640px)').matches
+    );
+  }
+
   // Navigation
   const navList = document.getElementById('navList');
-  navList.querySelectorAll('li').forEach((li) => {
+
+  function updateMobileMoreActiveState(sectionId) {
+    const moreItem = navList.querySelector('.mobile-more-nav-item');
+    if (!moreItem) return;
+    const primarySections = new Set([
+      'dashboard',
+      'timer',
+      'entries',
+      'analytics'
+    ]);
+    moreItem.classList.toggle('active', !primarySections.has(sectionId));
+  }
+
+  function showSection(sectionId, navItem = null) {
+    if (!sectionId || !document.getElementById(sectionId)) return;
+    navList
+      .querySelectorAll('li')
+      .forEach((item) => item.classList.remove('active'));
+    const item =
+      navItem || navList.querySelector(`li[data-section="${sectionId}"]`);
+    if (item) item.classList.add('active');
+    updateMobileMoreActiveState(sectionId);
+    document.querySelectorAll('.section').forEach((sec) => {
+      sec.style.display = 'none';
+    });
+    document.getElementById(sectionId).style.display = 'block';
+    // update content if needed
+    if (sectionId === 'dashboard') {
+      updateDashboard();
+    } else if (sectionId === 'projects') {
+      updateProjectsPage();
+    } else if (sectionId === 'entries') {
+      updateEntriesTable();
+    } else if (sectionId === 'timer') {
+      updateTimerSection();
+    } else if (sectionId === 'todo') {
+      updateTodoSection();
+    } else if (sectionId === 'grocery') {
+      updateGrocerySection();
+    } else if (sectionId === 'analytics') {
+      updateAnalyticsSection();
+    }
+    applyMobileChartCollapses();
+    renderMobileSyncStatus();
+  }
+
+  navList.querySelectorAll('li[data-section]').forEach((li) => {
     li.addEventListener('click', () => {
-      navList
-        .querySelectorAll('li')
-        .forEach((item) => item.classList.remove('active'));
-      li.classList.add('active');
-      const sectionId = li.getAttribute('data-section');
-      document.querySelectorAll('.section').forEach((sec) => {
-        sec.style.display = 'none';
-      });
-      document.getElementById(sectionId).style.display = 'block';
-      // update content if needed
-      if (sectionId === 'dashboard') {
-        updateDashboard();
-      } else if (sectionId === 'projects') {
-        updateProjectsPage();
-      } else if (sectionId === 'entries') {
-        updateEntriesTable();
-      } else if (sectionId === 'timer') {
-        updateTimerSection();
-      } else if (sectionId === 'todo') {
-        updateTodoSection();
-      } else if (sectionId === 'grocery') {
-        updateGrocerySection();
-      } else if (sectionId === 'analytics') {
-        updateAnalyticsSection();
-      }
+      showSection(li.getAttribute('data-section'), li);
     });
   });
 
   function activateSection(sectionId) {
-    const item = navList.querySelector(`li[data-section="${sectionId}"]`);
-    if (item) item.click();
+    showSection(sectionId);
   }
+
+  function openMobileMoreMenu() {
+    const options = [
+      ['projects', 'Projects'],
+      ['importExport', 'Backup / Sync'],
+      ['todo', 'Workouts'],
+      ['grocery', 'Finances']
+    ];
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop mobile-more-backdrop';
+    const panel = document.createElement('div');
+    panel.className = 'modal-panel mobile-more-panel';
+    panel.role = 'dialog';
+    panel.setAttribute('aria-modal', 'true');
+    const header = document.createElement('div');
+    header.className = 'modal-header';
+    const title = document.createElement('h3');
+    title.id = 'mobile-more-title';
+    title.className = 'modal-title';
+    title.textContent = 'More';
+    panel.setAttribute('aria-labelledby', title.id);
+    header.appendChild(title);
+    const body = document.createElement('div');
+    body.className = 'modal-body mobile-more-list';
+    const close = () => backdrop.remove();
+    options.forEach(([sectionId, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mobile-more-button';
+      button.textContent = label;
+      button.addEventListener('click', () => {
+        close();
+        activateSection(sectionId);
+      });
+      body.appendChild(button);
+    });
+    backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) close();
+    });
+    panel.appendChild(header);
+    panel.appendChild(body);
+    backdrop.appendChild(panel);
+    document.body.appendChild(backdrop);
+    const first = body.querySelector('button');
+    if (first) first.focus();
+  }
+
+  function ensureMobileMoreNav() {
+    if (!navList || navList.querySelector('.mobile-more-nav-item')) return;
+    const item = document.createElement('li');
+    item.className = 'mobile-more-nav-item';
+    item.textContent = 'More';
+    item.addEventListener('click', openMobileMoreMenu);
+    navList.appendChild(item);
+  }
+
+  ensureMobileMoreNav();
 
   function buildCommandResults(query) {
     const normalized = query.trim().toLowerCase();
@@ -9953,6 +10071,81 @@ import {
     return warnings;
   }
 
+  function getRunningEntryEffectiveSeconds(entry, now = new Date()) {
+    const paused = isTimerPaused(entry);
+    const last = entry.lastUpdateTime
+      ? new Date(entry.lastUpdateTime)
+      : new Date(entry.startTime);
+    const previous = Number(entry.effectiveSeconds) || 0;
+    if (paused || Number.isNaN(last.getTime())) return previous;
+    const factor = getEntryActiveFactor(entry, getRunningEntries().length);
+    return Math.max(0, previous + ((now - last) / 1000) * factor);
+  }
+
+  function renderMobileNowBar(now = new Date()) {
+    const bar = document.getElementById('mobileNowBar');
+    if (!bar) return;
+    if (!isMobileViewport()) {
+      bar.classList.add('hidden');
+      bar.innerHTML = '';
+      return;
+    }
+    const runningEntries = getRunningEntries();
+    if (!runningEntries.length) {
+      bar.classList.add('hidden');
+      bar.innerHTML = '';
+      return;
+    }
+    const activeEntries = getActiveRunningEntries();
+    const entry = activeEntries[0] || runningEntries[0];
+    const project = getEntryProject(entry);
+    const focus = getEntryActiveFactor(entry, runningEntries.length);
+    const effective = getRunningEntryEffectiveSeconds(entry, now);
+    const paused = isTimerPaused(entry);
+    bar.classList.remove('hidden');
+    bar.innerHTML = '';
+
+    const summary = document.createElement('button');
+    summary.type = 'button';
+    summary.className = 'mobile-now-summary';
+    summary.addEventListener('click', () => activateSection('timer'));
+    const label = document.createElement('span');
+    label.className = 'mobile-now-label';
+    label.textContent =
+      runningEntries.length > 1
+        ? `${runningEntries.length} timers`
+        : project
+          ? project.name
+          : 'Running timer';
+    const detail = document.createElement('strong');
+    detail.textContent = `${formatDuration(Math.floor(effective))} · ${formatFocusPercent(focus)}${paused ? ' · paused' : ''}`;
+    summary.appendChild(label);
+    summary.appendChild(detail);
+    bar.appendChild(summary);
+
+    const controls = document.createElement('div');
+    controls.className = 'mobile-now-controls';
+    const pauseBtn = document.createElement('button');
+    pauseBtn.type = 'button';
+    pauseBtn.className = 'btn secondary';
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    pauseBtn.addEventListener('click', () => {
+      if (paused) resumeTimer(entry.id);
+      else pauseTimer(entry.id);
+    });
+    controls.appendChild(pauseBtn);
+    const stopBtn = document.createElement('button');
+    stopBtn.type = 'button';
+    stopBtn.className = 'btn danger';
+    stopBtn.textContent = runningEntries.length > 1 ? 'Stop All' : 'Stop';
+    stopBtn.addEventListener('click', () => {
+      if (runningEntries.length > 1) stopAllTimers();
+      else stopSingleTimer(entry.id);
+    });
+    controls.appendChild(stopBtn);
+    bar.appendChild(controls);
+  }
+
   function updateTimerSection() {
     const runningEntries = getRunningEntries();
     const runningDiv = document.getElementById('runningTimerPro');
@@ -10214,6 +10407,7 @@ import {
       );
       const tick = () => {
         const now = new Date();
+        renderMobileNowBar(now);
         const todayStart = new Date(
           now.getFullYear(),
           now.getMonth(),
@@ -10306,6 +10500,7 @@ import {
       if (startDiv.parentNode === runningDiv.parentNode) {
         startDiv.parentNode.insertBefore(startDiv, runningDiv);
       }
+      renderMobileNowBar();
     }
     // update project selects
     updateProjectSelects();
@@ -10739,6 +10934,71 @@ import {
       .filter(Boolean);
   }
 
+  function getLastStoppedTimerShortcut(runningProjectIds) {
+    const entry = data.entries
+      .slice()
+      .filter(
+        (candidate) => !candidate.isRunning && !isCodexTimeEntry(candidate)
+      )
+      .sort((a, b) => {
+        const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
+        const bTime = new Date(b.endTime || b.createdAt || b.startTime || 0);
+        return bTime - aTime;
+      })[0];
+    if (!entry) return null;
+    const project = getStartableTimerProject(
+      entry.projectId,
+      runningProjectIds
+    );
+    if (!project) return null;
+    return {
+      source: 'last',
+      project,
+      description: String(entry.description || '').trim(),
+      focusFactor: getEntryFocusFactor(entry, 1)
+    };
+  }
+
+  function getYesterdayTimerShortcuts(
+    runningProjectIds,
+    { limit = 2, excludeKeys = new Set() } = {}
+  ) {
+    const today = startOfLocalDay(new Date());
+    const yesterday = addLocalDays(today, -1);
+    const seen = new Set(excludeKeys);
+    const shortcuts = [];
+    data.entries
+      .slice()
+      .filter((entry) => !entry.isRunning && !isCodexTimeEntry(entry))
+      .sort((a, b) => {
+        const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
+        const bTime = new Date(b.endTime || b.createdAt || b.startTime || 0);
+        return bTime - aTime;
+      })
+      .forEach((entry) => {
+        if (shortcuts.length >= limit) return;
+        const start = new Date(entry.startTime);
+        if (Number.isNaN(start.getTime())) return;
+        if (start < yesterday || start >= today) return;
+        const project = getStartableTimerProject(
+          entry.projectId,
+          runningProjectIds
+        );
+        if (!project) return;
+        const shortcut = {
+          source: 'yesterday',
+          project,
+          description: String(entry.description || '').trim(),
+          focusFactor: getEntryFocusFactor(entry, 1)
+        };
+        const key = getTimerShortcutKey(shortcut);
+        if (seen.has(key)) return;
+        seen.add(key);
+        shortcuts.push(shortcut);
+      });
+    return shortcuts;
+  }
+
   function getRecentTimerShortcuts(
     runningProjectIds,
     { limit = 4, excludeKeys = new Set() } = {}
@@ -10859,6 +11119,11 @@ import {
     }
 
     getPinnedTimerShortcuts(runningIds).forEach(addShortcut);
+    addShortcut(getLastStoppedTimerShortcut(runningIds));
+    getYesterdayTimerShortcuts(runningIds, {
+      limit,
+      excludeKeys: seen
+    }).forEach(addShortcut);
     getMostUsedTimerShortcuts(runningIds, {
       limit,
       excludeKeys: seen
@@ -11438,6 +11703,9 @@ import {
   const entryDateFromInput = document.getElementById('entryDateFromInput');
   const entryDateToInput = document.getElementById('entryDateToInput');
   const entryDateClearBtn = document.getElementById('entryDateClearBtn');
+  const entryDateQuickFilters = document.getElementById(
+    'entryDateQuickFilters'
+  );
   const billingPresetSelect = document.getElementById('billingPresetSelect');
   const saveBillingViewBtn = document.getElementById('saveBillingViewBtn');
   const deleteBillingViewBtn = document.getElementById('deleteBillingViewBtn');
@@ -11485,6 +11753,113 @@ import {
     if (backupConflict) return 'Backup conflict';
     if (!data.lastBackupAt) return 'Backup not set';
     return `Backup ${formatRelativeTime(data.lastBackupAt)}`;
+  }
+
+  function getMobileSyncState() {
+    const fsSupported =
+      typeof window !== 'undefined' && !!window.showDirectoryPicker;
+    if (backupConflict) {
+      return {
+        state: 'conflict',
+        label: 'Conflict',
+        detail: 'Backup folder has newer data'
+      };
+    }
+    if (!fsSupported) {
+      return {
+        state: 'unsupported',
+        label: 'Unsupported',
+        detail: 'Folder backup is unavailable here'
+      };
+    }
+    const updatedAt = data && data.updatedAt ? new Date(data.updatedAt) : null;
+    const backupAt =
+      data && data.lastBackupAt ? new Date(data.lastBackupAt) : null;
+    const stale =
+      needsBackup ||
+      !backupAt ||
+      Number.isNaN(backupAt.getTime()) ||
+      (updatedAt &&
+        !Number.isNaN(updatedAt.getTime()) &&
+        updatedAt.getTime() > backupAt.getTime());
+    if (stale) {
+      return {
+        state: 'needs-backup',
+        label: 'Needs backup',
+        detail: data.lastBackupAt
+          ? `Last backup ${formatRelativeTime(data.lastBackupAt)}`
+          : 'No backup yet'
+      };
+    }
+    return {
+      state: 'backed-up',
+      label: 'Backed up',
+      detail: `Synced ${formatRelativeTime(data.lastBackupAt)}`
+    };
+  }
+
+  function getPwaMobileDetail() {
+    if (
+      pendingServiceWorkerRegistration &&
+      pendingServiceWorkerRegistration.waiting
+    ) {
+      return 'Update ready';
+    }
+    if (pendingInstallPrompt) return 'Install ready';
+    return `Offline ${offlineShellStatus}`;
+  }
+
+  function triggerServiceWorkerUpdate() {
+    if (
+      pendingServiceWorkerRegistration &&
+      pendingServiceWorkerRegistration.waiting
+    ) {
+      reloadAfterServiceWorkerUpdate = true;
+      pendingServiceWorkerRegistration.waiting.postMessage({
+        type: 'SKIP_WAITING'
+      });
+      return true;
+    }
+    return false;
+  }
+
+  function renderMobileSyncStatus() {
+    const panel = document.getElementById('mobileSyncStatus');
+    if (!panel) return;
+    const sync = getMobileSyncState();
+    panel.className = `mobile-sync-status ${sync.state}`;
+    panel.innerHTML = '';
+    const copy = document.createElement('button');
+    copy.type = 'button';
+    copy.className = 'mobile-sync-copy';
+    copy.addEventListener('click', () => activateSection('importExport'));
+    const label = document.createElement('strong');
+    label.textContent = sync.label;
+    const detail = document.createElement('span');
+    detail.textContent = `${sync.detail} · ${getPwaMobileDetail()}`;
+    copy.appendChild(label);
+    copy.appendChild(detail);
+    panel.appendChild(copy);
+    if (
+      pendingServiceWorkerRegistration &&
+      pendingServiceWorkerRegistration.waiting
+    ) {
+      const updateBtn = document.createElement('button');
+      updateBtn.type = 'button';
+      updateBtn.className = 'btn primary';
+      updateBtn.textContent = 'Update';
+      updateBtn.addEventListener('click', triggerServiceWorkerUpdate);
+      panel.appendChild(updateBtn);
+    } else {
+      const backupBtn = document.createElement('button');
+      backupBtn.type = 'button';
+      backupBtn.className = 'btn secondary';
+      backupBtn.textContent = 'Sync';
+      backupBtn.addEventListener('click', () =>
+        activateSection('importExport')
+      );
+      panel.appendChild(backupBtn);
+    }
   }
 
   function renderTodayCommandPanel() {
@@ -11556,7 +11931,7 @@ import {
       runningProjectIds: new Set(
         runningEntries.map((entry) => String(entry.projectId))
       ),
-      limit: 3
+      limit: isMobileViewport() ? 5 : 3
     });
     if (quickTimerShortcuts.length) {
       const shortcutPanel = document.createElement('div');
@@ -11571,14 +11946,27 @@ import {
         const button = document.createElement('button');
         button.type = 'button';
         button.className = `today-timer-shortcut${shortcut.source === 'recommended' ? ' primary' : ''}`;
-        button.textContent =
-          shortcut.source === 'recommended'
-            ? `Next: ${shortcut.project.name}`
-            : formatTimerPresetLabel(
-                shortcut.project,
-                shortcut.description,
-                shortcut.focusFactor
-              );
+        if (shortcut.source === 'recommended') {
+          button.textContent = `Next: ${shortcut.project.name}`;
+        } else if (shortcut.source === 'last') {
+          button.textContent = `Last: ${formatTimerPresetLabel(
+            shortcut.project,
+            shortcut.description,
+            shortcut.focusFactor
+          )}`;
+        } else if (shortcut.source === 'yesterday') {
+          button.textContent = `Yesterday: ${formatTimerPresetLabel(
+            shortcut.project,
+            shortcut.description,
+            shortcut.focusFactor
+          )}`;
+        } else {
+          button.textContent = formatTimerPresetLabel(
+            shortcut.project,
+            shortcut.description,
+            shortcut.focusFactor
+          );
+        }
         button.title =
           'Start ' +
           shortcut.project.name +
@@ -11637,6 +12025,49 @@ import {
       from: formatDateInputValue(monday),
       to: formatDateInputValue(sunday)
     };
+  }
+
+  function getDayBounds(offset = 0) {
+    const day = addLocalDays(startOfLocalDay(new Date()), offset);
+    const value = formatDateInputValue(day);
+    return { from: value, to: value };
+  }
+
+  function applyEntryDateQuickFilter(value) {
+    let bounds = null;
+    if (value === 'today') bounds = getDayBounds(0);
+    else if (value === 'yesterday') bounds = getDayBounds(-1);
+    else if (value === 'this-week') bounds = getWeekBounds(0);
+    else if (value === 'last-week') bounds = getWeekBounds(-1);
+    else if (value === 'this-month') bounds = getMonthBounds(0);
+    if (!bounds) return;
+    applyEntryFilterSnapshot({
+      ...getCurrentEntryFilterSnapshot(),
+      from: bounds.from,
+      to: bounds.to,
+      showAll: true
+    });
+  }
+
+  function renderEntryDateQuickFilters() {
+    if (!entryDateQuickFilters) return;
+    entryDateQuickFilters.innerHTML = '';
+    [
+      ['today', 'Today'],
+      ['yesterday', 'Yesterday'],
+      ['this-week', 'This week'],
+      ['last-week', 'Last week'],
+      ['this-month', 'This month']
+    ].forEach(([value, label]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn secondary entry-date-chip';
+      button.textContent = label;
+      button.addEventListener('click', () => {
+        applyEntryDateQuickFilter(value);
+      });
+      entryDateQuickFilters.appendChild(button);
+    });
   }
 
   function getCurrentEntryFilterSnapshot() {
@@ -11834,6 +12265,7 @@ import {
     });
   }
   syncEntryDateFilterControls();
+  renderEntryDateQuickFilters();
 
   // Nudge buttons for manual entry: adjust hours by +/-5 minutes
   const minusBtn = document.getElementById('manualMinus5Btn');
@@ -12613,6 +13045,42 @@ import {
         snapSelect.value = '';
       });
       actionsTd.appendChild(snapSelect);
+      const moveSelect = document.createElement('select');
+      moveSelect.setAttribute('aria-label', 'Move Project');
+      moveSelect.style.marginLeft = '0.25rem';
+      moveSelect.style.padding = '0.25rem';
+      moveSelect.style.fontSize = '0.7rem';
+      moveSelect.style.border = '1px solid #cbd5e1';
+      moveSelect.style.borderRadius = '0.375rem';
+      const movePlaceholder = document.createElement('option');
+      movePlaceholder.value = '';
+      movePlaceholder.textContent = 'Move';
+      moveSelect.appendChild(movePlaceholder);
+      getActiveProjects().forEach((candidate) => {
+        if (String(candidate.id) === String(entry.projectId)) return;
+        const option = document.createElement('option');
+        option.value = candidate.id;
+        option.textContent = candidate.name;
+        moveSelect.appendChild(option);
+      });
+      moveSelect.disabled = moveSelect.options.length <= 1;
+      moveSelect.addEventListener('change', () => {
+        const projectId = moveSelect.value;
+        if (!projectId) return;
+        const project = data.projects.find(
+          (candidate) => String(candidate.id) === String(projectId)
+        );
+        if (!project) {
+          moveSelect.value = '';
+          return;
+        }
+        const snapshot = cloneData();
+        entry.projectId = project.id;
+        saveData();
+        refreshAllViews();
+        offerUndo('Entry moved.', snapshot);
+      });
+      actionsTd.appendChild(moveSelect);
       const editBtn = document.createElement('button');
       editBtn.type = 'button';
       editBtn.className = 'btn secondary';
@@ -13004,14 +13472,10 @@ import {
       updateBtn.type = 'button';
       updateBtn.className = 'btn primary';
       updateBtn.textContent = 'Update App';
-      updateBtn.addEventListener('click', () => {
-        reloadAfterServiceWorkerUpdate = true;
-        pendingServiceWorkerRegistration.waiting.postMessage({
-          type: 'SKIP_WAITING'
-        });
-      });
+      updateBtn.addEventListener('click', triggerServiceWorkerUpdate);
       panel.appendChild(updateBtn);
     }
+    renderMobileSyncStatus();
   }
 
   const reminderEnableToggle = document.getElementById('reminderEnableToggle');
@@ -13414,6 +13878,7 @@ import {
     }
     renderBackupSnapshotsPanel();
     updateAppHealthPanel();
+    renderMobileSyncStatus();
   }
   if (autoSyncToggle) {
     updateAutoSyncStatus();

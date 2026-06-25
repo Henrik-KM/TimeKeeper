@@ -51,7 +51,26 @@ async function gotoSection(page, sectionId, headingText) {
     name: headingText,
     exact: true
   });
-  await navItem.click();
+  if (await navItem.isVisible()) {
+    await navItem.click();
+  } else {
+    const moreLabels = {
+      projects: 'Projects',
+      importExport: 'Backup / Sync',
+      todo: 'Workouts',
+      grocery: 'Finances'
+    };
+    const moreItem = page.locator('.mobile-more-nav-item');
+    if (moreLabels[sectionId] && (await moreItem.isVisible())) {
+      await moreItem.click();
+      await page
+        .getByRole('dialog', { name: 'More' })
+        .getByRole('button', { name: moreLabels[sectionId], exact: true })
+        .click();
+    } else {
+      await navItem.click({ force: true });
+    }
+  }
   try {
     await expect(heading).toBeVisible({ timeout: 3000 });
   } catch {
@@ -1210,6 +1229,11 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
         id: 'alpha',
         name: 'Alpha Project',
         client: 'Acme'
+      }),
+      projectFixture({
+        id: 'beta',
+        name: 'Beta Project',
+        client: 'Beta Co'
       })
     ],
     entries: [
@@ -1240,6 +1264,9 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
       document.querySelector('#entriesTableBodyPro .entry-actions')
     );
     return {
+      visibleNav: [...document.querySelectorAll('#navList li')]
+        .filter((item) => getComputedStyle(item).display !== 'none')
+        .map((item) => item.textContent),
       sidebarPosition: sidebarStyle.position,
       sidebarBottom: sidebarStyle.bottom,
       rowDisplay: rowStyle.display,
@@ -1249,11 +1276,194 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
     };
   });
 
+  expect(
+    layout.visibleNav.map((item) => item.replace(/\s+/g, ' ').trim())
+  ).toEqual(['Today', 'Timer', 'Entries', 'Reports', 'More']);
   expect(layout.sidebarPosition).toBe('fixed');
   expect(layout.sidebarBottom).toBe('0px');
   expect(layout.rowDisplay).toBe('block');
   expect(layout.actionDisplay).toBe('flex');
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
+
+  await page
+    .locator('#entryDateQuickFilters')
+    .getByRole('button', { name: 'Yesterday' })
+    .click();
+  await expect(page.locator('#entryDateFromInput')).toHaveValue('2026-04-25');
+  await expect(page.locator('#entryDateToInput')).toHaveValue('2026-04-25');
+  const mobileRow = page
+    .locator('#entriesTableBodyPro tr')
+    .filter({ hasText: 'Mobile card work' });
+  await expect(mobileRow).toBeVisible();
+
+  await mobileRow.getByLabel('Move Project').selectOption('beta');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.entries.find((entry) => entry.id === 'alpha-entry')
+          ?.projectId;
+      })
+    )
+    .toBe('beta');
+
+  await mobileRow.getByRole('button', { name: 'Edit' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Edit Entry' });
+  await expect(editDialog).toBeVisible();
+  const sheetMetrics = await editDialog.evaluate((panel) => {
+    const rect = panel.getBoundingClientRect();
+    return {
+      height: rect.height,
+      top: rect.top,
+      viewportHeight: window.innerHeight
+    };
+  });
+  expect(sheetMetrics.height).toBeGreaterThan(700);
+  expect(sheetMetrics.top).toBeLessThan(20);
+  expect(sheetMetrics.viewportHeight - sheetMetrics.height).toBeLessThan(20);
+  await editDialog.getByRole('button', { name: 'Cancel' }).click();
+});
+
+test('mobile shell exposes Now bar More menu sync status charts and richer quick timers', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'running',
+        name: 'Mobile Timer',
+        client: 'Acme'
+      }),
+      projectFixture({
+        id: 'pinned',
+        name: 'Pinned Project',
+        client: 'Acme'
+      }),
+      projectFixture({
+        id: 'last',
+        name: 'Last Project',
+        client: 'Acme'
+      }),
+      projectFixture({
+        id: 'yesterday',
+        name: 'Yesterday Project',
+        client: 'Acme'
+      }),
+      projectFixture({
+        id: 'used',
+        name: 'Used Project',
+        client: 'Acme'
+      })
+    ],
+    entries: [
+      {
+        id: 'running-entry',
+        projectId: 'running',
+        description: 'Live focus',
+        startTime: '2026-04-26T11:00:00.000',
+        endTime: null,
+        duration: null,
+        isRunning: true,
+        createdAt: '2026-04-26T11:00:00.000',
+        effectiveSeconds: 1800,
+        lastUpdateTime: '2026-04-26T11:30:00.000',
+        factor: 1.5,
+        focusFactor: 1.5,
+        manualFactor: 1.5
+      },
+      entryFixture({
+        id: 'last-entry',
+        projectId: 'last',
+        description: 'Last stopped',
+        startTime: '2026-04-26T10:00:00.000',
+        endTime: '2026-04-26T11:00:00.000',
+        hours: 1
+      }),
+      entryFixture({
+        id: 'yesterday-entry',
+        projectId: 'yesterday',
+        description: 'Yesterday resume',
+        startTime: '2026-04-25T14:00:00.000',
+        endTime: '2026-04-25T15:00:00.000',
+        hours: 1
+      }),
+      entryFixture({
+        id: 'used-entry-1',
+        projectId: 'used',
+        description: 'Deep work',
+        startTime: '2026-04-22T09:00:00.000',
+        endTime: '2026-04-22T10:00:00.000',
+        hours: 1
+      }),
+      entryFixture({
+        id: 'used-entry-2',
+        projectId: 'used',
+        description: 'Deep work',
+        startTime: '2026-04-23T09:00:00.000',
+        endTime: '2026-04-23T10:30:00.000',
+        hours: 1.5
+      })
+    ],
+    timerPresets: [
+      {
+        id: 'pinned-preset',
+        projectId: 'pinned',
+        description: 'Pinned pass',
+        focusFactor: 1.5,
+        createdAt: '2026-04-24T09:00:00.000Z',
+        updatedAt: '2026-04-24T09:00:00.000Z'
+      }
+    ]
+  });
+
+  await page.goto('/');
+  const syncStatus = page.locator('#mobileSyncStatus');
+  await expect(syncStatus).toBeVisible();
+  await expect(syncStatus).toContainText(
+    /Backed up|Needs backup|Unsupported|Conflict/
+  );
+
+  const nowBar = page.locator('#mobileNowBar');
+  await expect(nowBar).toBeVisible();
+  await expect(nowBar).toContainText('Mobile Timer');
+  await expect(nowBar).toContainText('150%');
+  await nowBar.getByRole('button', { name: 'Pause' }).click();
+  await expect(nowBar.getByRole('button', { name: 'Resume' })).toBeVisible();
+  await nowBar.getByRole('button', { name: 'Resume' }).click();
+  await expect(nowBar.getByRole('button', { name: 'Pause' })).toBeVisible();
+
+  const commandPanel = page.locator('#todayCommandPanel');
+  await expect(commandPanel).toContainText('Quick timers');
+  await expect(commandPanel).toContainText(
+    'Pinned Project - Pinned pass - 150%'
+  );
+  await expect(commandPanel).toContainText(
+    'Last: Last Project - Last stopped - 100%'
+  );
+  await expect(commandPanel).toContainText(
+    'Yesterday: Yesterday Project - Yesterday resume - 100%'
+  );
+  await expect(commandPanel).toContainText('Used Project - Deep work - 100%');
+
+  await nowBar.getByRole('button', { name: 'Stop' }).click();
+  await expect(nowBar).toBeHidden();
+
+  await page.locator('.mobile-more-nav-item').click();
+  const moreDialog = page.getByRole('dialog', { name: 'More' });
+  await expect(moreDialog).toBeVisible();
+  await moreDialog.getByRole('button', { name: 'Finances' }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Finances', exact: true })
+  ).toBeVisible();
+
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const chartCard = page.locator('#weeklyScatterCard');
+  await expect(chartCard.locator('.mobile-chart-toggle')).toBeVisible();
+  await expect(page.locator('#weeklyScatter')).toBeHidden();
+  await chartCard.locator('.mobile-chart-toggle').click();
+  await expect(page.locator('#weeklyScatter')).toBeVisible();
 });
 
 test('entries render saved descriptions without executing markup', async ({
