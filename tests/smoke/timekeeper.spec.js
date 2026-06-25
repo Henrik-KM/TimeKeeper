@@ -535,6 +535,30 @@ test('timer descriptions pause resume and edit controls are usable', async ({
     'Paid focus: 50%'
   );
 
+  const runningTimer = page.locator('#runningTimerPro');
+  await expect(runningTimer.getByLabel('Timer focus')).toHaveValue('0.5');
+  await runningTimer.getByLabel('Timer focus').selectOption('1.5');
+  await expect(page.locator('#runningFocusStatus')).toContainText(
+    'Paid focus: 150%'
+  );
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        const entry = saved.entries.find(
+          (candidate) => candidate.description === 'Planning work'
+        );
+        return entry
+          ? {
+              factor: entry.factor,
+              focusFactor: entry.focusFactor,
+              manualFactor: entry.manualFactor
+            }
+          : null;
+      })
+    )
+    .toEqual({ factor: 1.5, focusFactor: 1.5, manualFactor: 1.5 });
+
   await page.getByRole('button', { name: 'Pause' }).click();
   await expect(page.getByText(/paused/)).toBeVisible();
   await page.getByRole('button', { name: 'Resume' }).click();
@@ -1502,6 +1526,26 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(nowBar).toBeVisible();
   await expect(nowBar).toContainText('Mobile Timer');
   await expect(nowBar).toContainText('150%');
+  await expect(nowBar.getByLabel('Timer focus')).toHaveValue('1.5');
+  await nowBar.getByLabel('Timer focus').selectOption('2');
+  await expect(nowBar).toContainText('200%');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        const entry = saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        );
+        return entry
+          ? {
+              factor: entry.factor,
+              focusFactor: entry.focusFactor,
+              manualFactor: entry.manualFactor
+            }
+          : null;
+      })
+    )
+    .toEqual({ factor: 2, focusFactor: 2, manualFactor: 2 });
   await nowBar.getByRole('button', { name: 'Pause' }).click();
   await expect(nowBar.getByRole('button', { name: 'Resume' })).toBeVisible();
   await nowBar.getByRole('button', { name: 'Resume' }).click();

@@ -2002,14 +2002,6 @@ import {
     return `${year}-${month}-${day}T${hours}:${minutes}`;
   }
 
-  function appendFocusFactorOptions(selectEl) {
-    FOCUS_FACTOR_OPTIONS.forEach((option) => {
-      const opt = document.createElement('option');
-      opt.value = String(option.value);
-      opt.textContent = option.label;
-      selectEl.appendChild(opt);
-    });
-  }
   function escapeHtml(value) {
     return String(value ?? '').replace(/[&<>"']/g, (char) => {
       switch (char) {
@@ -2045,18 +2037,6 @@ import {
     strong.textContent = label;
     container.appendChild(strong);
     container.appendChild(document.createTextNode(' ' + String(value ?? '')));
-  }
-  function ensureCurrentFocusOption(selectEl, factor) {
-    const value = String(normalizeFocusFactor(factor));
-    const exists = Array.from(selectEl.options).some(
-      (option) => option.value === value
-    );
-    if (exists) return value;
-    const opt = document.createElement('option');
-    opt.value = value;
-    opt.textContent = `${formatFocusPercent(value)} - current`;
-    selectEl.appendChild(opt);
-    return value;
   }
   const BACKUP_LATEST_FILENAME = 'timekeeper-data.json';
   const BACKUP_MANIFEST_FILENAME = 'timekeeper-manifest.json';
@@ -10350,6 +10330,68 @@ import {
     return Math.max(0, previous + ((now - last) / 1000) * factor);
   }
 
+  function appendCompactFocusFactorOptions(selectEl) {
+    FOCUS_FACTOR_OPTIONS.forEach((option) => {
+      const opt = document.createElement('option');
+      opt.value = String(option.value);
+      opt.textContent = formatFocusPercent(option.value);
+      selectEl.appendChild(opt);
+    });
+  }
+
+  function ensureCurrentCompactFocusOption(selectEl, factor) {
+    const value = String(normalizeFocusFactor(factor));
+    const exists = Array.from(selectEl.options).some(
+      (option) => option.value === value
+    );
+    if (exists) return value;
+    const opt = document.createElement('option');
+    opt.value = value;
+    opt.textContent = formatFocusPercent(value);
+    selectEl.appendChild(opt);
+    return value;
+  }
+
+  function updateRunningTimerFactor(entryId, value) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry) return;
+    const selectedFactor = normalizeFocusFactor(value);
+    const snapshot = cloneData();
+    const now = new Date();
+    const runningEntries = getRunningEntries();
+    const runningCount = runningEntries.length || 1;
+    runningEntries.forEach((runningEntry) => {
+      accumulateRunningEntry(runningEntry, now, runningCount);
+    });
+    entry.manualFactor = selectedFactor;
+    entry.factor = selectedFactor;
+    entry.focusFactor = selectedFactor;
+    rebalanceActiveRunningFactors(now);
+    saveData();
+    refreshAllViews();
+    provideHaptic('beep');
+    offerUndo(
+      `Timer focus set to ${formatFocusPercent(selectedFactor)}.`,
+      snapshot
+    );
+  }
+
+  function createRunningFactorSelect(entry, runningCount) {
+    const select = document.createElement('select');
+    select.className = 'running-factor-select';
+    select.setAttribute('aria-label', 'Timer focus');
+    select.title = 'Adjust timer focus';
+    appendCompactFocusFactorOptions(select);
+    select.value = ensureCurrentCompactFocusOption(
+      select,
+      getEntryActiveFactor(entry, runningCount)
+    );
+    select.addEventListener('change', () => {
+      updateRunningTimerFactor(entry.id, select.value);
+    });
+    return select;
+  }
+
   function renderMobileNowBar(now = new Date()) {
     const bar = document.getElementById('mobileNowBar');
     if (!bar) return;
@@ -10393,6 +10435,9 @@ import {
 
     const controls = document.createElement('div');
     controls.className = 'mobile-now-controls';
+    controls.appendChild(
+      createRunningFactorSelect(entry, runningEntries.length)
+    );
     const pauseBtn = document.createElement('button');
     pauseBtn.type = 'button';
     pauseBtn.className = 'btn secondary';
@@ -10525,35 +10570,6 @@ import {
         factorSpan.textContent = '';
         factorP.appendChild(factorSpan);
         row.appendChild(factorP);
-        // Focus selector. Timer focus is explicit; it no longer changes automatically
-        // when multiple timers are running.
-        const overrideP = document.createElement('p');
-        overrideP.innerHTML = '<strong>Focus:</strong> ';
-        const factorSelect = document.createElement('select');
-        factorSelect.style.marginLeft = '0.25rem';
-        appendFocusFactorOptions(factorSelect);
-        factorSelect.value = ensureCurrentFocusOption(
-          factorSelect,
-          getEntryActiveFactor(entry, getRunningEntries().length)
-        );
-        factorSelect.addEventListener('change', () => {
-          const v = factorSelect.value;
-          // Before changing the factor, accumulate time elapsed since last update
-          const now = new Date();
-          accumulateRunningEntry(entry, now, getRunningEntries().length);
-          const fVal = normalizeFocusFactor(v);
-          entry.manualFactor = fVal;
-          entry.factor = fVal;
-          entry.focusFactor = fVal;
-          rebalanceActiveRunningFactors(now);
-          saveData();
-          // Refresh the timer section to apply the new factor
-          updateTimerSection();
-          // Recompute focus blocker activation in case total factor changed
-          updateFocusBlocker();
-        });
-        overrideP.appendChild(factorSelect);
-        row.appendChild(overrideP);
         // Earned display
         const earnP = document.createElement('p');
         earnP.innerHTML = '<strong>Earned:</strong> ';
@@ -10630,10 +10646,14 @@ import {
         });
         projectSwitch.value = entry.projectId;
         projectSwitch.title = 'Switch this running timer to another project';
+        projectSwitch.setAttribute('aria-label', 'Switch timer project');
         projectSwitch.addEventListener('change', () => {
           switchRunningTimerProject(entry.id, projectSwitch.value);
         });
         runningControls.appendChild(projectSwitch);
+        runningControls.appendChild(
+          createRunningFactorSelect(entry, runningEntries.length)
+        );
         const pauseBtn = document.createElement('button');
         pauseBtn.className = 'btn secondary';
         pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
@@ -10652,7 +10672,6 @@ import {
           editRunningTimer(entry.id);
         });
         runningControls.appendChild(editTimerBtn);
-        row.appendChild(runningControls);
         // Stop button
         const stopBtn = document.createElement('button');
         stopBtn.className = 'btn danger';
@@ -10660,7 +10679,8 @@ import {
         stopBtn.addEventListener('click', () => {
           stopSingleTimer(entry.id);
         });
-        row.appendChild(stopBtn);
+        runningControls.appendChild(stopBtn);
+        row.appendChild(runningControls);
         runningDiv.appendChild(row);
       });
       // Start an interval that updates all running timers every second
