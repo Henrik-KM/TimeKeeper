@@ -1196,9 +1196,44 @@ tr:nth-child(even) td {
   }
 
   .mobile-favorite-timer-list,
+  .mobile-quick-timer-list,
   .mobile-recent-entry-list {
     display: grid;
     gap: 0.45rem;
+  }
+
+  .mobile-quick-timer-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-quick-timer {
+    display: grid;
+    gap: 0.16rem;
+    min-height: 3.35rem;
+    min-width: 0;
+    padding: 0.55rem 0.6rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.55rem;
+    background: #eff6ff;
+    color: #1e3a8a;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-quick-timer strong {
+    overflow: hidden;
+    font-size: 0.88rem;
+    line-height: 1.15;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-quick-timer span {
+    color: #475569;
+    font-size: 0.73rem;
+    font-weight: 700;
+    line-height: 1.2;
+    overflow-wrap: anywhere;
   }
 
   .mobile-favorite-timer,

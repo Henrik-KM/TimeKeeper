@@ -1555,6 +1555,11 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toContainText('Target');
   await expect(commandPanel).toContainText('Favorites');
+  await expect(commandPanel).toContainText('Most used timers');
+  await expect(commandPanel).toContainText('Used Project');
+  await expect(commandPanel).toContainText('Deep work');
+  await expect(commandPanel).toContainText('2x');
+  await expect(commandPanel).not.toContainText('Last stopped');
   await expect(commandPanel).toContainText('Favorite timers');
   await expect(commandPanel).not.toContainText('Cleanup');
   await expect(commandPanel).not.toContainText('Backup');
@@ -1642,6 +1647,76 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(page.locator('#weeklyScatter')).toBeHidden();
   await chartCard.locator('.mobile-chart-toggle').click();
   await expect(page.locator('#weeklyScatter')).toBeVisible();
+});
+
+test('mobile Today one-click timers use repeated manual history before recent one-offs', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-04-26T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'frequent',
+        name: 'Frequent Project'
+      }),
+      projectFixture({
+        id: 'recent',
+        name: 'Recent Project'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'frequent-1',
+        projectId: 'frequent',
+        description: 'Deep work',
+        startTime: '2026-04-22T09:00:00.000',
+        endTime: '2026-04-22T10:00:00.000',
+        createdAt: '2026-04-22T10:00:00.000',
+        hours: 1,
+        manualFactor: 0.5,
+        focusFactor: 0.5
+      }),
+      entryFixture({
+        id: 'frequent-2',
+        projectId: 'frequent',
+        description: 'Deep work',
+        startTime: '2026-04-23T09:00:00.000',
+        endTime: '2026-04-23T10:30:00.000',
+        createdAt: '2026-04-23T10:30:00.000',
+        hours: 1.5,
+        manualFactor: 0.5,
+        focusFactor: 0.5
+      }),
+      entryFixture({
+        id: 'recent-one-off',
+        projectId: 'recent',
+        description: 'Newest one-off',
+        startTime: '2026-04-26T10:00:00.000',
+        endTime: '2026-04-26T11:00:00.000',
+        createdAt: '2026-04-26T11:00:00.000',
+        hours: 1
+      })
+    ]
+  });
+
+  await page.goto('/');
+  const commandPanel = page.locator('#todayCommandPanel');
+  await expect(commandPanel).toContainText('Most used timers');
+  await expect(commandPanel).toContainText('Frequent Project');
+  await expect(commandPanel).toContainText('Deep work');
+  await expect(commandPanel).toContainText('50%');
+  await expect(commandPanel).toContainText('2x');
+  await expect(commandPanel).not.toContainText('Newest one-off');
+
+  await commandPanel
+    .locator('.mobile-quick-timer')
+    .filter({ hasText: 'Deep work' })
+    .click();
+  await expect(page.locator('#runningTimerPro')).toContainText('Deep work');
+  await expect(page.locator('[id^="runningFactor-"]').first()).toHaveText(
+    '50%'
+  );
 });
 
 test('entries render saved descriptions without executing markup', async ({

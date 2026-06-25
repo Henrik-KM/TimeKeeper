@@ -11428,7 +11428,7 @@ import {
 
   function getMostUsedTimerShortcuts(
     runningProjectIds,
-    { limit = 3, excludeKeys = new Set() } = {}
+    { limit = 3, excludeKeys = new Set(), minCount = 1 } = {}
   ) {
     const groups = new Map();
     data.entries.forEach((entry) => {
@@ -11467,6 +11467,7 @@ import {
       }
     });
     return Array.from(groups.values())
+      .filter((shortcut) => shortcut.count >= minCount)
       .sort((a, b) => {
         if (b.count !== a.count) return b.count - a.count;
         if (b.duration !== a.duration) return b.duration - a.duration;
@@ -11509,12 +11510,13 @@ import {
     }
 
     getPinnedTimerShortcuts(runningIds).forEach(addShortcut);
+    getMostUsedTimerShortcuts(runningIds, {
+      limit,
+      excludeKeys: seen,
+      minCount: 2
+    }).forEach(addShortcut);
     addShortcut(getLastStoppedTimerShortcut(runningIds));
     getYesterdayTimerShortcuts(runningIds, {
-      limit,
-      excludeKeys: seen
-    }).forEach(addShortcut);
-    getMostUsedTimerShortcuts(runningIds, {
       limit,
       excludeKeys: seen
     }).forEach(addShortcut);
@@ -12521,6 +12523,51 @@ import {
     panel.className = 'mobile-sync-status hidden';
   }
 
+  function renderMobileMostUsedTimers(container, runningProjectIds) {
+    const shortcuts = getMostUsedTimerShortcuts(runningProjectIds, {
+      limit: 4,
+      minCount: 2
+    });
+    if (!shortcuts.length) return;
+    const section = document.createElement('div');
+    section.className = 'mobile-today-section';
+    const title = document.createElement('div');
+    title.className = 'mobile-today-section-title';
+    title.textContent = 'Most used timers';
+    section.appendChild(title);
+    const list = document.createElement('div');
+    list.className = 'mobile-quick-timer-list';
+    shortcuts.forEach((shortcut) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mobile-quick-timer';
+      const label = document.createElement('strong');
+      label.textContent = shortcut.project.name;
+      const meta = document.createElement('span');
+      meta.textContent = [
+        shortcut.description,
+        formatFocusPercent(shortcut.focusFactor),
+        `${shortcut.count}x`
+      ]
+        .filter(Boolean)
+        .join(' - ');
+      button.appendChild(label);
+      button.appendChild(meta);
+      button.title =
+        'Start ' +
+        shortcut.project.name +
+        (shortcut.description ? ' - ' + shortcut.description : '') +
+        ' at ' +
+        formatFocusPercent(shortcut.focusFactor);
+      button.addEventListener('click', () => {
+        startTimerShortcut(shortcut, { navigate: true });
+      });
+      list.appendChild(button);
+    });
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+
   function renderMobileFavoriteTimers(container, runningProjectIds) {
     const favorites = getPinnedTimerShortcuts(runningProjectIds);
     if (!favorites.length) return;
@@ -12862,6 +12909,11 @@ import {
     );
     panel.appendChild(primary);
 
+    const runningProjectIds = new Set(
+      runningEntries.map((entry) => String(entry.projectId))
+    );
+    renderMobileMostUsedTimers(panel, runningProjectIds);
+
     const actions = document.createElement('div');
     actions.className = 'mobile-today-actions';
     [
@@ -12877,9 +12929,6 @@ import {
     });
     panel.appendChild(actions);
 
-    const runningProjectIds = new Set(
-      runningEntries.map((entry) => String(entry.projectId))
-    );
     renderMobileFavoriteTimers(panel, runningProjectIds);
     return true;
   }
