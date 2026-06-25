@@ -1478,6 +1478,9 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
     .evaluate((card) => {
       const canvas = card.querySelector('#wealthChart');
       return {
+        viewportWidth: window.innerWidth,
+        documentScrollWidth: document.documentElement.scrollWidth,
+        bodyScrollWidth: document.body.scrollWidth,
         cardClientWidth: card.clientWidth,
         cardScrollWidth: card.scrollWidth,
         canvasWidth: canvas ? canvas.getBoundingClientRect().width : 0,
@@ -1485,6 +1488,9 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
       };
     });
 
+  expect(
+    Math.max(metrics.documentScrollWidth, metrics.bodyScrollWidth)
+  ).toBeLessThanOrEqual(metrics.viewportWidth + 2);
   expect(metrics.cardScrollWidth).toBeGreaterThan(metrics.cardClientWidth);
   expect(metrics.canvasWidth).toBeGreaterThan(600);
   expect(metrics.canvasHeight).toBeGreaterThan(450);
