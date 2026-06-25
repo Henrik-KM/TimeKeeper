@@ -60,6 +60,29 @@ test('maps Codex cwd by TimeKeeper project parent folder', () => {
   assert.equal(mapping.projectId, 'iflai');
 });
 
+test('maps Codex cwd when it is the tracked GitHub project folder', () => {
+  const cwd = 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI';
+  const pathInfo = getGitHubProjectPathInfo(cwd);
+  const records = buildCodexUsageRecordsFromSessionText({
+    text: session({
+      cwd,
+      timestamps: ['2026-06-13T09:00:00.000Z', '2026-06-13T09:05:00.000Z']
+    }),
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+    dayStart: new Date('2026-06-13T00:00:00.000Z'),
+    now: new Date('2026-06-13T10:00:00.000Z')
+  });
+
+  assert.deepEqual(pathInfo, {
+    projectFolder: 'IFLAI',
+    repoName: 'IFLAI'
+  });
+  assert.equal(records.length, 1);
+  assert.equal(records[0].projectKey, 'IFLAI');
+  assert.equal(records[0].timekeeperProjectName, 'IFLAI');
+  assert.equal(records[0].timekeeperProjectId, 'iflai');
+});
+
 test('ignores GitHub parent folders that are not TimeKeeper projects', () => {
   const records = buildCodexUsageRecordsFromSessionText({
     text: session({

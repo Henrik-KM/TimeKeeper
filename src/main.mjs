@@ -2710,7 +2710,17 @@ import {
     return projects.flatMap((project) => [
       {
         matchType: 'pathIncludes',
+        match: `GitHub\\${project.name}`,
+        projectId: project.projectId
+      },
+      {
+        matchType: 'pathIncludes',
         match: `GitHub\\${project.name}\\`,
+        projectId: project.projectId
+      },
+      {
+        matchType: 'pathIncludes',
+        match: `GitHub/${project.name}`,
         projectId: project.projectId
       },
       {

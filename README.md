@@ -150,8 +150,8 @@ The helper never publishes prompts, tool output, or full local paths. It publish
 Setup:
 
 1. In TimeKeeper, open Import / Export -> Codex Integration.
-2. Keep Codex repos under `GitHub/<TimeKeeper project>/<repo>`, for example `GitHub/IFLAI/VWR-AutoInv` or `GitHub/Anders/particle_iden`.
-3. Add a fine-grained GitHub token with Contents read/write access and choose `Publish Config`. TimeKeeper publishes the active project names, and the helper only tracks folders whose parent folder is one of those TimeKeeper projects. A folder such as `GitHub/Polish/...` is ignored unless `Polish` exists as an active TimeKeeper project.
+2. Keep Codex work under `GitHub/<TimeKeeper project>` or `GitHub/<TimeKeeper project>/<repo>`, for example `GitHub/IFLAI`, `GitHub/IFLAI/VWR-AutoInv`, or `GitHub/Anders/particle_iden`.
+3. Add a fine-grained GitHub token with Contents read/write access and choose `Publish Config`. TimeKeeper publishes the active project names, and the helper only tracks folders whose GitHub project folder is one of those TimeKeeper projects. A folder such as `GitHub/Polish/...` is ignored unless `Polish` exists as an active TimeKeeper project.
 4. On each Windows desktop, set the same token for the helper:
 
 ```powershell

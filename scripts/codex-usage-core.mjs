@@ -60,8 +60,8 @@ export function getGitHubProjectPathInfo(cwd = '') {
     .lastIndexOf('github');
   if (gitHubIndex < 0) return null;
   const projectFolder = parts[gitHubIndex + 1] || '';
-  const repoName = parts[gitHubIndex + 2] || '';
-  if (!projectFolder || !repoName) return null;
+  const repoName = parts[gitHubIndex + 2] || projectFolder;
+  if (!projectFolder) return null;
   return { projectFolder, repoName };
 }
 
