@@ -1322,6 +1322,42 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
   expect(sheetMetrics.top).toBeLessThan(20);
   expect(sheetMetrics.viewportHeight - sheetMetrics.height).toBeLessThan(20);
   await editDialog.getByRole('button', { name: 'Cancel' }).click();
+
+  await expect(
+    mobileRow.getByRole('button', { name: 'Actions' })
+  ).toBeVisible();
+  await mobileRow.evaluate((row) => {
+    const makeTouchEvent = (type, x) => {
+      const event = new Event(type, { bubbles: true, cancelable: true });
+      Object.defineProperty(event, 'touches', {
+        value: type === 'touchend' ? [] : [{ clientX: x, clientY: 120 }]
+      });
+      Object.defineProperty(event, 'changedTouches', {
+        value: [{ clientX: x, clientY: 120 }]
+      });
+      return event;
+    };
+    row.dispatchEvent(makeTouchEvent('touchstart', 220));
+    row.dispatchEvent(makeTouchEvent('touchmove', 130));
+    row.dispatchEvent(makeTouchEvent('touchend', 130));
+  });
+  const actionSheet = page.getByRole('dialog', { name: 'Entry actions' });
+  await expect(actionSheet).toBeVisible();
+  await expect(
+    actionSheet.getByRole('button', { name: 'Duplicate' })
+  ).toBeVisible();
+  await expect(
+    actionSheet.getByRole('button', { name: 'Split' })
+  ).toBeVisible();
+  await expect(
+    actionSheet.getByRole('button', { name: 'Delete' })
+  ).toBeVisible();
+  await actionSheet.getByRole('button', { name: 'Duplicate' }).click();
+  const undoTray = page.locator('#mobileUndoTray');
+  await expect(undoTray).toContainText('Entry duplicated.');
+  await undoTray.getByRole('button', { name: 'Undo' }).click();
+  await expect(undoTray).not.toContainText('Entry duplicated.');
+  await expect(undoTray).toContainText('Entry moved.');
 });
 
 test('mobile shell exposes Now bar More menu sync status charts and richer quick timers', async ({
@@ -1390,6 +1426,22 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
         hours: 1
       }),
       entryFixture({
+        id: 'missing-entry',
+        projectId: 'yesterday',
+        description: '',
+        startTime: '2026-04-25T08:00:00.000',
+        endTime: '2026-04-25T09:00:00.000',
+        hours: 1
+      }),
+      entryFixture({
+        id: 'long-entry',
+        projectId: 'used',
+        description: 'Long review block',
+        startTime: '2026-04-25T09:00:00.000',
+        endTime: '2026-04-25T14:00:00.000',
+        hours: 5
+      }),
+      entryFixture({
         id: 'used-entry-1',
         projectId: 'used',
         description: 'Deep work',
@@ -1418,7 +1470,26 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
     ]
   });
 
+  const manifest = JSON.parse(await readFile('manifest.webmanifest', 'utf8'));
+  expect(manifest.shortcuts.map((shortcut) => shortcut.name)).toEqual(
+    expect.arrayContaining([
+      'Open Today',
+      'Start Timer',
+      'Quick Log',
+      'Open Reports',
+      'Sync Backup'
+    ])
+  );
+
+  await page.goto('/#quick-log');
+  const launchQuickLogDialog = page.getByRole('dialog', { name: 'Quick log' });
+  await expect(launchQuickLogDialog).toBeVisible();
+  await launchQuickLogDialog.getByRole('button', { name: 'Cancel' }).click();
+
   await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
+  ).toBeVisible();
   const syncStatus = page.locator('#mobileSyncStatus');
   await expect(syncStatus).toBeVisible();
   await expect(syncStatus).toContainText(
@@ -1435,17 +1506,71 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(nowBar.getByRole('button', { name: 'Pause' })).toBeVisible();
 
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Quick timers');
+  await expect(commandPanel).toContainText('Cleanup');
+  await expect(commandPanel).toContainText('Favorite timers');
   await expect(commandPanel).toContainText(
     'Pinned Project - Pinned pass - 150%'
   );
-  await expect(commandPanel).toContainText(
-    'Last: Last Project - Last stopped - 100%'
-  );
-  await expect(commandPanel).toContainText(
-    'Yesterday: Yesterday Project - Yesterday resume - 100%'
-  );
-  await expect(commandPanel).toContainText('Used Project - Deep work - 100%');
+  await expect(commandPanel).toContainText('Recent entries');
+  await expect(commandPanel).toContainText('Last Project');
+
+  const favoriteRow = commandPanel
+    .locator('.mobile-favorite-timer')
+    .filter({ hasText: 'Pinned Project' });
+  await favoriteRow.getByRole('button', { name: 'Edit' }).click();
+  const favoriteDialog = page.getByRole('dialog', {
+    name: 'Edit Favorite Timer'
+  });
+  await expect(favoriteDialog).toBeVisible();
+  await favoriteDialog.getByRole('button', { name: 'Cancel' }).click();
+
+  await commandPanel.getByRole('button', { name: 'Quick log' }).click();
+  const quickLogDialog = page.getByRole('dialog', { name: 'Quick log' });
+  await expect(quickLogDialog).toBeVisible();
+  await quickLogDialog
+    .getByLabel('Dictation quick log')
+    .fill('1.5h client call yesterday last');
+  await expect(
+    quickLogDialog.locator('.mobile-quick-log-preview')
+  ).toContainText('1.50h - Last Project - client call');
+  await quickLogDialog.getByRole('button', { name: 'Log entry' }).click();
+  await expect(quickLogDialog).toBeHidden();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        const entry = saved.entries.find(
+          (candidate) => candidate.description === 'client call'
+        );
+        return entry
+          ? {
+              projectId: entry.projectId,
+              duration: entry.duration,
+              endDate: entry.endTime.slice(0, 10)
+            }
+          : null;
+      })
+    )
+    .toEqual({
+      projectId: 'last',
+      duration: 5400,
+      endDate: '2026-04-25'
+    });
+
+  await commandPanel.getByRole('button', { name: 'Review yesterday' }).click();
+  const reviewDialog = page.getByRole('dialog', { name: 'Review yesterday' });
+  await expect(reviewDialog).toBeVisible();
+  await expect(reviewDialog).toContainText('Missing descriptions');
+  await expect(reviewDialog).toContainText('is missing a description.');
+  await expect(reviewDialog).toContainText('Used Project is');
+  await reviewDialog.getByRole('button', { name: 'Close' }).last().click();
+
+  await commandPanel.getByRole('button', { name: 'Sync setup' }).click();
+  const syncDialog = page.getByRole('dialog', { name: 'Sync setup' });
+  await expect(syncDialog).toBeVisible();
+  await expect(syncDialog).toContainText('Choose folder');
+  await expect(syncDialog).toContainText('Verify backup');
+  await syncDialog.getByRole('button', { name: 'Close' }).last().click();
 
   await nowBar.getByRole('button', { name: 'Stop' }).click();
   await expect(nowBar).toBeHidden();
@@ -1460,6 +1585,17 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await gotoSection(page, 'dashboard', 'Dashboard');
   const chartCard = page.locator('#weeklyScatterCard');
+  await expect(chartCard.locator('.mobile-chart-summary')).toBeVisible();
+  await expect(chartCard.locator('.mobile-chart-detail')).toBeVisible();
+  await chartCard.locator('.mobile-chart-detail').click();
+  const chartDialog = page.getByRole('dialog', {
+    name: 'Project Progress - Weekly (Expected vs Actual)'
+  });
+  await expect(chartDialog).toBeVisible();
+  await expect(chartDialog).toContainText(
+    /series|chart detail|tap for details/
+  );
+  await chartDialog.getByRole('button', { name: 'Close' }).last().click();
   await expect(chartCard.locator('.mobile-chart-toggle')).toBeVisible();
   await expect(page.locator('#weeklyScatter')).toBeHidden();
   await chartCard.locator('.mobile-chart-toggle').click();

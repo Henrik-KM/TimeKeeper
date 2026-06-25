@@ -1516,6 +1516,7 @@ import {
     updatePwaStatusPanel();
     renderTodayCommandPanel();
     renderMobileSyncStatus();
+    renderMobileUndoTray();
   }
 
   function restoreDataSnapshot(snapshot) {
@@ -1526,11 +1527,107 @@ import {
     refreshAllViews();
   }
 
+  const mobileActionHistory = [];
+
+  function pushMobileActionHistory(message, snapshot) {
+    mobileActionHistory.unshift({
+      id: uuid(),
+      message,
+      snapshot: cloneData(snapshot),
+      createdAt: new Date().toISOString()
+    });
+    mobileActionHistory.splice(5);
+    renderMobileUndoTray();
+  }
+
+  function renderMobileUndoTray() {
+    let tray = document.getElementById('mobileUndoTray');
+    if (!isMobileViewport()) {
+      if (tray) tray.classList.add('hidden');
+      return;
+    }
+    if (!tray) {
+      tray = document.createElement('div');
+      tray.id = 'mobileUndoTray';
+      tray.className = 'mobile-undo-tray hidden';
+      tray.setAttribute('aria-live', 'polite');
+      document.body.appendChild(tray);
+    }
+    tray.innerHTML = '';
+    if (!mobileActionHistory.length) {
+      tray.classList.add('hidden');
+      return;
+    }
+    tray.classList.remove('hidden');
+    const latest = mobileActionHistory[0];
+    const label = document.createElement('span');
+    label.textContent = latest.message;
+    tray.appendChild(label);
+    const undoBtn = document.createElement('button');
+    undoBtn.type = 'button';
+    undoBtn.className = 'btn secondary';
+    undoBtn.textContent = 'Undo';
+    undoBtn.addEventListener('click', () => {
+      restoreDataSnapshot(latest.snapshot);
+      mobileActionHistory.shift();
+      renderMobileUndoTray();
+      showToast('Undo applied.');
+    });
+    tray.appendChild(undoBtn);
+    const historyBtn = document.createElement('button');
+    historyBtn.type = 'button';
+    historyBtn.className = 'btn secondary';
+    historyBtn.textContent = 'History';
+    historyBtn.addEventListener('click', openMobileUndoHistory);
+    tray.appendChild(historyBtn);
+  }
+
+  function openMobileUndoHistory() {
+    const sheet = createMobileSheet('Recent actions', {
+      className: 'mobile-history-sheet'
+    });
+    const list = document.createElement('div');
+    list.className = 'mobile-history-list';
+    if (!mobileActionHistory.length) {
+      const empty = document.createElement('p');
+      empty.textContent = 'No recent actions.';
+      list.appendChild(empty);
+    } else {
+      mobileActionHistory.forEach((item) => {
+        const row = document.createElement('div');
+        row.className = 'mobile-history-row';
+        const text = document.createElement('span');
+        text.textContent = `${item.message} - ${formatRelativeTime(item.createdAt)}`;
+        row.appendChild(text);
+        const undo = document.createElement('button');
+        undo.type = 'button';
+        undo.className = 'btn secondary';
+        undo.textContent = 'Undo';
+        undo.addEventListener('click', () => {
+          sheet.close();
+          restoreDataSnapshot(item.snapshot);
+          const index = mobileActionHistory.findIndex(
+            (candidate) => candidate.id === item.id
+          );
+          if (index >= 0) mobileActionHistory.splice(index, 1);
+          renderMobileUndoTray();
+          showToast('Undo applied.');
+        });
+        row.appendChild(undo);
+        list.appendChild(row);
+      });
+    }
+    sheet.body.appendChild(list);
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
   function offerUndo(message, snapshot) {
+    pushMobileActionHistory(message, snapshot);
     showToast(message, {
       actionLabel: 'Undo',
       onAction: () => {
         restoreDataSnapshot(snapshot);
+        renderMobileUndoTray();
         showToast('Undo applied.');
       }
     });
@@ -6524,6 +6621,30 @@ import {
     );
     chartCards.forEach((card) => {
       card.classList.add('mobile-chart-card');
+      const summaryText = getMobileChartSummary(card);
+      let summary = card.querySelector(':scope > .mobile-chart-summary');
+      if (!summary) {
+        summary = document.createElement('p');
+        summary.className = 'mobile-chart-summary';
+        const heading = card.querySelector('h3, h4');
+        if (heading && heading.nextSibling) {
+          card.insertBefore(summary, heading.nextSibling);
+        } else {
+          card.insertBefore(summary, card.firstChild);
+        }
+      }
+      summary.textContent = summaryText;
+      let detail = card.querySelector(':scope > .mobile-chart-detail');
+      if (!detail) {
+        detail = document.createElement('button');
+        detail.type = 'button';
+        detail.className = 'btn secondary mobile-chart-detail';
+        detail.textContent = 'Details';
+        detail.addEventListener('click', () => {
+          openMobileChartDetail(card);
+        });
+        summary.after(detail);
+      }
       let toggle = card.querySelector(':scope > .mobile-chart-toggle');
       if (!toggle) {
         toggle = document.createElement('button');
@@ -6545,6 +6666,63 @@ import {
         toggle.textContent = 'Open chart';
       }
     });
+  }
+
+  function getMobileChartSummary(card) {
+    const heading =
+      card.querySelector('h3, h4')?.textContent?.trim() || 'Chart';
+    const chartCanvas = card.querySelector('canvas');
+    if (chartCanvas && window.Chart && typeof Chart.getChart === 'function') {
+      const chart = Chart.getChart(chartCanvas);
+      if (chart && chart.data) {
+        const datasets = Array.isArray(chart.data.datasets)
+          ? chart.data.datasets
+          : [];
+        const points = datasets.reduce((total, dataset) => {
+          const rows = Array.isArray(dataset.data) ? dataset.data.length : 0;
+          return total + rows;
+        }, 0);
+        if (datasets.length || points) {
+          return `${heading}: ${datasets.length || 1} series, ${points} points.`;
+        }
+      }
+    }
+    const table = card.querySelector('table');
+    if (table) {
+      const rows = Math.max(
+        0,
+        table.querySelectorAll('tbody tr, tr').length - 1
+      );
+      return rows
+        ? `${heading}: ${rows} rows available.`
+        : `${heading}: table summary available.`;
+    }
+    const text = card.textContent.replace(/\s+/g, ' ').trim();
+    return text && text !== heading
+      ? `${heading}: tap for details.`
+      : `${heading}: no chart data yet.`;
+  }
+
+  function openMobileChartDetail(card) {
+    const heading =
+      card.querySelector('h3, h4')?.textContent?.trim() || 'Chart details';
+    const sheet = createMobileSheet(heading, {
+      className: 'mobile-chart-detail-sheet',
+      description: getMobileChartSummary(card)
+    });
+    const copy = document.createElement('p');
+    copy.className = 'mobile-flow-description';
+    copy.textContent =
+      'Open the full chart when you need the desktop-style view.';
+    sheet.body.appendChild(copy);
+    sheet.addAction('Open full chart', 'primary', () => {
+      card.classList.add('mobile-chart-open');
+      const toggle = card.querySelector(':scope > .mobile-chart-toggle');
+      if (toggle) toggle.textContent = 'Close chart';
+      sheet.close();
+      card.scrollIntoView({ block: 'start', behavior: 'smooth' });
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
   }
 
   // Download the current data to a JSON file. Uses the same filename
@@ -7377,6 +7555,68 @@ import {
     document.body.appendChild(backdrop);
     const first = body.querySelector('button');
     if (first) first.focus();
+  }
+
+  function createMobileSheet(
+    titleText,
+    { className = '', description = '' } = {}
+  ) {
+    const backdrop = document.createElement('div');
+    backdrop.className = 'modal-backdrop mobile-flow-backdrop';
+    const panel = document.createElement('div');
+    panel.className = `modal-panel mobile-flow-panel${className ? ` ${className}` : ''}`;
+    panel.role = 'dialog';
+    panel.tabIndex = -1;
+    panel.setAttribute('aria-modal', 'true');
+    const titleId = `mobile-flow-title-${uuid()}`;
+    panel.setAttribute('aria-labelledby', titleId);
+    const header = document.createElement('div');
+    header.className = 'modal-header';
+    const title = document.createElement('h3');
+    title.id = titleId;
+    title.className = 'modal-title';
+    title.textContent = titleText;
+    header.appendChild(title);
+    const closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'btn secondary';
+    closeBtn.textContent = 'Close';
+    header.appendChild(closeBtn);
+    const body = document.createElement('div');
+    body.className = 'modal-body mobile-flow-body';
+    if (description) {
+      const paragraph = document.createElement('p');
+      paragraph.className = 'mobile-flow-description';
+      paragraph.textContent = description;
+      body.appendChild(paragraph);
+    }
+    const actions = document.createElement('div');
+    actions.className = 'modal-actions mobile-flow-actions';
+    const close = () => backdrop.remove();
+    closeBtn.addEventListener('click', close);
+    backdrop.addEventListener('click', (event) => {
+      if (event.target === backdrop) close();
+    });
+    panel.appendChild(header);
+    panel.appendChild(body);
+    panel.appendChild(actions);
+    backdrop.appendChild(panel);
+    document.body.appendChild(backdrop);
+    const addAction = (label, variant = 'secondary', onClick = close) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `btn ${variant}`;
+      button.textContent = label;
+      button.addEventListener('click', onClick);
+      actions.appendChild(button);
+      return button;
+    };
+    const firstFocus = body.querySelector(
+      'button, input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    );
+    if (firstFocus instanceof HTMLElement) firstFocus.focus();
+    else panel.focus();
+    return { backdrop, panel, body, actions, close, addAction };
   }
 
   function ensureMobileMoreNav() {
@@ -10656,6 +10896,7 @@ import {
     // Provide tactile feedback when stopping a timer
     provideHaptic('long');
     if (!toStop) return;
+    const snapshot = cloneData();
     const now = new Date();
     // Gather all running entries including the one to stop
     const runningEntries = getRunningEntries();
@@ -10690,6 +10931,7 @@ import {
     // Recompute focus blocker activation after stopping this timer. If the total
     // factor has dropped below or equal to 50%, the blocker will be disabled.
     updateFocusBlocker();
+    offerUndo('Timer stopped.', snapshot);
   }
   let timerInterval = null;
   // Chart instances for weekly and monthly scatter plots
@@ -10795,6 +11037,7 @@ import {
   function stopAllTimers() {
     const runningList = getRunningEntries();
     if (runningList.length === 0) return;
+    const snapshot = cloneData();
     const now = new Date();
     const n = runningList.length;
     // Update effective seconds for all entries using their current factors
@@ -10831,6 +11074,10 @@ import {
     // Do not immediately save backup here; periodic auto-sync will handle exporting
     // After stopping all timers, recompute focus blocker activation based on total factor
     updateFocusBlocker();
+    offerUndo(
+      runningList.length > 1 ? 'Timers stopped.' : 'Timer stopped.',
+      snapshot
+    );
   }
 
   function getStartFormTimerPreset() {
@@ -10901,6 +11148,101 @@ import {
     saveData();
     updateProjectSelects();
     offerUndo('Pinned timer removed.', snapshot);
+  }
+
+  function moveTimerPreset(presetId, direction) {
+    ensureTimerPresets();
+    const index = data.timerPresets.findIndex(
+      (preset) => String(preset.id) === String(presetId)
+    );
+    const targetIndex = index + direction;
+    if (
+      index < 0 ||
+      targetIndex < 0 ||
+      targetIndex >= data.timerPresets.length
+    ) {
+      return;
+    }
+    const snapshot = cloneData();
+    const [preset] = data.timerPresets.splice(index, 1);
+    data.timerPresets.splice(targetIndex, 0, preset);
+    preset.updatedAt = new Date().toISOString();
+    saveData();
+    updateProjectSelects();
+    renderTodayCommandPanel();
+    offerUndo('Favorite timer reordered.', snapshot);
+  }
+
+  async function editTimerPreset(presetId) {
+    ensureTimerPresets();
+    const preset = data.timerPresets.find(
+      (candidate) => String(candidate.id) === String(presetId)
+    );
+    if (!preset) return;
+    const currentProject = data.projects.find(
+      (project) => String(project.id) === String(preset.projectId)
+    );
+    const projectOptions = getActiveProjects().map((project) => ({
+      value: project.id,
+      label: project.name
+    }));
+    if (
+      currentProject &&
+      !projectOptions.some(
+        (option) => String(option.value) === String(currentProject.id)
+      )
+    ) {
+      projectOptions.unshift({
+        value: currentProject.id,
+        label: `${currentProject.name} (archived)`
+      });
+    }
+    const values = await openFormDialog({
+      title: 'Edit Favorite Timer',
+      fields: [
+        {
+          name: 'projectId',
+          label: 'Project',
+          type: 'select',
+          value: preset.projectId,
+          options: projectOptions,
+          required: true
+        },
+        {
+          name: 'description',
+          label: 'Description',
+          value: preset.description || ''
+        },
+        {
+          name: 'focusFactor',
+          label: 'Focus',
+          type: 'select',
+          value: String(normalizeFocusFactor(preset.focusFactor)),
+          options: FOCUS_FACTOR_OPTIONS.map((option) => ({
+            value: String(option.value),
+            label: option.label
+          }))
+        }
+      ],
+      submitLabel: 'Save Favorite'
+    });
+    if (!values) return;
+    const project = data.projects.find(
+      (candidate) => String(candidate.id) === String(values.projectId)
+    );
+    if (!project) {
+      showToast('Choose a valid project.');
+      return;
+    }
+    const snapshot = cloneData();
+    preset.projectId = project.id;
+    preset.description = String(values.description || '').trim();
+    preset.focusFactor = normalizeFocusFactor(values.focusFactor);
+    preset.updatedAt = new Date().toISOString();
+    saveData();
+    updateProjectSelects();
+    renderTodayCommandPanel();
+    offerUndo('Favorite timer updated.', snapshot);
   }
 
   function getStartableTimerProject(projectId, runningProjectIds) {
@@ -11385,7 +11727,11 @@ import {
     }
 
     recentEl.style.display = '';
-    const appendStartButton = (row, { project, description, focusFactor }) => {
+    const appendStartButton = (
+      row,
+      { project, description, focusFactor, id },
+      { editable = false } = {}
+    ) => {
       const focusText = formatFocusPercent(focusFactor);
       const button = document.createElement('button');
       button.type = 'button';
@@ -11404,6 +11750,23 @@ import {
       button.addEventListener('click', () => {
         startTimerShortcut({ project, description, focusFactor });
       });
+      if (editable && id) {
+        let pressTimer = null;
+        const clearPress = () => {
+          if (pressTimer) clearTimeout(pressTimer);
+          pressTimer = null;
+        };
+        button.addEventListener('pointerdown', () => {
+          clearPress();
+          pressTimer = setTimeout(() => {
+            editTimerPreset(id);
+            pressTimer = null;
+          }, 650);
+        });
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach((eventName) => {
+          button.addEventListener(eventName, clearPress);
+        });
+      }
       row.appendChild(button);
       return button;
     };
@@ -11422,7 +11785,34 @@ import {
         }
         const group = document.createElement('div');
         group.className = 'timer-chip-group';
-        appendStartButton(group, item);
+        appendStartButton(group, item, { editable: true });
+        const upButton = document.createElement('button');
+        upButton.type = 'button';
+        upButton.className = 'timer-chip-unpin';
+        upButton.textContent = 'Up';
+        upButton.title = 'Move favorite up';
+        upButton.addEventListener('click', () => {
+          moveTimerPreset(item.id, -1);
+        });
+        group.appendChild(upButton);
+        const downButton = document.createElement('button');
+        downButton.type = 'button';
+        downButton.className = 'timer-chip-unpin';
+        downButton.textContent = 'Down';
+        downButton.title = 'Move favorite down';
+        downButton.addEventListener('click', () => {
+          moveTimerPreset(item.id, 1);
+        });
+        group.appendChild(downButton);
+        const editButton = document.createElement('button');
+        editButton.type = 'button';
+        editButton.className = 'timer-chip-unpin';
+        editButton.textContent = 'Edit';
+        editButton.title = 'Edit favorite timer';
+        editButton.addEventListener('click', () => {
+          editTimerPreset(item.id);
+        });
+        group.appendChild(editButton);
         const unpinButton = document.createElement('button');
         unpinButton.type = 'button';
         unpinButton.className = 'timer-chip-unpin';
@@ -11565,10 +11955,14 @@ import {
 
   function parseQuickLogDate(rawText) {
     const text = String(rawText || '').trim();
-    const dateMatch = text.match(/\s+(\d{4}-\d{2}-\d{2}|today|yesterday)$/i);
+    const dateMatch = text.match(/\b(\d{4}-\d{2}-\d{2}|today|yesterday)\b/i);
     if (!dateMatch) return { text, endTime: new Date() };
     const token = dateMatch[1].toLowerCase();
-    const rest = text.slice(0, dateMatch.index).trim();
+    const rest = `${text.slice(0, dateMatch.index)} ${text.slice(
+      dateMatch.index + dateMatch[0].length
+    )}`
+      .replace(/\s+/g, ' ')
+      .trim();
     if (token === 'today') return { text: rest, endTime: new Date() };
     const endTime = new Date();
     if (token === 'yesterday') {
@@ -11580,6 +11974,62 @@ import {
     if (!parsed) return { text, endTime: new Date() };
     parsed.setHours(17, 0, 0, 0);
     return { text: rest, endTime: parsed };
+  }
+
+  function normalizeQuickLogPhrase(value) {
+    return String(value || '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, ' ')
+      .trim()
+      .replace(/\s+/g, ' ');
+  }
+
+  function getQuickLogProjectAliases(project) {
+    const aliases = new Set();
+    const name = normalizeQuickLogPhrase(project && project.name);
+    const client = normalizeQuickLogPhrase(project && project.client);
+    if (name) {
+      aliases.add(name);
+      const firstWord = name.split(' ')[0];
+      if (firstWord && firstWord.length >= 3) aliases.add(firstWord);
+    }
+    if (client && client.length >= 3) aliases.add(client);
+    return Array.from(aliases).sort((a, b) => b.length - a.length);
+  }
+
+  function findQuickLogProject(text) {
+    const normalizedText = normalizeQuickLogPhrase(text);
+    const candidates = getActiveProjects()
+      .slice()
+      .sort((a, b) => String(b.name).length - String(a.name).length);
+    for (const project of candidates) {
+      const aliases = getQuickLogProjectAliases(project);
+      for (const alias of aliases) {
+        if (!alias) continue;
+        const exact = normalizedText === alias;
+        const prefix = normalizedText.startsWith(alias + ' ');
+        const suffix = normalizedText.endsWith(' ' + alias);
+        const contained = normalizedText.includes(` ${alias} `);
+        if (exact || prefix || suffix || contained) {
+          return { project, alias };
+        }
+      }
+    }
+    return null;
+  }
+
+  function removeQuickLogAlias(text, alias) {
+    const words = normalizeQuickLogPhrase(alias).split(' ').filter(Boolean);
+    if (!words.length) return String(text || '').trim();
+    let result = String(text || '').trim();
+    words.forEach((word) => {
+      const pattern = new RegExp(
+        `(^|\\s)${word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?=\\s|$)`,
+        'i'
+      );
+      result = result.replace(pattern, ' ');
+    });
+    return result.replace(/\s+/g, ' ').trim();
   }
 
   function parseQuickLogInput(value) {
@@ -11599,31 +12049,219 @@ import {
       return { ok: false, reason: 'Quick log duration must be positive.' };
     }
     const dated = parseQuickLogDate(match[3]);
-    const candidates = getActiveProjects()
-      .slice()
-      .sort((a, b) => String(b.name).length - String(a.name).length);
-    const normalizedText = dated.text.toLowerCase();
-    const project = candidates.find((candidate) => {
-      const name = String(candidate.name || '')
-        .trim()
-        .toLowerCase();
-      if (!name) return false;
-      return normalizedText === name || normalizedText.startsWith(name + ' ');
-    });
-    if (!project) {
+    const projectMatch = findQuickLogProject(dated.text);
+    if (!projectMatch) {
       return {
         ok: false,
-        reason: 'Start the quick log text with an active project name.'
+        reason: 'Mention an active project name, client, or project keyword.'
       };
     }
-    const description = dated.text.slice(String(project.name).length).trim();
+    const description = removeQuickLogAlias(dated.text, projectMatch.alias);
     return {
       ok: true,
-      project,
+      project: projectMatch.project,
       description,
       hours,
       endTime: dated.endTime
     };
+  }
+
+  function getQuickLogDateEndTime(dateKey) {
+    const endTime = new Date();
+    if (dateKey === 'yesterday') {
+      endTime.setDate(endTime.getDate() - 1);
+      endTime.setHours(17, 0, 0, 0);
+    } else if (dateKey && dateKey !== 'today') {
+      const parsed = parseLocalDateString(dateKey);
+      if (parsed) {
+        parsed.setHours(17, 0, 0, 0);
+        return parsed;
+      }
+    }
+    return endTime;
+  }
+
+  function openMobileQuickLogSheet(seedText = '') {
+    const sheet = createMobileSheet('Quick log', {
+      className: 'mobile-quick-log-sheet',
+      description: 'Paste or dictate a log, or use the structured controls.'
+    });
+    const projectOptions = getActiveProjects();
+    const listId = `mobileQuickLogProjects-${uuid()}`;
+    const rawLabel = document.createElement('label');
+    rawLabel.className = 'mobile-sheet-field';
+    rawLabel.textContent = 'Dictation';
+    const rawInput = document.createElement('textarea');
+    rawInput.rows = 3;
+    rawInput.value = seedText;
+    rawInput.setAttribute('aria-label', 'Dictation quick log');
+    rawInput.placeholder = '1.5h client call yesterday alpha';
+    rawLabel.appendChild(rawInput);
+    sheet.body.appendChild(rawLabel);
+
+    const structured = document.createElement('div');
+    structured.className = 'mobile-quick-log-structured';
+    const projectLabel = document.createElement('label');
+    projectLabel.className = 'mobile-sheet-field';
+    projectLabel.textContent = 'Project';
+    const projectInput = document.createElement('input');
+    projectInput.setAttribute('aria-label', 'Project autocomplete');
+    projectInput.setAttribute('list', listId);
+    projectInput.placeholder = 'Project or client';
+    const dataList = document.createElement('datalist');
+    dataList.id = listId;
+    projectOptions.forEach((project) => {
+      const option = document.createElement('option');
+      option.value = project.name;
+      dataList.appendChild(option);
+    });
+    projectLabel.appendChild(projectInput);
+    projectLabel.appendChild(dataList);
+    structured.appendChild(projectLabel);
+
+    const durationLabel = document.createElement('label');
+    durationLabel.className = 'mobile-sheet-field';
+    durationLabel.textContent = 'Duration';
+    const durationRow = document.createElement('div');
+    durationRow.className = 'mobile-stepper-row';
+    const minus = document.createElement('button');
+    minus.type = 'button';
+    minus.className = 'btn secondary';
+    minus.textContent = '-15m';
+    const durationInput = document.createElement('input');
+    durationInput.type = 'number';
+    durationInput.min = '0';
+    durationInput.step = '0.25';
+    durationInput.value = '1';
+    durationInput.setAttribute('aria-label', 'Duration hours');
+    const plus = document.createElement('button');
+    plus.type = 'button';
+    plus.className = 'btn secondary';
+    plus.textContent = '+15m';
+    const adjustDuration = (delta) => {
+      const current = Number(durationInput.value) || 0;
+      durationInput.value = Math.max(0.25, current + delta).toFixed(2);
+      renderPreview();
+    };
+    minus.addEventListener('click', () => adjustDuration(-0.25));
+    plus.addEventListener('click', () => adjustDuration(0.25));
+    durationRow.appendChild(minus);
+    durationRow.appendChild(durationInput);
+    durationRow.appendChild(plus);
+    durationLabel.appendChild(durationRow);
+    structured.appendChild(durationLabel);
+
+    const descriptionLabel = document.createElement('label');
+    descriptionLabel.className = 'mobile-sheet-field';
+    descriptionLabel.textContent = 'Description';
+    const descriptionInput = document.createElement('input');
+    descriptionInput.setAttribute('aria-label', 'Quick log description');
+    descriptionInput.placeholder = 'What did you do?';
+    descriptionLabel.appendChild(descriptionInput);
+    structured.appendChild(descriptionLabel);
+
+    let dateKey = 'today';
+    const chips = document.createElement('div');
+    chips.className = 'mobile-date-chip-row';
+    [
+      ['today', 'Today'],
+      ['yesterday', 'Yesterday']
+    ].forEach(([value, label]) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = `btn secondary mobile-date-chip${value === dateKey ? ' active' : ''}`;
+      chip.textContent = label;
+      chip.addEventListener('click', () => {
+        dateKey = value;
+        chips.querySelectorAll('.mobile-date-chip').forEach((button) => {
+          button.classList.toggle('active', button === chip);
+        });
+        renderPreview();
+      });
+      chips.appendChild(chip);
+    });
+    structured.appendChild(chips);
+    sheet.body.appendChild(structured);
+
+    const preview = document.createElement('div');
+    preview.className = 'mobile-quick-log-preview';
+    preview.setAttribute('aria-live', 'polite');
+    sheet.body.appendChild(preview);
+
+    function findStructuredProject() {
+      const typed = normalizeQuickLogPhrase(projectInput.value);
+      return (
+        projectOptions.find((project) =>
+          getQuickLogProjectAliases(project).some((alias) => alias === typed)
+        ) ||
+        projectOptions.find(
+          (project) => normalizeQuickLogPhrase(project.name) === typed
+        ) ||
+        null
+      );
+    }
+
+    function getSheetQuickLogPayload() {
+      const raw = rawInput.value.trim();
+      if (raw) return parseQuickLogInput(raw);
+      const project = findStructuredProject();
+      const hours = Number(durationInput.value);
+      if (!project) {
+        return { ok: false, reason: 'Choose a project.' };
+      }
+      if (!Number.isFinite(hours) || hours <= 0) {
+        return { ok: false, reason: 'Enter a positive duration.' };
+      }
+      return {
+        ok: true,
+        project,
+        hours,
+        description: descriptionInput.value.trim(),
+        endTime: getQuickLogDateEndTime(dateKey)
+      };
+    }
+
+    function renderPreview() {
+      const parsed = getSheetQuickLogPayload();
+      if (!parsed.ok) {
+        preview.className = 'mobile-quick-log-preview risk';
+        preview.textContent = parsed.reason;
+        return;
+      }
+      preview.className = 'mobile-quick-log-preview';
+      preview.textContent = `${parsed.hours.toFixed(2)}h - ${parsed.project.name}${parsed.description ? ` - ${parsed.description}` : ''} - ${formatLocalDateString(parsed.endTime)}`;
+    }
+
+    [rawInput, projectInput, durationInput, descriptionInput].forEach(
+      (input) => {
+        input.addEventListener('input', renderPreview);
+        input.addEventListener('change', renderPreview);
+      }
+    );
+    renderPreview();
+
+    sheet.addAction('Log entry', 'primary', () => {
+      const parsed = getSheetQuickLogPayload();
+      if (!parsed.ok) {
+        showToast(parsed.reason);
+        renderPreview();
+        return;
+      }
+      const entry = createManualEntry({
+        projectId: parsed.project.id,
+        description: parsed.description,
+        endValue: toDateTimeInputValue(parsed.endTime),
+        hoursValue: parsed.hours,
+        focusFactor: DEFAULT_FOCUS_FACTOR,
+        now: new Date()
+      });
+      if (!entry) return;
+      sheet.close();
+      showToast(
+        `Logged ${parsed.hours.toFixed(2)}h to ${parsed.project.name}.`
+      );
+    });
+    sheet.addAction('Cancel', 'secondary', sheet.close);
   }
 
   document.getElementById('manualFormPro').addEventListener('submit', (e) => {
@@ -11656,6 +12294,11 @@ import {
   if (quickLogForm && quickLogInput) {
     quickLogForm.addEventListener('submit', (event) => {
       event.preventDefault();
+      if (isMobileViewport()) {
+        openMobileQuickLogSheet(quickLogInput.value);
+        quickLogInput.value = '';
+        return;
+      }
       const parsed = parseQuickLogInput(quickLogInput.value);
       if (!parsed.ok) {
         showToast(parsed.reason);
@@ -11846,7 +12489,7 @@ import {
     const label = document.createElement('strong');
     label.textContent = sync.label;
     const detail = document.createElement('span');
-    detail.textContent = `${sync.detail} · ${getPwaMobileDetail()}`;
+    detail.textContent = `${sync.detail} - ${getPwaMobileDetail()}`;
     copy.appendChild(label);
     copy.appendChild(detail);
     panel.appendChild(copy);
@@ -11872,16 +12515,441 @@ import {
     }
   }
 
+  function getRecentStoppedEntries(limit = 3) {
+    return data.entries
+      .filter((entry) => !entry.isRunning && !isCodexTimeEntry(entry))
+      .slice()
+      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+      .slice(0, limit);
+  }
+
+  function renderMobileFavoriteTimers(container, runningProjectIds) {
+    const favorites = getPinnedTimerShortcuts(runningProjectIds);
+    if (!favorites.length) return;
+    const section = document.createElement('div');
+    section.className = 'mobile-today-section';
+    const title = document.createElement('div');
+    title.className = 'mobile-today-section-title';
+    title.textContent = 'Favorite timers';
+    section.appendChild(title);
+    const list = document.createElement('div');
+    list.className = 'mobile-favorite-timer-list';
+    favorites.forEach((favorite) => {
+      const row = document.createElement('div');
+      row.className = 'mobile-favorite-timer';
+      const start = document.createElement('button');
+      start.type = 'button';
+      start.className = 'btn primary';
+      start.textContent = formatTimerPresetLabel(
+        favorite.project,
+        favorite.description,
+        favorite.focusFactor
+      );
+      start.addEventListener('click', () => {
+        startTimerShortcut(favorite, { navigate: true });
+      });
+      row.appendChild(start);
+      [
+        ['Up', () => moveTimerPreset(favorite.id, -1)],
+        ['Down', () => moveTimerPreset(favorite.id, 1)],
+        ['Edit', () => editTimerPreset(favorite.id)]
+      ].forEach(([label, action]) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'btn secondary';
+        button.textContent = label;
+        button.addEventListener('click', action);
+        row.appendChild(button);
+      });
+      list.appendChild(row);
+    });
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+
+  function renderMobileRecentEntries(container) {
+    const entries = getRecentStoppedEntries(3);
+    if (!entries.length) return;
+    const section = document.createElement('div');
+    section.className = 'mobile-today-section';
+    const title = document.createElement('div');
+    title.className = 'mobile-today-section-title';
+    title.textContent = 'Recent entries';
+    section.appendChild(title);
+    const list = document.createElement('div');
+    list.className = 'mobile-recent-entry-list';
+    entries.forEach((entry) => {
+      const project = getEntryProject(entry);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'mobile-recent-entry';
+      button.textContent = `${project ? project.name : 'Unknown'} - ${formatDuration(entry.duration || 0)}${entry.description ? ` - ${entry.description}` : ''}`;
+      button.addEventListener('click', () => {
+        openEntryActionSheet(entry.id);
+      });
+      list.appendChild(button);
+    });
+    section.appendChild(list);
+    container.appendChild(section);
+  }
+
+  function getReviewBounds(scope) {
+    if (scope === 'week') return getWeekBounds(0);
+    return getDayBounds(-1);
+  }
+
+  function getEntryReviewData(scope = 'yesterday') {
+    const bounds = getReviewBounds(scope);
+    const from = parseLocalDateString(bounds.from);
+    const to = addLocalDays(parseLocalDateString(bounds.to), 1);
+    const entries = data.entries.filter((entry) =>
+      entryOverlapsDateRange(entry, from, to)
+    );
+    const missingDescriptions = entries.filter(
+      (entry) => !entry.isRunning && !String(entry.description || '').trim()
+    );
+    const longEntries = entries.filter(
+      (entry) => !entry.isRunning && (Number(entry.duration) || 0) >= 4 * 3600
+    );
+    const staleRunning = entries.filter(
+      (entry) => entry.isRunning && getRunningTimerWarnings(entry).length
+    );
+    const days = [];
+    for (
+      let cursor = new Date(from);
+      cursor < to;
+      cursor = addLocalDays(cursor, 1)
+    ) {
+      const dayStart = new Date(cursor);
+      const dayEnd = addLocalDays(dayStart, 1);
+      const hasEntries = entries.some((entry) =>
+        entryOverlapsDateRange(entry, dayStart, dayEnd)
+      );
+      if (!hasEntries) days.push(formatLocalDateString(dayStart));
+    }
+    return {
+      scope,
+      bounds,
+      entries,
+      missingDescriptions,
+      longEntries,
+      staleRunning,
+      emptyDays: days
+    };
+  }
+
+  function openEntryReviewSheet(scope = 'yesterday') {
+    const review = getEntryReviewData(scope);
+    const sheet = createMobileSheet(
+      scope === 'week' ? 'Review this week' : 'Review yesterday',
+      {
+        className: 'mobile-entry-review-sheet',
+        description: `${review.bounds.from} to ${review.bounds.to}`
+      }
+    );
+    const summary = document.createElement('div');
+    summary.className = 'mobile-review-summary';
+    [
+      [`${review.entries.length} entries`, 'Entries'],
+      [`${review.missingDescriptions.length}`, 'Missing descriptions'],
+      [`${review.longEntries.length}`, 'Long entries'],
+      [`${review.emptyDays.length}`, 'Empty days']
+    ].forEach(([value, label]) => {
+      const item = document.createElement('div');
+      item.className = 'today-command-item';
+      const span = document.createElement('span');
+      span.textContent = label;
+      const strong = document.createElement('strong');
+      strong.textContent = value;
+      item.appendChild(span);
+      item.appendChild(strong);
+      summary.appendChild(item);
+    });
+    sheet.body.appendChild(summary);
+    const list = document.createElement('div');
+    list.className = 'mobile-review-list';
+    const addReviewAction = (text, label, action) => {
+      const row = document.createElement('div');
+      row.className = 'mobile-review-row';
+      const copy = document.createElement('span');
+      copy.textContent = text;
+      row.appendChild(copy);
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn secondary';
+      button.textContent = label;
+      button.addEventListener('click', () => {
+        sheet.close();
+        action();
+      });
+      row.appendChild(button);
+      list.appendChild(row);
+    };
+    review.missingDescriptions.slice(0, 3).forEach((entry) => {
+      const project = getEntryProject(entry);
+      addReviewAction(
+        `${project ? project.name : 'Entry'} is missing a description.`,
+        'Edit',
+        () => editStoppedEntry(entry.id)
+      );
+    });
+    review.longEntries.slice(0, 3).forEach((entry) => {
+      const project = getEntryProject(entry);
+      addReviewAction(
+        `${project ? project.name : 'Entry'} is ${formatDuration(entry.duration || 0)}.`,
+        'Split',
+        () => splitStoppedEntry(entry.id)
+      );
+    });
+    review.emptyDays.slice(0, 3).forEach((day) => {
+      addReviewAction(`${day} has no tracked entries.`, 'Quick log', () =>
+        openMobileQuickLogSheet(`1h ${day}`)
+      );
+    });
+    if (!list.childElementCount) {
+      const empty = document.createElement('p');
+      empty.textContent = 'No review issues found.';
+      list.appendChild(empty);
+    }
+    sheet.body.appendChild(list);
+    sheet.addAction('Open Entries', 'primary', () => {
+      sheet.close();
+      activateSection('entries');
+      applyEntryFilterSnapshot({
+        ...getCurrentEntryFilterSnapshot(),
+        from: review.bounds.from,
+        to: review.bounds.to,
+        showAll: true
+      });
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileSyncWizard() {
+    const sheet = createMobileSheet('Sync setup', {
+      className: 'mobile-sync-wizard-sheet',
+      description:
+        'Choose a folder, write a backup, verify it, then resolve conflicts if needed.'
+    });
+    const render = () => {
+      sheet.body.innerHTML = '';
+      const state = getMobileSyncState();
+      const status = document.createElement('div');
+      status.className = `mobile-sync-wizard-status ${state.state}`;
+      const statusLabel = document.createElement('strong');
+      statusLabel.textContent = state.label;
+      const statusDetail = document.createElement('span');
+      statusDetail.textContent = `${state.detail} - ${getPwaMobileDetail()}`;
+      status.appendChild(statusLabel);
+      status.appendChild(statusDetail);
+      sheet.body.appendChild(status);
+      const steps = document.createElement('div');
+      steps.className = 'mobile-sync-wizard-steps';
+      const addStep = (label, detail, action, disabled = false) => {
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'mobile-sync-step';
+        row.disabled = disabled;
+        const rowLabel = document.createElement('strong');
+        rowLabel.textContent = label;
+        const rowDetail = document.createElement('span');
+        rowDetail.textContent = detail;
+        row.appendChild(rowLabel);
+        row.appendChild(rowDetail);
+        row.addEventListener('click', async () => {
+          await action();
+          renderMobileSyncStatus();
+          render();
+        });
+        steps.appendChild(row);
+      };
+      addStep(
+        backupDirHandle ? 'Folder selected' : 'Choose folder',
+        backupDirHandle
+          ? backupDirHandle.name || data.backupDirName || 'Backup folder ready'
+          : 'Pick a cloud-synced folder for automatic backups',
+        () => chooseBackupDir({ activateSync: true }),
+        !window.showDirectoryPicker
+      );
+      addStep(
+        'Write backup',
+        data.lastBackupAt
+          ? `Last backup ${formatRelativeTime(data.lastBackupAt)}`
+          : 'No backup written yet',
+        () => saveBackupToDir({ promptOnConflict: true }),
+        !backupDirHandle || backupPermissionState !== 'granted'
+      );
+      addStep(
+        'Verify backup',
+        data.lastBackupVerifiedAt
+          ? `Verified ${formatRelativeTime(data.lastBackupVerifiedAt)}`
+          : 'Read latest backup, manifest, and snapshot back',
+        () => verifyBackupRoundTrip(),
+        !backupDirHandle || backupPermissionState !== 'granted'
+      );
+      addStep(
+        backupConflict ? 'Resolve conflict' : 'Conflict check',
+        backupConflict
+          ? formatBackupConflictWarning(backupConflict)
+          : 'No newer backup detected',
+        () => restoreLatestBackupFromDir(),
+        !backupConflict
+      );
+      sheet.body.appendChild(steps);
+    };
+    render();
+    sheet.addAction('Open Backup', 'primary', () => {
+      sheet.close();
+      activateSection('importExport');
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function renderMobileTodayCommandPanel({
+    panel,
+    runningEntries,
+    activeEntries,
+    stats,
+    recommendation,
+    settings
+  }) {
+    if (!isMobileViewport()) return false;
+    panel.classList.add('mobile-today-panel');
+    const running = runningEntries[0] || null;
+    const runningProject = running ? getEntryProject(running) : null;
+    const review = getEntryReviewData('yesterday');
+    const cleanupCount =
+      review.missingDescriptions.length +
+      review.longEntries.length +
+      review.staleRunning.length +
+      review.emptyDays.length;
+    const header = document.createElement('div');
+    header.className = 'mobile-today-header';
+    const title = document.createElement('div');
+    title.className = 'today-command-title';
+    title.textContent = 'Today';
+    header.appendChild(title);
+    const target = document.createElement('div');
+    target.className = 'today-command-meta';
+    target.textContent = `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`;
+    header.appendChild(target);
+    panel.appendChild(header);
+
+    const primary = document.createElement('div');
+    primary.className = 'mobile-today-primary';
+    const appendTodayCard = (label, value, className, onClick) => {
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = `mobile-today-card${className ? ` ${className}` : ''}`;
+      const span = document.createElement('span');
+      span.textContent = label;
+      const strong = document.createElement('strong');
+      strong.textContent = value;
+      card.appendChild(span);
+      card.appendChild(strong);
+      card.addEventListener('click', onClick);
+      primary.appendChild(card);
+      return card;
+    };
+    appendTodayCard(
+      running ? 'Running now' : 'Timer',
+      running ? runningProject?.name || 'Running timer' : 'No active timer',
+      running ? 'warm' : '',
+      () => activateSection('timer')
+    );
+    appendTodayCard(
+      'Next',
+      recommendation
+        ? recommendation.project.name
+        : activeEntries.length
+          ? `${activeEntries.length} active`
+          : 'Caught up',
+      'primary',
+      () => {
+        if (recommendation) {
+          startTimerShortcut(
+            {
+              project: recommendation.project,
+              description: '',
+              focusFactor: DEFAULT_FOCUS_FACTOR
+            },
+            { navigate: true }
+          );
+        } else {
+          activateSection('timer');
+        }
+      }
+    );
+    appendTodayCard(
+      'Backup',
+      getBackupFreshnessLabel(),
+      backupConflict || !data.lastBackupAt ? 'risk' : '',
+      openMobileSyncWizard
+    );
+    appendTodayCard(
+      'Cleanup',
+      cleanupCount
+        ? `${cleanupCount} review issue${cleanupCount === 1 ? '' : 's'}`
+        : settings.enabled
+          ? 'Ready'
+          : 'Reminders off',
+      cleanupCount ? 'risk' : '',
+      () => openEntryReviewSheet('yesterday')
+    );
+    panel.appendChild(primary);
+
+    const actions = document.createElement('div');
+    actions.className = 'mobile-today-actions';
+    [
+      ['Quick log', 'primary', () => openMobileQuickLogSheet()],
+      [
+        'Review yesterday',
+        'secondary',
+        () => openEntryReviewSheet('yesterday')
+      ],
+      ['Review this week', 'secondary', () => openEntryReviewSheet('week')],
+      ['Sync setup', 'secondary', openMobileSyncWizard]
+    ].forEach(([label, variant, action]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `btn ${variant}`;
+      button.textContent = label;
+      button.addEventListener('click', action);
+      actions.appendChild(button);
+    });
+    panel.appendChild(actions);
+
+    const runningProjectIds = new Set(
+      runningEntries.map((entry) => String(entry.projectId))
+    );
+    renderMobileFavoriteTimers(panel, runningProjectIds);
+    renderMobileRecentEntries(panel);
+    return true;
+  }
+
   function renderTodayCommandPanel() {
     const panel = document.getElementById('todayCommandPanel');
     if (!panel) return;
     panel.innerHTML = '';
+    panel.classList.remove('mobile-today-panel');
     const runningEntries = getRunningEntries();
     const activeEntries = getActiveRunningEntries();
     const stats = computeGlobalStats();
     const recommendation = getRecommendedProjectForToday();
     const audit = getLocalDataAudit();
     const settings = ensureReminderSettings();
+    if (
+      renderMobileTodayCommandPanel({
+        panel,
+        runningEntries,
+        activeEntries,
+        stats,
+        recommendation,
+        settings
+      })
+    ) {
+      return;
+    }
 
     const header = document.createElement('div');
     header.className = 'today-command-header';
@@ -12555,6 +13623,154 @@ import {
     offerUndo('Entry updated.', snapshot);
   }
 
+  async function moveEntryWithDialog(entryId) {
+    const entry = data.entries.find(
+      (candidate) => String(candidate.id) === String(entryId)
+    );
+    if (!entry) return;
+    const projectOptions = getActiveProjects()
+      .filter((project) => String(project.id) !== String(entry.projectId))
+      .map((project) => ({ value: project.id, label: project.name }));
+    if (!projectOptions.length) {
+      showToast('No other active project is available.');
+      return;
+    }
+    const values = await openFormDialog({
+      title: 'Move Entry',
+      fields: [
+        {
+          name: 'projectId',
+          label: 'Project',
+          type: 'select',
+          options: projectOptions,
+          required: true
+        }
+      ],
+      submitLabel: 'Move Entry'
+    });
+    if (!values) return;
+    const project = data.projects.find(
+      (candidate) => String(candidate.id) === String(values.projectId)
+    );
+    if (!project) {
+      showToast('Choose a valid project.');
+      return;
+    }
+    const snapshot = cloneData();
+    entry.projectId = project.id;
+    saveData();
+    refreshAllViews();
+    offerUndo('Entry moved.', snapshot);
+  }
+
+  async function confirmDeleteEntry(entryId) {
+    const ok = await requestConfirm({
+      title: 'Delete Entry',
+      message: 'Delete this time entry?',
+      confirmLabel: 'Delete',
+      danger: true
+    });
+    if (ok) deleteEntry(entryId);
+  }
+
+  function openEntryActionSheet(entryId) {
+    const entry = data.entries.find(
+      (candidate) => String(candidate.id) === String(entryId)
+    );
+    if (!entry) return;
+    const project = getEntryProject(entry);
+    const sheet = createMobileSheet('Entry actions', {
+      className: 'mobile-entry-action-sheet',
+      description: `${project ? project.name : 'Unknown project'} - ${
+        entry.description || 'No description'
+      }`
+    });
+    const grid = document.createElement('div');
+    grid.className = 'mobile-entry-action-grid';
+    const addButton = (label, variant, action, disabled = false) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `btn ${variant}`;
+      button.textContent = label;
+      button.disabled = disabled;
+      button.addEventListener('click', () => {
+        sheet.close();
+        action();
+      });
+      grid.appendChild(button);
+      return button;
+    };
+    addButton('Edit', 'primary', () => editStoppedEntry(entry.id));
+    addButton(
+      'Duplicate',
+      'secondary',
+      () => duplicateStoppedEntry(entry.id),
+      !!entry.isRunning
+    );
+    addButton(
+      'Split',
+      'secondary',
+      () => splitStoppedEntry(entry.id),
+      !!entry.isRunning || !entry.endTime
+    );
+    addButton('Move Project', 'secondary', () => moveEntryWithDialog(entry.id));
+    addButton('Delete', 'danger', () => confirmDeleteEntry(entry.id));
+    sheet.body.appendChild(grid);
+  }
+
+  function shouldIgnoreSwipeTarget(target) {
+    return !!(
+      target &&
+      target.closest &&
+      target.closest('button, input, select, textarea, a, label')
+    );
+  }
+
+  function attachEntrySwipeActions(row, entry) {
+    row.classList.add('entry-swipe-row');
+    row.dataset.entryId = entry.id;
+    let startX = 0;
+    let startY = 0;
+    let moved = false;
+    row.addEventListener(
+      'touchstart',
+      (event) => {
+        if (!isMobileViewport() || shouldIgnoreSwipeTarget(event.target))
+          return;
+        const touch = event.touches && event.touches[0];
+        if (!touch) return;
+        startX = touch.clientX;
+        startY = touch.clientY;
+        moved = false;
+      },
+      { passive: true }
+    );
+    row.addEventListener(
+      'touchmove',
+      (event) => {
+        if (!isMobileViewport() || shouldIgnoreSwipeTarget(event.target))
+          return;
+        const touch = event.touches && event.touches[0];
+        if (!touch) return;
+        const dx = touch.clientX - startX;
+        const dy = touch.clientY - startY;
+        if (Math.abs(dx) < 12 || Math.abs(dx) < Math.abs(dy)) return;
+        moved = true;
+        row.style.transform = `translateX(${Math.max(-84, Math.min(84, dx))}px)`;
+      },
+      { passive: true }
+    );
+    row.addEventListener('touchend', (event) => {
+      if (!isMobileViewport() || shouldIgnoreSwipeTarget(event.target)) return;
+      const touch = event.changedTouches && event.changedTouches[0];
+      row.style.transform = '';
+      if (!moved || !touch) return;
+      const dx = touch.clientX - startX;
+      if (dx <= -56) openEntryActionSheet(entry.id);
+      else if (dx >= 56) editStoppedEntry(entry.id);
+    });
+  }
+
   function getEntryProject(entry) {
     return (
       data.projects.find((p) => String(p.id) === String(entry.projectId)) ||
@@ -12929,6 +14145,7 @@ import {
     );
     sorted.forEach((entry) => {
       const tr = document.createElement('tr');
+      attachEntrySwipeActions(tr, entry);
       const project = getEntryProject(entry);
       const hours = entry.duration ? entry.duration / 3600 : 0;
       const total = project ? hours * project.hourlyRate : 0;
@@ -12973,6 +14190,14 @@ import {
       const actionsTd = appendEntryCell(tr, 'Actions', '');
       // Action cell: add nudge and snap controls plus delete button
       actionsTd.className = 'entry-actions';
+      const actionSheetBtn = document.createElement('button');
+      actionSheetBtn.type = 'button';
+      actionSheetBtn.className = 'btn primary entry-action-sheet-btn';
+      actionSheetBtn.textContent = 'Actions';
+      actionSheetBtn.addEventListener('click', () => {
+        openEntryActionSheet(entry.id);
+      });
+      actionsTd.appendChild(actionSheetBtn);
       // -5m button
       const minusBtn = document.createElement('button');
       minusBtn.className = 'btn secondary';
@@ -12982,6 +14207,7 @@ import {
       minusBtn.addEventListener('click', () => {
         // Provide quick beep feedback
         provideHaptic('beep');
+        const snapshot = cloneData();
         // Subtract 5 minutes (300 seconds) from the entry duration
         let newDur = (entry.duration || 0) - 300;
         if (newDur < 0) newDur = 0;
@@ -12990,10 +14216,8 @@ import {
         const start = new Date(entry.startTime);
         entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
         saveData();
-        updateEntriesTable();
-        updateDashboard();
-        updateProjectsPage();
-        updateTimerSection();
+        refreshAllViews();
+        offerUndo('Entry duration edited.', snapshot);
       });
       actionsTd.appendChild(minusBtn);
       // +5m button
@@ -13005,16 +14229,15 @@ import {
       plusBtn.textContent = '+5m';
       plusBtn.addEventListener('click', () => {
         provideHaptic('beep');
+        const snapshot = cloneData();
         // Add 5 minutes to the duration
         let newDur = (entry.duration || 0) + 300;
         entry.duration = newDur;
         const start = new Date(entry.startTime);
         entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
         saveData();
-        updateEntriesTable();
-        updateDashboard();
-        updateProjectsPage();
-        updateTimerSection();
+        refreshAllViews();
+        offerUndo('Entry duration edited.', snapshot);
       });
       actionsTd.appendChild(plusBtn);
       // Snap selector: choose nearest minutes (5,10,15)
@@ -13038,6 +14261,7 @@ import {
       snapSelect.addEventListener('change', () => {
         const val = parseInt(snapSelect.value);
         if (!isNaN(val) && val > 0) {
+          const snapshot = cloneData();
           const minutes = (entry.duration || 0) / 60;
           const snappedMinutes = Math.round(minutes / val) * val;
           entry.duration = Math.max(0, Math.floor(snappedMinutes * 60));
@@ -13046,10 +14270,8 @@ import {
             start.getTime() + entry.duration * 1000
           ).toISOString();
           saveData();
-          updateEntriesTable();
-          updateDashboard();
-          updateProjectsPage();
-          updateTimerSection();
+          refreshAllViews();
+          offerUndo('Entry duration edited.', snapshot);
         }
         // reset to placeholder
         snapSelect.value = '';
@@ -13133,15 +14355,8 @@ import {
       delBtn.style.fontSize = '0.7rem';
       delBtn.style.marginLeft = '0.25rem';
       delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', async () => {
-        const ok = await requestConfirm({
-          title: 'Delete Entry',
-          message: 'Delete this time entry?',
-          confirmLabel: 'Delete',
-          danger: true
-        });
-        if (!ok) return;
-        deleteEntry(entry.id);
+      delBtn.addEventListener('click', () => {
+        confirmDeleteEntry(entry.id);
       });
       actionsTd.appendChild(delBtn);
       tbody.appendChild(tr);
@@ -13697,16 +14912,35 @@ import {
         updatePwaStatusPanel();
       });
   }
-  // Programmatically activate the Timer tab on first load. This ensures the Timer
-  // section is displayed instead of the Dashboard when the page is opened. We
-  // simulate a click on the Timer navigation item which will trigger the
-  // navigation handler to set the active class and hide/show sections.
-  const timerNavItem = document.querySelector(
-    '#navList li[data-section="timer"]'
-  );
-  if (timerNavItem) {
-    timerNavItem.click();
+  function getSectionFromHash(hash = window.location.hash) {
+    const route = String(hash || '')
+      .replace(/^#/, '')
+      .toLowerCase();
+    const routes = {
+      today: 'dashboard',
+      dashboard: 'dashboard',
+      timer: 'timer',
+      entries: 'entries',
+      'quick-log': 'entries',
+      reports: 'analytics',
+      analytics: 'analytics',
+      sync: 'importExport',
+      backup: 'importExport'
+    };
+    return routes[route] || '';
   }
+
+  function applyLaunchRoute() {
+    const sectionId =
+      getSectionFromHash() || (isMobileViewport() ? 'dashboard' : 'timer');
+    activateSection(sectionId);
+    if (window.location.hash.toLowerCase() === '#quick-log') {
+      window.setTimeout(() => openMobileQuickLogSheet(), 0);
+    }
+  }
+
+  applyLaunchRoute();
+  window.addEventListener('hashchange', applyLaunchRoute);
 
   // Initialize auto sync toggle and status message
   const autoSyncToggle = document.getElementById('autoSyncToggle');

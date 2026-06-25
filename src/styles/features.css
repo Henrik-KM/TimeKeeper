@@ -890,6 +890,17 @@ tr:nth-child(even) td {
   display: none;
 }
 
+.mobile-chart-summary,
+.mobile-chart-detail {
+  display: none;
+}
+
+.entry-swipe-row {
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
 @media (max-width: 640px) {
   .sidebar {
     position: fixed;
@@ -948,6 +959,339 @@ tr:nth-child(even) td {
   .content {
     margin-left: 0;
     padding: 0.75rem 0.75rem 9.75rem;
+  }
+
+  .mobile-flow-backdrop {
+    z-index: 950;
+    align-items: flex-end;
+    padding: 0.45rem 0.45rem 0;
+  }
+
+  .mobile-flow-panel {
+    width: 100%;
+    max-height: calc(100dvh - 0.75rem);
+    border-radius: 0.85rem 0.85rem 0 0;
+  }
+
+  .mobile-flow-body {
+    max-height: min(70dvh, 36rem);
+    overflow: auto;
+  }
+
+  .mobile-flow-description {
+    margin: 0;
+    color: #475569;
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+
+  .mobile-flow-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .mobile-flow-actions .btn {
+    min-height: 2.75rem;
+  }
+
+  .mobile-sheet-field {
+    display: grid;
+    gap: 0.35rem;
+    color: #334155;
+    font-size: 0.86rem;
+    font-weight: 750;
+  }
+
+  .mobile-sheet-field input,
+  .mobile-sheet-field textarea,
+  .mobile-sheet-field select {
+    width: 100%;
+    min-width: 0;
+    padding: 0.65rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.55rem;
+    color: #0f172a;
+    font: inherit;
+  }
+
+  .mobile-stepper-row,
+  .mobile-date-chip-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .mobile-date-chip-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mobile-date-chip.active {
+    border-color: #0f766e;
+    background: #ccfbf1;
+    color: #134e4a;
+  }
+
+  .mobile-quick-log-structured {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .mobile-quick-log-preview {
+    padding: 0.65rem;
+    border: 1px solid #bbf7d0;
+    border-radius: 0.6rem;
+    background: #f0fdf4;
+    color: #166534;
+    font-size: 0.88rem;
+    font-weight: 700;
+  }
+
+  .mobile-quick-log-preview.risk {
+    border-color: #fde68a;
+    background: #fffbeb;
+    color: #92400e;
+  }
+
+  .mobile-undo-tray {
+    position: fixed;
+    right: 0.6rem;
+    bottom: calc(7.45rem + env(safe-area-inset-bottom));
+    left: 0.6rem;
+    z-index: 875;
+    display: flex;
+    gap: 0.45rem;
+    align-items: center;
+    padding: 0.5rem;
+    border: 1px solid #cbd5e1;
+    border-radius: 0.7rem;
+    background: rgba(255, 255, 255, 0.98);
+    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.18);
+  }
+
+  .mobile-undo-tray.hidden {
+    display: none;
+  }
+
+  .mobile-undo-tray span {
+    min-width: 0;
+    flex: 1 1 auto;
+    overflow: hidden;
+    color: #334155;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .mobile-undo-tray .btn {
+    flex: 0 0 auto;
+    min-height: 2.2rem;
+    padding: 0.4rem 0.55rem;
+  }
+
+  .mobile-history-list,
+  .mobile-review-list,
+  .mobile-sync-wizard-steps {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .mobile-history-row,
+  .mobile-review-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    align-items: center;
+    padding: 0.6rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.6rem;
+    background: #ffffff;
+  }
+
+  .mobile-today-panel {
+    display: grid;
+    gap: 0.75rem;
+    padding: 0.75rem;
+  }
+
+  .mobile-today-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .mobile-today-primary,
+  .mobile-review-summary {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+  }
+
+  .mobile-today-card {
+    display: grid;
+    gap: 0.15rem;
+    min-height: 4.8rem;
+    padding: 0.7rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.65rem;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-today-card span {
+    color: #64748b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+
+  .mobile-today-card strong {
+    overflow: hidden;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    text-overflow: ellipsis;
+  }
+
+  .mobile-today-card.primary {
+    border-color: #bfdbfe;
+    background: #eff6ff;
+  }
+
+  .mobile-today-card.warm {
+    border-color: #fde68a;
+    background: #fffbeb;
+  }
+
+  .mobile-today-card.risk {
+    border-color: #fecaca;
+    background: #fef2f2;
+  }
+
+  .mobile-today-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .mobile-today-actions .btn {
+    min-height: 2.65rem;
+  }
+
+  .mobile-today-section {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .mobile-today-section-title {
+    margin: 0;
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 850;
+    text-transform: uppercase;
+  }
+
+  .mobile-favorite-timer-list,
+  .mobile-recent-entry-list {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .mobile-favorite-timer,
+  .mobile-recent-entry {
+    display: grid;
+    gap: 0.1rem;
+    width: 100%;
+    padding: 0.65rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.6rem;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-favorite-timer small {
+    color: #64748b;
+    font-size: 0.75rem;
+  }
+
+  .mobile-favorite-controls {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+
+  .mobile-favorite-controls .btn {
+    min-height: 2.35rem;
+    padding: 0.4rem 0.45rem;
+  }
+
+  .mobile-review-row span,
+  .mobile-history-row span {
+    min-width: 0;
+    color: #334155;
+    font-size: 0.88rem;
+    line-height: 1.3;
+  }
+
+  .mobile-sync-wizard-status {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.65rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.6rem;
+    background: #f8fafc;
+  }
+
+  .mobile-sync-wizard-status.backed-up {
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+  }
+
+  .mobile-sync-wizard-status.needs-backup,
+  .mobile-sync-wizard-status.unsupported {
+    border-color: #fde68a;
+    background: #fffbeb;
+  }
+
+  .mobile-sync-wizard-status.conflict {
+    border-color: #fecaca;
+    background: #fef2f2;
+  }
+
+  .mobile-sync-wizard-status span {
+    color: #475569;
+    font-size: 0.84rem;
+    line-height: 1.3;
+  }
+
+  .mobile-sync-step {
+    display: grid;
+    gap: 0.2rem;
+    width: 100%;
+    padding: 0.7rem;
+    border: 1px solid #dbe3ef;
+    border-radius: 0.6rem;
+    background: #ffffff;
+    color: #0f172a;
+    cursor: pointer;
+    text-align: left;
+  }
+
+  .mobile-sync-step:disabled {
+    cursor: not-allowed;
+    opacity: 0.62;
+  }
+
+  .mobile-sync-step span {
+    color: #64748b;
+    font-size: 0.82rem;
+    line-height: 1.3;
   }
 
   .mobile-sync-status {
@@ -1072,8 +1416,26 @@ tr:nth-child(even) td {
   }
 
   .mobile-chart-card:not(.mobile-chart-open)
-    > :not(h3):not(h4):not(.mobile-chart-toggle) {
+    > :not(h3):not(h4):not(.mobile-chart-summary):not(.mobile-chart-detail):not(
+      .mobile-chart-toggle
+    ) {
     display: none !important;
+  }
+
+  .mobile-chart-summary {
+    display: block;
+    margin: 0;
+    color: #475569;
+    font-size: 0.88rem;
+    line-height: 1.35;
+  }
+
+  .mobile-chart-detail {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 2.6rem;
   }
 
   .mobile-chart-toggle {
@@ -1145,11 +1507,16 @@ tr:nth-child(even) td {
   }
 
   #entries .entry-table tr {
+    touch-action: pan-y;
     margin-bottom: 0.85rem;
     padding: 0.75rem;
     border: 1px solid #e2e8f0;
     border-radius: 0.65rem;
     background: #ffffff;
+  }
+
+  #entries .entry-table tr.entry-swipe-row:active {
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
   }
 
   #entries .entry-table tr:nth-child(even) td {
@@ -1192,5 +1559,15 @@ tr:nth-child(even) td {
     min-height: 2.45rem;
     margin-left: 0 !important;
     font-size: 0.82rem !important;
+  }
+
+  .mobile-entry-action-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem;
+  }
+
+  .mobile-entry-action-grid .btn {
+    min-height: 2.85rem;
   }
 }
