@@ -1571,7 +1571,7 @@ import {
       restoreDataSnapshot(latest.snapshot);
       mobileActionHistory.shift();
       renderMobileUndoTray();
-      showToast('Undo applied.');
+      if (!isMobileViewport()) showToast('Undo applied.');
     });
     tray.appendChild(undoBtn);
     const historyBtn = document.createElement('button');
@@ -1611,7 +1611,7 @@ import {
           );
           if (index >= 0) mobileActionHistory.splice(index, 1);
           renderMobileUndoTray();
-          showToast('Undo applied.');
+          if (!isMobileViewport()) showToast('Undo applied.');
         });
         row.appendChild(undo);
         list.appendChild(row);
@@ -1623,6 +1623,7 @@ import {
 
   function offerUndo(message, snapshot) {
     pushMobileActionHistory(message, snapshot);
+    if (isMobileViewport()) return;
     showToast(message, {
       actionLabel: 'Undo',
       onAction: () => {
@@ -10398,12 +10399,14 @@ import {
     if (!isMobileViewport()) {
       bar.classList.add('hidden');
       bar.innerHTML = '';
+      delete bar.dataset.renderKey;
       return;
     }
     const runningEntries = getRunningEntries();
     if (!runningEntries.length) {
       bar.classList.add('hidden');
       bar.innerHTML = '';
+      delete bar.dataset.renderKey;
       return;
     }
     const activeEntries = getActiveRunningEntries();
@@ -10412,7 +10415,34 @@ import {
     const focus = getEntryActiveFactor(entry, runningEntries.length);
     const effective = getRunningEntryEffectiveSeconds(entry, now);
     const paused = isTimerPaused(entry);
+    const labelText =
+      runningEntries.length > 1
+        ? `${runningEntries.length} timers`
+        : project
+          ? project.name
+          : 'Running timer';
+    const detailText = `${formatDuration(Math.floor(effective))} Â· ${formatFocusPercent(focus)}${paused ? ' Â· paused' : ''}`;
+    const renderKey = [
+      entry.id,
+      runningEntries.map((runningEntry) => runningEntry.id).join(','),
+      paused ? 'paused' : 'active',
+      runningEntries.length > 1 ? 'multi' : 'single'
+    ].join('|');
     bar.classList.remove('hidden');
+
+    if (bar.dataset.renderKey === renderKey) {
+      const label = bar.querySelector('.mobile-now-label');
+      if (label) label.textContent = labelText;
+      const detail = bar.querySelector('.mobile-now-summary strong');
+      if (detail) detail.textContent = detailText;
+      const select = bar.querySelector('.running-factor-select');
+      if (select && document.activeElement !== select) {
+        select.value = ensureCurrentCompactFocusOption(select, focus);
+      }
+      return;
+    }
+
+    bar.dataset.renderKey = renderKey;
     bar.innerHTML = '';
 
     const summary = document.createElement('button');

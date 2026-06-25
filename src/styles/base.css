@@ -542,7 +542,7 @@ textarea {
 @media (max-width: 720px) {
   .app-toast-region {
     right: 0.5rem;
-    bottom: 0.5rem;
+    bottom: calc(4.35rem + env(safe-area-inset-bottom));
     width: calc(100vw - 1rem);
   }
 

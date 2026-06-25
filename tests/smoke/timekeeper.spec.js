@@ -1527,6 +1527,17 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(nowBar).toContainText('Mobile Timer');
   await expect(nowBar).toContainText('150%');
   await expect(nowBar.getByLabel('Timer focus')).toHaveValue('1.5');
+  await page.evaluate(() => {
+    const select = document.querySelector(
+      '#mobileNowBar .running-factor-select'
+    );
+    if (select) select.setAttribute('data-stability-check', 'kept');
+  });
+  await page.waitForTimeout(1200);
+  await expect(nowBar.getByLabel('Timer focus')).toHaveAttribute(
+    'data-stability-check',
+    'kept'
+  );
   await nowBar.getByLabel('Timer focus').selectOption('2');
   await expect(nowBar).toContainText('200%');
   await expect
@@ -1621,6 +1632,20 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await nowBar.getByRole('button', { name: 'Stop' }).click();
   await expect(nowBar).toBeHidden();
+  await expect(page.locator('.app-toast')).toHaveCount(0);
+  await expect(page.locator('#mobileUndoTray')).toContainText('Timer stopped.');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const tray = document.getElementById('mobileUndoTray');
+        const nav = document.querySelector('.sidebar');
+        if (!tray || !nav) return null;
+        const trayRect = tray.getBoundingClientRect();
+        const navRect = nav.getBoundingClientRect();
+        return trayRect.bottom <= navRect.top;
+      })
+    )
+    .toBe(true);
 
   await page.locator('.mobile-more-nav-item').click();
   const moreDialog = page.getByRole('dialog', { name: 'More' });
