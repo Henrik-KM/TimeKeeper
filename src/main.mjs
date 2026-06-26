@@ -1527,9 +1527,31 @@ import {
     refreshAllViews();
   }
 
+  const MOBILE_UNDO_TRAY_VISIBLE_MS = 3500;
   const mobileActionHistory = [];
+  let mobileUndoTrayTimer = null;
+  let mobileUndoTrayDismissedActionId = null;
+
+  function clearMobileUndoTrayTimer() {
+    if (mobileUndoTrayTimer) {
+      clearTimeout(mobileUndoTrayTimer);
+      mobileUndoTrayTimer = null;
+    }
+  }
+
+  function scheduleMobileUndoTrayDismiss(actionId) {
+    clearMobileUndoTrayTimer();
+    mobileUndoTrayTimer = setTimeout(() => {
+      if (mobileActionHistory[0]?.id !== actionId) return;
+      mobileUndoTrayDismissedActionId = actionId;
+      const tray = document.getElementById('mobileUndoTray');
+      if (tray) tray.classList.add('hidden');
+      mobileUndoTrayTimer = null;
+    }, MOBILE_UNDO_TRAY_VISIBLE_MS);
+  }
 
   function pushMobileActionHistory(message, snapshot) {
+    mobileUndoTrayDismissedActionId = null;
     mobileActionHistory.unshift({
       id: uuid(),
       message,
@@ -1544,6 +1566,7 @@ import {
     let tray = document.getElementById('mobileUndoTray');
     if (!isMobileViewport()) {
       if (tray) tray.classList.add('hidden');
+      clearMobileUndoTrayTimer();
       return;
     }
     if (!tray) {
@@ -1556,10 +1579,17 @@ import {
     tray.innerHTML = '';
     if (!mobileActionHistory.length) {
       tray.classList.add('hidden');
+      mobileUndoTrayDismissedActionId = null;
+      clearMobileUndoTrayTimer();
+      return;
+    }
+    const latest = mobileActionHistory[0];
+    if (mobileUndoTrayDismissedActionId === latest.id) {
+      tray.classList.add('hidden');
+      clearMobileUndoTrayTimer();
       return;
     }
     tray.classList.remove('hidden');
-    const latest = mobileActionHistory[0];
     const label = document.createElement('span');
     label.textContent = latest.message;
     tray.appendChild(label);
@@ -1568,6 +1598,7 @@ import {
     undoBtn.className = 'btn secondary';
     undoBtn.textContent = 'Undo';
     undoBtn.addEventListener('click', () => {
+      clearMobileUndoTrayTimer();
       restoreDataSnapshot(latest.snapshot);
       mobileActionHistory.shift();
       renderMobileUndoTray();
@@ -1580,6 +1611,7 @@ import {
     historyBtn.textContent = 'History';
     historyBtn.addEventListener('click', openMobileUndoHistory);
     tray.appendChild(historyBtn);
+    scheduleMobileUndoTrayDismiss(latest.id);
   }
 
   function openMobileUndoHistory() {
@@ -10393,6 +10425,35 @@ import {
     return select;
   }
 
+  function adjustRunningTimerElapsed(entryId, actualSeconds) {
+    const entry = data.entries.find((e) => e.id === entryId && e.isRunning);
+    if (!entry || !Number.isFinite(actualSeconds) || actualSeconds === 0) {
+      return;
+    }
+    const now = new Date();
+    const currentFactor = accumulateRunningEntry(
+      entry,
+      now,
+      getRunningEntries().length
+    );
+    const delta = actualSeconds * currentFactor;
+    entry.effectiveSeconds = Math.max(0, (entry.effectiveSeconds || 0) + delta);
+    saveData();
+    updateTimerSection();
+    provideHaptic('beep');
+  }
+
+  function createRunningTimerNudgeButton(entry, seconds, label) {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'btn secondary';
+    button.textContent = label;
+    button.addEventListener('click', () => {
+      adjustRunningTimerElapsed(entry.id, seconds);
+    });
+    return button;
+  }
+
   function renderMobileNowBar(now = new Date()) {
     const bar = document.getElementById('mobileNowBar');
     if (!bar) return;
@@ -10421,7 +10482,7 @@ import {
         : project
           ? project.name
           : 'Running timer';
-    const detailText = `${formatDuration(Math.floor(effective))} Â· ${formatFocusPercent(focus)}${paused ? ' Â· paused' : ''}`;
+    const detailText = `${formatDuration(Math.floor(effective))} - ${formatFocusPercent(focus)}${paused ? ' - paused' : ''}`;
     const renderKey = [
       entry.id,
       runningEntries.map((runningEntry) => runningEntry.id).join(','),
@@ -10458,7 +10519,7 @@ import {
           ? project.name
           : 'Running timer';
     const detail = document.createElement('strong');
-    detail.textContent = `${formatDuration(Math.floor(effective))} · ${formatFocusPercent(focus)}${paused ? ' · paused' : ''}`;
+    detail.textContent = `${formatDuration(Math.floor(effective))} - ${formatFocusPercent(focus)}${paused ? ' - paused' : ''}`;
     summary.appendChild(label);
     summary.appendChild(detail);
     bar.appendChild(summary);
@@ -10468,15 +10529,8 @@ import {
     controls.appendChild(
       createRunningFactorSelect(entry, runningEntries.length)
     );
-    const pauseBtn = document.createElement('button');
-    pauseBtn.type = 'button';
-    pauseBtn.className = 'btn secondary';
-    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
-    pauseBtn.addEventListener('click', () => {
-      if (paused) resumeTimer(entry.id);
-      else pauseTimer(entry.id);
-    });
-    controls.appendChild(pauseBtn);
+    controls.appendChild(createRunningTimerNudgeButton(entry, -300, '-5m'));
+    controls.appendChild(createRunningTimerNudgeButton(entry, 300, '+5m'));
     const stopBtn = document.createElement('button');
     stopBtn.type = 'button';
     stopBtn.className = 'btn danger';
@@ -10619,22 +10673,7 @@ import {
         minusBtn.style.padding = '0.25rem 0.5rem';
         minusBtn.style.fontSize = '0.75rem';
         minusBtn.addEventListener('click', () => {
-          // Compute elapsed time since last update and update effective seconds first
-          const now = new Date();
-          const currentFactor = accumulateRunningEntry(
-            entry,
-            now,
-            getRunningEntries().length
-          );
-          // Subtract 5 minutes of actual time from effectiveSeconds taking into account factor
-          const delta = 300 * currentFactor;
-          entry.effectiveSeconds = Math.max(
-            0,
-            (entry.effectiveSeconds || 0) - delta
-          );
-          saveData();
-          updateTimerSection();
-          provideHaptic('beep');
+          adjustRunningTimerElapsed(entry.id, -300);
         });
         nudgeDiv.appendChild(minusBtn);
         // Plus 5 minutes button
@@ -10644,19 +10683,7 @@ import {
         plusBtn.style.padding = '0.25rem 0.5rem';
         plusBtn.style.fontSize = '0.75rem';
         plusBtn.addEventListener('click', () => {
-          // Compute elapsed time since last update and update effective seconds first
-          const now = new Date();
-          const currentFactor = accumulateRunningEntry(
-            entry,
-            now,
-            getRunningEntries().length
-          );
-          // Add 5 minutes of actual time to effectiveSeconds, scaled by factor
-          const delta = 300 * currentFactor;
-          entry.effectiveSeconds = (entry.effectiveSeconds || 0) + delta;
-          saveData();
-          updateTimerSection();
-          provideHaptic('beep');
+          adjustRunningTimerElapsed(entry.id, 300);
         });
         nudgeDiv.appendChild(plusBtn);
         row.appendChild(nudgeDiv);
@@ -10684,17 +10711,19 @@ import {
         runningControls.appendChild(
           createRunningFactorSelect(entry, runningEntries.length)
         );
-        const pauseBtn = document.createElement('button');
-        pauseBtn.className = 'btn secondary';
-        pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
-        pauseBtn.addEventListener('click', () => {
-          if (isTimerPaused(entry)) {
-            resumeTimer(entry.id);
-          } else {
-            pauseTimer(entry.id);
-          }
-        });
-        runningControls.appendChild(pauseBtn);
+        if (!isMobileViewport()) {
+          const pauseBtn = document.createElement('button');
+          pauseBtn.className = 'btn secondary';
+          pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
+          pauseBtn.addEventListener('click', () => {
+            if (isTimerPaused(entry)) {
+              resumeTimer(entry.id);
+            } else {
+              pauseTimer(entry.id);
+            }
+          });
+          runningControls.appendChild(pauseBtn);
+        }
         const editTimerBtn = document.createElement('button');
         editTimerBtn.className = 'btn secondary';
         editTimerBtn.textContent = 'Edit';
@@ -12946,10 +12975,25 @@ import {
 
     const actions = document.createElement('div');
     actions.className = 'mobile-today-actions';
-    [
-      ['Quick log', 'primary', () => openMobileQuickLogSheet()],
-      ['Timer', 'secondary', () => activateSection('timer')]
-    ].forEach(([label, variant, action]) => {
+    const nextTimerShortcut = getStartableTimerShortcuts({
+      recommendation,
+      runningProjectIds,
+      limit: 1
+    })[0];
+    const actionConfigs = [];
+    if (nextTimerShortcut) {
+      actionConfigs.push([
+        'Start next',
+        'primary',
+        () => startTimerShortcut(nextTimerShortcut, { navigate: true })
+      ]);
+    }
+    actionConfigs.push([
+      'Timer',
+      nextTimerShortcut ? 'secondary' : 'primary',
+      () => activateSection('timer')
+    ]);
+    actionConfigs.forEach(([label, variant, action]) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = `btn ${variant}`;

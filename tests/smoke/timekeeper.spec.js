@@ -1557,10 +1557,37 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       })
     )
     .toEqual({ factor: 2, focusFactor: 2, manualFactor: 2 });
-  await nowBar.getByRole('button', { name: 'Pause' }).click();
-  await expect(nowBar.getByRole('button', { name: 'Resume' })).toBeVisible();
-  await nowBar.getByRole('button', { name: 'Resume' }).click();
-  await expect(nowBar.getByRole('button', { name: 'Pause' })).toBeVisible();
+  const effectiveSecondsAfterFocus = await page.evaluate(() => {
+    const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+    return saved.entries.find((candidate) => candidate.id === 'running-entry')
+      .effectiveSeconds;
+  });
+  await nowBar.getByRole('button', { name: '+5m' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        ).effectiveSeconds;
+      })
+    )
+    .toBe(effectiveSecondsAfterFocus + 600);
+  await nowBar.getByRole('button', { name: '-5m' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        ).effectiveSeconds;
+      })
+    )
+    .toBe(effectiveSecondsAfterFocus);
+  await expect(nowBar.getByRole('button', { name: 'Pause' })).toHaveCount(0);
+  await expect(
+    page.locator('#runningTimerPro').getByRole('button', { name: 'Pause' })
+  ).toHaveCount(0);
 
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
@@ -1574,6 +1601,12 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(commandPanel).toContainText('Favorite timers');
   await expect(commandPanel).not.toContainText('Cleanup');
   await expect(commandPanel).not.toContainText('Backup');
+  await expect(
+    commandPanel.getByRole('button', { name: 'Start next' })
+  ).toBeVisible();
+  await expect(
+    commandPanel.getByRole('button', { name: 'Quick log' })
+  ).toHaveCount(0);
   await expect(commandPanel).not.toContainText('Recent entries');
   await expect(commandPanel).toContainText(
     'Pinned Project - Pinned pass - 150%'
@@ -1588,39 +1621,6 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   });
   await expect(favoriteDialog).toBeVisible();
   await favoriteDialog.getByRole('button', { name: 'Cancel' }).click();
-
-  await commandPanel.getByRole('button', { name: 'Quick log' }).click();
-  const quickLogDialog = page.getByRole('dialog', { name: 'Quick log' });
-  await expect(quickLogDialog).toBeVisible();
-  await quickLogDialog
-    .getByLabel('Dictation quick log')
-    .fill('1.5h client call yesterday last');
-  await expect(
-    quickLogDialog.locator('.mobile-quick-log-preview')
-  ).toContainText('1.50h - Last Project - client call');
-  await quickLogDialog.getByRole('button', { name: 'Log entry' }).click();
-  await expect(quickLogDialog).toBeHidden();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        const entry = saved.entries.find(
-          (candidate) => candidate.description === 'client call'
-        );
-        return entry
-          ? {
-              projectId: entry.projectId,
-              duration: entry.duration,
-              endDate: entry.endTime.slice(0, 10)
-            }
-          : null;
-      })
-    )
-    .toEqual({
-      projectId: 'last',
-      duration: 5400,
-      endDate: '2026-04-25'
-    });
 
   await gotoSection(page, 'importExport', 'Import / Export');
   await page.getByRole('button', { name: 'Sync Setup' }).click();
@@ -1646,6 +1646,9 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       })
     )
     .toBe(true);
+  await expect(page.locator('#mobileUndoTray')).toBeHidden({
+    timeout: 5000
+  });
 
   await page.locator('.mobile-more-nav-item').click();
   const moreDialog = page.getByRole('dialog', { name: 'More' });
