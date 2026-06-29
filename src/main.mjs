@@ -16,6 +16,7 @@ import {
   getProjectDeadlineDay,
   getProjectDeadlineEndExclusive,
   getProjectPlannedHoursForPeriod,
+  getProjectPlanningSnapshot,
   getProjectStartDate,
   getProjectWeeklyExpectedHours,
   getRollingWindowBounds,
@@ -7468,6 +7469,34 @@ import {
 
   // Navigation
   const navList = document.getElementById('navList');
+  const defaultSectionId = 'timer';
+  const sectionIds = new Set(
+    Array.from(document.querySelectorAll('.section')).map(
+      (section) => section.id
+    )
+  );
+  let activeSectionId = null;
+
+  function updateSectionHash(sectionId) {
+    if (!sectionIds.has(sectionId) || !window.history) return;
+    const nextHash = `#${encodeURIComponent(sectionId)}`;
+    if (window.location.hash === nextHash) return;
+    window.history.replaceState(
+      null,
+      '',
+      `${window.location.pathname}${window.location.search}${nextHash}`
+    );
+  }
+
+  function shouldShowTodayCommandPanel(sectionId = activeSectionId) {
+    return sectionId === 'dashboard';
+  }
+
+  function syncTodayCommandPanelVisibility(sectionId = activeSectionId) {
+    const panel = document.getElementById('todayCommandPanel');
+    if (!panel) return;
+    panel.classList.toggle('hidden', !shouldShowTodayCommandPanel(sectionId));
+  }
 
   function updateMobileMoreActiveState(sectionId) {
     const moreItem = navList.querySelector('.mobile-more-nav-item');
@@ -7481,8 +7510,10 @@ import {
     moreItem.classList.toggle('active', !primarySections.has(sectionId));
   }
 
-  function showSection(sectionId, navItem = null) {
-    if (!sectionId || !document.getElementById(sectionId)) return;
+  function showSection(sectionId, navItem = null, options = {}) {
+    if (!sectionId || !sectionIds.has(sectionId)) return;
+    const { updateHash = true, resetScroll = true } = options;
+    activeSectionId = sectionId;
     navList
       .querySelectorAll('li')
       .forEach((item) => item.classList.remove('active'));
@@ -7494,6 +7525,10 @@ import {
       sec.style.display = 'none';
     });
     document.getElementById(sectionId).style.display = 'block';
+    if (sectionId !== 'entries') {
+      closeManualEntryForm({ reset: false, updateNowBar: false });
+    }
+    syncTodayCommandPanelVisibility(sectionId);
     // update content if needed
     if (sectionId === 'dashboard') {
       updateDashboard();
@@ -7512,6 +7547,11 @@ import {
     }
     applyMobileChartCollapses();
     renderMobileSyncStatus();
+    renderMobileNowBar();
+    if (updateHash) updateSectionHash(sectionId);
+    if (resetScroll && typeof window.scrollTo === 'function') {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
   }
 
   navList.querySelectorAll('li[data-section]').forEach((li) => {
@@ -8272,9 +8312,28 @@ import {
     const remainingHours = project.budgetHours - totalHours;
     const created = getProjectStartDate(project);
     const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
-    const todayEndExclusive = addLocalDays(
-      new Date(now.getFullYear(), now.getMonth(), now.getDate()),
-      1
+    const todayStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const todayEndExclusive = addLocalDays(todayStart, 1);
+    const planningSnapshot = getProjectPlanningSnapshot(
+      project,
+      entries,
+      todayStart
+    );
+    const requiredDailyPace = Math.max(
+      0,
+      Number(planningSnapshot.dailyRate) || 0
+    );
+    const paceRemainingWorkdays = Math.max(
+      0,
+      Number(planningSnapshot.remainingWorkdays) || 0
+    );
+    const paceRemainingHours = Math.max(
+      0,
+      Number(planningSnapshot.remainingHours) || 0
     );
     const projectNotStarted = now < created;
     const totalProjectDays = deadlineEndExclusive
@@ -8450,9 +8509,13 @@ import {
         monthlyRevenue,
         lastMonthRevenue,
         weeklyTargetConst,
+        weeklyCommitmentHours: weeklyTargetConst,
         weeklyTargetBeforeRollingCredit: weeklyTargetConst,
         rolling30SurplusHours: 0,
-        monthlyTargetConst
+        monthlyTargetConst,
+        requiredDailyPace,
+        paceRemainingWorkdays,
+        paceRemainingHours
       };
     }
     // Period targets are anchored to the period start. They should not move
@@ -8511,9 +8574,13 @@ import {
         monthlyRevenue,
         lastMonthRevenue,
         weeklyTargetConst: 0,
+        weeklyCommitmentHours: 0,
         weeklyTargetBeforeRollingCredit: 0,
         rolling30SurplusHours: 0,
-        monthlyTargetConst: 0
+        monthlyTargetConst: 0,
+        requiredDailyPace,
+        paceRemainingWorkdays,
+        paceRemainingHours
       };
     }
     return {
@@ -8542,9 +8609,13 @@ import {
       monthlyRevenue,
       lastMonthRevenue,
       weeklyTargetConst,
+      weeklyCommitmentHours: weeklyTargetConst,
       weeklyTargetBeforeRollingCredit,
       rolling30SurplusHours,
-      monthlyTargetConst
+      monthlyTargetConst,
+      requiredDailyPace,
+      paceRemainingWorkdays,
+      paceRemainingHours
     };
   }
 
@@ -8609,6 +8680,10 @@ import {
       0,
       Number(projectStats.weeklyTargetConst) || 0
     );
+    const requiredDailyPace = Math.max(
+      0,
+      Number(projectStats.requiredDailyPace) || 0
+    );
     const todayIsWorkday =
       countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
     const remainingAtStartOfDay = Math.max(
@@ -8621,7 +8696,10 @@ import {
         : 0;
     return {
       todayHours,
+      requiredDailyPace,
+      weeklyCommitmentHours: weeklyTarget,
       dailyTarget,
+      recommendedToday: dailyTarget,
       remainingToday: Math.max(0, dailyTarget - todayHours),
       weeklyRemaining: Math.max(
         0,
@@ -8630,28 +8708,79 @@ import {
     };
   }
 
+  function getDailyPlanRecommendedRemaining(dailyPlan) {
+    const adjusted = Number(dailyPlan?.recommendedRemainingToday);
+    if (Number.isFinite(adjusted)) return Math.max(0, adjusted);
+    return Math.max(0, Number(dailyPlan?.remainingToday) || 0);
+  }
+
+  function applyPortfolioDailyCredit(dailyPlans) {
+    if (!dailyPlans || !dailyPlans.size) return dailyPlans;
+    let portfolioDailyTarget = 0;
+    let portfolioTodayHours = 0;
+    dailyPlans.forEach((plan) => {
+      portfolioDailyTarget += Math.max(0, Number(plan.dailyTarget) || 0);
+      portfolioTodayHours += Math.max(0, Number(plan.todayHours) || 0);
+    });
+    const portfolioRemainingToday = Math.max(
+      0,
+      portfolioDailyTarget - portfolioTodayHours
+    );
+    dailyPlans.forEach((plan) => {
+      plan.portfolioRemainingToday = portfolioRemainingToday;
+      plan.recommendedRemainingToday = Math.min(
+        Math.max(0, Number(plan.remainingToday) || 0),
+        portfolioRemainingToday
+      );
+    });
+    return dailyPlans;
+  }
+
+  function getProjectRecommendationPressure(item, dailyPlan) {
+    const remainingToday = getDailyPlanRecommendedRemaining(dailyPlan);
+    if (remainingToday <= 0.01) return 0;
+    const requiredDailyPace = Math.max(
+      0,
+      Number(dailyPlan?.requiredDailyPace ?? item.stats.requiredDailyPace) || 0
+    );
+    const remainingWorkdaysRaw = Number(item.stats.paceRemainingWorkdays);
+    const remainingWorkdays =
+      Number.isFinite(remainingWorkdaysRaw) && remainingWorkdaysRaw > 0
+        ? remainingWorkdaysRaw
+        : 1;
+    const positiveScheduleDeficit = Math.max(
+      0,
+      Number(item.stats.totalScheduleDeficit) || 0
+    );
+    const deficitPerWorkday = positiveScheduleDeficit / remainingWorkdays;
+    const urgencyLoad = requiredDailyPace / remainingWorkdays;
+    return remainingToday + requiredDailyPace + deficitPerWorkday + urgencyLoad;
+  }
+
   function getRecommendedProjectEntry(perProjectStats, dailyPlanByProjectId) {
     let recommendedProjectEntry = null;
-    let maxDailyRemaining = 0;
-    let bestTieBreaker = -Infinity;
+    let bestPressure = -Infinity;
+    let bestRemainingToday = 0;
+    let bestWeeklyRemaining = 0;
     perProjectStats.forEach((item) => {
       const dailyPlan =
         dailyPlanByProjectId &&
         dailyPlanByProjectId.get(String(item.project.id));
-      const remainingToday = dailyPlan
-        ? dailyPlan.remainingToday
-        : getProjectDailyPlan(item.project, item.stats).remainingToday;
-      const tieBreaker = Number.isFinite(item.stats.totalScheduleDeficit)
-        ? item.stats.totalScheduleDeficit
-        : 0;
+      const plan = dailyPlan || getProjectDailyPlan(item.project, item.stats);
+      const remainingToday = getDailyPlanRecommendedRemaining(plan);
+      const weeklyRemaining = Math.max(0, Number(plan.weeklyRemaining) || 0);
+      const pressure = getProjectRecommendationPressure(item, plan);
       if (
-        remainingToday > maxDailyRemaining + 0.01 ||
-        (Math.abs(remainingToday - maxDailyRemaining) <= 0.01 &&
-          remainingToday > 0 &&
-          tieBreaker > bestTieBreaker)
+        remainingToday > 0.01 &&
+        (pressure > bestPressure + 0.01 ||
+          (Math.abs(pressure - bestPressure) <= 0.01 &&
+            (remainingToday > bestRemainingToday + 0.01 ||
+              (Math.abs(remainingToday - bestRemainingToday) <= 0.01 &&
+                weeklyRemaining > bestWeeklyRemaining + 0.01))))
       ) {
-        maxDailyRemaining = remainingToday;
-        bestTieBreaker = tieBreaker;
+        bestPressure = pressure;
+        bestRemainingToday = remainingToday;
+        bestWeeklyRemaining = weeklyRemaining;
         recommendedProjectEntry = item;
       }
     });
@@ -8862,6 +8991,7 @@ import {
         getProjectDailyPlan(item.project, item.stats, weekContext)
       ])
     );
+    applyPortfolioDailyCredit(dailyPlanByProjectId);
     const recommendedProjectEntry = getRecommendedProjectEntry(
       perProjectStats,
       dailyPlanByProjectId
@@ -8960,7 +9090,7 @@ import {
         // Progress label expresses hours progress relative to target and time progress relative to the week
         progressLabel:
           (stats.weeklyProgress || 0).toFixed(1) +
-          '% of weekly target in ' +
+          '% of weekly commitment in ' +
           weeklyTimeProgress.toFixed(1) +
           '% of the week',
         // Schedule label indicates whether the user is ahead, behind, or on schedule this week
@@ -9383,7 +9513,7 @@ import {
         stats.totalHours.toFixed(1) +
         (isWeeklyPaceProject(project)
           ? `h total | ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h this week`
-          : 'h / ' + project.budgetHours.toFixed(1) + 'h');
+          : `h / ${project.budgetHours.toFixed(1)}h | ${stats.requiredDailyPace.toFixed(1)}h/day pace`);
       info.appendChild(hoursDiv);
       item.appendChild(info);
       // progress bar container showing expected progress (black) and hours worked (blue) as two stacked bars
@@ -9480,7 +9610,7 @@ import {
     table.classList.add('responsive-table');
     const thead = document.createElement('thead');
     thead.innerHTML =
-      '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>This Week</th><th>Last Week</th><th>30-Day Pace</th><th>Revenue</th></tr>';
+      '<tr><th>Project</th><th>Client</th><th>Hours</th><th>Budget</th><th>Status</th><th>Daily Pace</th><th>This Week</th><th>Last Week</th><th>30-Day Pace</th><th>Revenue</th></tr>';
     table.appendChild(thead);
     const tbody = document.createElement('tbody');
     activeProjects.forEach((project) => {
@@ -9506,7 +9636,8 @@ import {
               <td data-label="Hours">${stats.totalHours.toFixed(1)}h</td>
               <td data-label="Budget">${isWeeklyPaceProject(project) ? `${getProjectWeeklyExpectedHours(project).toFixed(1)}h/week` : `${project.budgetHours.toFixed(1)}h`}</td>
               <td data-label="Status"><span class="status-badge ${statusColor}"${statusTitle}>${statusLabel}</span></td>
-              <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</td>
+              <td data-label="Daily Pace">${stats.requiredDailyPace.toFixed(1)}h/workday</td>
+              <td data-label="This Week">${stats.weeklyHours.toFixed(1)} / ${stats.weeklyCommitmentHours.toFixed(1)}h (commitment)</td>
               <td data-label="Last Week">${stats.lastWeekHours.toFixed(1)}h</td>
               <td data-label="30-Day Pace">${stats.rolling30Hours.toFixed(1)} / ${stats.rolling30TargetConst.toFixed(1)}h${isRecommendedMonthly ? ' (Recommended)' : ''} (pace)</td>
               <td data-label="Revenue">${formatCurrency(stats.revenue)}</td>
@@ -9981,12 +10112,14 @@ import {
       const deadlineLine = isWeeklyProject
         ? '<p style="margin:0.25rem 0;"><strong>Deadline:</strong> None</p>'
         : `<p style="margin:0.25rem 0;"><strong>Deadline:</strong> ${formatDate(project.deadline)}</p>`;
+      const paceLine = `<p style="margin:0.25rem 0;"><strong>Required pace:</strong> ${stats.requiredDailyPace.toFixed(1)}h/workday</p>`;
       const card = document.createElement('div');
       card.className = 'card';
       card.innerHTML = `
               <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">${projectName}</h3>
               <p style="margin:0 0 0.25rem 0;"><strong>Client:</strong> ${projectClient}</p>
               ${budgetLine}
+              ${paceLine}
               <div style="margin:0.5rem 0;">
                 <!-- Dual progress bars showing actual hours vs expected timeline progress -->
                 <div style="display:flex; flex-direction:column; gap:0.2rem; margin-bottom:0.25rem;">
@@ -9999,7 +10132,7 @@ import {
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.weeklyTargetConst ? (stats.weeklyHours / stats.weeklyTargetConst) * 100 : 0}%"></div></div>
-                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyTargetConst.toFixed(1)}h (target)</small>
+                <small>This week: ${stats.weeklyHours.toFixed(1)} / ${stats.weeklyCommitmentHours.toFixed(1)}h (commitment)</small>
               </div>
               <div style="margin:0.5rem 0;">
                 <div class="progress-bar" style="margin-bottom:0.25rem;"><div class="fill" style="width:${stats.rolling30TargetConst ? (stats.rolling30Hours / stats.rolling30TargetConst) * 100 : 0}%"></div></div>
@@ -10457,7 +10590,11 @@ import {
   function renderMobileNowBar(now = new Date()) {
     const bar = document.getElementById('mobileNowBar');
     if (!bar) return;
-    if (!isMobileViewport()) {
+    if (
+      !isMobileViewport() ||
+      activeSectionId === 'timer' ||
+      isManualEntryFormOpen()
+    ) {
       bar.classList.add('hidden');
       bar.innerHTML = '';
       delete bar.dataset.renderKey;
@@ -11681,6 +11818,7 @@ import {
     const dailyPlanByProjectId = new Map(
       projectOptionData.map((item) => [String(item.project.id), item.dailyPlan])
     );
+    applyPortfolioDailyCredit(dailyPlanByProjectId);
     const recommendedEntry = getRecommendedProjectEntry(
       projectOptionData,
       dailyPlanByProjectId
@@ -11688,8 +11826,13 @@ import {
     const sortedProjects = projectOptionData
       .slice()
       .sort((a, b) => {
+        const pressureDiff =
+          getProjectRecommendationPressure(b, b.dailyPlan) -
+          getProjectRecommendationPressure(a, a.dailyPlan);
+        if (Math.abs(pressureDiff) > 0.01) return pressureDiff;
         const remainingDiff =
-          b.dailyPlan.remainingToday - a.dailyPlan.remainingToday;
+          getDailyPlanRecommendedRemaining(b.dailyPlan) -
+          getDailyPlanRecommendedRemaining(a.dailyPlan);
         if (Math.abs(remainingDiff) > 0.01) return remainingDiff;
         const weeklyDiff =
           b.dailyPlan.weeklyRemaining - a.dailyPlan.weeklyRemaining;
@@ -11708,8 +11851,9 @@ import {
     } else if (
       currentRecommendedMonthlyId &&
       !runningProjectIds.has(String(currentRecommendedMonthlyId)) &&
-      (dailyPlanByProjectId.get(String(currentRecommendedMonthlyId))
-        ?.remainingToday || 0) > 0
+      getDailyPlanRecommendedRemaining(
+        dailyPlanByProjectId.get(String(currentRecommendedMonthlyId))
+      ) > 0
     ) {
       recommendedForTimerId = currentRecommendedMonthlyId;
     } else {
@@ -11738,8 +11882,10 @@ import {
         try {
           const dailyPlan = dailyPlanByProjectId.get(String(project.id));
           label +=
-            ' (Recommended, needs ~' +
-            formatRecommendationHours(dailyPlan?.remainingToday) +
+            ' (Recommended, ~' +
+            formatRecommendationHours(
+              getDailyPlanRecommendedRemaining(dailyPlan)
+            ) +
             'h today)';
         } catch (err) {
           label += ' (Recommended)';
@@ -11802,8 +11948,10 @@ import {
           'Recommended: ' +
           recommendedProject.name +
           ' - ' +
-          formatRecommendationHours(dailyPlan?.remainingToday) +
-          'h left today';
+          formatRecommendationHours(
+            getDailyPlanRecommendedRemaining(dailyPlan)
+          ) +
+          'h today';
         recommendationEl.style.display = '';
       } else {
         recommendationEl.textContent = '';
@@ -11930,17 +12078,48 @@ import {
     appendSection('Recent timers', startableRecent);
   }
 
+  function isManualEntryFormOpen() {
+    const panel = document.getElementById('manualEntryFormPro');
+    return (
+      activeSectionId === 'entries' &&
+      panel &&
+      !panel.classList.contains('hidden')
+    );
+  }
+
+  function openManualEntryForm() {
+    const panel = document.getElementById('manualEntryFormPro');
+    if (!panel) return;
+    panel.classList.remove('hidden');
+    document.getElementById('entries')?.classList.add('manual-entry-active');
+    renderMobileNowBar();
+    if (!isMobileViewport()) return;
+    window.requestAnimationFrame(() => {
+      panel.scrollIntoView({ block: 'start', behavior: 'auto' });
+      const focusTarget =
+        document.getElementById('manualProjectPro') ||
+        document.getElementById('manualDescriptionPro');
+      if (focusTarget) focusTarget.focus({ preventScroll: true });
+    });
+  }
+
+  function closeManualEntryForm({ reset = true, updateNowBar = true } = {}) {
+    const panel = document.getElementById('manualEntryFormPro');
+    if (!panel) return;
+    panel.classList.add('hidden');
+    document.getElementById('entries')?.classList.remove('manual-entry-active');
+    if (reset) document.getElementById('manualFormPro')?.reset();
+    if (updateNowBar) renderMobileNowBar();
+  }
+
   // Manual entry add/cancel
   document
     .getElementById('addManualEntryBtnPro')
-    .addEventListener('click', () => {
-      document.getElementById('manualEntryFormPro').classList.remove('hidden');
-    });
+    .addEventListener('click', openManualEntryForm);
   document
     .getElementById('cancelManualBtnPro')
     .addEventListener('click', () => {
-      document.getElementById('manualEntryFormPro').classList.add('hidden');
-      document.getElementById('manualFormPro').reset();
+      closeManualEntryForm();
     });
 
   function applyProjectRoundingToWallSeconds(wallSeconds, project) {
@@ -12384,7 +12563,7 @@ import {
     });
     if (!entry) return;
     e.target.reset();
-    document.getElementById('manualEntryFormPro').classList.add('hidden');
+    closeManualEntryForm({ reset: false });
     showToast('Manual entry logged.');
   });
 
@@ -12490,6 +12669,7 @@ import {
         getProjectDailyPlan(item.project, item.stats, weekContext)
       ])
     );
+    applyPortfolioDailyCredit(dailyPlanByProjectId);
     const recommendation = getRecommendedProjectEntry(
       perProjectStats,
       dailyPlanByProjectId
@@ -13010,6 +13190,7 @@ import {
   function renderTodayCommandPanel() {
     const panel = document.getElementById('todayCommandPanel');
     if (!panel) return;
+    syncTodayCommandPanelVisibility();
     panel.innerHTML = '';
     panel.classList.remove('mobile-today-panel');
     const runningEntries = getRunningEntries();
@@ -13066,7 +13247,7 @@ import {
     addItem(
       'Next',
       recommendation
-        ? `${recommendation.project.name} ${formatRecommendationHours(recommendation.dailyPlan?.remainingToday)}h`
+        ? `${recommendation.project.name} ${formatRecommendationHours(getDailyPlanRecommendedRemaining(recommendation.dailyPlan))}h`
         : 'caught up'
     );
     addItem(
@@ -15011,9 +15192,10 @@ import {
   }
 
   function applyLaunchRoute() {
-    const sectionId = getSectionFromHash() || 'timer';
-    activateSection(sectionId);
-    if (window.location.hash.toLowerCase() === '#quick-log') {
+    const launchHash = String(window.location.hash || '').toLowerCase();
+    const sectionId = getSectionFromHash(launchHash) || defaultSectionId;
+    showSection(sectionId, null, { resetScroll: false });
+    if (launchHash === '#quick-log') {
       window.setTimeout(() => openMobileQuickLogSheet(), 0);
     }
   }

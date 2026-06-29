@@ -658,6 +658,10 @@ tr:nth-child(even) td {
   box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
 }
 
+.today-command-panel.hidden {
+  display: none;
+}
+
 .today-command-header,
 .today-command-actions {
   display: flex;
@@ -815,6 +819,32 @@ tr:nth-child(even) td {
   padding: 0.55rem;
   border: 1px solid #cbd5e1;
   border-radius: 0.45rem;
+}
+
+.manual-entry-panel {
+  margin-top: 1rem;
+  scroll-margin-top: 1rem;
+}
+
+.manual-entry-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.manual-hours-row,
+.manual-entry-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.manual-entry-actions {
+  flex-wrap: wrap;
+}
+
+.manual-entry-actions .btn {
+  align-self: flex-start;
 }
 
 .billing-view-toolbar {
@@ -1512,6 +1542,13 @@ tr:nth-child(even) td {
     flex-direction: column;
   }
 
+  .quick-log-row input,
+  .entry-filter,
+  .entry-filter-search,
+  .billing-view-toolbar select {
+    flex: 0 0 auto;
+  }
+
   .entry-date-quick-filters {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1537,6 +1574,51 @@ tr:nth-child(even) td {
 
   #entries .card > div:first-child .btn {
     width: 100%;
+  }
+
+  #entries.manual-entry-active .quick-log-form,
+  #entries.manual-entry-active .entry-toolbar,
+  #entries.manual-entry-active .billing-view-toolbar,
+  #entries.manual-entry-active #entrySummaryPro,
+  #entries.manual-entry-active #entryBulkActions,
+  #entries.manual-entry-active .entry-table-scroll {
+    display: none;
+  }
+
+  .manual-entry-panel {
+    margin: 0.75rem 0 1rem;
+    padding: 0.85rem;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.75rem;
+    background: #f8fbff;
+    scroll-margin-top: 0.75rem;
+  }
+
+  .manual-entry-form input,
+  .manual-entry-form select {
+    min-height: 2.75rem;
+    font-size: 1rem;
+  }
+
+  .manual-hours-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    align-items: stretch;
+  }
+
+  .manual-entry-actions {
+    position: sticky;
+    bottom: calc(4.2rem + env(safe-area-inset-bottom));
+    z-index: 3;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-top: 0.5rem;
+    background: linear-gradient(to bottom, rgba(248, 251, 255, 0), #f8fbff 35%);
+  }
+
+  .manual-entry-actions .btn {
+    width: 100%;
+    min-height: 2.75rem;
   }
 
   #entries .entry-table {

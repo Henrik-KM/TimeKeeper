@@ -1155,7 +1155,9 @@ test('QoL quick log saved billing views and reminder controls work', async ({
   await expect(
     page.getByRole('heading', { name: 'Timer', exact: true })
   ).toBeVisible();
+  await expect(page.locator('#todayCommandPanel')).toBeHidden();
   await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(page.locator('#todayCommandPanel')).toBeVisible();
   await expect(page.locator('#todayCommandPanel')).toContainText('Today');
   await expect(page.locator('#todayCommandPanel')).toContainText(
     'Quick timers'
@@ -1278,6 +1280,7 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
 
   await page.goto('/');
   await gotoSection(page, 'entries', 'Time Entries');
+  await expect(page.locator('#todayCommandPanel')).toBeHidden();
   await expect(page.locator('#quickLogInput')).toBeVisible();
   await expect(page.locator('#entriesTableBodyPro')).toContainText(
     'Mobile card work'
@@ -1299,6 +1302,15 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
       sidebarBottom: sidebarStyle.bottom,
       rowDisplay: rowStyle.display,
       actionDisplay: actionCellStyle.display,
+      quickLogHeight: document
+        .querySelector('#quickLogInput')
+        .getBoundingClientRect().height,
+      searchHeight: document
+        .querySelector('#entrySearchInput')
+        .getBoundingClientRect().height,
+      fromHeight: document
+        .querySelector('#entryDateFromInput')
+        .getBoundingClientRect().height,
       scrollWidth: document.documentElement.scrollWidth,
       viewportWidth: window.innerWidth
     };
@@ -1311,6 +1323,9 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
   expect(layout.sidebarBottom).toBe('0px');
   expect(layout.rowDisplay).toBe('block');
   expect(layout.actionDisplay).toBe('flex');
+  expect(layout.quickLogHeight).toBeLessThan(80);
+  expect(layout.searchHeight).toBeLessThan(80);
+  expect(layout.fromHeight).toBeLessThan(80);
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
 
   await page
@@ -1386,6 +1401,25 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
   await undoTray.getByRole('button', { name: 'Undo' }).click();
   await expect(undoTray).not.toContainText('Entry duplicated.');
   await expect(undoTray).toContainText('Entry moved.');
+
+  await page.getByRole('button', { name: 'Add Manual Entry' }).click();
+  await expect(page.locator('#manualEntryFormPro')).toBeVisible();
+  await expect(page.locator('#quickLogForm')).toBeHidden();
+  await expect(page.locator('.entry-table-scroll')).toBeHidden();
+  await expect(page.locator('#manualProjectPro')).toBeFocused();
+  const manualPanelTop = await page
+    .locator('#manualEntryFormPro')
+    .evaluate((panel) => panel.getBoundingClientRect().top);
+  expect(manualPanelTop).toBeGreaterThanOrEqual(0);
+  expect(manualPanelTop).toBeLessThan(120);
+  await page.getByRole('button', { name: 'Cancel' }).click();
+  await expect(page.locator('#manualEntryFormPro')).toBeHidden();
+  await expect(page.locator('#quickLogForm')).toBeVisible();
+
+  await page.evaluate(() => window.scrollTo(0, 1000));
+  await gotoSection(page, 'analytics', 'Reports');
+  await expect(page.locator('#todayCommandPanel')).toBeHidden();
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
 });
 
 test('mobile shell exposes Now bar More menu sync status charts and richer quick timers', async ({
@@ -1523,6 +1557,8 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(syncStatus).toBeHidden();
 
   const nowBar = page.locator('#mobileNowBar');
+  await expect(nowBar).toBeHidden();
+  await gotoSection(page, 'dashboard', 'Dashboard');
   await expect(nowBar).toBeVisible();
   await expect(nowBar).toContainText('Mobile Timer');
   await expect(nowBar).toContainText('150%');
@@ -1591,6 +1627,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
+  await expect(commandPanel).toBeVisible();
   await expect(commandPanel).toContainText('Target');
   await expect(commandPanel).toContainText('Favorites');
   await expect(commandPanel).toContainText('Most used timers');
@@ -1629,6 +1666,11 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(syncDialog).toContainText('Choose folder');
   await expect(syncDialog).toContainText('Verify backup');
   await syncDialog.getByRole('button', { name: 'Close' }).last().click();
+
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(nowBar).toBeHidden();
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(nowBar).toBeVisible();
 
   await nowBar.getByRole('button', { name: 'Stop' }).click();
   await expect(nowBar).toBeHidden();
@@ -1729,6 +1771,7 @@ test('mobile Today one-click timers use repeated manual history before recent on
   });
 
   await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toContainText('Most used timers');
   await expect(commandPanel).toContainText('Frequent Project');
@@ -1745,6 +1788,35 @@ test('mobile Today one-click timers use repeated manual history before recent on
   await expect(page.locator('[id^="runningFactor-"]').first()).toHaveText(
     '50%'
   );
+});
+
+test('mobile hash shortcuts open the requested section', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'shortcut-project', name: 'Shortcut' })],
+    entries: []
+  });
+
+  await page.goto('/#entries');
+  await expect(
+    page.getByRole('heading', { name: 'Time Entries', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('#todayCommandPanel')).toBeHidden();
+  await expect(page.locator('#navList li.active')).toContainText('Entries');
+
+  await page.goto('/#timer');
+  await expect(
+    page.getByRole('heading', { name: 'Timer', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('#todayCommandPanel')).toBeHidden();
+  await expect(page.locator('#navList li.active')).toContainText('Timer');
+
+  await page.goto('/#dashboard');
+  await expect(
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('#todayCommandPanel')).toBeVisible();
+  await expect(page.locator('#navList li.active')).toContainText('Today');
 });
 
 test('entries render saved descriptions without executing markup', async ({
@@ -2151,6 +2223,13 @@ test('daily target catches up against the fixed weekly target', async ({
   await expect(statsGrid).toContainText('Anders: 0.0 / 6.3h');
   await expect(statsGrid).toContainText('Anders: 2.0 / 8.3h');
   await expect(statsGrid).toContainText('Anders: 52.0 / 41.9h');
+
+  await gotoSection(page, 'projects', 'Projects');
+  const projectsList = page.locator('#projectsPageList');
+  await expect(projectsList).toContainText('Required pace: 1.8h/workday');
+  await expect(projectsList).toContainText(
+    'This week: 2.0 / 8.3h (commitment)'
+  );
 });
 
 test('missed Monday hours are spread over the remaining week', async ({
@@ -2301,11 +2380,56 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*needs ~10\.0h today/
+    /IFLAI.*Recommended.*~10\.0h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 10.0h left today'
+    'Recommended: IFLAI - 10.0h today'
   );
+});
+
+test('daily recommendation credits hours worked on another active project', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-20T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'project-one',
+        name: 'Project One',
+        budgetHours: 20,
+        startDate: '2026-04-20',
+        deadline: '2026-04-24'
+      }),
+      projectFixture({
+        id: 'project-two',
+        name: 'Project Two',
+        budgetHours: 20,
+        startDate: '2026-04-20',
+        deadline: '2026-04-24'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'project-one-today',
+        projectId: 'project-one',
+        startTime: '2026-04-20T08:00:00.000',
+        endTime: '2026-04-20T16:00:00.000',
+        hours: 8
+      })
+    ]
+  });
+
+  await page.goto('/');
+
+  await expect(page.locator('#timerRecommendationPro')).toBeHidden();
+  await expect(
+    page.locator('#timerProjectPro option').first()
+  ).not.toContainText('Recommended');
+  await expect(
+    page.locator('#todayCommandPanel .today-command-item').filter({
+      hasText: 'Next'
+    })
+  ).toContainText('caught up');
 });
 
 test('daily and weekly targets stay fixed while logging time during the day', async ({
