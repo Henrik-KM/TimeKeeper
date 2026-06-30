@@ -358,6 +358,350 @@ import {
       updateTodoSection();
     }
   }
+
+  function formatSek(value, decimals = -1) {
+    return formatCurrency(value || 0, decimals).replace(' kr', ' SEK');
+  }
+
+  function getCurrentWeekBounds(now = new Date()) {
+    const dayOfWeek = now.getDay();
+    const diffToMon = (dayOfWeek + 6) % 7;
+    const weekStart = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate() - diffToMon
+    );
+    weekStart.setHours(0, 0, 0, 0);
+    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+    return { weekStart, weekEnd };
+  }
+
+  function getFinanceBudgetSnapshot(now = new Date()) {
+    const groceries = Array.isArray(data.groceries) ? data.groceries : [];
+    const recurringPayments = ensureMonthlyRecurringPayments();
+    const recurringTotal = getMonthlyRecurringTotal(recurringPayments);
+    const { weekStart, weekEnd } = getCurrentWeekBounds(now);
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+    monthStart.setHours(0, 0, 0, 0);
+    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    let startDate = parseLocalDateString(data.groceryBudgetStartDate);
+    if (!startDate) {
+      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
+    }
+    startDate.setHours(0, 0, 0, 0);
+    const monthsDiff =
+      (now.getFullYear() - startDate.getFullYear()) * 12 +
+      (now.getMonth() - startDate.getMonth());
+    const halfIndex = Math.floor(monthsDiff / 6);
+    const halfStart = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + halfIndex * 6,
+      startDate.getDate()
+    );
+    halfStart.setHours(0, 0, 0, 0);
+    const halfEnd = new Date(
+      startDate.getFullYear(),
+      startDate.getMonth() + (halfIndex + 1) * 6,
+      startDate.getDate()
+    );
+    halfEnd.setHours(0, 0, 0, 0);
+    let weeklySpent = 0;
+    let monthlySpent = 0;
+    let biannualSpent = 0;
+    groceries.forEach((item) => {
+      if (!item || !item.archived || !item.purchasedDate) return;
+      const cost = Number(item.cost);
+      if (!Number.isFinite(cost)) return;
+      const purchasedDate = new Date(item.purchasedDate);
+      if (Number.isNaN(purchasedDate.getTime())) return;
+      const frequency =
+        typeof item.frequency === 'string'
+          ? item.frequency.toLowerCase()
+          : 'weekly';
+      if (
+        frequency === 'weekly' &&
+        purchasedDate >= weekStart &&
+        purchasedDate < weekEnd
+      ) {
+        weeklySpent += cost;
+      }
+      if (
+        frequency === 'monthly' &&
+        purchasedDate >= monthStart &&
+        purchasedDate < monthEnd
+      ) {
+        monthlySpent += cost;
+      }
+      if (
+        frequency === 'biannual' &&
+        purchasedDate >= halfStart &&
+        purchasedDate < halfEnd
+      ) {
+        biannualSpent += cost;
+      }
+    });
+    monthlySpent += recurringTotal;
+    const fitness = ensureFitnessDefaults();
+    const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
+    const nextMultiplier = clampMultiplier(
+      typeof fitness.nextMultiplier === 'number'
+        ? fitness.nextMultiplier
+        : currentMultiplier
+    );
+    const weeklyBaseWithCarry =
+      (data.groceryBudgetWeekly || 0) + (data.groceryBudgetWeeklyCarry || 0);
+    const monthlyBudget =
+      (data.groceryBudgetMonthly || 0) + (data.groceryBudgetMonthlyCarry || 0);
+    const biannualBudget =
+      (data.groceryBudgetBiYearly || 0) +
+      (data.groceryBudgetBiYearlyCarry || 0);
+    const weeklyBudget = weeklyBaseWithCarry * currentMultiplier;
+    const makePeriod = (spent, budget, start, end) => {
+      const progress = clampUnitInterval((now - start) / (end - start));
+      const expected = budget * progress;
+      return {
+        spent,
+        budget,
+        expected,
+        remaining: Math.max(0, budget - spent),
+        progress
+      };
+    };
+    return {
+      weekly: makePeriod(weeklySpent, weeklyBudget, weekStart, weekEnd),
+      monthly: makePeriod(monthlySpent, monthlyBudget, monthStart, monthEnd),
+      biannual: makePeriod(biannualSpent, biannualBudget, halfStart, halfEnd),
+      recurringTotal,
+      wellnessCredits: fitness.wellnessCredits || 0,
+      currentMultiplier,
+      nextMultiplier,
+      nextWeekBudget: weeklyBaseWithCarry * nextMultiplier
+    };
+  }
+
+  function getWorkoutMobileSummary(now = new Date()) {
+    const fitness = ensureFitnessDefaults();
+    const monday = getWeekStart(now);
+    const nextMonday = new Date(monday);
+    nextMonday.setDate(nextMonday.getDate() + 7);
+    const pointsInfo = collectWorkoutPoints({ start: monday, end: nextMonday });
+    const weeklyPlan = computeWorkoutWeekPlan({
+      fitness,
+      pointsInfo,
+      weekStart: monday,
+      weekEnd: nextMonday,
+      now
+    });
+    const remaining = weeklyPlan.paused
+      ? 0
+      : Math.max(0, weeklyPlan.requiredPoints - weeklyPlan.actualPoints);
+    let state = 'On track';
+    let tone = '';
+    if (weeklyPlan.paused) {
+      state = 'Week paused';
+      tone = 'muted';
+    } else if (weeklyPlan.scheduleDelta <= -1) {
+      state = `${formatPoints(Math.abs(weeklyPlan.scheduleDelta))} pts behind`;
+      tone = 'risk';
+    } else if (weeklyPlan.scheduleDelta >= 1) {
+      state = `${formatPoints(weeklyPlan.scheduleDelta)} pts ahead`;
+      tone = 'primary';
+    }
+    return {
+      weeklyPlan,
+      pointsInfo,
+      remaining,
+      label: weeklyPlan.paused
+        ? 'Paused'
+        : `${formatPoints(remaining)} pts left`,
+      detail: `${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(
+        weeklyPlan.requiredPoints
+      )} pts scheduled`,
+      state,
+      tone
+    };
+  }
+
+  function getRecentManualWorkoutEntry() {
+    return ensureWorkoutData()
+      .entries.slice()
+      .filter((entry) => entry && entry.timestamp)
+      .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))[0];
+  }
+
+  function getFavoriteWorkoutPreset() {
+    const workouts = ensureWorkoutData();
+    const recent = getRecentManualWorkoutEntry();
+    if (recent) {
+      const preset = workouts.presets.find(
+        (candidate) => candidate.id === recent.presetId
+      );
+      if (preset) return preset;
+      return {
+        id: null,
+        name: recent.name,
+        intensity: recent.intensity
+      };
+    }
+    return workouts.presets.slice().sort((a, b) => {
+      return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+    })[0];
+  }
+
+  function logWorkoutShortcut(presetOrEntry) {
+    if (!presetOrEntry) {
+      openMobileWorkoutSheet();
+      return null;
+    }
+    const snapshot = cloneData();
+    const entry = logWorkoutEntry({
+      name: presetOrEntry.name,
+      intensity: presetOrEntry.intensity,
+      presetId: presetOrEntry.id || presetOrEntry.presetId || null
+    });
+    if (!entry) {
+      showToast('Could not log workout.');
+      return null;
+    }
+    offerUndo('Workout logged.', snapshot);
+    provideHaptic('beep');
+    renderTodayCommandPanel();
+    return entry;
+  }
+
+  function getRecentArchivedPurchase() {
+    return (Array.isArray(data.groceries) ? data.groceries : [])
+      .filter((item) => item && item.archived && item.purchasedDate)
+      .sort((a, b) => new Date(b.purchasedDate) - new Date(a.purchasedDate))[0];
+  }
+
+  function computePurchaseCost(item, originalCost, { apply = false } = {}) {
+    const fitnessData = ensureFitnessDefaults();
+    let costVal = originalCost;
+    let creditsUsed = 0;
+    let boostCreditsUsed = 0;
+    let boostPercentApplied = 0;
+    const itemFrequency =
+      typeof item.frequency === 'string'
+        ? item.frequency.toLowerCase()
+        : 'weekly';
+    if (itemFrequency === 'weekly') {
+      const availableCredits = fitnessData.wellnessCredits || 0;
+      let remainingCredits = availableCredits;
+      if (
+        fitnessData.weekendBoostEnabled &&
+        item.category === 'treat' &&
+        isWeekendBoostActive()
+      ) {
+        const boostPct = Math.max(0, fitnessData.weekendBoostPercent || 0);
+        if (boostPct > 0) {
+          const discount = originalCost * boostPct;
+          boostCreditsUsed = Math.min(discount, remainingCredits);
+          creditsUsed += boostCreditsUsed;
+          remainingCredits -= boostCreditsUsed;
+          boostPercentApplied = boostPct;
+        }
+      }
+      const additionalCredits = Math.min(
+        remainingCredits,
+        Math.max(0, originalCost - creditsUsed)
+      );
+      creditsUsed += additionalCredits;
+      costVal = Math.max(0, originalCost - creditsUsed);
+      if (apply) {
+        fitnessData.wellnessCredits = Math.max(
+          0,
+          (fitnessData.wellnessCredits || 0) - creditsUsed
+        );
+      }
+    }
+    return {
+      originalCost,
+      cost: costVal,
+      creditsUsed,
+      boostApplied: boostCreditsUsed > 0,
+      boostPercentApplied
+    };
+  }
+
+  function logGroceryPurchase(item, parsedCost, { snapshot = null } = {}) {
+    if (!item) {
+      showToast('Choose an item to buy.');
+      return null;
+    }
+    const originalCost = Number(parsedCost);
+    if (!Number.isFinite(originalCost) || originalCost < 0) {
+      showToast('Enter a valid cost.');
+      return null;
+    }
+    const undoSnapshot = snapshot || cloneData();
+    const purchase = computePurchaseCost(item, originalCost, { apply: true });
+    item.originalCost = purchase.originalCost;
+    item.cost = purchase.cost;
+    item.appliedCredits = purchase.creditsUsed;
+    item.boostApplied = purchase.boostApplied;
+    item.boostPercentApplied = purchase.boostPercentApplied;
+    item.archived = true;
+    item.purchasedDate = new Date().toISOString();
+    saveData();
+    updateGrocerySection();
+    updateTodoSection();
+    renderTodayCommandPanel();
+    offerUndo('Purchase logged.', undoSnapshot);
+    provideHaptic('beep');
+    return purchase;
+  }
+
+  function createAndLogGroceryPurchase({
+    name,
+    frequency = 'weekly',
+    category = 'standard',
+    cost
+  }) {
+    const trimmed = String(name || '').trim();
+    if (!trimmed) {
+      showToast('Enter an item name.');
+      return null;
+    }
+    const snapshot = cloneData();
+    if (!Array.isArray(data.groceries)) data.groceries = [];
+    const item = {
+      id: uuid(),
+      name: trimmed,
+      frequency: ['weekly', 'monthly', 'biannual'].includes(frequency)
+        ? frequency
+        : 'weekly',
+      category: ['standard', 'treat', 'essential'].includes(category)
+        ? category
+        : 'standard',
+      archived: false,
+      createdAt: new Date().toISOString()
+    };
+    data.groceries.push(item);
+    return logGroceryPurchase(item, cost, { snapshot });
+  }
+
+  function repeatRecentPurchase() {
+    const recent = getRecentArchivedPurchase();
+    if (!recent) {
+      openMobileFinanceSheet();
+      return null;
+    }
+    return createAndLogGroceryPurchase({
+      name: recent.name,
+      frequency:
+        typeof recent.frequency === 'string'
+          ? recent.frequency.toLowerCase()
+          : 'weekly',
+      category: ['standard', 'treat', 'essential'].includes(recent.category)
+        ? recent.category
+        : 'standard',
+      cost: Number.isFinite(Number(recent.originalCost))
+        ? Number(recent.originalCost)
+        : Number(recent.cost) || 0
+    });
+  }
+
   let wealthChartInstance = null;
   function addWealthHistoryEntry(dateStr, amountRaw, noteRaw = '') {
     const parsedDate = parseISODateOnly(dateStr);
@@ -4349,6 +4693,20 @@ import {
         creditsRow.appendChild(potentialPill);
       }
       const fragment = document.createDocumentFragment();
+      const nextAction = document.createElement('div');
+      nextAction.className = `mobile-next-action${pausedThisWeek ? ' muted' : workoutPlan.scheduleDelta <= -1 ? ' risk' : ''}`;
+      if (pausedThisWeek) {
+        nextAction.textContent =
+          'Next: week paused, no workout points required.';
+      } else if (workoutPlan.requiredPoints > workoutPlan.actualPoints) {
+        nextAction.textContent = `Next: log ${formatPoints(
+          Math.max(0, workoutPlan.requiredPoints - workoutPlan.actualPoints)
+        )} pts to hit this week's scheduled target.`;
+      } else {
+        nextAction.textContent =
+          'Next: target covered; optional workouts improve next week and credits.';
+      }
+      fragment.appendChild(nextAction);
       fragment.appendChild(grid);
       fragment.appendChild(creditsRow);
       const boostRow = document.createElement('div');
@@ -5395,6 +5753,19 @@ import {
     summaryTitle.style.fontWeight = '600';
     summaryTitle.textContent = 'Budget Summary';
     summaryCard.appendChild(summaryTitle);
+    const budgetNextAction = document.createElement('div');
+    const weeklyRemaining = Math.max(0, weeklyDynamicBudget - weeklySpent);
+    budgetNextAction.className = `mobile-next-action${
+      weeklyRemaining <= 0
+        ? ' risk'
+        : weeklySpent > weeklyExpectedSpent
+          ? ' warm'
+          : ''
+    }`;
+    budgetNextAction.textContent = `Next: ${formatSek(
+      weeklyRemaining
+    )} left this week; ${weeklySpent > weeklyExpectedSpent ? 'spending is ahead of expected pace' : 'spending is within expected pace'}.`;
+    summaryCard.appendChild(budgetNextAction);
     function addBudgetLine(label, spent, budget, expected) {
       const line = document.createElement('div');
       line.style.fontSize = '0.85rem';
@@ -5651,61 +6022,7 @@ import {
           showToast('Enter a valid cost.');
           return;
         }
-        const snapshot = cloneData();
-        let costVal = parsedCost;
-        const fitnessData = ensureFitnessDefaults();
-        const originalCost = costVal;
-        let creditsUsed = 0;
-        let boostCreditsUsed = 0;
-        let boostPercentApplied = 0;
-        const itemFrequency =
-          typeof item.frequency === 'string'
-            ? item.frequency.toLowerCase()
-            : 'weekly';
-        if (itemFrequency === 'weekly') {
-          const availableCredits = fitnessData.wellnessCredits || 0;
-          let remainingCredits = availableCredits;
-          if (
-            fitnessData.weekendBoostEnabled &&
-            item.category === 'treat' &&
-            isWeekendBoostActive()
-          ) {
-            const boostPct = Math.max(0, fitnessData.weekendBoostPercent || 0);
-            if (boostPct > 0) {
-              const discount = originalCost * boostPct;
-              boostCreditsUsed = Math.min(discount, remainingCredits);
-              creditsUsed += boostCreditsUsed;
-              remainingCredits -= boostCreditsUsed;
-              boostPercentApplied = boostPct;
-            }
-          }
-          const additionalCredits = Math.min(
-            remainingCredits,
-            Math.max(0, originalCost - creditsUsed)
-          );
-          creditsUsed += additionalCredits;
-          fitnessData.wellnessCredits = Math.max(
-            0,
-            (fitnessData.wellnessCredits || 0) - creditsUsed
-          );
-          costVal = Math.max(0, originalCost - creditsUsed);
-        }
-        item.originalCost = originalCost;
-        item.cost = costVal;
-        item.appliedCredits = creditsUsed;
-        item.boostApplied = boostCreditsUsed > 0;
-        item.boostPercentApplied = boostPercentApplied;
-        item.archived = true;
-        item.purchasedDate = new Date().toISOString();
-        saveData();
-        updateGrocerySection();
-        if (typeof updateTodoSection === 'function') {
-          updateTodoSection();
-        }
-        offerUndo('Purchase logged.', snapshot);
-        if (typeof provideHaptic === 'function') {
-          provideHaptic('beep');
-        }
+        logGroceryPurchase(item, parsedCost);
       });
       btnGroup.appendChild(buyBtn);
       // Edit button
@@ -7670,6 +7987,574 @@ import {
     if (firstFocus instanceof HTMLElement) firstFocus.focus();
     else panel.focus();
     return { backdrop, panel, body, actions, close, addAction };
+  }
+
+  function createMobileField(labelText, control) {
+    const label = document.createElement('label');
+    label.className = 'mobile-sheet-field';
+    const span = document.createElement('span');
+    span.textContent = labelText;
+    label.appendChild(span);
+    label.appendChild(control);
+    return label;
+  }
+
+  function createMobileSelect(options, selectedValue = '') {
+    const select = document.createElement('select');
+    options.forEach((option) => {
+      const opt = document.createElement('option');
+      opt.value = option.value;
+      opt.textContent = option.label;
+      select.appendChild(opt);
+    });
+    if (selectedValue) select.value = selectedValue;
+    return select;
+  }
+
+  function getWorkoutQuickTimestamp(dateKey) {
+    const when = new Date();
+    if (dateKey === 'yesterday') {
+      when.setDate(when.getDate() - 1);
+      when.setHours(18, 0, 0, 0);
+    }
+    return when;
+  }
+
+  function openMobileWorkoutSheet(seedPreset = null) {
+    const summary = getWorkoutMobileSummary();
+    const sheet = createMobileSheet('Log workout', {
+      className: 'mobile-workout-sheet',
+      description: `${summary.label} - ${summary.state}`
+    });
+    const summaryBox = document.createElement('div');
+    summaryBox.className = `mobile-next-action${summary.tone ? ` ${summary.tone}` : ''}`;
+    summaryBox.textContent = `${summary.detail}. Next: ${summary.label}.`;
+    sheet.body.appendChild(summaryBox);
+
+    const presets = ensureWorkoutData()
+      .presets.slice()
+      .sort((a, b) => {
+        const recent = getRecentManualWorkoutEntry();
+        if (recent) {
+          if (a.id === recent.presetId) return -1;
+          if (b.id === recent.presetId) return 1;
+        }
+        return a.name.localeCompare(b.name, undefined, { sensitivity: 'base' });
+      })
+      .slice(0, 4);
+    if (presets.length) {
+      const quickSection = document.createElement('div');
+      quickSection.className = 'mobile-today-section';
+      const title = document.createElement('div');
+      title.className = 'mobile-today-section-title';
+      title.textContent = 'One-tap presets';
+      quickSection.appendChild(title);
+      const grid = document.createElement('div');
+      grid.className = 'mobile-domain-action-grid';
+      presets.forEach((preset) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'mobile-domain-action';
+        const label = document.createElement('strong');
+        label.textContent = preset.name;
+        const detail = document.createElement('span');
+        detail.textContent = getIntensitySummary(preset.intensity);
+        button.appendChild(label);
+        button.appendChild(detail);
+        button.addEventListener('click', () => {
+          logWorkoutShortcut(preset);
+          sheet.close();
+        });
+        grid.appendChild(button);
+      });
+      quickSection.appendChild(grid);
+      sheet.body.appendChild(quickSection);
+    }
+
+    const structured = document.createElement('div');
+    structured.className = 'mobile-quick-log-structured';
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Workout name';
+    nameInput.value = seedPreset ? seedPreset.name || '' : '';
+    structured.appendChild(createMobileField('Workout', nameInput));
+
+    const seedIntensity = seedPreset
+      ? normalizeIntensity(seedPreset.intensity)
+      : 'medium';
+    const seedCustomPoints = parseCustomIntensity(seedIntensity);
+    const intensitySelect = createMobileSelect(
+      [
+        { value: 'intense', label: 'Intense' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'light', label: 'Light' },
+        { value: 'custom', label: 'Custom points' }
+      ],
+      seedCustomPoints === null ? seedIntensity : 'custom'
+    );
+    structured.appendChild(createMobileField('Intensity', intensitySelect));
+
+    const customInput = document.createElement('input');
+    customInput.type = 'number';
+    customInput.min = '0.01';
+    customInput.step = '0.01';
+    customInput.placeholder = 'Points';
+    if (seedCustomPoints !== null) {
+      customInput.value = formatCustomIntensityValue(seedCustomPoints);
+    }
+    const customField = createMobileField('Custom points', customInput);
+    structured.appendChild(customField);
+
+    let dateKey = 'today';
+    const chips = document.createElement('div');
+    chips.className = 'mobile-date-chip-row';
+    [
+      ['today', 'Today'],
+      ['yesterday', 'Yesterday']
+    ].forEach(([value, label]) => {
+      const chip = document.createElement('button');
+      chip.type = 'button';
+      chip.className = `btn secondary mobile-date-chip${value === dateKey ? ' active' : ''}`;
+      chip.textContent = label;
+      chip.addEventListener('click', () => {
+        dateKey = value;
+        chips.querySelectorAll('.mobile-date-chip').forEach((button) => {
+          button.classList.toggle('active', button === chip);
+        });
+        renderWorkoutPreview();
+      });
+      chips.appendChild(chip);
+    });
+    structured.appendChild(chips);
+
+    const preview = document.createElement('div');
+    preview.className = 'mobile-quick-log-preview';
+    preview.setAttribute('aria-live', 'polite');
+
+    function getWorkoutPayload() {
+      const trimmed = nameInput.value.trim();
+      if (!trimmed) return { ok: false, reason: 'Enter a workout name.' };
+      let intensity = intensitySelect.value;
+      if (intensity === 'custom') {
+        const customPoints = sanitizeCustomPoints(customInput.value);
+        if (customPoints === null) {
+          return { ok: false, reason: 'Enter valid custom points.' };
+        }
+        intensity = makeCustomIntensity(customPoints);
+      }
+      return {
+        ok: true,
+        name: trimmed,
+        intensity,
+        timestamp: getWorkoutQuickTimestamp(dateKey)
+      };
+    }
+
+    function renderWorkoutPreview() {
+      customField.classList.toggle(
+        'hidden',
+        intensitySelect.value !== 'custom'
+      );
+      const payload = getWorkoutPayload();
+      if (!payload.ok) {
+        preview.className = 'mobile-quick-log-preview risk';
+        preview.textContent = payload.reason;
+        return;
+      }
+      preview.className = 'mobile-quick-log-preview';
+      preview.textContent = `${payload.name} - ${getIntensitySummary(
+        payload.intensity
+      )} - ${formatWorkoutTimestamp(payload.timestamp)}`;
+    }
+
+    [nameInput, intensitySelect, customInput].forEach((input) => {
+      input.addEventListener('input', renderWorkoutPreview);
+      input.addEventListener('change', renderWorkoutPreview);
+    });
+    sheet.body.appendChild(structured);
+    sheet.body.appendChild(preview);
+    renderWorkoutPreview();
+
+    sheet.addAction('Log workout', 'primary', () => {
+      const payload = getWorkoutPayload();
+      if (!payload.ok) {
+        showToast(payload.reason);
+        renderWorkoutPreview();
+        return;
+      }
+      const snapshot = cloneData();
+      const entry = logWorkoutEntry(payload);
+      if (!entry) {
+        showToast('Could not log workout.');
+        return;
+      }
+      offerUndo('Workout logged.', snapshot);
+      provideHaptic('beep');
+      renderTodayCommandPanel();
+      sheet.close();
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileWealthSnapshotSheet() {
+    const sheet = createMobileSheet('Wealth snapshot', {
+      className: 'mobile-wealth-sheet',
+      description: 'Add a quick wealth data point.'
+    });
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = formatDateInputValue(new Date());
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.min = '0';
+    amountInput.step = '1';
+    amountInput.placeholder = 'Amount (SEK)';
+    const noteInput = document.createElement('input');
+    noteInput.placeholder = 'Note';
+    sheet.body.appendChild(createMobileField('Date', dateInput));
+    sheet.body.appendChild(createMobileField('Amount', amountInput));
+    sheet.body.appendChild(createMobileField('Note', noteInput));
+    sheet.addAction('Add point', 'primary', () => {
+      const snapshot = cloneData();
+      const result = addWealthHistoryEntry(
+        dateInput.value,
+        amountInput.value,
+        noteInput.value
+      );
+      if (!result.ok) {
+        showToast(
+          result.reason === 'date'
+            ? 'Enter a valid date.'
+            : 'Enter a valid amount.'
+        );
+        return;
+      }
+      renderWealthHistoryTable();
+      updateWealthDashboard();
+      renderTodayCommandPanel();
+      offerUndo('Wealth point added.', snapshot);
+      sheet.close();
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileRecurringPaymentSheet() {
+    const sheet = createMobileSheet('Recurring payment', {
+      className: 'mobile-recurring-sheet',
+      description: 'Add a fixed monthly payment.'
+    });
+    const nameInput = document.createElement('input');
+    nameInput.placeholder = 'Name';
+    const amountInput = document.createElement('input');
+    amountInput.type = 'number';
+    amountInput.min = '0';
+    amountInput.step = '0.01';
+    amountInput.placeholder = 'Amount (SEK)';
+    sheet.body.appendChild(createMobileField('Name', nameInput));
+    sheet.body.appendChild(createMobileField('Amount', amountInput));
+    sheet.addAction('Add payment', 'primary', () => {
+      const name = nameInput.value.trim();
+      const amount = Number(amountInput.value);
+      if (!name) {
+        showToast('Please enter a payment name.');
+        return;
+      }
+      if (!Number.isFinite(amount) || amount < 0) {
+        showToast('Enter a valid amount.');
+        return;
+      }
+      const snapshot = cloneData();
+      ensureMonthlyRecurringPayments().push({ id: uuid(), name, amount });
+      saveData();
+      updateGrocerySection();
+      renderTodayCommandPanel();
+      offerUndo('Recurring payment added.', snapshot);
+      sheet.close();
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileFinanceSheet() {
+    const snapshot = getFinanceBudgetSnapshot();
+    const recent = getRecentArchivedPurchase();
+    const sheet = createMobileSheet('Finance quick actions', {
+      className: 'mobile-finance-sheet',
+      description: `Weekly left ${formatSek(snapshot.weekly.remaining)}. Credits ${formatSek(
+        snapshot.wellnessCredits
+      )}.`
+    });
+    const summary = document.createElement('div');
+    summary.className = 'mobile-next-action';
+    summary.textContent = `Weekly ${formatSek(
+      snapshot.weekly.spent
+    )} / ${formatSek(snapshot.weekly.budget)}. Monthly ${formatSek(
+      snapshot.monthly.spent
+    )} / ${formatSek(snapshot.monthly.budget)}.`;
+    sheet.body.appendChild(summary);
+
+    if (recent) {
+      const repeatButton = document.createElement('button');
+      repeatButton.type = 'button';
+      repeatButton.className = 'mobile-domain-action';
+      const repeatLabel = document.createElement('strong');
+      repeatLabel.textContent = 'Repeat recent';
+      const repeatDetail = document.createElement('span');
+      repeatDetail.textContent = `${recent.name} - ${formatSek(
+        Number.isFinite(Number(recent.originalCost))
+          ? Number(recent.originalCost)
+          : Number(recent.cost) || 0
+      )}`;
+      repeatButton.appendChild(repeatLabel);
+      repeatButton.appendChild(repeatDetail);
+      repeatButton.addEventListener('click', () => {
+        repeatRecentPurchase();
+        sheet.close();
+      });
+      sheet.body.appendChild(repeatButton);
+    }
+
+    const activeItems = (Array.isArray(data.groceries) ? data.groceries : [])
+      .filter((item) => item && !item.archived)
+      .sort((a, b) => {
+        const freqOrder = { weekly: 0, monthly: 1, biannual: 2 };
+        const freqA = freqOrder[a.frequency] ?? 0;
+        const freqB = freqOrder[b.frequency] ?? 0;
+        if (freqA !== freqB) return freqA - freqB;
+        return String(a.name || '').localeCompare(
+          String(b.name || ''),
+          undefined,
+          {
+            sensitivity: 'base'
+          }
+        );
+      });
+    const itemSelect = createMobileSelect([
+      { value: 'custom', label: 'New expense' },
+      ...activeItems.map((item) => ({ value: item.id, label: item.name }))
+    ]);
+    const customNameInput = document.createElement('input');
+    customNameInput.placeholder = 'Expense name';
+    const frequencySelect = createMobileSelect(
+      [
+        { value: 'weekly', label: 'Weekly' },
+        { value: 'monthly', label: 'Monthly' },
+        { value: 'biannual', label: 'Biannual' }
+      ],
+      'weekly'
+    );
+    const categorySelect = createMobileSelect(
+      [
+        { value: 'standard', label: 'Standard' },
+        { value: 'treat', label: 'Treat' },
+        { value: 'essential', label: 'Essential' }
+      ],
+      'standard'
+    );
+    const costInput = document.createElement('input');
+    costInput.type = 'number';
+    costInput.min = '0';
+    costInput.step = '0.01';
+    costInput.placeholder = 'Cost (SEK)';
+    const customNameField = createMobileField('New expense', customNameInput);
+    const frequencyField = createMobileField('Frequency', frequencySelect);
+    const categoryField = createMobileField('Category', categorySelect);
+    sheet.body.appendChild(createMobileField('Purchase', itemSelect));
+    sheet.body.appendChild(customNameField);
+    sheet.body.appendChild(frequencyField);
+    sheet.body.appendChild(categoryField);
+    sheet.body.appendChild(createMobileField('Cost', costInput));
+
+    const preview = document.createElement('div');
+    preview.className = 'mobile-quick-log-preview';
+    preview.setAttribute('aria-live', 'polite');
+    sheet.body.appendChild(preview);
+
+    function getSelectedPurchaseItem() {
+      if (itemSelect.value === 'custom') {
+        return {
+          id: null,
+          name: customNameInput.value.trim(),
+          frequency: frequencySelect.value,
+          category: categorySelect.value
+        };
+      }
+      return activeItems.find((item) => String(item.id) === itemSelect.value);
+    }
+
+    function renderPurchasePreview() {
+      const custom = itemSelect.value === 'custom';
+      [customNameField, frequencyField, categoryField].forEach((field) => {
+        field.classList.toggle('hidden', !custom);
+      });
+      const item = getSelectedPurchaseItem();
+      const cost = Number(costInput.value);
+      if (!item || !String(item.name || '').trim()) {
+        preview.className = 'mobile-quick-log-preview risk';
+        preview.textContent = 'Choose an item or enter a new expense.';
+        return;
+      }
+      if (!Number.isFinite(cost) || cost < 0) {
+        preview.className = 'mobile-quick-log-preview risk';
+        preview.textContent = 'Enter a valid cost.';
+        return;
+      }
+      const purchase = computePurchaseCost(item, cost);
+      preview.className = 'mobile-quick-log-preview';
+      preview.textContent = `${item.name} - ${formatSek(
+        purchase.cost
+      )} counted${purchase.creditsUsed > 0 ? ` after ${formatSek(purchase.creditsUsed)} credits` : ''}.`;
+    }
+
+    [
+      itemSelect,
+      customNameInput,
+      frequencySelect,
+      categorySelect,
+      costInput
+    ].forEach((input) => {
+      input.addEventListener('input', renderPurchasePreview);
+      input.addEventListener('change', renderPurchasePreview);
+    });
+    renderPurchasePreview();
+
+    sheet.addAction('Log purchase', 'primary', () => {
+      const selected = getSelectedPurchaseItem();
+      const cost = Number(costInput.value);
+      if (!selected || !String(selected.name || '').trim()) {
+        showToast('Choose an item or enter a new expense.');
+        return;
+      }
+      if (!Number.isFinite(cost) || cost < 0) {
+        showToast('Enter a valid cost.');
+        return;
+      }
+      if (itemSelect.value === 'custom') {
+        createAndLogGroceryPurchase({
+          name: selected.name,
+          frequency: selected.frequency,
+          category: selected.category,
+          cost
+        });
+      } else {
+        logGroceryPurchase(selected, cost);
+      }
+      sheet.close();
+    });
+    sheet.addAction('Wealth snapshot', 'secondary', () => {
+      sheet.close();
+      openMobileWealthSnapshotSheet();
+    });
+    sheet.addAction('Recurring', 'secondary', () => {
+      sheet.close();
+      openMobileRecurringPaymentSheet();
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileRunningTimerSheet(entryId) {
+    const entry = data.entries.find(
+      (candidate) =>
+        String(candidate.id) === String(entryId) && candidate.isRunning
+    );
+    if (!entry) return;
+    const project = getEntryProject(entry);
+    const sheet = createMobileSheet('Running timer', {
+      className: 'mobile-running-timer-sheet',
+      description: `${project ? project.name : 'Unknown project'} - ${formatDuration(
+        Math.floor(getRunningEntryEffectiveSeconds(entry))
+      )}`
+    });
+    const projectSelect = createMobileSelect(
+      getActiveProjects().map((candidate) => ({
+        value: candidate.id,
+        label: candidate.name
+      })),
+      entry.projectId
+    );
+    const descriptionInput = document.createElement('input');
+    descriptionInput.value = entry.description || '';
+    descriptionInput.placeholder = 'Description';
+    const startInput = document.createElement('input');
+    startInput.type = 'datetime-local';
+    startInput.value = toDateTimeInputValue(entry.startTime);
+    const factorSelect = document.createElement('select');
+    factorSelect.setAttribute('aria-label', 'Timer focus');
+    appendCompactFocusFactorOptions(factorSelect);
+    factorSelect.value = ensureCurrentCompactFocusOption(
+      factorSelect,
+      getEntryActiveFactor(entry, getRunningEntries().length)
+    );
+    sheet.body.appendChild(createMobileField('Project', projectSelect));
+    sheet.body.appendChild(createMobileField('Description', descriptionInput));
+    sheet.body.appendChild(createMobileField('Start time', startInput));
+    sheet.body.appendChild(createMobileField('Focus', factorSelect));
+
+    const quickGrid = document.createElement('div');
+    quickGrid.className = 'mobile-domain-action-grid';
+    [
+      ['-5m', () => adjustRunningTimerElapsed(entry.id, -300)],
+      ['+5m', () => adjustRunningTimerElapsed(entry.id, 300)],
+      [
+        isTimerPaused(entry) ? 'Resume' : 'Pause',
+        () => {
+          if (isTimerPaused(entry)) resumeTimer(entry.id);
+          else pauseTimer(entry.id);
+          sheet.close();
+        }
+      ]
+    ].forEach(([label, action]) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = 'btn secondary';
+      button.textContent = label;
+      button.addEventListener('click', action);
+      quickGrid.appendChild(button);
+    });
+    sheet.body.appendChild(quickGrid);
+
+    sheet.addAction('Save changes', 'primary', () => {
+      const parsedStart = parseDateTimeInput(startInput.value);
+      if (!parsedStart) {
+        showToast('Enter a valid start time.');
+        return;
+      }
+      const selectedProject = data.projects.find(
+        (candidate) => String(candidate.id) === String(projectSelect.value)
+      );
+      if (!selectedProject) {
+        showToast('Choose a valid project.');
+        return;
+      }
+      const duplicateProject = getRunningEntries().some(
+        (candidate) =>
+          candidate.id !== entry.id &&
+          String(candidate.projectId) === String(selectedProject.id)
+      );
+      if (duplicateProject) {
+        showToast('A timer is already running for that project.');
+        return;
+      }
+      const snapshot = cloneData();
+      const now = new Date();
+      accumulateRunningEntry(entry, now, getRunningEntries().length);
+      entry.projectId = selectedProject.id;
+      entry.description = descriptionInput.value.trim();
+      entry.startTime = parsedStart.toISOString();
+      entry.lastUpdateTime = now.toISOString();
+      const selectedFactor = normalizeFocusFactor(factorSelect.value);
+      entry.factor = selectedFactor;
+      entry.focusFactor = selectedFactor;
+      entry.manualFactor = selectedFactor;
+      rebalanceActiveRunningFactors(now);
+      saveData();
+      refreshAllViews();
+      offerUndo('Timer updated.', snapshot);
+      sheet.close();
+    });
+    sheet.addAction('Stop', 'danger', () => {
+      sheet.close();
+      stopSingleTimer(entry.id);
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
   }
 
   function ensureMobileMoreNav() {
@@ -10646,7 +11531,9 @@ import {
     const summary = document.createElement('button');
     summary.type = 'button';
     summary.className = 'mobile-now-summary';
-    summary.addEventListener('click', () => activateSection('timer'));
+    summary.addEventListener('click', () =>
+      openMobileRunningTimerSheet(entry.id)
+    );
     const label = document.createElement('span');
     label.className = 'mobile-now-label';
     label.textContent =
@@ -10668,6 +11555,23 @@ import {
     );
     controls.appendChild(createRunningTimerNudgeButton(entry, -300, '-5m'));
     controls.appendChild(createRunningTimerNudgeButton(entry, 300, '+5m'));
+    const pauseBtn = document.createElement('button');
+    pauseBtn.type = 'button';
+    pauseBtn.className = 'btn secondary';
+    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
+    pauseBtn.addEventListener('click', () => {
+      if (isTimerPaused(entry)) resumeTimer(entry.id);
+      else pauseTimer(entry.id);
+    });
+    controls.appendChild(pauseBtn);
+    const detailsBtn = document.createElement('button');
+    detailsBtn.type = 'button';
+    detailsBtn.className = 'btn secondary';
+    detailsBtn.textContent = 'Edit';
+    detailsBtn.addEventListener('click', () => {
+      openMobileRunningTimerSheet(entry.id);
+    });
+    controls.appendChild(detailsBtn);
     const stopBtn = document.createElement('button');
     stopBtn.type = 'button';
     stopBtn.className = 'btn danger';
@@ -10848,19 +11752,17 @@ import {
         runningControls.appendChild(
           createRunningFactorSelect(entry, runningEntries.length)
         );
-        if (!isMobileViewport()) {
-          const pauseBtn = document.createElement('button');
-          pauseBtn.className = 'btn secondary';
-          pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
-          pauseBtn.addEventListener('click', () => {
-            if (isTimerPaused(entry)) {
-              resumeTimer(entry.id);
-            } else {
-              pauseTimer(entry.id);
-            }
-          });
-          runningControls.appendChild(pauseBtn);
-        }
+        const pauseBtn = document.createElement('button');
+        pauseBtn.className = 'btn secondary';
+        pauseBtn.textContent = isTimerPaused(entry) ? 'Resume' : 'Pause';
+        pauseBtn.addEventListener('click', () => {
+          if (isTimerPaused(entry)) {
+            resumeTimer(entry.id);
+          } else {
+            pauseTimer(entry.id);
+          }
+        });
+        runningControls.appendChild(pauseBtn);
         const editTimerBtn = document.createElement('button');
         editTimerBtn.className = 'btn secondary';
         editTimerBtn.textContent = 'Edit';
@@ -13074,6 +13976,14 @@ import {
     panel.classList.add('mobile-today-panel');
     const running = runningEntries[0] || null;
     const runningProject = running ? getEntryProject(running) : null;
+    const workoutSummary = getWorkoutMobileSummary();
+    const financeSummary = getFinanceBudgetSnapshot();
+    const weeklyFinanceTone =
+      financeSummary.weekly.remaining <= 0
+        ? 'risk'
+        : financeSummary.weekly.spent > financeSummary.weekly.expected
+          ? 'warm'
+          : '';
     const favoriteCount = getPinnedTimerShortcuts(
       new Set(runningEntries.map((entry) => String(entry.projectId)))
     ).length;
@@ -13146,6 +14056,15 @@ import {
       favoriteCount ? '' : 'muted',
       () => activateSection('timer')
     );
+    appendTodayCard('Workout', workoutSummary.label, workoutSummary.tone, () =>
+      openMobileWorkoutSheet(getFavoriteWorkoutPreset())
+    );
+    appendTodayCard(
+      'Weekly budget',
+      `${formatSek(financeSummary.weekly.remaining)} left`,
+      weeklyFinanceTone,
+      openMobileFinanceSheet
+    );
     panel.appendChild(primary);
 
     const runningProjectIds = new Set(
@@ -13168,6 +14087,21 @@ import {
         () => startTimerShortcut(nextTimerShortcut, { navigate: true })
       ]);
     }
+    const favoriteWorkout = getFavoriteWorkoutPreset();
+    actionConfigs.push([
+      favoriteWorkout ? 'Log usual workout' : 'Log workout',
+      nextTimerShortcut ? 'secondary' : 'primary',
+      () =>
+        favoriteWorkout
+          ? logWorkoutShortcut(favoriteWorkout)
+          : openMobileWorkoutSheet()
+    ]);
+    const recentPurchase = getRecentArchivedPurchase();
+    actionConfigs.push([
+      recentPurchase ? 'Repeat purchase' : 'Log purchase',
+      'secondary',
+      () => (recentPurchase ? repeatRecentPurchase() : openMobileFinanceSheet())
+    ]);
     actionConfigs.push([
       'Timer',
       nextTimerShortcut ? 'secondary' : 'primary',

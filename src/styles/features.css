@@ -788,6 +788,72 @@ tr:nth-child(even) td {
   color: #1e3a8a;
 }
 
+.mobile-next-action {
+  margin: 0 0 0.65rem;
+  padding: 0.65rem;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.6rem;
+  background: #f0fdf4;
+  color: #166534;
+  font-size: 0.88rem;
+  font-weight: 750;
+  line-height: 1.35;
+}
+
+.mobile-next-action.warm {
+  border-color: #fde68a;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.mobile-next-action.risk {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.mobile-next-action.muted {
+  border-color: #dbe3ef;
+  background: #f8fafc;
+  color: #475569;
+}
+
+.mobile-domain-action-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.45rem;
+}
+
+.mobile-domain-action {
+  display: grid;
+  gap: 0.16rem;
+  width: 100%;
+  min-height: 3rem;
+  padding: 0.6rem;
+  border: 1px solid #dbe3ef;
+  border-radius: 0.6rem;
+  background: #ffffff;
+  color: #0f172a;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+
+.mobile-domain-action strong {
+  overflow: hidden;
+  font-size: 0.9rem;
+  line-height: 1.15;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mobile-domain-action span {
+  color: #64748b;
+  font-size: 0.76rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
 .quick-log-form {
   display: grid;
   gap: 0.35rem;
@@ -1202,6 +1268,11 @@ tr:nth-child(even) td {
     background: #fef2f2;
   }
 
+  .mobile-today-card.muted {
+    border-color: #dbe3ef;
+    background: #f8fafc;
+  }
+
   .mobile-today-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1460,11 +1531,18 @@ tr:nth-child(even) td {
     display: flex;
     flex: 0 1 auto;
     gap: 0.25rem;
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .mobile-now-controls::-webkit-scrollbar {
+    display: none;
   }
 
   .mobile-now-controls .btn {
     min-height: 2.35rem;
-    min-width: 2.75rem;
+    min-width: 2.55rem;
     padding: 0.45rem 0.4rem;
   }
 

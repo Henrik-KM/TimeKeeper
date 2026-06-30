@@ -1620,16 +1620,52 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       })
     )
     .toBe(effectiveSecondsAfterFocus);
-  await expect(nowBar.getByRole('button', { name: 'Pause' })).toHaveCount(0);
-  await expect(
-    page.locator('#runningTimerPro').getByRole('button', { name: 'Pause' })
-  ).toHaveCount(0);
+  await nowBar.getByRole('button', { name: 'Pause' }).click();
+  await expect(nowBar).toContainText('paused');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return !!saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        ).pausedAt;
+      })
+    )
+    .toBe(true);
+  await nowBar.getByRole('button', { name: 'Resume' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return !!saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        ).pausedAt;
+      })
+    )
+    .toBe(false);
+  await nowBar.getByRole('button', { name: 'Edit' }).click();
+  const runningDialog = page.getByRole('dialog', { name: 'Running timer' });
+  await expect(runningDialog).toBeVisible();
+  await runningDialog.getByLabel('Description').fill('Edited mobile focus');
+  await runningDialog.getByRole('button', { name: 'Save changes' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.entries.find(
+          (candidate) => candidate.id === 'running-entry'
+        ).description;
+      })
+    )
+    .toBe('Edited mobile focus');
 
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toBeVisible();
   await expect(commandPanel).toContainText('Target');
   await expect(commandPanel).toContainText('Favorites');
+  await expect(commandPanel).toContainText('Workout');
+  await expect(commandPanel).toContainText('Weekly budget');
   await expect(commandPanel).toContainText('Most used timers');
   await expect(commandPanel).toContainText('Used Project');
   await expect(commandPanel).toContainText('Deep work');
@@ -1669,6 +1705,9 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await gotoSection(page, 'timer', 'Timer');
   await expect(nowBar).toBeHidden();
+  await expect(
+    page.locator('#runningTimerPro').getByRole('button', { name: 'Pause' })
+  ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
   await expect(nowBar).toBeVisible();
 
@@ -1717,6 +1756,106 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(page.locator('#weeklyScatter')).toBeHidden();
   await chartCard.locator('.mobile-chart-toggle').click();
   await expect(page.locator('#weeklyScatter')).toBeVisible();
+});
+
+test('mobile Today logs workouts and finances from quick actions', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-06-03T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [],
+    entries: [],
+    workouts: {
+      presets: [
+        {
+          id: 'workout-run',
+          name: 'Morning Run',
+          intensity: 'medium'
+        }
+      ],
+      entries: []
+    },
+    groceries: [
+      {
+        id: 'recent-coffee',
+        name: 'Coffee',
+        frequency: 'weekly',
+        category: 'standard',
+        archived: true,
+        cost: 45,
+        originalCost: 45,
+        purchasedDate: '2026-06-02T10:00:00.000Z',
+        createdAt: '2026-06-01T10:00:00.000Z'
+      }
+    ],
+    monthlyRecurringPayments: [],
+    groceryBudgetWeekly: 1000,
+    groceryBudgetMonthly: 4000,
+    groceryBudgetBiYearly: 20000,
+    groceryBudgetWeeklyCarry: 0,
+    groceryBudgetMonthlyCarry: 0,
+    groceryBudgetBiYearlyCarry: 0,
+    wealthHistory: []
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const commandPanel = page.locator('#todayCommandPanel');
+  await expect(commandPanel).toContainText('Workout');
+  await expect(commandPanel).toContainText('Weekly budget');
+  await commandPanel.getByRole('button', { name: 'Log usual workout' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.workouts.entries.map((entry) => entry.name);
+      })
+    )
+    .toContain('Morning Run');
+
+  await commandPanel.getByRole('button', { name: 'Repeat purchase' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        return saved.groceries.filter(
+          (item) => item.name === 'Coffee' && item.archived
+        ).length;
+      })
+    )
+    .toBe(2);
+
+  await commandPanel
+    .locator('.mobile-today-card')
+    .filter({ hasText: 'Weekly budget' })
+    .click();
+  const financeDialog = page.getByRole('dialog', {
+    name: 'Finance quick actions'
+  });
+  await expect(financeDialog).toBeVisible();
+  await financeDialog
+    .getByRole('textbox', { name: 'New expense' })
+    .fill('Lunch');
+  await financeDialog.getByLabel('Cost').fill('120');
+  await financeDialog.getByRole('button', { name: 'Log purchase' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+        const lunch = saved.groceries.find(
+          (item) => item.name === 'Lunch' && item.archived
+        );
+        return lunch
+          ? {
+              cost: lunch.cost,
+              frequency: lunch.frequency,
+              category: lunch.category
+            }
+          : null;
+      })
+    )
+    .toEqual({ cost: 120, frequency: 'weekly', category: 'standard' });
 });
 
 test('mobile Today one-click timers use repeated manual history before recent one-offs', async ({
