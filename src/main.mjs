@@ -8796,6 +8796,27 @@ import {
     }
   }
 
+  function setActiveStravaActivities(activities) {
+    const normalizedActivities = Array.isArray(activities) ? activities : [];
+    cachedStravaActivities = normalizedActivities;
+    window.stravaActivitiesCache = normalizedActivities;
+    const updatedActivities =
+      applyStravaExertionOverrides(normalizedActivities);
+    refreshStravaScoreScale(updatedActivities);
+    return updatedActivities;
+  }
+
+  function primeStravaCacheFromBrowserStorage() {
+    const cached = getCachedStravaFeedPayload();
+    if (!cached) return false;
+    const activities = Array.isArray(cached.activities)
+      ? cached.activities
+      : [];
+    if (!activities.length) return false;
+    setActiveStravaActivities(activities);
+    return true;
+  }
+
   function getStravaExertionOverrides() {
     try {
       const raw = localStorage.getItem('stravaExertionOverrides');
@@ -9130,11 +9151,8 @@ import {
           : 'Latest activities';
       status.textContent = error
         ? `${updatedText} - latest refresh failed: ${error}`
-        : updatedText;
-      cachedStravaActivities = activities;
-      window.stravaActivitiesCache = activities;
-      const updatedActivities = applyStravaExertionOverrides(activities);
-      refreshStravaScoreScale(updatedActivities);
+        : `${updatedText}${options.refreshing ? ' - refreshing latest...' : ''}`;
+      const updatedActivities = setActiveStravaActivities(activities);
       renderStravaActivities(updatedActivities);
       updateFitnessCards();
       updateTodoSection();
@@ -9144,8 +9162,13 @@ import {
       }
       return true;
     };
-    status.textContent = 'Loading latest activities...';
-    list.innerHTML = '';
+    const cached = getCachedStravaFeedPayload();
+    const renderedCache =
+      cached && renderPayload(cached, { fromCache: true, refreshing: true });
+    if (!renderedCache) {
+      status.textContent = 'Loading latest activities...';
+      list.innerHTML = '';
+    }
     try {
       const response = await fetch('assets/strava.json', { cache: 'no-store' });
       if (!response.ok) {
@@ -9153,14 +9176,14 @@ import {
       }
       const data = await response.json();
       if (!renderPayload(data)) {
-        const cached = getCachedStravaFeedPayload();
-        if (cached) {
-          renderPayload(cached, { fromCache: true });
+        const fallback = getCachedStravaFeedPayload();
+        if (fallback) {
+          renderPayload(fallback, { fromCache: true });
         }
       }
     } catch (error) {
-      const cached = getCachedStravaFeedPayload();
-      if (cached && renderPayload(cached, { fromCache: true })) {
+      const fallback = getCachedStravaFeedPayload();
+      if (fallback && renderPayload(fallback, { fromCache: true })) {
         return;
       }
       status.textContent =
@@ -15905,11 +15928,8 @@ import {
           updated_utc: payload.updated_utc || new Date().toISOString(),
           source: payload.source || `browser-import:${file.name}`
         };
-        cachedStravaActivities = activities;
-        window.stravaActivitiesCache = activities;
         saveCachedStravaFeedPayload(importedPayload);
-        const updatedActivities = applyStravaExertionOverrides(activities);
-        refreshStravaScoreScale(updatedActivities);
+        const updatedActivities = setActiveStravaActivities(activities);
         renderStravaActivities(updatedActivities);
         const status = document.getElementById('stravaFeedStatus');
         if (status) {
@@ -15948,6 +15968,7 @@ import {
   }
 
   // Initial render
+  primeStravaCacheFromBrowserStorage();
   updateProjectSelects();
   updateEntriesTable();
   updateProjectsPage();

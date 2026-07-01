@@ -2245,6 +2245,73 @@ test('Strava feed falls back to browser cache when the published feed is empty',
   );
 });
 
+test('cached Strava workout points render before feed refresh finishes', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-06-03T12:00:00');
+  await page.addInitScript(() => {
+    localStorage.clear();
+    localStorage.setItem(
+      'timekeeperStravaFeedCache',
+      JSON.stringify({
+        updated_utc: '2026-06-01T08:00:00Z',
+        cached_utc: '2026-06-03T08:00:00Z',
+        activities: [
+          {
+            id: 18739736076,
+            name: 'Cached Weight Training',
+            type: 'WeightTraining',
+            start_date: '2026-06-01T09:12:25Z',
+            elapsed_time_min: 60.3,
+            avg_hr: 147,
+            max_hr: 186,
+            exertion: 3.8,
+            url: 'https://www.strava.com/activities/18739736076'
+          }
+        ]
+      })
+    );
+  });
+  let markFeedRequested;
+  const feedRequested = new Promise((resolve) => {
+    markFeedRequested = resolve;
+  });
+  let releaseFeed = () => {};
+  const releaseFeedWait = new Promise((resolve) => {
+    releaseFeed = () => resolve(undefined);
+  });
+  await page.route('**/assets/strava.json', async (route) => {
+    markFeedRequested();
+    await releaseFeedWait;
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        updated_utc: '2026-06-03T08:00:00Z',
+        activities: [],
+        error: 'Strava refresh delayed'
+      })
+    });
+  });
+
+  await page.goto('/');
+  await feedRequested;
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const workoutCard = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Workout Progress' });
+  await expect(workoutCard).toContainText('3.8 / 18 pts');
+  await expect(workoutCard).not.toContainText('0 / 18 pts');
+
+  releaseFeed();
+  await gotoSection(page, 'todo', 'Workouts');
+  await expect(page.locator('#stravaFeedStatus')).toContainText('Cached');
+  await expect(page.locator('#workoutEntriesContent')).toContainText(
+    'Cached Weight Training'
+  );
+});
+
 test('daily target catches up against the fixed weekly target', async ({
   page
 }) => {
