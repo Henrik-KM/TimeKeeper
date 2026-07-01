@@ -1620,58 +1620,23 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       })
     )
     .toBe(effectiveSecondsAfterFocus);
-  await nowBar.getByRole('button', { name: 'Pause' }).click();
-  await expect(nowBar).toContainText('paused');
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        return !!saved.entries.find(
-          (candidate) => candidate.id === 'running-entry'
-        ).pausedAt;
-      })
-    )
-    .toBe(true);
-  await nowBar.getByRole('button', { name: 'Resume' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        return !!saved.entries.find(
-          (candidate) => candidate.id === 'running-entry'
-        ).pausedAt;
-      })
-    )
-    .toBe(false);
-  await nowBar.getByRole('button', { name: 'Edit' }).click();
-  const runningDialog = page.getByRole('dialog', { name: 'Running timer' });
-  await expect(runningDialog).toBeVisible();
-  await runningDialog.getByLabel('Description').fill('Edited mobile focus');
-  await runningDialog.getByRole('button', { name: 'Save changes' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        return saved.entries.find(
-          (candidate) => candidate.id === 'running-entry'
-        ).description;
-      })
-    )
-    .toBe('Edited mobile focus');
+  await expect(nowBar.getByRole('button', { name: 'Pause' })).toHaveCount(0);
+  await expect(nowBar.getByRole('button', { name: 'Resume' })).toHaveCount(0);
+  await expect(nowBar.getByRole('button', { name: 'Edit' })).toHaveCount(0);
 
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toBeVisible();
   await expect(commandPanel).toContainText('Target');
-  await expect(commandPanel).toContainText('Favorites');
-  await expect(commandPanel).toContainText('Workout');
-  await expect(commandPanel).toContainText('Weekly budget');
+  await expect(commandPanel).toContainText('Daily workout target');
+  await expect(commandPanel).not.toContainText('Favorites');
+  await expect(commandPanel).not.toContainText('Weekly budget');
   await expect(commandPanel).toContainText('Most used timers');
   await expect(commandPanel).toContainText('Used Project');
   await expect(commandPanel).toContainText('Deep work');
   await expect(commandPanel).toContainText('2x');
   await expect(commandPanel).not.toContainText('Last stopped');
-  await expect(commandPanel).toContainText('Favorite timers');
+  await expect(commandPanel).not.toContainText('Favorite timers');
   await expect(commandPanel).not.toContainText('Cleanup');
   await expect(commandPanel).not.toContainText('Backup');
   await expect(
@@ -1681,19 +1646,9 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
     commandPanel.getByRole('button', { name: 'Quick log' })
   ).toHaveCount(0);
   await expect(commandPanel).not.toContainText('Recent entries');
-  await expect(commandPanel).toContainText(
+  await expect(commandPanel).not.toContainText(
     'Pinned Project - Pinned pass - 150%'
   );
-
-  const favoriteRow = commandPanel
-    .locator('.mobile-favorite-timer')
-    .filter({ hasText: 'Pinned Project' });
-  await favoriteRow.getByRole('button', { name: 'Edit' }).click();
-  const favoriteDialog = page.getByRole('dialog', {
-    name: 'Edit Favorite Timer'
-  });
-  await expect(favoriteDialog).toBeVisible();
-  await favoriteDialog.getByRole('button', { name: 'Cancel' }).click();
 
   await gotoSection(page, 'importExport', 'Import / Export');
   await page.getByRole('button', { name: 'Sync Setup' }).click();
@@ -1758,7 +1713,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(page.locator('#weeklyScatter')).toBeVisible();
 });
 
-test('mobile Today logs workouts and finances from quick actions', async ({
+test('mobile Today shows daily workout target without quick finance actions', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -1802,60 +1757,27 @@ test('mobile Today logs workouts and finances from quick actions', async ({
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Workout');
-  await expect(commandPanel).toContainText('Weekly budget');
-  await commandPanel.getByRole('button', { name: 'Log usual workout' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        return saved.workouts.entries.map((entry) => entry.name);
-      })
-    )
-    .toContain('Morning Run');
-
-  await commandPanel.getByRole('button', { name: 'Repeat purchase' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        return saved.groceries.filter(
-          (item) => item.name === 'Coffee' && item.archived
-        ).length;
-      })
-    )
-    .toBe(2);
-
+  await expect(commandPanel).toContainText('Daily workout target');
+  await expect(commandPanel).not.toContainText('Weekly budget');
+  await expect(
+    commandPanel.getByRole('button', { name: 'Log usual workout' })
+  ).toHaveCount(0);
+  await expect(
+    commandPanel.getByRole('button', { name: 'Log workout' })
+  ).toHaveCount(0);
+  await expect(
+    commandPanel.getByRole('button', { name: 'Repeat purchase' })
+  ).toHaveCount(0);
+  await expect(
+    commandPanel.getByRole('button', { name: 'Log purchase' })
+  ).toHaveCount(0);
   await commandPanel
     .locator('.mobile-today-card')
-    .filter({ hasText: 'Weekly budget' })
+    .filter({ hasText: 'Daily workout target' })
     .click();
-  const financeDialog = page.getByRole('dialog', {
-    name: 'Finance quick actions'
-  });
-  await expect(financeDialog).toBeVisible();
-  await financeDialog
-    .getByRole('textbox', { name: 'New expense' })
-    .fill('Lunch');
-  await financeDialog.getByLabel('Cost').fill('120');
-  await financeDialog.getByRole('button', { name: 'Log purchase' }).click();
-  await expect
-    .poll(() =>
-      page.evaluate(() => {
-        const saved = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-        const lunch = saved.groceries.find(
-          (item) => item.name === 'Lunch' && item.archived
-        );
-        return lunch
-          ? {
-              cost: lunch.cost,
-              frequency: lunch.frequency,
-              category: lunch.category
-            }
-          : null;
-      })
-    )
-    .toEqual({ cost: 120, frequency: 'weekly', category: 'standard' });
+  const workoutDialog = page.getByRole('dialog', { name: 'Log workout' });
+  await expect(workoutDialog).toBeVisible();
+  await workoutDialog.getByRole('button', { name: 'Close' }).last().click();
 });
 
 test('mobile Today one-click timers use repeated manual history before recent one-offs', async ({

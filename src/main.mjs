@@ -495,6 +495,12 @@ import {
     const remaining = weeklyPlan.paused
       ? 0
       : Math.max(0, weeklyPlan.requiredPoints - weeklyPlan.actualPoints);
+    const todayStart = startOfLocalDay(now);
+    const daysLeftThisWeek = Math.max(
+      1,
+      Math.ceil((nextMonday.getTime() - todayStart.getTime()) / 86400000)
+    );
+    const dailyTarget = weeklyPlan.paused ? 0 : remaining / daysLeftThisWeek;
     let state = 'On track';
     let tone = '';
     if (weeklyPlan.paused) {
@@ -511,9 +517,10 @@ import {
       weeklyPlan,
       pointsInfo,
       remaining,
+      dailyTarget,
       label: weeklyPlan.paused
         ? 'Paused'
-        : `${formatPoints(remaining)} pts left`,
+        : `${formatPoints(dailyTarget)} pts today`,
       detail: `${formatPoints(weeklyPlan.actualPoints)} / ${formatPoints(
         weeklyPlan.requiredPoints
       )} pts scheduled`,
@@ -11555,23 +11562,6 @@ import {
     );
     controls.appendChild(createRunningTimerNudgeButton(entry, -300, '-5m'));
     controls.appendChild(createRunningTimerNudgeButton(entry, 300, '+5m'));
-    const pauseBtn = document.createElement('button');
-    pauseBtn.type = 'button';
-    pauseBtn.className = 'btn secondary';
-    pauseBtn.textContent = paused ? 'Resume' : 'Pause';
-    pauseBtn.addEventListener('click', () => {
-      if (isTimerPaused(entry)) resumeTimer(entry.id);
-      else pauseTimer(entry.id);
-    });
-    controls.appendChild(pauseBtn);
-    const detailsBtn = document.createElement('button');
-    detailsBtn.type = 'button';
-    detailsBtn.className = 'btn secondary';
-    detailsBtn.textContent = 'Edit';
-    detailsBtn.addEventListener('click', () => {
-      openMobileRunningTimerSheet(entry.id);
-    });
-    controls.appendChild(detailsBtn);
     const stopBtn = document.createElement('button');
     stopBtn.type = 'button';
     stopBtn.className = 'btn danger';
@@ -13709,50 +13699,6 @@ import {
     container.appendChild(section);
   }
 
-  function renderMobileFavoriteTimers(container, runningProjectIds) {
-    const favorites = getPinnedTimerShortcuts(runningProjectIds);
-    if (!favorites.length) return;
-    const section = document.createElement('div');
-    section.className = 'mobile-today-section';
-    const title = document.createElement('div');
-    title.className = 'mobile-today-section-title';
-    title.textContent = 'Favorite timers';
-    section.appendChild(title);
-    const list = document.createElement('div');
-    list.className = 'mobile-favorite-timer-list';
-    favorites.forEach((favorite) => {
-      const row = document.createElement('div');
-      row.className = 'mobile-favorite-timer';
-      const start = document.createElement('button');
-      start.type = 'button';
-      start.className = 'btn primary';
-      start.textContent = formatTimerPresetLabel(
-        favorite.project,
-        favorite.description,
-        favorite.focusFactor
-      );
-      start.addEventListener('click', () => {
-        startTimerShortcut(favorite, { navigate: true });
-      });
-      row.appendChild(start);
-      [
-        ['Up', () => moveTimerPreset(favorite.id, -1)],
-        ['Down', () => moveTimerPreset(favorite.id, 1)],
-        ['Edit', () => editTimerPreset(favorite.id)]
-      ].forEach(([label, action]) => {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'btn secondary';
-        button.textContent = label;
-        button.addEventListener('click', action);
-        row.appendChild(button);
-      });
-      list.appendChild(row);
-    });
-    section.appendChild(list);
-    container.appendChild(section);
-  }
-
   function getReviewBounds(scope) {
     if (scope === 'week') return getWeekBounds(0);
     return getDayBounds(-1);
@@ -13977,16 +13923,6 @@ import {
     const running = runningEntries[0] || null;
     const runningProject = running ? getEntryProject(running) : null;
     const workoutSummary = getWorkoutMobileSummary();
-    const financeSummary = getFinanceBudgetSnapshot();
-    const weeklyFinanceTone =
-      financeSummary.weekly.remaining <= 0
-        ? 'risk'
-        : financeSummary.weekly.spent > financeSummary.weekly.expected
-          ? 'warm'
-          : '';
-    const favoriteCount = getPinnedTimerShortcuts(
-      new Set(runningEntries.map((entry) => String(entry.projectId)))
-    ).length;
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -14051,19 +13987,10 @@ import {
       () => activateSection('timer')
     );
     appendTodayCard(
-      'Favorites',
-      favoriteCount ? `${favoriteCount} pinned` : 'Pin from Timer',
-      favoriteCount ? '' : 'muted',
-      () => activateSection('timer')
-    );
-    appendTodayCard('Workout', workoutSummary.label, workoutSummary.tone, () =>
-      openMobileWorkoutSheet(getFavoriteWorkoutPreset())
-    );
-    appendTodayCard(
-      'Weekly budget',
-      `${formatSek(financeSummary.weekly.remaining)} left`,
-      weeklyFinanceTone,
-      openMobileFinanceSheet
+      'Daily workout target',
+      workoutSummary.label,
+      workoutSummary.tone,
+      () => openMobileWorkoutSheet(getFavoriteWorkoutPreset())
     );
     panel.appendChild(primary);
 
@@ -14087,21 +14014,6 @@ import {
         () => startTimerShortcut(nextTimerShortcut, { navigate: true })
       ]);
     }
-    const favoriteWorkout = getFavoriteWorkoutPreset();
-    actionConfigs.push([
-      favoriteWorkout ? 'Log usual workout' : 'Log workout',
-      nextTimerShortcut ? 'secondary' : 'primary',
-      () =>
-        favoriteWorkout
-          ? logWorkoutShortcut(favoriteWorkout)
-          : openMobileWorkoutSheet()
-    ]);
-    const recentPurchase = getRecentArchivedPurchase();
-    actionConfigs.push([
-      recentPurchase ? 'Repeat purchase' : 'Log purchase',
-      'secondary',
-      () => (recentPurchase ? repeatRecentPurchase() : openMobileFinanceSheet())
-    ]);
     actionConfigs.push([
       'Timer',
       nextTimerShortcut ? 'secondary' : 'primary',
@@ -14117,7 +14029,6 @@ import {
     });
     panel.appendChild(actions);
 
-    renderMobileFavoriteTimers(panel, runningProjectIds);
     return true;
   }
 
