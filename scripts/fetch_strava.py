@@ -1,12 +1,14 @@
 import json
 import os
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 import requests
 
 CLIENT_ID = os.environ.get("STRAVA_CLIENT_ID", "").strip()
 CLIENT_SECRET = os.environ.get("STRAVA_CLIENT_SECRET", "").strip()
 PER_PAGE = 200
+DEFAULT_LOOKBACK_DAYS = 120
+DEFAULT_DETAIL_REQUEST_LIMIT = 40
 
 OUTFILE = "assets/strava.json"
 TOKEN_FILE = "_private/strava_token.json"
@@ -15,6 +17,23 @@ OVERRIDES_FILE = "assets/strava_overrides.json"
 
 class StravaConfigurationError(RuntimeError):
     pass
+
+
+def read_int_env(name: str, default: int, minimum: int = 1) -> int:
+    raw = os.environ.get(name, "").strip()
+    if not raw:
+        return default
+    try:
+        value = int(raw)
+    except ValueError:
+        return default
+    return max(minimum, value)
+
+
+LOOKBACK_DAYS = read_int_env("STRAVA_LOOKBACK_DAYS", DEFAULT_LOOKBACK_DAYS)
+DETAIL_REQUEST_LIMIT = read_int_env(
+    "STRAVA_DETAIL_REQUEST_LIMIT", DEFAULT_DETAIL_REQUEST_LIMIT, minimum=0
+)
 
 
 def load_refresh_token() -> str:
@@ -78,22 +97,31 @@ def refresh_access_token(refresh_token: str) -> tuple[str, str | None]:
     return payload["access_token"], payload.get("refresh_token")
 
 
-def get_activities_page(access_token: str, page: int, per_page: int) -> list[dict]:
+def get_activities_page(
+    access_token: str, page: int, per_page: int, after: int | None = None
+) -> list[dict]:
+    params = {"per_page": per_page, "page": page}
+    if after is not None:
+        params["after"] = after
     response = requests.get(
         "https://www.strava.com/api/v3/athlete/activities",
         headers={"Authorization": f"Bearer {access_token}"},
-        params={"per_page": per_page, "page": page},
+        params=params,
         timeout=30,
     )
     response.raise_for_status()
     return response.json()
 
 
-def get_all_activities(access_token: str) -> list[dict]:
+def get_all_activities(
+    access_token: str, after: int | None = None
+) -> list[dict]:
     activities: list[dict] = []
     page = 1
     while True:
-        batch = get_activities_page(access_token, page=page, per_page=PER_PAGE)
+        batch = get_activities_page(
+            access_token, page=page, per_page=PER_PAGE, after=after
+        )
         if not batch:
             break
         activities.extend(batch)
@@ -113,13 +141,17 @@ def get_activity_details(access_token: str, activity_id: int) -> dict:
     return response.json()
 
 
+def activity_needs_details(activity: dict) -> bool:
+    if not activity.get("id"):
+        return False
+    return any(
+        activity.get(key) is None
+        for key in ("average_heartrate", "max_heartrate")
+    )
+
+
 def enrich_activity(activity: dict, access_token: str) -> dict:
-    needs_details = False
-    for key in ("average_heartrate", "max_heartrate", "perceived_exertion"):
-        if activity.get(key) is None:
-            needs_details = True
-            break
-    if not needs_details or not activity.get("id"):
+    if not activity_needs_details(activity):
         return activity
     details = get_activity_details(access_token, activity["id"])
     for key in ("average_heartrate", "max_heartrate", "perceived_exertion"):
@@ -188,6 +220,28 @@ def slim(activity: dict) -> dict:
     }
 
 
+def get_recent_activity_cutoff() -> int:
+    cutoff = datetime.now(timezone.utc) - timedelta(days=LOOKBACK_DAYS)
+    return int(cutoff.timestamp())
+
+
+def merge_activities(existing: list[dict], fresh: list[dict]) -> list[dict]:
+    merged_by_id: dict[str, dict] = {}
+    anonymous: list[dict] = []
+    for activity in [*existing, *fresh]:
+        activity_id = activity.get("id")
+        if activity_id is None:
+            anonymous.append(activity)
+            continue
+        merged_by_id[str(activity_id)] = activity
+    merged = [*merged_by_id.values(), *anonymous]
+    return sorted(
+        merged,
+        key=lambda activity: str(activity.get("start_date") or ""),
+        reverse=True,
+    )
+
+
 def write_payload(activities: list[dict], error: str | None = None) -> None:
     payload = {
         "updated_utc": datetime.now(timezone.utc).isoformat(),
@@ -223,6 +277,12 @@ def preserve_existing_payload(message: str) -> bool:
     return True
 
 
+def write_failure_payload(message: str) -> None:
+    print(message)
+    if not preserve_existing_payload(message):
+        write_payload([], error=message)
+
+
 def main() -> None:
     try:
         if not CLIENT_ID or not CLIENT_SECRET:
@@ -234,10 +294,48 @@ def main() -> None:
         if next_refresh_token and next_refresh_token != refresh_token:
             persist_refresh_token(next_refresh_token)
         overrides = load_exertion_overrides()
-        activities = get_all_activities(access_token)
+        existing_payload = read_existing_payload() or {}
+        existing_activities = existing_payload.get("activities") or []
+        activities = get_all_activities(
+            access_token, after=get_recent_activity_cutoff()
+        )
         slimmed: list[dict] = []
+        detail_requests = 0
+        detail_requests_enabled = DETAIL_REQUEST_LIMIT > 0
         for activity in activities:
-            enriched = enrich_activity(activity, access_token)
+            enriched = activity
+            if detail_requests_enabled and activity_needs_details(activity):
+                if detail_requests >= DETAIL_REQUEST_LIMIT:
+                    detail_requests_enabled = False
+                    print(
+                        "Reached Strava detail request limit; publishing "
+                        "remaining activities from summary data."
+                    )
+                else:
+                    try:
+                        enriched = enrich_activity(activity, access_token)
+                        detail_requests += 1
+                    except requests.HTTPError as error:
+                        status_code = (
+                            error.response.status_code if error.response else None
+                        )
+                        if status_code == 429:
+                            detail_requests_enabled = False
+                            print(
+                                "Strava detail rate limit reached; publishing "
+                                "remaining activities from summary data."
+                            )
+                        else:
+                            print(
+                                "Skipping Strava activity "
+                                f"{activity.get('id')} details after HTTP "
+                                f"{status_code or 'error'}."
+                            )
+                    except requests.RequestException as error:
+                        print(
+                            "Skipping Strava activity "
+                            f"{activity.get('id')} details after request error: {error}."
+                        )
             payload = slim(enriched)
             payload["estimated_exertion"] = estimate_exertion(
                 payload.get("avg_hr"),
@@ -248,7 +346,13 @@ def main() -> None:
             payload["exertion"] = override.get("exertion") if override else None
             payload["faulty"] = bool(override.get("faulty")) if override else False
             slimmed.append(payload)
-        write_payload(slimmed)
+        merged = merge_activities(existing_activities, slimmed)
+        write_payload(merged)
+        print(
+            f"Published {len(merged)} Strava activities "
+            f"({len(slimmed)} fetched from the last {LOOKBACK_DAYS} days, "
+            f"{detail_requests} detail requests)."
+        )
     except requests.HTTPError as error:
         status_code = error.response.status_code if error.response else None
         if status_code in {401, 403}:
@@ -256,29 +360,19 @@ def main() -> None:
                 "Strava authorization failed. Verify that the refresh token "
                 "has activity:read_all scope and that the STRAVA_* secrets are valid."
             )
-            print(message)
-            if preserve_existing_payload(message):
-                return
-            write_payload([], error=message)
-            return
+            write_failure_payload(message)
+            raise SystemExit(1) from error
         message = f"HTTP error while fetching Strava data: {error}"
-        print(message)
-        if not preserve_existing_payload(message):
-            write_payload([], error=message)
-        return
+        write_failure_payload(message)
+        raise SystemExit(1) from error
     except StravaConfigurationError as error:
         message = str(error)
-        print(message)
-        if preserve_existing_payload(message):
-            return
-        write_payload([], error=message)
-        return
+        write_failure_payload(message)
+        raise SystemExit(1) from error
     except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
         message = f"Unexpected error while fetching Strava data: {error}"
-        print(message)
-        if not preserve_existing_payload(message):
-            write_payload([], error=message)
-        return
+        write_failure_payload(message)
+        raise SystemExit(1) from error
 
 
 if __name__ == "__main__":
