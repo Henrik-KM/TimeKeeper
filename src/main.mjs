@@ -9601,19 +9601,19 @@ import {
     );
     const todayIsWorkday =
       countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
-    const remainingAtStartOfDay = Math.max(
-      0,
-      weeklyTarget - weekHoursBeforeToday
-    );
-    const dailyTarget =
+    const signedRemainingAtStartOfDay = weeklyTarget - weekHoursBeforeToday;
+    const signedDailyTarget =
       todayIsWorkday && weekContext.workDaysLeftInWeek > 0
-        ? remainingAtStartOfDay / weekContext.workDaysLeftInWeek
+        ? signedRemainingAtStartOfDay / weekContext.workDaysLeftInWeek
         : 0;
+    const dailyTarget = Math.max(0, signedDailyTarget);
     return {
       todayHours,
       requiredDailyPace,
       weeklyCommitmentHours: weeklyTarget,
       dailyTarget,
+      signedDailyTarget,
+      signedRemainingAtStartOfDay,
       recommendedToday: dailyTarget,
       remainingToday: Math.max(0, dailyTarget - todayHours),
       weeklyRemaining: Math.max(
@@ -9629,12 +9629,23 @@ import {
     return Math.max(0, Number(dailyPlan?.remainingToday) || 0);
   }
 
+  function getPortfolioDailyTarget(dailyPlans) {
+    let signedDailyTarget = 0;
+    dailyPlans.forEach((plan) => {
+      const signed = Number(plan?.signedDailyTarget);
+      signedDailyTarget += Number.isFinite(signed)
+        ? signed
+        : Math.max(0, Number(plan?.dailyTarget) || 0);
+    });
+    return Math.max(0, signedDailyTarget);
+  }
+
   function applyPortfolioDailyCredit(dailyPlans) {
     if (!dailyPlans || !dailyPlans.size) return dailyPlans;
-    let portfolioDailyTarget = 0;
+    const plans = Array.from(dailyPlans.values());
+    const portfolioDailyTarget = getPortfolioDailyTarget(plans);
     let portfolioTodayHours = 0;
-    dailyPlans.forEach((plan) => {
-      portfolioDailyTarget += Math.max(0, Number(plan.dailyTarget) || 0);
+    plans.forEach((plan) => {
       portfolioTodayHours += Math.max(0, Number(plan.todayHours) || 0);
     });
     const portfolioRemainingToday = Math.max(
@@ -9766,13 +9777,15 @@ import {
       isProjectActive(project, now)
     );
     const weekContext = getCurrentWeekPlanningContext(now);
+    const dailyPlans = [];
     activeProjects.forEach((project) => {
       const sp = computeProjectStats(project);
       weeklyTarget += sp.weeklyTargetConst || 0;
       monthTarget += sp.monthlyTargetConst || 0;
       rollingTarget += sp.rolling30TargetConst || 0;
-      dailyTarget += getProjectDailyPlan(project, sp, weekContext).dailyTarget;
+      dailyPlans.push(getProjectDailyPlan(project, sp, weekContext));
     });
+    dailyTarget = getPortfolioDailyTarget(dailyPlans);
     const rollingBounds = getRollingWindowBounds(now);
     data.entries.forEach((entry) => {
       if (entry.isRunning || !entry.duration) return;

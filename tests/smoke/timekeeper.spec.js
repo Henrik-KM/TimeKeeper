@@ -93,10 +93,17 @@ function projectFixture(overrides = {}) {
     budgetHours: overrides.budgetHours ?? 40,
     hourlyRate: overrides.hourlyRate ?? 100,
     startDate: overrides.startDate || '2026-04-01',
-    deadline: overrides.deadline || '2026-05-31',
+    deadline:
+      overrides.deadline !== undefined ? overrides.deadline : '2026-05-31',
     createdAt: overrides.createdAt || '2026-04-01T08:00:00.000',
     color: overrides.color || '#2563eb',
-    roundingMinutes: overrides.roundingMinutes ?? 0
+    roundingMinutes: overrides.roundingMinutes ?? 0,
+    ...(overrides.scheduleType !== undefined
+      ? { scheduleType: overrides.scheduleType }
+      : {}),
+    ...(overrides.weeklyExpectedHours !== undefined
+      ? { weeklyExpectedHours: overrides.weeklyExpectedHours }
+      : {})
   };
 }
 
@@ -2558,6 +2565,59 @@ test('daily recommendation credits hours worked on another active project', asyn
       hasText: 'Next'
     })
   ).toContainText('caught up');
+});
+
+test('portfolio daily target nets projects ahead and behind schedule', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-22T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'behind-project',
+        name: 'Behind Project',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 20,
+        budgetHours: 0,
+        startDate: '2026-04-20',
+        deadline: ''
+      }),
+      projectFixture({
+        id: 'ahead-project',
+        name: 'Ahead Project',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 20,
+        budgetHours: 0,
+        startDate: '2026-04-20',
+        deadline: ''
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'ahead-project-monday',
+        projectId: 'ahead-project',
+        startTime: '2026-04-20T08:00:00.000',
+        endTime: '2026-04-20T16:00:00.000',
+        hours: 40
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const todayCard = page.locator('.stat-card').filter({
+    hasText: "Today's Hours"
+  });
+  await expect(todayCard.locator('.stat-value')).toHaveText('0.0 / 0h');
+  await expect(todayCard).toContainText('Behind Project: 0.0 / 6.7h');
+  await expect(todayCard).toContainText('Ahead Project: 0.0 / 0.0h');
+
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(page.locator('#timerRecommendationPro')).toBeHidden();
+  await expect(
+    page.locator('#timerProjectPro option').first()
+  ).not.toContainText('Recommended');
 });
 
 test('daily and weekly targets stay fixed while logging time during the day', async ({

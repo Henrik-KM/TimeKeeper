@@ -209,9 +209,16 @@ def preserve_existing_payload(message: str) -> bool:
         return False
     count = len(existing.get("activities") or [])
     updated = existing.get("updated_utc") or "unknown"
+    existing["error"] = message
+    outdir = os.path.dirname(OUTFILE)
+    if outdir:
+        os.makedirs(outdir, exist_ok=True)
+    with open(OUTFILE, "w", encoding="utf-8") as output_file:
+        json.dump(existing, output_file, ensure_ascii=False, indent=2)
+        output_file.write("\n")
     print(
         f"{message} Keeping existing {OUTFILE} with {count} "
-        f"activities from {updated}."
+        f"activities from {updated} and marking it stale."
     )
     return True
 
@@ -252,7 +259,8 @@ def main() -> None:
             print(message)
             if preserve_existing_payload(message):
                 return
-            raise SystemExit(1) from error
+            write_payload([], error=message)
+            return
         message = f"HTTP error while fetching Strava data: {error}"
         print(message)
         if not preserve_existing_payload(message):
@@ -263,7 +271,8 @@ def main() -> None:
         print(message)
         if preserve_existing_payload(message):
             return
-        raise SystemExit(1) from error
+        write_payload([], error=message)
+        return
     except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
         message = f"Unexpected error while fetching Strava data: {error}"
         print(message)
