@@ -37,15 +37,22 @@ DETAIL_REQUEST_LIMIT = read_int_env(
 
 
 def load_refresh_token() -> str:
+    return load_refresh_token_candidates()[0]
+
+
+def load_refresh_token_candidates() -> list[str]:
+    candidates: list[str] = []
     if os.path.exists(TOKEN_FILE):
         with open(TOKEN_FILE, "r", encoding="utf-8") as token_file:
             payload = json.load(token_file)
             token = payload.get("refresh_token")
             if token:
-                return token
-    token = os.environ.get("STRAVA_REFRESH_TOKEN", "").strip()
-    if token:
-        return token
+                candidates.append(token)
+    env_token = os.environ.get("STRAVA_REFRESH_TOKEN", "").strip()
+    if env_token and env_token not in candidates:
+        candidates.append(env_token)
+    if candidates:
+        return candidates
     raise StravaConfigurationError(
         f"Missing Strava refresh token. Restore {TOKEN_FILE} or add "
         "STRAVA_REFRESH_TOKEN as a GitHub Actions secret."
@@ -95,6 +102,33 @@ def refresh_access_token(refresh_token: str) -> tuple[str, str | None]:
     response.raise_for_status()
     payload = response.json()
     return payload["access_token"], payload.get("refresh_token")
+
+
+def get_http_status_code(error: requests.HTTPError) -> int | None:
+    return error.response.status_code if error.response is not None else None
+
+
+def format_http_error(error: requests.HTTPError) -> str:
+    response = error.response
+    if response is None:
+        return str(error)
+    detail = ""
+    try:
+        body = response.json()
+    except ValueError:
+        body = response.text
+    if body:
+        body_text = json.dumps(body) if isinstance(body, (dict, list)) else str(body)
+        detail = f" Response: {body_text[:500]}"
+    return f"{error}{detail}"
+
+
+def can_retry_with_next_refresh_token(
+    error: requests.HTTPError, token_index: int, token_count: int
+) -> bool:
+    if token_index >= token_count - 1:
+        return False
+    return get_http_status_code(error) in {400, 401, 403}
 
 
 def get_activities_page(
@@ -289,16 +323,36 @@ def main() -> None:
             raise StravaConfigurationError(
                 "Missing STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET."
             )
-        refresh_token = load_refresh_token()
-        access_token, next_refresh_token = refresh_access_token(refresh_token)
-        if next_refresh_token and next_refresh_token != refresh_token:
-            persist_refresh_token(next_refresh_token)
+        refresh_tokens = load_refresh_token_candidates()
         overrides = load_exertion_overrides()
         existing_payload = read_existing_payload() or {}
         existing_activities = existing_payload.get("activities") or []
-        activities = get_all_activities(
-            access_token, after=get_recent_activity_cutoff()
-        )
+        access_token = ""
+        next_refresh_token = None
+        refresh_token = ""
+        activities: list[dict] = []
+        for token_index, candidate_refresh_token in enumerate(refresh_tokens):
+            refresh_token = candidate_refresh_token
+            try:
+                access_token, next_refresh_token = refresh_access_token(
+                    candidate_refresh_token
+                )
+                activities = get_all_activities(
+                    access_token, after=get_recent_activity_cutoff()
+                )
+                break
+            except requests.HTTPError as error:
+                if can_retry_with_next_refresh_token(
+                    error, token_index, len(refresh_tokens)
+                ):
+                    print(
+                        "Strava token candidate failed; retrying the next "
+                        "configured refresh token."
+                    )
+                    continue
+                raise
+        if next_refresh_token and next_refresh_token != refresh_token:
+            persist_refresh_token(next_refresh_token)
         slimmed: list[dict] = []
         detail_requests = 0
         detail_requests_enabled = DETAIL_REQUEST_LIMIT > 0
@@ -317,7 +371,9 @@ def main() -> None:
                         detail_requests += 1
                     except requests.HTTPError as error:
                         status_code = (
-                            error.response.status_code if error.response else None
+                            error.response.status_code
+                            if error.response is not None
+                            else None
                         )
                         if status_code == 429:
                             detail_requests_enabled = False
@@ -354,15 +410,16 @@ def main() -> None:
             f"{detail_requests} detail requests)."
         )
     except requests.HTTPError as error:
-        status_code = error.response.status_code if error.response else None
+        status_code = get_http_status_code(error)
         if status_code in {401, 403}:
             message = (
-                "Strava authorization failed. Verify that the refresh token "
-                "has activity:read_all scope and that the STRAVA_* secrets are valid."
+                f"Strava authorization failed: {format_http_error(error)}. "
+                "Verify that the refresh token has activity:read_all scope "
+                "and that the STRAVA_* secrets are valid."
             )
             write_failure_payload(message)
             raise SystemExit(1) from error
-        message = f"HTTP error while fetching Strava data: {error}"
+        message = f"HTTP error while fetching Strava data: {format_http_error(error)}"
         write_failure_payload(message)
         raise SystemExit(1) from error
     except StravaConfigurationError as error:
