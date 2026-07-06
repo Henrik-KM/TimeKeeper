@@ -9221,7 +9221,7 @@ import {
 
   const ROLLING_TARGET_BUFFER_RECOVERY_WEEKS = 4;
   const ROLLING_TARGET_BUFFER_MAX_INCREASE = 0.2;
-  const ROLLING_TARGET_BUFFER_MAX_DECREASE = 0.15;
+  const ROLLING_TARGET_BUFFER_MAX_DECREASE = 0.6;
 
   function clampNumber(value, min, max) {
     return Math.min(max, Math.max(min, value));

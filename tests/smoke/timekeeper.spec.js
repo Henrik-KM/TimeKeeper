@@ -2355,15 +2355,15 @@ test('daily target catches up against the fixed weekly target', async ({
   await gotoSection(page, 'dashboard', 'Dashboard');
 
   const statsGrid = page.locator('#statsGrid');
-  await expect(statsGrid).toContainText('Anders: 0.0 / 5.1h');
-  await expect(statsGrid).toContainText('Anders: 2.0 / 7.1h');
+  await expect(statsGrid).toContainText('Anders: 0.0 / 1.4h');
+  await expect(statsGrid).toContainText('Anders: 2.0 / 3.4h');
   await expect(statsGrid).toContainText('Anders: 52.0 / 41.9h');
 
   await gotoSection(page, 'projects', 'Projects');
   const projectsList = page.locator('#projectsPageList');
   await expect(projectsList).toContainText('Required pace: 1.8h/workday');
   await expect(projectsList).toContainText(
-    'This week: 2.0 / 7.1h (commitment)'
+    'This week: 2.0 / 3.4h (commitment)'
   );
 });
 
@@ -2440,11 +2440,11 @@ test('rolling pace buffer adjusts each project weekly target with medium caps', 
   await gotoSection(page, 'dashboard', 'Dashboard');
 
   const statsGrid = page.locator('#statsGrid');
-  await expect(statsGrid).toContainText("Today's Hours0.0 / 20.5h");
+  await expect(statsGrid).toContainText("Today's Hours0.0 / 16.0h");
   await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 12.0h');
-  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 8.5h');
+  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 4.0h');
   await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 60.0h');
-  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 42.5h');
+  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 20.0h');
 });
 
 test('weekend daily target is zero while weekly and rolling targets stay relevant', async ({
@@ -2490,7 +2490,7 @@ test('weekend daily target is zero while weekly and rolling targets stay relevan
     .locator('.stat-card')
     .filter({ hasText: 'Rolling 30 Days' });
   await expect(todayCard).toContainText('Anders: 0.0 / 0.0h');
-  await expect(weekCard).toContainText('Anders: 2.0 / 7.1h');
+  await expect(weekCard).toContainText('Anders: 2.0 / 3.4h');
   await expect(rollingCard).toContainText('Anders: 52.0 / 41.9h');
 });
 
