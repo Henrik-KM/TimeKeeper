@@ -9229,13 +9229,18 @@ import {
 
   function getRollingTargetBuffer(project, entries, weeklyBaseline, weekStart) {
     const baseline = Math.max(0, Number(weeklyBaseline) || 0);
+    const emptyBuffer = {
+      adjustmentHours: 0,
+      rollingActualHours: 0,
+      rollingTargetHours: 0,
+      rollingSurplusHours: 0,
+      portfolioAdjustmentHours: 0,
+      portfolioBaselineHours: 0,
+      portfolioRollingActualHours: 0,
+      portfolioRollingTargetHours: 0
+    };
     if (baseline <= 0 || !weekStart) {
-      return {
-        adjustmentHours: 0,
-        rollingActualHours: 0,
-        rollingTargetHours: 0,
-        rollingSurplusHours: 0
-      };
+      return emptyBuffer;
     }
     const created = getProjectStartDate(project);
     const rollingEndExclusive = startOfLocalDay(weekStart);
@@ -9250,32 +9255,85 @@ import {
             rollingEndExclusive
           )
         : 0;
-    if (rollingTargetHours <= 0) {
-      return {
-        adjustmentHours: 0,
-        rollingActualHours: 0,
-        rollingTargetHours: 0,
-        rollingSurplusHours: 0
-      };
-    }
     const rollingActualHours = sumEntryHours(
       entries,
       rollingStart,
       rollingEndExclusive
     );
-    const rollingDeficitHours = rollingTargetHours - rollingActualHours;
-    const rawAdjustment =
-      rollingDeficitHours / ROLLING_TARGET_BUFFER_RECOVERY_WEEKS;
-    const adjustmentHours = clampNumber(
-      rawAdjustment,
-      -baseline * ROLLING_TARGET_BUFFER_MAX_DECREASE,
-      baseline * ROLLING_TARGET_BUFFER_MAX_INCREASE
+    const weekEndExclusive = addLocalDays(startOfLocalDay(weekStart), 7);
+    let portfolioBaselineHours = 0;
+    let portfolioRollingActualHours = 0;
+    let portfolioRollingTargetHours = 0;
+    data.projects
+      .filter(
+        (candidate) =>
+          !isProjectArchived(candidate) &&
+          isProjectActive(candidate, rollingEndExclusive)
+      )
+      .forEach((candidate) => {
+        const candidateEntries =
+          String(candidate.id) === String(project.id)
+            ? entries
+            : getCompletedProjectEntries(candidate.id);
+        const candidateBaseline = getProjectPlannedHoursForPeriod(
+          candidate,
+          candidateEntries,
+          weekStart,
+          weekEndExclusive
+        );
+        if (candidateBaseline <= 0) return;
+        const candidateCreated = getProjectStartDate(candidate);
+        const candidateRollingTargetStart = maxDate(
+          rollingStart,
+          candidateCreated
+        );
+        const candidateRollingTarget =
+          candidateRollingTargetStart &&
+          candidateRollingTargetStart < rollingEndExclusive
+            ? getProjectPlannedHoursForPeriod(
+                candidate,
+                candidateEntries,
+                candidateRollingTargetStart,
+                rollingEndExclusive
+              )
+            : 0;
+        if (candidateRollingTarget <= 0) return;
+        portfolioBaselineHours += candidateBaseline;
+        portfolioRollingTargetHours += candidateRollingTarget;
+        portfolioRollingActualHours += sumEntryHours(
+          candidateEntries,
+          rollingStart,
+          rollingEndExclusive
+        );
+      });
+    if (portfolioBaselineHours <= 0 || portfolioRollingTargetHours <= 0) {
+      return {
+        ...emptyBuffer,
+        rollingActualHours,
+        rollingTargetHours,
+        rollingSurplusHours: rollingActualHours - rollingTargetHours
+      };
+    }
+    const portfolioDeficitHours =
+      portfolioRollingTargetHours - portfolioRollingActualHours;
+    const rawPortfolioAdjustment =
+      portfolioDeficitHours / ROLLING_TARGET_BUFFER_RECOVERY_WEEKS;
+    const portfolioAdjustmentHours = clampNumber(
+      rawPortfolioAdjustment,
+      -portfolioBaselineHours * ROLLING_TARGET_BUFFER_MAX_DECREASE,
+      portfolioBaselineHours * ROLLING_TARGET_BUFFER_MAX_INCREASE
     );
+    const adjustmentHours =
+      portfolioAdjustmentHours * (baseline / portfolioBaselineHours);
     return {
       adjustmentHours,
       rollingActualHours,
       rollingTargetHours,
-      rollingSurplusHours: -rollingDeficitHours
+      rollingSurplusHours: rollingActualHours - rollingTargetHours,
+      portfolioAdjustmentHours,
+      portfolioBaselineHours,
+      portfolioRollingActualHours,
+      portfolioRollingTargetHours
     };
   }
 
