@@ -2400,7 +2400,7 @@ test('missed Monday hours are spread over the remaining week', async ({
   await expect(statsGrid).toContainText('Weekly Catchup: 3.0 / 35.0h');
 });
 
-test('rolling pace buffer adjusts portfolio weekly targets with medium caps', async ({
+test('rolling pace buffer adjusts each project weekly target with medium caps', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-20T12:00:00');
@@ -2440,10 +2440,10 @@ test('rolling pace buffer adjusts portfolio weekly targets with medium caps', as
   await gotoSection(page, 'dashboard', 'Dashboard');
 
   const statsGrid = page.locator('#statsGrid');
-  await expect(statsGrid).toContainText("Today's Hours0.0 / 17.0h");
-  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 8.5h');
+  await expect(statsGrid).toContainText("Today's Hours0.0 / 20.5h");
+  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 12.0h');
   await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 8.5h');
-  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 42.5h');
+  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 60.0h');
   await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 42.5h');
 });
 
@@ -2562,10 +2562,10 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*~9\.5h today/
+    /IFLAI.*Recommended.*~12\.6h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 9.5h today'
+    'Recommended: IFLAI - 12.6h today'
   );
 });
 
