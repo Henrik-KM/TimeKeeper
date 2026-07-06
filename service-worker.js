@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v4';
+const CACHE_NAME = 'timekeeper-app-v5';
 const APP_SHELL = [
   './',
   './index.html',
