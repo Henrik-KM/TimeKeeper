@@ -9219,6 +9219,86 @@ import {
     );
   }
 
+  const ROLLING_TARGET_BUFFER_RECOVERY_WEEKS = 4;
+  const ROLLING_TARGET_BUFFER_MAX_INCREASE = 0.2;
+  const ROLLING_TARGET_BUFFER_MAX_DECREASE = 0.15;
+
+  function clampNumber(value, min, max) {
+    return Math.min(max, Math.max(min, value));
+  }
+
+  function getRollingTargetBuffer(project, entries, weeklyBaseline, weekStart) {
+    const baseline = Math.max(0, Number(weeklyBaseline) || 0);
+    if (baseline <= 0 || !weekStart) {
+      return {
+        adjustmentHours: 0,
+        rollingActualHours: 0,
+        rollingTargetHours: 0,
+        rollingSurplusHours: 0
+      };
+    }
+    const created = getProjectStartDate(project);
+    const rollingEndExclusive = startOfLocalDay(weekStart);
+    const rollingStart = addLocalDays(rollingEndExclusive, -30);
+    const rollingTargetStart = maxDate(rollingStart, created);
+    const rollingTargetHours =
+      rollingTargetStart && rollingTargetStart < rollingEndExclusive
+        ? getProjectPlannedHoursForPeriod(
+            project,
+            entries,
+            rollingTargetStart,
+            rollingEndExclusive
+          )
+        : 0;
+    if (rollingTargetHours <= 0) {
+      return {
+        adjustmentHours: 0,
+        rollingActualHours: 0,
+        rollingTargetHours: 0,
+        rollingSurplusHours: 0
+      };
+    }
+    const rollingActualHours = sumEntryHours(
+      entries,
+      rollingStart,
+      rollingEndExclusive
+    );
+    const rollingDeficitHours = rollingTargetHours - rollingActualHours;
+    const rawAdjustment =
+      rollingDeficitHours / ROLLING_TARGET_BUFFER_RECOVERY_WEEKS;
+    const adjustmentHours = clampNumber(
+      rawAdjustment,
+      -baseline * ROLLING_TARGET_BUFFER_MAX_DECREASE,
+      baseline * ROLLING_TARGET_BUFFER_MAX_INCREASE
+    );
+    return {
+      adjustmentHours,
+      rollingActualHours,
+      rollingTargetHours,
+      rollingSurplusHours: -rollingDeficitHours
+    };
+  }
+
+  function applyRollingTargetBuffer(
+    project,
+    entries,
+    weeklyBaseline,
+    weekStart
+  ) {
+    const baseline = Math.max(0, Number(weeklyBaseline) || 0);
+    const buffer = getRollingTargetBuffer(
+      project,
+      entries,
+      baseline,
+      weekStart
+    );
+    return {
+      ...buffer,
+      weeklyTarget: Math.max(0, baseline + buffer.adjustmentHours),
+      weeklyBaseline
+    };
+  }
+
   // Compute statistics per project
   function computeProjectStats(project, options = {}) {
     const now = new Date();
@@ -9376,12 +9456,19 @@ import {
     const monthlyRevenue = monthlyHours * project.hourlyRate;
     const lastMonthRevenue = lastMonthHours * project.hourlyRate;
     if (isWeeklyPaceProject(project)) {
-      const weeklyTargetConst = getProjectPlannedHoursForPeriod(
+      const weeklyTargetBeforeRollingCredit = getProjectPlannedHoursForPeriod(
         project,
         entries,
         weekStart,
         startNextWeek
       );
+      const rollingTargetBuffer = applyRollingTargetBuffer(
+        project,
+        entries,
+        weeklyTargetBeforeRollingCredit,
+        weekStart
+      );
+      const weeklyTargetConst = rollingTargetBuffer.weeklyTarget;
       const monthlyTargetConst = getProjectPlannedHoursForPeriod(
         project,
         entries,
@@ -9425,8 +9512,11 @@ import {
         lastMonthRevenue,
         weeklyTargetConst,
         weeklyCommitmentHours: weeklyTargetConst,
-        weeklyTargetBeforeRollingCredit: weeklyTargetConst,
-        rolling30SurplusHours: 0,
+        weeklyTargetBeforeRollingCredit,
+        rolling30SurplusHours: rollingTargetBuffer.rollingSurplusHours,
+        rollingTargetBufferAdjustmentHours: rollingTargetBuffer.adjustmentHours,
+        rollingTargetBufferActualHours: rollingTargetBuffer.rollingActualHours,
+        rollingTargetBufferTargetHours: rollingTargetBuffer.rollingTargetHours,
         monthlyTargetConst,
         requiredDailyPace,
         paceRemainingWorkdays,
@@ -9456,8 +9546,14 @@ import {
           rollingBounds.endExclusive
         )
       : 0;
-    const rolling30SurplusHours = 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
+    const rollingTargetBuffer = applyRollingTargetBuffer(
+      project,
+      entries,
+      weeklyTargetBeforeRollingCredit,
+      weekStart
+    );
+    weeklyTargetConst = rollingTargetBuffer.weeklyTarget;
     if (projectNotStarted) {
       monthlyTargetConst = 0;
       weeklyTargetConst = 0;
@@ -9495,7 +9591,10 @@ import {
         monthlyTargetConst: 0,
         requiredDailyPace,
         paceRemainingWorkdays,
-        paceRemainingHours
+        paceRemainingHours,
+        rollingTargetBufferAdjustmentHours: 0,
+        rollingTargetBufferActualHours: 0,
+        rollingTargetBufferTargetHours: 0
       };
     }
     return {
@@ -9526,7 +9625,10 @@ import {
       weeklyTargetConst,
       weeklyCommitmentHours: weeklyTargetConst,
       weeklyTargetBeforeRollingCredit,
-      rolling30SurplusHours,
+      rolling30SurplusHours: rollingTargetBuffer.rollingSurplusHours,
+      rollingTargetBufferAdjustmentHours: rollingTargetBuffer.adjustmentHours,
+      rollingTargetBufferActualHours: rollingTargetBuffer.rollingActualHours,
+      rollingTargetBufferTargetHours: rollingTargetBuffer.rollingTargetHours,
       monthlyTargetConst,
       requiredDailyPace,
       paceRemainingWorkdays,

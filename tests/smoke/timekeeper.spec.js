@@ -2355,15 +2355,15 @@ test('daily target catches up against the fixed weekly target', async ({
   await gotoSection(page, 'dashboard', 'Dashboard');
 
   const statsGrid = page.locator('#statsGrid');
-  await expect(statsGrid).toContainText('Anders: 0.0 / 6.3h');
-  await expect(statsGrid).toContainText('Anders: 2.0 / 8.3h');
+  await expect(statsGrid).toContainText('Anders: 0.0 / 5.1h');
+  await expect(statsGrid).toContainText('Anders: 2.0 / 7.1h');
   await expect(statsGrid).toContainText('Anders: 52.0 / 41.9h');
 
   await gotoSection(page, 'projects', 'Projects');
   const projectsList = page.locator('#projectsPageList');
   await expect(projectsList).toContainText('Required pace: 1.8h/workday');
   await expect(projectsList).toContainText(
-    'This week: 2.0 / 8.3h (commitment)'
+    'This week: 2.0 / 7.1h (commitment)'
   );
 });
 
@@ -2398,6 +2398,52 @@ test('missed Monday hours are spread over the remaining week', async ({
   const statsGrid = page.locator('#statsGrid');
   await expect(statsGrid).toContainText('Weekly Catchup: 0.0 / 8.0h');
   await expect(statsGrid).toContainText('Weekly Catchup: 3.0 / 35.0h');
+});
+
+test('rolling pace buffer adjusts weekly targets with medium caps', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-20T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'behind-weekly',
+        name: 'Behind Weekly',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 50,
+        budgetHours: 0,
+        startDate: '2026-02-02',
+        deadline: ''
+      }),
+      projectFixture({
+        id: 'ahead-weekly',
+        name: 'Ahead Weekly',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 50,
+        budgetHours: 0,
+        startDate: '2026-02-02',
+        deadline: ''
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'ahead-rolling-work',
+        projectId: 'ahead-weekly',
+        startTime: '2026-04-01T08:00:00.000',
+        endTime: '2026-04-01T18:00:00.000',
+        hours: 300
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const statsGrid = page.locator('#statsGrid');
+  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 12.0h');
+  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 8.5h');
+  await expect(statsGrid).toContainText('Behind Weekly: 0.0 / 60.0h');
+  await expect(statsGrid).toContainText('Ahead Weekly: 0.0 / 42.5h');
 });
 
 test('weekend daily target is zero while weekly and rolling targets stay relevant', async ({
@@ -2443,7 +2489,7 @@ test('weekend daily target is zero while weekly and rolling targets stay relevan
     .locator('.stat-card')
     .filter({ hasText: 'Rolling 30 Days' });
   await expect(todayCard).toContainText('Anders: 0.0 / 0.0h');
-  await expect(weekCard).toContainText('Anders: 2.0 / 8.3h');
+  await expect(weekCard).toContainText('Anders: 2.0 / 7.1h');
   await expect(rollingCard).toContainText('Anders: 52.0 / 41.9h');
 });
 
@@ -2515,10 +2561,10 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*~10\.0h today/
+    /IFLAI.*Recommended.*~12\.6h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 10.0h today'
+    'Recommended: IFLAI - 12.6h today'
   );
 });
 
