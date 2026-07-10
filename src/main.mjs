@@ -376,7 +376,7 @@ import {
     return { weekStart, weekEnd };
   }
 
-  function getFinanceBudgetSnapshot(now = new Date()) {
+  function _getFinanceBudgetSnapshot(now = new Date()) {
     const groceries = Array.isArray(data.groceries) ? data.groceries : [];
     const recurringPayments = ensureMonthlyRecurringPayments();
     const recurringTotal = getMonthlyRecurringTotal(recurringPayments);
@@ -582,53 +582,54 @@ import {
       .sort((a, b) => new Date(b.purchasedDate) - new Date(a.purchasedDate))[0];
   }
 
-  function computePurchaseCost(item, originalCost, { apply = false } = {}) {
-    const fitnessData = ensureFitnessDefaults();
-    let costVal = originalCost;
-    let creditsUsed = 0;
-    let boostCreditsUsed = 0;
-    let boostPercentApplied = 0;
-    const itemFrequency =
-      typeof item.frequency === 'string'
-        ? item.frequency.toLowerCase()
-        : 'weekly';
-    if (itemFrequency === 'weekly') {
-      const availableCredits = fitnessData.wellnessCredits || 0;
-      let remainingCredits = availableCredits;
-      if (
-        fitnessData.weekendBoostEnabled &&
-        item.category === 'treat' &&
-        isWeekendBoostActive()
-      ) {
-        const boostPct = Math.max(0, fitnessData.weekendBoostPercent || 0);
-        if (boostPct > 0) {
-          const discount = originalCost * boostPct;
-          boostCreditsUsed = Math.min(discount, remainingCredits);
-          creditsUsed += boostCreditsUsed;
-          remainingCredits -= boostCreditsUsed;
-          boostPercentApplied = boostPct;
-        }
-      }
-      const additionalCredits = Math.min(
-        remainingCredits,
-        Math.max(0, originalCost - creditsUsed)
-      );
-      creditsUsed += additionalCredits;
-      costVal = Math.max(0, originalCost - creditsUsed);
-      if (apply) {
-        fitnessData.wellnessCredits = Math.max(
-          0,
-          (fitnessData.wellnessCredits || 0) - creditsUsed
-        );
-      }
-    }
-    return {
-      originalCost,
-      cost: costVal,
-      creditsUsed,
-      boostApplied: boostCreditsUsed > 0,
-      boostPercentApplied
-    };
+  const SHOPPING_GROUPS = ['soon', 'later', 'recurring', 'someday'];
+  const SHOPPING_GROUP_LABELS = {
+    soon: 'Soon',
+    later: 'Later',
+    recurring: 'Recurring',
+    someday: 'Someday'
+  };
+  const LEGACY_FREQUENCY_GROUPS = {
+    weekly: 'soon',
+    monthly: 'later',
+    biannual: 'someday'
+  };
+
+  function normalizeShoppingGroup(item) {
+    const explicit = String(
+      item && item.shoppingGroup ? item.shoppingGroup : ''
+    )
+      .trim()
+      .toLowerCase();
+    if (SHOPPING_GROUPS.includes(explicit)) return explicit;
+    const legacy = String(item && item.frequency ? item.frequency : '')
+      .trim()
+      .toLowerCase();
+    return LEGACY_FREQUENCY_GROUPS[legacy] || 'soon';
+  }
+
+  function formatShoppingGroup(group) {
+    return SHOPPING_GROUP_LABELS[group] || SHOPPING_GROUP_LABELS.soon;
+  }
+
+  function parseOptionalMoney(value) {
+    if (value === null || value === undefined || value === '') return null;
+    const amount = Number(value);
+    if (!Number.isFinite(amount) || amount < 0) return NaN;
+    return amount;
+  }
+
+  function getShoppingEstimate(item) {
+    const estimate = parseOptionalMoney(item && item.estimate);
+    if (estimate === null || Number.isNaN(estimate)) return null;
+    return estimate;
+  }
+
+  function formatOptionalSek(value) {
+    const amount = parseOptionalMoney(value);
+    if (amount === null) return 'No cost';
+    if (Number.isNaN(amount)) return 'No cost';
+    return formatSek(amount);
   }
 
   function logGroceryPurchase(item, parsedCost, { snapshot = null } = {}) {
@@ -636,18 +637,17 @@ import {
       showToast('Choose an item to buy.');
       return null;
     }
-    const originalCost = Number(parsedCost);
-    if (!Number.isFinite(originalCost) || originalCost < 0) {
+    const originalCost = parseOptionalMoney(parsedCost);
+    if (Number.isNaN(originalCost)) {
       showToast('Enter a valid cost.');
       return null;
     }
     const undoSnapshot = snapshot || cloneData();
-    const purchase = computePurchaseCost(item, originalCost, { apply: true });
-    item.originalCost = purchase.originalCost;
-    item.cost = purchase.cost;
-    item.appliedCredits = purchase.creditsUsed;
-    item.boostApplied = purchase.boostApplied;
-    item.boostPercentApplied = purchase.boostPercentApplied;
+    item.originalCost = originalCost;
+    item.cost = originalCost;
+    item.appliedCredits = 0;
+    item.boostApplied = false;
+    item.boostPercentApplied = 0;
     item.archived = true;
     item.purchasedDate = new Date().toISOString();
     saveData();
@@ -656,13 +656,13 @@ import {
     renderTodayCommandPanel();
     offerUndo('Purchase logged.', undoSnapshot);
     provideHaptic('beep');
-    return purchase;
+    return { originalCost, cost: originalCost };
   }
 
   function createAndLogGroceryPurchase({
     name,
-    frequency = 'weekly',
-    category = 'standard',
+    shoppingGroup = 'soon',
+    estimate = null,
     cost
   }) {
     const trimmed = String(name || '').trim();
@@ -675,12 +675,10 @@ import {
     const item = {
       id: uuid(),
       name: trimmed,
-      frequency: ['weekly', 'monthly', 'biannual'].includes(frequency)
-        ? frequency
-        : 'weekly',
-      category: ['standard', 'treat', 'essential'].includes(category)
-        ? category
-        : 'standard',
+      shoppingGroup: SHOPPING_GROUPS.includes(shoppingGroup)
+        ? shoppingGroup
+        : 'soon',
+      estimate: parseOptionalMoney(estimate),
       archived: false,
       createdAt: new Date().toISOString()
     };
@@ -696,13 +694,8 @@ import {
     }
     return createAndLogGroceryPurchase({
       name: recent.name,
-      frequency:
-        typeof recent.frequency === 'string'
-          ? recent.frequency.toLowerCase()
-          : 'weekly',
-      category: ['standard', 'treat', 'essential'].includes(recent.category)
-        ? recent.category
-        : 'standard',
+      shoppingGroup: normalizeShoppingGroup(recent),
+      estimate: getShoppingEstimate(recent),
       cost: Number.isFinite(Number(recent.originalCost))
         ? Number(recent.originalCost)
         : Number(recent.cost) || 0
@@ -1689,7 +1682,7 @@ import {
         // Grocery items: weekly/monthly shopping list with carryOver and purchasedCount.
         groceries: Array.isArray(parsed.groceries)
           ? parsed.groceries.map((g) => {
-              // Migrate legacy properties to new structure. Each item should have a name and frequency.
+              // Preserve legacy budget-era fields, but drive the UI from shoppingGroup/estimate.
               if (!g.name) g.name = '';
               if (!g.frequency) g.frequency = 'weekly';
               if (typeof g.frequency === 'string') {
@@ -1710,6 +1703,9 @@ import {
               if (g.archived === undefined) g.archived = false;
               if (g.purchasedDate === undefined) g.purchasedDate = null;
               if (!g.category) g.category = 'standard';
+              g.shoppingGroup = normalizeShoppingGroup(g);
+              const estimate = parseOptionalMoney(g.estimate);
+              g.estimate = Number.isNaN(estimate) ? null : estimate;
               if (typeof g.cost === 'string') {
                 const parsedCost = parseFloat(g.cost);
                 if (!isNaN(parsedCost)) g.cost = parsedCost;
@@ -4478,12 +4474,8 @@ import {
     const workoutPlan = computeWorkoutWeekPlan({ fitness, pointsInfo });
     const settings = fitness.pointSettings || {};
     const multiplierPerPoint = Number(settings.multiplierPerPoint);
-    const creditsPerPoint = Number(settings.creditsPerPoint);
     const effectiveMultiplierPerPoint = Number.isFinite(multiplierPerPoint)
       ? multiplierPerPoint
-      : 0;
-    const effectiveCreditsPerPoint = Number.isFinite(creditsPerPoint)
-      ? creditsPerPoint
       : 0;
     const improvementPoints = Math.max(0, workoutPlan.baselineDelta);
     const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
@@ -4497,26 +4489,13 @@ import {
     );
     const weeklyBaseBudget =
       (data.groceryBudgetWeekly || 0) + (data.groceryBudgetWeeklyCarry || 0);
-    const currentBudget = weeklyBaseBudget * currentMultiplier;
     const projectedBudget = weeklyBaseBudget * projectedMultiplier;
-    const nextBudget = weeklyBaseBudget * nextMultiplier;
-    const projectedCredits = improvementPoints * effectiveCreditsPerPoint;
     const pausedThisWeek = isWeekPaused(getWeekKey(new Date()));
     const boostEnabled = fitness.weekendBoostEnabled;
     const boostActive = isWeekendBoostActive();
     const boostUnlocked =
       fitness.weekendBoostUnlockedWeek === getWeekKey(new Date());
-    const boostPercent = Math.round((fitness.weekendBoostPercent || 0) * 100);
     const lastWeek = fitness.lastWeekSummary || null;
-    const formatAmount = (num) => {
-      const str = formatCurrency(num, -1);
-      return str ? str.replace(' kr', ' SEK') : '0 SEK';
-    };
-    const formatSignedCredits = (value) => {
-      if (!Number.isFinite(value) || value === 0) return '0 credits';
-      const prefix = value >= 0 ? '+' : '-';
-      return prefix + Math.abs(value).toFixed(0) + ' credits';
-    };
     if (summaryEl) {
       const grid = document.createElement('div');
       grid.className = 'fitness-summary-grid';
@@ -4540,18 +4519,17 @@ import {
         grid.appendChild(row);
       }
       createRow(
-        'Current multiplier',
+        'Current fitness score',
         currentMultiplier.toFixed(2) + 'x',
-        'Weekly budget ' + formatAmount(currentBudget)
+        'Based on completed workout weeks'
       );
       const projectedDelta = projectedBudget - weeklyBaseBudget;
       createRow(
-        'Projected (if week ended today)',
+        'Projected score',
         projectedMultiplier.toFixed(2) + 'x',
-        `${formatSignedCurrency(projectedDelta)} | ${formatSignedCredits(projectedCredits)}`
+        'If the current workout week ended today'
       );
-      const nextDelta = nextBudget - weeklyBaseBudget;
-      let nextSub = formatSignedCurrency(nextDelta);
+      let nextSub = 'Locked from the last processed workout week';
       if (lastWeek) {
         if (lastWeek.paused) {
           nextSub += ' | Last week paused';
@@ -4581,12 +4559,6 @@ import {
               lastWeek.scheduleDeltaEnd >= 0
                 ? ` | Ahead by ${formatPoints(lastWeek.scheduleDeltaEnd)} pts overall`
                 : ` | Behind by ${formatPoints(Math.abs(lastWeek.scheduleDeltaEnd))} pts overall`;
-          }
-          if (
-            Number.isFinite(lastWeek.creditsEarned) &&
-            lastWeek.creditsEarned !== 0
-          ) {
-            nextSub += ' | ' + formatSignedCredits(lastWeek.creditsEarned);
           }
         }
       }
@@ -4651,9 +4623,7 @@ import {
         }
       }
       if (Math.abs(projectedDelta) >= 1 || improvementPoints > 0) {
-        const budgetGain = formatSignedCurrency(projectedDelta);
-        const creditGain = formatSignedCredits(projectedCredits);
-        pointsSubParts.push(`Potential ${budgetGain}, ${creditGain}`);
+        pointsSubParts.push('Can improve the next locked score');
       }
       const pointsSub = pointsSubParts.join(' | ');
       createRow('Points this week', pointsValue, pointsSub);
@@ -4700,8 +4670,7 @@ import {
       const creditsPill = document.createElement('span');
       creditsPill.className = 'fitness-pill';
       creditsPill.textContent =
-        'Wellness Credits: ' +
-        formatCurrency(fitness.wellnessCredits || 0, -1).replace(' kr', ' SEK');
+        'Current score ' + currentMultiplier.toFixed(2) + 'x';
       creditsRow.appendChild(creditsPill);
       if (fitness.creditsCap) {
         const capPill = document.createElement('span');
@@ -4725,7 +4694,7 @@ import {
         const potentialPill = document.createElement('span');
         potentialPill.className = 'fitness-pill accent';
         potentialPill.textContent =
-          'Projected ' + formatSignedCredits(projectedCredits);
+          'Projected score ' + projectedMultiplier.toFixed(2) + 'x';
         creditsRow.appendChild(potentialPill);
       }
       const fragment = document.createDocumentFragment();
@@ -4740,7 +4709,7 @@ import {
         )} pts to hit this week's scheduled target.`;
       } else {
         nextAction.textContent =
-          'Next: target covered; optional workouts improve next week and credits.';
+          'Next: target covered; optional workouts improve the next locked score.';
       }
       fragment.appendChild(nextAction);
       fragment.appendChild(grid);
@@ -4749,23 +4718,20 @@ import {
       boostRow.className = 'fitness-summary-row';
       const boostLabel = document.createElement('div');
       boostLabel.className = 'fitness-summary-label';
-      boostLabel.textContent = 'Weekend boost';
+      boostLabel.textContent = 'Weekend status';
       const boostValue = document.createElement('div');
       boostValue.className = 'fitness-summary-value';
       if (!boostEnabled) {
         boostValue.textContent = 'Disabled';
       } else if (boostActive) {
-        boostValue.textContent = 'Unlocked: +' + boostPercent + '% on Treats';
+        boostValue.textContent = 'Unlocked';
       } else if (boostUnlocked) {
-        boostValue.textContent =
-          'Unlocked - waiting for weekend (+' + boostPercent + '%)';
+        boostValue.textContent = 'Unlocked - waiting for weekend';
       } else if (pausedThisWeek) {
         boostValue.textContent = 'Paused this week';
       } else {
         boostValue.textContent =
-          'Reach the weekly point target by Friday to unlock (+' +
-          boostPercent +
-          '%)';
+          'Reach the weekly point target by Friday to unlock';
       }
       boostRow.appendChild(boostLabel);
       boostRow.appendChild(boostValue);
@@ -4860,7 +4826,7 @@ import {
               : Math.max(0, val);
           });
         });
-        appendSetting('Workout plan budget (points)', planTotalInput);
+        appendSetting('Workout plan target (points)', planTotalInput);
         const multiplierInput = registerControl(
           'multiplierPerPoint',
           document.createElement('input')
@@ -4879,7 +4845,7 @@ import {
               : Math.max(0, val) / 100;
           });
         });
-        appendSetting('Budget change per point (%)', multiplierInput);
+        appendSetting('Score change per point (%)', multiplierInput);
         const creditsPerPointInput = registerControl(
           'creditsPerPoint',
           document.createElement('input')
@@ -4897,7 +4863,7 @@ import {
               : Math.max(0, val);
           });
         });
-        appendSetting('Credits per point', creditsPerPointInput);
+        appendSetting('Legacy credits per point', creditsPerPointInput);
         const creditsCapInput = registerControl(
           'creditsCap',
           document.createElement('input')
@@ -4913,7 +4879,7 @@ import {
               : Math.max(0, val);
           });
         });
-        appendSetting('Credits cap', creditsCapInput);
+        appendSetting('Legacy credits cap', creditsCapInput);
         const boostToggle = registerControl(
           'boostToggle',
           document.createElement('input')
@@ -4924,7 +4890,7 @@ import {
             fit.weekendBoostEnabled = boostToggle.checked;
           });
         });
-        appendSetting('Enable weekend boost', boostToggle);
+        appendSetting('Enable weekend status', boostToggle);
         const boostPercentInput = registerControl(
           'boostPercent',
           document.createElement('input')
@@ -4940,7 +4906,7 @@ import {
               : Math.max(0, val) / 100;
           });
         });
-        appendSetting('Weekend boost percent', boostPercentInput);
+        appendSetting('Legacy boost percent', boostPercentInput);
         settingsEl.innerHTML = '';
         settingsEl.appendChild(settingsGrid);
         settingsEl._fitnessControls = controls;
@@ -5404,671 +5370,256 @@ import {
       });
       return;
     }
-    resetGroceriesIfNeeded();
     const weeklyListEl = document.getElementById('weeklyGroceryList');
     const monthlyListEl = document.getElementById('monthlyGroceryList');
+    const recurringListEl = document.getElementById('recurringGroceryList');
     const biannualListEl = document.getElementById('biannualGroceryList');
-    const summaryContainer = document.getElementById('budgetSummaryContainer');
-    const recurringListEl = document.getElementById('monthlyRecurringList');
+    const archivedListEl = document.getElementById('archivedGroceryList');
     if (
       !weeklyListEl ||
       !monthlyListEl ||
+      !recurringListEl ||
       !biannualListEl ||
-      !summaryContainer ||
-      !recurringListEl
+      !archivedListEl
     )
       return;
     renderWealthHistoryTable();
     updateWealthDashboard();
     const groceries = Array.isArray(data.groceries) ? data.groceries : [];
-    const recurringPayments = ensureMonthlyRecurringPayments();
-    const recurringTotal = getMonthlyRecurringTotal(recurringPayments);
     let normalizedAny = false;
-    const weeklyFragment = document.createDocumentFragment();
-    const monthlyFragment = document.createDocumentFragment();
-    const biannualFragment = document.createDocumentFragment();
-    // Determine period boundaries for weekly, monthly and biannual budgets
-    const now = new Date();
-    // Weekly boundaries (Monday to next Monday) for spending
-    const dayOfWeek = now.getDay();
-    const diffToMon = (dayOfWeek + 6) % 7;
-    const weekStart = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() - diffToMon
+    const fragments = {
+      soon: document.createDocumentFragment(),
+      later: document.createDocumentFragment(),
+      recurring: document.createDocumentFragment(),
+      someday: document.createDocumentFragment()
+    };
+    const listElements = {
+      soon: weeklyListEl,
+      later: monthlyListEl,
+      recurring: recurringListEl,
+      someday: biannualListEl
+    };
+    const groupOrder = new Map(
+      SHOPPING_GROUPS.map((group, index) => [group, index])
     );
-    weekStart.setHours(0, 0, 0, 0);
-    const weekEnd = new Date(weekStart.getTime() + 7 * 24 * 60 * 60 * 1000);
-    // Monthly boundaries (1st to next 1st) for spending
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    monthStart.setHours(0, 0, 0, 0);
-    const monthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    // Biannual boundaries based on start date
-    let halfStart;
-    let halfEnd;
-    {
-      // Determine budgeting start date; if not set, default to current date (start of month)
-      let startDate = parseLocalDateString(data.groceryBudgetStartDate);
-      if (!startDate) {
-        // default to first day of current month
-        startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-        data.groceryBudgetStartDate = formatLocalDateString(startDate);
-        // persist start date
-        saveData();
-      }
-      startDate.setHours(0, 0, 0, 0);
-      // Compute months difference between startDate and now
-      const monthsDiff =
-        (now.getFullYear() - startDate.getFullYear()) * 12 +
-        (now.getMonth() - startDate.getMonth());
-      const halfIndex = Math.floor(monthsDiff / 6);
-      halfStart = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth() + halfIndex * 6,
-        startDate.getDate()
-      );
-      halfStart.setHours(0, 0, 0, 0);
-      halfEnd = new Date(
-        startDate.getFullYear(),
-        startDate.getMonth() + (halfIndex + 1) * 6,
-        startDate.getDate()
-      );
-      halfEnd.setHours(0, 0, 0, 0);
-    }
-    // Compute amount spent in each period
-    let weeklySpent = 0;
-    let monthlySpent = 0;
-    let biannualSpent = 0;
-    groceries.forEach((it) => {
-      if (!it || !it.archived || !it.purchasedDate) return;
-      const cost = Number(it.cost);
-      if (!Number.isFinite(cost)) return;
-      const freq =
-        typeof it.frequency === 'string'
-          ? it.frequency.toLowerCase()
-          : 'weekly';
-      if (it.frequency !== freq) {
-        it.frequency = freq;
-        normalizedAny = true;
-      }
-      const pd = new Date(it.purchasedDate);
-      if (isNaN(pd)) return;
-      if (freq === 'weekly' && pd >= weekStart && pd < weekEnd) {
-        weeklySpent += cost;
-      }
-      if (freq === 'monthly' && pd >= monthStart && pd < monthEnd) {
-        monthlySpent += cost;
-      }
-      if (freq === 'biannual' && pd >= halfStart && pd < halfEnd) {
-        biannualSpent += cost;
-      }
-    });
-    monthlySpent += recurringTotal;
-
-    const recurringFragment = document.createDocumentFragment();
-    if (recurringPayments.length === 0) {
+    const appendEmpty = (fragment, text) => {
       const empty = document.createElement('li');
       empty.style.fontSize = '0.8rem';
       empty.style.color = '#64748b';
-      empty.textContent = 'No recurring payments added.';
-      recurringFragment.appendChild(empty);
-    } else {
-      recurringPayments.forEach((payment) => {
+      empty.textContent = text;
+      fragment.appendChild(empty);
+    };
+
+    groceries
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item && !item.archived)
+      .sort((a, b) => {
+        const groupDiff =
+          groupOrder.get(normalizeShoppingGroup(a.item)) -
+          groupOrder.get(normalizeShoppingGroup(b.item));
+        if (groupDiff !== 0) return groupDiff;
+        return String(a.item.name || '').localeCompare(
+          String(b.item.name || ''),
+          undefined,
+          { sensitivity: 'base' }
+        );
+      })
+      .forEach(({ item, index }) => {
+        const group = normalizeShoppingGroup(item);
+        if (item.shoppingGroup !== group) {
+          item.shoppingGroup = group;
+          normalizedAny = true;
+        }
+        const estimate = getShoppingEstimate(item);
         const li = document.createElement('li');
         li.style.display = 'flex';
-        li.style.justifyContent = 'space-between';
-        li.style.alignItems = 'center';
+        li.style.flexDirection = 'column';
+        li.style.gap = '0.3rem';
         li.style.padding = '0.5rem 0';
         li.style.borderBottom = '1px solid #f1f5f9';
 
+        const row = document.createElement('div');
+        row.style.display = 'flex';
+        row.style.justifyContent = 'space-between';
+        row.style.alignItems = 'center';
+        row.style.gap = '0.5rem';
         const info = document.createElement('span');
         info.style.fontWeight = '600';
-        const amountLabel = formatCurrency(payment.amount || 0, -1).replace(
-          ' kr',
-          ' SEK'
-        );
-        info.textContent = `${payment.name || 'Recurring payment'} - ${amountLabel}`;
-        li.appendChild(info);
+        info.textContent =
+          item.name +
+          (estimate !== null ? ` - est. ${formatSek(estimate)}` : '');
+        row.appendChild(info);
 
         const actions = document.createElement('div');
         actions.style.display = 'flex';
         actions.style.gap = '0.4rem';
+        actions.style.flexWrap = 'wrap';
 
-        const editBtn = document.createElement('button');
-        editBtn.className = 'btn secondary';
-        editBtn.style.fontSize = '0.7rem';
-        editBtn.textContent = 'Edit';
-        editBtn.addEventListener('click', async () => {
+        const boughtBtn = document.createElement('button');
+        boughtBtn.className = 'btn';
+        boughtBtn.textContent = 'Bought';
+        boughtBtn.style.fontSize = '0.7rem';
+        boughtBtn.addEventListener('click', async () => {
           const values = await openFormDialog({
-            title: 'Edit Recurring Payment',
-            fields: [
-              {
-                name: 'name',
-                label: 'Payment Name',
-                value: payment.name || '',
-                required: true
-              },
-              {
-                name: 'amount',
-                label: 'Monthly Amount (SEK)',
-                type: 'number',
-                min: 0,
-                step: 0.01,
-                value: payment.amount || 0,
-                required: true
-              }
-            ],
-            submitLabel: 'Save Payment'
-          });
-          if (!values) return;
-          const trimmedName = values.name.trim();
-          if (!trimmedName) {
-            showToast('Payment name cannot be empty.');
-            return;
-          }
-          const newAmount = parseFloat(values.amount);
-          if (!Number.isFinite(newAmount) || newAmount < 0) {
-            showToast('Enter a valid amount.');
-            return;
-          }
-          const snapshot = cloneData();
-          payment.name = trimmedName;
-          payment.amount = newAmount;
-          saveData();
-          updateGrocerySection();
-          offerUndo('Recurring payment updated.', snapshot);
-        });
-        actions.appendChild(editBtn);
-
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'btn danger';
-        deleteBtn.style.fontSize = '0.7rem';
-        deleteBtn.textContent = 'Delete';
-        deleteBtn.addEventListener('click', async () => {
-          const ok = await requestConfirm({
-            title: 'Remove Payment',
-            message: 'Remove this recurring payment?',
-            confirmLabel: 'Remove',
-            danger: true
-          });
-          if (!ok) return;
-          const snapshot = cloneData();
-          data.monthlyRecurringPayments = data.monthlyRecurringPayments.filter(
-            (p) => p.id !== payment.id
-          );
-          saveData();
-          updateGrocerySection();
-          offerUndo('Recurring payment removed.', snapshot);
-        });
-        actions.appendChild(deleteBtn);
-
-        li.appendChild(actions);
-        recurringFragment.appendChild(li);
-      });
-    }
-    recurringListEl.replaceChildren(...recurringFragment.childNodes);
-
-    // After rendering active items, render archived purchases with ability to edit cost
-    const archivedListEl = document.getElementById('archivedGroceryList');
-    if (archivedListEl) {
-      const archivedFragment = document.createDocumentFragment();
-      groceries.forEach((archItem, archIndex) => {
-        if (!archItem.archived) return;
-        const liArch = document.createElement('li');
-        liArch.style.display = 'flex';
-        liArch.style.flexDirection = 'column';
-        liArch.style.gap = '0.3rem';
-        liArch.style.padding = '0.5rem 0';
-        liArch.style.borderBottom = '1px solid #f1f5f9';
-        // Row containing details and action buttons
-        const rowArch = document.createElement('div');
-        rowArch.style.display = 'flex';
-        rowArch.style.justifyContent = 'space-between';
-        rowArch.style.alignItems = 'center';
-        // Details span: name - cost - frequency - purchase date
-        const detailsSpan = document.createElement('span');
-        let dateStr = '';
-        const freq =
-          typeof archItem.frequency === 'string'
-            ? archItem.frequency.toLowerCase()
-            : 'weekly';
-        if (archItem.frequency !== freq) {
-          archItem.frequency = freq;
-          normalizedAny = true;
-        }
-        if (archItem.purchasedDate) {
-          const dt = new Date(archItem.purchasedDate);
-          dateStr = dt.toLocaleDateString();
-        }
-        const costNum = Number(archItem.cost);
-        const costString = Number.isFinite(costNum)
-          ? formatCurrency(costNum, -1).replace(' kr', ' SEK')
-          : '0 SEK';
-        const parts = [`${archItem.name}`, costString];
-        const originalCostNum = Number(archItem.originalCost);
-        if (Number.isFinite(originalCostNum) && originalCostNum !== costNum) {
-          const originalString = formatCurrency(originalCostNum, -1).replace(
-            ' kr',
-            ' SEK'
-          );
-          let creditNote = `original ${originalString}`;
-          const appliedCreditsNum = Number(archItem.appliedCredits);
-          if (Number.isFinite(appliedCreditsNum) && appliedCreditsNum > 0) {
-            creditNote += `, credits -${formatCurrency(appliedCreditsNum, -1).replace(' kr', ' SEK')}`;
-          }
-          parts.push(creditNote);
-        }
-        const freqLabel = freq.charAt(0).toUpperCase() + freq.slice(1);
-        parts.push(freqLabel);
-        if (dateStr) parts.push(dateStr);
-        detailsSpan.textContent = parts.join(' - ');
-        rowArch.appendChild(detailsSpan);
-        if (archItem.boostApplied && archItem.boostPercentApplied) {
-          const boostNote = document.createElement('div');
-          boostNote.className = 'treat-note archived';
-          boostNote.textContent =
-            'Weekend Boost covered ' +
-            Math.round(
-              (archItem.boostPercentApplied ||
-                (typeof fitness !== 'undefined' && fitness.weekendBoostPercent
-                  ? fitness.weekendBoostPercent
-                  : 0)) * 100
-            ) +
-            '%';
-          liArch.appendChild(boostNote);
-        }
-        // Action buttons for archived items
-        const btnGroupArch = document.createElement('div');
-        // Edit archived item: allows editing cost
-        const editArchBtn = document.createElement('button');
-        editArchBtn.className = 'btn secondary';
-        editArchBtn.textContent = 'Edit';
-        editArchBtn.style.fontSize = '0.7rem';
-        editArchBtn.addEventListener('click', async () => {
-          const values = await openFormDialog({
-            title: 'Edit Purchase',
+            title: 'Mark Bought',
             fields: [
               {
                 name: 'cost',
-                label: 'Cost (SEK)',
+                label: 'Cost (SEK, optional)',
                 type: 'number',
                 min: 0,
                 step: 0.01,
-                value: archItem.cost || 0,
-                required: true
+                value: estimate !== null ? estimate : ''
               }
             ],
             submitLabel: 'Save Purchase'
           });
           if (!values) return;
-          const newCostVal = parseFloat(values.cost);
-          if (!Number.isFinite(newCostVal) || newCostVal < 0) {
-            showToast('Enter a valid cost.');
+          logGroceryPurchase(item, values.cost);
+        });
+        actions.appendChild(boughtBtn);
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn secondary';
+        editBtn.textContent = 'Edit';
+        editBtn.style.fontSize = '0.7rem';
+        editBtn.addEventListener('click', async () => {
+          const values = await openFormDialog({
+            title: 'Edit Shopping Item',
+            fields: [
+              {
+                name: 'name',
+                label: 'Item Name',
+                value: item.name || '',
+                required: true
+              },
+              {
+                name: 'shoppingGroup',
+                label: 'Group',
+                type: 'select',
+                value: group,
+                options: SHOPPING_GROUPS.map((value) => ({
+                  value,
+                  label: formatShoppingGroup(value)
+                }))
+              },
+              {
+                name: 'estimate',
+                label: 'Estimate (SEK, optional)',
+                type: 'number',
+                min: 0,
+                step: 1,
+                value: estimate !== null ? estimate : ''
+              }
+            ],
+            submitLabel: 'Save Item'
+          });
+          if (!values) return;
+          const trimmedName = values.name.trim();
+          if (!trimmedName) {
+            showToast('Item name is required.');
+            return;
+          }
+          const nextEstimate = parseOptionalMoney(values.estimate);
+          if (Number.isNaN(nextEstimate)) {
+            showToast('Enter a valid estimate.');
             return;
           }
           const snapshot = cloneData();
-          archItem.cost = newCostVal;
-          // Update purchase date to now if none exists
-          if (!archItem.purchasedDate) {
-            archItem.purchasedDate = new Date().toISOString();
-          }
+          item.name = trimmedName;
+          item.shoppingGroup = SHOPPING_GROUPS.includes(values.shoppingGroup)
+            ? values.shoppingGroup
+            : 'soon';
+          item.estimate = nextEstimate;
           saveData();
           updateGrocerySection();
-          offerUndo('Purchase updated.', snapshot);
-          if (typeof provideHaptic === 'function') {
-            provideHaptic('beep');
-          }
+          offerUndo('Shopping item updated.', snapshot);
         });
-        btnGroupArch.appendChild(editArchBtn);
-        // Delete archived item
-        const deleteArchBtn = document.createElement('button');
-        deleteArchBtn.className = 'btn danger';
-        deleteArchBtn.textContent = 'Delete';
-        deleteArchBtn.style.fontSize = '0.7rem';
-        deleteArchBtn.addEventListener('click', async () => {
+        actions.appendChild(editBtn);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'btn danger';
+        deleteBtn.textContent = 'Delete';
+        deleteBtn.style.fontSize = '0.7rem';
+        deleteBtn.addEventListener('click', async () => {
           const ok = await requestConfirm({
-            title: 'Delete Purchase',
-            message: 'Delete this archived purchase?',
+            title: 'Delete Shopping Item',
+            message: 'Delete this shopping item?',
             confirmLabel: 'Delete',
             danger: true
           });
           if (!ok) return;
           const snapshot = cloneData();
-          data.groceries.splice(archIndex, 1);
+          data.groceries.splice(index, 1);
           saveData();
           updateGrocerySection();
-          offerUndo('Archived purchase deleted.', snapshot);
+          offerUndo('Shopping item deleted.', snapshot);
         });
-        btnGroupArch.appendChild(deleteArchBtn);
-        rowArch.appendChild(btnGroupArch);
-        liArch.appendChild(rowArch);
-        archivedFragment.appendChild(liArch);
+        actions.appendChild(deleteBtn);
+
+        row.appendChild(actions);
+        li.appendChild(row);
+        fragments[group].appendChild(li);
       });
-      archivedListEl.replaceChildren(...archivedFragment.childNodes);
-    }
-    // Dynamic budgets = base + carry
-    const fitness = ensureFitnessDefaults();
-    const currentMultiplier = clampMultiplier(fitness.currentMultiplier || 1);
-    const nextMultiplier = clampMultiplier(
-      typeof fitness.nextMultiplier === 'number'
-        ? fitness.nextMultiplier
-        : currentMultiplier
-    );
-    const weeklyBaseBudget = data.groceryBudgetWeekly || 0;
-    const monthlyBaseBudget = data.groceryBudgetMonthly || 0;
-    const biBaseBudget = data.groceryBudgetBiYearly || 0;
-    const weeklyBaseWithCarry =
-      weeklyBaseBudget + (data.groceryBudgetWeeklyCarry || 0);
-    const monthlyDynamicBudget =
-      monthlyBaseBudget + (data.groceryBudgetMonthlyCarry || 0);
-    const biDynamicBudget =
-      biBaseBudget + (data.groceryBudgetBiYearlyCarry || 0);
-    const weeklyDynamicBudget = weeklyBaseWithCarry * currentMultiplier;
-    const nextWeekBudget = weeklyBaseWithCarry * nextMultiplier;
-    // Time progress for budgets (fraction of period elapsed)
-    const weekTimeProgress = clampUnitInterval(
-      (now - weekStart) / (weekEnd - weekStart)
-    );
-    const monthTimeProgress = clampUnitInterval(
-      (now - monthStart) / (monthEnd - monthStart)
-    );
-    const halfTimeProgress = clampUnitInterval(
-      (now - halfStart) / (halfEnd - halfStart)
-    );
-    // Expected spending so far
-    const weeklyExpectedSpent = weeklyDynamicBudget * weekTimeProgress;
-    const monthlyExpectedSpent = monthlyDynamicBudget * monthTimeProgress;
-    const biExpectedSpent = biDynamicBudget * halfTimeProgress;
-    // Build budget summary card
-    const summaryCard = document.createElement('div');
-    summaryCard.className = 'card';
-    summaryCard.style.marginBottom = '1rem';
-    const summaryTitle = document.createElement('h3');
-    summaryTitle.style.margin = '0 0 0.5rem 0';
-    summaryTitle.style.fontSize = '1.1rem';
-    summaryTitle.style.fontWeight = '600';
-    summaryTitle.textContent = 'Budget Summary';
-    summaryCard.appendChild(summaryTitle);
-    const budgetNextAction = document.createElement('div');
-    const weeklyRemaining = Math.max(0, weeklyDynamicBudget - weeklySpent);
-    budgetNextAction.className = `mobile-next-action${
-      weeklyRemaining <= 0
-        ? ' risk'
-        : weeklySpent > weeklyExpectedSpent
-          ? ' warm'
-          : ''
-    }`;
-    budgetNextAction.textContent = `Next: ${formatSek(
-      weeklyRemaining
-    )} left this week; ${weeklySpent > weeklyExpectedSpent ? 'spending is ahead of expected pace' : 'spending is within expected pace'}.`;
-    summaryCard.appendChild(budgetNextAction);
-    function addBudgetLine(label, spent, budget, expected) {
-      const line = document.createElement('div');
-      line.style.fontSize = '0.85rem';
-      line.style.marginBottom = '0.25rem';
-      // Format currency to nearest ten (use existing formatCurrency)
-      const spentStr = formatCurrency(spent || 0, -1);
-      const budgetStr = formatCurrency(budget || 0, -1);
-      const expectedStr = formatCurrency(expected || 0, -1);
-      line.textContent = `${label}: ${spentStr} / ${budgetStr} SEK (expected ${expectedStr} SEK)`;
-      summaryCard.appendChild(line);
-      // Create multi progress bar for budgets
-      const pb = document.createElement('div');
-      pb.className = 'progress-bar multi';
-      pb.style.marginBottom = '0.4rem';
-      // Expected fill (black)
-      const expectedFill = document.createElement('div');
-      expectedFill.className = 'expected-fill';
-      expectedFill.style.width =
-        budget > 0
-          ? Math.min(100, (expected / budget) * 100).toFixed(1) + '%'
-          : '0%';
-      pb.appendChild(expectedFill);
-      // Actual fill (blue)
-      const actualFill = document.createElement('div');
-      actualFill.className = 'hours-fill';
-      actualFill.style.width =
-        budget > 0
-          ? Math.min(100, (spent / budget) * 100).toFixed(1) + '%'
-          : '0%';
-      pb.appendChild(actualFill);
-      summaryCard.appendChild(pb);
-    }
-    addBudgetLine(
-      'Weekly',
-      weeklySpent,
-      weeklyDynamicBudget,
-      weeklyExpectedSpent
-    );
-    const multiplierLine = document.createElement('div');
-    multiplierLine.className = 'fitness-summary-sub';
-    multiplierLine.textContent =
-      'Fitness Multiplier next week: ' +
-      nextMultiplier.toFixed(2) +
-      'x (' +
-      formatSignedCurrency(nextWeekBudget - weeklyBaseWithCarry) +
-      ')';
-    summaryCard.appendChild(multiplierLine);
-    const creditsLine = document.createElement('div');
-    creditsLine.className = 'fitness-summary-sub';
-    creditsLine.textContent =
-      'Wellness Credits: ' +
-      formatCurrency(fitness.wellnessCredits || 0, -1).replace(' kr', ' SEK') +
-      ' (auto-applied)';
-    summaryCard.appendChild(creditsLine);
-    addBudgetLine(
-      'Monthly',
-      monthlySpent,
-      monthlyDynamicBudget,
-      monthlyExpectedSpent
-    );
-    if (recurringTotal > 0) {
-      const recurringLine = document.createElement('div');
-      recurringLine.className = 'fitness-summary-sub';
-      recurringLine.textContent =
-        'Recurring payments this month: ' +
-        formatCurrency(recurringTotal, -1).replace(' kr', ' SEK');
-      summaryCard.appendChild(recurringLine);
-    }
-    addBudgetLine('Biannual', biannualSpent, biDynamicBudget, biExpectedSpent);
-    // Add edit buttons for budgets and start date
-    const controlsDiv = document.createElement('div');
-    controlsDiv.style.display = 'flex';
-    controlsDiv.style.gap = '0.5rem';
-    controlsDiv.style.marginTop = '0.5rem';
-    // Edit budgets button
-    const editBudgetsBtn = document.createElement('button');
-    editBudgetsBtn.className = 'btn secondary';
-    editBudgetsBtn.style.fontSize = '0.75rem';
-    editBudgetsBtn.textContent = 'Edit Budgets';
-    editBudgetsBtn.addEventListener('click', async () => {
-      const values = await openFormDialog({
-        title: 'Edit Grocery Budgets',
-        fields: [
-          {
-            name: 'weekly',
-            label: 'Weekly Budget (SEK)',
-            type: 'number',
-            min: 0,
-            step: 1,
-            value: data.groceryBudgetWeekly || 0
-          },
-          {
-            name: 'monthly',
-            label: 'Monthly Budget (SEK)',
-            type: 'number',
-            min: 0,
-            step: 1,
-            value: data.groceryBudgetMonthly || 0
-          },
-          {
-            name: 'biannual',
-            label: 'Biannual Budget (SEK)',
-            type: 'number',
-            min: 0,
-            step: 1,
-            value: data.groceryBudgetBiYearly || 0
-          }
-        ],
-        submitLabel: 'Save Budgets'
-      });
-      if (!values) return;
-      const weekly = parseFloat(values.weekly);
-      const monthly = parseFloat(values.monthly);
-      const biannual = parseFloat(values.biannual);
-      if (
-        !Number.isFinite(weekly) ||
-        weekly < 0 ||
-        !Number.isFinite(monthly) ||
-        monthly < 0 ||
-        !Number.isFinite(biannual) ||
-        biannual < 0
-      ) {
-        showToast('Enter valid non-negative budgets.');
-        return;
-      }
-      const snapshot = cloneData();
-      data.groceryBudgetWeekly = weekly;
-      data.groceryBudgetMonthly = monthly;
-      data.groceryBudgetBiYearly = biannual;
-      saveData();
-      updateGrocerySection();
-      offerUndo('Grocery budgets updated.', snapshot);
+
+    SHOPPING_GROUPS.forEach((group) => {
+      const fragment = fragments[group];
+      if (!fragment.childNodes.length) appendEmpty(fragment, 'No items.');
+      listElements[group].replaceChildren(...fragment.childNodes);
     });
-    controlsDiv.appendChild(editBudgetsBtn);
-    // Edit start date button
-    const editStartBtn = document.createElement('button');
-    editStartBtn.className = 'btn secondary';
-    editStartBtn.style.fontSize = '0.75rem';
-    editStartBtn.textContent = 'Set Start Date';
-    editStartBtn.addEventListener('click', async () => {
-      const values = await openFormDialog({
-        title: 'Set Budget Start Date',
-        fields: [
-          {
-            name: 'startDate',
-            label: 'Start Date',
-            type: 'date',
-            value: data.groceryBudgetStartDate || '',
-            required: true
-          }
-        ],
-        submitLabel: 'Save Date'
+
+    const archivedFragment = document.createDocumentFragment();
+    const archivedItems = groceries
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => item && item.archived)
+      .sort((a, b) => {
+        const aTime = new Date(a.item.purchasedDate || 0).getTime();
+        const bTime = new Date(b.item.purchasedDate || 0).getTime();
+        return bTime - aTime;
       });
-      if (!values) return;
-      const parsed = parseLocalDateString(values.startDate);
-      if (!parsed) {
-        showToast('Enter a valid start date.');
-        return;
-      }
-      const normalized = formatLocalDateString(parsed);
-      if (data.groceryBudgetStartDate !== normalized) {
-        const snapshot = cloneData();
-        data.groceryBudgetStartDate = normalized;
-        saveData();
-        offerUndo('Budget start date updated.', snapshot);
-      }
-      updateGrocerySection();
-    });
-    controlsDiv.appendChild(editStartBtn);
-    summaryCard.appendChild(controlsDiv);
-    if (summaryCard instanceof DocumentFragment) {
-      summaryContainer.replaceChildren(...summaryCard.childNodes);
-    } else {
-      summaryContainer.replaceChildren(summaryCard);
+    if (!archivedItems.length) {
+      appendEmpty(archivedFragment, 'No purchases logged yet.');
     }
-    // ------------------------------------------------------------
-    // In budget-only mode we do not limit the number of items that can be
-    // purchased in a period.  We therefore do not compute or display
-    // purchase quotas, and buy buttons remain enabled regardless of
-    // how many items have been purchased.
-    // Render unarchived items
-    const boostEnabled = fitness.weekendBoostEnabled;
-    const boostActive = isWeekendBoostActive();
-    const boostUnlocked =
-      fitness.weekendBoostUnlockedWeek === getWeekKey(new Date());
-    const boostPercentDisplay = Math.round(
-      (fitness.weekendBoostPercent || 0) * 100
-    );
-    groceries.forEach((item, index) => {
-      if (item.archived) return;
-      const freq =
-        typeof item.frequency === 'string'
-          ? item.frequency.toLowerCase()
-          : 'weekly';
-      if (item.frequency !== freq) {
-        item.frequency = freq;
-        normalizedAny = true;
-      }
+    archivedItems.forEach(({ item, index }) => {
       const li = document.createElement('li');
       li.style.display = 'flex';
       li.style.flexDirection = 'column';
       li.style.gap = '0.3rem';
       li.style.padding = '0.5rem 0';
       li.style.borderBottom = '1px solid #f1f5f9';
-      // Row: name and actions
       const row = document.createElement('div');
       row.style.display = 'flex';
       row.style.justifyContent = 'space-between';
       row.style.alignItems = 'center';
-      const nameSpan = document.createElement('span');
-      nameSpan.textContent = item.name;
-      nameSpan.style.fontWeight = '600';
-      if (item.category === 'treat') {
-        const tag = document.createElement('span');
-        tag.className = 'treat-tag';
-        tag.textContent = 'Treat';
-        tag.style.marginLeft = '0.35rem';
-        nameSpan.appendChild(tag);
-      } else if (item.category === 'essential') {
-        const tag = document.createElement('span');
-        tag.className = 'treat-tag muted';
-        tag.textContent = 'Essential';
-        tag.style.marginLeft = '0.35rem';
-        nameSpan.appendChild(tag);
-      }
-      row.appendChild(nameSpan);
-      const btnGroup = document.createElement('div');
-      // Buy button (log purchase with cost). In budget-only mode there is
-      // no limit on the number of purchases per period, so the button
-      // is always enabled.
-      const buyBtn = document.createElement('button');
-      buyBtn.className = 'btn';
-      buyBtn.textContent = 'Buy';
-      buyBtn.style.fontSize = '0.7rem';
-      buyBtn.addEventListener('click', async () => {
-        const values = await openFormDialog({
-          title: 'Log Purchase',
-          fields: [
-            {
-              name: 'cost',
-              label: 'Cost (SEK)',
-              type: 'number',
-              min: 0,
-              step: 0.01,
-              value: 0,
-              required: true
-            }
-          ],
-          submitLabel: 'Buy'
-        });
-        if (!values) return;
-        const parsedCost = parseFloat(values.cost);
-        if (!Number.isFinite(parsedCost) || parsedCost < 0) {
-          showToast('Enter a valid cost.');
-          return;
-        }
-        logGroceryPurchase(item, parsedCost);
-      });
-      btnGroup.appendChild(buyBtn);
-      // Edit button
+      row.style.gap = '0.5rem';
+      const purchasedDate = item.purchasedDate
+        ? new Date(item.purchasedDate)
+        : null;
+      const dateLabel =
+        purchasedDate && !Number.isNaN(purchasedDate.getTime())
+          ? purchasedDate.toLocaleDateString()
+          : '';
+      const details = document.createElement('span');
+      const parts = [
+        item.name || 'Purchase',
+        formatOptionalSek(item.cost),
+        formatShoppingGroup(normalizeShoppingGroup(item))
+      ];
+      if (dateLabel) parts.push(dateLabel);
+      details.textContent = parts.join(' - ');
+      row.appendChild(details);
+
+      const actions = document.createElement('div');
+      actions.style.display = 'flex';
+      actions.style.gap = '0.4rem';
+      actions.style.flexWrap = 'wrap';
       const editBtn = document.createElement('button');
       editBtn.className = 'btn secondary';
-      editBtn.textContent = 'Edit';
       editBtn.style.fontSize = '0.7rem';
+      editBtn.textContent = 'Edit';
       editBtn.addEventListener('click', async () => {
         const values = await openFormDialog({
-          title: 'Edit Grocery Item',
+          title: 'Edit Purchase',
           fields: [
             {
               name: 'name',
@@ -6077,29 +5628,25 @@ import {
               required: true
             },
             {
-              name: 'frequency',
-              label: 'Frequency',
-              type: 'select',
-              value: freq,
-              options: [
-                { value: 'weekly', label: 'Weekly' },
-                { value: 'monthly', label: 'Monthly' },
-                { value: 'biannual', label: 'Biannual' }
-              ]
+              name: 'cost',
+              label: 'Cost (SEK, optional)',
+              type: 'number',
+              min: 0,
+              step: 0.01,
+              value:
+                item.cost === null || item.cost === undefined ? '' : item.cost
             },
             {
-              name: 'category',
-              label: 'Category',
-              type: 'select',
-              value: item.category || 'standard',
-              options: [
-                { value: 'standard', label: 'Standard' },
-                { value: 'treat', label: 'Treat' },
-                { value: 'essential', label: 'Essential' }
-              ]
+              name: 'purchasedDate',
+              label: 'Purchase Date',
+              type: 'date',
+              value:
+                purchasedDate && !Number.isNaN(purchasedDate.getTime())
+                  ? formatLocalDateString(purchasedDate)
+                  : ''
             }
           ],
-          submitLabel: 'Save Item'
+          submitLabel: 'Save Purchase'
         });
         if (!values) return;
         const trimmedName = values.name.trim();
@@ -6107,32 +5654,52 @@ import {
           showToast('Item name is required.');
           return;
         }
+        const nextCost = parseOptionalMoney(values.cost);
+        if (Number.isNaN(nextCost)) {
+          showToast('Enter a valid cost.');
+          return;
+        }
+        const parsedDate = values.purchasedDate
+          ? parseLocalDateString(values.purchasedDate)
+          : null;
+        if (values.purchasedDate && !parsedDate) {
+          showToast('Enter a valid purchase date.');
+          return;
+        }
         const snapshot = cloneData();
         item.name = trimmedName;
-        item.frequency = ['weekly', 'monthly', 'biannual'].includes(
-          values.frequency
-        )
-          ? values.frequency
-          : 'weekly';
-        item.category = ['standard', 'treat', 'essential'].includes(
-          values.category
-        )
-          ? values.category
-          : 'standard';
+        item.cost = nextCost;
+        item.originalCost = nextCost;
+        item.appliedCredits = 0;
+        item.boostApplied = false;
+        item.boostPercentApplied = 0;
+        if (parsedDate) {
+          const current =
+            purchasedDate && !Number.isNaN(purchasedDate.getTime())
+              ? purchasedDate
+              : new Date();
+          parsedDate.setHours(
+            current.getHours(),
+            current.getMinutes(),
+            current.getSeconds(),
+            current.getMilliseconds()
+          );
+          item.purchasedDate = parsedDate.toISOString();
+        }
         saveData();
         updateGrocerySection();
-        offerUndo('Grocery item updated.', snapshot);
+        offerUndo('Purchase updated.', snapshot);
       });
-      btnGroup.appendChild(editBtn);
-      // Delete button
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn danger';
-      delBtn.textContent = 'Delete';
-      delBtn.style.fontSize = '0.7rem';
-      delBtn.addEventListener('click', async () => {
+      actions.appendChild(editBtn);
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'btn danger';
+      deleteBtn.style.fontSize = '0.7rem';
+      deleteBtn.textContent = 'Delete';
+      deleteBtn.addEventListener('click', async () => {
         const ok = await requestConfirm({
-          title: 'Delete Grocery Item',
-          message: 'Delete this grocery item?',
+          title: 'Delete Purchase',
+          message: 'Delete this purchase?',
           confirmLabel: 'Delete',
           danger: true
         });
@@ -6141,308 +5708,17 @@ import {
         data.groceries.splice(index, 1);
         saveData();
         updateGrocerySection();
-        offerUndo('Grocery item deleted.', snapshot);
+        offerUndo('Purchase deleted.', snapshot);
       });
-      btnGroup.appendChild(delBtn);
-      row.appendChild(btnGroup);
-      li.appendChild(row);
-      if (item.category === 'treat') {
-        const note = document.createElement('div');
-        note.className = 'treat-note';
-        if (!boostEnabled) {
-          note.textContent = 'Treat item';
-        } else if (boostActive) {
-          note.textContent =
-            'Weekend Boost applied: -' + boostPercentDisplay + '% from credits';
-        } else if (boostUnlocked) {
-          note.textContent =
-            'Weekend Boost unlocked: +' +
-            boostPercentDisplay +
-            '% on Treats this weekend';
-        } else {
-          note.textContent =
-            'Treat item - unlock +' + boostPercentDisplay + '% by Friday 18:00';
-        }
-        li.appendChild(note);
-      }
-      // Append to appropriate list
-      if (freq === 'monthly') {
-        monthlyFragment.appendChild(li);
-      } else if (freq === 'biannual') {
-        biannualFragment.appendChild(li);
-      } else {
-        weeklyFragment.appendChild(li);
-      }
-    });
-    weeklyListEl.replaceChildren(...weeklyFragment.childNodes);
-    monthlyListEl.replaceChildren(...monthlyFragment.childNodes);
-    biannualListEl.replaceChildren(...biannualFragment.childNodes);
-    updateFitnessCards();
-    if (normalizedAny) {
-      saveData();
-    }
-  }
+      actions.appendChild(deleteBtn);
 
-  // Reset grocery budgets for weekly, monthly, and biannual periods. Carry-overs are recalculated
-  // whenever we cross a boundary or when archived purchases are edited retroactively.
-  function resetGroceriesIfNeeded() {
-    const now = new Date();
-    let dataChanged = false;
-    const budgetStartDate = parseLocalDateString(data.groceryBudgetStartDate);
-    if (budgetStartDate) {
-      budgetStartDate.setHours(0, 0, 0, 0);
-    }
-    // Determine the start of this week (Monday at 00:00)
-    const dow = now.getDay();
-    const diffToMonday = (dow + 6) % 7;
-    const thisMonday = new Date(
-      now.getFullYear(),
-      now.getMonth(),
-      now.getDate() - diffToMonday
-    );
-    thisMonday.setHours(0, 0, 0, 0);
-    const mondayStr = thisMonday.toDateString();
-    const prevMonday = new Date(thisMonday.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const lastWeekReset = localStorage.getItem('groceryWeeklyResetPro');
-    const hasWeekReset =
-      typeof lastWeekReset === 'string' && lastWeekReset.length > 0;
-    let weeklySpentPrev = 0;
-    if (Array.isArray(data.groceries)) {
-      data.groceries.forEach((item) => {
-        if (!item || !item.archived) return;
-        const freq =
-          typeof item.frequency === 'string'
-            ? item.frequency.toLowerCase()
-            : 'weekly';
-        if (item.frequency !== freq) item.frequency = freq;
-        if (freq !== 'weekly') return;
-        const cost = Number(item.cost);
-        if (!Number.isFinite(cost)) return;
-        if (item.purchasedDate) {
-          const pd = new Date(item.purchasedDate);
-          if (pd >= prevMonday && pd < thisMonday) {
-            weeklySpentPrev += cost;
-          }
-        } else {
-          // Exclude legacy purchases without a recorded purchase date from budget calculations.
-          // Optionally, assign a neutral date for consistency:
-          item.purchasedDate = null;
-          // Do not count their cost in weeklySpentPrev.
-        }
-      });
-    }
-    const baseBudget =
-      typeof data.groceryBudgetWeekly === 'number'
-        ? data.groceryBudgetWeekly
-        : 0;
-    const storedCarry =
-      typeof data.groceryBudgetWeeklyCarry === 'number'
-        ? data.groceryBudgetWeeklyCarry
-        : 0;
-    if (hasWeekReset) {
-      const baselineCarry =
-        lastWeekReset === mondayStr &&
-        typeof data.groceryBudgetWeeklyCarryBaseline === 'number'
-          ? data.groceryBudgetWeeklyCarryBaseline
-          : storedCarry;
-      const dynamicPrevBudget = baseBudget + baselineCarry;
-      const newWeeklyCarry = dynamicPrevBudget - weeklySpentPrev;
-      if (
-        lastWeekReset !== mondayStr ||
-        data.groceryBudgetWeeklyCarry !== newWeeklyCarry ||
-        data.groceryBudgetWeeklyCarryBaseline !== baselineCarry
-      ) {
-        data.groceryBudgetWeeklyCarry = newWeeklyCarry;
-        data.groceryBudgetWeeklyCarryBaseline = baselineCarry;
-        localStorage.setItem('groceryWeeklyResetPro', mondayStr);
-        dataChanged = true;
-      }
-    } else {
-      localStorage.setItem('groceryWeeklyResetPro', mondayStr);
-      if (data.groceryBudgetWeeklyCarry !== storedCarry) {
-        data.groceryBudgetWeeklyCarry = storedCarry;
-        dataChanged = true;
-      }
-      if (data.groceryBudgetWeeklyCarryBaseline !== storedCarry) {
-        data.groceryBudgetWeeklyCarryBaseline = storedCarry;
-        dataChanged = true;
-      }
-    }
-    // Monthly carry-over recalculation
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const thisMonthStart = new Date(year, month, 1);
-    thisMonthStart.setHours(0, 0, 0, 0);
-    const monthKey = year + '-' + month;
-    const lastMonthReset = localStorage.getItem('groceryMonthlyResetPro');
-    const hasMonthReset =
-      typeof lastMonthReset === 'string' && lastMonthReset.length > 0;
-    const prevMonthStart = new Date(year, month - 1, 1);
-    const prevMonthEnd = new Date(year, month, 1);
-    let monthlySpentPrev = 0;
-    if (Array.isArray(data.groceries)) {
-      data.groceries.forEach((item) => {
-        if (!item || !item.archived) return;
-        const freq =
-          typeof item.frequency === 'string'
-            ? item.frequency.toLowerCase()
-            : 'weekly';
-        if (item.frequency !== freq) item.frequency = freq;
-        if (freq !== 'monthly') return;
-        const cost = Number(item.cost);
-        if (!Number.isFinite(cost)) return;
-        if (item.purchasedDate) {
-          const pd = new Date(item.purchasedDate);
-          if (pd >= prevMonthStart && pd < prevMonthEnd) {
-            monthlySpentPrev += cost;
-          }
-        } else {
-          // Legacy monthly item without a purchasedDate: skip from monthlySpentPrev calculation.
-          // Optionally, flag for user review or log a warning here.
-          // No changes to item or monthlySpentPrev.
-        }
-      });
-    }
-    monthlySpentPrev += getMonthlyRecurringTotal();
-    const baseBudgetM =
-      typeof data.groceryBudgetMonthly === 'number'
-        ? data.groceryBudgetMonthly
-        : 0;
-    const storedCarryM =
-      typeof data.groceryBudgetMonthlyCarry === 'number'
-        ? data.groceryBudgetMonthlyCarry
-        : 0;
-    const skipMonthlyCarry = !!(
-      budgetStartDate && prevMonthEnd <= budgetStartDate
-    );
-    if (hasMonthReset && !skipMonthlyCarry) {
-      const baselineCarryM =
-        lastMonthReset === monthKey &&
-        typeof data.groceryBudgetMonthlyCarryBaseline === 'number'
-          ? data.groceryBudgetMonthlyCarryBaseline
-          : storedCarryM;
-      const dynamicPrevBudgetM = baseBudgetM + baselineCarryM;
-      const newMonthlyCarry = dynamicPrevBudgetM - monthlySpentPrev;
-      if (
-        lastMonthReset !== monthKey ||
-        data.groceryBudgetMonthlyCarry !== newMonthlyCarry ||
-        data.groceryBudgetMonthlyCarryBaseline !== baselineCarryM
-      ) {
-        data.groceryBudgetMonthlyCarry = newMonthlyCarry;
-        data.groceryBudgetMonthlyCarryBaseline = baselineCarryM;
-        localStorage.setItem('groceryMonthlyResetPro', monthKey);
-        dataChanged = true;
-      }
-    } else {
-      const fallbackCarryM =
-        typeof data.groceryBudgetMonthlyCarryBaseline === 'number'
-          ? data.groceryBudgetMonthlyCarryBaseline
-          : storedCarryM;
-      localStorage.setItem('groceryMonthlyResetPro', monthKey);
-      if (data.groceryBudgetMonthlyCarry !== fallbackCarryM) {
-        data.groceryBudgetMonthlyCarry = fallbackCarryM;
-        dataChanged = true;
-      }
-      if (data.groceryBudgetMonthlyCarryBaseline !== fallbackCarryM) {
-        data.groceryBudgetMonthlyCarryBaseline = fallbackCarryM;
-        dataChanged = true;
-      }
-    }
-    // Biannual carry-over recalculation
-    let startDate = budgetStartDate
-      ? new Date(budgetStartDate.getTime())
-      : null;
-    if (!startDate) {
-      startDate = new Date(now.getFullYear(), now.getMonth(), 1);
-    }
-    startDate.setHours(0, 0, 0, 0);
-    const monthsDiff =
-      (now.getFullYear() - startDate.getFullYear()) * 12 +
-      (now.getMonth() - startDate.getMonth());
-    const currentHalfIndex = Math.floor(monthsDiff / 6);
-    const lastHalfReset = localStorage.getItem('groceryBiResetPro');
-    const hasHalfReset =
-      typeof lastHalfReset === 'string' && lastHalfReset.length > 0;
-    const halfKey = String(currentHalfIndex);
-    const prevHalfStart = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth() + (currentHalfIndex - 1) * 6,
-      startDate.getDate()
-    );
-    const prevHalfEnd = new Date(
-      startDate.getFullYear(),
-      startDate.getMonth() + currentHalfIndex * 6,
-      startDate.getDate()
-    );
-    let biSpentPrevTotal = 0;
-    if (Array.isArray(data.groceries)) {
-      data.groceries.forEach((item) => {
-        if (!item || !item.archived) return;
-        const freq =
-          typeof item.frequency === 'string'
-            ? item.frequency.toLowerCase()
-            : 'weekly';
-        if (item.frequency !== freq) item.frequency = freq;
-        if (freq !== 'biannual') return;
-        const cost = Number(item.cost);
-        if (!Number.isFinite(cost)) return;
-        if (item.purchasedDate) {
-          const pd = new Date(item.purchasedDate);
-          if (pd >= prevHalfStart && pd < prevHalfEnd) {
-            biSpentPrevTotal += cost;
-          }
-        } else {
-          // Undated legacy biannual purchase: exclude from carry-over calculation.
-          // Optionally, flag for review:
-          item.needsDateAssignment = true;
-        }
-      });
-    }
-    const baseBudgetBi =
-      typeof data.groceryBudgetBiYearly === 'number'
-        ? data.groceryBudgetBiYearly
-        : 0;
-    const storedCarryBi =
-      typeof data.groceryBudgetBiYearlyCarry === 'number'
-        ? data.groceryBudgetBiYearlyCarry
-        : 0;
-    const skipBiCarry = !!(budgetStartDate && prevHalfEnd <= budgetStartDate);
-    if (hasHalfReset && !skipBiCarry) {
-      const baselineCarryBi =
-        lastHalfReset === halfKey &&
-        typeof data.groceryBudgetBiYearlyCarryBaseline === 'number'
-          ? data.groceryBudgetBiYearlyCarryBaseline
-          : storedCarryBi;
-      const dynamicPrevBudgetBi = baseBudgetBi + baselineCarryBi;
-      const newBiCarry = dynamicPrevBudgetBi - biSpentPrevTotal;
-      if (
-        lastHalfReset !== halfKey ||
-        data.groceryBudgetBiYearlyCarry !== newBiCarry ||
-        data.groceryBudgetBiYearlyCarryBaseline !== baselineCarryBi
-      ) {
-        data.groceryBudgetBiYearlyCarry = newBiCarry;
-        data.groceryBudgetBiYearlyCarryBaseline = baselineCarryBi;
-        localStorage.setItem('groceryBiResetPro', halfKey);
-        dataChanged = true;
-      }
-    } else {
-      const fallbackCarryBi =
-        typeof data.groceryBudgetBiYearlyCarryBaseline === 'number'
-          ? data.groceryBudgetBiYearlyCarryBaseline
-          : storedCarryBi;
-      localStorage.setItem('groceryBiResetPro', halfKey);
-      if (data.groceryBudgetBiYearlyCarry !== fallbackCarryBi) {
-        data.groceryBudgetBiYearlyCarry = fallbackCarryBi;
-        dataChanged = true;
-      }
-      if (data.groceryBudgetBiYearlyCarryBaseline !== fallbackCarryBi) {
-        data.groceryBudgetBiYearlyCarryBaseline = fallbackCarryBi;
-        dataChanged = true;
-      }
-    }
-    if (dataChanged) {
-      saveData();
-    }
+      row.appendChild(actions);
+      li.appendChild(row);
+      archivedFragment.appendChild(li);
+    });
+    archivedListEl.replaceChildren(...archivedFragment.childNodes);
+    updateFitnessCards();
+    if (normalizedAny) saveData();
   }
 
   // Render reports section including monthly heatmap and per-project burndown charts. This
@@ -8273,7 +7549,7 @@ import {
     sheet.addAction('Close', 'secondary', sheet.close);
   }
 
-  function openMobileRecurringPaymentSheet() {
+  function _openMobileRecurringPaymentSheet() {
     const sheet = createMobileSheet('Recurring payment', {
       className: 'mobile-recurring-sheet',
       description: 'Add a fixed monthly payment.'
@@ -8310,22 +7586,11 @@ import {
   }
 
   function openMobileFinanceSheet() {
-    const snapshot = getFinanceBudgetSnapshot();
     const recent = getRecentArchivedPurchase();
-    const sheet = createMobileSheet('Finance quick actions', {
+    const sheet = createMobileSheet('Shopping list', {
       className: 'mobile-finance-sheet',
-      description: `Weekly left ${formatSek(snapshot.weekly.remaining)}. Credits ${formatSek(
-        snapshot.wellnessCredits
-      )}.`
+      description: 'Log a purchase or add a new shopping-list item.'
     });
-    const summary = document.createElement('div');
-    summary.className = 'mobile-next-action';
-    summary.textContent = `Weekly ${formatSek(
-      snapshot.weekly.spent
-    )} / ${formatSek(snapshot.weekly.budget)}. Monthly ${formatSek(
-      snapshot.monthly.spent
-    )} / ${formatSek(snapshot.monthly.budget)}.`;
-    sheet.body.appendChild(summary);
 
     if (recent) {
       const repeatButton = document.createElement('button');
@@ -8351,10 +7616,13 @@ import {
     const activeItems = (Array.isArray(data.groceries) ? data.groceries : [])
       .filter((item) => item && !item.archived)
       .sort((a, b) => {
-        const freqOrder = { weekly: 0, monthly: 1, biannual: 2 };
-        const freqA = freqOrder[a.frequency] ?? 0;
-        const freqB = freqOrder[b.frequency] ?? 0;
-        if (freqA !== freqB) return freqA - freqB;
+        const groupOrder = new Map(
+          SHOPPING_GROUPS.map((group, index) => [group, index])
+        );
+        const groupDiff =
+          groupOrder.get(normalizeShoppingGroup(a)) -
+          groupOrder.get(normalizeShoppingGroup(b));
+        if (groupDiff !== 0) return groupDiff;
         return String(a.name || '').localeCompare(
           String(b.name || ''),
           undefined,
@@ -8369,21 +7637,12 @@ import {
     ]);
     const customNameInput = document.createElement('input');
     customNameInput.placeholder = 'Expense name';
-    const frequencySelect = createMobileSelect(
-      [
-        { value: 'weekly', label: 'Weekly' },
-        { value: 'monthly', label: 'Monthly' },
-        { value: 'biannual', label: 'Biannual' }
-      ],
-      'weekly'
-    );
-    const categorySelect = createMobileSelect(
-      [
-        { value: 'standard', label: 'Standard' },
-        { value: 'treat', label: 'Treat' },
-        { value: 'essential', label: 'Essential' }
-      ],
-      'standard'
+    const groupSelect = createMobileSelect(
+      SHOPPING_GROUPS.map((value) => ({
+        value,
+        label: formatShoppingGroup(value)
+      })),
+      'soon'
     );
     const costInput = document.createElement('input');
     costInput.type = 'number';
@@ -8391,12 +7650,10 @@ import {
     costInput.step = '0.01';
     costInput.placeholder = 'Cost (SEK)';
     const customNameField = createMobileField('New expense', customNameInput);
-    const frequencyField = createMobileField('Frequency', frequencySelect);
-    const categoryField = createMobileField('Category', categorySelect);
+    const groupField = createMobileField('Group', groupSelect);
     sheet.body.appendChild(createMobileField('Purchase', itemSelect));
     sheet.body.appendChild(customNameField);
-    sheet.body.appendChild(frequencyField);
-    sheet.body.appendChild(categoryField);
+    sheet.body.appendChild(groupField);
     sheet.body.appendChild(createMobileField('Cost', costInput));
 
     const preview = document.createElement('div');
@@ -8409,8 +7666,7 @@ import {
         return {
           id: null,
           name: customNameInput.value.trim(),
-          frequency: frequencySelect.value,
-          category: categorySelect.value
+          shoppingGroup: groupSelect.value
         };
       }
       return activeItems.find((item) => String(item.id) === itemSelect.value);
@@ -8418,7 +7674,7 @@ import {
 
     function renderPurchasePreview() {
       const custom = itemSelect.value === 'custom';
-      [customNameField, frequencyField, categoryField].forEach((field) => {
+      [customNameField, groupField].forEach((field) => {
         field.classList.toggle('hidden', !custom);
       });
       const item = getSelectedPurchaseItem();
@@ -8433,20 +7689,11 @@ import {
         preview.textContent = 'Enter a valid cost.';
         return;
       }
-      const purchase = computePurchaseCost(item, cost);
       preview.className = 'mobile-quick-log-preview';
-      preview.textContent = `${item.name} - ${formatSek(
-        purchase.cost
-      )} counted${purchase.creditsUsed > 0 ? ` after ${formatSek(purchase.creditsUsed)} credits` : ''}.`;
+      preview.textContent = `${item.name} - ${formatSek(cost)} logged.`;
     }
 
-    [
-      itemSelect,
-      customNameInput,
-      frequencySelect,
-      categorySelect,
-      costInput
-    ].forEach((input) => {
+    [itemSelect, customNameInput, groupSelect, costInput].forEach((input) => {
       input.addEventListener('input', renderPurchasePreview);
       input.addEventListener('change', renderPurchasePreview);
     });
@@ -8466,8 +7713,7 @@ import {
       if (itemSelect.value === 'custom') {
         createAndLogGroceryPurchase({
           name: selected.name,
-          frequency: selected.frequency,
-          category: selected.category,
+          shoppingGroup: selected.shoppingGroup,
           cost
         });
       } else {
@@ -8478,10 +7724,6 @@ import {
     sheet.addAction('Wealth snapshot', 'secondary', () => {
       sheet.close();
       openMobileWealthSnapshotSheet();
-    });
-    sheet.addAction('Recurring', 'secondary', () => {
-      sheet.close();
-      openMobileRecurringPaymentSheet();
     });
     sheet.addAction('Close', 'secondary', sheet.close);
   }
@@ -11363,63 +10605,38 @@ import {
     updateDashboard();
   });
 
-  const monthlyRecurringForm = document.getElementById('monthlyRecurringForm');
-  if (monthlyRecurringForm) {
-    monthlyRecurringForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const nameInput = document.getElementById('monthlyPaymentName');
-      const amountInput = document.getElementById('monthlyPaymentAmount');
-      const name = nameInput.value.trim();
-      const amount = parseFloat(amountInput.value);
-      if (!name) {
-        showToast('Please enter a payment name.');
-        nameInput.focus();
-        return;
-      }
-      if (!Number.isFinite(amount) || amount < 0) {
-        showToast('Enter a valid amount.');
-        amountInput.focus();
-        return;
-      }
-      const payments = ensureMonthlyRecurringPayments();
-      payments.push({ id: uuid(), name, amount });
-      saveData();
-      monthlyRecurringForm.reset();
-      updateGrocerySection();
-    });
-  }
-
   const groceryForm = document.getElementById('groceryForm');
   if (groceryForm) {
     groceryForm.addEventListener('submit', (e) => {
       e.preventDefault();
       const nameInput = document.getElementById('groceryName');
-      const freqSelect = document.getElementById('groceryFreq');
-      const categorySelect = document.getElementById('groceryCategory');
+      const groupSelect = document.getElementById('groceryGroup');
+      const estimateInput = document.getElementById('groceryEstimate');
       const name = nameInput.value.trim();
       if (!name) {
         showToast('Please enter an item name.');
         nameInput.focus();
         return;
       }
-      const normalizedFreq = ['weekly', 'monthly', 'biannual'].includes(
-        (freqSelect.value || '').toLowerCase()
+      const normalizedGroup = SHOPPING_GROUPS.includes(
+        (groupSelect.value || '').toLowerCase()
       )
-        ? freqSelect.value.toLowerCase()
-        : 'weekly';
-      const normalizedCategory = ['standard', 'treat', 'essential'].includes(
-        (categorySelect.value || '').toLowerCase()
-      )
-        ? categorySelect.value.toLowerCase()
-        : 'standard';
+        ? groupSelect.value.toLowerCase()
+        : 'soon';
+      const estimate = parseOptionalMoney(estimateInput.value);
+      if (Number.isNaN(estimate)) {
+        showToast('Enter a valid estimate.');
+        estimateInput.focus();
+        return;
+      }
       if (!Array.isArray(data.groceries)) {
         data.groceries = [];
       }
       data.groceries.push({
         id: uuid(),
         name,
-        frequency: normalizedFreq,
-        category: normalizedCategory,
+        shoppingGroup: normalizedGroup,
+        estimate,
         archived: false,
         createdAt: new Date().toISOString()
       });

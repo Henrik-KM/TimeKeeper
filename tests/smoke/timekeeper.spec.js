@@ -2078,15 +2078,16 @@ test('workout, finances, wealth, and Strava fallback paths still render', async 
   );
 
   await gotoSection(page, 'grocery', 'Finances');
-  await page.locator('#monthlyPaymentName').fill('Gym');
-  await page.locator('#monthlyPaymentAmount').fill('50');
-  await page.locator('#monthlyRecurringForm button[type="submit"]').click();
-  await expect(page.getByText(/Gym/)).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Shopping List' })
+  ).toBeVisible();
 
   await page.locator('#groceryName').fill('Protein');
-  await page.locator('#groceryFreq').selectOption('weekly');
+  await page.locator('#groceryGroup').selectOption('soon');
+  await page.locator('#groceryEstimate').fill('250');
   await page.locator('#groceryForm button[type="submit"]').click();
   await expect(page.getByText('Protein')).toBeVisible();
+  await expect(page.getByText(/est\. 250 SEK/)).toBeVisible();
 
   await page.locator('#wealthEntryDate').fill('2026-04-01');
   await page.locator('#wealthEntryAmount').fill('100000');
