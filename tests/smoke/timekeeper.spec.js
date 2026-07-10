@@ -3132,7 +3132,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
-test('Codex GitHub inbox imports seven recent days once without exporting the token', async ({
+test('Codex inbox reconciles delegated entries and imports seven recent days once', async ({
   page
 }) => {
   await freezeTime(page, '2026-06-13T12:00:00');
@@ -3150,16 +3150,21 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
         startTime: '2026-06-13T08:00:00.000Z',
         endTime: '2026-06-13T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 0.75,
-        effectiveSeconds: 1350,
-        focusPolicyVersion: 1,
+        focusFactor: 1.68,
+        effectiveSeconds: 3024,
+        focusPolicyVersion: 2,
+        delegationCredit: 0.35,
+        delegatedSessionCount: 4,
+        supersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
         modelBreakdown: [
           {
+            role: 'parent',
             model: 'gpt-5.6-sol',
             effort: 'ultra',
-            factor: 0.75,
+            factor: 0.7,
+            creditMultiplier: 1,
             wallSeconds: 1800,
-            effectiveSeconds: 1350
+            effectiveSeconds: 1260
           }
         ],
         description: 'Codex: VWR automation'
@@ -3203,7 +3208,32 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
         deadline: '2026-06-30'
       })
     ],
-    entries: [],
+    entries: [
+      {
+        ...entryFixture({
+          id: 'old-parent-entry',
+          projectId: 'iflai',
+          description: 'Codex: delegated parent',
+          startTime: '2026-06-13T08:00:00.000Z',
+          endTime: '2026-06-13T08:30:00.000Z',
+          hours: 0.25
+        }),
+        source: 'codex',
+        externalId: 'codex-parent-old'
+      },
+      {
+        ...entryFixture({
+          id: 'old-subagent-entry',
+          projectId: 'iflai',
+          description: 'Codex: delegated subagent',
+          startTime: '2026-06-13T08:05:00.000Z',
+          endTime: '2026-06-13T08:20:00.000Z',
+          hours: 0.1
+        }),
+        source: 'codex',
+        externalId: 'codex-subagent-old'
+      }
+    ],
     codexIntegration: {
       enabled: true,
       repository: 'Henrik-KM/TimeKeeper',
@@ -3268,17 +3298,21 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
     expect.objectContaining({
       projectId: 'iflai',
       description: 'Codex: VWR automation',
-      duration: 1350,
-      focusFactor: 0.75,
-      manualFactor: 0.75,
+      duration: 3024,
+      focusFactor: 1.68,
+      manualFactor: 1.68,
       source: 'codex',
       externalId: 'codex-today',
-      codexFocusPolicyVersion: 1,
+      codexFocusPolicyVersion: 2,
+      codexDelegatedSessionCount: 4,
+      codexDelegationCredit: 0.35,
+      codexSupersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
       codexModelBreakdown: [
         expect.objectContaining({
+          role: 'parent',
           model: 'gpt-5.6-sol',
           effort: 'ultra',
-          factor: 0.75
+          factor: 0.7
         })
       ]
     })
@@ -3293,6 +3327,12 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
     })
   );
   expect(JSON.stringify(data)).not.toContain('ghp_codex_test');
+  expect(data.entries.map((entry) => entry.externalId)).not.toContain(
+    'codex-parent-old'
+  );
+  expect(data.entries.map((entry) => entry.externalId)).not.toContain(
+    'codex-subagent-old'
+  );
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
   await page.getByRole('button', { name: 'Import Now' }).click();
@@ -3418,11 +3458,12 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     Buffer.from(bodies[1].content, 'base64').toString('utf8')
   );
   expect(publishedConfig).toMatchObject({
-    version: 3,
+    version: 4,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 1,
+      version: 2,
       defaultFactor: 0.5,
+      delegationCredit: 0.35,
       modelBaseFactors: {
         luna: 0.35,
         terra: 0.45,

@@ -1,9 +1,16 @@
 import assert from 'node:assert/strict';
+import { promises as fs } from 'node:fs';
+import os from 'node:os';
+import path from 'node:path';
 import test from 'node:test';
 
-import { makeCodexPayloadKey } from '../../scripts/codex-usage-bridge.mjs';
+import {
+  makeCodexPayloadKey,
+  readCodexSessionSummary
+} from '../../scripts/codex-usage-bridge.mjs';
 import {
   buildCodexUsageRecordsFromSessionData,
+  buildCodexUsageRecordsFromSessionGroup,
   buildCodexUsageRecordsFromSessionText,
   findTrackedProjectForCwd,
   getGitHubProjectPathInfo,
@@ -139,7 +146,7 @@ test('resolves model and effort focus factors with a safe unknown fallback', () 
   );
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'ultra' }).factor,
-    0.75
+    0.7
   );
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
@@ -174,6 +181,62 @@ test('Codex payload fingerprint changes when model weighting changes', () => {
     makeCodexPayloadKey(payload),
     makeCodexPayloadKey(changedPayload)
   );
+});
+
+test('streamed session parsing keeps the first subagent identity', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'timekeeper-codex-')
+  );
+  const filePath = path.join(directory, 'subagent.jsonl');
+  const text = jsonl([
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'session_meta',
+      payload: {
+        id: 'subagent-thread',
+        session_id: 'parent-thread',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\Anders\\Research',
+        thread_source: 'subagent',
+        source: { subagent: {} }
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:00:00.001Z',
+      type: 'session_meta',
+      payload: {
+        id: 'parent-thread',
+        session_id: 'parent-thread',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\Anders\\Research',
+        thread_source: 'user'
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:00:00.002Z',
+      type: 'turn_context',
+      payload: { model: 'gpt-5.6-sol', effort: 'ultra' }
+    },
+    {
+      timestamp: '2026-06-13T09:10:00.000Z',
+      type: 'response_item',
+      payload: { type: 'message' }
+    }
+  ]);
+
+  try {
+    await fs.writeFile(filePath, text, 'utf8');
+    const summary = await readCodexSessionSummary(
+      filePath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+
+    assert.equal(summary.meta.id, 'subagent-thread');
+    assert.equal(summary.meta.sessionId, 'parent-thread');
+    assert.equal(summary.meta.threadSource, 'subagent');
+    assert.equal(summary.meta.isSubagent, true);
+    assert.equal(summary.activity.at(-1).model, 'gpt-5.6-sol');
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
 });
 
 test('weights one Codex span across model changes without splitting it', () => {
@@ -217,16 +280,16 @@ test('weights one Codex span across model changes without splitting it', () => {
 
   assert.equal(records.length, 1);
   assert.equal(records[0].wallSeconds, 1200);
-  assert.equal(records[0].effectiveSeconds, 630);
-  assert.equal(records[0].focusFactor, 0.525);
-  assert.equal(records[0].focusPolicyVersion, 1);
+  assert.equal(records[0].effectiveSeconds, 600);
+  assert.equal(records[0].focusFactor, 0.5);
+  assert.equal(records[0].focusPolicyVersion, 2);
   assert.deepEqual(records[0].modelBreakdown, [
     {
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.75,
+      factor: 0.7,
       wallSeconds: 600,
-      effectiveSeconds: 450
+      effectiveSeconds: 420
     },
     {
       model: 'gpt-5.6-luna',
@@ -234,6 +297,79 @@ test('weights one Codex span across model changes without splitting it', () => {
       factor: 0.3,
       wallSeconds: 600,
       effectiveSeconds: 180
+    }
+  ]);
+});
+
+test('consolidates delegated sessions with uncapped discounted subagent credit', () => {
+  const point = (timestamp) => ({
+    timestamp: new Date(timestamp),
+    model: 'gpt-5.6-sol',
+    effort: 'ultra'
+  });
+  const activity = [
+    point('2026-06-13T09:00:00.000Z'),
+    point('2026-06-13T09:10:00.000Z')
+  ];
+  const parent = {
+    meta: {
+      id: 'parent-thread',
+      sessionId: 'parent-thread',
+      cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\Anders\\Research',
+      isSubagent: false
+    },
+    activity
+  };
+  const subagents = Array.from({ length: 4 }, (_, index) => ({
+    meta: {
+      id: `subagent-${index + 1}`,
+      sessionId: 'parent-thread',
+      cwd: parent.meta.cwd,
+      isSubagent: true
+    },
+    activity
+  }));
+
+  const records = buildCodexUsageRecordsFromSessionGroup({
+    sessions: [parent, ...subagents],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
+    threadNamesById: new Map([
+      ['parent-thread', 'Execute research project end to end']
+    ]),
+    now: new Date('2026-06-13T10:00:00.000Z')
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].wallSeconds, 600);
+  assert.equal(records[0].effectiveSeconds, 1008);
+  assert.equal(records[0].focusFactor, 1.68);
+  assert.equal(records[0].delegationCredit, 0.35);
+  assert.equal(records[0].delegatedSessionCount, 4);
+  assert.equal(records[0].supersedesExternalIds.length, 1);
+  assert.equal(
+    records[0].description,
+    'Codex: Execute research project end to end'
+  );
+  assert.deepEqual(records[0].modelBreakdown, [
+    {
+      role: 'parent',
+      model: 'gpt-5.6-sol',
+      effort: 'ultra',
+      factor: 0.7,
+      creditMultiplier: 1,
+      creditedFactor: 0.7,
+      wallSeconds: 600,
+      effectiveSeconds: 420
+    },
+    {
+      role: 'subagent',
+      model: 'gpt-5.6-sol',
+      effort: 'ultra',
+      factor: 0.7,
+      creditMultiplier: 0.35,
+      creditedFactor: 0.245,
+      wallSeconds: 2400,
+      effectiveSeconds: 588
     }
   ]);
 });

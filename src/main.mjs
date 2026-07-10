@@ -1398,10 +1398,11 @@ import {
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_FOCUS_FACTOR = 0.5;
   const CODEX_FOCUS_POLICY = {
-    version: 1,
+    version: 2,
     defaultFactor: CODEX_FOCUS_FACTOR,
     minimumFactor: 0.25,
     maximumFactor: 0.8,
+    delegationCredit: 0.35,
     modelBaseFactors: {
       luna: 0.35,
       terra: 0.45,
@@ -1414,7 +1415,7 @@ import {
       high: 0.05,
       xhigh: 0.1,
       max: 0.15,
-      ultra: 0.2
+      ultra: 0.15
     }
   };
 
@@ -3251,7 +3252,7 @@ import {
     const config = getCodexIntegrationConfig();
     const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 3,
+      version: 4,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
@@ -3444,12 +3445,38 @@ import {
     );
   }
 
+  function getCodexSupersededRecordIds(record, recordId) {
+    if (!Array.isArray(record?.supersedesExternalIds)) return [];
+    return [
+      ...new Set(
+        record.supersedesExternalIds
+          .map((id) => String(id || '').trim())
+          .filter((id) => id && id !== recordId)
+      )
+    ];
+  }
+
+  function reconcileCodexSupersededEntries(supersededIds = []) {
+    if (!supersededIds.length) return 0;
+    const superseded = new Set(supersededIds);
+    const before = data.entries.length;
+    data.entries = data.entries.filter(
+      (entry) =>
+        !(
+          isCodexTimeEntry(entry) &&
+          superseded.has(String(entry?.externalId || ''))
+        )
+    );
+    return before - data.entries.length;
+  }
+
   function importCodexInboxPayloads(payloads = []) {
     const config = getCodexIntegrationConfig();
     const importedIds = getCodexExistingExternalIds();
     const windowStart = getCodexImportWindowStart();
     let imported = 0;
     let skipped = 0;
+    let reconciled = 0;
     const nowIso = new Date().toISOString();
     payloads.forEach((payload) => {
       const records = Array.isArray(payload?.records) ? payload.records : [];
@@ -3467,9 +3494,9 @@ import {
         );
         const start = new Date(record?.startTime || '');
         const end = new Date(record?.endTime || '');
+        const alreadyImported = importedIds.has(recordId);
         if (
           !recordId ||
-          importedIds.has(recordId) ||
           !isCodexRecordInImportWindow(record, windowStart) ||
           !projectId ||
           !getActiveCodexProject(projectId) ||
@@ -3479,6 +3506,13 @@ import {
           Number.isNaN(end.getTime()) ||
           end <= start
         ) {
+          skipped += 1;
+          return;
+        }
+        const supersededIds = getCodexSupersededRecordIds(record, recordId);
+        reconciled += reconcileCodexSupersededEntries(supersededIds);
+        supersededIds.forEach((id) => importedIds.add(id));
+        if (alreadyImported) {
           skipped += 1;
           return;
         }
@@ -3498,7 +3532,14 @@ import {
           codexFocusPolicyVersion: Number(record?.focusPolicyVersion) || null,
           codexModelBreakdown: Array.isArray(record?.modelBreakdown)
             ? record.modelBreakdown
-            : []
+            : [],
+          codexDelegatedSessionCount:
+            Math.max(0, Math.floor(Number(record?.delegatedSessionCount))) || 0,
+          codexDelegationCredit:
+            Number(record?.delegationCredit) >= 0
+              ? Number(record.delegationCredit)
+              : null,
+          codexSupersedesExternalIds: supersededIds
         });
         importedIds.add(recordId);
         imported += 1;
@@ -3506,21 +3547,22 @@ import {
     });
     config.importedCodexRecordIds = [...importedIds].slice(-1000);
     config.lastImportAt = nowIso;
-    config.lastImportSummary = { imported, skipped };
+    config.lastImportSummary = { imported, skipped, reconciled };
     codexImportRuntimeStatus = {
       pending: false,
       checkedAt: nowIso,
       error: '',
       imported,
-      skipped
+      skipped,
+      reconciled
     };
-    if (imported > 0) {
+    if (imported > 0 || reconciled > 0) {
       saveData();
       refreshAllViews();
     } else {
       updateCodexIntegrationPanel();
     }
-    return { imported, skipped };
+    return { imported, skipped, reconciled };
   }
 
   async function fetchCodexInboxPayloads() {
@@ -3559,7 +3601,7 @@ import {
     const config = getCodexIntegrationConfig();
     if (!config.enabled) {
       updateCodexIntegrationPanel();
-      return { imported: 0, skipped: 0 };
+      return { imported: 0, skipped: 0, reconciled: 0 };
     }
     if (codexImportPromise) return codexImportPromise;
     codexImportRuntimeStatus = {
@@ -3572,9 +3614,9 @@ import {
     codexImportPromise = fetchCodexInboxPayloads()
       .then((payloads) => {
         const result = importCodexInboxPayloads(payloads);
-        if (!quiet && result.imported > 0) {
+        if (!quiet && (result.imported > 0 || result.reconciled > 0)) {
           showToast(
-            `Imported ${result.imported} Codex entr${result.imported === 1 ? 'y' : 'ies'}.`
+            `Imported ${result.imported} and reconciled ${result.reconciled} Codex entr${result.imported + result.reconciled === 1 ? 'y' : 'ies'}.`
           );
         } else if (!quiet) {
           showToast('No new Codex entries.');
@@ -3591,7 +3633,7 @@ import {
         updateCodexIntegrationPanel();
         if (!quiet)
           showToast(`Codex import failed: ${codexImportRuntimeStatus.error}`);
-        return { imported: 0, skipped: 0 };
+        return { imported: 0, skipped: 0, reconciled: 0 };
       })
       .finally(() => {
         codexImportPromise = null;

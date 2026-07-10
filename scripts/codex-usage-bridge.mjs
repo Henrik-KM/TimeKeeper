@@ -7,7 +7,7 @@ import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 
 import {
-  buildCodexUsageRecordsFromSessionData,
+  buildCodexUsageRecordsFromSessionGroup,
   DEFAULT_CODEX_LOOKBACK_DAYS,
   getDefaultMachineId,
   getLocalDayStart,
@@ -247,15 +247,23 @@ function getJsonLineTimestamp(line) {
   return parseTimestamp(match?.[1]);
 }
 
-async function readCodexSessionSummary(filePath, windowStart) {
+export async function readCodexSessionSummary(filePath, windowStart) {
   const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
-  const meta = { id: '', cwd: '', timestamp: null };
+  const meta = {
+    id: '',
+    sessionId: '',
+    cwd: '',
+    timestamp: null,
+    threadSource: '',
+    isSubagent: false
+  };
   const timestamps = [];
   const activity = [];
   let activeModel = '';
   let activeEffort = '';
   let firstTimestamp = null;
   let lastTimestampMs = null;
+  let hasSessionMeta = false;
   const lineReader = readline.createInterface({
     input: createReadStream(filePath, { encoding: 'utf8' }),
     crlfDelay: Infinity
@@ -268,11 +276,22 @@ async function readCodexSessionSummary(filePath, windowStart) {
       try {
         const event = JSON.parse(line);
         const payload = event?.payload || {};
-        if (event?.type === 'session_meta') {
-          meta.id = String(payload.id || meta.id || '').trim();
-          meta.cwd = String(payload.cwd || meta.cwd || '').trim();
+        if (event?.type === 'session_meta' && !hasSessionMeta) {
+          meta.id = String(payload.id || '').trim();
+          meta.sessionId = String(
+            payload.session_id || payload.id || ''
+          ).trim();
+          meta.cwd = String(payload.cwd || '').trim();
           meta.timestamp =
-            parseTimestamp(payload.timestamp) || timestamp || meta.timestamp;
+            parseTimestamp(payload.timestamp) || timestamp || null;
+          meta.threadSource = String(payload.thread_source || '').trim();
+          const source = payload.source;
+          meta.isSubagent =
+            meta.threadSource === 'subagent' ||
+            (source &&
+              typeof source === 'object' &&
+              Object.prototype.hasOwnProperty.call(source, 'subagent'));
+          hasSessionMeta = true;
         } else if (event?.type === 'turn_context') {
           activeModel = String(payload.model || activeModel || '').trim();
           activeEffort = String(
@@ -303,7 +322,7 @@ async function readCodexSessionSummary(filePath, windowStart) {
     }
   }
   if (!meta.timestamp) meta.timestamp = firstTimestamp;
-  return { meta, timestamps, activity };
+  return { meta, timestamps, activity, sourceFile: filePath };
 }
 
 async function readJsonFile(filePath, fallback) {
@@ -389,22 +408,27 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     rangeStart
   );
   const threadNamesById = await loadThreadNames(options.sessionIndexPath);
-  const records = [];
-  await Promise.all(
-    files.map(async (filePath) => {
-      const summary = await readCodexSessionSummary(filePath, rangeStart);
-      records.push(
-        ...buildCodexUsageRecordsFromSessionData({
-          ...summary,
-          trackedProjects: config.trackedProjects || config.projects || [],
-          mappings: config.mappings || [],
-          threadNamesById,
-          now,
-          focusFactor: config.focusFactor,
-          focusPolicy: config.focusPolicy,
-          sourceFile: filePath
-        })
-      );
+  const summaries = await Promise.all(
+    files.map((filePath) => readCodexSessionSummary(filePath, rangeStart))
+  );
+  const sessionGroups = new Map();
+  summaries.forEach((summary) => {
+    const groupId = String(
+      summary.meta.sessionId || summary.meta.id || summary.sourceFile
+    ).trim();
+    const group = sessionGroups.get(groupId) || [];
+    group.push(summary);
+    sessionGroups.set(groupId, group);
+  });
+  const records = Array.from(sessionGroups.values()).flatMap((sessions) =>
+    buildCodexUsageRecordsFromSessionGroup({
+      sessions,
+      trackedProjects: config.trackedProjects || config.projects || [],
+      mappings: config.mappings || [],
+      threadNamesById,
+      now,
+      focusFactor: config.focusFactor,
+      focusPolicy: config.focusPolicy
     })
   );
   const uniqueRecords = Array.from(

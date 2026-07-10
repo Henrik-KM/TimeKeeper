@@ -1,15 +1,16 @@
 {
-  "version": 3,
+  "version": 4,
   "source": "timekeeper",
   "enabled": true,
   "updatedAt": "2026-06-25T14:31:49.954Z",
   "matchMode": "github-parent-folder",
   "focusFactor": 0.5,
   "focusPolicy": {
-    "version": 1,
+    "version": 2,
     "defaultFactor": 0.5,
     "minimumFactor": 0.25,
     "maximumFactor": 0.8,
+    "delegationCredit": 0.35,
     "modelBaseFactors": {
       "luna": 0.35,
       "terra": 0.45,
@@ -22,7 +23,7 @@
       "high": 0.05,
       "xhigh": 0.1,
       "max": 0.15,
-      "ultra": 0.2
+      "ultra": 0.15
     }
   },
   "trackedProjects": [
