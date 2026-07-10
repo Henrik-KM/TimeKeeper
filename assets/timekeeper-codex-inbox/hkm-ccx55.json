@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-10T12:49:52.139Z",
+  "updatedAt": "2026-07-10T14:23:02.084Z",
   "dayStart": "2026-07-09T22:00:00.000Z",
   "rangeStart": "2026-07-03T22:00:00.000Z",
   "lookbackDays": 7,
@@ -623,6 +623,36 @@
         }
       ],
       "description": "Codex: Update July timesheet"
+    },
+    {
+      "id": "codex-9a9788ce6ef2e6a5a52a3415",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-10T13:53:42.406Z",
+      "endTime": "2026-07-10T14:01:21.036Z",
+      "wallSeconds": 458,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 343,
+      "focusPolicyVersion": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.75,
+          "wallSeconds": 458,
+          "effectiveSeconds": 343
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
     }
   ]
 }
