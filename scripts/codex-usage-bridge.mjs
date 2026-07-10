@@ -1,4 +1,5 @@
 import { createReadStream, promises as fs } from 'node:fs';
+import crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 import process from 'node:process';
@@ -421,6 +422,18 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
   };
 }
 
+export function makeCodexPayloadKey(payload = {}) {
+  return crypto
+    .createHash('sha256')
+    .update(
+      JSON.stringify({
+        rangeStart: payload.rangeStart,
+        records: Array.isArray(payload.records) ? payload.records : []
+      })
+    )
+    .digest('hex');
+}
+
 export async function runCodexUsageBridge(rawArgs = parseArgs()) {
   const options = buildOptions(rawArgs);
   const payload = await buildCodexInboxPayload(options);
@@ -429,10 +442,7 @@ export async function runCodexUsageBridge(rawArgs = parseArgs()) {
     return payload;
   }
   const state = await readJsonFile(options.statePath, {});
-  const payloadKey = JSON.stringify({
-    rangeStart: payload.rangeStart,
-    recordIds: payload.records.map((record) => record.id)
-  });
+  const payloadKey = makeCodexPayloadKey(payload);
   if (!options.force && state.lastPayloadKey === payloadKey) {
     process.stdout.write(
       `Codex bridge unchanged: ${payload.records.length} records for ${options.machineId}\n`

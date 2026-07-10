@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 
+import { makeCodexPayloadKey } from '../../scripts/codex-usage-bridge.mjs';
 import {
   buildCodexUsageRecordsFromSessionData,
   buildCodexUsageRecordsFromSessionText,
@@ -143,6 +144,35 @@ test('resolves model and effort focus factors with a safe unknown fallback', () 
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
     0.5
+  );
+});
+
+test('Codex payload fingerprint changes when model weighting changes', () => {
+  const payload = {
+    rangeStart: '2026-06-07T00:00:00.000Z',
+    records: [
+      {
+        id: 'codex-record',
+        focusFactor: 0.5,
+        effectiveSeconds: 300
+      }
+    ]
+  };
+  const changedPayload = {
+    ...payload,
+    records: [
+      {
+        ...payload.records[0],
+        focusFactor: 0.75,
+        effectiveSeconds: 450
+      }
+    ]
+  };
+
+  assert.equal(makeCodexPayloadKey(payload), makeCodexPayloadKey(payload));
+  assert.notEqual(
+    makeCodexPayloadKey(payload),
+    makeCodexPayloadKey(changedPayload)
   );
 });
 
