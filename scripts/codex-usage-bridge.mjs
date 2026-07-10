@@ -250,6 +250,9 @@ async function readCodexSessionSummary(filePath, windowStart) {
   const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
   const meta = { id: '', cwd: '', timestamp: null };
   const timestamps = [];
+  const activity = [];
+  let activeModel = '';
+  let activeEffort = '';
   let firstTimestamp = null;
   let lastTimestampMs = null;
   const lineReader = readline.createInterface({
@@ -260,14 +263,21 @@ async function readCodexSessionSummary(filePath, windowStart) {
     if (!line) continue;
     const timestamp = getJsonLineTimestamp(line);
     if (timestamp && !firstTimestamp) firstTimestamp = timestamp;
-    if (/"type"\s*:\s*"session_meta"/.test(line)) {
+    if (/"type"\s*:\s*"(session_meta|turn_context)"/.test(line)) {
       try {
         const event = JSON.parse(line);
         const payload = event?.payload || {};
-        meta.id = String(payload.id || meta.id || '').trim();
-        meta.cwd = String(payload.cwd || meta.cwd || '').trim();
-        meta.timestamp =
-          parseTimestamp(payload.timestamp) || timestamp || meta.timestamp;
+        if (event?.type === 'session_meta') {
+          meta.id = String(payload.id || meta.id || '').trim();
+          meta.cwd = String(payload.cwd || meta.cwd || '').trim();
+          meta.timestamp =
+            parseTimestamp(payload.timestamp) || timestamp || meta.timestamp;
+        } else if (event?.type === 'turn_context') {
+          activeModel = String(payload.model || activeModel || '').trim();
+          activeEffort = String(
+            payload.effort || payload.reasoning_effort || activeEffort || ''
+          ).trim();
+        }
       } catch {
         // Ignore malformed or partially-written metadata lines.
       }
@@ -276,12 +286,23 @@ async function readCodexSessionSummary(filePath, windowStart) {
       const timestampMs = timestamp.getTime();
       if (timestampMs !== lastTimestampMs) {
         timestamps.push(timestamp);
+        activity.push({
+          timestamp,
+          model: activeModel,
+          effort: activeEffort
+        });
         lastTimestampMs = timestampMs;
+      } else if (activity.length) {
+        activity[activity.length - 1] = {
+          timestamp,
+          model: activeModel,
+          effort: activeEffort
+        };
       }
     }
   }
   if (!meta.timestamp) meta.timestamp = firstTimestamp;
-  return { meta, timestamps };
+  return { meta, timestamps, activity };
 }
 
 async function readJsonFile(filePath, fallback) {
@@ -378,6 +399,8 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
           mappings: config.mappings || [],
           threadNamesById,
           now,
+          focusFactor: config.focusFactor,
+          focusPolicy: config.focusPolicy,
           sourceFile: filePath
         })
       );

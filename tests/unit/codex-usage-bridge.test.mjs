@@ -6,7 +6,8 @@ import {
   buildCodexUsageRecordsFromSessionText,
   findTrackedProjectForCwd,
   getGitHubProjectPathInfo,
-  getLocalLookbackStart
+  getLocalLookbackStart,
+  resolveCodexFocusFactor
 } from '../../scripts/codex-usage-core.mjs';
 
 function jsonl(events) {
@@ -127,6 +128,84 @@ test('builds Codex records from streamed session summary data', () => {
   assert.equal(records[0].timekeeperProjectId, 'anders');
   assert.equal(records[0].wallSeconds, 300);
   assert.equal(records[0].effectiveSeconds, 150);
+  assert.equal(records[0].focusFactor, 0.5);
+});
+
+test('resolves model and effort focus factors with a safe unknown fallback', () => {
+  assert.equal(
+    resolveCodexFocusFactor({ model: 'gpt-5.6-luna', effort: 'light' }).factor,
+    0.3
+  );
+  assert.equal(
+    resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'ultra' }).factor,
+    0.75
+  );
+  assert.equal(
+    resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
+    0.5
+  );
+});
+
+test('weights one Codex span across model changes without splitting it', () => {
+  const text = jsonl([
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'session_meta',
+      payload: {
+        id: 'thread-model-switch',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI\\email-helper'
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'turn_context',
+      payload: { model: 'gpt-5.6-sol', effort: 'ultra' }
+    },
+    {
+      timestamp: '2026-06-13T09:10:00.000Z',
+      type: 'response_item',
+      payload: { type: 'message' }
+    },
+    {
+      timestamp: '2026-06-13T09:10:00.000Z',
+      type: 'turn_context',
+      payload: { model: 'gpt-5.6-luna', effort: 'low' }
+    },
+    {
+      timestamp: '2026-06-13T09:20:00.000Z',
+      type: 'response_item',
+      payload: { type: 'message' }
+    }
+  ]);
+
+  const records = buildCodexUsageRecordsFromSessionText({
+    text,
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+    dayStart: new Date('2026-06-13T00:00:00.000Z'),
+    now: new Date('2026-06-13T10:00:00.000Z')
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].wallSeconds, 1200);
+  assert.equal(records[0].effectiveSeconds, 630);
+  assert.equal(records[0].focusFactor, 0.525);
+  assert.equal(records[0].focusPolicyVersion, 1);
+  assert.deepEqual(records[0].modelBreakdown, [
+    {
+      model: 'gpt-5.6-sol',
+      effort: 'ultra',
+      factor: 0.75,
+      wallSeconds: 600,
+      effectiveSeconds: 450
+    },
+    {
+      model: 'gpt-5.6-luna',
+      effort: 'low',
+      factor: 0.3,
+      wallSeconds: 600,
+      effectiveSeconds: 180
+    }
+  ]);
 });
 
 test('ignores Codex activity before the configured day start', () => {

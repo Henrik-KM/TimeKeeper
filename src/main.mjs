@@ -1404,6 +1404,26 @@ import {
   const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_FOCUS_FACTOR = 0.5;
+  const CODEX_FOCUS_POLICY = {
+    version: 1,
+    defaultFactor: CODEX_FOCUS_FACTOR,
+    minimumFactor: 0.25,
+    maximumFactor: 0.8,
+    modelBaseFactors: {
+      luna: 0.35,
+      terra: 0.45,
+      sol: 0.55
+    },
+    modelOverrides: {},
+    effortAdjustments: {
+      low: -0.05,
+      medium: 0,
+      high: 0.05,
+      xhigh: 0.1,
+      max: 0.15,
+      ultra: 0.2
+    }
+  };
 
   function normalizeGitHubRepository(value = '') {
     const repository = String(value || '')
@@ -3235,12 +3255,13 @@ import {
     const config = getCodexIntegrationConfig();
     const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 2,
+      version: 3,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
       matchMode: 'github-parent-folder',
       focusFactor: CODEX_FOCUS_FACTOR,
+      focusPolicy: CODEX_FOCUS_POLICY,
       trackedProjects,
       mappings: getCodexLegacyPathMappings(trackedProjects)
     };
@@ -3444,6 +3465,10 @@ import {
           : findCodexProjectByName(record?.timekeeperProjectName);
         if (namedProject) projectId = String(namedProject.id);
         const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
+        const recordFocusFactor = normalizeFocusFactor(
+          record?.focusFactor,
+          CODEX_FOCUS_FACTOR
+        );
         const start = new Date(record?.startTime || '');
         const end = new Date(record?.endTime || '');
         if (
@@ -3468,12 +3493,16 @@ import {
           startTime: start.toISOString(),
           endTime: end.toISOString(),
           duration: effectiveSeconds,
-          focusFactor: CODEX_FOCUS_FACTOR,
-          manualFactor: CODEX_FOCUS_FACTOR,
+          focusFactor: recordFocusFactor,
+          manualFactor: recordFocusFactor,
           isRunning: false,
           createdAt: nowIso,
           source: 'codex',
-          externalId: recordId
+          externalId: recordId,
+          codexFocusPolicyVersion: Number(record?.focusPolicyVersion) || null,
+          codexModelBreakdown: Array.isArray(record?.modelBreakdown)
+            ? record.modelBreakdown
+            : []
         });
         importedIds.add(recordId);
         imported += 1;

@@ -3149,8 +3149,18 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
         startTime: '2026-06-13T08:00:00.000Z',
         endTime: '2026-06-13T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 0.5,
-        effectiveSeconds: 900,
+        focusFactor: 0.75,
+        effectiveSeconds: 1350,
+        focusPolicyVersion: 1,
+        modelBreakdown: [
+          {
+            model: 'gpt-5.6-sol',
+            effort: 'ultra',
+            factor: 0.75,
+            wallSeconds: 1800,
+            effectiveSeconds: 1350
+          }
+        ],
         description: 'Codex: VWR automation'
       },
       {
@@ -3257,11 +3267,19 @@ test('Codex GitHub inbox imports seven recent days once without exporting the to
     expect.objectContaining({
       projectId: 'iflai',
       description: 'Codex: VWR automation',
-      duration: 900,
-      focusFactor: 0.5,
-      manualFactor: 0.5,
+      duration: 1350,
+      focusFactor: 0.75,
+      manualFactor: 0.75,
       source: 'codex',
-      externalId: 'codex-today'
+      externalId: 'codex-today',
+      codexFocusPolicyVersion: 1,
+      codexModelBreakdown: [
+        expect.objectContaining({
+          model: 'gpt-5.6-sol',
+          effort: 'ultra',
+          factor: 0.75
+        })
+      ]
     })
   );
   expect(data.entries).toContainEqual(
@@ -3399,8 +3417,17 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     Buffer.from(bodies[1].content, 'base64').toString('utf8')
   );
   expect(publishedConfig).toMatchObject({
-    version: 2,
+    version: 3,
     matchMode: 'github-parent-folder',
+    focusPolicy: {
+      version: 1,
+      defaultFactor: 0.5,
+      modelBaseFactors: {
+        luna: 0.35,
+        terra: 0.45,
+        sol: 0.55
+      }
+    },
     trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }]
   });
   expect(JSON.stringify(publishedConfig)).not.toContain('Polish');

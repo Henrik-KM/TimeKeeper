@@ -6,6 +6,177 @@ export const DEFAULT_CODEX_FOCUS_FACTOR = 0.5;
 export const DEFAULT_IDLE_GAP_MS = 15 * 60 * 1000;
 export const DEFAULT_MATURE_MS = 17 * 60 * 1000;
 export const DEFAULT_CODEX_LOOKBACK_DAYS = 7;
+export const DEFAULT_CODEX_FOCUS_POLICY = {
+  version: 1,
+  defaultFactor: DEFAULT_CODEX_FOCUS_FACTOR,
+  minimumFactor: 0.25,
+  maximumFactor: 0.8,
+  modelBaseFactors: {
+    luna: 0.35,
+    terra: 0.45,
+    sol: 0.55
+  },
+  modelOverrides: {},
+  effortAdjustments: {
+    low: -0.05,
+    medium: 0,
+    high: 0.05,
+    xhigh: 0.1,
+    max: 0.15,
+    ultra: 0.2
+  }
+};
+
+function getFiniteNumber(value, fallback) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function normalizeNumberMap(value, fallback, { positiveOnly = false } = {}) {
+  const source = value && typeof value === 'object' ? value : {};
+  const normalized = { ...fallback };
+  Object.entries(source).forEach(([key, rawValue]) => {
+    const name = String(key || '')
+      .trim()
+      .toLowerCase();
+    const number = Number(rawValue);
+    if (!name || !Number.isFinite(number) || (positiveOnly && number <= 0)) {
+      return;
+    }
+    normalized[name] = number;
+  });
+  return normalized;
+}
+
+export function normalizeCodexFocusPolicy(
+  value = {},
+  fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
+) {
+  const source = /** @type {Record<string, any>} */ (
+    value && typeof value === 'object' ? value : {}
+  );
+  const minimumFactor = Math.max(
+    0.01,
+    getFiniteNumber(
+      source.minimumFactor,
+      DEFAULT_CODEX_FOCUS_POLICY.minimumFactor
+    )
+  );
+  const maximumFactor = Math.max(
+    minimumFactor,
+    getFiniteNumber(
+      source.maximumFactor,
+      DEFAULT_CODEX_FOCUS_POLICY.maximumFactor
+    )
+  );
+  const requestedDefault = getFiniteNumber(
+    source.defaultFactor,
+    getFiniteNumber(fallbackFactor, DEFAULT_CODEX_FOCUS_FACTOR)
+  );
+  return {
+    version: Math.max(
+      1,
+      Math.floor(
+        getFiniteNumber(source.version, DEFAULT_CODEX_FOCUS_POLICY.version)
+      )
+    ),
+    defaultFactor: Math.min(
+      maximumFactor,
+      Math.max(minimumFactor, requestedDefault)
+    ),
+    minimumFactor,
+    maximumFactor,
+    modelBaseFactors: normalizeNumberMap(
+      source.modelBaseFactors,
+      DEFAULT_CODEX_FOCUS_POLICY.modelBaseFactors,
+      { positiveOnly: true }
+    ),
+    modelOverrides: normalizeNumberMap(
+      source.modelOverrides,
+      {},
+      {
+        positiveOnly: true
+      }
+    ),
+    effortAdjustments: normalizeNumberMap(
+      source.effortAdjustments,
+      DEFAULT_CODEX_FOCUS_POLICY.effortAdjustments
+    )
+  };
+}
+
+export function normalizeCodexEffort(value = '') {
+  const normalized = String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[\s_]+/g, '-');
+  if (normalized === 'light') return 'low';
+  if (normalized === 'extra-high' || normalized === 'extra-high-reasoning') {
+    return 'xhigh';
+  }
+  return normalized;
+}
+
+/**
+ * @param {{
+ *   model?: string,
+ *   effort?: string,
+ *   policy: ReturnType<typeof normalizeCodexFocusPolicy>
+ * }} options
+ */
+function resolveNormalizedCodexFocusFactor({
+  model = '',
+  effort = '',
+  policy
+}) {
+  const normalizedModel = String(model || '')
+    .trim()
+    .toLowerCase();
+  const normalizedEffort = normalizeCodexEffort(effort);
+  let modelFamily = '';
+  let baseFactor = policy.modelOverrides[normalizedModel];
+  let hasModelRule = Number.isFinite(baseFactor);
+  if (!Number.isFinite(baseFactor)) {
+    const modelParts = normalizedModel.split(/[-_.]+/).filter(Boolean);
+    modelFamily = Object.keys(policy.modelBaseFactors).find((family) =>
+      modelParts.includes(family)
+    );
+    baseFactor = modelFamily
+      ? policy.modelBaseFactors[modelFamily]
+      : policy.defaultFactor;
+    hasModelRule = !!modelFamily;
+  }
+  const adjustment = hasModelRule
+    ? getFiniteNumber(policy.effortAdjustments[normalizedEffort], 0)
+    : 0;
+  const factor = Number(
+    Math.min(
+      policy.maximumFactor,
+      Math.max(policy.minimumFactor, baseFactor + adjustment)
+    ).toFixed(4)
+  );
+  return {
+    factor,
+    model: normalizedModel,
+    modelFamily,
+    effort: normalizedEffort,
+    policyVersion: policy.version,
+    source: hasModelRule ? 'model-effort' : 'default'
+  };
+}
+
+export function resolveCodexFocusFactor({
+  model = '',
+  effort = '',
+  focusPolicy = {},
+  fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
+} = {}) {
+  return resolveNormalizedCodexFocusFactor({
+    model,
+    effort,
+    policy: normalizeCodexFocusPolicy(focusPolicy, fallbackFactor)
+  });
+}
 
 export function getLocalDayStart(referenceDate = new Date()) {
   return new Date(
@@ -203,6 +374,42 @@ export function getSessionEventTimestamps(events = [], dayStart = null) {
   return unique;
 }
 
+export function getCodexSessionActivity(events = [], dayStart = null) {
+  const minTime = dayStart instanceof Date ? dayStart.getTime() : null;
+  let activeModel = '';
+  let activeEffort = '';
+  const activity = [];
+  events.forEach((event) => {
+    if (event?.type === 'turn_context') {
+      activeModel = String(event?.payload?.model || activeModel || '').trim();
+      activeEffort = String(
+        event?.payload?.effort ||
+          event?.payload?.reasoning_effort ||
+          activeEffort ||
+          ''
+      ).trim();
+    }
+    const timestamp = parseTimestamp(event?.timestamp);
+    if (!timestamp || (minTime !== null && timestamp.getTime() < minTime)) {
+      return;
+    }
+    const point = {
+      timestamp,
+      model: activeModel,
+      effort: activeEffort
+    };
+    const previous = activity[activity.length - 1];
+    if (previous && previous.timestamp.getTime() === timestamp.getTime()) {
+      activity[activity.length - 1] = point;
+    } else {
+      activity.push(point);
+    }
+  });
+  return activity.sort(
+    (left, right) => left.timestamp.getTime() - right.timestamp.getTime()
+  );
+}
+
 export function buildActiveSpans(
   timestamps = [],
   {
@@ -242,6 +449,100 @@ export function buildActiveSpans(
   return spans;
 }
 
+export function buildModelWeightedActiveSpans(
+  activity = [],
+  {
+    idleGapMs = DEFAULT_IDLE_GAP_MS,
+    matureMs = DEFAULT_MATURE_MS,
+    now = new Date(),
+    focusPolicy = {},
+    fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
+  } = {}
+) {
+  if (!Array.isArray(activity) || activity.length < 2) return [];
+  const sorted = activity
+    .map((point) => ({
+      timestamp:
+        point?.timestamp instanceof Date
+          ? point.timestamp
+          : parseTimestamp(point?.timestamp),
+      model: String(point?.model || '').trim(),
+      effort: String(point?.effort || '').trim()
+    }))
+    .filter((point) => point.timestamp)
+    .sort(
+      (left, right) => left.timestamp.getTime() - right.timestamp.getTime()
+    );
+  if (sorted.length < 2) return [];
+  const policy = normalizeCodexFocusPolicy(focusPolicy, fallbackFactor);
+  const spans = [];
+  let spanStart = sorted[0].timestamp;
+  let spanEnd = sorted[0].timestamp;
+  let activeMs = 0;
+  let effectiveMs = 0;
+  let breakdown = new Map();
+  const closeSpan = () => {
+    if (activeMs <= 0) return;
+    const modelBreakdown = Array.from(breakdown.values()).map((item) => ({
+      model: item.model || 'unknown',
+      effort: item.effort || 'unknown',
+      factor: item.factor,
+      wallSeconds: Math.floor(item.wallMs / 1000),
+      effectiveSeconds: Math.floor(item.effectiveMs / 1000)
+    }));
+    spans.push({
+      start: spanStart,
+      end: spanEnd,
+      activeMs,
+      effectiveMs,
+      focusFactor: effectiveMs / activeMs,
+      focusPolicyVersion: policy.version,
+      modelBreakdown
+    });
+  };
+  for (let index = 1; index < sorted.length; index += 1) {
+    const previous = sorted[index - 1];
+    const current = sorted[index];
+    const gap = current.timestamp.getTime() - previous.timestamp.getTime();
+    if (gap > idleGapMs) {
+      closeSpan();
+      spanStart = current.timestamp;
+      spanEnd = current.timestamp;
+      activeMs = 0;
+      effectiveMs = 0;
+      breakdown = new Map();
+      continue;
+    }
+    if (gap <= 0) continue;
+    const resolved = resolveNormalizedCodexFocusFactor({
+      model: previous.model,
+      effort: previous.effort,
+      policy
+    });
+    const weightedGap = gap * resolved.factor;
+    activeMs += gap;
+    effectiveMs += weightedGap;
+    spanEnd = current.timestamp;
+    const key = [resolved.model, resolved.effort, resolved.factor].join(
+      '\u001f'
+    );
+    const currentBreakdown = breakdown.get(key) || {
+      model: resolved.model,
+      effort: resolved.effort,
+      factor: resolved.factor,
+      wallMs: 0,
+      effectiveMs: 0
+    };
+    currentBreakdown.wallMs += gap;
+    currentBreakdown.effectiveMs += weightedGap;
+    breakdown.set(key, currentBreakdown);
+  }
+  if (now.getTime() - spanEnd.getTime() >= matureMs) {
+    closeSpan();
+  }
+  return spans;
+}
+
 export function makeCodexRecordId(parts = []) {
   const hash = crypto
     .createHash('sha256')
@@ -255,6 +556,7 @@ export function makeCodexRecordId(parts = []) {
  * @param {{
  *   meta?: { id?: string, cwd?: string },
  *   timestamps?: Array<Date>,
+ *   activity?: Array<{ timestamp: Date, model?: string, effort?: string }>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
@@ -262,12 +564,14 @@ export function makeCodexRecordId(parts = []) {
  *   idleGapMs?: number,
  *   matureMs?: number,
  *   focusFactor?: number,
+ *   focusPolicy?: object,
  *   sourceFile?: string
  * }} options
  */
 export function buildCodexUsageRecordsFromSessionData({
   meta = {},
   timestamps = [],
+  activity = [],
   trackedProjects,
   mappings,
   threadNamesById = new Map(),
@@ -275,6 +579,7 @@ export function buildCodexUsageRecordsFromSessionData({
   idleGapMs = DEFAULT_IDLE_GAP_MS,
   matureMs = DEFAULT_MATURE_MS,
   focusFactor = DEFAULT_CODEX_FOCUS_FACTOR,
+  focusPolicy = {},
   sourceFile = ''
 } = {}) {
   const projectMatch = findTrackedProjectForCwd(
@@ -283,13 +588,31 @@ export function buildCodexUsageRecordsFromSessionData({
     mappings
   );
   if (!projectMatch || !projectMatch.projectId) return [];
-  const spans = buildActiveSpans(timestamps, { idleGapMs, matureMs, now });
+  const normalizedPolicy = normalizeCodexFocusPolicy(focusPolicy, focusFactor);
+  const spans = activity.length
+    ? buildModelWeightedActiveSpans(activity, {
+        idleGapMs,
+        matureMs,
+        now,
+        focusPolicy: normalizedPolicy,
+        fallbackFactor: normalizedPolicy.defaultFactor
+      })
+    : buildActiveSpans(timestamps, { idleGapMs, matureMs, now }).map(
+        (span) => ({
+          ...span,
+          effectiveMs: span.activeMs * normalizedPolicy.defaultFactor,
+          focusFactor: normalizedPolicy.defaultFactor,
+          focusPolicyVersion: normalizedPolicy.version,
+          modelBreakdown: []
+        })
+      );
   const threadName = threadNamesById.get(meta.id) || '';
   return spans
     .map((span) => {
       const wallSeconds = Math.floor(span.activeMs / 1000);
-      const effectiveSeconds = Math.floor(wallSeconds * focusFactor);
+      const effectiveSeconds = Math.floor(span.effectiveMs / 1000);
       if (wallSeconds <= 0 || effectiveSeconds <= 0) return null;
+      const recordFocusFactor = Number(span.focusFactor.toFixed(4));
       const startIso = span.start.toISOString();
       const endIso = span.end.toISOString();
       return {
@@ -307,8 +630,10 @@ export function buildCodexUsageRecordsFromSessionData({
         startTime: startIso,
         endTime: endIso,
         wallSeconds,
-        focusFactor,
+        focusFactor: recordFocusFactor,
         effectiveSeconds,
+        focusPolicyVersion: span.focusPolicyVersion,
+        modelBreakdown: span.modelBreakdown,
         description: threadName
           ? `Codex: ${threadName}`
           : `Codex: ${projectMatch.repoName}`
@@ -328,6 +653,7 @@ export function buildCodexUsageRecordsFromSessionData({
  *   idleGapMs?: number,
  *   matureMs?: number,
  *   focusFactor?: number,
+ *   focusPolicy?: object,
  *   sourceFile?: string
  * }} options
  */
@@ -341,14 +667,17 @@ export function buildCodexUsageRecordsFromSessionText({
   idleGapMs = DEFAULT_IDLE_GAP_MS,
   matureMs = DEFAULT_MATURE_MS,
   focusFactor = DEFAULT_CODEX_FOCUS_FACTOR,
+  focusPolicy = {},
   sourceFile = ''
 } = {}) {
   const events = parseCodexJsonl(text);
   const meta = getCodexSessionMeta(events);
-  const timestamps = getSessionEventTimestamps(events, dayStart);
+  const activity = getCodexSessionActivity(events, dayStart);
+  const timestamps = activity.map((point) => point.timestamp);
   return buildCodexUsageRecordsFromSessionData({
     meta,
     timestamps,
+    activity,
     trackedProjects,
     mappings,
     threadNamesById,
@@ -356,6 +685,7 @@ export function buildCodexUsageRecordsFromSessionText({
     idleGapMs,
     matureMs,
     focusFactor,
+    focusPolicy,
     sourceFile
   });
 }

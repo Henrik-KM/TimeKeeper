@@ -1,10 +1,30 @@
 {
-  "version": 2,
+  "version": 3,
   "source": "timekeeper",
   "enabled": true,
   "updatedAt": "2026-06-25T14:31:49.954Z",
   "matchMode": "github-parent-folder",
   "focusFactor": 0.5,
+  "focusPolicy": {
+    "version": 1,
+    "defaultFactor": 0.5,
+    "minimumFactor": 0.25,
+    "maximumFactor": 0.8,
+    "modelBaseFactors": {
+      "luna": 0.35,
+      "terra": 0.45,
+      "sol": 0.55
+    },
+    "modelOverrides": {},
+    "effortAdjustments": {
+      "low": -0.05,
+      "medium": 0,
+      "high": 0.05,
+      "xhigh": 0.1,
+      "max": 0.15,
+      "ultra": 0.2
+    }
+  },
   "trackedProjects": [
     {
       "name": "Anders",
