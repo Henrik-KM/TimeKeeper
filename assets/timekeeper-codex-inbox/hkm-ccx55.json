@@ -2,34 +2,11 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-10T20:22:15.149Z",
-  "dayStart": "2026-07-09T22:00:00.000Z",
-  "rangeStart": "2026-07-03T22:00:00.000Z",
+  "updatedAt": "2026-07-11T01:03:04.762Z",
+  "dayStart": "2026-07-10T22:00:00.000Z",
+  "rangeStart": "2026-07-04T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
-    {
-      "id": "codex-d6ea84dfa2e42a7e966ec7bb",
-      "threadId": "019f0e61-fcd7-7473-9cae-5c0565e34717",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-04T08:56:55.699Z",
-      "endTime": "2026-07-04T12:33:24.261Z",
-      "wallSeconds": 12988,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6494,
-      "focusPolicyVersion": 2,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.5",
-          "effort": "xhigh",
-          "factor": 0.5,
-          "wallSeconds": 12988,
-          "effectiveSeconds": 6494
-        }
-      ],
-      "description": "Codex: email-helper"
-    },
     {
       "id": "codex-6d78e3a0bf3d712c90d3770f",
       "threadId": "019f36a2-e4f4-7b20-b4c9-dbeab91847ab",
@@ -690,6 +667,64 @@
         "codex-b7602a667c18f9af975a5a01",
         "codex-7107d9e1d20d8758dc71acb0",
         "codex-aae1945b48ae8b1d21c54f4e"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-21f4d3e04a0e38d34e330db5",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-10T20:13:28.898Z",
+      "endTime": "2026-07-10T21:09:06.747Z",
+      "wallSeconds": 3337,
+      "focusFactor": 1.2308,
+      "effectiveSeconds": 4108,
+      "focusPolicyVersion": 2,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 6,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.7,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.7,
+          "wallSeconds": 3328,
+          "effectiveSeconds": 2330
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.7,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.245,
+          "wallSeconds": 7257,
+          "effectiveSeconds": 1778
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-6815685c4dcf11b65e913df2",
+        "codex-1e3d8f174a8380927b268055",
+        "codex-bdd36dd740c424ab17cdb81d",
+        "codex-19a3d5cf181a015e51d786a1",
+        "codex-8d6d1a912276941dd528b90e",
+        "codex-0a09df5fbf12eed463d7ac01",
+        "codex-f9b6082b22af95a4042010d3",
+        "codex-e7c288296cb886c515eb654c"
       ],
       "description": "Codex: Execute research project end to end"
     }
