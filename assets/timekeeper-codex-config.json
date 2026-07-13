@@ -1,20 +1,20 @@
 {
-  "version": 4,
+  "version": 5,
   "source": "timekeeper",
   "enabled": true,
-  "updatedAt": "2026-06-25T14:31:49.954Z",
+  "updatedAt": "2026-07-13T09:52:33.200Z",
   "matchMode": "github-parent-folder",
-  "focusFactor": 0.5,
+  "focusFactor": 0.4,
   "focusPolicy": {
-    "version": 2,
-    "defaultFactor": 0.5,
-    "minimumFactor": 0.25,
+    "version": 3,
+    "defaultFactor": 0.4,
+    "minimumFactor": 0.2,
     "maximumFactor": 0.8,
     "delegationCredit": 0.35,
     "modelBaseFactors": {
-      "luna": 0.35,
-      "terra": 0.45,
-      "sol": 0.55
+      "luna": 0.25,
+      "terra": 0.35,
+      "sol": 0.45
     },
     "modelOverrides": {},
     "effortAdjustments": {

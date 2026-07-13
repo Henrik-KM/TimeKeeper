@@ -1396,17 +1396,17 @@ import {
   const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
   const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
-  const CODEX_FOCUS_FACTOR = 0.5;
+  const CODEX_FOCUS_FACTOR = 0.4;
   const CODEX_FOCUS_POLICY = {
-    version: 2,
+    version: 3,
     defaultFactor: CODEX_FOCUS_FACTOR,
-    minimumFactor: 0.25,
+    minimumFactor: 0.2,
     maximumFactor: 0.8,
     delegationCredit: 0.35,
     modelBaseFactors: {
-      luna: 0.35,
-      terra: 0.45,
-      sol: 0.55
+      luna: 0.25,
+      terra: 0.35,
+      sol: 0.45
     },
     modelOverrides: {},
     effortAdjustments: {
@@ -2834,7 +2834,8 @@ import {
     checkedAt: null,
     error: '',
     imported: 0,
-    skipped: 0
+    skipped: 0,
+    updated: 0
   };
 
   function normalizeGitHubPath(value) {
@@ -3252,7 +3253,7 @@ import {
     const config = getCodexIntegrationConfig();
     const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 4,
+      version: 5,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
@@ -3415,8 +3416,8 @@ import {
     );
   }
 
-  function getCodexExistingExternalIds() {
-    const ids = new Set(getCodexIntegrationConfig().importedCodexRecordIds);
+  function getCodexExistingExternalIds(config = getCodexIntegrationConfig()) {
+    const ids = new Set(config.importedCodexRecordIds);
     data.entries.forEach((entry) => {
       if (entry && entry.externalId) ids.add(String(entry.externalId));
     });
@@ -3472,11 +3473,12 @@ import {
 
   function importCodexInboxPayloads(payloads = []) {
     const config = getCodexIntegrationConfig();
-    const importedIds = getCodexExistingExternalIds();
+    const importedIds = getCodexExistingExternalIds(config);
     const windowStart = getCodexImportWindowStart();
     let imported = 0;
     let skipped = 0;
     let reconciled = 0;
+    let updated = 0;
     const nowIso = new Date().toISOString();
     payloads.forEach((payload) => {
       const records = Array.isArray(payload?.records) ? payload.records : [];
@@ -3495,6 +3497,13 @@ import {
         const start = new Date(record?.startTime || '');
         const end = new Date(record?.endTime || '');
         const alreadyImported = importedIds.has(recordId);
+        const existingEntry = alreadyImported
+          ? data.entries.find(
+              (entry) =>
+                isCodexTimeEntry(entry) &&
+                String(entry?.externalId || '') === recordId
+            )
+          : null;
         if (
           !recordId ||
           !isCodexRecordInImportWindow(record, windowStart) ||
@@ -3512,24 +3521,12 @@ import {
         const supersededIds = getCodexSupersededRecordIds(record, recordId);
         reconciled += reconcileCodexSupersededEntries(supersededIds);
         supersededIds.forEach((id) => importedIds.add(id));
-        if (alreadyImported) {
-          skipped += 1;
-          return;
-        }
-        data.entries.push({
-          id: uuid(),
-          projectId,
-          description: String(record.description || 'Codex work').trim(),
-          startTime: start.toISOString(),
-          endTime: end.toISOString(),
+        const focusPolicyVersion = Number(record?.focusPolicyVersion) || null;
+        const codexMetadata = {
           duration: effectiveSeconds,
           focusFactor: recordFocusFactor,
           manualFactor: recordFocusFactor,
-          isRunning: false,
-          createdAt: nowIso,
-          source: 'codex',
-          externalId: recordId,
-          codexFocusPolicyVersion: Number(record?.focusPolicyVersion) || null,
+          codexFocusPolicyVersion: focusPolicyVersion,
           codexModelBreakdown: Array.isArray(record?.modelBreakdown)
             ? record.modelBreakdown
             : [],
@@ -3540,6 +3537,33 @@ import {
               ? Number(record.delegationCredit)
               : null,
           codexSupersedesExternalIds: supersededIds
+        };
+        if (alreadyImported) {
+          const existingPolicyVersion =
+            Number(existingEntry?.codexFocusPolicyVersion) || 0;
+          if (
+            existingEntry &&
+            focusPolicyVersion &&
+            focusPolicyVersion > existingPolicyVersion
+          ) {
+            Object.assign(existingEntry, codexMetadata);
+            updated += 1;
+          } else {
+            skipped += 1;
+          }
+          return;
+        }
+        data.entries.push({
+          id: uuid(),
+          projectId,
+          description: String(record.description || 'Codex work').trim(),
+          startTime: start.toISOString(),
+          endTime: end.toISOString(),
+          isRunning: false,
+          createdAt: nowIso,
+          source: 'codex',
+          externalId: recordId,
+          ...codexMetadata
         });
         importedIds.add(recordId);
         imported += 1;
@@ -3547,22 +3571,23 @@ import {
     });
     config.importedCodexRecordIds = [...importedIds].slice(-1000);
     config.lastImportAt = nowIso;
-    config.lastImportSummary = { imported, skipped, reconciled };
+    config.lastImportSummary = { imported, skipped, reconciled, updated };
     codexImportRuntimeStatus = {
       pending: false,
       checkedAt: nowIso,
       error: '',
       imported,
       skipped,
-      reconciled
+      reconciled,
+      updated
     };
-    if (imported > 0 || reconciled > 0) {
+    if (imported > 0 || reconciled > 0 || updated > 0) {
       saveData();
       refreshAllViews();
     } else {
       updateCodexIntegrationPanel();
     }
-    return { imported, skipped, reconciled };
+    return { imported, skipped, reconciled, updated };
   }
 
   async function fetchCodexInboxPayloads() {
@@ -3601,7 +3626,7 @@ import {
     const config = getCodexIntegrationConfig();
     if (!config.enabled) {
       updateCodexIntegrationPanel();
-      return { imported: 0, skipped: 0, reconciled: 0 };
+      return { imported: 0, skipped: 0, reconciled: 0, updated: 0 };
     }
     if (codexImportPromise) return codexImportPromise;
     codexImportRuntimeStatus = {
@@ -3614,9 +3639,12 @@ import {
     codexImportPromise = fetchCodexInboxPayloads()
       .then((payloads) => {
         const result = importCodexInboxPayloads(payloads);
-        if (!quiet && (result.imported > 0 || result.reconciled > 0)) {
+        if (
+          !quiet &&
+          (result.imported > 0 || result.reconciled > 0 || result.updated > 0)
+        ) {
           showToast(
-            `Imported ${result.imported} and reconciled ${result.reconciled} Codex entr${result.imported + result.reconciled === 1 ? 'y' : 'ies'}.`
+            `Codex import: ${result.imported} new, ${result.updated} recalibrated, ${result.reconciled} reconciled.`
           );
         } else if (!quiet) {
           showToast('No new Codex entries.');
@@ -3633,7 +3661,7 @@ import {
         updateCodexIntegrationPanel();
         if (!quiet)
           showToast(`Codex import failed: ${codexImportRuntimeStatus.error}`);
-        return { imported: 0, skipped: 0, reconciled: 0 };
+        return { imported: 0, skipped: 0, reconciled: 0, updated: 0 };
       })
       .finally(() => {
         codexImportPromise = null;
@@ -3706,7 +3734,7 @@ import {
     if (config.lastImportSummary) {
       const pill = document.createElement('span');
       pill.className = 'health-pill';
-      pill.textContent = `Last import: ${config.lastImportSummary.imported || 0} new, ${config.lastImportSummary.skipped || 0} skipped`;
+      pill.textContent = `Last import: ${config.lastImportSummary.imported || 0} new, ${config.lastImportSummary.updated || 0} recalibrated, ${config.lastImportSummary.skipped || 0} skipped`;
       summary.appendChild(pill);
     }
   }

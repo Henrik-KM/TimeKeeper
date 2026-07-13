@@ -135,23 +135,48 @@ test('builds Codex records from streamed session summary data', () => {
   assert.equal(records[0].projectKey, 'particle_iden');
   assert.equal(records[0].timekeeperProjectId, 'anders');
   assert.equal(records[0].wallSeconds, 300);
-  assert.equal(records[0].effectiveSeconds, 150);
-  assert.equal(records[0].focusFactor, 0.5);
+  assert.equal(records[0].effectiveSeconds, 120);
+  assert.equal(records[0].focusFactor, 0.4);
 });
 
 test('resolves model and effort focus factors with a safe unknown fallback', () => {
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-5.6-luna', effort: 'light' }).factor,
-    0.3
+    0.2
+  );
+  assert.equal(
+    resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'high' }).factor,
+    0.5
   );
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'ultra' }).factor,
-    0.7
+    0.6
   );
   assert.equal(
     resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
-    0.5
+    0.4
   );
+});
+
+test('keeps the lowered Codex model scale evenly spaced', () => {
+  const expected = {
+    luna: { low: 0.2, medium: 0.25, high: 0.3, xhigh: 0.35, ultra: 0.4 },
+    terra: { low: 0.3, medium: 0.35, high: 0.4, xhigh: 0.45, ultra: 0.5 },
+    sol: { low: 0.4, medium: 0.45, high: 0.5, xhigh: 0.55, ultra: 0.6 }
+  };
+
+  Object.entries(expected).forEach(([model, efforts]) => {
+    Object.entries(efforts).forEach(([effort, factor]) => {
+      assert.equal(
+        resolveCodexFocusFactor({
+          model: `gpt-5.6-${model}`,
+          effort
+        }).factor,
+        factor,
+        `${model} ${effort}`
+      );
+    });
+  });
 });
 
 test('Codex payload fingerprint changes when model weighting changes', () => {
@@ -280,23 +305,23 @@ test('weights one Codex span across model changes without splitting it', () => {
 
   assert.equal(records.length, 1);
   assert.equal(records[0].wallSeconds, 1200);
-  assert.equal(records[0].effectiveSeconds, 600);
-  assert.equal(records[0].focusFactor, 0.5);
-  assert.equal(records[0].focusPolicyVersion, 2);
+  assert.equal(records[0].effectiveSeconds, 480);
+  assert.equal(records[0].focusFactor, 0.4);
+  assert.equal(records[0].focusPolicyVersion, 3);
   assert.deepEqual(records[0].modelBreakdown, [
     {
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.7,
+      factor: 0.6,
       wallSeconds: 600,
-      effectiveSeconds: 420
+      effectiveSeconds: 360
     },
     {
       model: 'gpt-5.6-luna',
       effort: 'low',
-      factor: 0.3,
+      factor: 0.2,
       wallSeconds: 600,
-      effectiveSeconds: 180
+      effectiveSeconds: 120
     }
   ]);
 });
@@ -341,8 +366,8 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
 
   assert.equal(records.length, 1);
   assert.equal(records[0].wallSeconds, 600);
-  assert.equal(records[0].effectiveSeconds, 1008);
-  assert.equal(records[0].focusFactor, 1.68);
+  assert.equal(records[0].effectiveSeconds, 864);
+  assert.equal(records[0].focusFactor, 1.44);
   assert.equal(records[0].delegationCredit, 0.35);
   assert.equal(records[0].delegatedSessionCount, 4);
   assert.equal(records[0].supersedesExternalIds.length, 1);
@@ -355,21 +380,21 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
       role: 'parent',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.7,
+      factor: 0.6,
       creditMultiplier: 1,
-      creditedFactor: 0.7,
+      creditedFactor: 0.6,
       wallSeconds: 600,
-      effectiveSeconds: 420
+      effectiveSeconds: 360
     },
     {
       role: 'subagent',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.7,
+      factor: 0.6,
       creditMultiplier: 0.35,
-      creditedFactor: 0.245,
+      creditedFactor: 0.21,
       wallSeconds: 2400,
-      effectiveSeconds: 588
+      effectiveSeconds: 504
     }
   ]);
 });
@@ -393,7 +418,7 @@ test('ignores Codex activity before the configured day start', () => {
   assert.equal(records.length, 1);
   assert.equal(records[0].startTime, '2026-06-13T08:00:00.000Z');
   assert.equal(records[0].wallSeconds, 600);
-  assert.equal(records[0].effectiveSeconds, 300);
+  assert.equal(records[0].effectiveSeconds, 240);
   assert.equal(records[0].projectKey, 'VWR-AutoInv');
   assert.equal(records[0].timekeeperProjectName, 'IFLAI');
   assert.equal(records[0].description, 'Codex: Plan POU vision demo');
@@ -423,7 +448,7 @@ test('splits active Codex spans across idle gaps', () => {
   );
   assert.deepEqual(
     records.map((record) => record.effectiveSeconds),
-    [150, 300]
+    [120, 240]
   );
 });
 

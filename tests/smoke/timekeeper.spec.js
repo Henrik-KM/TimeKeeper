@@ -3150,9 +3150,9 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         startTime: '2026-06-13T08:00:00.000Z',
         endTime: '2026-06-13T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 1.68,
-        effectiveSeconds: 3024,
-        focusPolicyVersion: 2,
+        focusFactor: 1.44,
+        effectiveSeconds: 2592,
+        focusPolicyVersion: 3,
         delegationCredit: 0.35,
         delegatedSessionCount: 4,
         supersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
@@ -3161,10 +3161,10 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
             role: 'parent',
             model: 'gpt-5.6-sol',
             effort: 'ultra',
-            factor: 0.7,
+            factor: 0.6,
             creditMultiplier: 1,
             wallSeconds: 1800,
-            effectiveSeconds: 1260
+            effectiveSeconds: 1080
           }
         ],
         description: 'Codex: VWR automation'
@@ -3232,6 +3232,24 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         }),
         source: 'codex',
         externalId: 'codex-subagent-old'
+      },
+      {
+        ...entryFixture({
+          id: 'existing-aggregate-entry',
+          projectId: 'iflai',
+          description: 'Codex: VWR automation',
+          startTime: '2026-06-13T08:00:00.000Z',
+          endTime: '2026-06-13T08:30:00.000Z',
+          hours: 0.84
+        }),
+        source: 'codex',
+        externalId: 'codex-today',
+        focusFactor: 1.68,
+        manualFactor: 1.68,
+        codexFocusPolicyVersion: 2,
+        codexModelBreakdown: [],
+        codexDelegatedSessionCount: 4,
+        codexDelegationCredit: 0.35
       }
     ],
     codexIntegration: {
@@ -3296,14 +3314,15 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   );
   expect(data.entries).toContainEqual(
     expect.objectContaining({
+      id: 'existing-aggregate-entry',
       projectId: 'iflai',
       description: 'Codex: VWR automation',
-      duration: 3024,
-      focusFactor: 1.68,
-      manualFactor: 1.68,
+      duration: 2592,
+      focusFactor: 1.44,
+      manualFactor: 1.44,
       source: 'codex',
       externalId: 'codex-today',
-      codexFocusPolicyVersion: 2,
+      codexFocusPolicyVersion: 3,
       codexDelegatedSessionCount: 4,
       codexDelegationCredit: 0.35,
       codexSupersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
@@ -3312,7 +3331,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
           role: 'parent',
           model: 'gpt-5.6-sol',
           effort: 'ultra',
-          factor: 0.7
+          factor: 0.6
         })
       ]
     })
@@ -3333,6 +3352,19 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   expect(data.entries.map((entry) => entry.externalId)).not.toContain(
     'codex-subagent-old'
   );
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('timekeeperDataPro')).codexIntegration
+            .lastImportSummary
+      )
+    )
+    .toMatchObject({
+      imported: 1,
+      reconciled: 2,
+      updated: 1
+    });
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
   await page.getByRole('button', { name: 'Import Now' }).click();
@@ -3458,16 +3490,17 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     Buffer.from(bodies[1].content, 'base64').toString('utf8')
   );
   expect(publishedConfig).toMatchObject({
-    version: 4,
+    version: 5,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 2,
-      defaultFactor: 0.5,
+      version: 3,
+      defaultFactor: 0.4,
+      minimumFactor: 0.2,
       delegationCredit: 0.35,
       modelBaseFactors: {
-        luna: 0.35,
-        terra: 0.45,
-        sol: 0.55
+        luna: 0.25,
+        terra: 0.35,
+        sol: 0.45
       }
     },
     trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }]

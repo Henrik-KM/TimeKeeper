@@ -2,20 +2,20 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 
-export const DEFAULT_CODEX_FOCUS_FACTOR = 0.5;
+export const DEFAULT_CODEX_FOCUS_FACTOR = 0.4;
 export const DEFAULT_IDLE_GAP_MS = 15 * 60 * 1000;
 export const DEFAULT_MATURE_MS = 17 * 60 * 1000;
 export const DEFAULT_CODEX_LOOKBACK_DAYS = 7;
 export const DEFAULT_CODEX_FOCUS_POLICY = {
-  version: 2,
+  version: 3,
   defaultFactor: DEFAULT_CODEX_FOCUS_FACTOR,
-  minimumFactor: 0.25,
+  minimumFactor: 0.2,
   maximumFactor: 0.8,
   delegationCredit: 0.35,
   modelBaseFactors: {
-    luna: 0.35,
-    terra: 0.45,
-    sol: 0.55
+    luna: 0.25,
+    terra: 0.35,
+    sol: 0.45
   },
   modelOverrides: {},
   effortAdjustments: {
