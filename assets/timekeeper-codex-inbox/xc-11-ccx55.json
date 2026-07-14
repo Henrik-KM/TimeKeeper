@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-07-14T08:22:01.883Z",
+  "updatedAt": "2026-07-14T10:02:02.290Z",
   "dayStart": "2026-07-13T22:00:00.000Z",
   "rangeStart": "2026-07-07T22:00:00.000Z",
   "lookbackDays": 7,
@@ -291,6 +291,36 @@
           "factor": 0.45,
           "wallSeconds": 33,
           "effectiveSeconds": 15
+        }
+      ],
+      "description": "Codex: Plan POU vision demo"
+    },
+    {
+      "id": "codex-31339ac345b9054d439ad523",
+      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
+      "projectKey": "VWR-AutoInv",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-07-14T09:42:56.975Z",
+      "endTime": "2026-07-14T09:43:13.846Z",
+      "wallSeconds": 16,
+      "focusFactor": 0.4729,
+      "effectiveSeconds": 7,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 9,
+          "effectiveSeconds": 4
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 7,
+          "effectiveSeconds": 3
         }
       ],
       "description": "Codex: Plan POU vision demo"
