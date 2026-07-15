@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-14T22:03:02.647Z",
+  "updatedAt": "2026-07-15T09:43:02.435Z",
   "dayStart": "2026-07-14T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1023,6 +1023,36 @@
           "factor": 0.45,
           "wallSeconds": 229,
           "effectiveSeconds": 103
+        }
+      ],
+      "description": "Codex: Test Slack connection"
+    },
+    {
+      "id": "codex-0360c766e68232d3d4007e2b",
+      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-07-15T08:38:51.917Z",
+      "endTime": "2026-07-15T09:22:34.641Z",
+      "wallSeconds": 2622,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1310,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 11,
+          "effectiveSeconds": 5
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 2610,
+          "effectiveSeconds": 1305
         }
       ],
       "description": "Codex: Test Slack connection"
