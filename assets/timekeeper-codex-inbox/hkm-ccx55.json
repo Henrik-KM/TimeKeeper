@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-15T11:58:02.308Z",
+  "updatedAt": "2026-07-15T13:13:02.469Z",
   "dayStart": "2026-07-14T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1260,6 +1260,36 @@
         "codex-03afe1bac2ead610b5fdd512"
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-3b9e0fd59bdb32397ab9fd23",
+      "threadId": "019f65d5-0cef-7b01-bcc8-82d608cd7b43",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-15T12:51:52.849Z",
+      "endTime": "2026-07-15T12:55:24.063Z",
+      "wallSeconds": 211,
+      "focusFactor": 0.45,
+      "effectiveSeconds": 95,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 211,
+          "effectiveSeconds": 95
+        }
+      ],
+      "description": "Codex: Find deletable archives"
     }
   ]
 }
