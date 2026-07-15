@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-15T16:13:02.025Z",
+  "updatedAt": "2026-07-15T18:33:02.057Z",
   "dayStart": "2026-07-14T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1473,6 +1473,77 @@
         }
       ],
       "description": "Codex: Test Slack connection"
+    },
+    {
+      "id": "codex-6d70509a5f3313bc6b5a74eb",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-15T16:12:10.633Z",
+      "endTime": "2026-07-15T18:12:06.625Z",
+      "wallSeconds": 7195,
+      "focusFactor": 0.8704,
+      "effectiveSeconds": 6263,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 7195,
+          "effectiveSeconds": 4317
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.21,
+          "wallSeconds": 9264,
+          "effectiveSeconds": 1945
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-b8904d1f03f1b8688be843c4",
+        "codex-8652c2fd302c2ec4b08d4308",
+        "codex-038a5503b8e2a8fb9328838d",
+        "codex-7027b4d9b0252c809cd8a790",
+        "codex-003213773a4100063461aee2",
+        "codex-96f352bd255323ef70b9badc",
+        "codex-e4ca6f429d63352eb0da23b1",
+        "codex-c3efc0ba37dad5363074f11d",
+        "codex-fb22582c9fe5e2784de825d0",
+        "codex-d8cc3d13eca999868f58b3c0",
+        "codex-96e5abb773c682fe54fc8944"
+      ],
+      "description": "Codex: Execute research project end to end"
     }
   ]
 }
