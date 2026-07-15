@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-15T13:48:02.750Z",
+  "updatedAt": "2026-07-15T13:53:02.669Z",
   "dayStart": "2026-07-14T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1320,6 +1320,29 @@
         }
       ],
       "description": "Codex: Test Slack connection"
+    },
+    {
+      "id": "codex-9305be287cf6fde47965375f",
+      "threadId": "019f65d5-0cef-7b01-bcc8-82d608cd7b43",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-15T13:29:31.555Z",
+      "endTime": "2026-07-15T13:34:08.761Z",
+      "wallSeconds": 277,
+      "focusFactor": 0.45,
+      "effectiveSeconds": 124,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 277,
+          "effectiveSeconds": 124
+        }
+      ],
+      "description": "Codex: Find deletable archives"
     }
   ]
 }
