@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-15T09:43:02.435Z",
+  "updatedAt": "2026-07-15T10:48:02.259Z",
   "dayStart": "2026-07-14T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1028,6 +1028,95 @@
       "description": "Codex: Test Slack connection"
     },
     {
+      "id": "codex-a1cdfedb8807678a7d64ebd3",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-15T08:23:31.294Z",
+      "endTime": "2026-07-15T09:46:39.588Z",
+      "wallSeconds": 4988,
+      "focusFactor": 1.037,
+      "effectiveSeconds": 5172,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 8,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 4988,
+          "effectiveSeconds": 2992
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.21,
+          "wallSeconds": 10379,
+          "effectiveSeconds": 2179
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.3-codex-spark",
+          "effort": "high",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh",
+          "factor": 0.55,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.1925,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-19a5d107b32cacd64cc0cba9",
+        "codex-71b73a0043cffd71c32669c0",
+        "codex-f7c75e407ca5161b6b6785a0",
+        "codex-eb1615b567b2165773ca8a53",
+        "codex-c3ed7cbfdffb4f62888818a5",
+        "codex-0c1ede218654ac98347ce767",
+        "codex-ff9a2e6e0b9396a75723ef1b",
+        "codex-fb4c76967d56f91159a35cdb",
+        "codex-1d6756ff94b8d9192d241982"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
       "id": "codex-0360c766e68232d3d4007e2b",
       "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
       "projectKey": "email-helper",
@@ -1053,6 +1142,36 @@
           "factor": 0.5,
           "wallSeconds": 2610,
           "effectiveSeconds": 1305
+        }
+      ],
+      "description": "Codex: Test Slack connection"
+    },
+    {
+      "id": "codex-f8851a397d9168fe3555db22",
+      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-07-15T09:38:46.436Z",
+      "endTime": "2026-07-15T09:42:57.236Z",
+      "wallSeconds": 250,
+      "focusFactor": 0.4028,
+      "effectiveSeconds": 101,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 6,
+          "effectiveSeconds": 3
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "low",
+          "factor": 0.4,
+          "wallSeconds": 243,
+          "effectiveSeconds": 97
         }
       ],
       "description": "Codex: Test Slack connection"
