@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-07-16T12:37:02.312Z",
+  "updatedAt": "2026-07-16T13:32:02.301Z",
   "dayStart": "2026-07-15T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 7,
@@ -402,6 +402,36 @@
         }
       ],
       "description": "Codex: Plan POU vision demo"
+    },
+    {
+      "id": "codex-0c0a18610ef0575c544702dd",
+      "threadId": "019d6c4a-c8a6-7761-b514-682c24b870e5",
+      "projectKey": "particle_iden",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-16T13:00:32.351Z",
+      "endTime": "2026-07-16T13:10:33.096Z",
+      "wallSeconds": 600,
+      "focusFactor": 0.4446,
+      "effectiveSeconds": 267,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.5",
+          "effort": "xhigh",
+          "factor": 0.4,
+          "wallSeconds": 64,
+          "effectiveSeconds": 25
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 536,
+          "effectiveSeconds": 241
+        }
+      ],
+      "description": "Codex: Improve hybrid algorithm"
     }
   ]
 }
