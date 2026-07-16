@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-16T16:13:02.355Z",
+  "updatedAt": "2026-07-16T19:18:02.590Z",
   "dayStart": "2026-07-15T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1780,6 +1780,124 @@
         "codex-9e974d962097ebc827c90089",
         "codex-8cfd16dafa2e6eee72b7baef",
         "codex-5a5a2d3fe7de8c48e5bf932f"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-c82545616e37abeb66b524fe",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-16T10:44:43.346Z",
+      "endTime": "2026-07-16T18:58:48.101Z",
+      "wallSeconds": 29644,
+      "focusFactor": 0.6623,
+      "effectiveSeconds": 19633,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 13,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 29632,
+          "effectiveSeconds": 17779
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 4,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.21,
+          "wallSeconds": 8676,
+          "effectiveSeconds": 1822
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.3-codex-spark",
+          "effort": "high",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.1575,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh",
+          "factor": 0.55,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.1925,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 217,
+          "effectiveSeconds": 30
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-7302d7dcfd7532913bc2da62",
+        "codex-01eccea704b9adb29a233df9",
+        "codex-0af6489850801a05087da7d7",
+        "codex-f9b0c4f95fca63f91dafa3cd",
+        "codex-2426009acdec70e7fa9d4cd8",
+        "codex-b8bb0b519f6cb77231cc6a28",
+        "codex-31fcbc5cb232e0568b1cc1b7",
+        "codex-517092aa1c864e6f3bc2b6a7",
+        "codex-3025bfe264506cec17308de7",
+        "codex-8af42e926b497eb3e2a157b3",
+        "codex-1642d54daf60a22c1ff0a2ef",
+        "codex-4fa31daafed681f64ea6afb1",
+        "codex-4e93cb0c05ce0dee092ffe43",
+        "codex-0e4a707b49484461caa93b33",
+        "codex-a200b1ade17eac0396981914",
+        "codex-1755ecd4e3dcda5d94686822",
+        "codex-82f912c9a9971dceebb9ca82",
+        "codex-d224418a6829200ba9de3a00"
       ],
       "description": "Codex: Execute research project end to end"
     },
