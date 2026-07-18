@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-18T19:43:02.399Z",
+  "updatedAt": "2026-07-18T20:53:02.475Z",
   "dayStart": "2026-07-17T22:00:00.000Z",
   "rangeStart": "2026-07-11T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1917,6 +1917,86 @@
       ],
       "supersedesExternalIds": [
         "codex-0e96fbea6b0499fde6de9aa1"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-c73e143da63e8d764b696e52",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-18T19:43:19.569Z",
+      "endTime": "2026-07-18T20:35:16.918Z",
+      "wallSeconds": 3117,
+      "focusFactor": 1.2325,
+      "effectiveSeconds": 3841,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 9,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 3117,
+          "effectiveSeconds": 1870
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.21,
+          "wallSeconds": 8033,
+          "effectiveSeconds": 1687
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 1625,
+          "effectiveSeconds": 284
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.1575,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-d10139eabb36807afc4cc819",
+        "codex-61e65dcd6449e7527a2429a7",
+        "codex-924c872b3ea3afd008cef952",
+        "codex-b08567a7c9409e1686f112b0",
+        "codex-bf39ab74a84ad1349451410a",
+        "codex-df92e4b9b9c9e191f4fa4170",
+        "codex-7324d378e47d4836799e079f",
+        "codex-0bf36269d073e103d9892117",
+        "codex-eb5dc745ddd17f0b7bfe0799",
+        "codex-143135ded4265fc95f028f70"
       ],
       "description": "Codex: Execute research project end to end"
     }
