@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-19T22:03:01.766Z",
+  "updatedAt": "2026-07-20T10:08:02.082Z",
   "dayStart": "2026-07-19T22:00:00.000Z",
   "rangeStart": "2026-07-13T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1759,6 +1759,43 @@
         "codex-08e2f93cff87f697c601f386"
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-43f4f955b77559c0505bccf1",
+      "threadId": "019f3b9f-7d07-7943-9bb8-fd36d7c1e00e",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-20T09:10:51.221Z",
+      "endTime": "2026-07-20T09:48:49.223Z",
+      "wallSeconds": 2278,
+      "focusFactor": 0.5146,
+      "effectiveSeconds": 1172,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.5",
+          "effort": "xhigh",
+          "factor": 0.4,
+          "wallSeconds": 23,
+          "effectiveSeconds": 9
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 1540,
+          "effectiveSeconds": 770
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh",
+          "factor": 0.55,
+          "wallSeconds": 713,
+          "effectiveSeconds": 392
+        }
+      ],
+      "description": "Codex: Apply Henrik style guide"
     }
   ]
 }
