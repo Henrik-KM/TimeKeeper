@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-21T12:03:02.577Z",
+  "updatedAt": "2026-07-21T17:38:02.203Z",
   "dayStart": "2026-07-20T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1994,6 +1994,47 @@
         }
       ],
       "description": "Codex: Apply Henrik style guide"
+    },
+    {
+      "id": "codex-4b703a215fbbb66b64cfc6e7",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-21T12:59:49.028Z",
+      "endTime": "2026-07-21T17:20:44.736Z",
+      "wallSeconds": 15655,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 7827,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
+          "wallSeconds": 2,
+          "effectiveSeconds": 1
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 15653,
+          "effectiveSeconds": 7826
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-0c317f3a452241375212982e"
+      ],
+      "description": "Codex: Execute research project end to end"
     }
   ]
 }
