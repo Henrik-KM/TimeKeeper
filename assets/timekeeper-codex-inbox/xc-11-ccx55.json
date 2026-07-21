@@ -2,269 +2,11 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-07-16T13:32:02.301Z",
-  "dayStart": "2026-07-15T22:00:00.000Z",
-  "rangeStart": "2026-07-09T22:00:00.000Z",
+  "updatedAt": "2026-07-21T11:22:02.182Z",
+  "dayStart": "2026-07-20T22:00:00.000Z",
+  "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
-    {
-      "id": "codex-fe3de11741881c6402cc2996",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-10T09:00:09.054Z",
-      "endTime": "2026-07-10T10:08:53.487Z",
-      "wallSeconds": 4124,
-      "focusFactor": 0.5398,
-      "effectiveSeconds": 2226,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.5",
-          "effort": "xhigh",
-          "factor": 0.4,
-          "wallSeconds": 281,
-          "effectiveSeconds": 112
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "wallSeconds": 3843,
-          "effectiveSeconds": 2113
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-aac1cc34d5c37d5bbd240825",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-12T19:47:59.525Z",
-      "endTime": "2026-07-12T20:24:28.692Z",
-      "wallSeconds": 2189,
-      "focusFactor": 0.55,
-      "effectiveSeconds": 1204,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "wallSeconds": 2189,
-          "effectiveSeconds": 1204
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-898978415652ecd3af934ccf",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-13T09:16:43.509Z",
-      "endTime": "2026-07-13T09:32:50.664Z",
-      "wallSeconds": 967,
-      "focusFactor": 0.5025,
-      "effectiveSeconds": 486,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "wallSeconds": 49,
-          "effectiveSeconds": 26
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 918,
-          "effectiveSeconds": 459
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-db1eda46af6b85628fd9d853",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-13T09:55:04.444Z",
-      "endTime": "2026-07-13T11:11:07.542Z",
-      "wallSeconds": 4563,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 2281,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 4563,
-          "effectiveSeconds": 2281
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-b41b920735e777c9b1f29f6f",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-13T11:53:37.494Z",
-      "endTime": "2026-07-13T12:39:00.400Z",
-      "wallSeconds": 2722,
-      "focusFactor": 0.4828,
-      "effectiveSeconds": 1314,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 1787,
-          "effectiveSeconds": 893
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 935,
-          "effectiveSeconds": 421
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-f5891bbc75b931c4b0709b5c",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-14T08:02:14.178Z",
-      "endTime": "2026-07-14T08:02:47.993Z",
-      "wallSeconds": 33,
-      "focusFactor": 0.45,
-      "effectiveSeconds": 15,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 33,
-          "effectiveSeconds": 15
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-31339ac345b9054d439ad523",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-14T09:42:56.975Z",
-      "endTime": "2026-07-14T09:43:13.846Z",
-      "wallSeconds": 16,
-      "focusFactor": 0.4729,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 9,
-          "effectiveSeconds": 4
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 7,
-          "effectiveSeconds": 3
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-59e0adf838071127f17a9430",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-14T10:07:39.712Z",
-      "endTime": "2026-07-14T10:30:16.338Z",
-      "wallSeconds": 1356,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 678,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 1356,
-          "effectiveSeconds": 678
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-d41d9a8d2fec7676add05cee",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-14T10:49:43.968Z",
-      "endTime": "2026-07-14T10:58:12.130Z",
-      "wallSeconds": 508,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 254,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 508,
-          "effectiveSeconds": 254
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
-    {
-      "id": "codex-d96caefc4cdcb6c5cdc2c3a5",
-      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
-      "projectKey": "VWR-AutoInv",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-14T11:14:38.138Z",
-      "endTime": "2026-07-14T11:25:44.504Z",
-      "wallSeconds": 666,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 333,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 666,
-          "effectiveSeconds": 333
-        }
-      ],
-      "description": "Codex: Plan POU vision demo"
-    },
     {
       "id": "codex-045861425f77da454173d1ce",
       "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
@@ -432,6 +174,29 @@
         }
       ],
       "description": "Codex: Improve hybrid algorithm"
+    },
+    {
+      "id": "codex-84d097dcb7f4a9d3cdf85c98",
+      "threadId": "019ebaf2-c23c-7272-a657-9434c6c1c39b",
+      "projectKey": "VWR-AutoInv",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-07-16T13:09:43.711Z",
+      "endTime": "2026-07-16T13:24:58.778Z",
+      "wallSeconds": 915,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 457,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 915,
+          "effectiveSeconds": 457
+        }
+      ],
+      "description": "Codex: Plan POU vision demo"
     }
   ]
 }
