@@ -2,643 +2,11 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-21T18:48:02.423Z",
-  "dayStart": "2026-07-20T22:00:00.000Z",
-  "rangeStart": "2026-07-14T22:00:00.000Z",
+  "updatedAt": "2026-07-22T08:19:23.158Z",
+  "dayStart": "2026-07-21T22:00:00.000Z",
+  "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
-    {
-      "id": "codex-a1cdfedb8807678a7d64ebd3",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T08:23:31.294Z",
-      "endTime": "2026-07-15T09:46:39.588Z",
-      "wallSeconds": 4988,
-      "focusFactor": 1.037,
-      "effectiveSeconds": 5172,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 8,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 4988,
-          "effectiveSeconds": 2992
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 10379,
-          "effectiveSeconds": 2179
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-19a5d107b32cacd64cc0cba9",
-        "codex-71b73a0043cffd71c32669c0",
-        "codex-f7c75e407ca5161b6b6785a0",
-        "codex-eb1615b567b2165773ca8a53",
-        "codex-c3ed7cbfdffb4f62888818a5",
-        "codex-0c1ede218654ac98347ce767",
-        "codex-ff9a2e6e0b9396a75723ef1b",
-        "codex-fb4c76967d56f91159a35cdb",
-        "codex-1d6756ff94b8d9192d241982"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-0360c766e68232d3d4007e2b",
-      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-15T08:38:51.917Z",
-      "endTime": "2026-07-15T09:22:34.641Z",
-      "wallSeconds": 2622,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1310,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 11,
-          "effectiveSeconds": 5
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 2610,
-          "effectiveSeconds": 1305
-        }
-      ],
-      "description": "Codex: Test Slack connection"
-    },
-    {
-      "id": "codex-f8851a397d9168fe3555db22",
-      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-15T09:38:46.436Z",
-      "endTime": "2026-07-15T09:42:57.236Z",
-      "wallSeconds": 250,
-      "focusFactor": 0.4028,
-      "effectiveSeconds": 101,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 6,
-          "effectiveSeconds": 3
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "low",
-          "factor": 0.4,
-          "wallSeconds": 243,
-          "effectiveSeconds": 97
-        }
-      ],
-      "description": "Codex: Test Slack connection"
-    },
-    {
-      "id": "codex-5d7828b4c2e1fce0d6f81015",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T10:45:40.717Z",
-      "endTime": "2026-07-15T11:36:38.370Z",
-      "wallSeconds": 3057,
-      "focusFactor": 0.8262,
-      "effectiveSeconds": 2526,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 4,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 3054,
-          "effectiveSeconds": 1832
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 3303,
-          "effectiveSeconds": 693
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-51c4e2ed28c5b16ecef2c643",
-        "codex-7364089629882f0d123565ce",
-        "codex-5938aa35c6fa2b4befb8cde4",
-        "codex-8b3f22b6d648d97f3a2866c8",
-        "codex-03afe1bac2ead610b5fdd512"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-bff01856eace29f973c3607a",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T12:32:54.424Z",
-      "endTime": "2026-07-15T15:32:12.612Z",
-      "wallSeconds": 10758,
-      "focusFactor": 0.8234,
-      "effectiveSeconds": 8858,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 14,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 10385,
-          "effectiveSeconds": 6231
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 370,
-          "effectiveSeconds": 185
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 4,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 11624,
-          "effectiveSeconds": 2441
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-9bf01b57bcde4a68add5f092",
-        "codex-808b2805d748cb2514fccbfb",
-        "codex-708fb47978f3591a46ac522d",
-        "codex-f60d7e96e9ad20f7325621a1",
-        "codex-58535b676746bca883598a11",
-        "codex-8430ad4aaddb06bd10ef52fa",
-        "codex-658d81cfb7ca094933947e4e",
-        "codex-73a95b4734133bd28a7563b2",
-        "codex-801103ce9f17b8a7b403c69f",
-        "codex-961d4bcbc784195b2732d42e",
-        "codex-c867f426cfc483dac7a063e9",
-        "codex-8cd76b17b2c29ce125c3fa43",
-        "codex-a9e73d5e1b3f12ec12efef7f",
-        "codex-1e2678c9898afb6522662301",
-        "codex-ebab9408f7ff62ecaeb90c68",
-        "codex-dda800046681ff1943dca74d",
-        "codex-f937bb0b19d849e9c7499d83"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-3b9e0fd59bdb32397ab9fd23",
-      "threadId": "019f65d5-0cef-7b01-bcc8-82d608cd7b43",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T12:51:52.849Z",
-      "endTime": "2026-07-15T12:55:24.063Z",
-      "wallSeconds": 211,
-      "focusFactor": 0.45,
-      "effectiveSeconds": 95,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 211,
-          "effectiveSeconds": 95
-        }
-      ],
-      "description": "Codex: Find deletable archives"
-    },
-    {
-      "id": "codex-020d564a2216965b4ccaf626",
-      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-15T13:02:27.637Z",
-      "endTime": "2026-07-15T13:26:16.728Z",
-      "wallSeconds": 1429,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 714,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "low",
-          "factor": 0.4,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 1428,
-          "effectiveSeconds": 714
-        }
-      ],
-      "description": "Codex: Test Slack connection"
-    },
-    {
-      "id": "codex-9305be287cf6fde47965375f",
-      "threadId": "019f65d5-0cef-7b01-bcc8-82d608cd7b43",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T13:29:31.555Z",
-      "endTime": "2026-07-15T13:34:08.761Z",
-      "wallSeconds": 277,
-      "focusFactor": 0.45,
-      "effectiveSeconds": 124,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "wallSeconds": 277,
-          "effectiveSeconds": 124
-        }
-      ],
-      "description": "Codex: Find deletable archives"
-    },
-    {
-      "id": "codex-b9acdbdcadabccafe4886869",
-      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-15T14:22:13.237Z",
-      "endTime": "2026-07-15T14:56:04.179Z",
-      "wallSeconds": 2030,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1015,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 2030,
-          "effectiveSeconds": 1015
-        }
-      ],
-      "description": "Codex: Test Slack connection"
-    },
-    {
-      "id": "codex-6d70509a5f3313bc6b5a74eb",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T16:12:10.633Z",
-      "endTime": "2026-07-15T18:12:06.625Z",
-      "wallSeconds": 7195,
-      "focusFactor": 0.8704,
-      "effectiveSeconds": 6263,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 5,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 7195,
-          "effectiveSeconds": 4317
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 9264,
-          "effectiveSeconds": 1945
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-b8904d1f03f1b8688be843c4",
-        "codex-8652c2fd302c2ec4b08d4308",
-        "codex-038a5503b8e2a8fb9328838d",
-        "codex-7027b4d9b0252c809cd8a790",
-        "codex-003213773a4100063461aee2",
-        "codex-96f352bd255323ef70b9badc",
-        "codex-e4ca6f429d63352eb0da23b1",
-        "codex-c3efc0ba37dad5363074f11d",
-        "codex-fb22582c9fe5e2784de825d0",
-        "codex-d8cc3d13eca999868f58b3c0",
-        "codex-96e5abb773c682fe54fc8944"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-fe8cd252211f4baeff519d70",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T18:36:37.658Z",
-      "endTime": "2026-07-15T18:40:35.106Z",
-      "wallSeconds": 237,
-      "focusFactor": 0.7283,
-      "effectiveSeconds": 172,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 167,
-          "effectiveSeconds": 100
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 344,
-          "effectiveSeconds": 72
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-4acb2931737d47c8087e9fa8",
-        "codex-7f111af4abcd87f16b0bee83",
-        "codex-163f97f704025b447db99971"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-f56afec4067619c31a4fea5b",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-15T19:26:52.151Z",
-      "endTime": "2026-07-15T21:41:50.097Z",
-      "wallSeconds": 8097,
-      "focusFactor": 0.45,
-      "effectiveSeconds": 3644,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.45,
-          "wallSeconds": 8097,
-          "effectiveSeconds": 3644
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-4df8b3aa1104516853a15707"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
     {
       "id": "codex-5eba0282a0c0ea32a77cc410",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
@@ -2064,6 +1432,68 @@
       ],
       "supersedesExternalIds": [
         "codex-3c5a72bd431e667fad2f947a"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-58136c317b7ff2d5598016d1",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-21T19:05:03.885Z",
+      "endTime": "2026-07-21T20:22:28.217Z",
+      "wallSeconds": 4644,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2322,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 4644,
+          "effectiveSeconds": 2322
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-9b0bac26da9d02216e1a743e"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-3d2de152008a3882e7e77195",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-22T01:30:33.485Z",
+      "endTime": "2026-07-22T01:32:11.714Z",
+      "wallSeconds": 98,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 49,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 98,
+          "effectiveSeconds": 49
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-ff559b76df33aa13491c35c5"
       ],
       "description": "Codex: Execute research project end to end"
     }
