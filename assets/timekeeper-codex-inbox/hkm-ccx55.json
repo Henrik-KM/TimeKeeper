@@ -2,290 +2,25 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-22T19:58:02.000Z",
-  "dayStart": "2026-07-21T22:00:00.000Z",
-  "rangeStart": "2026-07-15T22:00:00.000Z",
+  "updatedAt": "2026-07-22T22:03:02.606Z",
+  "dayStart": "2026-07-22T22:00:00.000Z",
+  "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
     {
-      "id": "codex-5eba0282a0c0ea32a77cc410",
+      "id": "codex-da5ffeb2d56ae7ac4ded08bc",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
       "projectKey": "Research",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-16T08:10:59.653Z",
-      "endTime": "2026-07-16T08:29:03.093Z",
-      "wallSeconds": 1083,
-      "focusFactor": 0.45,
-      "effectiveSeconds": 487,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.45,
-          "wallSeconds": 1083,
-          "effectiveSeconds": 487
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-742b3f1751ab034444ac2559"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-ec4df7b72b930a6601ab378d",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-16T09:03:16.103Z",
-      "endTime": "2026-07-16T09:56:29.454Z",
-      "wallSeconds": 3193,
-      "focusFactor": 0.6354,
-      "effectiveSeconds": 2029,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.45,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 3193,
-          "effectiveSeconds": 1915
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 538,
-          "effectiveSeconds": 113
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1575,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-9e974d962097ebc827c90089",
-        "codex-8cfd16dafa2e6eee72b7baef",
-        "codex-5a5a2d3fe7de8c48e5bf932f"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-c82545616e37abeb66b524fe",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-16T10:44:43.346Z",
-      "endTime": "2026-07-16T18:58:48.101Z",
-      "wallSeconds": 29644,
-      "focusFactor": 0.6623,
-      "effectiveSeconds": 19633,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 13,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 29632,
-          "effectiveSeconds": 17779
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 4,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 8676,
-          "effectiveSeconds": 1822
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1575,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "codex-auto-review",
-          "effort": "low",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 217,
-          "effectiveSeconds": 30
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-7302d7dcfd7532913bc2da62",
-        "codex-01eccea704b9adb29a233df9",
-        "codex-0af6489850801a05087da7d7",
-        "codex-f9b0c4f95fca63f91dafa3cd",
-        "codex-2426009acdec70e7fa9d4cd8",
-        "codex-b8bb0b519f6cb77231cc6a28",
-        "codex-31fcbc5cb232e0568b1cc1b7",
-        "codex-517092aa1c864e6f3bc2b6a7",
-        "codex-3025bfe264506cec17308de7",
-        "codex-8af42e926b497eb3e2a157b3",
-        "codex-1642d54daf60a22c1ff0a2ef",
-        "codex-4fa31daafed681f64ea6afb1",
-        "codex-4e93cb0c05ce0dee092ffe43",
-        "codex-0e4a707b49484461caa93b33",
-        "codex-a200b1ade17eac0396981914",
-        "codex-1755ecd4e3dcda5d94686822",
-        "codex-82f912c9a9971dceebb9ca82",
-        "codex-d224418a6829200ba9de3a00"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-62f270ce1c108ae5dc072477",
-      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-07-16T15:17:23.721Z",
-      "endTime": "2026-07-16T15:53:54.762Z",
-      "wallSeconds": 2191,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1095,
-      "focusPolicyVersion": 3,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 2191,
-          "effectiveSeconds": 1095
-        }
-      ],
-      "description": "Codex: Test Slack connection"
-    },
-    {
-      "id": "codex-bb970cdcbbb974ef2c0b04b7",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-16T20:44:40.676Z",
+      "startTime": "2026-07-16T22:00:04.479Z",
       "endTime": "2026-07-17T01:14:24.299Z",
-      "wallSeconds": 16183,
-      "focusFactor": 1.0098,
-      "effectiveSeconds": 16341,
+      "wallSeconds": 11659,
+      "focusFactor": 1.0774,
+      "effectiveSeconds": 12562,
       "focusPolicyVersion": 3,
       "delegationCredit": 0.35,
-      "delegatedSessionCount": 15,
+      "delegatedSessionCount": 8,
       "modelBreakdown": [
         {
           "role": "parent",
@@ -294,28 +29,8 @@
           "factor": 0.6,
           "creditMultiplier": 1,
           "creditedFactor": 0.6,
-          "wallSeconds": 16183,
-          "effectiveSeconds": 9710
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.6,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
-          "wallSeconds": 30291,
-          "effectiveSeconds": 6361
-        },
-        {
-          "role": "subagent",
-          "model": "codex-auto-review",
-          "effort": "low",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 1928,
-          "effectiveSeconds": 269
+          "wallSeconds": 11659,
+          "effectiveSeconds": 6995
         },
         {
           "role": "subagent",
@@ -324,6 +39,26 @@
           "factor": 0.4,
           "creditMultiplier": 0.35,
           "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "ultra",
+          "factor": 0.6,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.21,
+          "wallSeconds": 25254,
+          "effectiveSeconds": 5303
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "xhigh",
+          "factor": 0.55,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.1925,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
@@ -339,16 +74,6 @@
         },
         {
           "role": "subagent",
-          "model": "gpt-5.3-codex-spark",
-          "effort": "high",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
@@ -359,26 +84,28 @@
         },
         {
           "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "xhigh",
-          "factor": 0.55,
+          "model": "gpt-5.3-codex-spark",
+          "effort": "high",
+          "factor": 0.4,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
+          "creditedFactor": 0.14,
           "wallSeconds": 0,
           "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1879,
+          "effectiveSeconds": 263
         }
       ],
       "supersedesExternalIds": [
-        "codex-03748219320dd110437ac7cf",
-        "codex-19b7fdda6fee755c5d06efa6",
-        "codex-6a0cfd05b5a669246dfa48fb",
-        "codex-81e071e846b23394a55c5597",
-        "codex-8914265bdffb67df9cf13833",
-        "codex-398eb05e2ea9d8d9b8537a9a",
+        "codex-b4921a239b7b65ed517c36ab",
         "codex-ca421b464df20adecc2d7ec9",
-        "codex-ceeb232a82746ccf1fb0ea72",
-        "codex-690408829cfc671e986fca0f",
-        "codex-d00a65bf15e94dae72247d64",
         "codex-7ab8911453c3377c7677163e",
         "codex-618b5de4441f3ddd1ecf6426",
         "codex-dc2ad35c59bcae1e4a0aa1c8",
