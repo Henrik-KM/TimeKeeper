@@ -3374,6 +3374,8 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   await expect(page.locator('#statsGrid')).toContainText('Codex Usage');
   await expect(page.locator('#statsGrid')).toContainText('5% remaining');
   await expect(page.locator('#statsGrid')).toContainText('1-week limit');
+  await expect(page.locator('#todayCommandPanel')).toContainText('Codex');
+  await expect(page.locator('#todayCommandPanel')).toContainText('5% left');
   await expect
     .poll(() =>
       page.evaluate(
@@ -3395,6 +3397,14 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   );
   expect(data.entries).toHaveLength(2);
   expect(JSON.stringify(data)).not.toContain('codex-too-old');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const mobileCodexUsage = page.locator(
+    '#todayCommandPanel .mobile-today-card.codex'
+  );
+  await expect(mobileCodexUsage).toBeVisible();
+  await expect(mobileCodexUsage).toContainText('5% left');
 });
 
 test('Codex config publish retries after a stale GitHub sha', async ({

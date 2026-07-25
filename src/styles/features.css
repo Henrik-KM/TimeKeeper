@@ -1273,6 +1273,17 @@ tr:nth-child(even) td {
     background: #f8fafc;
   }
 
+  .mobile-today-card.codex {
+    grid-column: 1 / -1;
+    min-height: 3.8rem;
+  }
+
+  .mobile-today-card.codex strong {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+  }
+
   .mobile-today-actions {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));

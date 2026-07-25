@@ -9420,16 +9420,20 @@ import {
     }).format(date)}`;
   }
 
-  function getCodexUsageCard() {
+  function getCodexUsageSummary() {
     const config = getCodexIntegrationConfig();
     if (!config.enabled) return null;
     const usage = config.usageLimits;
     if (!usage?.primary) {
       return {
-        title: 'Codex Usage',
+        remainingPercent: null,
         value: 'Unavailable',
-        icon: 'AI',
-        changeLabel: 'Waiting for desktop usage data'
+        todayValue: 'Waiting for desktop usage data',
+        resetLabel: '',
+        windowLabel: '',
+        statusLabel: '',
+        secondaryLabel: '',
+        tone: 'muted'
       };
     }
     const primary = usage.primary;
@@ -9437,19 +9441,50 @@ import {
     const isStale =
       !Number.isFinite(observedAt) ||
       Date.now() - observedAt > CODEX_USAGE_STALE_MS;
-    const secondary = usage.secondary
+    const remainingLabel = formatCodexUsagePercent(primary.remainingPercent);
+    const resetLabel = formatCodexUsageReset(primary.resetsAt);
+    const secondaryLabel = usage.secondary
       ? `${formatCodexUsageWindow(usage.secondary.windowMinutes)}: ${formatCodexUsagePercent(usage.secondary.remainingPercent)}% remaining`
       : '';
     return {
-      title: 'Codex Usage',
-      value: `${formatCodexUsagePercent(primary.remainingPercent)}% remaining`,
-      progress: primary.remainingPercent,
-      icon: 'AI',
-      progressLabel: `${formatCodexUsageWindow(primary.windowMinutes)} limit - ${formatCodexUsageReset(primary.resetsAt)}`,
-      scheduleLabel: isStale
+      remainingPercent: primary.remainingPercent,
+      value: `${remainingLabel}% remaining`,
+      todayValue: `${remainingLabel}% left - ${resetLabel.toLowerCase()}${isStale ? ' - stale' : ''}`,
+      resetLabel,
+      windowLabel: formatCodexUsageWindow(primary.windowMinutes),
+      statusLabel: isStale
         ? `Stale - last updated ${formatRelativeTime(usage.observedAt)}`
         : `Updated ${formatRelativeTime(usage.observedAt)}`,
-      metaLabel: secondary
+      secondaryLabel,
+      tone: isStale
+        ? 'muted'
+        : primary.remainingPercent <= 10
+          ? 'risk'
+          : primary.remainingPercent <= 25
+            ? 'warm'
+            : ''
+    };
+  }
+
+  function getCodexUsageCard() {
+    const usage = getCodexUsageSummary();
+    if (!usage) return null;
+    if (!Number.isFinite(usage.remainingPercent)) {
+      return {
+        title: 'Codex Usage',
+        value: usage.value,
+        icon: 'AI',
+        changeLabel: usage.todayValue
+      };
+    }
+    return {
+      title: 'Codex Usage',
+      value: usage.value,
+      progress: usage.remainingPercent,
+      icon: 'AI',
+      progressLabel: `${usage.windowLabel} limit - ${usage.resetLabel}`,
+      scheduleLabel: usage.statusLabel,
+      metaLabel: usage.secondaryLabel
     };
   }
 
@@ -13488,6 +13523,7 @@ import {
     const running = runningEntries[0] || null;
     const runningProject = running ? getEntryProject(running) : null;
     const workoutSummary = getWorkoutMobileSummary();
+    const codexUsage = getCodexUsageSummary();
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -13557,6 +13593,14 @@ import {
       workoutSummary.tone,
       () => openMobileWorkoutSheet(getFavoriteWorkoutPreset())
     );
+    if (codexUsage) {
+      appendTodayCard(
+        'Codex',
+        codexUsage.todayValue,
+        `codex ${codexUsage.tone}`.trim(),
+        () => activateSection('importExport')
+      );
+    }
     panel.appendChild(primary);
 
     const runningProjectIds = new Set(
@@ -13670,6 +13714,10 @@ import {
       settings.enabled ? 'on' : 'off',
       settings.enabled ? '' : 'muted'
     );
+    const codexUsage = getCodexUsageSummary();
+    if (codexUsage) {
+      addItem('Codex', codexUsage.todayValue, codexUsage.tone);
+    }
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
     }
