@@ -247,6 +247,48 @@ function getJsonLineTimestamp(line) {
   return parseTimestamp(match?.[1]);
 }
 
+function sanitizeRateLimitWindow(value) {
+  const source = value && typeof value === 'object' ? value : {};
+  const usedPercent = Number(source.used_percent);
+  const windowMinutes = Number(source.window_minutes);
+  const resetsAtSeconds = Number(source.resets_at);
+  if (
+    !Number.isFinite(usedPercent) ||
+    !Number.isFinite(windowMinutes) ||
+    windowMinutes <= 0
+  ) {
+    return null;
+  }
+  const resetsAt =
+    Number.isFinite(resetsAtSeconds) && resetsAtSeconds > 0
+      ? new Date(resetsAtSeconds * 1000)
+      : null;
+  return {
+    usedPercent: Number(Math.min(100, Math.max(0, usedPercent)).toFixed(1)),
+    remainingPercent: Number(
+      Math.min(100, Math.max(0, 100 - usedPercent)).toFixed(1)
+    ),
+    windowMinutes: Math.round(windowMinutes),
+    resetsAt:
+      resetsAt && !Number.isNaN(resetsAt.getTime())
+        ? resetsAt.toISOString()
+        : null
+  };
+}
+
+function sanitizeCodexUsageLimits(value, observedAt) {
+  const source = value && typeof value === 'object' ? value : {};
+  const primary = sanitizeRateLimitWindow(source.primary);
+  const secondary = sanitizeRateLimitWindow(source.secondary);
+  const observed = parseTimestamp(observedAt);
+  if (!primary || !observed) return null;
+  return {
+    observedAt: observed.toISOString(),
+    primary,
+    secondary
+  };
+}
+
 export async function readCodexSessionSummary(filePath, windowStart) {
   const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
   const meta = {
@@ -264,6 +306,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
   let firstTimestamp = null;
   let lastTimestampMs = null;
   let hasSessionMeta = false;
+  let usageLimits = null;
   const lineReader = readline.createInterface({
     input: createReadStream(filePath, { encoding: 'utf8' }),
     crlfDelay: Infinity
@@ -272,7 +315,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
     if (!line) continue;
     const timestamp = getJsonLineTimestamp(line);
     if (timestamp && !firstTimestamp) firstTimestamp = timestamp;
-    if (/"type"\s*:\s*"(session_meta|turn_context)"/.test(line)) {
+    if (/"type"\s*:\s*"(session_meta|turn_context|event_msg)"/.test(line)) {
       try {
         const event = JSON.parse(line);
         const payload = event?.payload || {};
@@ -297,6 +340,23 @@ export async function readCodexSessionSummary(filePath, windowStart) {
           activeEffort = String(
             payload.effort || payload.reasoning_effort || activeEffort || ''
           ).trim();
+        } else if (
+          event?.type === 'event_msg' &&
+          payload.type === 'token_count' &&
+          payload.rate_limits
+        ) {
+          const candidate = sanitizeCodexUsageLimits(
+            payload.rate_limits,
+            timestamp
+          );
+          if (
+            candidate &&
+            (!usageLimits ||
+              Date.parse(candidate.observedAt) >
+                Date.parse(usageLimits.observedAt))
+          ) {
+            usageLimits = candidate;
+          }
         }
       } catch {
         // Ignore malformed or partially-written metadata lines.
@@ -322,7 +382,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
     }
   }
   if (!meta.timestamp) meta.timestamp = firstTimestamp;
-  return { meta, timestamps, activity, sourceFile: filePath };
+  return { meta, timestamps, activity, usageLimits, sourceFile: filePath };
 }
 
 async function readJsonFile(filePath, fallback) {
@@ -434,14 +494,21 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
   const uniqueRecords = Array.from(
     new Map(records.map((record) => [record.id, record])).values()
   ).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+  const usageLimits =
+    summaries
+      .map((summary) => summary.usageLimits)
+      .filter(Boolean)
+      .sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt))[0] ||
+    null;
   return {
-    version: 1,
+    version: 2,
     source: 'timekeeper-codex-bridge',
     machineId: options.machineId,
     updatedAt: now.toISOString(),
     dayStart: dayStart.toISOString(),
     rangeStart: rangeStart.toISOString(),
     lookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
+    usageLimits,
     records: uniqueRecords
   };
 }
@@ -452,6 +519,7 @@ export function makeCodexPayloadKey(payload = {}) {
     .update(
       JSON.stringify({
         rangeStart: payload.rangeStart,
+        usageLimits: payload.usageLimits || null,
         records: Array.isArray(payload.records) ? payload.records : []
       })
     )

@@ -1396,6 +1396,7 @@ import {
   const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
   const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
+  const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
   const CODEX_FOCUS_FACTOR = 0.4;
   const CODEX_FOCUS_POLICY = {
     version: 3,
@@ -1466,7 +1467,42 @@ import {
       mappings: [],
       importedCodexRecordIds: [],
       lastImportAt: null,
-      lastImportSummary: null
+      lastImportSummary: null,
+      usageLimits: null
+    };
+  }
+
+  function normalizeCodexUsageWindow(value) {
+    const source = value && typeof value === 'object' ? value : {};
+    const usedPercent = Number(source.usedPercent);
+    const remainingPercent = Number(source.remainingPercent);
+    const windowMinutes = Number(source.windowMinutes);
+    const resetsAt = new Date(source.resetsAt || '');
+    if (
+      !Number.isFinite(usedPercent) ||
+      !Number.isFinite(remainingPercent) ||
+      !Number.isFinite(windowMinutes) ||
+      windowMinutes <= 0
+    ) {
+      return null;
+    }
+    return {
+      usedPercent: Math.min(100, Math.max(0, usedPercent)),
+      remainingPercent: Math.min(100, Math.max(0, remainingPercent)),
+      windowMinutes: Math.round(windowMinutes),
+      resetsAt: Number.isNaN(resetsAt.getTime()) ? null : resetsAt.toISOString()
+    };
+  }
+
+  function normalizeCodexUsageLimits(value) {
+    const source = value && typeof value === 'object' ? value : {};
+    const observedAt = new Date(source.observedAt || '');
+    const primary = normalizeCodexUsageWindow(source.primary);
+    if (Number.isNaN(observedAt.getTime()) || !primary) return null;
+    return {
+      observedAt: observedAt.toISOString(),
+      primary,
+      secondary: normalizeCodexUsageWindow(source.secondary)
     };
   }
 
@@ -1490,7 +1526,8 @@ import {
       lastImportSummary:
         config.lastImportSummary && typeof config.lastImportSummary === 'object'
           ? config.lastImportSummary
-          : null
+          : null,
+      usageLimits: normalizeCodexUsageLimits(config.usageLimits)
     };
   }
 
@@ -3473,6 +3510,7 @@ import {
 
   function importCodexInboxPayloads(payloads = []) {
     const config = getCodexIntegrationConfig();
+    const previousUsageLimits = JSON.stringify(config.usageLimits);
     const importedIds = getCodexExistingExternalIds(config);
     const windowStart = getCodexImportWindowStart();
     let imported = 0;
@@ -3480,6 +3518,13 @@ import {
     let reconciled = 0;
     let updated = 0;
     const nowIso = new Date().toISOString();
+    config.usageLimits =
+      payloads
+        .map((payload) => normalizeCodexUsageLimits(payload?.usageLimits))
+        .filter(Boolean)
+        .sort(
+          (a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt)
+        )[0] || config.usageLimits;
     payloads.forEach((payload) => {
       const records = Array.isArray(payload?.records) ? payload.records : [];
       records.forEach((record) => {
@@ -3581,10 +3626,14 @@ import {
       reconciled,
       updated
     };
+    const usageChanged =
+      JSON.stringify(config.usageLimits) !== previousUsageLimits;
     if (imported > 0 || reconciled > 0 || updated > 0) {
       saveData();
       refreshAllViews();
     } else {
+      if (usageChanged) persistDataToLocalStorage();
+      updateDashboard();
       updateCodexIntegrationPanel();
     }
     return { imported, skipped, reconciled, updated };
@@ -9345,6 +9394,65 @@ import {
   }
 
   // Dashboard rendering
+  function formatCodexUsagePercent(value) {
+    const percent = Number(value);
+    if (!Number.isFinite(percent)) return '0';
+    return Number.isInteger(percent) ? String(percent) : percent.toFixed(1);
+  }
+
+  function formatCodexUsageWindow(minutes) {
+    const value = Math.max(1, Math.round(Number(minutes) || 0));
+    if (value % 10080 === 0) return `${value / 10080}-week`;
+    if (value % 1440 === 0) return `${value / 1440}-day`;
+    if (value % 60 === 0) return `${value / 60}-hour`;
+    return `${value}-minute`;
+  }
+
+  function formatCodexUsageReset(value) {
+    const date = new Date(value || '');
+    if (Number.isNaN(date.getTime())) return 'Reset time unavailable';
+    return `Resets ${new Intl.DateTimeFormat('en-GB', {
+      weekday: 'short',
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date)}`;
+  }
+
+  function getCodexUsageCard() {
+    const config = getCodexIntegrationConfig();
+    if (!config.enabled) return null;
+    const usage = config.usageLimits;
+    if (!usage?.primary) {
+      return {
+        title: 'Codex Usage',
+        value: 'Unavailable',
+        icon: 'AI',
+        changeLabel: 'Waiting for desktop usage data'
+      };
+    }
+    const primary = usage.primary;
+    const observedAt = Date.parse(usage.observedAt);
+    const isStale =
+      !Number.isFinite(observedAt) ||
+      Date.now() - observedAt > CODEX_USAGE_STALE_MS;
+    const secondary = usage.secondary
+      ? `${formatCodexUsageWindow(usage.secondary.windowMinutes)}: ${formatCodexUsagePercent(usage.secondary.remainingPercent)}% remaining`
+      : '';
+    return {
+      title: 'Codex Usage',
+      value: `${formatCodexUsagePercent(primary.remainingPercent)}% remaining`,
+      progress: primary.remainingPercent,
+      icon: 'AI',
+      progressLabel: `${formatCodexUsageWindow(primary.windowMinutes)} limit - ${formatCodexUsageReset(primary.resetsAt)}`,
+      scheduleLabel: isStale
+        ? `Stale - last updated ${formatRelativeTime(usage.observedAt)}`
+        : `Updated ${formatRelativeTime(usage.observedAt)}`,
+      metaLabel: secondary
+    };
+  }
+
   function updateDashboard() {
     const stats = computeGlobalStats();
     const nowTime = new Date();
@@ -9494,6 +9602,8 @@ import {
         metaLabel: workoutMetaLabel
       }
     ]; // Active Projects card removed per user request
+    const codexUsageCard = getCodexUsageCard();
+    if (codexUsageCard) cards.push(codexUsageCard);
     const statsGrid = document.getElementById('statsGrid');
     statsGrid.innerHTML = '';
     cards.forEach((card) => {

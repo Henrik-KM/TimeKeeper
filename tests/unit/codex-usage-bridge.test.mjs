@@ -208,6 +208,97 @@ test('Codex payload fingerprint changes when model weighting changes', () => {
   );
 });
 
+test('Codex payload fingerprint changes when usage limits change', () => {
+  const payload = {
+    rangeStart: '2026-06-07T00:00:00.000Z',
+    records: [],
+    usageLimits: {
+      observedAt: '2026-06-13T09:00:00.000Z',
+      primary: {
+        usedPercent: 90,
+        remainingPercent: 10,
+        windowMinutes: 10080,
+        resetsAt: '2026-06-16T17:00:00.000Z'
+      },
+      secondary: null
+    }
+  };
+
+  assert.notEqual(
+    makeCodexPayloadKey(payload),
+    makeCodexPayloadKey({
+      ...payload,
+      usageLimits: {
+        ...payload.usageLimits,
+        observedAt: '2026-06-13T09:05:00.000Z',
+        primary: {
+          ...payload.usageLimits.primary,
+          usedPercent: 95,
+          remainingPercent: 5
+        }
+      }
+    })
+  );
+});
+
+test('streamed session parsing sanitizes the latest Codex usage limits', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'timekeeper-codex-')
+  );
+  const filePath = path.join(directory, 'usage.jsonl');
+  const text = jsonl([
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'session_meta',
+      payload: {
+        id: 'usage-thread',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI'
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:05:00.000Z',
+      type: 'event_msg',
+      payload: {
+        type: 'token_count',
+        total_token_usage: { input_tokens: 123456 },
+        rate_limits: {
+          limit_id: 'codex',
+          plan_type: 'private-plan-name',
+          primary: {
+            used_percent: 95,
+            window_minutes: 10080,
+            resets_at: 1781648400
+          },
+          secondary: null
+        }
+      }
+    }
+  ]);
+
+  try {
+    await fs.writeFile(filePath, text, 'utf8');
+    const summary = await readCodexSessionSummary(
+      filePath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+
+    assert.deepEqual(summary.usageLimits, {
+      observedAt: '2026-06-13T09:05:00.000Z',
+      primary: {
+        usedPercent: 95,
+        remainingPercent: 5,
+        windowMinutes: 10080,
+        resetsAt: new Date(1781648400 * 1000).toISOString()
+      },
+      secondary: null
+    });
+    assert.equal(JSON.stringify(summary.usageLimits).includes('plan'), false);
+    assert.equal(JSON.stringify(summary.usageLimits).includes('token'), false);
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('streamed session parsing keeps the first subagent identity', async () => {
   const directory = await fs.mkdtemp(
     path.join(os.tmpdir(), 'timekeeper-codex-')

@@ -3137,10 +3137,20 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
 }) => {
   await freezeTime(page, '2026-06-13T12:00:00');
   const inboxPayload = {
-    version: 1,
+    version: 2,
     source: 'timekeeper-codex-bridge',
     machineId: 'desktop-a',
     updatedAt: '2026-06-13T10:00:00.000Z',
+    usageLimits: {
+      observedAt: '2026-06-13T10:30:00.000Z',
+      primary: {
+        usedPercent: 95,
+        remainingPercent: 5,
+        windowMinutes: 10080,
+        resetsAt: '2026-06-16T17:00:00.000Z'
+      },
+      secondary: null
+    },
     records: [
       {
         id: 'codex-today',
@@ -3352,6 +3362,18 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   expect(data.entries.map((entry) => entry.externalId)).not.toContain(
     'codex-subagent-old'
   );
+  expect(data.codexIntegration.usageLimits).toEqual(
+    expect.objectContaining({
+      observedAt: '2026-06-13T10:30:00.000Z',
+      primary: expect.objectContaining({
+        remainingPercent: 5,
+        windowMinutes: 10080
+      })
+    })
+  );
+  await expect(page.locator('#statsGrid')).toContainText('Codex Usage');
+  await expect(page.locator('#statsGrid')).toContainText('5% remaining');
+  await expect(page.locator('#statsGrid')).toContainText('1-week limit');
   await expect
     .poll(() =>
       page.evaluate(
