@@ -728,6 +728,185 @@ tr:nth-child(even) td {
   justify-content: flex-start;
 }
 
+.codex-page-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.codex-page-header h2 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+
+.codex-page-content {
+  display: grid;
+  gap: 1.5rem;
+}
+
+.codex-report-section {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.codex-report-section + .codex-report-section {
+  padding-top: 1.25rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.codex-report-section h3 {
+  margin: 0;
+  color: #334155;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
+.codex-limit-grid,
+.codex-metric-grid,
+.codex-bridge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 0.65rem;
+}
+
+.codex-limit-card,
+.codex-metric {
+  display: grid;
+  align-content: start;
+  gap: 0.25rem;
+  min-width: 0;
+  padding: 0.8rem;
+  border: 1px solid #dbe3ef;
+  border-radius: 0.5rem;
+  background: #ffffff;
+}
+
+.codex-limit-card.primary {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+}
+
+.codex-limit-card.primary.warm {
+  border-color: #fde68a;
+  background: #fffbeb;
+}
+
+.codex-limit-card.primary.risk {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.codex-limit-card.primary.muted {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.codex-limit-card > span,
+.codex-metric > span {
+  color: #64748b;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.codex-limit-card > strong {
+  color: #0f172a;
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.codex-limit-card > b {
+  color: #334155;
+  font-size: 0.8rem;
+  font-weight: 650;
+}
+
+.codex-limit-card > small,
+.codex-metric > small {
+  color: #64748b;
+  font-size: 0.76rem;
+}
+
+.codex-metric > strong {
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  font-size: 1.1rem;
+}
+
+.codex-breakdown-list,
+.codex-model-list,
+.codex-session-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.codex-breakdown-row,
+.codex-model-row,
+.codex-session-row {
+  min-width: 0;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.codex-breakdown-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(6rem, 30%);
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.codex-breakdown-row > div:first-child,
+.codex-session-row > div:first-child {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.codex-breakdown-row span,
+.codex-session-row span,
+.codex-model-row span {
+  color: #64748b;
+  font-size: 0.78rem;
+}
+
+.codex-share-track {
+  height: 0.45rem;
+  overflow: hidden;
+  border-radius: 0.25rem;
+  background: #e2e8f0;
+}
+
+.codex-share-track > div {
+  height: 100%;
+  border-radius: inherit;
+  background: #2563eb;
+}
+
+.codex-model-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(5rem, 0.6fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.codex-session-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.codex-session-duration {
+  display: grid;
+  justify-items: end;
+  gap: 0.15rem;
+  white-space: nowrap;
+}
+
 .mobile-sync-status,
 .mobile-now-bar {
   display: none;
@@ -1057,6 +1236,32 @@ tr:nth-child(even) td {
     padding: 0.75rem 0.75rem 9.75rem;
   }
 
+  .codex-limit-grid,
+  .codex-bridge-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .codex-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .codex-breakdown-row {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+
+  .codex-model-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .codex-model-row span:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .codex-session-row {
+    align-items: start;
+  }
+
   .mobile-flow-backdrop {
     z-index: 950;
     align-items: flex-end;
@@ -1280,8 +1485,17 @@ tr:nth-child(even) td {
 
   .mobile-today-card.codex strong {
     overflow: visible;
+    font-size: 1.55rem;
+    line-height: 1;
     text-overflow: clip;
     white-space: normal;
+  }
+
+  .mobile-today-card-detail {
+    color: #475569;
+    font-size: 0.78rem;
+    font-weight: 650;
+    line-height: 1.25;
   }
 
   .mobile-today-actions {

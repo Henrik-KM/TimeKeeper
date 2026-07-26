@@ -56,6 +56,7 @@ async function gotoSection(page, sectionId, headingText) {
   } else {
     const moreLabels = {
       projects: 'Projects',
+      codex: 'Codex',
       importExport: 'Backup / Sync',
       todo: 'Workouts',
       grocery: 'Finances'
@@ -3374,8 +3375,10 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   await expect(page.locator('#statsGrid')).toContainText('Codex Usage');
   await expect(page.locator('#statsGrid')).toContainText('5% remaining');
   await expect(page.locator('#statsGrid')).toContainText('1-week limit');
+  await expect(page.locator('#statsGrid')).toContainText('Resets in');
   await expect(page.locator('#todayCommandPanel')).toContainText('Codex');
-  await expect(page.locator('#todayCommandPanel')).toContainText('5% left');
+  await expect(page.locator('#todayCommandPanel')).toContainText('5%');
+  await expect(page.locator('#todayCommandPanel')).toContainText('Resets in');
   await expect
     .poll(() =>
       page.evaluate(
@@ -3398,13 +3401,30 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   expect(data.entries).toHaveLength(2);
   expect(JSON.stringify(data)).not.toContain('codex-too-old');
 
+  await gotoSection(page, 'codex', 'Codex');
+  const codexPage = page.locator('#codexPageContent');
+  await expect(codexPage).toContainText('5%');
+  await expect(codexPage).toContainText('Resets in');
+  await expect(codexPage).toContainText('Last 7 Days');
+  await expect(codexPage).toContainText('2');
+  await expect(codexPage).toContainText('IFLAI');
+  await expect(codexPage).toContainText('gpt-5.6-sol');
+  await expect(codexPage).toContainText('Connected');
+
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoSection(page, 'dashboard', 'Dashboard');
   const mobileCodexUsage = page.locator(
     '#todayCommandPanel .mobile-today-card.codex'
   );
   await expect(mobileCodexUsage).toBeVisible();
-  await expect(mobileCodexUsage).toContainText('5% left');
+  await expect(mobileCodexUsage.locator('strong')).toHaveText('5%');
+  await expect(mobileCodexUsage).toContainText('Remaining - Resets in');
+  await mobileCodexUsage.click();
+  await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await gotoSection(page, 'codex', 'Codex');
+  await expect(page.locator('#codex')).toBeVisible();
+  await expect(page.locator('.mobile-more-nav-item')).toHaveClass(/active/);
 });
 
 test('Codex config publish retries after a stale GitHub sha', async ({

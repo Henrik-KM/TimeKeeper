@@ -1918,6 +1918,7 @@ import {
     updateFocusBlocker();
     updateAutoSyncStatus();
     updateCodexIntegrationPanel();
+    updateCodexPage();
     updateReminderSettingsPanel();
     updatePwaStatusPanel();
     renderTodayCommandPanel();
@@ -3635,6 +3636,7 @@ import {
       if (usageChanged) persistDataToLocalStorage();
       updateDashboard();
       updateCodexIntegrationPanel();
+      updateCodexPage();
     }
     return { imported, skipped, reconciled, updated };
   }
@@ -3675,6 +3677,7 @@ import {
     const config = getCodexIntegrationConfig();
     if (!config.enabled) {
       updateCodexIntegrationPanel();
+      updateCodexPage();
       return { imported: 0, skipped: 0, reconciled: 0, updated: 0 };
     }
     if (codexImportPromise) return codexImportPromise;
@@ -3685,6 +3688,7 @@ import {
       error: ''
     };
     updateCodexIntegrationPanel();
+    updateCodexPage();
     codexImportPromise = fetchCodexInboxPayloads()
       .then((payloads) => {
         const result = importCodexInboxPayloads(payloads);
@@ -3715,6 +3719,7 @@ import {
       .finally(() => {
         codexImportPromise = null;
         updateCodexIntegrationPanel();
+        updateCodexPage();
       });
     return codexImportPromise;
   }
@@ -7292,6 +7297,8 @@ import {
       updateGrocerySection();
     } else if (sectionId === 'analytics') {
       updateAnalyticsSection();
+    } else if (sectionId === 'codex') {
+      updateCodexPage();
     }
     applyMobileChartCollapses();
     renderMobileSyncStatus();
@@ -7315,6 +7322,7 @@ import {
   function openMobileMoreMenu() {
     const options = [
       ['projects', 'Projects'],
+      ['codex', 'Codex'],
       ['importExport', 'Backup / Sync'],
       ['todo', 'Workouts'],
       ['grocery', 'Finances']
@@ -7975,7 +7983,8 @@ import {
       ['importExport', 'Open Backup / Import'],
       ['todo', 'Open Workouts'],
       ['grocery', 'Open Finances'],
-      ['analytics', 'Open Reports']
+      ['analytics', 'Open Reports'],
+      ['codex', 'Open Codex']
     ].map(([sectionId, label]) => ({
       label,
       meta: 'Navigate',
@@ -9411,13 +9420,20 @@ import {
   function formatCodexUsageReset(value) {
     const date = new Date(value || '');
     if (Number.isNaN(date.getTime())) return 'Reset time unavailable';
-    return `Resets ${new Intl.DateTimeFormat('en-GB', {
-      weekday: 'short',
-      day: 'numeric',
-      month: 'short',
-      hour: '2-digit',
-      minute: '2-digit'
-    }).format(date)}`;
+    const remainingMinutes = Math.ceil(
+      (date.getTime() - Date.now()) / (60 * 1000)
+    );
+    if (remainingMinutes <= 0) return 'Reset due';
+    const days = Math.floor(remainingMinutes / (24 * 60));
+    const hours = Math.floor((remainingMinutes % (24 * 60)) / 60);
+    const minutes = remainingMinutes % 60;
+    if (days > 0) {
+      return `Resets in ${days}d${hours ? ` ${hours}h` : ''}`;
+    }
+    if (hours > 0) {
+      return `Resets in ${hours}h${minutes ? ` ${minutes}m` : ''}`;
+    }
+    return `Resets in ${Math.max(1, minutes)}m`;
   }
 
   function getCodexUsageSummary() {
@@ -9427,8 +9443,10 @@ import {
     if (!usage?.primary) {
       return {
         remainingPercent: null,
+        remainingLabel: '',
         value: 'Unavailable',
         todayValue: 'Waiting for desktop usage data',
+        todayDetail: '',
         resetLabel: '',
         windowLabel: '',
         statusLabel: '',
@@ -9448,8 +9466,10 @@ import {
       : '';
     return {
       remainingPercent: primary.remainingPercent,
+      remainingLabel: `${remainingLabel}%`,
       value: `${remainingLabel}% remaining`,
-      todayValue: `${remainingLabel}% left - ${resetLabel.toLowerCase()}${isStale ? ' - stale' : ''}`,
+      todayValue: `${remainingLabel}% left`,
+      todayDetail: `${resetLabel}${isStale ? ` - data updated ${formatRelativeTime(usage.observedAt)}` : ''}`,
       resetLabel,
       windowLabel: formatCodexUsageWindow(primary.windowMinutes),
       statusLabel: isStale
@@ -9486,6 +9506,380 @@ import {
       scheduleLabel: usage.statusLabel,
       metaLabel: usage.secondaryLabel
     };
+  }
+
+  function getCodexEntryWallSeconds(entry) {
+    const start = new Date(entry?.startTime || '');
+    const end = new Date(entry?.endTime || '');
+    if (
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      end > start
+    ) {
+      return Math.round((end.getTime() - start.getTime()) / 1000);
+    }
+    const effectiveSeconds = Math.max(0, Number(entry?.duration) || 0);
+    const focusFactor = getEntryFocusFactor(entry, 1);
+    return focusFactor > 0
+      ? Math.round(effectiveSeconds / focusFactor)
+      : effectiveSeconds;
+  }
+
+  function getCodexPageData() {
+    const now = new Date();
+    const todayStart = startOfLocalDay(now);
+    const rangeStart = new Date(todayStart);
+    rangeStart.setDate(rangeStart.getDate() - 6);
+    const entries = data.entries
+      .filter(
+        (entry) =>
+          !entry.isRunning &&
+          isCodexTimeEntry(entry) &&
+          !Number.isNaN(new Date(entry.startTime || '').getTime())
+      )
+      .sort(
+        (a, b) =>
+          new Date(b.startTime || '').getTime() -
+          new Date(a.startTime || '').getTime()
+      );
+    const recentEntries = entries.filter(
+      (entry) => new Date(entry.startTime).getTime() >= rangeStart.getTime()
+    );
+    const todayEntries = recentEntries.filter(
+      (entry) => new Date(entry.startTime).getTime() >= todayStart.getTime()
+    );
+    const summarize = (items) =>
+      items.reduce(
+        (summary, entry) => {
+          summary.effectiveSeconds += Math.max(0, Number(entry.duration) || 0);
+          summary.wallSeconds += getCodexEntryWallSeconds(entry);
+          summary.delegatedSessions += Math.max(
+            0,
+            Number(entry.codexDelegatedSessionCount) || 0
+          );
+          return summary;
+        },
+        {
+          sessions: items.length,
+          effectiveSeconds: 0,
+          wallSeconds: 0,
+          delegatedSessions: 0
+        }
+      );
+    const projects = new Map();
+    recentEntries.forEach((entry) => {
+      const project = getEntryProject(entry);
+      const key = String(project?.id || entry.projectId || 'unknown');
+      const current = projects.get(key) || {
+        name: project?.name || 'Unknown project',
+        sessions: 0,
+        effectiveSeconds: 0,
+        wallSeconds: 0
+      };
+      current.sessions += 1;
+      current.effectiveSeconds += Math.max(0, Number(entry.duration) || 0);
+      current.wallSeconds += getCodexEntryWallSeconds(entry);
+      projects.set(key, current);
+    });
+    const models = new Map();
+    recentEntries.forEach((entry) => {
+      const breakdown = Array.isArray(entry.codexModelBreakdown)
+        ? entry.codexModelBreakdown
+        : [];
+      const rows = breakdown.length
+        ? breakdown
+        : [
+            {
+              model: 'Unknown model',
+              effort: '',
+              effectiveSeconds: Number(entry.duration) || 0,
+              wallSeconds: getCodexEntryWallSeconds(entry)
+            }
+          ];
+      rows.forEach((row) => {
+        const model = String(row?.model || 'Unknown model').trim();
+        const effort = String(row?.effort || '').trim();
+        const key = `${model}::${effort}`;
+        const current = models.get(key) || {
+          model,
+          effort,
+          effectiveSeconds: 0,
+          wallSeconds: 0
+        };
+        current.effectiveSeconds += Math.max(
+          0,
+          Number(row?.effectiveSeconds) || 0
+        );
+        current.wallSeconds += Math.max(0, Number(row?.wallSeconds) || 0);
+        models.set(key, current);
+      });
+    });
+    return {
+      today: summarize(todayEntries),
+      week: summarize(recentEntries),
+      entries: recentEntries,
+      projects: [...projects.values()].sort(
+        (a, b) => b.effectiveSeconds - a.effectiveSeconds
+      ),
+      models: [...models.values()].sort(
+        (a, b) => b.effectiveSeconds - a.effectiveSeconds
+      ),
+      rangeStart
+    };
+  }
+
+  function appendCodexPageSection(content, titleText) {
+    const section = document.createElement('section');
+    section.className = 'codex-report-section';
+    const title = document.createElement('h3');
+    title.textContent = titleText;
+    section.appendChild(title);
+    content.appendChild(section);
+    return section;
+  }
+
+  function appendCodexMetric(container, label, value, detail = '') {
+    const metric = document.createElement('div');
+    metric.className = 'codex-metric';
+    const labelEl = document.createElement('span');
+    labelEl.textContent = label;
+    const valueEl = document.createElement('strong');
+    valueEl.textContent = value;
+    metric.appendChild(labelEl);
+    metric.appendChild(valueEl);
+    if (detail) {
+      const detailEl = document.createElement('small');
+      detailEl.textContent = detail;
+      metric.appendChild(detailEl);
+    }
+    container.appendChild(metric);
+    return metric;
+  }
+
+  function updateCodexPage() {
+    const content = document.getElementById('codexPageContent');
+    if (!content) return;
+    content.replaceChildren();
+    const config = getCodexIntegrationConfig();
+    const usage = getCodexUsageSummary();
+    const report = getCodexPageData();
+
+    const limits = appendCodexPageSection(content, 'Usage Limits');
+    const limitGrid = document.createElement('div');
+    limitGrid.className = 'codex-limit-grid';
+    if (usage && Number.isFinite(usage.remainingPercent)) {
+      const primary = document.createElement('div');
+      primary.className = `codex-limit-card primary${usage.tone ? ` ${usage.tone}` : ''}`;
+      const label = document.createElement('span');
+      label.textContent = `${usage.windowLabel} limit`;
+      const value = document.createElement('strong');
+      value.textContent = usage.remainingLabel;
+      const remaining = document.createElement('b');
+      remaining.textContent = 'remaining';
+      const reset = document.createElement('small');
+      reset.textContent = usage.resetLabel;
+      const freshness = document.createElement('small');
+      freshness.textContent = usage.statusLabel;
+      primary.appendChild(label);
+      primary.appendChild(value);
+      primary.appendChild(remaining);
+      primary.appendChild(reset);
+      primary.appendChild(freshness);
+      limitGrid.appendChild(primary);
+
+      if (config.usageLimits?.secondary) {
+        const secondaryWindow = config.usageLimits.secondary;
+        const secondary = appendCodexMetric(
+          limitGrid,
+          `${formatCodexUsageWindow(secondaryWindow.windowMinutes)} limit`,
+          `${formatCodexUsagePercent(secondaryWindow.remainingPercent)}%`,
+          formatCodexUsageReset(secondaryWindow.resetsAt)
+        );
+        secondary.classList.add('codex-limit-card');
+      }
+    } else {
+      appendCodexMetric(
+        limitGrid,
+        'Current limit',
+        usage?.value || 'Unavailable',
+        config.enabled
+          ? 'Waiting for desktop usage data'
+          : 'Codex integration is off'
+      );
+    }
+    limits.appendChild(limitGrid);
+
+    const activity = appendCodexPageSection(content, 'Activity');
+    const activityGrid = document.createElement('div');
+    activityGrid.className = 'codex-metric-grid';
+    appendCodexMetric(
+      activityGrid,
+      'Today',
+      formatDuration(report.today.effectiveSeconds),
+      `${formatDuration(report.today.wallSeconds)} wall time`
+    );
+    appendCodexMetric(
+      activityGrid,
+      'Last 7 Days',
+      formatDuration(report.week.effectiveSeconds),
+      `${formatDuration(report.week.wallSeconds)} wall time`
+    );
+    appendCodexMetric(
+      activityGrid,
+      'Sessions',
+      String(report.week.sessions),
+      `${report.today.sessions} today`
+    );
+    const weightedFocus =
+      report.week.wallSeconds > 0
+        ? report.week.effectiveSeconds / report.week.wallSeconds
+        : 0;
+    appendCodexMetric(
+      activityGrid,
+      'Credited Focus',
+      formatFocusPercent(weightedFocus),
+      `${report.week.delegatedSessions} delegated sessions`
+    );
+    activity.appendChild(activityGrid);
+
+    const projects = appendCodexPageSection(content, 'Projects - Last 7 Days');
+    const projectList = document.createElement('div');
+    projectList.className = 'codex-breakdown-list';
+    if (!report.projects.length) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent = 'No imported Codex sessions in the last 7 days.';
+      projectList.appendChild(empty);
+    }
+    report.projects.forEach((project) => {
+      const row = document.createElement('div');
+      row.className = 'codex-breakdown-row';
+      const copy = document.createElement('div');
+      const name = document.createElement('strong');
+      name.textContent = project.name;
+      const detail = document.createElement('span');
+      detail.textContent = `${project.sessions} sessions - ${formatDuration(project.effectiveSeconds)} effective - ${formatDuration(project.wallSeconds)} wall`;
+      copy.appendChild(name);
+      copy.appendChild(detail);
+      const share = document.createElement('div');
+      share.className = 'codex-share-track';
+      const fill = document.createElement('div');
+      fill.style.width = `${Math.min(
+        100,
+        report.week.effectiveSeconds > 0
+          ? (project.effectiveSeconds / report.week.effectiveSeconds) * 100
+          : 0
+      ).toFixed(1)}%`;
+      share.appendChild(fill);
+      row.appendChild(copy);
+      row.appendChild(share);
+      projectList.appendChild(row);
+    });
+    projects.appendChild(projectList);
+
+    const models = appendCodexPageSection(content, 'Models and Effort');
+    const modelList = document.createElement('div');
+    modelList.className = 'codex-model-list';
+    if (!report.models.length) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent =
+        'Model details will appear after Codex sessions import.';
+      modelList.appendChild(empty);
+    }
+    report.models.forEach((model) => {
+      const row = document.createElement('div');
+      row.className = 'codex-model-row';
+      const name = document.createElement('strong');
+      name.textContent = model.model;
+      const effort = document.createElement('span');
+      effort.textContent = model.effort || 'effort unavailable';
+      const duration = document.createElement('span');
+      duration.textContent = `${formatDuration(model.effectiveSeconds)} effective`;
+      row.appendChild(name);
+      row.appendChild(effort);
+      row.appendChild(duration);
+      modelList.appendChild(row);
+    });
+    models.appendChild(modelList);
+
+    const recent = appendCodexPageSection(content, 'Recent Sessions');
+    const recentList = document.createElement('div');
+    recentList.className = 'codex-session-list';
+    report.entries.slice(0, 10).forEach((entry) => {
+      const row = document.createElement('div');
+      row.className = 'codex-session-row';
+      const main = document.createElement('div');
+      const description = document.createElement('strong');
+      description.textContent = String(entry.description || 'Codex work');
+      const project = getEntryProject(entry);
+      const detail = document.createElement('span');
+      detail.textContent = `${project?.name || 'Unknown project'} - ${formatDateTime(entry.startTime)}`;
+      main.appendChild(description);
+      main.appendChild(detail);
+      const duration = document.createElement('div');
+      duration.className = 'codex-session-duration';
+      const effective = document.createElement('strong');
+      effective.textContent = formatDuration(Number(entry.duration) || 0);
+      const wall = document.createElement('span');
+      wall.textContent = `${formatDuration(getCodexEntryWallSeconds(entry))} wall`;
+      duration.appendChild(effective);
+      duration.appendChild(wall);
+      row.appendChild(main);
+      row.appendChild(duration);
+      recentList.appendChild(row);
+    });
+    if (!recentList.childElementCount) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent = 'No recent Codex sessions.';
+      recentList.appendChild(empty);
+    }
+    recent.appendChild(recentList);
+
+    const bridge = appendCodexPageSection(content, 'Bridge');
+    const bridgeGrid = document.createElement('div');
+    bridgeGrid.className = 'codex-bridge-grid';
+    appendCodexMetric(
+      bridgeGrid,
+      'Status',
+      config.enabled ? 'Connected' : 'Off',
+      config.lastImportAt
+        ? `Checked ${formatRelativeTime(config.lastImportAt)}`
+        : 'No import recorded'
+    );
+    appendCodexMetric(
+      bridgeGrid,
+      'Last Import',
+      config.lastImportSummary
+        ? `${config.lastImportSummary.imported || 0} new`
+        : 'Waiting',
+      config.lastImportSummary
+        ? `${config.lastImportSummary.updated || 0} recalibrated - ${config.lastImportSummary.skipped || 0} skipped`
+        : ''
+    );
+    const focusPolicyVersion = Math.max(
+      0,
+      ...report.entries.map(
+        (entry) => Number(entry.codexFocusPolicyVersion) || 0
+      )
+    );
+    appendCodexMetric(
+      bridgeGrid,
+      'Focus Policy',
+      focusPolicyVersion > 0 ? `v${focusPolicyVersion}` : 'Unavailable',
+      'Model and effort weighted'
+    );
+    bridge.appendChild(bridgeGrid);
+
+    const refreshButton = document.getElementById('codexPageRefreshBtn');
+    if (refreshButton) {
+      refreshButton.disabled =
+        !config.enabled || codexImportRuntimeStatus.pending;
+      refreshButton.textContent = codexImportRuntimeStatus.pending
+        ? 'Refreshing...'
+        : 'Refresh';
+    }
   }
 
   function updateDashboard() {
@@ -13538,7 +13932,7 @@ import {
 
     const primary = document.createElement('div');
     primary.className = 'mobile-today-primary';
-    const appendTodayCard = (label, value, className, onClick) => {
+    const appendTodayCard = (label, value, className, onClick, detail = '') => {
       const card = document.createElement('button');
       card.type = 'button';
       card.className = `mobile-today-card${className ? ` ${className}` : ''}`;
@@ -13548,6 +13942,12 @@ import {
       strong.textContent = value;
       card.appendChild(span);
       card.appendChild(strong);
+      if (detail) {
+        const small = document.createElement('small');
+        small.className = 'mobile-today-card-detail';
+        small.textContent = detail;
+        card.appendChild(small);
+      }
       card.addEventListener('click', onClick);
       primary.appendChild(card);
       return card;
@@ -13596,9 +13996,12 @@ import {
     if (codexUsage) {
       appendTodayCard(
         'Codex',
-        codexUsage.todayValue,
+        codexUsage.remainingLabel || codexUsage.value,
         `codex ${codexUsage.tone}`.trim(),
-        () => activateSection('importExport')
+        () => activateSection('codex'),
+        Number.isFinite(codexUsage.remainingPercent)
+          ? `Remaining - ${codexUsage.todayDetail}`
+          : codexUsage.todayValue
       );
     }
     panel.appendChild(primary);
@@ -13716,7 +14119,13 @@ import {
     );
     const codexUsage = getCodexUsageSummary();
     if (codexUsage) {
-      addItem('Codex', codexUsage.todayValue, codexUsage.tone);
+      addItem(
+        'Codex',
+        [codexUsage.todayValue, codexUsage.todayDetail]
+          .filter(Boolean)
+          .join(' - '),
+        codexUsage.tone
+      );
     }
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
@@ -15541,6 +15950,7 @@ import {
     'codexPublishConfigBtn'
   );
   const codexImportNowBtn = document.getElementById('codexImportNowBtn');
+  const codexPageRefreshBtn = document.getElementById('codexPageRefreshBtn');
   if (codexConfigBtn) {
     codexConfigBtn.addEventListener('click', () => {
       editCodexIntegrationSettings();
@@ -15556,6 +15966,11 @@ import {
       importCodexUsage();
     });
   }
+  if (codexPageRefreshBtn) {
+    codexPageRefreshBtn.addEventListener('click', () => {
+      importCodexUsage();
+    });
+  }
 
   // Initial render
   primeStravaCacheFromBrowserStorage();
@@ -15565,6 +15980,7 @@ import {
   updateDashboard();
   updateTimerSection();
   updateCodexIntegrationPanel();
+  updateCodexPage();
   scheduleCodexAutoImport();
   loadStravaFeed();
   if (
