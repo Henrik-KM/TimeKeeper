@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-26T15:13:02.857Z",
+  "updatedAt": "2026-07-26T15:33:02.834Z",
   "dayStart": "2026-07-25T22:00:00.000Z",
   "rangeStart": "2026-07-19T22:00:00.000Z",
   "lookbackDays": 7,
@@ -1728,6 +1728,37 @@
       ],
       "supersedesExternalIds": [
         "codex-5e23d87dacc075af246decb3"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-5ef7d5fe4359fd11b5230618",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-26T15:12:16.547Z",
+      "endTime": "2026-07-26T15:12:39.115Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 22,
+          "effectiveSeconds": 11
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-8f1a7ac8d95acf56e0c4805d"
       ],
       "description": "Codex: Execute research project end to end"
     }
