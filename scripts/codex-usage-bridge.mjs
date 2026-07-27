@@ -278,6 +278,10 @@ function sanitizeRateLimitWindow(value) {
 
 function sanitizeCodexUsageLimits(value, observedAt) {
   const source = value && typeof value === 'object' ? value : {};
+  const limitId = String(source.limit_id || '')
+    .trim()
+    .toLowerCase();
+  if (limitId && limitId !== 'codex') return null;
   const primary = sanitizeRateLimitWindow(source.primary);
   const secondary = sanitizeRateLimitWindow(source.secondary);
   const observed = parseTimestamp(observedAt);

@@ -272,6 +272,22 @@ test('streamed session parsing sanitizes the latest Codex usage limits', async (
           secondary: null
         }
       }
+    },
+    {
+      timestamp: '2026-06-13T09:06:00.000Z',
+      type: 'event_msg',
+      payload: {
+        type: 'token_count',
+        rate_limits: {
+          limit_id: 'codex_bengalfox',
+          primary: {
+            used_percent: 0,
+            window_minutes: 10080,
+            resets_at: 1781907600
+          },
+          secondary: null
+        }
+      }
     }
   ]);
 
