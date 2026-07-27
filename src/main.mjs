@@ -1394,7 +1394,7 @@ import {
   const CODEX_DEFAULT_BRANCH = 'main';
   const CODEX_DEFAULT_CONFIG_PATH = 'assets/timekeeper-codex-config.json';
   const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
-  const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
+  const CODEX_IMPORT_INTERVAL_MS = 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
   const CODEX_FOCUS_FACTOR = 0.4;
@@ -7209,6 +7209,8 @@ import {
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'hidden') {
       flushBackupNow().catch(() => {});
+    } else {
+      importCodexUsage({ quiet: true });
     }
   });
 
@@ -9469,12 +9471,12 @@ import {
       remainingLabel: `${remainingLabel}%`,
       value: `${remainingLabel}% remaining`,
       todayValue: `${remainingLabel}% left`,
-      todayDetail: `${resetLabel}${isStale ? ` - data updated ${formatRelativeTime(usage.observedAt)}` : ''}`,
+      todayDetail: `${resetLabel}${isStale ? ` - measured ${formatRelativeTime(usage.observedAt)}` : ''}`,
       resetLabel,
       windowLabel: formatCodexUsageWindow(primary.windowMinutes),
       statusLabel: isStale
-        ? `Stale - last updated ${formatRelativeTime(usage.observedAt)}`
-        : `Updated ${formatRelativeTime(usage.observedAt)}`,
+        ? `Usage measured ${formatRelativeTime(usage.observedAt)}`
+        : `Measured ${formatRelativeTime(usage.observedAt)}`,
       secondaryLabel,
       tone: isStale
         ? 'muted'
