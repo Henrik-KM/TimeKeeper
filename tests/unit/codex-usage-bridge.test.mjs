@@ -6,7 +6,8 @@ import test from 'node:test';
 
 import {
   makeCodexPayloadKey,
-  readCodexSessionSummary
+  readCodexSessionSummary,
+  sanitizeAppServerUsageLimits
 } from '../../scripts/codex-usage-bridge.mjs';
 import {
   buildCodexUsageRecordsFromSessionData,
@@ -239,6 +240,54 @@ test('Codex payload fingerprint changes when usage limits change', () => {
       }
     })
   );
+});
+
+test('sanitizes the canonical live Codex rate-limit bucket', () => {
+  const usageLimits = sanitizeAppServerUsageLimits(
+    {
+      rateLimits: {
+        limitId: 'codex_bengalfox',
+        primary: {
+          usedPercent: 0,
+          windowDurationMins: 10080,
+          resetsAt: 1781907600
+        }
+      },
+      rateLimitsByLimitId: {
+        codex_bengalfox: {
+          limitId: 'codex_bengalfox',
+          primary: {
+            usedPercent: 0,
+            windowDurationMins: 10080,
+            resetsAt: 1781907600
+          }
+        },
+        codex: {
+          limitId: 'codex',
+          planType: 'private-plan-name',
+          primary: {
+            usedPercent: 38,
+            windowDurationMins: 10080,
+            resetsAt: 1781648400
+          },
+          secondary: null
+        }
+      }
+    },
+    new Date('2026-06-13T09:10:00.000Z')
+  );
+
+  assert.deepEqual(usageLimits, {
+    observedAt: '2026-06-13T09:10:00.000Z',
+    primary: {
+      usedPercent: 38,
+      remainingPercent: 62,
+      windowMinutes: 10080,
+      resetsAt: new Date(1781648400 * 1000).toISOString()
+    },
+    secondary: null
+  });
+  assert.equal(JSON.stringify(usageLimits).includes('plan'), false);
 });
 
 test('streamed session parsing sanitizes the latest Codex usage limits', async () => {
