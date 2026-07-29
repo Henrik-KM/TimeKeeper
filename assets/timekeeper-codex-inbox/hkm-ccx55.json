@@ -2,12 +2,12 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-29T19:43:02.537Z",
+  "updatedAt": "2026-07-29T19:43:49.100Z",
   "dayStart": "2026-07-28T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 7,
   "usageLimits": {
-    "observedAt": "2026-07-29T19:43:03.277Z",
+    "observedAt": "2026-07-29T19:43:49.743Z",
     "primary": {
       "usedPercent": 10,
       "remainingPercent": 90,
@@ -26,10 +26,10 @@
       "startTime": "2026-07-22T22:00:07.375Z",
       "endTime": "2026-07-23T01:13:06.181Z",
       "wallSeconds": 11578,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5789,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2894,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -37,11 +37,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 11578,
-          "effectiveSeconds": 5789
+          "effectiveSeconds": 2894,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -58,10 +60,10 @@
       "startTime": "2026-07-23T06:14:43.742Z",
       "endTime": "2026-07-24T03:32:58.484Z",
       "wallSeconds": 76694,
-      "focusFactor": 0.5236,
-      "effectiveSeconds": 40155,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.2618,
+      "effectiveSeconds": 20077,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 11,
       "modelBreakdown": [
@@ -69,71 +71,85 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 76694,
-          "effectiveSeconds": 38347
+          "effectiveSeconds": 19173,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "unknown",
           "effort": "unknown",
-          "factor": 0.4,
+          "factor": 0.2,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
+          "creditedFactor": 0.07,
           "wallSeconds": 0,
-          "effectiveSeconds": 0
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
+          "creditedFactor": 0.0875,
           "wallSeconds": 10325,
-          "effectiveSeconds": 1806
+          "effectiveSeconds": 903,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "gpt-5.6-sol",
           "effort": "ultra",
-          "factor": 0.6,
+          "factor": 0.3,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.21,
+          "creditedFactor": 0.105,
           "wallSeconds": 4,
-          "effectiveSeconds": 0
+          "effectiveSeconds": 0,
+          "baseFactor": 0.6,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
-          "factor": 0.45,
+          "factor": 0.225,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.1575,
+          "creditedFactor": 0.0788,
           "wallSeconds": 0,
-          "effectiveSeconds": 0
+          "effectiveSeconds": 0,
+          "baseFactor": 0.45,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "gpt-5.6-sol",
           "effort": "xhigh",
-          "factor": 0.55,
+          "factor": 0.275,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.1925,
+          "creditedFactor": 0.0963,
           "wallSeconds": 0,
-          "effectiveSeconds": 0
+          "effectiveSeconds": 0,
+          "baseFactor": 0.55,
+          "repositoryMultiplier": 0.5
         },
         {
           "role": "subagent",
           "model": "gpt-5.3-codex-spark",
           "effort": "high",
-          "factor": 0.4,
+          "factor": 0.2,
           "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
+          "creditedFactor": 0.07,
           "wallSeconds": 0,
-          "effectiveSeconds": 0
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -161,10 +177,10 @@
       "startTime": "2026-07-24T08:02:33.444Z",
       "endTime": "2026-07-24T08:02:41.569Z",
       "wallSeconds": 8,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 4,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -172,79 +188,17 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 8,
-          "effectiveSeconds": 4
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
         "codex-9ba682494f4af2ede337291a"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-964d1eb7bfa2ca5f32e5d0cf",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-25T10:05:47.691Z",
-      "endTime": "2026-07-25T10:05:50.334Z",
-      "wallSeconds": 2,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 2,
-          "effectiveSeconds": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-2d1f057f8767d3d576bf7e23"
-      ],
-      "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-c9e5ad6321ff33c398728156",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-25T14:05:02.430Z",
-      "endTime": "2026-07-25T14:05:04.561Z",
-      "wallSeconds": 2,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 2,
-          "effectiveSeconds": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-fb4ba4c8056ad133cc6fe08a"
       ],
       "description": "Codex: Execute research project end to end"
     },
@@ -257,10 +211,10 @@
       "startTime": "2026-07-25T19:29:10.959Z",
       "endTime": "2026-07-25T19:59:24.104Z",
       "wallSeconds": 1813,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 906,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 453,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -268,11 +222,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 1813,
-          "effectiveSeconds": 906
+          "effectiveSeconds": 453,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -289,10 +245,10 @@
       "startTime": "2026-07-25T20:29:10.424Z",
       "endTime": "2026-07-25T20:29:26.063Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -300,11 +256,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -321,10 +279,10 @@
       "startTime": "2026-07-25T23:14:51.067Z",
       "endTime": "2026-07-25T23:15:04.023Z",
       "wallSeconds": 12,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -332,11 +290,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 12,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -353,10 +313,10 @@
       "startTime": "2026-07-26T01:38:51.986Z",
       "endTime": "2026-07-26T01:39:10.441Z",
       "wallSeconds": 18,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -364,11 +324,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 18,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -385,10 +347,10 @@
       "startTime": "2026-07-26T05:41:40.540Z",
       "endTime": "2026-07-26T05:41:56.391Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -396,11 +358,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -417,10 +381,10 @@
       "startTime": "2026-07-26T06:03:37.877Z",
       "endTime": "2026-07-26T06:12:27.171Z",
       "wallSeconds": 529,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 264,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 132,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -428,11 +392,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 529,
-          "effectiveSeconds": 264
+          "effectiveSeconds": 132,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -449,10 +415,10 @@
       "startTime": "2026-07-26T06:42:08.564Z",
       "endTime": "2026-07-26T06:42:26.914Z",
       "wallSeconds": 18,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -460,11 +426,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 18,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -481,10 +449,10 @@
       "startTime": "2026-07-26T07:12:08.965Z",
       "endTime": "2026-07-26T07:12:24.974Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -492,11 +460,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -513,10 +483,10 @@
       "startTime": "2026-07-26T07:42:09.404Z",
       "endTime": "2026-07-26T07:42:25.459Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -524,11 +494,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -545,10 +517,10 @@
       "startTime": "2026-07-26T08:12:09.860Z",
       "endTime": "2026-07-26T08:12:26.196Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -556,11 +528,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -577,10 +551,10 @@
       "startTime": "2026-07-26T08:42:10.303Z",
       "endTime": "2026-07-26T08:42:30.284Z",
       "wallSeconds": 19,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -588,11 +562,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -609,10 +585,10 @@
       "startTime": "2026-07-26T09:12:10.802Z",
       "endTime": "2026-07-26T09:12:22.903Z",
       "wallSeconds": 12,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -620,11 +596,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 12,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -641,10 +619,10 @@
       "startTime": "2026-07-26T09:42:11.275Z",
       "endTime": "2026-07-26T09:45:07.457Z",
       "wallSeconds": 176,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 88,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 44,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -652,11 +630,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 176,
-          "effectiveSeconds": 88
+          "effectiveSeconds": 44,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -673,10 +653,10 @@
       "startTime": "2026-07-26T10:12:14.651Z",
       "endTime": "2026-07-26T10:12:49.179Z",
       "wallSeconds": 34,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 17,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -684,11 +664,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 34,
-          "effectiveSeconds": 17
+          "effectiveSeconds": 8,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -705,10 +687,10 @@
       "startTime": "2026-07-26T10:42:12.134Z",
       "endTime": "2026-07-26T10:42:37.152Z",
       "wallSeconds": 25,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 12,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 6,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -716,11 +698,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 25,
-          "effectiveSeconds": 12
+          "effectiveSeconds": 6,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -737,10 +721,10 @@
       "startTime": "2026-07-26T11:12:12.714Z",
       "endTime": "2026-07-26T11:12:29.363Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -748,11 +732,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -769,10 +755,10 @@
       "startTime": "2026-07-26T11:42:13.317Z",
       "endTime": "2026-07-26T11:42:37.887Z",
       "wallSeconds": 24,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 12,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 6,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -780,11 +766,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 24,
-          "effectiveSeconds": 12
+          "effectiveSeconds": 6,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -801,10 +789,10 @@
       "startTime": "2026-07-26T12:12:13.811Z",
       "endTime": "2026-07-26T12:12:34.904Z",
       "wallSeconds": 21,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 10,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 5,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -812,11 +800,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 21,
-          "effectiveSeconds": 10
+          "effectiveSeconds": 5,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -833,10 +823,10 @@
       "startTime": "2026-07-26T12:42:14.297Z",
       "endTime": "2026-07-26T12:42:33.547Z",
       "wallSeconds": 19,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -844,11 +834,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -865,10 +857,10 @@
       "startTime": "2026-07-26T13:12:14.657Z",
       "endTime": "2026-07-26T13:12:31.313Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -876,11 +868,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -897,10 +891,10 @@
       "startTime": "2026-07-26T13:42:15.123Z",
       "endTime": "2026-07-26T13:42:34.431Z",
       "wallSeconds": 19,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -908,11 +902,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -953,10 +949,10 @@
       "startTime": "2026-07-26T14:12:15.629Z",
       "endTime": "2026-07-26T14:12:36.247Z",
       "wallSeconds": 20,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 10,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 5,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -964,11 +960,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 20,
-          "effectiveSeconds": 10
+          "effectiveSeconds": 5,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -985,10 +983,10 @@
       "startTime": "2026-07-26T14:42:16.032Z",
       "endTime": "2026-07-26T14:43:33.071Z",
       "wallSeconds": 77,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 38,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 19,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -996,11 +994,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 77,
-          "effectiveSeconds": 38
+          "effectiveSeconds": 19,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1017,10 +1017,10 @@
       "startTime": "2026-07-26T15:12:16.547Z",
       "endTime": "2026-07-26T15:12:39.115Z",
       "wallSeconds": 22,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 11,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 5,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1028,11 +1028,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 22,
-          "effectiveSeconds": 11
+          "effectiveSeconds": 5,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1049,10 +1051,10 @@
       "startTime": "2026-07-26T15:42:16.974Z",
       "endTime": "2026-07-26T15:42:36.680Z",
       "wallSeconds": 19,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1060,11 +1062,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1081,10 +1085,10 @@
       "startTime": "2026-07-26T16:12:17.518Z",
       "endTime": "2026-07-26T16:12:34.797Z",
       "wallSeconds": 17,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1092,11 +1096,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 17,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1113,10 +1119,10 @@
       "startTime": "2026-07-26T16:42:17.890Z",
       "endTime": "2026-07-26T16:43:50.997Z",
       "wallSeconds": 93,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 46,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 23,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1124,11 +1130,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 93,
-          "effectiveSeconds": 46
+          "effectiveSeconds": 23,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1145,10 +1153,10 @@
       "startTime": "2026-07-26T17:12:18.331Z",
       "endTime": "2026-07-26T17:13:50.278Z",
       "wallSeconds": 91,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 45,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 22,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1156,11 +1164,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 91,
-          "effectiveSeconds": 45
+          "effectiveSeconds": 22,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1177,10 +1187,10 @@
       "startTime": "2026-07-26T17:42:18.809Z",
       "endTime": "2026-07-26T17:42:36.097Z",
       "wallSeconds": 17,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1188,11 +1198,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 17,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1209,10 +1221,10 @@
       "startTime": "2026-07-26T18:12:19.258Z",
       "endTime": "2026-07-26T18:12:36.303Z",
       "wallSeconds": 17,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1220,11 +1232,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 17,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1241,10 +1255,10 @@
       "startTime": "2026-07-26T19:53:51.705Z",
       "endTime": "2026-07-26T19:54:24.377Z",
       "wallSeconds": 32,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 16,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1252,11 +1266,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 32,
-          "effectiveSeconds": 16
+          "effectiveSeconds": 8,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1273,10 +1289,10 @@
       "startTime": "2026-07-26T21:03:04.577Z",
       "endTime": "2026-07-26T21:03:29.966Z",
       "wallSeconds": 25,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 12,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 6,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1284,11 +1300,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 25,
-          "effectiveSeconds": 12
+          "effectiveSeconds": 6,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1305,10 +1323,10 @@
       "startTime": "2026-07-26T21:33:04.412Z",
       "endTime": "2026-07-26T21:33:18.641Z",
       "wallSeconds": 14,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1316,11 +1334,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 14,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1337,10 +1357,10 @@
       "startTime": "2026-07-26T22:03:04.831Z",
       "endTime": "2026-07-26T22:03:20.001Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1348,11 +1368,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1369,10 +1391,10 @@
       "startTime": "2026-07-26T22:33:05.272Z",
       "endTime": "2026-07-26T22:33:35.016Z",
       "wallSeconds": 29,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 14,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 7,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1380,11 +1402,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 29,
-          "effectiveSeconds": 14
+          "effectiveSeconds": 7,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1401,10 +1425,10 @@
       "startTime": "2026-07-26T23:03:05.917Z",
       "endTime": "2026-07-26T23:03:19.490Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1412,11 +1436,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1433,10 +1459,10 @@
       "startTime": "2026-07-26T23:33:06.238Z",
       "endTime": "2026-07-26T23:33:24.375Z",
       "wallSeconds": 18,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1444,11 +1470,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 18,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1465,10 +1493,10 @@
       "startTime": "2026-07-27T00:03:06.752Z",
       "endTime": "2026-07-27T00:03:22.995Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1476,11 +1504,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1497,10 +1527,10 @@
       "startTime": "2026-07-27T00:33:07.123Z",
       "endTime": "2026-07-27T00:33:28.591Z",
       "wallSeconds": 21,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 10,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 5,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1508,11 +1538,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 21,
-          "effectiveSeconds": 10
+          "effectiveSeconds": 5,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1529,10 +1561,10 @@
       "startTime": "2026-07-27T01:03:07.512Z",
       "endTime": "2026-07-27T01:03:25.228Z",
       "wallSeconds": 17,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1540,11 +1572,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 17,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1561,10 +1595,10 @@
       "startTime": "2026-07-27T01:33:07.896Z",
       "endTime": "2026-07-27T01:39:00.625Z",
       "wallSeconds": 352,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 176,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 88,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1572,11 +1606,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 352,
-          "effectiveSeconds": 176
+          "effectiveSeconds": 88,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1593,10 +1629,10 @@
       "startTime": "2026-07-27T02:03:08.153Z",
       "endTime": "2026-07-27T02:35:03.906Z",
       "wallSeconds": 1915,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 957,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 478,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1604,11 +1640,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 1915,
-          "effectiveSeconds": 957
+          "effectiveSeconds": 478,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1625,10 +1663,10 @@
       "startTime": "2026-07-27T06:18:21.550Z",
       "endTime": "2026-07-27T07:54:58.264Z",
       "wallSeconds": 5796,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 2898,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 1449,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1636,11 +1674,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 5796,
-          "effectiveSeconds": 2898
+          "effectiveSeconds": 1449,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1657,10 +1697,10 @@
       "startTime": "2026-07-27T08:16:56.984Z",
       "endTime": "2026-07-27T10:02:26.925Z",
       "wallSeconds": 6329,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 3164,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 1582,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1668,11 +1708,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 6329,
-          "effectiveSeconds": 3164
+          "effectiveSeconds": 1582,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1689,10 +1731,10 @@
       "startTime": "2026-07-27T10:26:32.230Z",
       "endTime": "2026-07-27T10:26:57.233Z",
       "wallSeconds": 25,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 12,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 6,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1700,11 +1742,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 25,
-          "effectiveSeconds": 12
+          "effectiveSeconds": 6,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1721,10 +1765,10 @@
       "startTime": "2026-07-27T10:50:11.379Z",
       "endTime": "2026-07-27T12:54:48.817Z",
       "wallSeconds": 7477,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 3738,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 1869,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1732,11 +1776,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 7477,
-          "effectiveSeconds": 3738
+          "effectiveSeconds": 1869,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1753,10 +1799,10 @@
       "startTime": "2026-07-27T13:10:34.108Z",
       "endTime": "2026-07-27T16:01:03.097Z",
       "wallSeconds": 10228,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5114,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2557,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1764,11 +1810,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 10228,
-          "effectiveSeconds": 5114
+          "effectiveSeconds": 2557,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1809,10 +1857,10 @@
       "startTime": "2026-07-27T16:30:17.889Z",
       "endTime": "2026-07-27T16:39:01.082Z",
       "wallSeconds": 523,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 261,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 130,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1820,11 +1868,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 523,
-          "effectiveSeconds": 261
+          "effectiveSeconds": 130,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1841,10 +1891,10 @@
       "startTime": "2026-07-27T17:00:18.277Z",
       "endTime": "2026-07-27T17:01:03.892Z",
       "wallSeconds": 45,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 22,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1852,11 +1902,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 45,
-          "effectiveSeconds": 22
+          "effectiveSeconds": 11,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1873,10 +1925,10 @@
       "startTime": "2026-07-27T17:30:18.610Z",
       "endTime": "2026-07-27T17:31:02.364Z",
       "wallSeconds": 43,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 21,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1884,11 +1936,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 43,
-          "effectiveSeconds": 21
+          "effectiveSeconds": 10,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1905,10 +1959,10 @@
       "startTime": "2026-07-27T18:00:18.868Z",
       "endTime": "2026-07-27T18:02:32.474Z",
       "wallSeconds": 133,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 66,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 33,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1916,11 +1970,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 133,
-          "effectiveSeconds": 66
+          "effectiveSeconds": 33,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1937,10 +1993,10 @@
       "startTime": "2026-07-27T18:30:19.205Z",
       "endTime": "2026-07-27T18:31:56.035Z",
       "wallSeconds": 96,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 48,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 24,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1948,11 +2004,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 96,
-          "effectiveSeconds": 48
+          "effectiveSeconds": 24,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -1969,10 +2027,10 @@
       "startTime": "2026-07-27T19:00:19.466Z",
       "endTime": "2026-07-27T19:01:02.723Z",
       "wallSeconds": 43,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 21,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -1980,11 +2038,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 43,
-          "effectiveSeconds": 21
+          "effectiveSeconds": 10,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2001,10 +2061,10 @@
       "startTime": "2026-07-27T19:30:19.751Z",
       "endTime": "2026-07-27T19:31:02.050Z",
       "wallSeconds": 42,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 21,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2012,11 +2072,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 42,
-          "effectiveSeconds": 21
+          "effectiveSeconds": 10,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2033,10 +2095,10 @@
       "startTime": "2026-07-27T20:00:20.016Z",
       "endTime": "2026-07-27T20:13:57.954Z",
       "wallSeconds": 817,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 408,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 204,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2044,11 +2106,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 817,
-          "effectiveSeconds": 408
+          "effectiveSeconds": 204,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2065,10 +2129,10 @@
       "startTime": "2026-07-27T20:57:46.310Z",
       "endTime": "2026-07-27T21:30:20.563Z",
       "wallSeconds": 1954,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 977,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 488,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2076,11 +2140,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 1954,
-          "effectiveSeconds": 977
+          "effectiveSeconds": 488,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2097,10 +2163,10 @@
       "startTime": "2026-07-28T06:19:56.367Z",
       "endTime": "2026-07-28T07:02:32.133Z",
       "wallSeconds": 2555,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1277,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 638,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2108,11 +2174,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 2555,
-          "effectiveSeconds": 1277
+          "effectiveSeconds": 638,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2129,10 +2197,10 @@
       "startTime": "2026-07-28T08:50:06.138Z",
       "endTime": "2026-07-28T09:05:38.125Z",
       "wallSeconds": 931,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 465,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 232,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2140,11 +2208,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 931,
-          "effectiveSeconds": 465
+          "effectiveSeconds": 232,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2161,10 +2231,10 @@
       "startTime": "2026-07-28T09:47:56.249Z",
       "endTime": "2026-07-28T15:18:17.883Z",
       "wallSeconds": 19821,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9910,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4955,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2172,11 +2242,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19821,
-          "effectiveSeconds": 9910
+          "effectiveSeconds": 4955,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2193,10 +2265,10 @@
       "startTime": "2026-07-28T15:43:35.854Z",
       "endTime": "2026-07-28T17:38:47.224Z",
       "wallSeconds": 6911,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 3455,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 1727,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2204,11 +2276,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 6911,
-          "effectiveSeconds": 3455
+          "effectiveSeconds": 1727,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2256,10 +2330,10 @@
       "startTime": "2026-07-28T18:44:48.530Z",
       "endTime": "2026-07-28T22:31:42.241Z",
       "wallSeconds": 13613,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6806,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3403,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2267,11 +2341,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13613,
-          "effectiveSeconds": 6806
+          "effectiveSeconds": 3403,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2288,10 +2364,10 @@
       "startTime": "2026-07-28T23:00:13.869Z",
       "endTime": "2026-07-28T23:11:42.519Z",
       "wallSeconds": 688,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 344,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 172,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2299,11 +2375,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 688,
-          "effectiveSeconds": 344
+          "effectiveSeconds": 172,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2320,10 +2398,10 @@
       "startTime": "2026-07-28T23:30:14.245Z",
       "endTime": "2026-07-28T23:31:08.682Z",
       "wallSeconds": 54,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 27,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2331,11 +2409,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 54,
-          "effectiveSeconds": 27
+          "effectiveSeconds": 13,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2352,10 +2432,10 @@
       "startTime": "2026-07-29T00:00:14.760Z",
       "endTime": "2026-07-29T00:01:42.077Z",
       "wallSeconds": 87,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 43,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2363,11 +2443,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 87,
-          "effectiveSeconds": 43
+          "effectiveSeconds": 21,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2384,10 +2466,10 @@
       "startTime": "2026-07-29T00:30:15.005Z",
       "endTime": "2026-07-29T00:31:29.052Z",
       "wallSeconds": 74,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 37,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 18,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2395,11 +2477,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 74,
-          "effectiveSeconds": 37
+          "effectiveSeconds": 18,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2416,10 +2500,10 @@
       "startTime": "2026-07-29T01:00:15.465Z",
       "endTime": "2026-07-29T01:00:32.446Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2427,11 +2511,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2448,10 +2534,10 @@
       "startTime": "2026-07-29T01:30:16.107Z",
       "endTime": "2026-07-29T01:34:00.104Z",
       "wallSeconds": 223,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 111,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 55,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2459,11 +2545,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 223,
-          "effectiveSeconds": 111
+          "effectiveSeconds": 55,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2480,10 +2568,10 @@
       "startTime": "2026-07-29T02:00:16.434Z",
       "endTime": "2026-07-29T02:00:30.736Z",
       "wallSeconds": 14,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2491,11 +2579,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 14,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2512,10 +2602,10 @@
       "startTime": "2026-07-29T06:38:22.447Z",
       "endTime": "2026-07-29T06:39:18.366Z",
       "wallSeconds": 55,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 27,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2523,11 +2613,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 55,
-          "effectiveSeconds": 27
+          "effectiveSeconds": 13,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2544,10 +2636,10 @@
       "startTime": "2026-07-29T06:58:46.016Z",
       "endTime": "2026-07-29T06:58:59.730Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2555,11 +2647,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2576,10 +2670,10 @@
       "startTime": "2026-07-29T07:28:46.332Z",
       "endTime": "2026-07-29T07:28:57.794Z",
       "wallSeconds": 11,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2587,11 +2681,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 11,
-          "effectiveSeconds": 5
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2608,10 +2704,10 @@
       "startTime": "2026-07-29T07:58:46.698Z",
       "endTime": "2026-07-29T07:59:06.385Z",
       "wallSeconds": 19,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2619,11 +2715,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 19,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2640,10 +2738,10 @@
       "startTime": "2026-07-29T08:28:46.990Z",
       "endTime": "2026-07-29T08:29:00.059Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2651,11 +2749,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2672,10 +2772,10 @@
       "startTime": "2026-07-29T08:58:47.254Z",
       "endTime": "2026-07-29T08:59:00.928Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2683,11 +2783,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2704,10 +2806,10 @@
       "startTime": "2026-07-29T09:28:47.517Z",
       "endTime": "2026-07-29T09:29:01.129Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2715,11 +2817,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2736,10 +2840,10 @@
       "startTime": "2026-07-29T09:58:47.799Z",
       "endTime": "2026-07-29T09:59:04.086Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2747,11 +2851,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2768,10 +2874,10 @@
       "startTime": "2026-07-29T10:28:48.126Z",
       "endTime": "2026-07-29T10:29:02.980Z",
       "wallSeconds": 14,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2779,11 +2885,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 14,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2800,10 +2908,10 @@
       "startTime": "2026-07-29T10:58:48.357Z",
       "endTime": "2026-07-29T10:59:05.496Z",
       "wallSeconds": 17,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2811,11 +2919,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 17,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2832,10 +2942,10 @@
       "startTime": "2026-07-29T11:28:49.674Z",
       "endTime": "2026-07-29T11:29:05.693Z",
       "wallSeconds": 16,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 8,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2843,11 +2953,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 16,
-          "effectiveSeconds": 8
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2864,10 +2976,10 @@
       "startTime": "2026-07-29T11:58:49.951Z",
       "endTime": "2026-07-29T11:59:39.972Z",
       "wallSeconds": 50,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 25,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 12,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2875,11 +2987,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 50,
-          "effectiveSeconds": 25
+          "effectiveSeconds": 12,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2896,10 +3010,10 @@
       "startTime": "2026-07-29T12:28:50.199Z",
       "endTime": "2026-07-29T12:29:05.453Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2907,11 +3021,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2928,10 +3044,10 @@
       "startTime": "2026-07-29T12:58:50.497Z",
       "endTime": "2026-07-29T12:59:06.341Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2939,11 +3055,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2960,10 +3078,10 @@
       "startTime": "2026-07-29T13:28:50.769Z",
       "endTime": "2026-07-29T13:31:32.677Z",
       "wallSeconds": 161,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 80,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 40,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -2971,11 +3089,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 161,
-          "effectiveSeconds": 80
+          "effectiveSeconds": 40,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -2992,10 +3112,10 @@
       "startTime": "2026-07-29T13:58:51.044Z",
       "endTime": "2026-07-29T13:59:09.397Z",
       "wallSeconds": 18,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 9,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 4,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3003,11 +3123,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 18,
-          "effectiveSeconds": 9
+          "effectiveSeconds": 4,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3024,10 +3146,10 @@
       "startTime": "2026-07-29T14:28:51.356Z",
       "endTime": "2026-07-29T14:29:01.737Z",
       "wallSeconds": 10,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3035,11 +3157,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 10,
-          "effectiveSeconds": 5
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3056,10 +3180,10 @@
       "startTime": "2026-07-29T14:58:51.584Z",
       "endTime": "2026-07-29T14:59:05.752Z",
       "wallSeconds": 14,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3067,11 +3191,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 14,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3088,10 +3214,10 @@
       "startTime": "2026-07-29T15:28:51.850Z",
       "endTime": "2026-07-29T15:29:02.747Z",
       "wallSeconds": 10,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3099,11 +3225,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 10,
-          "effectiveSeconds": 5
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3120,10 +3248,10 @@
       "startTime": "2026-07-29T15:58:52.112Z",
       "endTime": "2026-07-29T15:59:07.899Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3131,11 +3259,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3152,10 +3282,10 @@
       "startTime": "2026-07-29T16:28:52.451Z",
       "endTime": "2026-07-29T16:29:05.816Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3163,11 +3293,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3184,10 +3316,10 @@
       "startTime": "2026-07-29T16:58:52.748Z",
       "endTime": "2026-07-29T16:59:05.206Z",
       "wallSeconds": 12,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3195,11 +3327,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 12,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3216,10 +3350,10 @@
       "startTime": "2026-07-29T17:28:53.070Z",
       "endTime": "2026-07-29T17:29:06.399Z",
       "wallSeconds": 13,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 6,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3227,11 +3361,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 13,
-          "effectiveSeconds": 6
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3248,10 +3384,10 @@
       "startTime": "2026-07-29T17:58:53.354Z",
       "endTime": "2026-07-29T17:59:03.888Z",
       "wallSeconds": 10,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3259,11 +3395,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 10,
-          "effectiveSeconds": 5
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3280,10 +3418,10 @@
       "startTime": "2026-07-29T18:28:53.568Z",
       "endTime": "2026-07-29T18:29:08.993Z",
       "wallSeconds": 15,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3291,11 +3429,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 15,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
@@ -3312,10 +3452,10 @@
       "startTime": "2026-07-29T18:58:53.862Z",
       "endTime": "2026-07-29T18:59:08.048Z",
       "wallSeconds": 14,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 7,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 3,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
@@ -3323,11 +3463,13 @@
           "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
-          "factor": 0.5,
+          "factor": 0.25,
           "creditMultiplier": 1,
-          "creditedFactor": 0.5,
+          "creditedFactor": 0.25,
           "wallSeconds": 14,
-          "effectiveSeconds": 7
+          "effectiveSeconds": 3,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
         }
       ],
       "supersedesExternalIds": [
