@@ -619,7 +619,23 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     codexExecutable: options.codexExecutable
   });
   const dayStart = getLocalDayStart(now);
-  const rangeStart = getLocalLookbackStart(now);
+  const recentRangeStart = getLocalLookbackStart(now);
+  const repositoryMultipliers =
+    config.focusPolicy?.repositoryMultipliers &&
+    typeof config.focusPolicy.repositoryMultipliers === 'object'
+      ? config.focusPolicy.repositoryMultipliers
+      : {};
+  const repositoryBackfillDays = Math.min(
+    365,
+    Math.max(
+      DEFAULT_CODEX_LOOKBACK_DAYS,
+      Math.floor(
+        Number(config.focusPolicy?.repositoryBackfillDays) ||
+          DEFAULT_CODEX_LOOKBACK_DAYS
+      )
+    )
+  );
+  const rangeStart = getLocalLookbackStart(now, repositoryBackfillDays);
   const files = await listSessionFilesChangedSince(
     options.sessionsDir,
     rangeStart
@@ -648,9 +664,24 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
       focusPolicy: config.focusPolicy
     })
   );
-  const uniqueRecords = Array.from(
+  const allUniqueRecords = Array.from(
     new Map(records.map((record) => [record.id, record])).values()
   ).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
+  const backfillRepositories = new Set(
+    Object.entries(repositoryMultipliers)
+      .filter(([, multiplier]) => Number(multiplier) > 0)
+      .map(([repoName]) => String(repoName).trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const uniqueRecords = allUniqueRecords.filter((record) => {
+    const start = parseTimestamp(record.startTime);
+    if (start && start >= recentRangeStart) return true;
+    return backfillRepositories.has(
+      String(record.projectKey || '')
+        .trim()
+        .toLowerCase()
+    );
+  });
   const sessionUsageLimits =
     summaries
       .map((summary) => summary.usageLimits)
@@ -665,7 +696,9 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     updatedAt: now.toISOString(),
     dayStart: dayStart.toISOString(),
     rangeStart: rangeStart.toISOString(),
-    lookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
+    lookbackDays: repositoryBackfillDays,
+    recentLookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
+    policyBackfillRepositories: [...backfillRepositories],
     usageLimits,
     records: uniqueRecords
   };
