@@ -482,6 +482,51 @@ test('weights one Codex span across model changes without splitting it', () => {
   ]);
 });
 
+test('halves model-weighted focus for an autonomous research repository', () => {
+  const records = buildCodexUsageRecordsFromSessionData({
+    meta: {
+      id: 'autonomous-research',
+      cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\Anders\\Research'
+    },
+    activity: [
+      {
+        timestamp: new Date('2026-06-13T09:00:00.000Z'),
+        model: 'gpt-5.6-sol',
+        effort: 'high'
+      },
+      {
+        timestamp: new Date('2026-06-13T09:10:00.000Z'),
+        model: 'gpt-5.6-sol',
+        effort: 'high'
+      }
+    ],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
+    now: new Date('2026-06-13T10:00:00.000Z'),
+    focusPolicy: {
+      version: 3,
+      repositoryMultipliers: { Research: 0.5 }
+    }
+  });
+
+  assert.equal(records.length, 1);
+  assert.equal(records[0].wallSeconds, 600);
+  assert.equal(records[0].effectiveSeconds, 150);
+  assert.equal(records[0].focusFactor, 0.25);
+  assert.equal(records[0].focusPolicyVersion, 4);
+  assert.equal(records[0].repositoryFocusMultiplier, 0.5);
+  assert.deepEqual(records[0].modelBreakdown, [
+    {
+      model: 'gpt-5.6-sol',
+      effort: 'high',
+      baseFactor: 0.5,
+      factor: 0.25,
+      repositoryMultiplier: 0.5,
+      wallSeconds: 600,
+      effectiveSeconds: 150
+    }
+  ]);
+});
+
 test('consolidates delegated sessions with uncapped discounted subagent credit', () => {
   const point = (timestamp) => ({
     timestamp: new Date(timestamp),
@@ -553,6 +598,49 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
       effectiveSeconds: 504
     }
   ]);
+
+  const autonomousRecords = buildCodexUsageRecordsFromSessionGroup({
+    sessions: [parent, ...subagents],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
+    now: new Date('2026-06-13T10:00:00.000Z'),
+    focusPolicy: {
+      version: 3,
+      repositoryMultipliers: { research: 0.5 }
+    }
+  });
+
+  assert.equal(autonomousRecords[0].effectiveSeconds, 432);
+  assert.equal(autonomousRecords[0].focusFactor, 0.72);
+  assert.equal(autonomousRecords[0].focusPolicyVersion, 4);
+  assert.equal(autonomousRecords[0].repositoryFocusMultiplier, 0.5);
+  assert.deepEqual(
+    autonomousRecords[0].modelBreakdown.map((item) => ({
+      role: item.role,
+      baseFactor: item.baseFactor,
+      factor: item.factor,
+      creditedFactor: item.creditedFactor,
+      repositoryMultiplier: item.repositoryMultiplier,
+      effectiveSeconds: item.effectiveSeconds
+    })),
+    [
+      {
+        role: 'parent',
+        baseFactor: 0.6,
+        factor: 0.3,
+        creditedFactor: 0.3,
+        repositoryMultiplier: 0.5,
+        effectiveSeconds: 180
+      },
+      {
+        role: 'subagent',
+        baseFactor: 0.6,
+        factor: 0.3,
+        creditedFactor: 0.105,
+        repositoryMultiplier: 0.5,
+        effectiveSeconds: 252
+      }
+    ]
+  );
 });
 
 test('ignores Codex activity before the configured day start', () => {

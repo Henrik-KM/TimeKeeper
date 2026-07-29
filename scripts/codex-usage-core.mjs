@@ -18,6 +18,8 @@ export const DEFAULT_CODEX_FOCUS_POLICY = {
     sol: 0.45
   },
   modelOverrides: {},
+  repositoryMultipliers: {},
+  repositoryMultiplierPolicyVersion: 4,
   effortAdjustments: {
     low: -0.05,
     medium: 0,
@@ -105,6 +107,22 @@ export function normalizeCodexFocusPolicy(
       {
         positiveOnly: true
       }
+    ),
+    repositoryMultipliers: normalizeNumberMap(
+      source.repositoryMultipliers,
+      {},
+      {
+        positiveOnly: true
+      }
+    ),
+    repositoryMultiplierPolicyVersion: Math.max(
+      1,
+      Math.floor(
+        getFiniteNumber(
+          source.repositoryMultiplierPolicyVersion,
+          DEFAULT_CODEX_FOCUS_POLICY.repositoryMultiplierPolicyVersion
+        )
+      )
     ),
     effortAdjustments: normalizeNumberMap(
       source.effortAdjustments,
@@ -551,6 +569,40 @@ export function buildModelWeightedActiveSpans(
   return spans;
 }
 
+function getRepositoryFocusMultiplier(repoName, policy) {
+  const normalizedRepoName = String(repoName || '')
+    .trim()
+    .toLowerCase();
+  return getFiniteNumber(policy.repositoryMultipliers[normalizedRepoName], 1);
+}
+
+function applyRepositoryFocusMultiplier(span, multiplier, policy) {
+  if (multiplier === 1) return span;
+  return {
+    ...span,
+    effectiveMs: span.effectiveMs * multiplier,
+    focusFactor: span.focusFactor * multiplier,
+    focusPolicyVersion: Math.max(
+      span.focusPolicyVersion || policy.version,
+      policy.repositoryMultiplierPolicyVersion
+    ),
+    modelBreakdown: span.modelBreakdown.map((item) => ({
+      ...item,
+      baseFactor: item.factor,
+      factor: Number((item.factor * multiplier).toFixed(4)),
+      ...(Number.isFinite(item.creditedFactor)
+        ? {
+            creditedFactor: Number(
+              (item.creditedFactor * multiplier).toFixed(4)
+            )
+          }
+        : {}),
+      repositoryMultiplier: multiplier,
+      effectiveSeconds: Math.floor(item.effectiveSeconds * multiplier)
+    }))
+  };
+}
+
 export function makeCodexRecordId(parts = []) {
   const hash = crypto
     .createHash('sha256')
@@ -597,6 +649,10 @@ export function buildCodexUsageRecordsFromSessionData({
   );
   if (!projectMatch || !projectMatch.projectId) return [];
   const normalizedPolicy = normalizeCodexFocusPolicy(focusPolicy, focusFactor);
+  const repositoryFocusMultiplier = getRepositoryFocusMultiplier(
+    projectMatch.repoName,
+    normalizedPolicy
+  );
   const spans = activity.length
     ? buildModelWeightedActiveSpans(activity, {
         idleGapMs,
@@ -616,7 +672,12 @@ export function buildCodexUsageRecordsFromSessionData({
       );
   const threadName = threadNamesById.get(meta.id) || '';
   return spans
-    .map((span) => {
+    .map((rawSpan) => {
+      const span = applyRepositoryFocusMultiplier(
+        rawSpan,
+        repositoryFocusMultiplier,
+        normalizedPolicy
+      );
       const wallSeconds = Math.floor(span.activeMs / 1000);
       const effectiveSeconds = Math.floor(span.effectiveMs / 1000);
       if (wallSeconds <= 0 || effectiveSeconds <= 0) return null;
@@ -640,7 +701,8 @@ export function buildCodexUsageRecordsFromSessionData({
         wallSeconds,
         focusFactor: recordFocusFactor,
         effectiveSeconds,
-        focusPolicyVersion: span.focusPolicyVersion,
+        focusPolicyVersion: span.focusPolicyVersion || normalizedPolicy.version,
+        repositoryFocusMultiplier,
         modelBreakdown: span.modelBreakdown,
         description: threadName
           ? `Codex: ${threadName}`
@@ -909,6 +971,10 @@ export function buildCodexUsageRecordsFromSessionGroup({
   );
   if (!projectMatch || !projectMatch.projectId) return [];
   const normalizedPolicy = normalizeCodexFocusPolicy(focusPolicy, focusFactor);
+  const repositoryFocusMultiplier = getRepositoryFocusMultiplier(
+    projectMatch.repoName,
+    normalizedPolicy
+  );
   const intervals = usableSessions.flatMap((session) =>
     buildCodexActivityIntervals(session, {
       idleGapMs,
@@ -938,8 +1004,13 @@ export function buildCodexUsageRecordsFromSessionGroup({
   const threadName = threadNamesById.get(rootSessionId) || '';
   return collectiveGroups
     .map((group, index) => {
-      const span = aggregateCodexIntervals(group);
-      if (!span) return null;
+      const rawSpan = aggregateCodexIntervals(group);
+      if (!rawSpan) return null;
+      const span = applyRepositoryFocusMultiplier(
+        rawSpan,
+        repositoryFocusMultiplier,
+        normalizedPolicy
+      );
       const isLast = index === collectiveGroups.length - 1;
       if (isLast && now.getTime() - span.end.getTime() < matureMs) return null;
       const wallSeconds = Math.floor(span.wallMs / 1000);
@@ -970,7 +1041,8 @@ export function buildCodexUsageRecordsFromSessionGroup({
         wallSeconds,
         focusFactor: Number(span.focusFactor.toFixed(4)),
         effectiveSeconds,
-        focusPolicyVersion: normalizedPolicy.version,
+        focusPolicyVersion: span.focusPolicyVersion || normalizedPolicy.version,
+        repositoryFocusMultiplier,
         delegationCredit: normalizedPolicy.delegationCredit,
         delegatedSessionCount: span.delegatedSessionCount,
         modelBreakdown: span.modelBreakdown,
