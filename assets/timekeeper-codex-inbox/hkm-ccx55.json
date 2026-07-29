@@ -2,12 +2,12 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-29T19:43:49.100Z",
+  "updatedAt": "2026-07-29T19:48:02.510Z",
   "dayStart": "2026-07-28T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 7,
   "usageLimits": {
-    "observedAt": "2026-07-29T19:43:49.743Z",
+    "observedAt": "2026-07-29T19:48:03.160Z",
     "primary": {
       "usedPercent": 10,
       "remainingPercent": 90,
@@ -3500,6 +3500,40 @@
         }
       ],
       "description": "Codex: Test Slack connection"
+    },
+    {
+      "id": "codex-192596264b5621c3d0bc14d3",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-29T19:28:54.113Z",
+      "endTime": "2026-07-29T19:29:04.680Z",
+      "wallSeconds": 10,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.25,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 10,
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-d3601f7af96851aecc29f619"
+      ],
+      "description": "Codex: Execute research project end to end"
     }
   ]
 }
