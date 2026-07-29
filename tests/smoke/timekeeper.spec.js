@@ -3200,9 +3200,23 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         startTime: '2026-06-06T08:00:00.000Z',
         endTime: '2026-06-06T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 0.5,
-        effectiveSeconds: 900,
-        description: 'Codex: too old'
+        focusFactor: 0.25,
+        effectiveSeconds: 450,
+        focusPolicyVersion: 4,
+        description: 'Codex: corrected historical work'
+      },
+      {
+        id: 'codex-too-old-absent',
+        threadId: 'thread-too-old-absent',
+        projectKey: 'Research',
+        timekeeperProjectName: 'IFLAI',
+        startTime: '2026-06-05T08:00:00.000Z',
+        endTime: '2026-06-05T08:30:00.000Z',
+        wallSeconds: 1800,
+        focusFactor: 0.25,
+        effectiveSeconds: 450,
+        focusPolicyVersion: 4,
+        description: 'Codex: absent historical work'
       }
     ]
   };
@@ -3261,6 +3275,21 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         codexModelBreakdown: [],
         codexDelegatedSessionCount: 4,
         codexDelegationCredit: 0.35
+      },
+      {
+        ...entryFixture({
+          id: 'existing-too-old-entry',
+          projectId: 'iflai',
+          description: 'Codex: corrected historical work',
+          startTime: '2026-06-06T08:00:00.000Z',
+          endTime: '2026-06-06T08:30:00.000Z',
+          hours: 0.25
+        }),
+        source: 'codex',
+        externalId: 'codex-too-old',
+        focusFactor: 0.5,
+        manualFactor: 0.5,
+        codexFocusPolicyVersion: 3
       }
     ],
     codexIntegration: {
@@ -3319,7 +3348,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         return data.entries.length;
       })
     )
-    .toBe(2);
+    .toBe(3);
   let data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
@@ -3346,6 +3375,20 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         })
       ]
     })
+  );
+  expect(data.entries).toContainEqual(
+    expect.objectContaining({
+      id: 'existing-too-old-entry',
+      duration: 450,
+      focusFactor: 0.25,
+      manualFactor: 0.25,
+      source: 'codex',
+      externalId: 'codex-too-old',
+      codexFocusPolicyVersion: 4
+    })
+  );
+  expect(data.entries.map((entry) => entry.externalId)).not.toContain(
+    'codex-too-old-absent'
   );
   expect(data.entries).toContainEqual(
     expect.objectContaining({
@@ -3390,7 +3433,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
     .toMatchObject({
       imported: 1,
       reconciled: 2,
-      updated: 1
+      updated: 2
     });
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
@@ -3398,8 +3441,8 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
-  expect(data.entries).toHaveLength(2);
-  expect(JSON.stringify(data)).not.toContain('codex-too-old');
+  expect(data.entries).toHaveLength(3);
+  expect(JSON.stringify(data)).not.toContain('codex-too-old-absent');
 
   await gotoSection(page, 'codex', 'Codex');
   const codexPage = page.locator('#codexPageContent');

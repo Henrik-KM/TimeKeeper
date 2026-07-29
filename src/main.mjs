@@ -3552,7 +3552,8 @@ import {
           : null;
         if (
           !recordId ||
-          !isCodexRecordInImportWindow(record, windowStart) ||
+          (!existingEntry &&
+            !isCodexRecordInImportWindow(record, windowStart)) ||
           !projectId ||
           !getActiveCodexProject(projectId) ||
           !Number.isFinite(effectiveSeconds) ||

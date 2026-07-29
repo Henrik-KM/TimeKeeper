@@ -1,4 +1,5 @@
 import { createReadStream, promises as fs } from 'node:fs';
+import { spawn } from 'node:child_process';
 import crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
@@ -97,6 +98,8 @@ function buildOptions(args = parseArgs()) {
       args.statePath ||
       process.env.TIMEKEEPER_CODEX_STATE_PATH ||
       getDefaultStatePath(),
+    codexExecutable:
+      args.codexExecutable || process.env.TIMEKEEPER_CODEX_EXECUTABLE || '',
     machineId,
     dryRun: !!args.dryRun,
     force: !!args.force
@@ -293,6 +296,153 @@ function sanitizeCodexUsageLimits(value, observedAt) {
   };
 }
 
+function sanitizeAppServerRateLimitWindow(value) {
+  const source = value && typeof value === 'object' ? value : {};
+  return sanitizeRateLimitWindow({
+    used_percent: source.usedPercent,
+    window_minutes: source.windowDurationMins,
+    resets_at: source.resetsAt
+  });
+}
+
+export function sanitizeAppServerUsageLimits(value, observedAt = new Date()) {
+  const source = value && typeof value === 'object' ? value : {};
+  const canonical =
+    source.rateLimitsByLimitId?.codex || source.rateLimits || null;
+  if (
+    !canonical ||
+    String(canonical.limitId || 'codex')
+      .trim()
+      .toLowerCase() !== 'codex'
+  ) {
+    return null;
+  }
+  const primary = sanitizeAppServerRateLimitWindow(canonical.primary);
+  const secondary = sanitizeAppServerRateLimitWindow(canonical.secondary);
+  const observed = parseTimestamp(observedAt);
+  if (!primary || !observed) return null;
+  return {
+    observedAt: observed.toISOString(),
+    primary,
+    secondary
+  };
+}
+
+function getCodexExecutableCandidates(explicitPath = '') {
+  const executableName = process.platform === 'win32' ? 'codex.exe' : 'codex';
+  return Array.from(
+    new Set(
+      [
+        explicitPath,
+        path.join(
+          os.homedir(),
+          '.codex',
+          'plugins',
+          '.plugin-appserver',
+          executableName
+        ),
+        path.join(os.homedir(), '.codex', '.sandbox-bin', executableName),
+        'codex'
+      ].filter(Boolean)
+    )
+  );
+}
+
+function queryCodexAppServer(executable, timeoutMs) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(executable, ['app-server'], {
+      stdio: ['pipe', 'pipe', 'ignore'],
+      windowsHide: true
+    });
+    const lineReader = readline.createInterface({ input: child.stdout });
+    let settled = false;
+    const finish = (error, result = null) => {
+      if (settled) return;
+      settled = true;
+      clearTimeout(timeout);
+      lineReader.close();
+      child.kill();
+      if (error) reject(error);
+      else resolve(result);
+    };
+    const timeout = setTimeout(
+      () => finish(new Error('Codex app-server query timed out')),
+      timeoutMs
+    );
+    child.once('error', (error) => finish(error));
+    child.once('exit', (code) => {
+      if (!settled) {
+        finish(new Error(`Codex app-server exited with code ${code}`));
+      }
+    });
+    lineReader.on('line', (line) => {
+      try {
+        const message = JSON.parse(line);
+        if (message.id === 1) {
+          if (message.error) {
+            finish(
+              new Error(message.error.message || 'Codex initialize failed')
+            );
+            return;
+          }
+          child.stdin.write(
+            `${JSON.stringify({ method: 'initialized', params: {} })}\n`
+          );
+          child.stdin.write(
+            `${JSON.stringify({
+              method: 'account/rateLimits/read',
+              id: 2
+            })}\n`
+          );
+        } else if (message.id === 2) {
+          if (message.error) {
+            finish(
+              new Error(
+                message.error.message || 'Codex rate-limit query failed'
+              )
+            );
+            return;
+          }
+          finish(
+            null,
+            sanitizeAppServerUsageLimits(message.result, new Date())
+          );
+        }
+      } catch {
+        // Ignore non-JSON diagnostic output from the executable.
+      }
+    });
+    child.stdin.write(
+      `${JSON.stringify({
+        method: 'initialize',
+        id: 1,
+        params: {
+          clientInfo: {
+            name: 'timekeeper_codex_bridge',
+            title: 'TimeKeeper Codex bridge',
+            version: '1.0.0'
+          }
+        }
+      })}\n`
+    );
+  });
+}
+
+export async function readLiveCodexUsageLimits({
+  codexExecutable = '',
+  timeoutMs = 10_000
+} = {}) {
+  for (const executable of getCodexExecutableCandidates(codexExecutable)) {
+    try {
+      const usageLimits = await queryCodexAppServer(executable, timeoutMs);
+      if (usageLimits) return usageLimits;
+    } catch {
+      // Try another installed Codex executable, then fall back to session logs.
+    }
+  }
+  return null;
+}
+
 export async function readCodexSessionSummary(filePath, windowStart) {
   const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
   const meta = {
@@ -465,8 +615,27 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     };
   }
   const now = new Date();
+  const liveUsageLimitsPromise = readLiveCodexUsageLimits({
+    codexExecutable: options.codexExecutable
+  });
   const dayStart = getLocalDayStart(now);
-  const rangeStart = getLocalLookbackStart(now);
+  const recentRangeStart = getLocalLookbackStart(now);
+  const repositoryMultipliers =
+    config.focusPolicy?.repositoryMultipliers &&
+    typeof config.focusPolicy.repositoryMultipliers === 'object'
+      ? config.focusPolicy.repositoryMultipliers
+      : {};
+  const repositoryBackfillDays = Math.min(
+    365,
+    Math.max(
+      DEFAULT_CODEX_LOOKBACK_DAYS,
+      Math.floor(
+        Number(config.focusPolicy?.repositoryBackfillDays) ||
+          DEFAULT_CODEX_LOOKBACK_DAYS
+      )
+    )
+  );
+  const rangeStart = getLocalLookbackStart(now, repositoryBackfillDays);
   const files = await listSessionFilesChangedSince(
     options.sessionsDir,
     rangeStart
@@ -495,15 +664,31 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
       focusPolicy: config.focusPolicy
     })
   );
-  const uniqueRecords = Array.from(
+  const allUniqueRecords = Array.from(
     new Map(records.map((record) => [record.id, record])).values()
   ).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
-  const usageLimits =
+  const backfillRepositories = new Set(
+    Object.entries(repositoryMultipliers)
+      .filter(([, multiplier]) => Number(multiplier) > 0)
+      .map(([repoName]) => String(repoName).trim().toLowerCase())
+      .filter(Boolean)
+  );
+  const uniqueRecords = allUniqueRecords.filter((record) => {
+    const start = parseTimestamp(record.startTime);
+    if (start && start >= recentRangeStart) return true;
+    return backfillRepositories.has(
+      String(record.projectKey || '')
+        .trim()
+        .toLowerCase()
+    );
+  });
+  const sessionUsageLimits =
     summaries
       .map((summary) => summary.usageLimits)
       .filter(Boolean)
       .sort((a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt))[0] ||
     null;
+  const usageLimits = (await liveUsageLimitsPromise) || sessionUsageLimits;
   return {
     version: 2,
     source: 'timekeeper-codex-bridge',
@@ -511,7 +696,9 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     updatedAt: now.toISOString(),
     dayStart: dayStart.toISOString(),
     rangeStart: rangeStart.toISOString(),
-    lookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
+    lookbackDays: repositoryBackfillDays,
+    recentLookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
+    policyBackfillRepositories: [...backfillRepositories],
     usageLimits,
     records: uniqueRecords
   };
