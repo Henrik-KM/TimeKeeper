@@ -3779,6 +3779,128 @@ test('auto-sync unsupported state still renders safely', async ({ page }) => {
   );
 });
 
+test('Codex local context writes scoped real usage into the selected repository', async ({
+  page
+}) => {
+  await page.addInitScript(() => {
+    class FakeFileHandle {
+      constructor(directory, name) {
+        this.kind = 'file';
+        this.directory = directory;
+        this.name = name;
+      }
+      async createWritable() {
+        const directory = this.directory;
+        const name = this.name;
+        const chunks = [];
+        return {
+          async write(value) {
+            chunks.push(String(value));
+          },
+          async close() {
+            directory.files.set(name, chunks.join(''));
+          }
+        };
+      }
+    }
+    class FakeDirectoryHandle {
+      constructor(name) {
+        this.kind = 'directory';
+        this.name = name;
+        this.files = new Map();
+        this.directories = new Map();
+      }
+      async queryPermission() {
+        return 'granted';
+      }
+      async requestPermission() {
+        return 'granted';
+      }
+      async getFileHandle(name, options = {}) {
+        if (!this.files.has(name)) {
+          if (!options.create) throw new Error(`Missing file ${name}`);
+          this.files.set(name, '');
+        }
+        return new FakeFileHandle(this, name);
+      }
+      async getDirectoryHandle(name, options = {}) {
+        if (!this.directories.has(name)) {
+          if (!options.create) throw new Error(`Missing directory ${name}`);
+          this.directories.set(name, new FakeDirectoryHandle(name));
+        }
+        return this.directories.get(name);
+      }
+      async removeEntry(name) {
+        this.files.delete(name);
+        this.directories.delete(name);
+      }
+    }
+    window['__timekeeperCodexContextRoot'] = new FakeDirectoryHandle(
+      'TimeKeeper'
+    );
+    window['showDirectoryPicker'] = async () =>
+      window['__timekeeperCodexContextRoot'];
+  });
+  await seedLocalStorage(page, {
+    updatedAt: '2026-07-30T08:00:00.000Z',
+    projects: [
+      projectFixture({
+        id: 'real-project',
+        name: 'Real Project',
+        client: 'Real Client',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 12,
+        hourlyRate: 1800
+      })
+    ],
+    entries: [
+      {
+        id: 'real-entry',
+        projectId: 'real-project',
+        description: 'Actual recorded workflow',
+        start: '2026-07-30T08:00:00.000Z',
+        end: '2026-07-30T09:00:00.000Z',
+        duration: 5400,
+        focusFactor: 1.5,
+        source: 'manual'
+      }
+    ],
+    groceries: [{ name: 'Private purchase' }],
+    wealthHistory: [{ amount: 123456 }],
+    codexIntegration: { token: 'private-token' }
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'importExport', 'Import / Export');
+  await page.getByRole('button', { name: 'Connect Local Context' }).click();
+
+  await expect(page.locator('#codexContextStatus')).toContainText(
+    'Private context updated'
+  );
+  const context = await page.evaluate(() => {
+    const root = window['__timekeeperCodexContextRoot'];
+    const directory = root.directories.get('.timekeeper-private');
+    return JSON.parse(directory.files.get('codex-context.json'));
+  });
+  expect(context.schema).toBe('timekeeper-codex-development-context/v1');
+  expect(context.projects[0]).toMatchObject({
+    id: 'real-project',
+    name: 'Real Project',
+    client: 'Real Client',
+    weeklyExpectedHours: 12
+  });
+  expect(context.projects[0]).not.toHaveProperty('hourlyRate');
+  expect(context.entries[0]).toMatchObject({
+    description: 'Actual recorded workflow',
+    focusFactor: 1.5,
+    wallClockSeconds: 3600,
+    effectiveSeconds: 5400
+  });
+  expect(JSON.stringify(context)).not.toContain('Private purchase');
+  expect(JSON.stringify(context)).not.toContain('123456');
+  expect(JSON.stringify(context)).not.toContain('private-token');
+});
+
 test('backup snapshots can be listed and restored from the selected folder', async ({
   page
 }) => {

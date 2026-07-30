@@ -46,6 +46,7 @@ import {
   resolveStravaExertion
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
+import { buildCodexDevelopmentContext } from './features/codex/context.mjs';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,
@@ -1890,6 +1891,7 @@ import {
     // Mark data as needing backup
     needsBackup = true;
     scheduleBackupSoon();
+    scheduleCodexContextWrite();
     renderMobileSyncStatus();
   }
 
@@ -2484,6 +2486,9 @@ import {
   const BACKUP_SNAPSHOT_KEEP = 30;
   const AUTO_BACKUP_INTERVAL_MS = 60000;
   const BACKUP_DEBOUNCE_MS = 12000;
+  const CODEX_CONTEXT_DIRECTORY = '.timekeeper-private';
+  const CODEX_CONTEXT_FILENAME = 'codex-context.json';
+  const CODEX_CONTEXT_DEBOUNCE_MS = 3000;
   // Initialize backup and sync flags before they are referenced in saveData().
   // needsBackup tracks whether the data has changed and needs to be exported.
   // autoSyncEnabled indicates whether automatic export is enabled.
@@ -2505,6 +2510,12 @@ import {
   //   'denied'  - Permission to write to the backup directory has been denied.
   let backupPermissionState = 'missing';
   let backupWarningMessage = '';
+  let codexContextRootHandle = null;
+  let codexContextPermissionState = 'missing';
+  let codexContextLastWrittenAt = null;
+  let codexContextError = '';
+  let codexContextWriteTimer = null;
+  let codexContextWriteInFlight = null;
   let data = loadData();
   ensureFitnessDefaults();
   ensureWorkoutData();
@@ -2586,28 +2597,57 @@ import {
       request.onerror = (e) => reject(e.target.error);
     });
   }
-  async function saveBackupDirHandle(handle) {
+  async function saveDirectoryHandle(key, handle) {
     try {
       const db = await openHandleDB();
       const tx = db.transaction('handles', 'readwrite');
-      tx.objectStore('handles').put(handle, 'backupDir');
-      return tx.complete;
+      tx.objectStore('handles').put(handle, key);
+      return await new Promise((resolve, reject) => {
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+      });
     } catch (err) {
-      console.error('Error saving backup handle:', err);
+      console.error(`Error saving directory handle "${key}":`, err);
+      return false;
     }
   }
-  async function loadBackupDirHandle() {
+
+  async function loadDirectoryHandle(key) {
     try {
       const db = await openHandleDB();
       return await new Promise((resolve) => {
         const tx = db.transaction('handles', 'readonly');
-        const getReq = tx.objectStore('handles').get('backupDir');
+        const getReq = tx.objectStore('handles').get(key);
         getReq.onsuccess = () => resolve(getReq.result || null);
         getReq.onerror = () => resolve(null);
       });
     } catch {
       return null;
     }
+  }
+
+  async function removeDirectoryHandle(key) {
+    try {
+      const db = await openHandleDB();
+      const tx = db.transaction('handles', 'readwrite');
+      tx.objectStore('handles').delete(key);
+      return await new Promise((resolve) => {
+        tx.oncomplete = () => resolve(true);
+        tx.onerror = () => resolve(false);
+        tx.onabort = () => resolve(false);
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  function saveBackupDirHandle(handle) {
+    return saveDirectoryHandle('backupDir', handle);
+  }
+
+  function loadBackupDirHandle() {
+    return loadDirectoryHandle('backupDir');
   }
   async function getBackupPermissionState(handle) {
     if (!handle) return 'missing';
@@ -2834,6 +2874,17 @@ import {
       refreshBackupSnapshots({ quiet: true });
     }
     updateFocusBlocker();
+  });
+
+  loadDirectoryHandle('codexContextRoot').then(async (handle) => {
+    codexContextRootHandle = handle;
+    codexContextPermissionState = await getBackupPermissionState(handle);
+    updateCodexContextStatus();
+    if (handle && codexContextPermissionState === 'granted') {
+      writeCodexContextNow({ quiet: true }).catch((error) => {
+        console.error('Refreshing Codex development context failed:', error);
+      });
+    }
   });
 
   // -------------------------------------------------------------------------
@@ -6527,6 +6578,222 @@ import {
     } finally {
       await writable.close();
     }
+  }
+
+  function updateCodexContextStatus() {
+    const status = document.getElementById('codexContextStatus');
+    const connectButton = document.getElementById('connectCodexContextBtn');
+    const refreshButton = document.getElementById('refreshCodexContextBtn');
+    const disconnectButton = document.getElementById(
+      'disconnectCodexContextBtn'
+    );
+    const supported = !!window.showDirectoryPicker;
+    const connected = !!codexContextRootHandle;
+    const writable = connected && codexContextPermissionState === 'granted';
+    if (connectButton) {
+      connectButton.disabled = !supported;
+      connectButton.textContent = connected
+        ? 'Change Context Folder'
+        : 'Connect Local Context';
+    }
+    if (refreshButton) {
+      refreshButton.disabled = !writable;
+    }
+    if (disconnectButton) {
+      disconnectButton.disabled = !connected;
+    }
+    if (!status) return;
+    if (!supported) {
+      status.textContent =
+        'Local context requires a Chromium browser with folder access.';
+      return;
+    }
+    if (!connected) {
+      status.textContent =
+        'Not connected. Select this TimeKeeper repository to create a private, git-ignored Codex context.';
+      return;
+    }
+    if (codexContextError) {
+      status.textContent = `Context error: ${codexContextError}`;
+      return;
+    }
+    if (codexContextPermissionState === 'prompt') {
+      status.textContent =
+        'Folder connected. Reconnect or refresh to grant write access.';
+      return;
+    }
+    if (codexContextPermissionState !== 'granted') {
+      status.textContent =
+        'Context is paused because folder access was denied.';
+      return;
+    }
+    const rootName = codexContextRootHandle.name || 'selected folder';
+    status.textContent = codexContextLastWrittenAt
+      ? `Private context updated ${formatRelativeTime(codexContextLastWrittenAt)} in ${rootName}/${CODEX_CONTEXT_DIRECTORY}/${CODEX_CONTEXT_FILENAME}.`
+      : `Private context is connected to ${rootName}/${CODEX_CONTEXT_DIRECTORY}/${CODEX_CONTEXT_FILENAME}.`;
+  }
+
+  async function getCodexContextWritePermission({ prompt = false } = {}) {
+    const handle = codexContextRootHandle;
+    if (!handle) {
+      codexContextPermissionState = 'missing';
+      return false;
+    }
+    if (!handle.queryPermission) {
+      codexContextPermissionState = 'granted';
+      return true;
+    }
+    let permission = await handle.queryPermission({ mode: 'readwrite' });
+    if (permission === 'prompt' && prompt && handle.requestPermission) {
+      permission = await handle.requestPermission({ mode: 'readwrite' });
+    }
+    codexContextPermissionState = permission || 'denied';
+    return permission === 'granted';
+  }
+
+  async function writeCodexContextNow({ quiet = false, prompt = false } = {}) {
+    if (codexContextWriteInFlight) return codexContextWriteInFlight;
+    codexContextWriteInFlight = (async () => {
+      try {
+        const permitted = await getCodexContextWritePermission({ prompt });
+        if (!permitted) {
+          codexContextError = '';
+          updateCodexContextStatus();
+          if (!quiet) {
+            showToast('Allow folder access to refresh Codex context.');
+          }
+          return false;
+        }
+        const contextDirectory =
+          await codexContextRootHandle.getDirectoryHandle(
+            CODEX_CONTEXT_DIRECTORY,
+            { create: true }
+          );
+        const context = buildCodexDevelopmentContext(data);
+        await writeTextFile(
+          contextDirectory,
+          CODEX_CONTEXT_FILENAME,
+          JSON.stringify(context, null, 2)
+        );
+        codexContextLastWrittenAt = context.generatedAt;
+        codexContextError = '';
+        updateCodexContextStatus();
+        if (!quiet) {
+          showToast('Codex development context refreshed.');
+        }
+        return true;
+      } catch (error) {
+        codexContextError =
+          error && error.message
+            ? error.message
+            : 'Could not write the local context file.';
+        updateCodexContextStatus();
+        if (!quiet) showToast('Codex context refresh failed.');
+        return false;
+      } finally {
+        codexContextWriteInFlight = null;
+      }
+    })();
+    return codexContextWriteInFlight;
+  }
+
+  function scheduleCodexContextWrite() {
+    if (!codexContextRootHandle || codexContextPermissionState !== 'granted') {
+      return;
+    }
+    if (codexContextWriteTimer) clearTimeout(codexContextWriteTimer);
+    codexContextWriteTimer = setTimeout(() => {
+      codexContextWriteTimer = null;
+      writeCodexContextNow({ quiet: true }).catch((error) => {
+        console.error('Writing Codex development context failed:', error);
+      });
+    }, CODEX_CONTEXT_DEBOUNCE_MS);
+  }
+
+  async function connectCodexContext() {
+    if (!window.showDirectoryPicker) {
+      updateCodexContextStatus();
+      showToast('This browser cannot connect a local context folder.');
+      return false;
+    }
+    try {
+      const handle = await window.showDirectoryPicker({
+        id: 'timekeeper-codex-context',
+        mode: 'readwrite',
+        startIn: 'documents'
+      });
+      codexContextRootHandle = handle;
+      codexContextPermissionState = await getBackupPermissionState(handle);
+      if (codexContextPermissionState !== 'granted') {
+        const permitted = await getCodexContextWritePermission({
+          prompt: true
+        });
+        if (!permitted) {
+          updateCodexContextStatus();
+          showToast('Folder access was not granted.');
+          return false;
+        }
+      }
+      await saveDirectoryHandle('codexContextRoot', handle);
+      codexContextError = '';
+      updateCodexContextStatus();
+      return writeCodexContextNow({ prompt: true });
+    } catch (error) {
+      if (error?.name !== 'AbortError') {
+        codexContextError =
+          error && error.message
+            ? error.message
+            : 'Could not connect the selected folder.';
+        updateCodexContextStatus();
+        showToast('Codex context connection failed.');
+      }
+      return false;
+    }
+  }
+
+  async function disconnectCodexContext() {
+    if (!codexContextRootHandle) return;
+    const confirmed = await requestConfirm({
+      title: 'Disconnect Codex Context',
+      message:
+        'Remove the private context file and stop refreshing it? Your TimeKeeper data is not changed.',
+      confirmLabel: 'Disconnect',
+      danger: true
+    });
+    if (!confirmed) return;
+    try {
+      const permitted = await getCodexContextWritePermission({ prompt: true });
+      if (!permitted) {
+        showToast('Allow folder access so the private context can be removed.');
+        return;
+      }
+      const contextDirectory = await codexContextRootHandle.getDirectoryHandle(
+        CODEX_CONTEXT_DIRECTORY,
+        { create: false }
+      );
+      await contextDirectory.removeEntry(CODEX_CONTEXT_FILENAME);
+    } catch (error) {
+      if (error?.name !== 'NotFoundError') {
+        codexContextError =
+          error && error.message
+            ? error.message
+            : 'Could not remove the private context file.';
+        updateCodexContextStatus();
+        showToast('Codex context could not be removed.');
+        return;
+      }
+    }
+    if (codexContextWriteTimer) {
+      clearTimeout(codexContextWriteTimer);
+      codexContextWriteTimer = null;
+    }
+    await removeDirectoryHandle('codexContextRoot');
+    codexContextRootHandle = null;
+    codexContextPermissionState = 'missing';
+    codexContextLastWrittenAt = null;
+    codexContextError = '';
+    updateCodexContextStatus();
+    showToast('Codex development context disconnected.');
   }
 
   async function readTextFile(directoryHandle, fileName) {
@@ -15954,6 +16221,15 @@ import {
   );
   const codexImportNowBtn = document.getElementById('codexImportNowBtn');
   const codexPageRefreshBtn = document.getElementById('codexPageRefreshBtn');
+  const connectCodexContextBtn = document.getElementById(
+    'connectCodexContextBtn'
+  );
+  const refreshCodexContextBtn = document.getElementById(
+    'refreshCodexContextBtn'
+  );
+  const disconnectCodexContextBtn = document.getElementById(
+    'disconnectCodexContextBtn'
+  );
   if (codexConfigBtn) {
     codexConfigBtn.addEventListener('click', () => {
       editCodexIntegrationSettings();
@@ -15974,8 +16250,24 @@ import {
       importCodexUsage();
     });
   }
+  if (connectCodexContextBtn) {
+    connectCodexContextBtn.addEventListener('click', () => {
+      connectCodexContext();
+    });
+  }
+  if (refreshCodexContextBtn) {
+    refreshCodexContextBtn.addEventListener('click', () => {
+      writeCodexContextNow({ prompt: true });
+    });
+  }
+  if (disconnectCodexContextBtn) {
+    disconnectCodexContextBtn.addEventListener('click', () => {
+      disconnectCodexContext();
+    });
+  }
 
   // Initial render
+  updateCodexContextStatus();
   primeStravaCacheFromBrowserStorage();
   updateProjectSelects();
   updateEntriesTable();
