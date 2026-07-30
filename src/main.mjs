@@ -29,6 +29,7 @@ import {
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
+import { encryptCodexContext } from './features/codex/encryption.mjs';
 import {
   computeWealthRegression,
   getDefaultWealthHistory,
@@ -1399,6 +1400,8 @@ import {
     'Henrik-KM/timekeeper-private-context';
   const CODEX_CONTEXT_DEFAULT_BRANCH = 'main';
   const CODEX_CONTEXT_DEFAULT_PATH = 'codex-context.json';
+  const CODEX_CONTEXT_ENCRYPTED_BRANCH = 'codex-context';
+  const CODEX_CONTEXT_ENCRYPTED_PATH = 'codex-context.enc.json';
   const CODEX_CONTEXT_PUBLISH_DEBOUNCE_MS = 5000;
   const CODEX_CONTEXT_RETRY_MS = 60 * 1000;
   const CODEX_CONTEXT_RUNNING_REFRESH_MS = 5 * 60 * 1000;
@@ -6668,7 +6671,11 @@ import {
       return;
     }
     if (codexRemoteContextStatus.publishedAt) {
-      status.textContent = `Private context synced ${formatRelativeTime(codexRemoteContextStatus.publishedAt)} to ${config.contextRepository}.`;
+      const destination =
+        codexRemoteContextStatus.storage === 'encrypted-fallback'
+          ? 'with end-to-end encryption'
+          : `to ${config.contextRepository}`;
+      status.textContent = `Private context synced ${formatRelativeTime(codexRemoteContextStatus.publishedAt)} ${destination}.`;
       return;
     }
     status.textContent = `Private context sync is ON for ${config.contextRepository}.`;
@@ -6685,6 +6692,36 @@ import {
       String(context.coverage.totalEntries || 0),
       String(runningBucket)
     ].join(':');
+  }
+
+  async function putCodexContextSnapshot(context, config, token) {
+    try {
+      const apiUrl = await putGitHubJsonFile(
+        config.contextPath,
+        context,
+        'Update private TimeKeeper context',
+        {
+          repository: config.contextRepository,
+          branch: config.contextBranch,
+          token
+        }
+      );
+      return { apiUrl, storage: 'private-repository' };
+    } catch (error) {
+      if (error.status !== 403 && error.status !== 404) throw error;
+    }
+    const encryptedContext = await encryptCodexContext(context);
+    const apiUrl = await putGitHubJsonFile(
+      CODEX_CONTEXT_ENCRYPTED_PATH,
+      encryptedContext,
+      'Update encrypted TimeKeeper context [skip ci]',
+      {
+        repository: config.repository,
+        branch: CODEX_CONTEXT_ENCRYPTED_BRANCH,
+        token
+      }
+    );
+    return { apiUrl, storage: 'encrypted-fallback' };
   }
 
   async function publishCodexRemoteContext({
@@ -6724,24 +6761,20 @@ import {
       error: ''
     };
     updateCodexContextStatus();
-    codexRemoteContextPublishPromise = putGitHubJsonFile(
-      config.contextPath,
+    codexRemoteContextPublishPromise = putCodexContextSnapshot(
       context,
-      'Update private TimeKeeper context',
-      {
-        repository: config.contextRepository,
-        branch: config.contextBranch,
-        token
-      }
+      config,
+      token
     )
-      .then((apiUrl) => {
+      .then(({ apiUrl, storage }) => {
         codexRemoteContextLastDataKey = dataKey;
         codexRemoteContextStatus = {
           checkedAt: new Date().toISOString(),
           pending: true,
           publishedAt: new Date().toISOString(),
           error: '',
-          apiUrl
+          apiUrl,
+          storage
         };
         updateCodexContextStatus();
         if (!quiet) showToast('Private Codex context synced.');

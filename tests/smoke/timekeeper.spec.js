@@ -3896,6 +3896,100 @@ test('Codex private context automatically publishes scoped real usage', async ({
   ).not.toContain('private-token');
 });
 
+test('Codex context falls back to end-to-end encrypted repository storage', async ({
+  page
+}) => {
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'encrypted-project',
+        name: 'Encrypted Project',
+        client: 'Encrypted Client'
+      })
+    ],
+    entries: [
+      {
+        id: 'encrypted-entry',
+        projectId: 'encrypted-project',
+        description: 'Never publish this plaintext',
+        start: '2026-07-30T08:00:00.000Z',
+        end: '2026-07-30T09:00:00.000Z',
+        duration: 3600,
+        focusFactor: 1,
+        source: 'manual'
+      }
+    ],
+    codexIntegration: {
+      enabled: true,
+      repository: 'Henrik-KM/TimeKeeper',
+      branch: 'main'
+    }
+  });
+  await page.addInitScript(() => {
+    localStorage.setItem('timekeeperCodexIntegrationToken', 'scoped-token');
+  });
+  await page.route(
+    (url) => url.href.includes('/repos/Henrik-KM/timekeeper-private-context/'),
+    (route) =>
+      route.fulfill({
+        status: 404,
+        contentType: 'application/json',
+        body: JSON.stringify({ message: 'Not Found' })
+      })
+  );
+  let encryptedBody = null;
+  await page.route(
+    (url) =>
+      url.href.includes(
+        '/repos/Henrik-KM/TimeKeeper/contents/codex-context.enc.json'
+      ),
+    async (route) => {
+      if (route.request().method() === 'GET') {
+        await route.fulfill({
+          status: 404,
+          contentType: 'application/json',
+          body: JSON.stringify({ message: 'Not Found' })
+        });
+        return;
+      }
+      encryptedBody = JSON.parse(route.request().postData() || '{}');
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { sha: 'encrypted-sha' } })
+      });
+    }
+  );
+
+  await page.goto('/');
+  await expect.poll(() => encryptedBody).not.toBeNull();
+  const publishedEncryptedBody = /** @type {any} */ (encryptedBody);
+  const encryptedPayload = JSON.parse(
+    Buffer.from(publishedEncryptedBody.content, 'base64').toString('utf8')
+  );
+  expect(encryptedPayload).toMatchObject({
+    schema: 'timekeeper-codex-encrypted-context/v1',
+    algorithms: {
+      content: 'AES-256-GCM',
+      key: 'RSA-OAEP-3072-SHA256'
+    }
+  });
+  expect(publishedEncryptedBody).toMatchObject({
+    message: 'Update encrypted TimeKeeper context [skip ci]',
+    branch: 'codex-context'
+  });
+  expect(JSON.stringify(encryptedPayload)).not.toContain(
+    'Never publish this plaintext'
+  );
+  expect(JSON.stringify(encryptedPayload)).not.toContain('Encrypted Client');
+  expect(JSON.stringify(encryptedPayload)).not.toContain('scoped-token');
+
+  await gotoSection(page, 'importExport', 'Import / Export');
+  await expect(page.locator('#codexContextStatus')).toContainText(
+    'end-to-end encryption'
+  );
+});
+
 test('backup snapshots can be listed and restored from the selected folder', async ({
   page
 }) => {
