@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-30T22:03:02.114Z",
+  "updatedAt": "2026-07-30T22:08:02.100Z",
   "dayStart": "2026-07-30T22:00:00.000Z",
   "rangeStart": "2026-05-02T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-07-30T22:03:03.134Z",
+    "observedAt": "2026-07-30T22:08:03.268Z",
     "primary": {
       "usedPercent": 37,
       "remainingPercent": 63,
@@ -8386,6 +8386,37 @@
         "codex-ee3d6acb2749df72a33c31c2"
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-0f018087fa5ec133c1feac42",
+      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-07-30T21:49:16.261Z",
+      "endTime": "2026-07-30T21:50:48.596Z",
+      "wallSeconds": 92,
+      "focusFactor": 0.3009,
+      "effectiveSeconds": 27,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "high",
+          "factor": 0.3,
+          "wallSeconds": 91,
+          "effectiveSeconds": 27
+        }
+      ],
+      "description": "Codex: Test Slack connection"
     }
   ]
 }
