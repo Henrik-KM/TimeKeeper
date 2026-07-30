@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v8';
+const CACHE_NAME = 'timekeeper-app-v9';
 const APP_SHELL = [
   './',
   './index.html',
@@ -12,6 +12,7 @@ const APP_SHELL = [
   './src/shared/runtime-helpers.mjs',
   './src/shared/id.mjs',
   './src/shared/ui.mjs',
+  './src/features/codex/context.mjs',
   './src/features/strava/core.mjs',
   './src/features/strava/import.mjs',
   './src/features/wealth/core.mjs',

@@ -1395,6 +1395,13 @@ import {
   const CODEX_DEFAULT_BRANCH = 'main';
   const CODEX_DEFAULT_CONFIG_PATH = 'assets/timekeeper-codex-config.json';
   const CODEX_DEFAULT_INBOX_PATH = 'assets/timekeeper-codex-inbox';
+  const CODEX_CONTEXT_DEFAULT_REPOSITORY =
+    'Henrik-KM/timekeeper-private-context';
+  const CODEX_CONTEXT_DEFAULT_BRANCH = 'main';
+  const CODEX_CONTEXT_DEFAULT_PATH = 'codex-context.json';
+  const CODEX_CONTEXT_PUBLISH_DEBOUNCE_MS = 5000;
+  const CODEX_CONTEXT_RETRY_MS = 60 * 1000;
+  const CODEX_CONTEXT_RUNNING_REFRESH_MS = 5 * 60 * 1000;
   const CODEX_IMPORT_INTERVAL_MS = 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
@@ -1465,6 +1472,10 @@ import {
       branch: CODEX_DEFAULT_BRANCH,
       configPath: CODEX_DEFAULT_CONFIG_PATH,
       inboxPath: CODEX_DEFAULT_INBOX_PATH,
+      contextSyncEnabled: false,
+      contextRepository: CODEX_CONTEXT_DEFAULT_REPOSITORY,
+      contextBranch: CODEX_CONTEXT_DEFAULT_BRANCH,
+      contextPath: CODEX_CONTEXT_DEFAULT_PATH,
       mappings: [],
       importedCodexRecordIds: [],
       lastImportAt: null,
@@ -1510,6 +1521,10 @@ import {
   function normalizeCodexIntegration(value = {}) {
     const config = value && typeof value === 'object' ? value : {};
     const defaults = makeDefaultCodexIntegration();
+    const hasContextSyncPreference = Object.prototype.hasOwnProperty.call(
+      config,
+      'contextSyncEnabled'
+    );
     const importedIds = Array.isArray(config.importedCodexRecordIds)
       ? config.importedCodexRecordIds.map((id) => String(id)).filter(Boolean)
       : [];
@@ -1521,6 +1536,16 @@ import {
         String(config.branch || defaults.branch).trim() || defaults.branch,
       configPath: normalizeCodexPath(config.configPath, defaults.configPath),
       inboxPath: normalizeCodexPath(config.inboxPath, defaults.inboxPath),
+      contextSyncEnabled: hasContextSyncPreference
+        ? config.contextSyncEnabled === true
+        : config.enabled === true,
+      contextRepository:
+        normalizeGitHubRepository(config.contextRepository) ||
+        defaults.contextRepository,
+      contextBranch:
+        String(config.contextBranch || defaults.contextBranch).trim() ||
+        defaults.contextBranch,
+      contextPath: normalizeCodexPath(config.contextPath, defaults.contextPath),
       mappings: normalizeCodexMappings(config.mappings),
       importedCodexRecordIds: [...new Set(importedIds)].slice(-1000),
       lastImportAt: config.lastImportAt || null,
@@ -1891,7 +1916,7 @@ import {
     // Mark data as needing backup
     needsBackup = true;
     scheduleBackupSoon();
-    scheduleCodexContextWrite();
+    scheduleCodexRemoteContextPublish();
     renderMobileSyncStatus();
   }
 
@@ -2486,9 +2511,6 @@ import {
   const BACKUP_SNAPSHOT_KEEP = 30;
   const AUTO_BACKUP_INTERVAL_MS = 60000;
   const BACKUP_DEBOUNCE_MS = 12000;
-  const CODEX_CONTEXT_DIRECTORY = '.timekeeper-private';
-  const CODEX_CONTEXT_FILENAME = 'codex-context.json';
-  const CODEX_CONTEXT_DEBOUNCE_MS = 3000;
   // Initialize backup and sync flags before they are referenced in saveData().
   // needsBackup tracks whether the data has changed and needs to be exported.
   // autoSyncEnabled indicates whether automatic export is enabled.
@@ -2510,12 +2532,17 @@ import {
   //   'denied'  - Permission to write to the backup directory has been denied.
   let backupPermissionState = 'missing';
   let backupWarningMessage = '';
-  let codexContextRootHandle = null;
-  let codexContextPermissionState = 'missing';
-  let codexContextLastWrittenAt = null;
-  let codexContextError = '';
-  let codexContextWriteTimer = null;
-  let codexContextWriteInFlight = null;
+  let codexRemoteContextTimer = null;
+  let codexRemoteContextPublishPromise = null;
+  let codexRemoteContextQueued = false;
+  let codexRemoteContextLastDataKey = '';
+  let codexRemoteContextStatus = {
+    checkedAt: null,
+    pending: false,
+    publishedAt: null,
+    error: '',
+    apiUrl: ''
+  };
   let data = loadData();
   ensureFitnessDefaults();
   ensureWorkoutData();
@@ -2624,21 +2651,6 @@ import {
       });
     } catch {
       return null;
-    }
-  }
-
-  async function removeDirectoryHandle(key) {
-    try {
-      const db = await openHandleDB();
-      const tx = db.transaction('handles', 'readwrite');
-      tx.objectStore('handles').delete(key);
-      return await new Promise((resolve) => {
-        tx.oncomplete = () => resolve(true);
-        tx.onerror = () => resolve(false);
-        tx.onabort = () => resolve(false);
-      });
-    } catch {
-      return false;
     }
   }
 
@@ -2874,17 +2886,6 @@ import {
       refreshBackupSnapshots({ quiet: true });
     }
     updateFocusBlocker();
-  });
-
-  loadDirectoryHandle('codexContextRoot').then(async (handle) => {
-    codexContextRootHandle = handle;
-    codexContextPermissionState = await getBackupPermissionState(handle);
-    updateCodexContextStatus();
-    if (handle && codexContextPermissionState === 'granted') {
-      writeCodexContextNow({ quiet: true }).catch((error) => {
-        console.error('Refreshing Codex development context failed:', error);
-      });
-    }
   });
 
   // -------------------------------------------------------------------------
@@ -3354,10 +3355,17 @@ import {
     };
   }
 
-  async function putGitHubJsonFile(pathValue, payload, message) {
+  async function putGitHubJsonFile(pathValue, payload, message, options = {}) {
     const config = getCodexIntegrationConfig();
-    const token = getCodexIntegrationToken();
-    const apiUrl = getCodexGitHubPathApiUrl(pathValue, config);
+    const targetConfig = {
+      repository: options.repository || config.repository,
+      branch: options.branch || config.branch
+    };
+    const token =
+      options.token === undefined
+        ? getCodexIntegrationToken()
+        : String(options.token || '');
+    const apiUrl = getCodexGitHubPathApiUrl(pathValue, targetConfig);
     if (!apiUrl) throw new Error('Enter a GitHub repository as owner/repo.');
     if (!token) {
       throw new Error('Enter a GitHub token with Contents read/write access.');
@@ -3377,7 +3385,7 @@ import {
       const body = {
         message,
         content,
-        branch: config.branch
+        branch: targetConfig.branch
       };
       if (sha) body.sha = sha;
       try {
@@ -3473,6 +3481,31 @@ import {
           value: config.inboxPath || CODEX_DEFAULT_INBOX_PATH
         },
         {
+          name: 'contextSyncEnabled',
+          label: 'Private context sync',
+          type: 'select',
+          value: config.contextSyncEnabled ? 'on' : 'off',
+          options: [
+            { value: 'off', label: 'Off' },
+            { value: 'on', label: 'On' }
+          ]
+        },
+        {
+          name: 'contextRepository',
+          label: 'Private context repository',
+          value: config.contextRepository || CODEX_CONTEXT_DEFAULT_REPOSITORY
+        },
+        {
+          name: 'contextBranch',
+          label: 'Private context branch',
+          value: config.contextBranch || CODEX_CONTEXT_DEFAULT_BRANCH
+        },
+        {
+          name: 'contextPath',
+          label: 'Private context file',
+          value: config.contextPath || CODEX_CONTEXT_DEFAULT_PATH
+        },
+        {
           name: 'token',
           label: 'GitHub token',
           type: 'password',
@@ -3489,10 +3522,20 @@ import {
       repository: values.repository,
       branch: values.branch,
       configPath: values.configPath,
-      inboxPath: values.inboxPath
+      inboxPath: values.inboxPath,
+      contextSyncEnabled: values.contextSyncEnabled === 'on',
+      contextRepository: values.contextRepository,
+      contextBranch: values.contextBranch,
+      contextPath: values.contextPath
     });
     if (next.enabled && !next.repository.includes('/')) {
       showToast('Codex integration needs a GitHub repository as owner/repo.');
+      return;
+    }
+    if (next.contextSyncEnabled && !next.contextRepository.includes('/')) {
+      showToast(
+        'Private context sync needs a GitHub repository as owner/repo.'
+      );
       return;
     }
     data.codexIntegration = next;
@@ -3500,6 +3543,7 @@ import {
     saveData();
     updateCodexIntegrationPanel();
     scheduleCodexAutoImport();
+    scheduleCodexRemoteContextPublish({ delay: 0, force: true });
     showToast(
       next.enabled ? 'Codex import enabled.' : 'Codex import disabled.'
     );
@@ -6582,218 +6626,199 @@ import {
 
   function updateCodexContextStatus() {
     const status = document.getElementById('codexContextStatus');
-    const connectButton = document.getElementById('connectCodexContextBtn');
+    const enableButton = document.getElementById('connectCodexContextBtn');
     const refreshButton = document.getElementById('refreshCodexContextBtn');
-    const disconnectButton = document.getElementById(
-      'disconnectCodexContextBtn'
-    );
-    const supported = !!window.showDirectoryPicker;
-    const connected = !!codexContextRootHandle;
-    const writable = connected && codexContextPermissionState === 'granted';
-    if (connectButton) {
-      connectButton.disabled = !supported;
-      connectButton.textContent = connected
-        ? 'Change Context Folder'
-        : 'Connect Local Context';
+    const pauseButton = document.getElementById('disconnectCodexContextBtn');
+    const config = getCodexIntegrationConfig();
+    const enabled = config.contextSyncEnabled;
+    const hasToken = !!getCodexIntegrationToken();
+    if (enableButton) {
+      enableButton.disabled = enabled;
+      enableButton.textContent = enabled
+        ? 'Private Sync On'
+        : 'Enable Private Sync';
     }
     if (refreshButton) {
-      refreshButton.disabled = !writable;
+      refreshButton.disabled =
+        !enabled || !hasToken || codexRemoteContextStatus.pending;
+      refreshButton.textContent = codexRemoteContextStatus.pending
+        ? 'Syncing...'
+        : 'Sync Context Now';
     }
-    if (disconnectButton) {
-      disconnectButton.disabled = !connected;
+    if (pauseButton) {
+      pauseButton.disabled = !enabled;
+      pauseButton.textContent = 'Pause Private Sync';
     }
     if (!status) return;
-    if (!supported) {
+    if (!enabled) {
+      status.textContent = 'Private Codex context sync is OFF.';
+      return;
+    }
+    if (!hasToken) {
       status.textContent =
-        'Local context requires a Chromium browser with folder access.';
+        'Private context sync needs the GitHub token from Configure Codex.';
       return;
     }
-    if (!connected) {
-      status.textContent =
-        'Not connected. Select this TimeKeeper repository to create a private, git-ignored Codex context.';
+    if (codexRemoteContextStatus.pending) {
+      status.textContent = 'Publishing private Codex context to GitHub...';
       return;
     }
-    if (codexContextError) {
-      status.textContent = `Context error: ${codexContextError}`;
+    if (codexRemoteContextStatus.error) {
+      status.textContent = `Private context sync error: ${codexRemoteContextStatus.error}`;
       return;
     }
-    if (codexContextPermissionState === 'prompt') {
-      status.textContent =
-        'Folder connected. Reconnect or refresh to grant write access.';
+    if (codexRemoteContextStatus.publishedAt) {
+      status.textContent = `Private context synced ${formatRelativeTime(codexRemoteContextStatus.publishedAt)} to ${config.contextRepository}.`;
       return;
     }
-    if (codexContextPermissionState !== 'granted') {
-      status.textContent =
-        'Context is paused because folder access was denied.';
-      return;
-    }
-    const rootName = codexContextRootHandle.name || 'selected folder';
-    status.textContent = codexContextLastWrittenAt
-      ? `Private context updated ${formatRelativeTime(codexContextLastWrittenAt)} in ${rootName}/${CODEX_CONTEXT_DIRECTORY}/${CODEX_CONTEXT_FILENAME}.`
-      : `Private context is connected to ${rootName}/${CODEX_CONTEXT_DIRECTORY}/${CODEX_CONTEXT_FILENAME}.`;
+    status.textContent = `Private context sync is ON for ${config.contextRepository}.`;
   }
 
-  async function getCodexContextWritePermission({ prompt = false } = {}) {
-    const handle = codexContextRootHandle;
-    if (!handle) {
-      codexContextPermissionState = 'missing';
+  function getCodexRemoteContextDataKey(context) {
+    const runningBucket = context.usage.runningTimers
+      ? Math.floor(Date.now() / CODEX_CONTEXT_RUNNING_REFRESH_MS)
+      : 0;
+    return [
+      String(data.updatedAt || ''),
+      String(data.backupRevision || 0),
+      String(context.coverage.totalProjects || 0),
+      String(context.coverage.totalEntries || 0),
+      String(runningBucket)
+    ].join(':');
+  }
+
+  async function publishCodexRemoteContext({
+    quiet = false,
+    force = false
+  } = {}) {
+    const config = getCodexIntegrationConfig();
+    if (!config.contextSyncEnabled) {
+      updateCodexContextStatus();
       return false;
     }
-    if (!handle.queryPermission) {
-      codexContextPermissionState = 'granted';
+    const token = getCodexIntegrationToken();
+    if (!token) {
+      codexRemoteContextStatus = {
+        ...codexRemoteContextStatus,
+        checkedAt: new Date().toISOString(),
+        pending: false,
+        error: 'Configure a GitHub token with access to the private repository.'
+      };
+      updateCodexContextStatus();
+      return false;
+    }
+    if (codexRemoteContextPublishPromise) {
+      codexRemoteContextQueued = true;
+      return codexRemoteContextPublishPromise;
+    }
+    const context = buildCodexDevelopmentContext(data);
+    const dataKey = getCodexRemoteContextDataKey(context);
+    if (!force && dataKey === codexRemoteContextLastDataKey) {
+      updateCodexContextStatus();
       return true;
     }
-    let permission = await handle.queryPermission({ mode: 'readwrite' });
-    if (permission === 'prompt' && prompt && handle.requestPermission) {
-      permission = await handle.requestPermission({ mode: 'readwrite' });
-    }
-    codexContextPermissionState = permission || 'denied';
-    return permission === 'granted';
-  }
-
-  async function writeCodexContextNow({ quiet = false, prompt = false } = {}) {
-    if (codexContextWriteInFlight) return codexContextWriteInFlight;
-    codexContextWriteInFlight = (async () => {
-      try {
-        const permitted = await getCodexContextWritePermission({ prompt });
-        if (!permitted) {
-          codexContextError = '';
-          updateCodexContextStatus();
-          if (!quiet) {
-            showToast('Allow folder access to refresh Codex context.');
-          }
-          return false;
-        }
-        const contextDirectory =
-          await codexContextRootHandle.getDirectoryHandle(
-            CODEX_CONTEXT_DIRECTORY,
-            { create: true }
-          );
-        const context = buildCodexDevelopmentContext(data);
-        await writeTextFile(
-          contextDirectory,
-          CODEX_CONTEXT_FILENAME,
-          JSON.stringify(context, null, 2)
-        );
-        codexContextLastWrittenAt = context.generatedAt;
-        codexContextError = '';
+    codexRemoteContextStatus = {
+      ...codexRemoteContextStatus,
+      checkedAt: new Date().toISOString(),
+      pending: true,
+      error: ''
+    };
+    updateCodexContextStatus();
+    codexRemoteContextPublishPromise = putGitHubJsonFile(
+      config.contextPath,
+      context,
+      'Update private TimeKeeper context',
+      {
+        repository: config.contextRepository,
+        branch: config.contextBranch,
+        token
+      }
+    )
+      .then((apiUrl) => {
+        codexRemoteContextLastDataKey = dataKey;
+        codexRemoteContextStatus = {
+          checkedAt: new Date().toISOString(),
+          pending: true,
+          publishedAt: new Date().toISOString(),
+          error: '',
+          apiUrl
+        };
+        updateCodexContextStatus();
+        if (!quiet) showToast('Private Codex context synced.');
+        return true;
+      })
+      .catch((error) => {
+        codexRemoteContextStatus = {
+          ...codexRemoteContextStatus,
+          checkedAt: new Date().toISOString(),
+          pending: true,
+          error: error && error.message ? error.message : String(error)
+        };
         updateCodexContextStatus();
         if (!quiet) {
-          showToast('Codex development context refreshed.');
+          showToast(
+            `Private context sync failed: ${codexRemoteContextStatus.error}`
+          );
         }
-        return true;
-      } catch (error) {
-        codexContextError =
-          error && error.message
-            ? error.message
-            : 'Could not write the local context file.';
-        updateCodexContextStatus();
-        if (!quiet) showToast('Codex context refresh failed.');
-        return false;
-      } finally {
-        codexContextWriteInFlight = null;
-      }
-    })();
-    return codexContextWriteInFlight;
-  }
-
-  function scheduleCodexContextWrite() {
-    if (!codexContextRootHandle || codexContextPermissionState !== 'granted') {
-      return;
-    }
-    if (codexContextWriteTimer) clearTimeout(codexContextWriteTimer);
-    codexContextWriteTimer = setTimeout(() => {
-      codexContextWriteTimer = null;
-      writeCodexContextNow({ quiet: true }).catch((error) => {
-        console.error('Writing Codex development context failed:', error);
-      });
-    }, CODEX_CONTEXT_DEBOUNCE_MS);
-  }
-
-  async function connectCodexContext() {
-    if (!window.showDirectoryPicker) {
-      updateCodexContextStatus();
-      showToast('This browser cannot connect a local context folder.');
-      return false;
-    }
-    try {
-      const handle = await window.showDirectoryPicker({
-        id: 'timekeeper-codex-context',
-        mode: 'readwrite',
-        startIn: 'documents'
-      });
-      codexContextRootHandle = handle;
-      codexContextPermissionState = await getBackupPermissionState(handle);
-      if (codexContextPermissionState !== 'granted') {
-        const permitted = await getCodexContextWritePermission({
-          prompt: true
+        scheduleCodexRemoteContextPublish({
+          delay: CODEX_CONTEXT_RETRY_MS,
+          force: true
         });
-        if (!permitted) {
-          updateCodexContextStatus();
-          showToast('Folder access was not granted.');
-          return false;
-        }
-      }
-      await saveDirectoryHandle('codexContextRoot', handle);
-      codexContextError = '';
-      updateCodexContextStatus();
-      return writeCodexContextNow({ prompt: true });
-    } catch (error) {
-      if (error?.name !== 'AbortError') {
-        codexContextError =
-          error && error.message
-            ? error.message
-            : 'Could not connect the selected folder.';
+        return false;
+      })
+      .finally(() => {
+        codexRemoteContextPublishPromise = null;
+        codexRemoteContextStatus = {
+          ...codexRemoteContextStatus,
+          pending: false
+        };
         updateCodexContextStatus();
-        showToast('Codex context connection failed.');
-      }
-      return false;
-    }
+        if (codexRemoteContextQueued) {
+          codexRemoteContextQueued = false;
+          scheduleCodexRemoteContextPublish({ delay: 0, force: true });
+        }
+      });
+    return codexRemoteContextPublishPromise;
   }
 
-  async function disconnectCodexContext() {
-    if (!codexContextRootHandle) return;
-    const confirmed = await requestConfirm({
-      title: 'Disconnect Codex Context',
-      message:
-        'Remove the private context file and stop refreshing it? Your TimeKeeper data is not changed.',
-      confirmLabel: 'Disconnect',
-      danger: true
-    });
-    if (!confirmed) return;
-    try {
-      const permitted = await getCodexContextWritePermission({ prompt: true });
-      if (!permitted) {
-        showToast('Allow folder access so the private context can be removed.');
-        return;
-      }
-      const contextDirectory = await codexContextRootHandle.getDirectoryHandle(
-        CODEX_CONTEXT_DIRECTORY,
-        { create: false }
-      );
-      await contextDirectory.removeEntry(CODEX_CONTEXT_FILENAME);
-    } catch (error) {
-      if (error?.name !== 'NotFoundError') {
-        codexContextError =
-          error && error.message
-            ? error.message
-            : 'Could not remove the private context file.';
-        updateCodexContextStatus();
-        showToast('Codex context could not be removed.');
-        return;
-      }
-    }
-    if (codexContextWriteTimer) {
-      clearTimeout(codexContextWriteTimer);
-      codexContextWriteTimer = null;
-    }
-    await removeDirectoryHandle('codexContextRoot');
-    codexContextRootHandle = null;
-    codexContextPermissionState = 'missing';
-    codexContextLastWrittenAt = null;
-    codexContextError = '';
+  function scheduleCodexRemoteContextPublish({
+    delay = CODEX_CONTEXT_PUBLISH_DEBOUNCE_MS,
+    force = false
+  } = {}) {
+    const config = getCodexIntegrationConfig();
+    if (!config.contextSyncEnabled) return;
+    if (codexRemoteContextTimer) clearTimeout(codexRemoteContextTimer);
+    codexRemoteContextTimer = setTimeout(
+      () => {
+        codexRemoteContextTimer = null;
+        publishCodexRemoteContext({ quiet: true, force }).catch((error) => {
+          console.error('Publishing private Codex context failed:', error);
+        });
+      },
+      Math.max(0, Number(delay) || 0)
+    );
+  }
+
+  function enableCodexRemoteContextSync() {
+    const config = getCodexIntegrationConfig();
+    config.contextSyncEnabled = true;
+    data.codexIntegration = config;
+    saveData();
     updateCodexContextStatus();
-    showToast('Codex development context disconnected.');
+    scheduleCodexRemoteContextPublish({ delay: 0, force: true });
+  }
+
+  function pauseCodexRemoteContextSync() {
+    const config = getCodexIntegrationConfig();
+    config.contextSyncEnabled = false;
+    data.codexIntegration = config;
+    if (codexRemoteContextTimer) {
+      clearTimeout(codexRemoteContextTimer);
+      codexRemoteContextTimer = null;
+    }
+    saveData();
+    updateCodexContextStatus();
+    showToast('Private Codex context sync paused.');
   }
 
   async function readTextFile(directoryHandle, fileName) {
@@ -16252,17 +16277,17 @@ import {
   }
   if (connectCodexContextBtn) {
     connectCodexContextBtn.addEventListener('click', () => {
-      connectCodexContext();
+      enableCodexRemoteContextSync();
     });
   }
   if (refreshCodexContextBtn) {
     refreshCodexContextBtn.addEventListener('click', () => {
-      writeCodexContextNow({ prompt: true });
+      publishCodexRemoteContext({ force: true });
     });
   }
   if (disconnectCodexContextBtn) {
     disconnectCodexContextBtn.addEventListener('click', () => {
-      disconnectCodexContext();
+      pauseCodexRemoteContextSync();
     });
   }
 
@@ -16277,6 +16302,13 @@ import {
   updateCodexIntegrationPanel();
   updateCodexPage();
   scheduleCodexAutoImport();
+  scheduleCodexRemoteContextPublish({ delay: 0, force: true });
+  setInterval(() => {
+    scheduleCodexRemoteContextPublish({ delay: 0 });
+  }, CODEX_CONTEXT_RUNNING_REFRESH_MS);
+  window.addEventListener('online', () => {
+    scheduleCodexRemoteContextPublish({ delay: 0, force: true });
+  });
   loadStravaFeed();
   if (
     'serviceWorker' in navigator &&

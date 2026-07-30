@@ -125,9 +125,12 @@ adding a dev-server dependency.
 TimeKeeper data is local-first and user-owned. Be conservative.
 
 - When `.timekeeper-private/codex-context.json` exists, it is an explicitly
-  user-authorized, local-only product-development context. Read it when actual
-  TimeKeeper usage can inform the task, summarize patterns instead of repeating
-  private entry descriptions unnecessarily, and never stage or commit it.
+  user-authorized product-development context pulled from the private
+  `Henrik-KM/timekeeper-private-context` repository. When actual TimeKeeper
+  usage can inform the task, run `npm.cmd run codex:context:pull` if the local
+  snapshot is missing or stale, then read it. Summarize patterns instead of
+  repeating private entry descriptions unnecessarily, and never stage or
+  commit the snapshot.
 - Add new saved fields through defaulting/normalization so older exports still
   load.
 - Keep import/export compatibility with `timekeeperDataPro`.

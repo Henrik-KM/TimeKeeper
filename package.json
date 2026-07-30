@@ -7,6 +7,7 @@
     "focus:blocker:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-focus-blocker.ps1",
     "focus:blocker:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/uninstall-focus-blocker.ps1",
     "codex:bridge": "node scripts/codex-usage-bridge.mjs",
+    "codex:context:pull": "node scripts/pull-codex-context.mjs",
     "codex:bridge:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-codex-usage-bridge.ps1",
     "codex:bridge:uninstall": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/uninstall-codex-usage-bridge.ps1",
     "lint": "eslint . --ext .js,.mjs",

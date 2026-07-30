@@ -3779,68 +3779,9 @@ test('auto-sync unsupported state still renders safely', async ({ page }) => {
   );
 });
 
-test('Codex local context writes scoped real usage into the selected repository', async ({
+test('Codex private context automatically publishes scoped real usage', async ({
   page
 }) => {
-  await page.addInitScript(() => {
-    class FakeFileHandle {
-      constructor(directory, name) {
-        this.kind = 'file';
-        this.directory = directory;
-        this.name = name;
-      }
-      async createWritable() {
-        const directory = this.directory;
-        const name = this.name;
-        const chunks = [];
-        return {
-          async write(value) {
-            chunks.push(String(value));
-          },
-          async close() {
-            directory.files.set(name, chunks.join(''));
-          }
-        };
-      }
-    }
-    class FakeDirectoryHandle {
-      constructor(name) {
-        this.kind = 'directory';
-        this.name = name;
-        this.files = new Map();
-        this.directories = new Map();
-      }
-      async queryPermission() {
-        return 'granted';
-      }
-      async requestPermission() {
-        return 'granted';
-      }
-      async getFileHandle(name, options = {}) {
-        if (!this.files.has(name)) {
-          if (!options.create) throw new Error(`Missing file ${name}`);
-          this.files.set(name, '');
-        }
-        return new FakeFileHandle(this, name);
-      }
-      async getDirectoryHandle(name, options = {}) {
-        if (!this.directories.has(name)) {
-          if (!options.create) throw new Error(`Missing directory ${name}`);
-          this.directories.set(name, new FakeDirectoryHandle(name));
-        }
-        return this.directories.get(name);
-      }
-      async removeEntry(name) {
-        this.files.delete(name);
-        this.directories.delete(name);
-      }
-    }
-    window['__timekeeperCodexContextRoot'] = new FakeDirectoryHandle(
-      'TimeKeeper'
-    );
-    window['showDirectoryPicker'] = async () =>
-      window['__timekeeperCodexContextRoot'];
-  });
   await seedLocalStorage(page, {
     updatedAt: '2026-07-30T08:00:00.000Z',
     projects: [
@@ -3867,21 +3808,67 @@ test('Codex local context writes scoped real usage into the selected repository'
     ],
     groceries: [{ name: 'Private purchase' }],
     wealthHistory: [{ amount: 123456 }],
-    codexIntegration: { token: 'private-token' }
+    codexIntegration: {
+      enabled: true,
+      repository: 'Henrik-KM/TimeKeeper',
+      branch: 'main',
+      configPath: 'assets/timekeeper-codex-config.json',
+      inboxPath: 'assets/timekeeper-codex-inbox'
+    }
   });
+  await page.addInitScript(() => {
+    localStorage.setItem('timekeeperCodexIntegrationToken', 'private-token');
+  });
+
+  const publishedBodies = [];
+  let publishedSha = '';
+  await page.route(
+    (url) =>
+      url.href.includes(
+        '/repos/Henrik-KM/timekeeper-private-context/contents/codex-context.json'
+      ),
+    async (route) => {
+      const request = route.request();
+      if (request.method() === 'GET') {
+        if (!publishedSha) {
+          await route.fulfill({
+            status: 404,
+            contentType: 'application/json',
+            body: JSON.stringify({ message: 'Not Found' })
+          });
+          return;
+        }
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify({ sha: publishedSha })
+        });
+        return;
+      }
+      const body = JSON.parse(request.postData() || '{}');
+      publishedBodies.push(body);
+      publishedSha = `context-sha-${publishedBodies.length}`;
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { sha: publishedSha } })
+      });
+    }
+  );
 
   await page.goto('/');
+  await expect.poll(() => publishedBodies.length).toBe(1);
   await gotoSection(page, 'importExport', 'Import / Export');
-  await page.getByRole('button', { name: 'Connect Local Context' }).click();
-
   await expect(page.locator('#codexContextStatus')).toContainText(
-    'Private context updated'
+    'Private context synced'
   );
-  const context = await page.evaluate(() => {
-    const root = window['__timekeeperCodexContextRoot'];
-    const directory = root.directories.get('.timekeeper-private');
-    return JSON.parse(directory.files.get('codex-context.json'));
-  });
+  await expect(
+    page.getByRole('button', { name: 'Private Sync On' })
+  ).toBeDisabled();
+
+  const context = JSON.parse(
+    Buffer.from(publishedBodies[0].content, 'base64').toString('utf8')
+  );
   expect(context.schema).toBe('timekeeper-codex-development-context/v1');
   expect(context.projects[0]).toMatchObject({
     id: 'real-project',
@@ -3899,6 +3886,14 @@ test('Codex local context writes scoped real usage into the selected repository'
   expect(JSON.stringify(context)).not.toContain('Private purchase');
   expect(JSON.stringify(context)).not.toContain('123456');
   expect(JSON.stringify(context)).not.toContain('private-token');
+  expect(publishedBodies[0]).toMatchObject({
+    message: 'Update private TimeKeeper context',
+    branch: 'main'
+  });
+
+  expect(
+    await page.evaluate(() => localStorage.getItem('timekeeperDataPro'))
+  ).not.toContain('private-token');
 });
 
 test('backup snapshots can be listed and restored from the selected folder', async ({
