@@ -25,9 +25,9 @@ function getEntryFocusFactor(entry) {
 }
 
 function normalizeEntry(entry, nowMs) {
-  const start = toIso(entry?.start);
+  const start = toIso(entry?.startTime || entry?.start);
   if (!start) return null;
-  const end = toIso(entry?.end);
+  const end = toIso(entry?.endTime || entry?.end);
   const focusFactor = getEntryFocusFactor(entry);
   const savedEffectiveSeconds = finiteNonNegative(entry?.duration, NaN);
   const elapsedSeconds = Math.max(
@@ -143,7 +143,8 @@ export function buildCodexDevelopmentContext(data, { now = new Date() } = {}) {
   const sources = {};
   const focusFactors = {};
   const activeDays = new Set();
-  const normalizedEntries = (Array.isArray(data?.entries) ? data.entries : [])
+  const sourceEntries = Array.isArray(data?.entries) ? data.entries : [];
+  const normalizedEntries = sourceEntries
     .map((entry) => normalizeEntry(entry, nowMs))
     .filter(Boolean)
     .sort((a, b) => new Date(b.start).getTime() - new Date(a.start).getTime());
@@ -178,6 +179,8 @@ export function buildCodexDevelopmentContext(data, { now = new Date() } = {}) {
       totalProjects: projects.length,
       activeProjects: projects.filter((project) => !project.archived).length,
       totalEntries: normalizedEntries.length,
+      sourceEntries: sourceEntries.length,
+      rejectedEntries: sourceEntries.length - normalizedEntries.length,
       activeDays: activeDays.size,
       firstEntryAt: firstEntry?.start || null,
       lastEntryAt: lastEntry?.start || null,

@@ -3799,8 +3799,8 @@ test('Codex private context automatically publishes scoped real usage', async ({
         id: 'real-entry',
         projectId: 'real-project',
         description: 'Actual recorded workflow',
-        start: '2026-07-30T08:00:00.000Z',
-        end: '2026-07-30T09:00:00.000Z',
+        startTime: '2026-07-30T08:00:00.000Z',
+        endTime: '2026-07-30T09:00:00.000Z',
         duration: 5400,
         focusFactor: 1.5,
         source: 'manual'
@@ -3912,8 +3912,8 @@ test('Codex context falls back to end-to-end encrypted repository storage', asyn
         id: 'encrypted-entry',
         projectId: 'encrypted-project',
         description: 'Never publish this plaintext',
-        start: '2026-07-30T08:00:00.000Z',
-        end: '2026-07-30T09:00:00.000Z',
+        startTime: '2026-07-30T08:00:00.000Z',
+        endTime: '2026-07-30T09:00:00.000Z',
         duration: 3600,
         focusFactor: 1,
         source: 'manual'
