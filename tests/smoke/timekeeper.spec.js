@@ -664,6 +664,127 @@ test('manual entries can use start end times and focus factor', async ({
   expect(saved.manualFactor).toBe(0.5);
 });
 
+test('entries preserve active elapsed time and group Codex records by project-day', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-07-31T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'codex-project', name: 'Codex Project' })],
+    entries: [
+      {
+        ...entryFixture({
+          id: 'codex-one',
+          projectId: 'codex-project',
+          description: 'First Codex record',
+          startTime: '2026-07-30T09:00:00.000',
+          endTime: '2026-07-30T10:00:00.000',
+          hours: 1.5,
+          focusFactor: 1.5
+        }),
+        source: 'codex',
+        elapsedSeconds: 3600
+      },
+      {
+        ...entryFixture({
+          id: 'codex-two',
+          projectId: 'codex-project',
+          description: 'Second Codex record',
+          startTime: '2026-07-30T13:00:00.000',
+          endTime: '2026-07-30T13:30:00.000',
+          hours: 0.75,
+          focusFactor: 1.5
+        }),
+        source: 'codex',
+        elapsedSeconds: 1800
+      }
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'entries', 'Time Entries');
+
+  const group = page.locator('.entry-group-row');
+  await expect(group).toContainText('Codex activity');
+  await expect(group).toContainText('2 records');
+  await expect(group).toContainText('2h 15m 0s effective');
+  await expect(group).toContainText('1h 30m 0s active');
+  await expect(
+    page
+      .locator('#entriesTableBodyPro tr')
+      .filter({ hasText: 'First Codex record' })
+  ).toHaveCount(0);
+
+  await group.getByRole('button').click();
+  const firstRow = page
+    .locator('#entriesTableBodyPro tr')
+    .filter({ hasText: 'First Codex record' });
+  await expect(firstRow).toContainText('1h 30m 0s eff / 1h 0m 0s active');
+
+  const saved = await page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+    return stored.entries.find((entry) => entry.id === 'codex-one');
+  });
+  expect(saved.duration).toBe(5400);
+  expect(saved.elapsedSeconds).toBe(3600);
+});
+
+test('mobile Today exposes project lanes and confirms suspicious recorded time', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-07-31T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'review-project', name: 'Review Project' })
+    ],
+    entries: [
+      {
+        ...entryFixture({
+          id: 'long-entry',
+          projectId: 'review-project',
+          startTime: '2026-07-29T20:00:00.000',
+          endTime: '2026-07-30T09:00:00.000',
+          hours: 13
+        }),
+        elapsedSeconds: 13 * 3600
+      }
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const commandPanel = page.locator('#todayCommandPanel');
+  await expect(commandPanel).toContainText('Project lanes');
+  await expect(commandPanel).toContainText('Review Project');
+  await expect(commandPanel).toContainText('Learned pace');
+  await expect(commandPanel).toContainText('Weekends off');
+
+  await commandPanel
+    .locator('.mobile-today-card')
+    .filter({ hasText: 'Time review' })
+    .click();
+  const reviewSheet = page.getByRole('dialog', { name: 'Time review' });
+  await expect(reviewSheet).toContainText('13h 0m 0s active');
+  await reviewSheet.getByRole('button', { name: /Review Project/ }).click();
+
+  const entrySheet = page.getByRole('dialog', {
+    name: 'Review recorded time'
+  });
+  await expect(entrySheet).toContainText('Crosses day');
+  await expect(entrySheet).toContainText('13h 0m 0s');
+  await entrySheet
+    .getByRole('button', { name: 'Confirm', exact: true })
+    .click();
+
+  const reviewedAt = await page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem('timekeeperDataPro'));
+    return stored.entries.find((entry) => entry.id === 'long-entry')
+      .integrityReviewedAt;
+  });
+  expect(reviewedAt).toBeTruthy();
+  await expect(commandPanel).not.toContainText('Time review');
+});
+
 test('stopped entries can be fully edited after they are saved', async ({
   page
 }) => {

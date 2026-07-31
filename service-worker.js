@@ -3,17 +3,18 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v12';
+const CACHE_NAME = 'timekeeper-app-v13';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
-  './src/main.mjs?v=12',
+  './src/main.mjs?v=13',
   './src/shared/runtime-helpers.mjs',
   './src/shared/id.mjs',
   './src/shared/ui.mjs',
-  './src/features/codex/context.mjs?v=12',
-  './src/features/codex/encryption.mjs?v=12',
+  './src/features/codex/context.mjs?v=13',
+  './src/features/codex/encryption.mjs?v=13',
+  './src/features/time-usage/core.mjs',
   './src/features/strava/core.mjs',
   './src/features/strava/import.mjs',
   './src/features/wealth/core.mjs',
@@ -63,8 +64,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '12') return;
-          url.searchParams.set('timekeeper-update', '12');
+          if (url.searchParams.get('timekeeper-update') === '13') return;
+          url.searchParams.set('timekeeper-update', '13');
           client.navigate(url.href).catch(() => undefined);
         });
       })

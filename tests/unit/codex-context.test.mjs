@@ -25,6 +25,7 @@ test('buildCodexDevelopmentContext exposes project usage without private domains
           startTime: '2026-07-29T10:00:00.000Z',
           endTime: '2026-07-29T11:00:00.000Z',
           duration: 5400,
+          elapsedSeconds: 1800,
           focusFactor: 1.5,
           source: 'manual'
         }
@@ -44,12 +45,13 @@ test('buildCodexDevelopmentContext exposes project usage without private domains
   assert.equal(context.coverage.sourceEntries, 1);
   assert.equal(context.coverage.rejectedEntries, 0);
   assert.equal(context.usage.windows['7d'].effectiveHours, 1.5);
-  assert.equal(context.usage.windows['7d'].wallClockHours, 1);
+  assert.equal(context.usage.windows['7d'].wallClockHours, 0.5);
   assert.equal(context.projects[0].name, 'Actual Project');
   assert.equal(context.projects[0].weeklyExpectedHours, 10);
   assert.equal(context.projects[0].usage['7d'].effectiveHours, 1.5);
   assert.equal(context.entries[0].description, 'Real workflow');
   assert.equal(context.entries[0].focusFactor, 1.5);
+  assert.equal(context.entries[0].timestampIntervalSeconds, 3600);
   assert.doesNotMatch(JSON.stringify(context), /1500|Private|secret-token/);
 });
 
@@ -95,4 +97,28 @@ test('buildCodexDevelopmentContext preserves legacy start and end aliases', () =
 
   assert.equal(context.coverage.totalEntries, 1);
   assert.equal(context.entries[0].id, 'legacy-entry');
+});
+
+test('buildCodexDevelopmentContext advances active running totals from their last update', () => {
+  const context = buildCodexDevelopmentContext(
+    {
+      entries: [
+        {
+          id: 'running-entry',
+          startTime: '2026-07-30T10:00:00.000Z',
+          endTime: null,
+          isRunning: true,
+          effectiveSeconds: 1800,
+          elapsedSeconds: 1200,
+          lastUpdateTime: '2026-07-30T11:00:00.000Z',
+          focusFactor: 0.5
+        }
+      ]
+    },
+    { now: new Date('2026-07-30T12:00:00.000Z') }
+  );
+
+  assert.equal(context.entries[0].effectiveSeconds, 3600);
+  assert.equal(context.entries[0].wallClockSeconds, 4800);
+  assert.equal(context.entries[0].timestampIntervalSeconds, 7200);
 });

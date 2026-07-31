@@ -29,16 +29,42 @@ function normalizeEntry(entry, nowMs) {
   if (!start) return null;
   const end = toIso(entry?.endTime || entry?.end);
   const focusFactor = getEntryFocusFactor(entry);
-  const savedEffectiveSeconds = finiteNonNegative(entry?.duration, NaN);
-  const elapsedSeconds = Math.max(
+  const savedEffectiveSeconds = finiteNonNegative(
+    entry?.isRunning ? entry?.effectiveSeconds : entry?.duration,
+    NaN
+  );
+  const timestampIntervalSeconds = Math.max(
     0,
     ((end ? new Date(end).getTime() : nowMs) - new Date(start).getTime()) / 1000
   );
-  const effectiveSeconds = Number.isFinite(savedEffectiveSeconds)
+  let effectiveSeconds = Number.isFinite(savedEffectiveSeconds)
     ? savedEffectiveSeconds
-    : elapsedSeconds * focusFactor;
-  const wallClockSeconds =
-    focusFactor > 0 ? effectiveSeconds / focusFactor : effectiveSeconds;
+    : timestampIntervalSeconds * focusFactor;
+  if (
+    Number.isFinite(savedEffectiveSeconds) &&
+    entry?.isRunning &&
+    !entry?.pausedAt
+  ) {
+    const lastUpdate = toIso(entry?.lastUpdateTime) || start;
+    effectiveSeconds +=
+      Math.max(0, (nowMs - new Date(lastUpdate).getTime()) / 1000) *
+      focusFactor;
+  }
+  const savedElapsedSeconds = finiteNonNegative(entry?.elapsedSeconds, NaN);
+  let wallClockSeconds = Number.isFinite(savedElapsedSeconds)
+    ? savedElapsedSeconds
+    : timestampIntervalSeconds;
+  if (
+    Number.isFinite(savedElapsedSeconds) &&
+    entry?.isRunning &&
+    !entry?.pausedAt
+  ) {
+    const lastUpdate = toIso(entry?.lastUpdateTime) || start;
+    wallClockSeconds += Math.max(
+      0,
+      (nowMs - new Date(lastUpdate).getTime()) / 1000
+    );
+  }
   return {
     id: String(entry?.id || ''),
     projectId: String(entry?.projectId || ''),
@@ -48,6 +74,7 @@ function normalizeEntry(entry, nowMs) {
     isRunning: entry?.isRunning === true || !end,
     focusFactor: round(focusFactor, 4),
     wallClockSeconds: Math.round(wallClockSeconds),
+    timestampIntervalSeconds: Math.round(timestampIntervalSeconds),
     effectiveSeconds: Math.round(effectiveSeconds),
     source: String(entry?.source || (entry?.manual ? 'manual' : 'timer'))
   };

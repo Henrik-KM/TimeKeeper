@@ -29,7 +29,7 @@ import {
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
-import { encryptCodexContext } from './features/codex/encryption.mjs?v=12';
+import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
   computeWealthRegression,
   getDefaultWealthHistory,
@@ -47,7 +47,19 @@ import {
   resolveStravaExertion
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
-import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=12';
+import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
+import {
+  computeUnionSeconds,
+  getCapacityShareForDateRange,
+  getEntryElapsedSeconds,
+  getEntryIntegrityReasons,
+  getEntrySource,
+  getEntryTimestampSeconds,
+  getRecentProjectHours,
+  getWeekdayCapacityProfile,
+  groupTimeEntries,
+  normalizeEntryTiming
+} from './features/time-usage/core.mjs';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,
@@ -1686,6 +1698,15 @@ import {
       });
   }
 
+  function normalizeUsagePreferences(value = {}) {
+    const input = value && typeof value === 'object' ? value : {};
+    return {
+      groupEntries: input.groupEntries !== false,
+      learnedWeekdayPacing: input.learnedWeekdayPacing !== false,
+      includeWeekendCapacity: input.includeWeekendCapacity === true
+    };
+  }
+
   function loadData() {
     const raw = localStorage.getItem('timekeeperDataPro');
     if (!raw) {
@@ -1715,6 +1736,7 @@ import {
         updatedAt: null,
         timerPresets: [],
         entryBillingViews: [],
+        usagePreferences: normalizeUsagePreferences(),
         reminderSettings: normalizeReminderSettings(),
         codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
@@ -1729,7 +1751,9 @@ import {
         projects: Array.isArray(parsed.projects)
           ? parsed.projects.map(normalizeProjectData)
           : [],
-        entries: Array.isArray(parsed.entries) ? parsed.entries : [],
+        entries: Array.isArray(parsed.entries)
+          ? parsed.entries.map((entry) => normalizeEntryTiming(entry))
+          : [],
         todos: Array.isArray(parsed.todos) ? parsed.todos : [],
         workouts: applyWorkoutDefaults(
           parsed.workouts || migrateLegacyTodosToWorkouts(parsed.todos)
@@ -1852,6 +1876,7 @@ import {
         updatedAt: parsed.updatedAt || null,
         timerPresets: normalizeTimerPresets(parsed.timerPresets),
         entryBillingViews: normalizeBillingViews(parsed.entryBillingViews),
+        usagePreferences: normalizeUsagePreferences(parsed.usagePreferences),
         reminderSettings: normalizeReminderSettings(parsed.reminderSettings),
         codexIntegration: normalizeCodexIntegration(parsed.codexIntegration),
         focusBlockerSites: normalizeFocusBlockedSites(
@@ -1900,6 +1925,7 @@ import {
         updatedAt: null,
         timerPresets: [],
         entryBillingViews: [],
+        usagePreferences: normalizeUsagePreferences(),
         reminderSettings: normalizeReminderSettings(),
         codexIntegration: makeDefaultCodexIntegration(),
         focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
@@ -2113,6 +2139,11 @@ import {
     return data.entryBillingViews;
   }
 
+  function ensureUsagePreferences() {
+    data.usagePreferences = normalizeUsagePreferences(data.usagePreferences);
+    return data.usagePreferences;
+  }
+
   function ensureReminderSettings() {
     data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
     return data.reminderSettings;
@@ -2157,6 +2188,7 @@ import {
     let invalidRunningEntries = 0;
     let invalidFocusEntries = 0;
     let staleRunningEntries = 0;
+    let integrityReviewEntries = 0;
     const todayStart = startOfLocalDay(now);
 
     data.entries.forEach((entry) => {
@@ -2193,6 +2225,9 @@ import {
           (start && end && end <= start)
         ) {
           invalidStoppedEntries += 1;
+        }
+        if (getEntryIntegrityReasons(entry).length) {
+          integrityReviewEntries += 1;
         }
       }
 
@@ -2232,6 +2267,8 @@ import {
       issueParts.push(`${invalidFocusEntries} invalid focus values`);
     if (staleRunningEntries)
       issueParts.push(`${staleRunningEntries} running timers need review`);
+    if (integrityReviewEntries)
+      issueParts.push(`${integrityReviewEntries} stopped entries need review`);
 
     return {
       duplicateProjectCount,
@@ -2241,8 +2278,10 @@ import {
       invalidRunningEntries,
       invalidFocusEntries,
       staleRunningEntries,
+      integrityReviewEntries,
       repairableCount,
-      totalIssues: repairableCount + staleRunningEntries,
+      totalIssues:
+        repairableCount + staleRunningEntries + integrityReviewEntries,
       issueParts
     };
   }
@@ -2311,20 +2350,31 @@ import {
       }
 
       const duration = Number(entry.duration);
+      const elapsedSeconds = Number(entry.elapsedSeconds);
       const end = new Date(entry.endTime);
       const endValid = !Number.isNaN(end.getTime());
       const durationValid = Number.isFinite(duration) && duration >= 0;
+      const elapsedValid =
+        Number.isFinite(elapsedSeconds) && elapsedSeconds >= 0;
       if (startValid && endValid && end > start) {
-        const computedDuration = Math.floor(
-          ((end.getTime() - start.getTime()) / 1000) * focusFactor
+        const timestampSeconds = Math.floor(
+          (end.getTime() - start.getTime()) / 1000
         );
-        if (!durationValid || duration !== computedDuration) {
-          entry.duration = computedDuration;
+        if (!elapsedValid) {
+          entry.elapsedSeconds = timestampSeconds;
+          changed = true;
+        }
+        if (!durationValid) {
+          entry.duration = Math.floor(timestampSeconds * focusFactor);
           changed = true;
         }
       } else if (startValid && durationValid) {
+        const recoveredElapsed = elapsedValid
+          ? elapsedSeconds
+          : duration / focusFactor;
+        entry.elapsedSeconds = Math.max(0, Math.floor(recoveredElapsed));
         entry.endTime = new Date(
-          start.getTime() + (duration / focusFactor) * 1000
+          start.getTime() + entry.elapsedSeconds * 1000
         ).toISOString();
         changed = true;
       } else {
@@ -2432,6 +2482,8 @@ import {
     const factor = getEntryActiveFactor(entry, runningCount);
     entry.effectiveSeconds =
       (entry.effectiveSeconds || 0) + elapsedSec * factor;
+    entry.elapsedSeconds =
+      Math.max(0, Number(entry.elapsedSeconds) || 0) + elapsedSec;
     entry.lastUpdateTime = now.toISOString();
     return factor;
   }
@@ -2561,6 +2613,7 @@ import {
   let entryDateFrom = '';
   let entryDateTo = '';
   const selectedEntryIds = new Set();
+  const expandedEntryGroupIds = new Set();
   let pendingInstallPrompt = null;
   let pendingServiceWorkerRegistration = null;
   let reloadAfterServiceWorkerUpdate = false;
@@ -3640,6 +3693,10 @@ import {
         );
         const start = new Date(record?.startTime || '');
         const end = new Date(record?.endTime || '');
+        const recordElapsedSeconds =
+          record?.wallSeconds === null || record?.wallSeconds === undefined
+            ? NaN
+            : Math.floor(Number(record.wallSeconds));
         const alreadyImported = importedIds.has(recordId);
         const existingEntry = alreadyImported
           ? data.entries.find(
@@ -3669,6 +3726,10 @@ import {
         const focusPolicyVersion = Number(record?.focusPolicyVersion) || null;
         const codexMetadata = {
           duration: effectiveSeconds,
+          elapsedSeconds:
+            Number.isFinite(recordElapsedSeconds) && recordElapsedSeconds >= 0
+              ? recordElapsedSeconds
+              : Math.floor((end.getTime() - start.getTime()) / 1000),
           focusFactor: recordFocusFactor,
           manualFactor: recordFocusFactor,
           codexFocusPolicyVersion: focusPolicyVersion,
@@ -8194,7 +8255,9 @@ import {
       className: 'mobile-running-timer-sheet',
       description: `${project ? project.name : 'Unknown project'} - ${formatDuration(
         Math.floor(getRunningEntryEffectiveSeconds(entry))
-      )}`
+      )} effective / ${formatDuration(
+        Math.floor(getRunningEntryElapsedSeconds(entry))
+      )} active`
     });
     const projectSelect = createMobileSelect(
       getActiveProjects().map((candidate) => ({
@@ -9406,6 +9469,28 @@ import {
     return sumEntryHours(projectEntries, start, end);
   }
 
+  let weekdayCapacityCache = null;
+  function getPlanningWeekdayCapacity(now = new Date()) {
+    const preferences = ensureUsagePreferences();
+    const cacheKey = [
+      data.updatedAt || '',
+      preferences.learnedWeekdayPacing,
+      preferences.includeWeekendCapacity,
+      formatLocalDateString(now)
+    ].join(':');
+    if (weekdayCapacityCache?.key === cacheKey) {
+      return weekdayCapacityCache.profile;
+    }
+    const profile = preferences.learnedWeekdayPacing
+      ? getWeekdayCapacityProfile(data.entries, {
+          now,
+          includeWeekends: preferences.includeWeekendCapacity
+        })
+      : null;
+    weekdayCapacityCache = { key: cacheKey, profile };
+    return profile;
+  }
+
   function getProjectDailyPlan(project, stats, context, options = {}) {
     const weekContext = context || getCurrentWeekPlanningContext();
     const projectStats = stats || computeProjectStats(project, options);
@@ -9432,10 +9517,29 @@ import {
     const todayIsWorkday =
       countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
     const signedRemainingAtStartOfDay = weeklyTarget - weekHoursBeforeToday;
-    const signedDailyTarget =
+    let signedDailyTarget =
       todayIsWorkday && weekContext.workDaysLeftInWeek > 0
         ? signedRemainingAtStartOfDay / weekContext.workDaysLeftInWeek
         : 0;
+    const preferences = ensureUsagePreferences();
+    const capacityProfile = getPlanningWeekdayCapacity(weekContext.now);
+    if (
+      preferences.learnedWeekdayPacing &&
+      capacityProfile?.learned &&
+      signedRemainingAtStartOfDay > 0
+    ) {
+      const capacity = getCapacityShareForDateRange(
+        weekContext.todayStart,
+        weekContext.startNextWeek,
+        capacityProfile.weights,
+        { includeWeekends: preferences.includeWeekendCapacity }
+      );
+      signedDailyTarget =
+        capacity.totalWeight > 0
+          ? (signedRemainingAtStartOfDay * capacity.todayWeight) /
+            capacity.totalWeight
+          : 0;
+    }
     const dailyTarget = Math.max(0, signedDailyTarget);
     return {
       todayHours,
@@ -9444,6 +9548,10 @@ import {
       dailyTarget,
       signedDailyTarget,
       signedRemainingAtStartOfDay,
+      capacityMode:
+        preferences.learnedWeekdayPacing && capacityProfile?.learned
+          ? 'learned'
+          : 'flat',
       recommendedToday: dailyTarget,
       remainingToday: Math.max(0, dailyTarget - todayHours),
       weeklyRemaining: Math.max(
@@ -9837,20 +9945,7 @@ import {
   }
 
   function getCodexEntryWallSeconds(entry) {
-    const start = new Date(entry?.startTime || '');
-    const end = new Date(entry?.endTime || '');
-    if (
-      !Number.isNaN(start.getTime()) &&
-      !Number.isNaN(end.getTime()) &&
-      end > start
-    ) {
-      return Math.round((end.getTime() - start.getTime()) / 1000);
-    }
-    const effectiveSeconds = Math.max(0, Number(entry?.duration) || 0);
-    const focusFactor = getEntryFocusFactor(entry, 1);
-    return focusFactor > 0
-      ? Math.round(effectiveSeconds / focusFactor)
-      : effectiveSeconds;
+    return getEntryElapsedSeconds(entry);
   }
 
   function getCodexPageData() {
@@ -9945,6 +10040,7 @@ import {
     return {
       today: summarize(todayEntries),
       week: summarize(recentEntries),
+      projectDays: groupTimeEntries(recentEntries).length,
       entries: recentEntries,
       projects: [...projects.values()].sort(
         (a, b) => b.effectiveSeconds - a.effectiveSeconds
@@ -10044,19 +10140,25 @@ import {
       activityGrid,
       'Today',
       formatDuration(report.today.effectiveSeconds),
-      `${formatDuration(report.today.wallSeconds)} wall time`
+      `${formatDuration(report.today.wallSeconds)} active time`
     );
     appendCodexMetric(
       activityGrid,
       'Last 7 Days',
       formatDuration(report.week.effectiveSeconds),
-      `${formatDuration(report.week.wallSeconds)} wall time`
+      `${formatDuration(report.week.wallSeconds)} active time`
     );
     appendCodexMetric(
       activityGrid,
-      'Sessions',
+      'Records',
       String(report.week.sessions),
       `${report.today.sessions} today`
+    );
+    appendCodexMetric(
+      activityGrid,
+      'Project-days',
+      String(report.projectDays),
+      'Expandable work summaries'
     );
     const weightedFocus =
       report.week.wallSeconds > 0
@@ -10086,7 +10188,7 @@ import {
       const name = document.createElement('strong');
       name.textContent = project.name;
       const detail = document.createElement('span');
-      detail.textContent = `${project.sessions} sessions - ${formatDuration(project.effectiveSeconds)} effective - ${formatDuration(project.wallSeconds)} wall`;
+      detail.textContent = `${project.sessions} records - ${formatDuration(project.effectiveSeconds)} effective - ${formatDuration(project.wallSeconds)} active`;
       copy.appendChild(name);
       copy.appendChild(detail);
       const share = document.createElement('div');
@@ -11710,6 +11812,10 @@ import {
     return Math.max(0, previous + ((now - last) / 1000) * factor);
   }
 
+  function getRunningEntryElapsedSeconds(entry, now = new Date()) {
+    return getEntryElapsedSeconds(entry, now);
+  }
+
   function appendCompactFocusFactorOptions(selectEl) {
     FOCUS_FACTOR_OPTIONS.forEach((option) => {
       const opt = document.createElement('option');
@@ -11785,6 +11891,10 @@ import {
     );
     const delta = actualSeconds * currentFactor;
     entry.effectiveSeconds = Math.max(0, (entry.effectiveSeconds || 0) + delta);
+    entry.elapsedSeconds = Math.max(
+      0,
+      (Number(entry.elapsedSeconds) || 0) + actualSeconds
+    );
     saveData();
     updateTimerSection();
     provideHaptic('beep');
@@ -11826,6 +11936,7 @@ import {
     const project = getEntryProject(entry);
     const focus = getEntryActiveFactor(entry, runningEntries.length);
     const effective = getRunningEntryEffectiveSeconds(entry, now);
+    const elapsed = getRunningEntryElapsedSeconds(entry, now);
     const paused = isTimerPaused(entry);
     const labelText =
       runningEntries.length > 1
@@ -11833,7 +11944,7 @@ import {
         : project
           ? project.name
           : 'Running timer';
-    const detailText = `${formatDuration(Math.floor(effective))} - ${formatFocusPercent(focus)}${paused ? ' - paused' : ''}`;
+    const detailText = `${formatDuration(Math.floor(effective))} eff / ${formatDuration(Math.floor(elapsed))} active - ${formatFocusPercent(focus)}${paused ? ' - paused' : ''}`;
     const renderKey = [
       entry.id,
       runningEntries.map((runningEntry) => runningEntry.id).join(','),
@@ -12142,9 +12253,11 @@ import {
             'runningElapsed-' + entry.id
           );
           if (elapsedSpan)
-            elapsedSpan.textContent =
-              formatDuration(Math.floor(effective)) +
-              (paused ? ' (paused)' : '');
+            elapsedSpan.textContent = `${formatDuration(
+              Math.floor(effective)
+            )} effective / ${formatDuration(
+              Math.floor(getRunningEntryElapsedSeconds(entry, now))
+            )} active${paused ? ' (paused)' : ''}`;
           // Update factor display as percentage
           const factorSpan = document.getElementById(
             'runningFactor-' + entry.id
@@ -12328,10 +12441,16 @@ import {
       );
       entry.effectiveSeconds =
         Math.max(0, (now - parsedStart) / 1000) * activeFactor;
+      entry.elapsedSeconds = Math.max(0, (now - parsedStart) / 1000);
     } else {
       entry.effectiveSeconds =
         entry.effectiveSeconds ||
         Math.max(0, (now - parsedStart) / 1000) * previousFactor;
+      const savedElapsedSeconds = Number(entry.elapsedSeconds);
+      entry.elapsedSeconds =
+        Number.isFinite(savedElapsedSeconds) && savedElapsedSeconds >= 0
+          ? savedElapsedSeconds
+          : Math.max(0, (now - parsedStart) / 1000);
     }
     saveData();
     refreshAllViews();
@@ -12355,6 +12474,9 @@ import {
     });
     // Finalize the stopped entry
     const finalSeconds = toStop.effectiveSeconds || 0;
+    toStop.elapsedSeconds = Math.floor(
+      Math.max(0, Number(toStop.elapsedSeconds) || 0)
+    );
     toStop.endTime = now.toISOString();
     toStop.duration = Math.floor(finalSeconds);
     toStop.isRunning = false;
@@ -12434,6 +12556,7 @@ import {
       isRunning: true,
       createdAt: now.toISOString(),
       effectiveSeconds: initialHours * 3600,
+      elapsedSeconds: initialHours * 3600,
       lastUpdateTime: now.toISOString(),
       factor: newEntryFactor,
       focusFactor: newEntryFactor,
@@ -12507,6 +12630,7 @@ import {
         rawDuration = Math.floor(roundedMinutes * 60);
       }
       e.duration = rawDuration;
+      e.elapsedSeconds = Math.floor(Math.max(0, Number(e.elapsedSeconds) || 0));
       e.endTime = now.toISOString();
       e.isRunning = false;
       e.focusFactor = getEntryFocusFactor(e, n);
@@ -12886,6 +13010,46 @@ import {
       .slice(0, limit);
   }
 
+  function getActiveProjectsByRecentAndUrgency(now = new Date()) {
+    const projects = getActiveProjects();
+    if (projects.length < 2) return projects;
+    const recentHours = getRecentProjectHours(data.entries, { now, days: 30 });
+    const pinnedIds = new Set(
+      ensureTimerPresets().map((preset) => String(preset.projectId || ''))
+    );
+    const stats = projects.map((project) => ({
+      project,
+      stats: computeProjectStats(project)
+    }));
+    const weekContext = getCurrentWeekPlanningContext(now);
+    const plans = new Map(
+      stats.map((item) => [
+        String(item.project.id),
+        getProjectDailyPlan(item.project, item.stats, weekContext)
+      ])
+    );
+    applyPortfolioDailyCredit(plans);
+    return stats
+      .map((item) => {
+        const projectId = String(item.project.id);
+        const plan = plans.get(projectId);
+        return {
+          project: item.project,
+          recentHours: recentHours.get(projectId) || 0,
+          pressure: getProjectRecommendationPressure(item, plan),
+          pinned: pinnedIds.has(projectId)
+        };
+      })
+      .sort((left, right) => {
+        if (left.pinned !== right.pinned) return left.pinned ? -1 : 1;
+        const leftScore = left.pressure * 4 + left.recentHours;
+        const rightScore = right.pressure * 4 + right.recentHours;
+        if (rightScore !== leftScore) return rightScore - leftScore;
+        return left.project.name.localeCompare(right.project.name);
+      })
+      .map((item) => item.project);
+  }
+
   function getStartableTimerShortcuts({
     recommendation = null,
     runningProjectIds = null,
@@ -12936,7 +13100,7 @@ import {
     }).forEach(addShortcut);
 
     if (shortcuts.length < limit) {
-      getActiveProjects().forEach((project) => {
+      getActiveProjectsByRecentAndUrgency().forEach((project) => {
         const startableProject = getStartableTimerProject(
           project.id,
           runningIds
@@ -12964,8 +13128,43 @@ import {
     });
   }
 
+  function updateRecentDescriptionOptions() {
+    const datalist = document.getElementById('recentDescriptionOptions');
+    if (!datalist) return;
+    const descriptions = new Map();
+    data.entries.forEach((entry) => {
+      const description = String(entry.description || '').trim();
+      if (!description || isCodexTimeEntry(entry)) return;
+      const key = description.toLowerCase();
+      const time = new Date(
+        entry.endTime || entry.createdAt || entry.startTime || 0
+      ).getTime();
+      const current = descriptions.get(key) || {
+        description,
+        count: 0,
+        lastTime: 0
+      };
+      current.count += 1;
+      current.lastTime = Math.max(current.lastTime, time || 0);
+      descriptions.set(key, current);
+    });
+    datalist.replaceChildren();
+    Array.from(descriptions.values())
+      .sort((left, right) => {
+        if (right.count !== left.count) return right.count - left.count;
+        return right.lastTime - left.lastTime;
+      })
+      .slice(0, 10)
+      .forEach((item) => {
+        const option = document.createElement('option');
+        option.value = item.description;
+        datalist.appendChild(option);
+      });
+  }
+
   // Update project selects for timer and manual forms
   function updateProjectSelects() {
+    updateRecentDescriptionOptions();
     const timerSelect = document.getElementById('timerProjectPro');
     const manualSelect = document.getElementById('manualProjectPro');
     const entryFilterSelect = document.getElementById('entryProjectFilter');
@@ -13434,8 +13633,11 @@ import {
       startTime: startTime.toISOString(),
       endTime: endTime.toISOString(),
       duration: durationSeconds,
+      elapsedSeconds: Math.floor(wallSeconds),
       focusFactor: normalizedFocus,
       manualFactor: normalizedFocus,
+      source: 'manual',
+      manual: true,
       isRunning: false,
       createdAt: now.toISOString()
     };
@@ -13830,6 +14032,26 @@ import {
       updateEntriesTable();
     });
   }
+  const toggleEntryGroupingBtn = document.getElementById(
+    'toggleEntryGroupingBtn'
+  );
+  function updateEntryGroupingToggleLabel() {
+    if (!toggleEntryGroupingBtn) return;
+    toggleEntryGroupingBtn.textContent = ensureUsagePreferences().groupEntries
+      ? 'Show Raw'
+      : 'Group Entries';
+  }
+  if (toggleEntryGroupingBtn) {
+    updateEntryGroupingToggleLabel();
+    toggleEntryGroupingBtn.addEventListener('click', () => {
+      const preferences = ensureUsagePreferences();
+      preferences.groupEntries = !preferences.groupEntries;
+      expandedEntryGroupIds.clear();
+      saveData();
+      updateEntryGroupingToggleLabel();
+      updateEntriesTable();
+    });
+  }
   const entryProjectFilterSelect =
     document.getElementById('entryProjectFilter');
   if (entryProjectFilterSelect) {
@@ -14021,6 +14243,250 @@ import {
     container.appendChild(section);
   }
 
+  function getTodayContextSwitchCount(now = new Date()) {
+    const start = startOfLocalDay(now);
+    const end = addLocalDays(start, 1);
+    const entries = data.entries
+      .filter((entry) => entryOverlapsDateRange(entry, start, end))
+      .slice()
+      .sort(
+        (left, right) => new Date(left.startTime) - new Date(right.startTime)
+      );
+    let switches = 0;
+    for (let index = 1; index < entries.length; index += 1) {
+      if (
+        String(entries[index - 1].projectId) !==
+        String(entries[index].projectId)
+      ) {
+        switches += 1;
+      }
+    }
+    return switches;
+  }
+
+  function renderTodayProjectLanes(container, runningEntries, recommendation) {
+    const ranked = getActiveProjectsByRecentAndUrgency();
+    if (!ranked.length) return;
+    const runningByProject = new Map(
+      runningEntries.map((entry) => [String(entry.projectId), entry])
+    );
+    const recentHours = getRecentProjectHours(data.entries, { days: 30 });
+    const selected = [];
+    const addProject = (project) => {
+      if (
+        !project ||
+        selected.some((item) => String(item.id) === String(project.id))
+      ) {
+        return;
+      }
+      selected.push(project);
+    };
+    runningEntries.forEach((entry) => addProject(getEntryProject(entry)));
+    addProject(recommendation?.project);
+    ranked.forEach(addProject);
+
+    const section = document.createElement('div');
+    section.className = 'today-project-lanes';
+    const header = document.createElement('div');
+    header.className = 'today-project-lanes-header';
+    const title = document.createElement('strong');
+    title.textContent = 'Project lanes';
+    const switches = document.createElement('span');
+    const switchCount = getTodayContextSwitchCount();
+    switches.textContent = `${switchCount} ${switchCount === 1 ? 'switch' : 'switches'} today`;
+    header.appendChild(title);
+    header.appendChild(switches);
+    section.appendChild(header);
+    const lanes = document.createElement('div');
+    lanes.className = 'today-project-lane-list';
+    selected.slice(0, 4).forEach((project) => {
+      const projectId = String(project.id);
+      const running = runningByProject.get(projectId);
+      const isRecommended =
+        String(recommendation?.project?.id || '') === projectId;
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.className = `today-project-lane${running ? ' running' : ''}${isRecommended ? ' recommended' : ''}`;
+      const name = document.createElement('strong');
+      name.textContent = project.name;
+      const detail = document.createElement('span');
+      detail.textContent = running
+        ? isTimerPaused(running)
+          ? 'Paused'
+          : 'Running'
+        : isRecommended
+          ? `${formatRecommendationHours(getDailyPlanRecommendedRemaining(recommendation.dailyPlan))}h next`
+          : `${(recentHours.get(projectId) || 0).toFixed(1)}h recent`;
+      button.appendChild(name);
+      button.appendChild(detail);
+      button.addEventListener('click', () => {
+        if (running) {
+          activateSection('timer');
+          return;
+        }
+        startTimerShortcut(
+          {
+            project,
+            description: '',
+            focusFactor: DEFAULT_FOCUS_FACTOR
+          },
+          { navigate: true }
+        );
+      });
+      lanes.appendChild(button);
+    });
+    section.appendChild(lanes);
+    const preferences = ensureUsagePreferences();
+    const controls = document.createElement('div');
+    controls.className = 'today-capacity-controls';
+    const paceButton = document.createElement('button');
+    paceButton.type = 'button';
+    paceButton.className = 'today-capacity-toggle';
+    paceButton.textContent = preferences.learnedWeekdayPacing
+      ? 'Learned pace'
+      : 'Flat pace';
+    paceButton.title = 'Toggle learned weekday capacity';
+    paceButton.addEventListener('click', () => {
+      preferences.learnedWeekdayPacing = !preferences.learnedWeekdayPacing;
+      weekdayCapacityCache = null;
+      saveData();
+      refreshAllViews();
+    });
+    controls.appendChild(paceButton);
+    const weekendButton = document.createElement('button');
+    weekendButton.type = 'button';
+    weekendButton.className = 'today-capacity-toggle';
+    weekendButton.textContent = preferences.includeWeekendCapacity
+      ? 'Weekends on'
+      : 'Weekends off';
+    weekendButton.title = 'Toggle weekend planning capacity';
+    weekendButton.addEventListener('click', () => {
+      preferences.includeWeekendCapacity = !preferences.includeWeekendCapacity;
+      weekdayCapacityCache = null;
+      saveData();
+      refreshAllViews();
+    });
+    controls.appendChild(weekendButton);
+    section.appendChild(controls);
+    container.appendChild(section);
+  }
+
+  function getIntegrityReviewEntries() {
+    return data.entries
+      .filter((entry) => getEntryIntegrityReasons(entry).length)
+      .slice()
+      .sort(
+        (left, right) => new Date(right.startTime) - new Date(left.startTime)
+      );
+  }
+
+  function confirmEntryIntegrity(entry) {
+    if (!entry) return;
+    const reasons = getEntryIntegrityReasons(entry);
+    entry.integrityReviewedAt = new Date().toISOString();
+    entry.integrityReviewReasons = reasons;
+  }
+
+  function openIntegrityEntryReview(entryId) {
+    const entry = data.entries.find(
+      (candidate) => String(candidate.id) === String(entryId)
+    );
+    if (!entry) return;
+    const project = getEntryProject(entry);
+    const reasons = getEntryIntegrityReasons(entry);
+    const sheet = createMobileSheet('Review recorded time', {
+      className: 'mobile-entry-review-sheet',
+      description: `${project?.name || 'Unknown project'} - ${formatDateTime(entry.startTime)}`
+    });
+    const summary = document.createElement('div');
+    summary.className = 'mobile-review-summary';
+    [
+      [formatDuration(getEntryElapsedSeconds(entry)), 'Active elapsed'],
+      [formatDuration(getEntryTimestampSeconds(entry)), 'Timestamp span'],
+      [formatDuration(Number(entry.duration) || 0), 'Effective'],
+      [reasons.includes('crosses-day') ? 'Crosses day' : 'Same day', 'Boundary']
+    ].forEach(([value, label]) => {
+      const item = document.createElement('div');
+      item.className = 'today-command-item';
+      const span = document.createElement('span');
+      span.textContent = label;
+      const strong = document.createElement('strong');
+      strong.textContent = value;
+      item.appendChild(span);
+      item.appendChild(strong);
+      summary.appendChild(item);
+    });
+    sheet.body.appendChild(summary);
+    sheet.addAction('Confirm', 'primary', () => {
+      const snapshot = cloneData();
+      confirmEntryIntegrity(entry);
+      saveData();
+      refreshAllViews();
+      sheet.close();
+      offerUndo('Recorded time confirmed.', snapshot);
+    });
+    sheet.addAction('Trim / Edit', 'secondary', () => {
+      sheet.close();
+      editStoppedEntry(entry.id);
+    });
+    sheet.addAction('Split', 'secondary', () => {
+      sheet.close();
+      splitStoppedEntry(entry.id);
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openTimeIntegrityReviewSheet() {
+    const entries = getIntegrityReviewEntries();
+    const sheet = createMobileSheet('Time review', {
+      className: 'mobile-entry-review-sheet',
+      description: `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} need confirmation`
+    });
+    const list = document.createElement('div');
+    list.className = 'mobile-review-list';
+    entries.slice(0, 20).forEach((entry) => {
+      const project = getEntryProject(entry);
+      const row = document.createElement('button');
+      row.type = 'button';
+      row.className = 'mobile-review-row mobile-review-entry-button';
+      const copy = document.createElement('span');
+      copy.textContent = `${project?.name || 'Unknown project'} - ${formatDuration(getEntryElapsedSeconds(entry))} active - ${formatDateTime(entry.startTime)}`;
+      const action = document.createElement('strong');
+      action.textContent = 'Review';
+      row.appendChild(copy);
+      row.appendChild(action);
+      row.addEventListener('click', () => {
+        sheet.close();
+        openIntegrityEntryReview(entry.id);
+      });
+      list.appendChild(row);
+    });
+    if (!entries.length) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent = 'No recorded-time entries need review.';
+      list.appendChild(empty);
+    }
+    sheet.body.appendChild(list);
+    if (entries.length) {
+      sheet.addAction('Confirm All', 'secondary', async () => {
+        const ok = await requestConfirm({
+          title: 'Confirm Recorded Time',
+          message: `Mark all ${entries.length} reviewed entries as intentional?`,
+          confirmLabel: 'Confirm All'
+        });
+        if (!ok) return;
+        const snapshot = cloneData();
+        entries.forEach(confirmEntryIntegrity);
+        saveData();
+        refreshAllViews();
+        sheet.close();
+        offerUndo('Recorded times confirmed.', snapshot);
+      });
+    }
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
   function getReviewBounds(scope) {
     if (scope === 'week') return getWeekBounds(0);
     return getDayBounds(-1);
@@ -14033,11 +14499,8 @@ import {
     const entries = data.entries.filter((entry) =>
       entryOverlapsDateRange(entry, from, to)
     );
-    const missingDescriptions = entries.filter(
-      (entry) => !entry.isRunning && !String(entry.description || '').trim()
-    );
-    const longEntries = entries.filter(
-      (entry) => !entry.isRunning && (Number(entry.duration) || 0) >= 4 * 3600
+    const integrityEntries = entries.filter(
+      (entry) => getEntryIntegrityReasons(entry).length
     );
     const staleRunning = entries.filter(
       (entry) => entry.isRunning && getRunningTimerWarnings(entry).length
@@ -14059,8 +14522,7 @@ import {
       scope,
       bounds,
       entries,
-      missingDescriptions,
-      longEntries,
+      integrityEntries,
       staleRunning,
       emptyDays: days
     };
@@ -14079,8 +14541,7 @@ import {
     summary.className = 'mobile-review-summary';
     [
       [`${review.entries.length} entries`, 'Entries'],
-      [`${review.missingDescriptions.length}`, 'Missing descriptions'],
-      [`${review.longEntries.length}`, 'Long entries'],
+      [`${review.integrityEntries.length}`, 'Time review'],
       [`${review.emptyDays.length}`, 'Empty days']
     ].forEach(([value, label]) => {
       const item = document.createElement('div');
@@ -14113,20 +14574,12 @@ import {
       row.appendChild(button);
       list.appendChild(row);
     };
-    review.missingDescriptions.slice(0, 3).forEach((entry) => {
+    review.integrityEntries.slice(0, 5).forEach((entry) => {
       const project = getEntryProject(entry);
       addReviewAction(
-        `${project ? project.name : 'Entry'} is missing a description.`,
-        'Edit',
-        () => editStoppedEntry(entry.id)
-      );
-    });
-    review.longEntries.slice(0, 3).forEach((entry) => {
-      const project = getEntryProject(entry);
-      addReviewAction(
-        `${project ? project.name : 'Entry'} is ${formatDuration(entry.duration || 0)}.`,
-        'Split',
-        () => splitStoppedEntry(entry.id)
+        `${project ? project.name : 'Entry'} spans ${formatDuration(getEntryTimestampSeconds(entry))} and records ${formatDuration(getEntryElapsedSeconds(entry))} active.`,
+        'Review',
+        () => openIntegrityEntryReview(entry.id)
       );
     });
     review.emptyDays.slice(0, 3).forEach((day) => {
@@ -14238,7 +14691,8 @@ import {
     runningEntries,
     activeEntries,
     stats,
-    recommendation
+    recommendation,
+    audit
   }) {
     if (!isMobileViewport()) return false;
     panel.classList.add('mobile-today-panel');
@@ -14332,7 +14786,17 @@ import {
           : codexUsage.todayValue
       );
     }
+    if (audit.integrityReviewEntries > 0) {
+      appendTodayCard(
+        'Time review',
+        `${audit.integrityReviewEntries} ${audit.integrityReviewEntries === 1 ? 'entry' : 'entries'}`,
+        'risk',
+        openTimeIntegrityReviewSheet
+      );
+    }
     panel.appendChild(primary);
+
+    renderTodayProjectLanes(panel, runningEntries, recommendation);
 
     const runningProjectIds = new Set(
       runningEntries.map((entry) => String(entry.projectId))
@@ -14391,7 +14855,8 @@ import {
         activeEntries,
         stats,
         recommendation,
-        settings
+        settings,
+        audit
       })
     ) {
       return;
@@ -14458,7 +14923,16 @@ import {
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
     }
+    if (audit.integrityReviewEntries > 0) {
+      addItem(
+        'Time review',
+        `${audit.integrityReviewEntries} ${audit.integrityReviewEntries === 1 ? 'entry' : 'entries'}`,
+        'risk'
+      );
+    }
     panel.appendChild(grid);
+
+    renderTodayProjectLanes(panel, runningEntries, recommendation);
 
     const quickTimerShortcuts = getStartableTimerShortcuts({
       recommendation,
@@ -14518,6 +14992,14 @@ import {
 
     const actions = document.createElement('div');
     actions.className = 'today-command-actions';
+    if (audit.integrityReviewEntries > 0) {
+      const reviewBtn = document.createElement('button');
+      reviewBtn.type = 'button';
+      reviewBtn.className = 'btn secondary';
+      reviewBtn.textContent = 'Review Time';
+      reviewBtn.addEventListener('click', openTimeIntegrityReviewSheet);
+      actions.appendChild(reviewBtn);
+    }
     if (runningEntries.length) {
       const stopBtn = document.createElement('button');
       stopBtn.type = 'button';
@@ -14833,6 +15315,14 @@ import {
     offerUndo('Entry deleted.', snapshot);
   }
 
+  function expandGroupedEntry(entryId) {
+    if (!ensureUsagePreferences().groupEntries) return;
+    const group = groupTimeEntries(data.entries).find((candidate) =>
+      candidate.entries.some((entry) => String(entry.id) === String(entryId))
+    );
+    if (group?.count > 1) expandedEntryGroupIds.add(group.id);
+  }
+
   function duplicateStoppedEntry(entryId) {
     const entry = data.entries.find(
       (candidate) => String(candidate.id) === String(entryId)
@@ -14856,6 +15346,7 @@ import {
     delete duplicate.factor;
     delete duplicate.pausedAt;
     data.entries.push(duplicate);
+    expandGroupedEntry(duplicate.id);
     saveData();
     refreshAllViews();
     offerUndo('Entry duplicated.', snapshot);
@@ -14914,12 +15405,15 @@ import {
       return;
     }
     const focusFactor = getEntryFocusFactor(entry, 1);
-    const firstDuration = Math.floor(
-      ((splitTime.getTime() - start.getTime()) / 1000) * focusFactor
-    );
-    const secondDuration = Math.floor(
-      ((end.getTime() - splitTime.getTime()) / 1000) * focusFactor
-    );
+    const spanSeconds = (end.getTime() - start.getTime()) / 1000;
+    const firstRatio =
+      (splitTime.getTime() - start.getTime()) / 1000 / spanSeconds;
+    const originalDuration = Math.max(0, Number(entry.duration) || 0);
+    const originalElapsed = getEntryElapsedSeconds(entry);
+    const firstDuration = Math.floor(originalDuration * firstRatio);
+    const secondDuration = Math.max(0, originalDuration - firstDuration);
+    const firstElapsed = Math.floor(originalElapsed * firstRatio);
+    const secondElapsed = Math.max(0, originalElapsed - firstElapsed);
     if (firstDuration <= 0 || secondDuration <= 0) {
       showToast('Split would create an empty entry.');
       return;
@@ -14932,6 +15426,7 @@ import {
       startTime: splitTime.toISOString(),
       endTime: end.toISOString(),
       duration: secondDuration,
+      elapsedSeconds: secondElapsed,
       createdAt: new Date().toISOString(),
       isRunning: false,
       focusFactor,
@@ -14941,9 +15436,11 @@ import {
     delete secondEntry.lastUpdateTime;
     delete secondEntry.factor;
     delete secondEntry.pausedAt;
+    delete secondEntry.integrityReviewedAt;
     entry.description = String(values.firstDescription || '').trim();
     entry.endTime = splitTime.toISOString();
     entry.duration = firstDuration;
+    entry.elapsedSeconds = firstElapsed;
     entry.focusFactor = focusFactor;
     entry.manualFactor = focusFactor;
     entry.isRunning = false;
@@ -14951,7 +15448,9 @@ import {
     delete entry.lastUpdateTime;
     delete entry.factor;
     delete entry.pausedAt;
+    delete entry.integrityReviewedAt;
     data.entries.push(secondEntry);
+    expandGroupedEntry(entry.id);
     saveData();
     refreshAllViews();
     offerUndo('Entry split.', snapshot);
@@ -15067,6 +15566,10 @@ import {
       Math.max(0, (parsedEnd.getTime() - parsedStart.getTime()) / 1000) *
         focusFactor
     );
+    entry.elapsedSeconds = Math.floor(
+      Math.max(0, (parsedEnd.getTime() - parsedStart.getTime()) / 1000)
+    );
+    delete entry.integrityReviewedAt;
     entry.focusFactor = focusFactor;
     entry.manualFactor = focusFactor;
     entry.isRunning = false;
@@ -15307,13 +15810,24 @@ import {
     const summaryEl = document.getElementById('entrySummaryPro');
     if (!summaryEl) return;
     summaryEl.innerHTML = '';
-    const totalHours = entriesToShow.reduce(
-      (sum, entry) => sum + ((entry.duration || 0) / 3600 || 0),
+    const totalEffectiveSeconds = entriesToShow.reduce(
+      (sum, entry) => sum + Math.max(0, Number(entry.duration) || 0),
       0
     );
+    const totalElapsedSeconds = entriesToShow.reduce(
+      (sum, entry) => sum + getEntryElapsedSeconds(entry),
+      0
+    );
+    const unionSeconds = computeUnionSeconds(entriesToShow);
+    const groups = groupTimeEntries(entriesToShow);
+    const sourceCounts = entriesToShow.reduce((counts, entry) => {
+      const source = getEntrySource(entry);
+      counts[source] = (counts[source] || 0) + 1;
+      return counts;
+    }, {});
     const totalEarned = entriesToShow.reduce((sum, entry) => {
       const project = getEntryProject(entry);
-      const hours = (entry.duration || 0) / 3600 || 0;
+      const hours = Math.max(0, Number(entry.duration) || 0) / 3600;
       return sum + (project ? hours * (Number(project.hourlyRate) || 0) : 0);
     }, 0);
     const { fromDate, toExclusive, hasDateFilter } = getEntryDateRangeFilter();
@@ -15324,10 +15838,16 @@ import {
         : 'Last 30 days';
     const labels = [
       `${entriesToShow.length} ${entriesToShow.length === 1 ? 'entry' : 'entries'}`,
-      `${formatDuration(Math.round(totalHours * 3600))} tracked`,
+      ensureUsagePreferences().groupEntries
+        ? `${groups.length} work ${groups.length === 1 ? 'episode' : 'episodes'}`
+        : '',
+      `${formatDuration(totalEffectiveSeconds)} effective`,
+      `${formatDuration(totalElapsedSeconds)} active`,
+      `${formatDuration(unionSeconds)} unique`,
+      `${sourceCounts.timer || 0} timer / ${sourceCounts.codex || 0} Codex / ${sourceCounts.manual || 0} manual`,
       `${formatCurrency(totalEarned)} billable`,
       scopeText
-    ];
+    ].filter(Boolean);
     labels.forEach((label) => {
       const pill = document.createElement('span');
       pill.className = 'entry-summary-pill';
@@ -15573,6 +16093,26 @@ import {
     bulkEl.appendChild(exportSummaryBtn);
   }
 
+  function setStoppedEntryElapsedSeconds(entry, requestedElapsedSeconds) {
+    if (!entry || entry.isRunning) return false;
+    const start = new Date(entry.startTime || '');
+    if (Number.isNaN(start.getTime())) return false;
+    const previousElapsed = getEntryElapsedSeconds(entry);
+    const nextElapsed = Math.max(0, Math.floor(requestedElapsedSeconds));
+    const elapsedDelta = nextElapsed - previousElapsed;
+    const focusFactor = getEntryFocusFactor(entry, 1);
+    entry.elapsedSeconds = nextElapsed;
+    entry.duration = Math.max(
+      0,
+      Math.floor((Number(entry.duration) || 0) + elapsedDelta * focusFactor)
+    );
+    entry.endTime = new Date(
+      start.getTime() + nextElapsed * 1000
+    ).toISOString();
+    delete entry.integrityReviewedAt;
+    return true;
+  }
+
   // Entries table
   function updateEntriesTable() {
     const tbody = document.getElementById('entriesTableBodyPro');
@@ -15599,223 +16139,276 @@ import {
     const sorted = [...entriesToShow].sort(
       (a, b) => new Date(b.startTime) - new Date(a.startTime)
     );
-    sorted.forEach((entry) => {
-      const tr = document.createElement('tr');
-      attachEntrySwipeActions(tr, entry);
-      const project = getEntryProject(entry);
-      const hours = entry.duration ? entry.duration / 3600 : 0;
-      const total = project ? hours * project.hourlyRate : 0;
-      const selectTd = appendEntryCell(tr, 'Select', '');
-      selectTd.className = 'entry-select-cell';
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.checked = selectedEntryIds.has(String(entry.id));
-      checkbox.addEventListener('change', () => {
-        if (checkbox.checked) selectedEntryIds.add(String(entry.id));
-        else selectedEntryIds.delete(String(entry.id));
-        renderEntryBulkActions(entriesToShow);
-      });
-      selectTd.appendChild(checkbox);
-      appendEntryCell(tr, 'Project', project ? project.name : '');
-      appendEntryCell(tr, 'Description', entry.description || '');
-      appendEntryCell(tr, 'Start', formatDateTime(entry.startTime));
-      appendEntryCell(
-        tr,
-        'End',
-        entry.endTime
-          ? formatDateTime(entry.endTime)
-          : entry.isRunning
-            ? '-'
-            : ''
-      );
-      appendEntryCell(
-        tr,
-        'Duration',
-        entry.duration
-          ? formatDuration(entry.duration)
-          : entry.isRunning
-            ? 'Running...'
-            : ''
-      );
-      appendEntryCell(
-        tr,
-        'Focus',
-        formatFocusPercent(getEntryFocusFactor(entry, 1))
-      );
-      appendEntryCell(tr, 'Total', formatCurrency(total));
-      const actionsTd = appendEntryCell(tr, 'Actions', '');
-      // Action cell: add nudge and snap controls plus delete button
-      actionsTd.className = 'entry-actions';
-      const actionSheetBtn = document.createElement('button');
-      actionSheetBtn.type = 'button';
-      actionSheetBtn.className = 'btn primary entry-action-sheet-btn';
-      actionSheetBtn.textContent = 'Actions';
-      actionSheetBtn.addEventListener('click', () => {
-        openEntryActionSheet(entry.id);
-      });
-      actionsTd.appendChild(actionSheetBtn);
-      // -5m button
-      const minusBtn = document.createElement('button');
-      minusBtn.className = 'btn secondary';
-      minusBtn.style.padding = '0.25rem 0.5rem';
-      minusBtn.style.fontSize = '0.7rem';
-      minusBtn.textContent = '-5m';
-      minusBtn.addEventListener('click', () => {
-        // Provide quick beep feedback
-        provideHaptic('beep');
-        const snapshot = cloneData();
-        // Subtract 5 minutes (300 seconds) from the entry duration
-        let newDur = (entry.duration || 0) - 300;
-        if (newDur < 0) newDur = 0;
-        entry.duration = newDur;
-        // Update endTime based on new duration
-        const start = new Date(entry.startTime);
-        entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
-        saveData();
-        refreshAllViews();
-        offerUndo('Entry duration edited.', snapshot);
-      });
-      actionsTd.appendChild(minusBtn);
-      // +5m button
-      const plusBtn = document.createElement('button');
-      plusBtn.className = 'btn secondary';
-      plusBtn.style.padding = '0.25rem 0.5rem';
-      plusBtn.style.fontSize = '0.7rem';
-      plusBtn.style.marginLeft = '0.25rem';
-      plusBtn.textContent = '+5m';
-      plusBtn.addEventListener('click', () => {
-        provideHaptic('beep');
-        const snapshot = cloneData();
-        // Add 5 minutes to the duration
-        let newDur = (entry.duration || 0) + 300;
-        entry.duration = newDur;
-        const start = new Date(entry.startTime);
-        entry.endTime = new Date(start.getTime() + newDur * 1000).toISOString();
-        saveData();
-        refreshAllViews();
-        offerUndo('Entry duration edited.', snapshot);
-      });
-      actionsTd.appendChild(plusBtn);
-      // Snap selector: choose nearest minutes (5,10,15)
-      const snapSelect = document.createElement('select');
-      snapSelect.style.marginLeft = '0.25rem';
-      snapSelect.style.padding = '0.25rem';
-      snapSelect.style.fontSize = '0.7rem';
-      snapSelect.style.border = '1px solid #cbd5e1';
-      snapSelect.style.borderRadius = '0.375rem';
-      // Placeholder option
-      const placeholderOption = document.createElement('option');
-      placeholderOption.value = '';
-      placeholderOption.textContent = 'Snap';
-      snapSelect.appendChild(placeholderOption);
-      [5, 10, 15].forEach((mins) => {
-        const opt = document.createElement('option');
-        opt.value = String(mins);
-        opt.textContent = mins + 'm';
-        snapSelect.appendChild(opt);
-      });
-      snapSelect.addEventListener('change', () => {
-        const val = parseInt(snapSelect.value);
-        if (!isNaN(val) && val > 0) {
-          const snapshot = cloneData();
-          const minutes = (entry.duration || 0) / 60;
-          const snappedMinutes = Math.round(minutes / val) * val;
-          entry.duration = Math.max(0, Math.floor(snappedMinutes * 60));
-          const start = new Date(entry.startTime);
-          entry.endTime = new Date(
-            start.getTime() + entry.duration * 1000
-          ).toISOString();
-          saveData();
-          refreshAllViews();
-          offerUndo('Entry duration edited.', snapshot);
-        }
-        // reset to placeholder
-        snapSelect.value = '';
-      });
-      actionsTd.appendChild(snapSelect);
-      const moveSelect = document.createElement('select');
-      moveSelect.setAttribute('aria-label', 'Move Project');
-      moveSelect.style.marginLeft = '0.25rem';
-      moveSelect.style.padding = '0.25rem';
-      moveSelect.style.fontSize = '0.7rem';
-      moveSelect.style.border = '1px solid #cbd5e1';
-      moveSelect.style.borderRadius = '0.375rem';
-      const movePlaceholder = document.createElement('option');
-      movePlaceholder.value = '';
-      movePlaceholder.textContent = 'Move';
-      moveSelect.appendChild(movePlaceholder);
-      getActiveProjects().forEach((candidate) => {
-        if (String(candidate.id) === String(entry.projectId)) return;
-        const option = document.createElement('option');
-        option.value = candidate.id;
-        option.textContent = candidate.name;
-        moveSelect.appendChild(option);
-      });
-      moveSelect.disabled = moveSelect.options.length <= 1;
-      moveSelect.addEventListener('change', () => {
-        const projectId = moveSelect.value;
-        if (!projectId) return;
-        const project = data.projects.find(
-          (candidate) => String(candidate.id) === String(projectId)
-        );
-        if (!project) {
-          moveSelect.value = '';
-          return;
-        }
-        const snapshot = cloneData();
-        entry.projectId = project.id;
-        saveData();
-        refreshAllViews();
-        offerUndo('Entry moved.', snapshot);
-      });
-      actionsTd.appendChild(moveSelect);
-      const editBtn = document.createElement('button');
-      editBtn.type = 'button';
-      editBtn.className = 'btn secondary';
-      editBtn.style.padding = '0.25rem 0.5rem';
-      editBtn.style.fontSize = '0.7rem';
-      editBtn.style.marginLeft = '0.25rem';
-      editBtn.textContent = 'Edit';
-      editBtn.addEventListener('click', () => {
-        editStoppedEntry(entry.id);
-      });
-      actionsTd.appendChild(editBtn);
-      const splitBtn = document.createElement('button');
-      splitBtn.type = 'button';
-      splitBtn.className = 'btn secondary';
-      splitBtn.style.padding = '0.25rem 0.5rem';
-      splitBtn.style.fontSize = '0.7rem';
-      splitBtn.style.marginLeft = '0.25rem';
-      splitBtn.textContent = 'Split';
-      splitBtn.disabled = !!entry.isRunning || !entry.endTime;
-      splitBtn.addEventListener('click', () => {
-        splitStoppedEntry(entry.id);
-      });
-      actionsTd.appendChild(splitBtn);
-      const duplicateBtn = document.createElement('button');
-      duplicateBtn.type = 'button';
-      duplicateBtn.className = 'btn secondary';
-      duplicateBtn.style.padding = '0.25rem 0.5rem';
-      duplicateBtn.style.fontSize = '0.7rem';
-      duplicateBtn.style.marginLeft = '0.25rem';
-      duplicateBtn.textContent = 'Duplicate';
-      duplicateBtn.disabled = !!entry.isRunning;
-      duplicateBtn.addEventListener('click', () => {
-        duplicateStoppedEntry(entry.id);
-      });
-      actionsTd.appendChild(duplicateBtn);
-      // Delete button
-      const delBtn = document.createElement('button');
-      delBtn.className = 'btn danger';
-      delBtn.style.padding = '0.25rem 0.5rem';
-      delBtn.style.fontSize = '0.7rem';
-      delBtn.style.marginLeft = '0.25rem';
-      delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', () => {
-        confirmDeleteEntry(entry.id);
-      });
-      actionsTd.appendChild(delBtn);
-      tbody.appendChild(tr);
+    const groups = ensureUsagePreferences().groupEntries
+      ? groupTimeEntries(sorted)
+      : sorted.map((entry, index) => ({
+          id: `raw:${entry.id || index}`,
+          count: 1,
+          entries: [entry]
+        }));
+    groups.forEach((group) => {
+      if (group.count > 1) {
+        const headerRow = document.createElement('tr');
+        headerRow.className = 'entry-group-row';
+        const cell = document.createElement('td');
+        cell.colSpan = 9;
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.className = 'entry-group-toggle';
+        const project = getEntryProject(group.entries[0]);
+        const sourceLabel =
+          group.source === 'codex'
+            ? 'Codex activity'
+            : group.source === 'manual'
+              ? 'Manual entries'
+              : 'Timer episode';
+        const label = document.createElement('strong');
+        label.textContent = `${project?.name || 'Unknown project'} - ${sourceLabel}`;
+        const detail = document.createElement('span');
+        detail.textContent = `${group.dateKey} - ${group.count} records - ${formatDuration(group.effectiveSeconds)} effective - ${formatDuration(group.elapsedSeconds)} active`;
+        const state = document.createElement('b');
+        state.textContent = expandedEntryGroupIds.has(group.id)
+          ? 'Collapse'
+          : 'Expand';
+        button.appendChild(label);
+        button.appendChild(detail);
+        button.appendChild(state);
+        button.addEventListener('click', () => {
+          if (expandedEntryGroupIds.has(group.id)) {
+            expandedEntryGroupIds.delete(group.id);
+          } else {
+            expandedEntryGroupIds.add(group.id);
+          }
+          updateEntriesTable();
+        });
+        cell.appendChild(button);
+        headerRow.appendChild(cell);
+        tbody.appendChild(headerRow);
+      }
+      if (group.count > 1 && !expandedEntryGroupIds.has(group.id)) return;
+      group.entries
+        .slice()
+        .sort((a, b) => new Date(b.startTime) - new Date(a.startTime))
+        .forEach((entry) => {
+          const tr = document.createElement('tr');
+          attachEntrySwipeActions(tr, entry);
+          const project = getEntryProject(entry);
+          const hours = entry.duration ? entry.duration / 3600 : 0;
+          const total = project ? hours * project.hourlyRate : 0;
+          const selectTd = appendEntryCell(tr, 'Select', '');
+          selectTd.className = 'entry-select-cell';
+          const checkbox = document.createElement('input');
+          checkbox.type = 'checkbox';
+          checkbox.checked = selectedEntryIds.has(String(entry.id));
+          checkbox.addEventListener('change', () => {
+            if (checkbox.checked) selectedEntryIds.add(String(entry.id));
+            else selectedEntryIds.delete(String(entry.id));
+            renderEntryBulkActions(entriesToShow);
+          });
+          selectTd.appendChild(checkbox);
+          appendEntryCell(tr, 'Project', project ? project.name : '');
+          const entrySource = getEntrySource(entry);
+          appendEntryCell(
+            tr,
+            'Description',
+            String(entry.description || '').trim() ||
+              (entrySource === 'codex'
+                ? 'Codex activity'
+                : entrySource === 'manual'
+                  ? 'Manual time'
+                  : 'Project time')
+          );
+          appendEntryCell(tr, 'Start', formatDateTime(entry.startTime));
+          appendEntryCell(
+            tr,
+            'End',
+            entry.endTime
+              ? formatDateTime(entry.endTime)
+              : entry.isRunning
+                ? '-'
+                : ''
+          );
+          appendEntryCell(
+            tr,
+            'Duration',
+            entry.duration
+              ? `${formatDuration(entry.duration)} eff / ${formatDuration(getEntryElapsedSeconds(entry))} active`
+              : entry.isRunning
+                ? 'Running...'
+                : ''
+          );
+          appendEntryCell(
+            tr,
+            'Focus',
+            formatFocusPercent(getEntryFocusFactor(entry, 1))
+          );
+          appendEntryCell(tr, 'Total', formatCurrency(total));
+          const actionsTd = appendEntryCell(tr, 'Actions', '');
+          // Action cell: add nudge and snap controls plus delete button
+          actionsTd.className = 'entry-actions';
+          const actionSheetBtn = document.createElement('button');
+          actionSheetBtn.type = 'button';
+          actionSheetBtn.className = 'btn primary entry-action-sheet-btn';
+          actionSheetBtn.textContent = 'Actions';
+          actionSheetBtn.addEventListener('click', () => {
+            openEntryActionSheet(entry.id);
+          });
+          actionsTd.appendChild(actionSheetBtn);
+          // -5m button
+          const minusBtn = document.createElement('button');
+          minusBtn.className = 'btn secondary';
+          minusBtn.style.padding = '0.25rem 0.5rem';
+          minusBtn.style.fontSize = '0.7rem';
+          minusBtn.textContent = '-5m';
+          minusBtn.addEventListener('click', () => {
+            // Provide quick beep feedback
+            provideHaptic('beep');
+            const snapshot = cloneData();
+            setStoppedEntryElapsedSeconds(
+              entry,
+              getEntryElapsedSeconds(entry) - 300
+            );
+            saveData();
+            refreshAllViews();
+            offerUndo('Entry duration edited.', snapshot);
+          });
+          actionsTd.appendChild(minusBtn);
+          // +5m button
+          const plusBtn = document.createElement('button');
+          plusBtn.className = 'btn secondary';
+          plusBtn.style.padding = '0.25rem 0.5rem';
+          plusBtn.style.fontSize = '0.7rem';
+          plusBtn.style.marginLeft = '0.25rem';
+          plusBtn.textContent = '+5m';
+          plusBtn.addEventListener('click', () => {
+            provideHaptic('beep');
+            const snapshot = cloneData();
+            setStoppedEntryElapsedSeconds(
+              entry,
+              getEntryElapsedSeconds(entry) + 300
+            );
+            saveData();
+            refreshAllViews();
+            offerUndo('Entry duration edited.', snapshot);
+          });
+          actionsTd.appendChild(plusBtn);
+          // Snap selector: choose nearest minutes (5,10,15)
+          const snapSelect = document.createElement('select');
+          snapSelect.style.marginLeft = '0.25rem';
+          snapSelect.style.padding = '0.25rem';
+          snapSelect.style.fontSize = '0.7rem';
+          snapSelect.style.border = '1px solid #cbd5e1';
+          snapSelect.style.borderRadius = '0.375rem';
+          // Placeholder option
+          const placeholderOption = document.createElement('option');
+          placeholderOption.value = '';
+          placeholderOption.textContent = 'Snap';
+          snapSelect.appendChild(placeholderOption);
+          [5, 10, 15].forEach((mins) => {
+            const opt = document.createElement('option');
+            opt.value = String(mins);
+            opt.textContent = mins + 'm';
+            snapSelect.appendChild(opt);
+          });
+          snapSelect.addEventListener('change', () => {
+            const val = parseInt(snapSelect.value);
+            if (!isNaN(val) && val > 0) {
+              const snapshot = cloneData();
+              const minutes = getEntryElapsedSeconds(entry) / 60;
+              const snappedMinutes = Math.round(minutes / val) * val;
+              setStoppedEntryElapsedSeconds(entry, snappedMinutes * 60);
+              saveData();
+              refreshAllViews();
+              offerUndo('Entry duration edited.', snapshot);
+            }
+            // reset to placeholder
+            snapSelect.value = '';
+          });
+          actionsTd.appendChild(snapSelect);
+          const moveSelect = document.createElement('select');
+          moveSelect.setAttribute('aria-label', 'Move Project');
+          moveSelect.style.marginLeft = '0.25rem';
+          moveSelect.style.padding = '0.25rem';
+          moveSelect.style.fontSize = '0.7rem';
+          moveSelect.style.border = '1px solid #cbd5e1';
+          moveSelect.style.borderRadius = '0.375rem';
+          const movePlaceholder = document.createElement('option');
+          movePlaceholder.value = '';
+          movePlaceholder.textContent = 'Move';
+          moveSelect.appendChild(movePlaceholder);
+          getActiveProjects().forEach((candidate) => {
+            if (String(candidate.id) === String(entry.projectId)) return;
+            const option = document.createElement('option');
+            option.value = candidate.id;
+            option.textContent = candidate.name;
+            moveSelect.appendChild(option);
+          });
+          moveSelect.disabled = moveSelect.options.length <= 1;
+          moveSelect.addEventListener('change', () => {
+            const projectId = moveSelect.value;
+            if (!projectId) return;
+            const project = data.projects.find(
+              (candidate) => String(candidate.id) === String(projectId)
+            );
+            if (!project) {
+              moveSelect.value = '';
+              return;
+            }
+            const snapshot = cloneData();
+            entry.projectId = project.id;
+            saveData();
+            refreshAllViews();
+            offerUndo('Entry moved.', snapshot);
+          });
+          actionsTd.appendChild(moveSelect);
+          const editBtn = document.createElement('button');
+          editBtn.type = 'button';
+          editBtn.className = 'btn secondary';
+          editBtn.style.padding = '0.25rem 0.5rem';
+          editBtn.style.fontSize = '0.7rem';
+          editBtn.style.marginLeft = '0.25rem';
+          editBtn.textContent = 'Edit';
+          editBtn.addEventListener('click', () => {
+            editStoppedEntry(entry.id);
+          });
+          actionsTd.appendChild(editBtn);
+          const splitBtn = document.createElement('button');
+          splitBtn.type = 'button';
+          splitBtn.className = 'btn secondary';
+          splitBtn.style.padding = '0.25rem 0.5rem';
+          splitBtn.style.fontSize = '0.7rem';
+          splitBtn.style.marginLeft = '0.25rem';
+          splitBtn.textContent = 'Split';
+          splitBtn.disabled = !!entry.isRunning || !entry.endTime;
+          splitBtn.addEventListener('click', () => {
+            splitStoppedEntry(entry.id);
+          });
+          actionsTd.appendChild(splitBtn);
+          const duplicateBtn = document.createElement('button');
+          duplicateBtn.type = 'button';
+          duplicateBtn.className = 'btn secondary';
+          duplicateBtn.style.padding = '0.25rem 0.5rem';
+          duplicateBtn.style.fontSize = '0.7rem';
+          duplicateBtn.style.marginLeft = '0.25rem';
+          duplicateBtn.textContent = 'Duplicate';
+          duplicateBtn.disabled = !!entry.isRunning;
+          duplicateBtn.addEventListener('click', () => {
+            duplicateStoppedEntry(entry.id);
+          });
+          actionsTd.appendChild(duplicateBtn);
+          // Delete button
+          const delBtn = document.createElement('button');
+          delBtn.className = 'btn danger';
+          delBtn.style.padding = '0.25rem 0.5rem';
+          delBtn.style.fontSize = '0.7rem';
+          delBtn.style.marginLeft = '0.25rem';
+          delBtn.textContent = 'Delete';
+          delBtn.addEventListener('click', () => {
+            confirmDeleteEntry(entry.id);
+          });
+          actionsTd.appendChild(delBtn);
+          tbody.appendChild(tr);
+        });
     });
   }
 
@@ -15847,14 +16440,17 @@ import {
     );
     data.timerPresets = normalizeTimerPresets(data.timerPresets);
     data.entryBillingViews = normalizeBillingViews(data.entryBillingViews);
+    data.usagePreferences = normalizeUsagePreferences(data.usagePreferences);
     data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
     // Remove transient timer fields from imported entries.
+    data.entries = data.entries.map((entry) => normalizeEntryTiming(entry));
     data.entries.forEach((entry) => {
       delete entry.effectiveSeconds;
       delete entry.lastUpdateTime;
       delete entry.factor;
     });
+    updateEntryGroupingToggleLabel();
     let colorChanged = false;
     data.projects.forEach((p) => {
       if (!p.color) {
