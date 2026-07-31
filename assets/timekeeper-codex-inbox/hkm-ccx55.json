@@ -2,19 +2,19 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-31T19:28:02.143Z",
+  "updatedAt": "2026-07-31T19:33:02.116Z",
   "dayStart": "2026-07-30T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-07-31T19:28:02.917Z",
+    "observedAt": "2026-07-31T19:33:03.122Z",
     "primary": {
       "usedPercent": 42,
       "remainingPercent": 58,
       "windowMinutes": 10080,
-      "resetsAt": "2026-08-05T06:38:35.000Z"
+      "resetsAt": "2026-08-05T06:38:36.000Z"
     },
     "secondary": null
   },
@@ -4716,6 +4716,30 @@
           "factor": 0.5,
           "wallSeconds": 15,
           "effectiveSeconds": 7
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-df450e2ac2aaa23185205b50",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-31T19:12:22.952Z",
+      "endTime": "2026-07-31T19:12:40.359Z",
+      "wallSeconds": 17,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 17,
+          "effectiveSeconds": 8
         }
       ],
       "description": "Codex: Execute research project end to end"
