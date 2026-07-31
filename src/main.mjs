@@ -29,7 +29,7 @@ import {
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
-import { encryptCodexContext } from './features/codex/encryption.mjs';
+import { encryptCodexContext } from './features/codex/encryption.mjs?v=12';
 import {
   computeWealthRegression,
   getDefaultWealthHistory,
@@ -47,7 +47,7 @@ import {
   resolveStravaExertion
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
-import { buildCodexDevelopmentContext } from './features/codex/context.mjs';
+import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=12';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,

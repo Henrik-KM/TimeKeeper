@@ -3,17 +3,17 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v11';
+const CACHE_NAME = 'timekeeper-app-v12';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
-  './src/main.mjs',
+  './src/main.mjs?v=12',
   './src/shared/runtime-helpers.mjs',
   './src/shared/id.mjs',
   './src/shared/ui.mjs',
-  './src/features/codex/context.mjs',
-  './src/features/codex/encryption.mjs',
+  './src/features/codex/context.mjs?v=12',
+  './src/features/codex/encryption.mjs?v=12',
   './src/features/strava/core.mjs',
   './src/features/strava/import.mjs',
   './src/features/wealth/core.mjs',
@@ -38,17 +38,36 @@ sw.addEventListener('install', (event) => {
 });
 
 sw.addEventListener('activate', (event) => {
+  let refreshExistingClients = false;
   event.waitUntil(
     caches
       .keys()
-      .then((keys) =>
-        Promise.all(
+      .then((keys) => {
+        refreshExistingClients = keys.some(
+          (key) => key.startsWith('timekeeper-app-') && key !== CACHE_NAME
+        );
+        return Promise.all(
           keys
             .filter((key) => key !== CACHE_NAME)
             .map((key) => caches.delete(key))
-        )
-      )
+        );
+      })
       .then(() => sw.clients.claim())
+      .then(() =>
+        sw.clients.matchAll({
+          type: 'window',
+          includeUncontrolled: true
+        })
+      )
+      .then((clients) => {
+        if (!refreshExistingClients) return;
+        clients.forEach((client) => {
+          const url = new URL(client.url);
+          if (url.searchParams.get('timekeeper-update') === '12') return;
+          url.searchParams.set('timekeeper-update', '12');
+          client.navigate(url.href).catch(() => undefined);
+        });
+      })
   );
 });
 
