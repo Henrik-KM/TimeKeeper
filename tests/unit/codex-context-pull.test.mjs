@@ -66,6 +66,7 @@ test('fetches context through authenticated gh without exposing a token', () => 
   assert.deepEqual(fetched, context);
   assert.match(calls[0].command, /^gh(?:\.exe)?$/);
   assert.deepEqual(calls[0].args.slice(-2), ['--jq', '.content']);
+  assert.ok(calls[0].options.maxBuffer >= 64 * 1024 * 1024);
   assert.equal(JSON.stringify(calls).includes('token'), false);
 });
 

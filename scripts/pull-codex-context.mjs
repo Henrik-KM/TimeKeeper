@@ -17,6 +17,7 @@ export const DEFAULT_ENCRYPTED_REPOSITORY = 'Henrik-KM/TimeKeeper';
 export const DEFAULT_ENCRYPTED_BRANCH = 'codex-context';
 export const DEFAULT_ENCRYPTED_PATH = 'codex-context.enc.json';
 export const DEFAULT_PRIVATE_KEY_PATH = 'codex-context-private.pem';
+const GITHUB_CONTEXT_MAX_BUFFER = 64 * 1024 * 1024;
 
 /**
  * @typedef {{
@@ -144,6 +145,7 @@ export function fetchPrivateContext(
     ['api', apiPath, '--jq', '.content'],
     {
       encoding: 'utf8',
+      maxBuffer: GITHUB_CONTEXT_MAX_BUFFER,
       windowsHide: true
     }
   );
@@ -162,6 +164,7 @@ function fetchGitHubFileContent(options, runCommand) {
     ['api', getContextApiPath(options), '--jq', '.content'],
     {
       encoding: 'utf8',
+      maxBuffer: GITHUB_CONTEXT_MAX_BUFFER,
       windowsHide: true
     }
   );
