@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-07-31T17:28:01.859Z",
+  "updatedAt": "2026-07-31T17:33:01.890Z",
   "dayStart": "2026-07-30T22:00:00.000Z",
   "rangeStart": "2026-05-02T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-07-31T17:28:02.825Z",
+    "observedAt": "2026-07-31T17:33:02.958Z",
     "primary": {
       "usedPercent": 42,
       "remainingPercent": 58,
@@ -9707,6 +9707,40 @@
       ],
       "supersedesExternalIds": [
         "codex-d344ec914805ba197fb43c65"
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-589e7a5aa4bb4b2d4a1d8c31",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-07-31T17:12:21.583Z",
+      "endTime": "2026-07-31T17:14:19.309Z",
+      "wallSeconds": 117,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 29,
+      "focusPolicyVersion": 4,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.25,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 117,
+          "effectiveSeconds": 29,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-7c4e77db1bc39de03101ae3c"
       ],
       "description": "Codex: Execute research project end to end"
     }
