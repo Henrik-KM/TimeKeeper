@@ -3,10 +3,7 @@ import test from 'node:test';
 
 import {
   computeUnionSeconds,
-  getCapacityShareForDateRange,
   getEntryElapsedSeconds,
-  getEntryIntegrityReasons,
-  getWeekdayCapacityProfile,
   groupTimeEntries,
   normalizeEntryTiming
 } from '../../src/features/time-usage/core.mjs';
@@ -90,58 +87,4 @@ test('union time does not double-count simultaneous entries', () => {
     ]),
     5400
   );
-});
-
-test('long and cross-day entries require review until confirmed', () => {
-  const entry = {
-    startTime: '2026-07-29T20:00:00.000Z',
-    endTime: '2026-07-30T09:00:00.000Z',
-    elapsedSeconds: 13 * 3600,
-    isRunning: false
-  };
-  assert.deepEqual(getEntryIntegrityReasons(entry), ['long', 'crosses-day']);
-  assert.deepEqual(
-    getEntryIntegrityReasons({
-      ...entry,
-      integrityReviewedAt: '2026-07-31T10:00:00.000Z'
-    }),
-    []
-  );
-  assert.deepEqual(
-    getEntryIntegrityReasons({
-      startTime: '2026-07-30T00:00:00.000Z',
-      endTime: '2026-07-30T13:00:00.000Z',
-      elapsedSeconds: 60,
-      isRunning: false
-    }),
-    ['long']
-  );
-});
-
-test('learned weekday capacity allocates less work to Friday', () => {
-  const entries = [];
-  for (let week = 0; week < 4; week += 1) {
-    for (let weekday = 1; weekday <= 5; weekday += 1) {
-      const start = new Date(Date.UTC(2026, 6, 6 + week * 7 + weekday - 1, 8));
-      const hours = weekday === 5 ? 4 : 8;
-      entries.push({
-        startTime: start.toISOString(),
-        endTime: new Date(start.getTime() + hours * 3600000).toISOString(),
-        duration: hours * 3600,
-        elapsedSeconds: hours * 3600,
-        isRunning: false
-      });
-    }
-  }
-  const profile = getWeekdayCapacityProfile(entries, {
-    now: new Date('2026-08-02T12:00:00.000Z')
-  });
-  assert.equal(profile.learned, true);
-  assert.ok(profile.weights[5] < profile.weights[1]);
-  const share = getCapacityShareForDateRange(
-    new Date(2026, 6, 31, 8),
-    new Date(2026, 7, 3),
-    profile.weights
-  );
-  assert.equal(share.totalWeight, share.todayWeight);
 });

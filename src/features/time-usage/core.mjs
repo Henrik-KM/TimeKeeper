@@ -1,4 +1,3 @@
-export const LONG_ENTRY_REVIEW_SECONDS = 12 * 60 * 60;
 export const ENTRY_GROUP_GAP_SECONDS = 15 * 60;
 
 function finiteNonNegative(value, fallback = 0) {
@@ -78,32 +77,6 @@ export function normalizeEntryTiming(entry, now = new Date()) {
     normalized.elapsedSeconds = Math.round(saved);
   }
   return normalized;
-}
-
-export function entryCrossesLocalDay(entry) {
-  const start = validDate(entry?.startTime);
-  const end = validDate(entry?.endTime);
-  if (!start || !end) return false;
-  return (
-    start.getFullYear() !== end.getFullYear() ||
-    start.getMonth() !== end.getMonth() ||
-    start.getDate() !== end.getDate()
-  );
-}
-
-export function getEntryIntegrityReasons(
-  entry,
-  { longSeconds = LONG_ENTRY_REVIEW_SECONDS } = {}
-) {
-  if (!entry || entry.isRunning || entry.integrityReviewedAt) return [];
-  const reasons = [];
-  const elapsedSeconds = getEntryElapsedSeconds(entry);
-  const timestampSeconds = getEntryTimestampSeconds(entry);
-  if (Math.max(elapsedSeconds, timestampSeconds) >= longSeconds) {
-    reasons.push('long');
-  }
-  if (entryCrossesLocalDay(entry)) reasons.push('crosses-day');
-  return reasons;
 }
 
 function localDateKey(value) {
@@ -246,92 +219,6 @@ export function computeUnionSeconds(entries) {
   });
   totalMs += currentEnd - currentStart;
   return Math.round(totalMs / 1000);
-}
-
-function median(values) {
-  if (!values.length) return 0;
-  const ordered = values.slice().sort((left, right) => left - right);
-  const middle = Math.floor(ordered.length / 2);
-  return ordered.length % 2
-    ? ordered[middle]
-    : (ordered[middle - 1] + ordered[middle]) / 2;
-}
-
-export function getWeekdayCapacityProfile(
-  entries,
-  { now = new Date(), lookbackDays = 90, includeWeekends = false } = {}
-) {
-  const current = validDate(now) || new Date();
-  const cutoff = current.getTime() - lookbackDays * 86400000;
-  const days = new Map();
-  (Array.isArray(entries) ? entries : []).forEach((entry) => {
-    if (!entry || entry.isRunning) return;
-    const start = validDate(entry.startTime);
-    if (!start || start.getTime() < cutoff || start > current) return;
-    if (getEntryTimestampSeconds(entry) >= LONG_ENTRY_REVIEW_SECONDS) return;
-    const key = localDateKey(start);
-    const currentDay = days.get(key) || {
-      weekday: start.getDay(),
-      effectiveSeconds: 0
-    };
-    currentDay.effectiveSeconds += finiteNonNegative(entry.duration);
-    days.set(key, currentDay);
-  });
-  const samples = Array.from({ length: 7 }, () => []);
-  days.forEach((day) => samples[day.weekday].push(day.effectiveSeconds / 3600));
-  const medians = samples.map((values) => median(values));
-  const weekdayReference = median(
-    medians.slice(1, 5).filter((value) => value > 0)
-  );
-  const fallback = weekdayReference > 0 ? weekdayReference : 1;
-  const weights = medians.map((value, weekday) => {
-    if (!includeWeekends && (weekday === 0 || weekday === 6)) return 0;
-    if (samples[weekday].length < 3 || value <= 0) {
-      return weekday === 0 || weekday === 6 ? 0 : 1;
-    }
-    return Math.max(0.2, Math.min(1.5, value / fallback));
-  });
-  return {
-    weights,
-    medians,
-    sampleDays: samples.map((values) => values.length),
-    learned:
-      samples.slice(1, 6).filter((values) => values.length >= 3).length >= 3
-  };
-}
-
-export function getCapacityShareForDateRange(
-  start,
-  endExclusive,
-  weights,
-  { includeWeekends = false } = {}
-) {
-  const first = validDate(start);
-  const end = validDate(endExclusive);
-  if (!first || !end || first >= end) return { todayWeight: 0, totalWeight: 0 };
-  let totalWeight = 0;
-  let todayWeight = 0;
-  for (
-    let cursor = new Date(
-      first.getFullYear(),
-      first.getMonth(),
-      first.getDate()
-    );
-    cursor < end;
-    cursor.setDate(cursor.getDate() + 1)
-  ) {
-    const weekday = cursor.getDay();
-    const weight =
-      !includeWeekends && (weekday === 0 || weekday === 6)
-        ? 0
-        : finiteNonNegative(
-            weights?.[weekday],
-            weekday === 0 || weekday === 6 ? 0 : 1
-          );
-    if (cursor.toDateString() === first.toDateString()) todayWeight = weight;
-    totalWeight += weight;
-  }
-  return { todayWeight, totalWeight };
 }
 
 export function getRecentProjectHours(
