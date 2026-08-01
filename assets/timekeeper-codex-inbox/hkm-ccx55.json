@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-01T17:08:02.221Z",
+  "updatedAt": "2026-08-01T17:13:02.250Z",
   "dayStart": "2026-07-31T22:00:00.000Z",
   "rangeStart": "2026-07-25T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-01T17:08:02.762Z",
+    "observedAt": "2026-08-01T17:13:03.224Z",
     "primary": {
       "usedPercent": 11,
       "remainingPercent": 89,
@@ -5655,6 +5655,75 @@
         }
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-6a04a6e3503783de91f53275",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-01T16:42:36.456Z",
+      "endTime": "2026-08-01T16:56:07.526Z",
+      "wallSeconds": 811,
+      "focusFactor": 0.5054,
+      "effectiveSeconds": 409,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 767,
+          "effectiveSeconds": 383
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 43,
+          "effectiveSeconds": 26
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-d58ad370674f2801eb1311dd",
+      "threadId": "019f3774-81bf-7cc3-982d-ce68e7d82a27",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-01T16:49:55.889Z",
+      "endTime": "2026-08-01T16:52:48.864Z",
+      "wallSeconds": 172,
+      "focusFactor": 0.4837,
+      "effectiveSeconds": 83,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "high",
+          "factor": 0.3,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "wallSeconds": 100,
+          "effectiveSeconds": 40
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 72,
+          "effectiveSeconds": 43
+        }
+      ],
+      "description": "Codex: Test Slack connection"
     }
   ]
 }
