@@ -50,13 +50,9 @@ import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
 import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
 import {
   computeUnionSeconds,
-  getCapacityShareForDateRange,
   getEntryElapsedSeconds,
-  getEntryIntegrityReasons,
   getEntrySource,
-  getEntryTimestampSeconds,
   getRecentProjectHours,
-  getWeekdayCapacityProfile,
   groupTimeEntries,
   normalizeEntryTiming
 } from './features/time-usage/core.mjs';
@@ -1701,9 +1697,7 @@ import {
   function normalizeUsagePreferences(value = {}) {
     const input = value && typeof value === 'object' ? value : {};
     return {
-      groupEntries: input.groupEntries !== false,
-      learnedWeekdayPacing: input.learnedWeekdayPacing !== false,
-      includeWeekendCapacity: input.includeWeekendCapacity === true
+      groupEntries: input.groupEntries !== false
     };
   }
 
@@ -2188,7 +2182,6 @@ import {
     let invalidRunningEntries = 0;
     let invalidFocusEntries = 0;
     let staleRunningEntries = 0;
-    let integrityReviewEntries = 0;
     const todayStart = startOfLocalDay(now);
 
     data.entries.forEach((entry) => {
@@ -2225,9 +2218,6 @@ import {
           (start && end && end <= start)
         ) {
           invalidStoppedEntries += 1;
-        }
-        if (getEntryIntegrityReasons(entry).length) {
-          integrityReviewEntries += 1;
         }
       }
 
@@ -2267,8 +2257,6 @@ import {
       issueParts.push(`${invalidFocusEntries} invalid focus values`);
     if (staleRunningEntries)
       issueParts.push(`${staleRunningEntries} running timers need review`);
-    if (integrityReviewEntries)
-      issueParts.push(`${integrityReviewEntries} stopped entries need review`);
 
     return {
       duplicateProjectCount,
@@ -2278,10 +2266,8 @@ import {
       invalidRunningEntries,
       invalidFocusEntries,
       staleRunningEntries,
-      integrityReviewEntries,
       repairableCount,
-      totalIssues:
-        repairableCount + staleRunningEntries + integrityReviewEntries,
+      totalIssues: repairableCount + staleRunningEntries,
       issueParts
     };
   }
@@ -9469,28 +9455,6 @@ import {
     return sumEntryHours(projectEntries, start, end);
   }
 
-  let weekdayCapacityCache = null;
-  function getPlanningWeekdayCapacity(now = new Date()) {
-    const preferences = ensureUsagePreferences();
-    const cacheKey = [
-      data.updatedAt || '',
-      preferences.learnedWeekdayPacing,
-      preferences.includeWeekendCapacity,
-      formatLocalDateString(now)
-    ].join(':');
-    if (weekdayCapacityCache?.key === cacheKey) {
-      return weekdayCapacityCache.profile;
-    }
-    const profile = preferences.learnedWeekdayPacing
-      ? getWeekdayCapacityProfile(data.entries, {
-          now,
-          includeWeekends: preferences.includeWeekendCapacity
-        })
-      : null;
-    weekdayCapacityCache = { key: cacheKey, profile };
-    return profile;
-  }
-
   function getProjectDailyPlan(project, stats, context, options = {}) {
     const weekContext = context || getCurrentWeekPlanningContext();
     const projectStats = stats || computeProjectStats(project, options);
@@ -9517,29 +9481,10 @@ import {
     const todayIsWorkday =
       countWorkdays(weekContext.todayStart, weekContext.todayEnd) > 0;
     const signedRemainingAtStartOfDay = weeklyTarget - weekHoursBeforeToday;
-    let signedDailyTarget =
+    const signedDailyTarget =
       todayIsWorkday && weekContext.workDaysLeftInWeek > 0
         ? signedRemainingAtStartOfDay / weekContext.workDaysLeftInWeek
         : 0;
-    const preferences = ensureUsagePreferences();
-    const capacityProfile = getPlanningWeekdayCapacity(weekContext.now);
-    if (
-      preferences.learnedWeekdayPacing &&
-      capacityProfile?.learned &&
-      signedRemainingAtStartOfDay > 0
-    ) {
-      const capacity = getCapacityShareForDateRange(
-        weekContext.todayStart,
-        weekContext.startNextWeek,
-        capacityProfile.weights,
-        { includeWeekends: preferences.includeWeekendCapacity }
-      );
-      signedDailyTarget =
-        capacity.totalWeight > 0
-          ? (signedRemainingAtStartOfDay * capacity.todayWeight) /
-            capacity.totalWeight
-          : 0;
-    }
     const dailyTarget = Math.max(0, signedDailyTarget);
     return {
       todayHours,
@@ -9548,10 +9493,6 @@ import {
       dailyTarget,
       signedDailyTarget,
       signedRemainingAtStartOfDay,
-      capacityMode:
-        preferences.learnedWeekdayPacing && capacityProfile?.learned
-          ? 'learned'
-          : 'flat',
       recommendedToday: dailyTarget,
       remainingToday: Math.max(0, dailyTarget - todayHours),
       weeklyRemaining: Math.max(
@@ -14243,250 +14184,6 @@ import {
     container.appendChild(section);
   }
 
-  function getTodayContextSwitchCount(now = new Date()) {
-    const start = startOfLocalDay(now);
-    const end = addLocalDays(start, 1);
-    const entries = data.entries
-      .filter((entry) => entryOverlapsDateRange(entry, start, end))
-      .slice()
-      .sort(
-        (left, right) => new Date(left.startTime) - new Date(right.startTime)
-      );
-    let switches = 0;
-    for (let index = 1; index < entries.length; index += 1) {
-      if (
-        String(entries[index - 1].projectId) !==
-        String(entries[index].projectId)
-      ) {
-        switches += 1;
-      }
-    }
-    return switches;
-  }
-
-  function renderTodayProjectLanes(container, runningEntries, recommendation) {
-    const ranked = getActiveProjectsByRecentAndUrgency();
-    if (!ranked.length) return;
-    const runningByProject = new Map(
-      runningEntries.map((entry) => [String(entry.projectId), entry])
-    );
-    const recentHours = getRecentProjectHours(data.entries, { days: 30 });
-    const selected = [];
-    const addProject = (project) => {
-      if (
-        !project ||
-        selected.some((item) => String(item.id) === String(project.id))
-      ) {
-        return;
-      }
-      selected.push(project);
-    };
-    runningEntries.forEach((entry) => addProject(getEntryProject(entry)));
-    addProject(recommendation?.project);
-    ranked.forEach(addProject);
-
-    const section = document.createElement('div');
-    section.className = 'today-project-lanes';
-    const header = document.createElement('div');
-    header.className = 'today-project-lanes-header';
-    const title = document.createElement('strong');
-    title.textContent = 'Project lanes';
-    const switches = document.createElement('span');
-    const switchCount = getTodayContextSwitchCount();
-    switches.textContent = `${switchCount} ${switchCount === 1 ? 'switch' : 'switches'} today`;
-    header.appendChild(title);
-    header.appendChild(switches);
-    section.appendChild(header);
-    const lanes = document.createElement('div');
-    lanes.className = 'today-project-lane-list';
-    selected.slice(0, 4).forEach((project) => {
-      const projectId = String(project.id);
-      const running = runningByProject.get(projectId);
-      const isRecommended =
-        String(recommendation?.project?.id || '') === projectId;
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.className = `today-project-lane${running ? ' running' : ''}${isRecommended ? ' recommended' : ''}`;
-      const name = document.createElement('strong');
-      name.textContent = project.name;
-      const detail = document.createElement('span');
-      detail.textContent = running
-        ? isTimerPaused(running)
-          ? 'Paused'
-          : 'Running'
-        : isRecommended
-          ? `${formatRecommendationHours(getDailyPlanRecommendedRemaining(recommendation.dailyPlan))}h next`
-          : `${(recentHours.get(projectId) || 0).toFixed(1)}h recent`;
-      button.appendChild(name);
-      button.appendChild(detail);
-      button.addEventListener('click', () => {
-        if (running) {
-          activateSection('timer');
-          return;
-        }
-        startTimerShortcut(
-          {
-            project,
-            description: '',
-            focusFactor: DEFAULT_FOCUS_FACTOR
-          },
-          { navigate: true }
-        );
-      });
-      lanes.appendChild(button);
-    });
-    section.appendChild(lanes);
-    const preferences = ensureUsagePreferences();
-    const controls = document.createElement('div');
-    controls.className = 'today-capacity-controls';
-    const paceButton = document.createElement('button');
-    paceButton.type = 'button';
-    paceButton.className = 'today-capacity-toggle';
-    paceButton.textContent = preferences.learnedWeekdayPacing
-      ? 'Learned pace'
-      : 'Flat pace';
-    paceButton.title = 'Toggle learned weekday capacity';
-    paceButton.addEventListener('click', () => {
-      preferences.learnedWeekdayPacing = !preferences.learnedWeekdayPacing;
-      weekdayCapacityCache = null;
-      saveData();
-      refreshAllViews();
-    });
-    controls.appendChild(paceButton);
-    const weekendButton = document.createElement('button');
-    weekendButton.type = 'button';
-    weekendButton.className = 'today-capacity-toggle';
-    weekendButton.textContent = preferences.includeWeekendCapacity
-      ? 'Weekends on'
-      : 'Weekends off';
-    weekendButton.title = 'Toggle weekend planning capacity';
-    weekendButton.addEventListener('click', () => {
-      preferences.includeWeekendCapacity = !preferences.includeWeekendCapacity;
-      weekdayCapacityCache = null;
-      saveData();
-      refreshAllViews();
-    });
-    controls.appendChild(weekendButton);
-    section.appendChild(controls);
-    container.appendChild(section);
-  }
-
-  function getIntegrityReviewEntries() {
-    return data.entries
-      .filter((entry) => getEntryIntegrityReasons(entry).length)
-      .slice()
-      .sort(
-        (left, right) => new Date(right.startTime) - new Date(left.startTime)
-      );
-  }
-
-  function confirmEntryIntegrity(entry) {
-    if (!entry) return;
-    const reasons = getEntryIntegrityReasons(entry);
-    entry.integrityReviewedAt = new Date().toISOString();
-    entry.integrityReviewReasons = reasons;
-  }
-
-  function openIntegrityEntryReview(entryId) {
-    const entry = data.entries.find(
-      (candidate) => String(candidate.id) === String(entryId)
-    );
-    if (!entry) return;
-    const project = getEntryProject(entry);
-    const reasons = getEntryIntegrityReasons(entry);
-    const sheet = createMobileSheet('Review recorded time', {
-      className: 'mobile-entry-review-sheet',
-      description: `${project?.name || 'Unknown project'} - ${formatDateTime(entry.startTime)}`
-    });
-    const summary = document.createElement('div');
-    summary.className = 'mobile-review-summary';
-    [
-      [formatDuration(getEntryElapsedSeconds(entry)), 'Active elapsed'],
-      [formatDuration(getEntryTimestampSeconds(entry)), 'Timestamp span'],
-      [formatDuration(Number(entry.duration) || 0), 'Effective'],
-      [reasons.includes('crosses-day') ? 'Crosses day' : 'Same day', 'Boundary']
-    ].forEach(([value, label]) => {
-      const item = document.createElement('div');
-      item.className = 'today-command-item';
-      const span = document.createElement('span');
-      span.textContent = label;
-      const strong = document.createElement('strong');
-      strong.textContent = value;
-      item.appendChild(span);
-      item.appendChild(strong);
-      summary.appendChild(item);
-    });
-    sheet.body.appendChild(summary);
-    sheet.addAction('Confirm', 'primary', () => {
-      const snapshot = cloneData();
-      confirmEntryIntegrity(entry);
-      saveData();
-      refreshAllViews();
-      sheet.close();
-      offerUndo('Recorded time confirmed.', snapshot);
-    });
-    sheet.addAction('Trim / Edit', 'secondary', () => {
-      sheet.close();
-      editStoppedEntry(entry.id);
-    });
-    sheet.addAction('Split', 'secondary', () => {
-      sheet.close();
-      splitStoppedEntry(entry.id);
-    });
-    sheet.addAction('Close', 'secondary', sheet.close);
-  }
-
-  function openTimeIntegrityReviewSheet() {
-    const entries = getIntegrityReviewEntries();
-    const sheet = createMobileSheet('Time review', {
-      className: 'mobile-entry-review-sheet',
-      description: `${entries.length} ${entries.length === 1 ? 'entry' : 'entries'} need confirmation`
-    });
-    const list = document.createElement('div');
-    list.className = 'mobile-review-list';
-    entries.slice(0, 20).forEach((entry) => {
-      const project = getEntryProject(entry);
-      const row = document.createElement('button');
-      row.type = 'button';
-      row.className = 'mobile-review-row mobile-review-entry-button';
-      const copy = document.createElement('span');
-      copy.textContent = `${project?.name || 'Unknown project'} - ${formatDuration(getEntryElapsedSeconds(entry))} active - ${formatDateTime(entry.startTime)}`;
-      const action = document.createElement('strong');
-      action.textContent = 'Review';
-      row.appendChild(copy);
-      row.appendChild(action);
-      row.addEventListener('click', () => {
-        sheet.close();
-        openIntegrityEntryReview(entry.id);
-      });
-      list.appendChild(row);
-    });
-    if (!entries.length) {
-      const empty = document.createElement('p');
-      empty.className = 'status-muted';
-      empty.textContent = 'No recorded-time entries need review.';
-      list.appendChild(empty);
-    }
-    sheet.body.appendChild(list);
-    if (entries.length) {
-      sheet.addAction('Confirm All', 'secondary', async () => {
-        const ok = await requestConfirm({
-          title: 'Confirm Recorded Time',
-          message: `Mark all ${entries.length} reviewed entries as intentional?`,
-          confirmLabel: 'Confirm All'
-        });
-        if (!ok) return;
-        const snapshot = cloneData();
-        entries.forEach(confirmEntryIntegrity);
-        saveData();
-        refreshAllViews();
-        sheet.close();
-        offerUndo('Recorded times confirmed.', snapshot);
-      });
-    }
-    sheet.addAction('Close', 'secondary', sheet.close);
-  }
-
   function getReviewBounds(scope) {
     if (scope === 'week') return getWeekBounds(0);
     return getDayBounds(-1);
@@ -14499,8 +14196,11 @@ import {
     const entries = data.entries.filter((entry) =>
       entryOverlapsDateRange(entry, from, to)
     );
-    const integrityEntries = entries.filter(
-      (entry) => getEntryIntegrityReasons(entry).length
+    const missingDescriptions = entries.filter(
+      (entry) => !entry.isRunning && !String(entry.description || '').trim()
+    );
+    const longEntries = entries.filter(
+      (entry) => !entry.isRunning && (Number(entry.duration) || 0) >= 4 * 3600
     );
     const staleRunning = entries.filter(
       (entry) => entry.isRunning && getRunningTimerWarnings(entry).length
@@ -14522,7 +14222,8 @@ import {
       scope,
       bounds,
       entries,
-      integrityEntries,
+      missingDescriptions,
+      longEntries,
       staleRunning,
       emptyDays: days
     };
@@ -14541,7 +14242,8 @@ import {
     summary.className = 'mobile-review-summary';
     [
       [`${review.entries.length} entries`, 'Entries'],
-      [`${review.integrityEntries.length}`, 'Time review'],
+      [`${review.missingDescriptions.length}`, 'Missing descriptions'],
+      [`${review.longEntries.length}`, 'Long entries'],
       [`${review.emptyDays.length}`, 'Empty days']
     ].forEach(([value, label]) => {
       const item = document.createElement('div');
@@ -14574,12 +14276,20 @@ import {
       row.appendChild(button);
       list.appendChild(row);
     };
-    review.integrityEntries.slice(0, 5).forEach((entry) => {
+    review.missingDescriptions.slice(0, 3).forEach((entry) => {
       const project = getEntryProject(entry);
       addReviewAction(
-        `${project ? project.name : 'Entry'} spans ${formatDuration(getEntryTimestampSeconds(entry))} and records ${formatDuration(getEntryElapsedSeconds(entry))} active.`,
-        'Review',
-        () => openIntegrityEntryReview(entry.id)
+        `${project ? project.name : 'Entry'} is missing a description.`,
+        'Edit',
+        () => editStoppedEntry(entry.id)
+      );
+    });
+    review.longEntries.slice(0, 3).forEach((entry) => {
+      const project = getEntryProject(entry);
+      addReviewAction(
+        `${project ? project.name : 'Entry'} is ${formatDuration(entry.duration || 0)}.`,
+        'Split',
+        () => splitStoppedEntry(entry.id)
       );
     });
     review.emptyDays.slice(0, 3).forEach((day) => {
@@ -14691,8 +14401,7 @@ import {
     runningEntries,
     activeEntries,
     stats,
-    recommendation,
-    audit
+    recommendation
   }) {
     if (!isMobileViewport()) return false;
     panel.classList.add('mobile-today-panel');
@@ -14786,17 +14495,7 @@ import {
           : codexUsage.todayValue
       );
     }
-    if (audit.integrityReviewEntries > 0) {
-      appendTodayCard(
-        'Time review',
-        `${audit.integrityReviewEntries} ${audit.integrityReviewEntries === 1 ? 'entry' : 'entries'}`,
-        'risk',
-        openTimeIntegrityReviewSheet
-      );
-    }
     panel.appendChild(primary);
-
-    renderTodayProjectLanes(panel, runningEntries, recommendation);
 
     const runningProjectIds = new Set(
       runningEntries.map((entry) => String(entry.projectId))
@@ -14855,8 +14554,7 @@ import {
         activeEntries,
         stats,
         recommendation,
-        settings,
-        audit
+        settings
       })
     ) {
       return;
@@ -14923,16 +14621,7 @@ import {
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
     }
-    if (audit.integrityReviewEntries > 0) {
-      addItem(
-        'Time review',
-        `${audit.integrityReviewEntries} ${audit.integrityReviewEntries === 1 ? 'entry' : 'entries'}`,
-        'risk'
-      );
-    }
     panel.appendChild(grid);
-
-    renderTodayProjectLanes(panel, runningEntries, recommendation);
 
     const quickTimerShortcuts = getStartableTimerShortcuts({
       recommendation,
@@ -14992,14 +14681,6 @@ import {
 
     const actions = document.createElement('div');
     actions.className = 'today-command-actions';
-    if (audit.integrityReviewEntries > 0) {
-      const reviewBtn = document.createElement('button');
-      reviewBtn.type = 'button';
-      reviewBtn.className = 'btn secondary';
-      reviewBtn.textContent = 'Review Time';
-      reviewBtn.addEventListener('click', openTimeIntegrityReviewSheet);
-      actions.appendChild(reviewBtn);
-    }
     if (runningEntries.length) {
       const stopBtn = document.createElement('button');
       stopBtn.type = 'button';
@@ -15436,7 +15117,6 @@ import {
     delete secondEntry.lastUpdateTime;
     delete secondEntry.factor;
     delete secondEntry.pausedAt;
-    delete secondEntry.integrityReviewedAt;
     entry.description = String(values.firstDescription || '').trim();
     entry.endTime = splitTime.toISOString();
     entry.duration = firstDuration;
@@ -15448,7 +15128,6 @@ import {
     delete entry.lastUpdateTime;
     delete entry.factor;
     delete entry.pausedAt;
-    delete entry.integrityReviewedAt;
     data.entries.push(secondEntry);
     expandGroupedEntry(entry.id);
     saveData();
@@ -15569,7 +15248,6 @@ import {
     entry.elapsedSeconds = Math.floor(
       Math.max(0, (parsedEnd.getTime() - parsedStart.getTime()) / 1000)
     );
-    delete entry.integrityReviewedAt;
     entry.focusFactor = focusFactor;
     entry.manualFactor = focusFactor;
     entry.isRunning = false;
@@ -16109,7 +15787,6 @@ import {
     entry.endTime = new Date(
       start.getTime() + nextElapsed * 1000
     ).toISOString();
-    delete entry.integrityReviewedAt;
     return true;
   }
 

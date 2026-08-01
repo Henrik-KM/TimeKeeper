@@ -582,10 +582,6 @@ tr:nth-child(even) td {
     grid-row: 2;
     white-space: normal;
   }
-
-  .today-project-lane-list {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 
 /* Generic cards */
@@ -781,92 +777,6 @@ tr:nth-child(even) td {
 
 .today-command-actions {
   justify-content: flex-start;
-}
-
-.today-project-lanes {
-  display: grid;
-  gap: 0.55rem;
-  padding: 0.75rem;
-  border: 1px solid #dbe3ef;
-  border-radius: 0.7rem;
-  background: #f8fafc;
-}
-
-.today-project-lanes-header,
-.today-capacity-controls {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.today-project-lanes-header span {
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 700;
-}
-
-.today-project-lane-list {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
-  gap: 0.45rem;
-}
-
-.today-project-lane {
-  display: grid;
-  gap: 0.15rem;
-  min-width: 0;
-  min-height: 3.25rem;
-  padding: 0.55rem 0.65rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 0.55rem;
-  background: #ffffff;
-  color: #0f172a;
-  cursor: pointer;
-  font: inherit;
-  text-align: left;
-}
-
-.today-project-lane.running {
-  border-color: #86efac;
-  background: #f0fdf4;
-}
-
-.today-project-lane.recommended {
-  border-color: #93c5fd;
-  background: #eff6ff;
-}
-
-.today-project-lane strong,
-.today-project-lane span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.today-project-lane span {
-  color: #64748b;
-  font-size: 0.75rem;
-  font-weight: 700;
-}
-
-.today-capacity-controls {
-  justify-content: flex-start;
-}
-
-.today-capacity-toggle,
-.mobile-review-entry-button {
-  min-height: 2.2rem;
-  padding: 0.4rem 0.65rem;
-  border: 1px solid #cbd5e1;
-  border-radius: 999px;
-  background: #ffffff;
-  color: #334155;
-  cursor: pointer;
-  font: inherit;
-  font-size: 0.78rem;
-  font-weight: 750;
 }
 
 .codex-page-header {

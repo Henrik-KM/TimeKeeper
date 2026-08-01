@@ -728,7 +728,7 @@ test('entries preserve active elapsed time and group Codex records by project-da
   expect(saved.elapsedSeconds).toBe(3600);
 });
 
-test('mobile Today exposes project lanes and confirms suspicious recorded time', async ({
+test('mobile Today stays focused on timers without extra review panels', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -754,35 +754,14 @@ test('mobile Today exposes project lanes and confirms suspicious recorded time',
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Project lanes');
-  await expect(commandPanel).toContainText('Review Project');
-  await expect(commandPanel).toContainText('Learned pace');
-  await expect(commandPanel).toContainText('Weekends off');
-
-  await commandPanel
-    .locator('.mobile-today-card')
-    .filter({ hasText: 'Time review' })
-    .click();
-  const reviewSheet = page.getByRole('dialog', { name: 'Time review' });
-  await expect(reviewSheet).toContainText('13h 0m 0s active');
-  await reviewSheet.getByRole('button', { name: /Review Project/ }).click();
-
-  const entrySheet = page.getByRole('dialog', {
-    name: 'Review recorded time'
-  });
-  await expect(entrySheet).toContainText('Crosses day');
-  await expect(entrySheet).toContainText('13h 0m 0s');
-  await entrySheet
-    .getByRole('button', { name: 'Confirm', exact: true })
-    .click();
-
-  const reviewedAt = await page.evaluate(() => {
-    const stored = JSON.parse(localStorage.getItem('timekeeperDataPro'));
-    return stored.entries.find((entry) => entry.id === 'long-entry')
-      .integrityReviewedAt;
-  });
-  expect(reviewedAt).toBeTruthy();
+  await expect(commandPanel).toContainText('Today');
+  await expect(commandPanel).toContainText('Timer');
+  await expect(commandPanel).toContainText('Target');
+  await expect(commandPanel).not.toContainText('Project lanes');
+  await expect(commandPanel).not.toContainText('Learned pace');
+  await expect(commandPanel).not.toContainText('Weekends off');
   await expect(commandPanel).not.toContainText('Time review');
+  await expect(commandPanel).not.toContainText('Review Time');
 });
 
 test('stopped entries can be fully edited after they are saved', async ({
