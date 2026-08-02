@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-02T09:22:02.444Z",
+  "updatedAt": "2026-08-02T16:17:02.211Z",
   "dayStart": "2026-08-01T22:00:00.000Z",
   "rangeStart": "2026-07-26T22:00:00.000Z",
   "lookbackDays": 7,
@@ -422,6 +422,36 @@
           "factor": 0.4,
           "wallSeconds": 10,
           "effectiveSeconds": 4
+        }
+      ],
+      "description": "Codex: Coordinate with research agent"
+    },
+    {
+      "id": "codex-5624def2024a02f33156d24b",
+      "threadId": "019fb403-73cb-7ef1-9374-89f37031c1ef",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-02T10:00:12.137Z",
+      "endTime": "2026-08-02T15:55:45.995Z",
+      "wallSeconds": 21333,
+      "focusFactor": 0.3991,
+      "effectiveSeconds": 8514,
+      "focusPolicyVersion": 3,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "wallSeconds": 20957,
+          "effectiveSeconds": 8382
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "xhigh",
+          "factor": 0.35,
+          "wallSeconds": 376,
+          "effectiveSeconds": 131
         }
       ],
       "description": "Codex: Coordinate with research agent"
