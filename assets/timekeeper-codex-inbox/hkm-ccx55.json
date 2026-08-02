@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-02T08:58:01.662Z",
+  "updatedAt": "2026-08-02T09:03:01.644Z",
   "dayStart": "2026-08-01T22:00:00.000Z",
   "rangeStart": "2026-07-26T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-02T08:58:02.217Z",
+    "observedAt": "2026-08-02T09:03:02.248Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
@@ -5685,6 +5685,30 @@
       "description": "Codex: Execute research project end to end"
     },
     {
+      "id": "codex-32d223380cfe98ecebb4f695",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-02T07:16:05.798Z",
+      "endTime": "2026-08-02T08:41:38.828Z",
+      "wallSeconds": 5133,
+      "focusFactor": 0.6,
+      "effectiveSeconds": 3079,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 5133,
+          "effectiveSeconds": 3079
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
       "id": "codex-a9a9e7698ec488e3d2cb06ab",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
       "projectKey": "Research",
@@ -5728,6 +5752,30 @@
           "factor": 0.6,
           "wallSeconds": 15,
           "effectiveSeconds": 9
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-92a3391b61c82977526c3ac3",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-02T08:42:46.304Z",
+      "endTime": "2026-08-02T08:43:05.937Z",
+      "wallSeconds": 19,
+      "focusFactor": 0.6,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 19,
+          "effectiveSeconds": 11
         }
       ],
       "description": "Codex: Execute research project end to end"
