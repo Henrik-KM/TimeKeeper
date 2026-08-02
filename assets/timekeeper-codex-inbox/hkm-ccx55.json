@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-02T17:23:02.463Z",
+  "updatedAt": "2026-08-02T17:28:02.438Z",
   "dayStart": "2026-08-01T22:00:00.000Z",
   "rangeStart": "2026-07-26T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-02T17:23:03.190Z",
+    "observedAt": "2026-08-02T17:28:03.126Z",
     "primary": {
       "usedPercent": 51,
       "remainingPercent": 49,
@@ -6170,6 +6170,30 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-a610799dadd7485e66da736f",
+      "threadId": "019f3b9f-7d07-7943-9bb8-fd36d7c1e00e",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-02T14:57:01.522Z",
+      "endTime": "2026-08-02T17:08:00.775Z",
+      "wallSeconds": 7859,
+      "focusFactor": 0.6,
+      "effectiveSeconds": 4715,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 7859,
+          "effectiveSeconds": 4715
+        }
+      ],
+      "description": "Codex: Apply Henrik style guide"
     },
     {
       "id": "codex-852f880aa352716cb6f237a0",
