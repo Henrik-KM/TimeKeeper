@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v13';
+const CACHE_NAME = 'timekeeper-app-v14';
 const APP_SHELL = [
   './',
   './index.html',
@@ -19,6 +19,8 @@ const APP_SHELL = [
   './src/features/strava/import.mjs',
   './src/features/wealth/core.mjs',
   './src/features/workouts/runtime.mjs',
+  './src/features/company-operator/core.mjs',
+  './src/features/company-operator/runtime.mjs',
   './src/styles/base.css',
   './src/styles/components.css',
   './src/styles/features.css',
@@ -80,6 +82,8 @@ sw.addEventListener('message', (event) => {
 
 sw.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
+  const requestUrl = new URL(event.request.url);
+  if (requestUrl.origin !== sw.location.origin) return;
   event.respondWith(
     fetch(event.request)
       .then((response) => {

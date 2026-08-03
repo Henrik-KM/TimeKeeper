@@ -56,6 +56,7 @@ import {
   groupTimeEntries,
   normalizeEntryTiming
 } from './features/time-usage/core.mjs';
+import { createCompanyOperatorController } from './features/company-operator/runtime.mjs';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,
@@ -7597,6 +7598,11 @@ import {
 
   // Navigation
   const navList = document.getElementById('navList');
+  const companyOperatorController = createCompanyOperatorController({
+    root: document.getElementById('companyPageContent'),
+    connectButton: document.getElementById('companyPageConnectBtn'),
+    refreshButton: document.getElementById('companyPageRefreshBtn')
+  });
   const defaultSectionId = 'timer';
   const sectionIds = new Set(
     Array.from(document.querySelectorAll('.section')).map(
@@ -7633,7 +7639,7 @@ import {
       'dashboard',
       'timer',
       'entries',
-      'analytics'
+      'company'
     ]);
     moreItem.classList.toggle('active', !primarySections.has(sectionId));
   }
@@ -7642,6 +7648,7 @@ import {
     if (!sectionId || !sectionIds.has(sectionId)) return;
     const { updateHash = true, resetScroll = true } = options;
     activeSectionId = sectionId;
+    companyOperatorController.setActive(sectionId === 'company');
     navList
       .querySelectorAll('li')
       .forEach((item) => item.classList.remove('active'));
@@ -7674,6 +7681,8 @@ import {
       updateAnalyticsSection();
     } else if (sectionId === 'codex') {
       updateCodexPage();
+    } else if (sectionId === 'company') {
+      companyOperatorController.render();
     }
     applyMobileChartCollapses();
     renderMobileSyncStatus();
@@ -7698,6 +7707,7 @@ import {
     const options = [
       ['projects', 'Projects'],
       ['codex', 'Codex'],
+      ['analytics', 'Reports'],
       ['importExport', 'Backup / Sync'],
       ['todo', 'Workouts'],
       ['grocery', 'Finances']
@@ -8361,6 +8371,7 @@ import {
       ['todo', 'Open Workouts'],
       ['grocery', 'Open Finances'],
       ['analytics', 'Open Reports'],
+      ['company', 'Open Company'],
       ['codex', 'Open Codex']
     ].map(([sectionId, label]) => ({
       label,
@@ -16690,6 +16701,7 @@ import {
       'quick-log': 'entries',
       reports: 'analytics',
       analytics: 'analytics',
+      company: 'company',
       sync: 'importExport',
       backup: 'importExport'
     };

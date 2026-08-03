@@ -57,6 +57,7 @@ async function gotoSection(page, sectionId, headingText) {
     const moreLabels = {
       projects: 'Projects',
       codex: 'Codex',
+      analytics: 'Reports',
       importExport: 'Backup / Sync',
       todo: 'Workouts',
       grocery: 'Finances'
@@ -1426,7 +1427,7 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
 
   expect(
     layout.visibleNav.map((item) => item.replace(/\s+/g, ' ').trim())
-  ).toEqual(['Today', 'Timer', 'Entries', 'Reports', 'More']);
+  ).toEqual(['Today', 'Timer', 'Company', 'Entries', 'More']);
   expect(layout.sidebarPosition).toBe('fixed');
   expect(layout.sidebarBottom).toBe('0px');
   expect(layout.rowDisplay).toBe('block');
@@ -1528,6 +1529,254 @@ test('mobile entries use bottom navigation and card rows', async ({ page }) => {
   await gotoSection(page, 'analytics', 'Reports');
   await expect(page.locator('#todayCommandPanel')).toBeHidden();
   await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(0);
+});
+
+test('mobile Company tab explains its one-time private connection', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, { projects: [], entries: [] });
+
+  await page.goto('/#company');
+  await expect(
+    page.getByRole('heading', { name: 'Company', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Connect your private Company workspace'
+  );
+  await page.getByRole('button', { name: 'Connect Company' }).click();
+  const dialog = page.getByRole('dialog', { name: 'Connect Company' });
+  await expect(dialog).toBeVisible();
+  await expect(dialog.getByLabel('Private GitHub repository')).toHaveValue(
+    'Henrik-KM/timekeeper-private-context'
+  );
+  await expect(dialog.getByLabel('Fine-grained GitHub token')).toBeVisible();
+  await dialog.getByRole('button', { name: 'Cancel' }).click();
+});
+
+test('service worker never caches private cross-origin API responses', async () => {
+  const serviceWorker = await readFile('service-worker.js', 'utf8');
+
+  expect(serviceWorker).toContain(
+    'if (requestUrl.origin !== sw.location.origin) return;'
+  );
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v14';");
+});
+
+test('mobile Company tab loads private priorities and queues safe steering', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-03T12:00:00.000Z');
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorToken',
+      'github_pat_private_company_test'
+    );
+  });
+  const snapshot = {
+    schema_version: 1,
+    generated_at: '2026-08-03T11:58:00.000Z',
+    status: 'ready',
+    state_version: 'state-avantor-1',
+    today: {
+      project: 'Avantor',
+      title: 'IFLAI - AI cameras for PoU',
+      next_action: 'Prepare the tiered pricing and total-cost response.',
+      why: 'A live customer request needs a decision-ready response.',
+      done_when: 'Every requested tier, assumption, and approval is explicit.',
+      confidence: 'medium'
+    },
+    priorities: [
+      {
+        issue_id: 'priority:avantor',
+        evidence_fingerprint: 'evidence-avantor-1',
+        project: 'Avantor',
+        title: 'IFLAI - AI cameras for PoU <img src=x onerror=alert(1)>',
+        business_lane: 'customer_delivery',
+        business_impact: 'A live customer request needs a response.',
+        priority_score: 88,
+        confidence: 'medium',
+        current_state: 'open_commercial_request',
+        next_action: 'Prepare the tiered pricing and total-cost response.',
+        done_when: 'Every requested tier, assumption, and approval is explicit.'
+      }
+    ],
+    work_products: {
+      status: 'ready',
+      title: 'Customer delivery priorities',
+      summary: 'Prepared the strongest supported customer work.',
+      assets: [
+        {
+          asset_id: 'priority:avantor',
+          title: 'Avantor commercial response',
+          format: 'commercial_response_workbook',
+          purpose: 'Collect the inputs needed for a commercial response.',
+          content: '100 cameras\n500 cameras\n1,000 cameras\n2,000 cameras'
+        }
+      ]
+    },
+    decisions: {
+      pending_count: 1,
+      deferred_count: 0,
+      pending: [
+        {
+          approval_id: 'approval:pricing',
+          decision_fingerprint: 'decision-evidence-1',
+          title: 'Choose the pricing direction',
+          decision_requested: 'Choose the supported pricing direction.',
+          done_when: 'The direction is recorded.',
+          severity: 'high'
+        }
+      ]
+    },
+    handled: {
+      today_verified_actions: 4,
+      today_estimated_minutes_saved: 52,
+      receipts: [
+        {
+          receipt_id: 'receipt-1',
+          label: 'Prepared the most important company work',
+          summary: 'Prepared an internal commercial response matrix.',
+          status: 'verified',
+          finished_at: '2026-08-03T11:55:00.000Z',
+          estimated_minutes_saved: 35
+        }
+      ]
+    },
+    sources: {
+      status: 'ready',
+      attention_count: 0,
+      items: [
+        { name: 'outlook', status: 'ready', status_text: 'Up to date' },
+        { name: 'slack', status: 'ready', status_text: 'Up to date' }
+      ]
+    }
+  };
+  const encodedSnapshot = Buffer.from(JSON.stringify(snapshot)).toString(
+    'base64'
+  );
+  await page.route('https://api.github.com/**', async (route) => {
+    const request = route.request();
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encodedSnapshot, sha: 'state-sha' })
+      });
+      return;
+    }
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/receipts/')
+    ) {
+      await route.fulfill({ status: 404, body: '{}' });
+      return;
+    }
+    if (
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+    ) {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { path: 'company-operator/commands' } })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  await expect(
+    page.getByRole('heading', { name: 'Company', exact: true })
+  ).toBeVisible();
+  await expect(page.locator('#companyPageContent')).toContainText('Avantor');
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Prepare the tiered pricing and total-cost response.'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Commercial workbook'
+  );
+  await expect(page.locator('#companyPageContent img')).toHaveCount(0);
+
+  const mobileLayout = await page.evaluate(() => ({
+    viewportWidth: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    actionHeights: [
+      ...document.querySelectorAll(
+        '#companyPageContent .company-primary-card .company-action-grid .btn'
+      )
+    ].map((button) => button.getBoundingClientRect().height)
+  }));
+  expect(mobileLayout.scrollWidth).toBeLessThanOrEqual(
+    mobileLayout.viewportWidth + 2
+  );
+  expect(mobileLayout.actionHeights).toHaveLength(4);
+  expect(Math.min(...mobileLayout.actionHeights)).toBeGreaterThanOrEqual(44);
+
+  const commandRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Work on this now' }).click();
+  const request = await commandRequest;
+  const requestBody = request.postDataJSON();
+  const command = JSON.parse(
+    Buffer.from(requestBody.content, 'base64').toString('utf8')
+  );
+
+  expect(command.action).toBe('work_next');
+  expect(command.target.issue_id).toBe('priority:avantor');
+  expect(command.target.evidence_fingerprint).toBe('evidence-avantor-1');
+  expect(command.source).toBe('timekeeper_mobile');
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'queued for the desktop operator'
+  );
+  const storage = await page.evaluate(() => ({
+    normalData: localStorage.getItem('timekeeperDataPro') || '',
+    token: localStorage.getItem('timekeeperCompanyOperatorToken') || ''
+  }));
+  expect(storage.normalData).not.toContain('github_pat_private_company_test');
+  expect(storage.token).toBe('github_pat_private_company_test');
+
+  const decisionRequest = page.waitForRequest(
+    (candidate) =>
+      candidate.method() === 'PUT' &&
+      candidate.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Choose direction' }).click();
+  const decisionDialog = page.getByRole('dialog', {
+    name: 'Choose this direction?'
+  });
+  await decisionDialog
+    .getByRole('button', { name: 'Choose direction' })
+    .click();
+  const decisionPayload = (await decisionRequest).postDataJSON();
+  const decisionCommand = JSON.parse(
+    Buffer.from(decisionPayload.content, 'base64').toString('utf8')
+  );
+  expect(decisionCommand.action).toBe('record_decision');
+  expect(decisionCommand.params.approval_id).toBe('approval:pricing');
+  expect(decisionCommand.params.decision_fingerprint).toBe(
+    'decision-evidence-1'
+  );
+  expect(decisionCommand.params.decision).toBe('approve');
 });
 
 test('mobile shell exposes Now bar More menu sync status charts and richer quick timers', async ({
@@ -1647,6 +1896,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
       'Open Today',
       'Start Timer',
       'Quick Log',
+      'Open Company',
       'Open Reports',
       'Sync Backup'
     ])

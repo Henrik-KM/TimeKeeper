@@ -19,6 +19,7 @@
         <!-- Set Dashboard tab without active class; we will programmatically activate the Timer tab on load -->
         <li data-section="dashboard" class="active">Today</li>
         <li data-section="timer">Timer</li>
+        <li data-section="company">Company</li>
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
@@ -477,6 +478,21 @@
           <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Purchase History</h3>
           <ul id="archivedGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
+      </section>
+
+      <!-- Mobile Company Operator Section -->
+      <section id="company" class="section" style="display:none;">
+        <div class="company-page-header">
+          <div>
+            <h2>Company</h2>
+            <p>Priorities, completed work, and your direction to Codex</p>
+          </div>
+          <div class="company-page-header-actions">
+            <button id="companyPageConnectBtn" type="button" class="btn secondary">Connect</button>
+            <button id="companyPageRefreshBtn" type="button" class="btn secondary">Refresh</button>
+          </div>
+        </div>
+        <div id="companyPageContent" class="company-page-content" aria-live="polite"></div>
       </section>
 
       <!-- Codex Usage Section -->
