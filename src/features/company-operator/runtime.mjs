@@ -155,6 +155,11 @@ export function createCompanyOperatorController({
           commandId,
           action,
           label: priority.project || priority.title || 'Company priority',
+          issueId: priority.issueId,
+          evidenceFingerprint: priority.evidenceFingerprint,
+          project: priority.project || 'Company',
+          title: priority.title || '',
+          status: 'queued',
           queuedAt: new Date().toISOString()
         }
       ]);
@@ -322,15 +327,28 @@ export function createCompanyOperatorController({
           remaining.push(item);
           continue;
         }
+        const status = String(remote.payload.status || 'unknown');
+        if (['queued', 'accepted', 'processing', 'running'].includes(status)) {
+          remaining.push({
+            ...item,
+            status,
+            reason: String(remote.payload.reason || ''),
+            dispatch: safeRemoteDispatch(remote.payload.dispatch)
+          });
+          continue;
+        }
         completed.push({
           commandId: item.commandId,
           label: item.label,
           action: item.action,
-          status: String(remote.payload.status || 'unknown'),
+          issueId: item.issueId || '',
+          evidenceFingerprint: item.evidenceFingerprint || '',
+          status,
           reason: String(remote.payload.reason || ''),
-          processedAt: String(remote.payload.processed_at || '')
+          processedAt: String(remote.payload.processed_at || ''),
+          dispatch: safeRemoteDispatch(remote.payload.dispatch)
         });
-        applied = applied || remote.payload.status === 'applied';
+        applied = applied || status === 'applied';
       } catch (error) {
         remaining.push(item);
       }
@@ -368,17 +386,28 @@ export function createCompanyOperatorController({
 
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
-    const primary = snapshot.priorities[0];
+    const priorities = visiblePriorities();
+    const primary = priorities[0];
     if (primary) root.appendChild(primaryCard(primary));
+    else if (loadPending().some((item) => item.action === 'work_next')) {
+      root.appendChild(
+        card(
+          'Codex is handling the current priority',
+          'The next supported priority will appear here as soon as one is available.'
+        )
+      );
+    }
     root.appendChild(commandStatus());
+    const dispatches = dispatchSection();
+    if (dispatches) root.appendChild(dispatches);
     if (snapshot.decisions.pending.length) {
       root.appendChild(decisionSection(snapshot.decisions.pending));
     }
     if (snapshot.workProducts.assets.length) {
       root.appendChild(workProductSection(snapshot.workProducts.assets));
     }
-    if (snapshot.priorities.length > 1) {
-      root.appendChild(prioritySection(snapshot.priorities.slice(1)));
+    if (priorities.length > 1) {
+      root.appendChild(prioritySection(priorities.slice(1)));
     }
     root.appendChild(handledSection());
     root.appendChild(sourceSection());
@@ -505,6 +534,105 @@ export function createCompanyOperatorController({
     return section;
   }
 
+  function visiblePriorities() {
+    const pending = loadPending().filter(
+      (item) => item.action === 'work_next' && item.issueId
+    );
+    const applied = loadReceipts().filter(
+      (item) =>
+        item.action === 'work_next' && item.status === 'applied' && item.issueId
+    );
+    const remoteInProgress = Array.isArray(snapshot?.dispatches?.inProgress)
+      ? snapshot.dispatches.inProgress
+      : [];
+    return snapshot.priorities.filter((priority) => {
+      if (
+        pending.some(
+          (item) =>
+            item.issueId === priority.issueId &&
+            (!item.evidenceFingerprint ||
+              item.evidenceFingerprint === priority.evidenceFingerprint)
+        )
+      ) {
+        return false;
+      }
+      if (
+        applied.some(
+          (item) =>
+            item.issueId === priority.issueId &&
+            item.evidenceFingerprint === priority.evidenceFingerprint
+        )
+      ) {
+        return false;
+      }
+      return !remoteInProgress.some(
+        (item) => item.issueId && item.issueId === priority.issueId
+      );
+    });
+  }
+
+  function dispatchSection() {
+    const pending = loadPending().filter((item) => item.action === 'work_next');
+    const recent = Array.isArray(snapshot?.dispatches?.recent)
+      ? snapshot.dispatches.recent.slice(0, 5)
+      : [];
+    if (!pending.length && !recent.length) return null;
+    const section = sectionBlock('Codex work');
+    pending.forEach((item) => {
+      const row = element('article', 'company-dispatch-card in-progress');
+      row.appendChild(element('strong', '', item.label || 'Company priority'));
+      row.appendChild(
+        element(
+          'span',
+          '',
+          item.status === 'processing'
+            ? 'Codex is working on this now'
+            : 'Queued for the desktop Codex worker'
+        )
+      );
+      row.appendChild(element('small', '', 'Tracked as IFLAI Codex time'));
+      section.appendChild(row);
+    });
+    recent.forEach((dispatch) => {
+      const row = element(
+        'article',
+        `company-dispatch-card ${dispatch.status}`
+      );
+      row.appendChild(
+        element('strong', '', dispatch.project || 'Company work')
+      );
+      row.appendChild(
+        element(
+          'span',
+          '',
+          dispatch.summary || dispatch.reason || displayDispatchStatus(dispatch)
+        )
+      );
+      if (dispatch.requiresDecision) {
+        row.appendChild(
+          element(
+            'span',
+            'company-dispatch-next',
+            `Your decision: ${dispatch.recommendedNextAction || 'Review the completed brief.'}`
+          )
+        );
+      }
+      const details = [
+        [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
+        displayModelTier(dispatch.modelRoutingTier),
+        dispatch.executionRepo,
+        formatDispatchDuration(dispatch.durationSeconds),
+        dispatch.timeTrackingStatus === 'session_persisted'
+          ? 'IFLAI time session saved'
+          : ''
+      ].filter(Boolean);
+      if (details.length)
+        row.appendChild(element('small', '', details.join(' · ')));
+      section.appendChild(row);
+    });
+    return section;
+  }
+
   function commandStatus() {
     const pending = loadPending();
     const receipts = loadReceipts().slice(-5).reverse();
@@ -514,7 +642,7 @@ export function createCompanyOperatorController({
         element(
           'p',
           'company-queued',
-          `${pending.length} instruction${pending.length === 1 ? '' : 's'} queued for the desktop operator`
+          `${pending.length} Codex job${pending.length === 1 ? '' : 's'} queued or in progress`
         )
       );
     }
@@ -543,6 +671,15 @@ export function createCompanyOperatorController({
       item.appendChild(element('strong', '', receipt.label));
       if (receipt.summary)
         item.appendChild(element('span', '', receipt.summary));
+      const details = [
+        [receipt.model, receipt.reasoningEffort].filter(Boolean).join(' / '),
+        receipt.executionRepo,
+        receipt.estimatedMinutesSaved
+          ? `${receipt.estimatedMinutesSaved} min saved`
+          : ''
+      ].filter(Boolean);
+      if (details.length)
+        item.appendChild(element('small', '', details.join(' · ')));
       section.appendChild(item);
     });
     return section;
@@ -770,6 +907,72 @@ function companyErrorMessage(error) {
     return 'The private Company workspace is not ready yet.';
   }
   return 'Company information could not be refreshed. Your TimeKeeper data is unaffected.';
+}
+
+function safeRemoteDispatch(value) {
+  const source =
+    value && typeof value === 'object' && !Array.isArray(value) ? value : {};
+  return {
+    status: String(source.status || '').slice(0, 60),
+    summary: String(source.summary || '').slice(0, 500),
+    outcomeStatus: String(
+      source.outcome_status || source.outcomeStatus || ''
+    ).slice(0, 60),
+    requiresDecision:
+      source.requires_decision === true || source.requiresDecision === true,
+    recommendedNextAction: String(
+      source.recommended_next_action || source.recommendedNextAction || ''
+    ).slice(0, 500),
+    model: String(source.model || '').slice(0, 100),
+    reasoningEffort: String(
+      source.reasoning_effort || source.reasoningEffort || ''
+    ).slice(0, 30),
+    modelRoutingTier: String(
+      source.model_routing_tier || source.modelRoutingTier || ''
+    ).slice(0, 40),
+    executionRepo: String(
+      source.execution_repo || source.executionRepo || ''
+    ).slice(0, 120),
+    sessionId: String(source.session_id || source.sessionId || '').slice(
+      0,
+      140
+    ),
+    durationSeconds: Math.max(
+      0,
+      Math.round(Number(source.duration_seconds || source.durationSeconds) || 0)
+    ),
+    timeTrackingStatus: String(
+      source.time_tracking_status || source.timeTrackingStatus || ''
+    ).slice(0, 80)
+  };
+}
+
+function displayDispatchStatus(dispatch) {
+  if (dispatch.status === 'verified') return 'Completed and verified';
+  if (dispatch.status === 'processing') return 'Codex is working on this now';
+  if (dispatch.status === 'blocked') return 'Needs a decision or more evidence';
+  if (dispatch.status === 'failed') return 'Codex work needs attention';
+  return 'Codex work updated';
+}
+
+function displayModelTier(value) {
+  const labels = {
+    lightweight: 'Lightweight task',
+    standard: 'Standard task',
+    complex: 'Complex task',
+    challenging: 'Challenging task',
+    frontier: 'Exceptional challenge',
+    fixed: 'Fixed model setting'
+  };
+  return labels[String(value || '').toLowerCase()] || '';
+}
+
+function formatDispatchDuration(value) {
+  const seconds = Math.max(0, Math.round(Number(value) || 0));
+  if (!seconds) return '';
+  if (seconds < 60) return `${seconds}s`;
+  const minutes = Math.round(seconds / 60);
+  return `${minutes} min`;
 }
 
 function formatAssetType(value) {

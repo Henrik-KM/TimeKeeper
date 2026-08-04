@@ -1089,6 +1089,7 @@ tr:nth-child(even) td {
 
 .company-list-card,
 .company-receipt-card,
+.company-dispatch-card,
 .company-work-product {
   margin-top: 0.65rem;
   padding: 0.8rem;
@@ -1154,6 +1155,39 @@ tr:nth-child(even) td {
 .company-receipt-card {
   display: grid;
   gap: 0.25rem;
+}
+
+.company-dispatch-card {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.company-dispatch-card.in-progress {
+  border-color: #93c5fd;
+  background: #eff6ff;
+}
+
+.company-dispatch-card.verified {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.company-dispatch-card.blocked,
+.company-dispatch-card.failed {
+  border-color: #fca5a5;
+  background: #fef2f2;
+}
+
+.company-dispatch-card span,
+.company-dispatch-card small,
+.company-receipt-card small {
+  color: #475569;
+  font-size: 0.8rem;
+}
+
+.company-dispatch-card .company-dispatch-next {
+  color: #92400e;
+  font-weight: 700;
 }
 
 .company-receipt-card span,

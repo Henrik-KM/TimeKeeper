@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v14';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v15';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1611,6 +1611,19 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
         current_state: 'open_commercial_request',
         next_action: 'Prepare the tiered pricing and total-cost response.',
         done_when: 'Every requested tier, assumption, and approval is explicit.'
+      },
+      {
+        issue_id: 'priority:albany',
+        evidence_fingerprint: 'evidence-albany-1',
+        project: 'Albany',
+        title: 'Albany customer meeting outcome',
+        business_lane: 'customer_delivery',
+        business_impact: 'A customer follow-up needs a clear next step.',
+        priority_score: 82,
+        confidence: 'medium',
+        current_state: 'meeting_followup',
+        next_action: 'Prepare the evidence-backed customer follow-up.',
+        done_when: 'The next step is explicit and ready for review.'
       }
     ],
     work_products: {
@@ -1652,6 +1665,31 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           status: 'verified',
           finished_at: '2026-08-03T11:55:00.000Z',
           estimated_minutes_saved: 35
+        }
+      ]
+    },
+    dispatches: {
+      in_progress_count: 0,
+      in_progress: [],
+      recent: [
+        {
+          dispatch_id: 'dispatch:older-work',
+          command_id: 'mobile-older-work',
+          issue_id: 'priority:older',
+          project: 'MAGIK',
+          status: 'verified',
+          summary: 'Completed an earlier evidence-backed deliverable.',
+          outcome_status: 'needs_decision',
+          requires_decision: true,
+          recommended_next_action:
+            'Choose whether to continue the opportunity.',
+          model: 'gpt-5.6-sol',
+          reasoning_effort: 'max',
+          model_routing_tier: 'frontier',
+          execution_repo: 'email-helper',
+          duration_seconds: 125,
+          artifact_count: 1,
+          time_tracking_status: 'session_persisted'
         }
       ]
     },
@@ -1746,7 +1784,22 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   expect(command.target.evidence_fingerprint).toBe('evidence-avantor-1');
   expect(command.source).toBe('timekeeper_mobile');
   await expect(page.locator('#companyPageContent')).toContainText(
-    'queued for the desktop operator'
+    'Codex job queued or in progress'
+  );
+  await expect(
+    page.locator('#companyPageContent .company-primary-card')
+  ).toContainText('Albany');
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'gpt-5.6-sol / max'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'IFLAI time session saved'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Exceptional challenge'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Your decision: Choose whether to continue the opportunity.'
   );
   const storage = await page.evaluate(() => ({
     normalData: localStorage.getItem('timekeeperDataPro') || '',

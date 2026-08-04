@@ -52,6 +52,7 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const workProducts = asRecord(source.work_products || source.workProducts);
   const decisions = asRecord(source.decisions);
   const handled = asRecord(source.handled);
+  const dispatches = asRecord(source.dispatches);
   const sources = asRecord(source.sources);
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
@@ -82,6 +83,17 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
           handled.todayEstimatedMinutesSaved
       ),
       receipts: normalizeArray(handled.receipts, normalizeReceipt, 10)
+    },
+    dispatches: {
+      inProgressCount: toCount(
+        dispatches.in_progress_count ?? dispatches.inProgressCount
+      ),
+      inProgress: normalizeArray(
+        dispatches.in_progress || dispatches.inProgress,
+        normalizeDispatch,
+        8
+      ),
+      recent: normalizeArray(dispatches.recent, normalizeDispatch, 8)
     },
     sources: {
       status: cleanText(sources.status, 80),
@@ -266,6 +278,68 @@ function normalizeReceipt(value) {
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
     estimatedMinutesSaved: toCount(
       source.estimated_minutes_saved ?? source.estimatedMinutesSaved
+    ),
+    model: cleanText(source.model, 100),
+    reasoningEffort: cleanText(
+      source.reasoning_effort || source.reasoningEffort,
+      30
+    ),
+    modelRoutingTier: cleanText(
+      source.model_routing_tier || source.modelRoutingTier,
+      40
+    ),
+    executionRepo: cleanText(
+      source.execution_repo || source.executionRepo,
+      120
+    ),
+    sessionId: cleanText(source.session_id || source.sessionId, 140)
+  };
+}
+
+function normalizeDispatch(value) {
+  const source = asRecord(value);
+  const commandId = cleanText(source.command_id || source.commandId, 120);
+  const dispatchId = cleanText(source.dispatch_id || source.dispatchId, 160);
+  if (!commandId && !dispatchId) return null;
+  return {
+    dispatchId,
+    commandId,
+    issueId: cleanText(source.issue_id || source.issueId, 160),
+    project: cleanText(source.project, 100) || 'Company',
+    status: cleanText(source.status, 60) || 'unknown',
+    reason: cleanText(source.reason, 240),
+    summary: cleanText(source.summary, 500),
+    outcomeStatus: cleanText(source.outcome_status || source.outcomeStatus, 60),
+    requiresDecision:
+      source.requires_decision === true || source.requiresDecision === true,
+    recommendedNextAction: cleanText(
+      source.recommended_next_action || source.recommendedNextAction,
+      500
+    ),
+    model: cleanText(source.model, 100),
+    reasoningEffort: cleanText(
+      source.reasoning_effort || source.reasoningEffort,
+      30
+    ),
+    modelRoutingTier: cleanText(
+      source.model_routing_tier || source.modelRoutingTier,
+      40
+    ),
+    executionRepo: cleanText(
+      source.execution_repo || source.executionRepo,
+      120
+    ),
+    sessionId: cleanText(source.session_id || source.sessionId, 140),
+    startedAt: cleanText(source.started_at || source.startedAt, 80),
+    finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
+    durationSeconds: toCount(source.duration_seconds ?? source.durationSeconds),
+    artifactCount: toCount(source.artifact_count ?? source.artifactCount),
+    estimatedMinutesSaved: toCount(
+      source.estimated_minutes_saved ?? source.estimatedMinutesSaved
+    ),
+    timeTrackingStatus: cleanText(
+      source.time_tracking_status || source.timeTrackingStatus,
+      80
     )
   };
 }

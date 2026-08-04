@@ -51,6 +51,35 @@ test('normalizes a bounded mobile Company snapshot', () => {
       ]
     },
     handled: { today_verified_actions: 3, receipts: [] },
+    dispatches: {
+      in_progress_count: 1,
+      in_progress: [
+        {
+          command_id: 'mobile-company-001',
+          issue_id: 'priority:avantor',
+          project: 'Avantor',
+          status: 'processing'
+        }
+      ],
+      recent: [
+        {
+          dispatch_id: 'dispatch:mobile-company-000',
+          command_id: 'mobile-company-000',
+          issue_id: 'priority:older',
+          project: 'Albany',
+          status: 'verified',
+          outcome_status: 'needs_decision',
+          requires_decision: true,
+          recommended_next_action: 'Choose whether to proceed.',
+          model: 'gpt-5.6-sol',
+          reasoning_effort: 'max',
+          model_routing_tier: 'frontier',
+          execution_repo: 'email-helper',
+          duration_seconds: 125,
+          time_tracking_status: 'session_persisted'
+        }
+      ]
+    },
     sources: { status: 'ready', attention_count: 0, items: [] }
   });
 
@@ -65,6 +94,16 @@ test('normalizes a bounded mobile Company snapshot', () => {
     '100 cameras\n500 cameras'
   );
   assert.equal(snapshot.handled.todayVerifiedActions, 3);
+  assert.equal(snapshot.dispatches.inProgressCount, 1);
+  assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');
+  assert.equal(snapshot.dispatches.recent[0].model, 'gpt-5.6-sol');
+  assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
+  assert.equal(snapshot.dispatches.recent[0].modelRoutingTier, 'frontier');
+  assert.equal(snapshot.dispatches.recent[0].requiresDecision, true);
+  assert.equal(
+    snapshot.dispatches.recent[0].recommendedNextAction,
+    'Choose whether to proceed.'
+  );
   assert.equal(
     snapshot.decisions.pending[0].decisionFingerprint,
     'decision-evidence-1'
