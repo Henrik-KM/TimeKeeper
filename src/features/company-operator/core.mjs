@@ -334,6 +334,11 @@ function normalizeDispatch(value) {
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
     durationSeconds: toCount(source.duration_seconds ?? source.durationSeconds),
     artifactCount: toCount(source.artifact_count ?? source.artifactCount),
+    deliverableStatus: cleanText(
+      source.deliverable_status || source.deliverableStatus,
+      40
+    ),
+    deliverables: normalizeArray(source.deliverables, normalizeDeliverable, 2),
     estimatedMinutesSaved: toCount(
       source.estimated_minutes_saved ?? source.estimatedMinutesSaved
     ),
@@ -341,6 +346,23 @@ function normalizeDispatch(value) {
       source.time_tracking_status || source.timeTrackingStatus,
       80
     )
+  };
+}
+
+function normalizeDeliverable(value) {
+  const source = asRecord(value);
+  const content = boundedMultiline(source.content, 40000);
+  const sha256 = cleanText(source.sha256, 64).toLowerCase();
+  if (source.verified !== true || !content || !/^[0-9a-f]{64}$/.test(sha256)) {
+    return null;
+  }
+  return {
+    label: cleanText(source.label, 180) || 'Codex result',
+    kind: cleanText(source.kind, 80) || 'text',
+    content,
+    bytes: toCount(source.bytes),
+    sha256,
+    verified: true
   };
 }
 

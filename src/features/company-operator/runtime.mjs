@@ -617,6 +617,25 @@ export function createCompanyOperatorController({
           )
         );
       }
+      dispatch.deliverables.forEach((deliverable) => {
+        const reader = element('details', 'company-deliverable-reader');
+        const opener = element('summary');
+        opener.appendChild(element('strong', '', 'Read full result'));
+        opener.appendChild(
+          element(
+            'span',
+            '',
+            [deliverable.label, formatFileSize(deliverable.bytes)]
+              .filter(Boolean)
+              .join(' · ')
+          )
+        );
+        reader.appendChild(opener);
+        reader.appendChild(
+          element('pre', 'company-deliverable-content', deliverable.content)
+        );
+        row.appendChild(reader);
+      });
       const details = [
         [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
         displayModelTier(dispatch.modelRoutingTier),
@@ -973,6 +992,13 @@ function formatDispatchDuration(value) {
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.round(seconds / 60);
   return `${minutes} min`;
+}
+
+function formatFileSize(value) {
+  const bytes = Math.max(0, Math.round(Number(value) || 0));
+  if (!bytes) return '';
+  if (bytes < 1024) return `${bytes} B`;
+  return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} KB`;
 }
 
 function formatAssetType(value) {

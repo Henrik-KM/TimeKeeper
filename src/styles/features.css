@@ -1190,6 +1190,45 @@ tr:nth-child(even) td {
   font-weight: 700;
 }
 
+.company-deliverable-reader {
+  margin-top: 0.35rem;
+  border: 1px solid #86efac;
+  border-radius: 0.65rem;
+  background: #ffffff;
+}
+
+.company-deliverable-reader summary {
+  display: grid;
+  min-height: 2.75rem;
+  padding: 0.65rem 0.75rem;
+  cursor: pointer;
+  align-content: center;
+  gap: 0.1rem;
+}
+
+.company-deliverable-reader summary strong {
+  color: #166534;
+  font-size: 0.9rem;
+}
+
+.company-deliverable-reader summary span {
+  color: #64748b;
+  font-size: 0.74rem;
+}
+
+.company-deliverable-content {
+  max-width: 100%;
+  margin: 0;
+  padding: 0.85rem;
+  overflow-wrap: anywhere;
+  border-top: 1px solid #dcfce7;
+  color: #1e293b;
+  font-family: inherit;
+  font-size: 0.84rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+}
+
 .company-receipt-card span,
 .company-handled-summary {
   color: #475569;

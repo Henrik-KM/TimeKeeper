@@ -76,6 +76,17 @@ test('normalizes a bounded mobile Company snapshot', () => {
           model_routing_tier: 'frontier',
           execution_repo: 'email-helper',
           duration_seconds: 125,
+          deliverable_status: 'ready',
+          deliverables: [
+            {
+              label: 'Decision brief',
+              kind: 'decision_brief',
+              content: '# Decision brief\n\n- Assign an owner.',
+              bytes: 41,
+              sha256: 'a'.repeat(64),
+              verified: true
+            }
+          ],
           time_tracking_status: 'session_persisted'
         }
       ]
@@ -100,6 +111,11 @@ test('normalizes a bounded mobile Company snapshot', () => {
   assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
   assert.equal(snapshot.dispatches.recent[0].modelRoutingTier, 'frontier');
   assert.equal(snapshot.dispatches.recent[0].requiresDecision, true);
+  assert.equal(snapshot.dispatches.recent[0].deliverableStatus, 'ready');
+  assert.equal(
+    snapshot.dispatches.recent[0].deliverables[0].content,
+    '# Decision brief\n\n- Assign an owner.'
+  );
   assert.equal(
     snapshot.dispatches.recent[0].recommendedNextAction,
     'Choose whether to proceed.'

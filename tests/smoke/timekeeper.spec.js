@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v15';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v16';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1689,6 +1689,18 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           execution_repo: 'email-helper',
           duration_seconds: 125,
           artifact_count: 1,
+          deliverable_status: 'ready',
+          deliverables: [
+            {
+              label: 'MAGIK opportunity decision brief',
+              kind: 'decision_brief',
+              content:
+                '# Completed decision brief\n\n- Assign an owner.\n- Confirm the deadline.\n\n<img src=x onerror=alert(1)>',
+              bytes: 2140,
+              sha256: 'a'.repeat(64),
+              verified: true
+            }
+          ],
           time_tracking_status: 'session_persisted'
         }
       ]
@@ -1801,6 +1813,24 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   await expect(page.locator('#companyPageContent')).toContainText(
     'Your decision: Choose whether to continue the opportunity.'
   );
+  await page
+    .locator('#companyPageContent .company-deliverable-reader summary')
+    .click();
+  await expect(
+    page.locator('#companyPageContent .company-deliverable-content')
+  ).toContainText('Confirm the deadline.');
+  await expect(page.locator('#companyPageContent img')).toHaveCount(0);
+  const resultLayout = await page.evaluate(() => ({
+    viewportWidth: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    readerHeight: document
+      .querySelector('.company-deliverable-reader summary')
+      ?.getBoundingClientRect().height
+  }));
+  expect(resultLayout.scrollWidth).toBeLessThanOrEqual(
+    resultLayout.viewportWidth + 2
+  );
+  expect(resultLayout.readerHeight).toBeGreaterThanOrEqual(44);
   const storage = await page.evaluate(() => ({
     normalData: localStorage.getItem('timekeeperDataPro') || '',
     token: localStorage.getItem('timekeeperCompanyOperatorToken') || ''
