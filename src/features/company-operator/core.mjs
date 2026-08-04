@@ -16,6 +16,21 @@ const ALLOWED_ACTIONS = new Set([
   'snooze',
   'work_next'
 ]);
+const RESULT_DESTINATION_TYPES = new Set([
+  'github_change',
+  'internal_brief',
+  'onedrive_document',
+  'outlook_draft',
+  'private_file',
+  'sharepoint_document',
+  'website'
+]);
+const LEGACY_PREVIEW_KINDS = new Set([
+  'decision_brief',
+  'executive_brief',
+  'internal_brief',
+  'meeting_brief'
+]);
 
 export function normalizeCompanyOperatorSettings(value = {}) {
   const source = asRecord(value);
@@ -301,6 +316,11 @@ function normalizeDispatch(value) {
   const commandId = cleanText(source.command_id || source.commandId, 120);
   const dispatchId = cleanText(source.dispatch_id || source.dispatchId, 160);
   if (!commandId && !dispatchId) return null;
+  const legacyDestinations = normalizeArray(
+    source.deliverables,
+    normalizeLegacyDeliverable,
+    2
+  );
   return {
     dispatchId,
     commandId,
@@ -334,11 +354,7 @@ function normalizeDispatch(value) {
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
     durationSeconds: toCount(source.duration_seconds ?? source.durationSeconds),
     artifactCount: toCount(source.artifact_count ?? source.artifactCount),
-    deliverableStatus: cleanText(
-      source.deliverable_status || source.deliverableStatus,
-      40
-    ),
-    deliverables: normalizeArray(source.deliverables, normalizeDeliverable, 2),
+    result: normalizeDispatchResult(source.result, source, legacyDestinations),
     estimatedMinutesSaved: toCount(
       source.estimated_minutes_saved ?? source.estimatedMinutesSaved
     ),
@@ -349,21 +365,213 @@ function normalizeDispatch(value) {
   };
 }
 
-function normalizeDeliverable(value) {
+function normalizeDispatchResult(value, dispatch, legacyDestinations) {
   const source = asRecord(value);
+  const destinations = normalizeArray(
+    source.destinations,
+    normalizeResultDestination,
+    4
+  );
+  return {
+    status:
+      cleanText(source.status, 60) ||
+      cleanText(dispatch.outcome_status || dispatch.outcomeStatus, 60) ||
+      cleanText(dispatch.status, 60) ||
+      'unknown',
+    headline:
+      cleanText(source.headline, 500) || cleanText(dispatch.summary, 500),
+    completedWork: Array.isArray(source.completed_work || source.completedWork)
+      ? (source.completed_work || source.completedWork)
+          .map((item) => cleanText(item, 300))
+          .filter(Boolean)
+          .slice(0, 6)
+      : [],
+    nextAction:
+      cleanText(source.next_action || source.nextAction, 500) ||
+      cleanText(
+        dispatch.recommended_next_action || dispatch.recommendedNextAction,
+        500
+      ),
+    destinations: destinations.length ? destinations : legacyDestinations
+  };
+}
+
+function normalizeLegacyDeliverable(value) {
+  const source = asRecord(value);
+  const kind = normalizedKey(source.kind);
+  if (!LEGACY_PREVIEW_KINDS.has(kind)) return null;
   const content = boundedMultiline(source.content, 40000);
   const sha256 = cleanText(source.sha256, 64).toLowerCase();
   if (source.verified !== true || !content || !/^[0-9a-f]{64}$/.test(sha256)) {
     return null;
   }
   return {
+    type: 'internal_brief',
+    mode: 'preview',
     label: cleanText(source.label, 180) || 'Codex result',
-    kind: cleanText(source.kind, 80) || 'text',
-    content,
+    kind,
+    location: 'Private Company brief',
+    actionLabel: 'Read brief',
+    previewContent: content,
+    downloadContent: '',
+    filename: '',
+    mimeType: '',
+    url: '',
     bytes: toCount(source.bytes),
     sha256,
     verified: true
   };
+}
+
+function normalizeResultDestination(value) {
+  const source = asRecord(value);
+  const type = normalizedKey(source.type);
+  const mode = normalizedKey(source.mode);
+  if (source.verified !== true || !RESULT_DESTINATION_TYPES.has(type)) {
+    return null;
+  }
+  const base = {
+    type,
+    mode,
+    label: cleanText(source.label, 180) || 'Codex result',
+    kind: normalizedKey(source.kind) || 'result',
+    location: cleanText(source.location, 180),
+    statusText: cleanText(source.status_text || source.statusText, 240),
+    bytes: toCount(source.bytes),
+    sha256: cleanText(source.sha256, 64).toLowerCase(),
+    verified: true
+  };
+  if (mode === 'preview' && type === 'internal_brief') {
+    const previewContent = boundedMultiline(
+      source.preview_content || source.previewContent,
+      40000
+    );
+    if (!previewContent || !/^[0-9a-f]{64}$/.test(base.sha256)) return null;
+    return {
+      ...base,
+      actionLabel: 'Read brief',
+      previewContent,
+      downloadContent: '',
+      filename: '',
+      mimeType: '',
+      url: ''
+    };
+  }
+  if (mode === 'download' && type === 'private_file') {
+    const downloadContent = boundedMultiline(
+      source.download_content || source.downloadContent,
+      40000
+    );
+    const filename = cleanFilename(source.filename);
+    if (!downloadContent || !filename || !/^[0-9a-f]{64}$/.test(base.sha256)) {
+      return null;
+    }
+    return {
+      ...base,
+      actionLabel: 'Download file',
+      previewContent: '',
+      downloadContent,
+      filename,
+      mimeType: normalizeTextMimeType(source.mime_type || source.mimeType),
+      url: ''
+    };
+  }
+  if (mode === 'open') {
+    const url = normalizeDestinationUrl(type, source.url);
+    if (!url) return null;
+    return {
+      ...base,
+      actionLabel: destinationActionLabel(type),
+      previewContent: '',
+      downloadContent: '',
+      filename: '',
+      mimeType: '',
+      url
+    };
+  }
+  if (mode === 'none' && type === 'private_file') {
+    return {
+      ...base,
+      actionLabel: '',
+      previewContent: '',
+      downloadContent: '',
+      filename: '',
+      mimeType: '',
+      url: ''
+    };
+  }
+  return null;
+}
+
+function normalizeDestinationUrl(type, value) {
+  const raw = cleanText(value, 1000);
+  let url;
+  try {
+    url = new URL(raw);
+  } catch (error) {
+    return '';
+  }
+  if (url.protocol !== 'https:' || url.username || url.password) return '';
+  const host = url.hostname.toLowerCase();
+  if (isLocalHostname(host)) return '';
+  const allowed = {
+    github_change: host === 'github.com' || host.endsWith('.github.com'),
+    onedrive_document: host === '1drv.ms' || host === 'onedrive.live.com',
+    outlook_draft:
+      host === 'outlook.office.com' || host === 'outlook.office365.com',
+    sharepoint_document: host.endsWith('.sharepoint.com'),
+    website: true
+  };
+  return allowed[type] ? url.href : '';
+}
+
+function destinationActionLabel(type) {
+  return {
+    github_change: 'View changes',
+    onedrive_document: 'Open document',
+    outlook_draft: 'Open draft',
+    sharepoint_document: 'Open document',
+    website: 'Open page'
+  }[type];
+}
+
+function isLocalHostname(host) {
+  if (!host || host === 'localhost' || host.endsWith('.local')) return true;
+  if (host === '::1' || host.startsWith('127.') || host.startsWith('10.')) {
+    return true;
+  }
+  if (host.startsWith('192.168.') || host.startsWith('169.254.')) return true;
+  const match = /^172\.(\d{1,3})\./.exec(host);
+  return Boolean(match && Number(match[1]) >= 16 && Number(match[1]) <= 31);
+}
+
+function cleanFilename(value) {
+  const filename = [...String(value || '')]
+    .map((character) =>
+      character.charCodeAt(0) <= 31 || '\\/:*?"<>|'.includes(character)
+        ? '-'
+        : character
+    )
+    .join('')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 160);
+  return filename && filename !== '.' && filename !== '..' ? filename : '';
+}
+
+function normalizeTextMimeType(value) {
+  const mime = cleanText(value, 100).toLowerCase();
+  return /^(text\/(?:plain|markdown|csv))(?:;charset=utf-8)?$/.test(mime)
+    ? mime
+    : 'text/plain;charset=utf-8';
+}
+
+function normalizedKey(value) {
+  return String(value || '')
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '_')
+    .replace(/^_+|_+$/g, '');
 }
 
 function normalizeSource(value) {

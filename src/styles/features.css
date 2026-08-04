@@ -1190,14 +1190,59 @@ tr:nth-child(even) td {
   font-weight: 700;
 }
 
-.company-deliverable-reader {
+.company-result-status {
+  justify-self: start;
+  padding: 0.18rem 0.5rem;
+  border-radius: 999px;
+  background: #dcfce7;
+  color: #166534;
+  font-size: 0.7rem;
+  font-weight: 800;
+}
+
+.company-result-status.needs_decision {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.company-result-status.blocked,
+.company-result-status.failed {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.company-result-completed summary,
+.company-run-details summary {
+  min-height: 2.5rem;
+  cursor: pointer;
+  align-content: center;
+  color: #475569;
+  font-size: 0.78rem;
+  font-weight: 750;
+}
+
+.company-result-completed ul {
+  margin: 0 0 0.35rem;
+  padding-left: 1.2rem;
+  color: #334155;
+  font-size: 0.82rem;
+}
+
+.company-result-destination {
+  display: grid;
+  gap: 0.55rem;
   margin-top: 0.35rem;
+  padding: 0.65rem 0.75rem;
   border: 1px solid #86efac;
   border-radius: 0.65rem;
   background: #ffffff;
 }
 
-.company-deliverable-reader summary {
+.company-result-destination.preview {
+  padding: 0;
+}
+
+.company-result-destination.preview summary {
   display: grid;
   min-height: 2.75rem;
   padding: 0.65rem 0.75rem;
@@ -1206,17 +1251,30 @@ tr:nth-child(even) td {
   gap: 0.1rem;
 }
 
-.company-deliverable-reader summary strong {
+.company-result-destination.preview summary strong {
   color: #166534;
   font-size: 0.9rem;
 }
 
-.company-deliverable-reader summary span {
+.company-result-destination.preview summary span,
+.company-result-location span,
+.company-result-location small {
   color: #64748b;
   font-size: 0.74rem;
 }
 
-.company-deliverable-content {
+.company-result-location {
+  display: grid;
+  gap: 0.12rem;
+  min-width: 0;
+}
+
+.company-result-destination .btn {
+  min-height: 2.75rem;
+  margin: 0;
+}
+
+.company-result-preview {
   max-width: 100%;
   margin: 0;
   padding: 0.85rem;
@@ -1227,6 +1285,11 @@ tr:nth-child(even) td {
   font-size: 0.84rem;
   line-height: 1.55;
   white-space: pre-wrap;
+}
+
+.company-run-details small {
+  display: block;
+  padding: 0 0 0.45rem;
 }
 
 .company-receipt-card span,

@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v16';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v17';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1688,19 +1688,49 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           model_routing_tier: 'frontier',
           execution_repo: 'email-helper',
           duration_seconds: 125,
-          artifact_count: 1,
-          deliverable_status: 'ready',
-          deliverables: [
-            {
-              label: 'MAGIK opportunity decision brief',
-              kind: 'decision_brief',
-              content:
-                '# Completed decision brief\n\n- Assign an owner.\n- Confirm the deadline.\n\n<img src=x onerror=alert(1)>',
-              bytes: 2140,
-              sha256: 'a'.repeat(64),
-              verified: true
-            }
-          ],
+          artifact_count: 2,
+          result: {
+            status: 'needs_decision',
+            headline: 'Completed an earlier evidence-backed deliverable.',
+            completed_work: [
+              'Reviewed the supported evidence.',
+              'Prepared the decision brief.'
+            ],
+            next_action: 'Choose whether to continue the opportunity.',
+            destinations: [
+              {
+                type: 'internal_brief',
+                mode: 'preview',
+                label: 'MAGIK opportunity decision brief',
+                location: 'Private Company brief',
+                preview_content:
+                  '# Completed decision brief\n\n- Assign an owner.\n- Confirm the deadline.\n\n<img src=x onerror=alert(1)>',
+                bytes: 2140,
+                sha256: 'a'.repeat(64),
+                verified: true
+              },
+              {
+                type: 'private_file',
+                mode: 'download',
+                label: 'Supporting notes',
+                location: 'Private download',
+                download_content: 'Supporting evidence notes',
+                filename: 'supporting-notes.md',
+                mime_type: 'text/markdown;charset=utf-8',
+                bytes: 25,
+                sha256: 'b'.repeat(64),
+                verified: true
+              },
+              {
+                type: 'github_change',
+                mode: 'open',
+                label: 'Implemented change',
+                location: 'GitHub',
+                url: 'https://github.com/Henrik-KM/TimeKeeper/commit/abc',
+                verified: true
+              }
+            ]
+          },
           time_tracking_status: 'session_persisted'
         }
       ]
@@ -1802,6 +1832,16 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     page.locator('#companyPageContent .company-primary-card')
   ).toContainText('Albany');
   await expect(page.locator('#companyPageContent')).toContainText(
+    'Codex results'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Decision needed'
+  );
+  await expect(page.getByText('gpt-5.6-sol / max')).toBeHidden();
+  await page
+    .locator('#companyPageContent .company-run-details summary')
+    .click();
+  await expect(page.locator('#companyPageContent')).toContainText(
     'gpt-5.6-sol / max'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
@@ -1814,17 +1854,27 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Your decision: Choose whether to continue the opportunity.'
   );
   await page
-    .locator('#companyPageContent .company-deliverable-reader summary')
+    .locator('#companyPageContent .company-result-destination.preview summary')
     .click();
   await expect(
-    page.locator('#companyPageContent .company-deliverable-content')
+    page.locator('#companyPageContent .company-result-preview')
   ).toContainText('Confirm the deadline.');
+  const downloadPromise = page.waitForEvent('download');
+  await page.getByRole('button', { name: 'Download file' }).click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toBe('supporting-notes.md');
+  const changeLink = page.getByRole('link', { name: 'View changes' });
+  await expect(changeLink).toHaveAttribute(
+    'href',
+    'https://github.com/Henrik-KM/TimeKeeper/commit/abc'
+  );
+  await expect(changeLink).toHaveAttribute('target', '_blank');
   await expect(page.locator('#companyPageContent img')).toHaveCount(0);
   const resultLayout = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
     readerHeight: document
-      .querySelector('.company-deliverable-reader summary')
+      .querySelector('.company-result-destination.preview summary')
       ?.getBoundingClientRect().height
   }));
   expect(resultLayout.scrollWidth).toBeLessThanOrEqual(

@@ -76,17 +76,48 @@ test('normalizes a bounded mobile Company snapshot', () => {
           model_routing_tier: 'frontier',
           execution_repo: 'email-helper',
           duration_seconds: 125,
-          deliverable_status: 'ready',
-          deliverables: [
-            {
-              label: 'Decision brief',
-              kind: 'decision_brief',
-              content: '# Decision brief\n\n- Assign an owner.',
-              bytes: 41,
-              sha256: 'a'.repeat(64),
-              verified: true
-            }
-          ],
+          result: {
+            status: 'needs_decision',
+            headline: 'Prepared the supported decision brief.',
+            completed_work: ['Reviewed the evidence.', 'Prepared the brief.'],
+            next_action: 'Choose whether to proceed.',
+            destinations: [
+              {
+                type: 'internal_brief',
+                mode: 'preview',
+                label: 'Decision brief',
+                location: 'Private Company brief',
+                preview_content: '# Decision brief\n\n- Assign an owner.',
+                bytes: 41,
+                sha256: 'a'.repeat(64),
+                verified: true
+              },
+              {
+                type: 'github_change',
+                mode: 'open',
+                label: 'Implementation',
+                url: 'https://github.com/Henrik-KM/TimeKeeper/commit/abc',
+                verified: true
+              },
+              {
+                type: 'private_file',
+                mode: 'download',
+                label: 'Supporting notes',
+                download_content: 'Private supporting notes',
+                filename: 'supporting-notes.md',
+                mime_type: 'text/markdown;charset=utf-8',
+                sha256: 'b'.repeat(64),
+                verified: true
+              },
+              {
+                type: 'outlook_draft',
+                mode: 'open',
+                label: 'Fake draft',
+                url: 'https://example.com/not-outlook',
+                verified: true
+              }
+            ]
+          },
           time_tracking_status: 'session_persisted'
         }
       ]
@@ -111,10 +142,22 @@ test('normalizes a bounded mobile Company snapshot', () => {
   assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
   assert.equal(snapshot.dispatches.recent[0].modelRoutingTier, 'frontier');
   assert.equal(snapshot.dispatches.recent[0].requiresDecision, true);
-  assert.equal(snapshot.dispatches.recent[0].deliverableStatus, 'ready');
+  assert.equal(snapshot.dispatches.recent[0].result.status, 'needs_decision');
   assert.equal(
-    snapshot.dispatches.recent[0].deliverables[0].content,
+    snapshot.dispatches.recent[0].result.destinations[0].previewContent,
     '# Decision brief\n\n- Assign an owner.'
+  );
+  assert.deepEqual(
+    snapshot.dispatches.recent[0].result.destinations.map((item) => item.type),
+    ['internal_brief', 'github_change', 'private_file']
+  );
+  assert.equal(
+    snapshot.dispatches.recent[0].result.destinations[1].actionLabel,
+    'View changes'
+  );
+  assert.equal(
+    snapshot.dispatches.recent[0].result.destinations[2].downloadContent,
+    'Private supporting notes'
   );
   assert.equal(
     snapshot.dispatches.recent[0].recommendedNextAction,
@@ -125,6 +168,42 @@ test('normalizes a bounded mobile Company snapshot', () => {
     'decision-evidence-1'
   );
   assert.equal(snapshot.priorities[0].title, '<img src=x onerror=alert(1)>');
+});
+
+test('legacy dispatches preview only explicitly classified briefs', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    dispatches: {
+      recent: [
+        {
+          dispatch_id: 'dispatch:legacy-result',
+          status: 'verified',
+          deliverables: [
+            {
+              label: 'Decision brief',
+              kind: 'decision_brief',
+              content: 'Preview this brief.',
+              sha256: 'a'.repeat(64),
+              verified: true
+            },
+            {
+              label: 'Generic output',
+              kind: 'markdown',
+              content: 'Do not preview every Markdown file.',
+              sha256: 'b'.repeat(64),
+              verified: true
+            }
+          ]
+        }
+      ]
+    }
+  });
+
+  assert.equal(snapshot.dispatches.recent[0].result.destinations.length, 1);
+  assert.equal(
+    snapshot.dispatches.recent[0].result.destinations[0].type,
+    'internal_brief'
+  );
 });
 
 test('builds an expiring allowlisted command without source content', () => {
