@@ -1682,7 +1682,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           outcome_status: 'needs_decision',
           requires_decision: true,
           recommended_next_action:
-            'Choose whether to continue the opportunity.',
+            'Assign one accountable Bioventurehub owner now. That owner should verify the external deadline before any response.',
           model: 'gpt-5.6-sol',
           reasoning_effort: 'max',
           model_routing_tier: 'frontier',
@@ -1696,7 +1696,8 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
               'Reviewed the supported evidence.',
               'Prepared the decision brief.'
             ],
-            next_action: 'Choose whether to continue the opportunity.',
+            next_action:
+              'Assign one accountable Bioventurehub owner now. That owner should verify the external deadline before any response.',
             destinations: [
               {
                 type: 'internal_brief',
@@ -1851,7 +1852,10 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Exceptional challenge'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Your decision: Choose whether to continue the opportunity.'
+    'Your decision: Verify the external deadline before any response.'
+  );
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'accountable Bioventurehub owner'
   );
   await page
     .locator('#companyPageContent .company-result-destination.preview summary')

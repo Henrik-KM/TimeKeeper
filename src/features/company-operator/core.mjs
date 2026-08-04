@@ -120,6 +120,82 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   };
 }
 
+export function cleanLegacyResponsibilityCopy(value, limit = 500) {
+  let text = cleanText(value, limit);
+  if (!text) return '';
+  const startsUppercase = /^[A-Z]/.test(text);
+  const assignment =
+    /^Assign (?:one|an) accountable [^.]{1,160}? owner now\.\s*That owner should\s+(.+)$/i.exec(
+      text
+    );
+  if (assignment) {
+    const action = assignment[1].trim();
+    return action ? `${action.charAt(0).toUpperCase()}${action.slice(1)}` : '';
+  }
+  if (text.toLowerCase() === 'assign an owner.') {
+    return 'Confirm the remaining human-only step.';
+  }
+  const replacements = [
+    [
+      'a verified owner, next action, and target date',
+      'a verified next action and target date'
+    ],
+    [
+      'the next action, owner, and date are verified',
+      'the next action and date are verified'
+    ],
+    [
+      'result, open technical question, commercial implication, owner, and date',
+      'result, open technical question, commercial implication, and target date'
+    ],
+    [
+      'named business outcome, owner, and date',
+      'named business outcome and target date'
+    ],
+    [
+      'resolved technical next step, accountable owner, and target date',
+      'resolved technical next step and target date'
+    ],
+    [
+      'requirements, deadline, owner, and complete internal',
+      'requirements, deadline, and complete internal'
+    ],
+    [
+      'named business objective, owner, evidence standard, and target date',
+      'named business objective, evidence standard, and target date'
+    ],
+    ['the evidence, owner, and date', 'the evidence and target date'],
+    [
+      'an owner decision is still required',
+      "Henrik's responsibility decision is still required"
+    ],
+    [
+      'the resulting next action has a verified owner and date',
+      'the resulting next action and target date are verified'
+    ],
+    [
+      'Who owns the resulting action and what is the next real date?',
+      'What is the resulting action and its next real date?'
+    ],
+    [
+      'Who owns the next action and by when?',
+      'What is the next action and target date?'
+    ],
+    [
+      'together with the evidence, owner, and next date',
+      'together with the evidence and next date'
+    ],
+    ['one owned next step', 'one verified next step']
+  ];
+  replacements.forEach(([oldText, newText]) => {
+    text = text.replace(new RegExp(escapeRegExp(oldText), 'gi'), newText);
+  });
+  if (startsUppercase && text) {
+    text = `${text.charAt(0).toUpperCase()}${text.slice(1)}`;
+  }
+  return text;
+}
+
 export function buildCompanyOperatorCommand({
   commandId,
   action,
@@ -208,9 +284,15 @@ function normalizeToday(value) {
     status: cleanText(source.status, 80),
     project: cleanText(source.project, 100) || 'Company',
     title: cleanText(source.title, 220),
-    nextAction: cleanText(source.next_action || source.nextAction, 500),
+    nextAction: cleanLegacyResponsibilityCopy(
+      source.next_action || source.nextAction,
+      500
+    ),
     why: cleanText(source.why, 500),
-    doneWhen: cleanText(source.done_when || source.doneWhen, 500),
+    doneWhen: cleanLegacyResponsibilityCopy(
+      source.done_when || source.doneWhen,
+      500
+    ),
     confidence: cleanText(source.confidence, 40) || 'unknown',
     userDirection: cleanText(source.user_direction || source.userDirection, 500)
   };
@@ -236,8 +318,14 @@ function normalizePriority(value) {
     priorityScore: toCount(source.priority_score ?? source.priorityScore),
     confidence: cleanText(source.confidence, 40) || 'unknown',
     currentState: cleanText(source.current_state || source.currentState, 120),
-    nextAction: cleanText(source.next_action || source.nextAction, 500),
-    doneWhen: cleanText(source.done_when || source.doneWhen, 500),
+    nextAction: cleanLegacyResponsibilityCopy(
+      source.next_action || source.nextAction,
+      500
+    ),
+    doneWhen: cleanLegacyResponsibilityCopy(
+      source.done_when || source.doneWhen,
+      500
+    ),
     userDirection: cleanText(
       source.user_direction || source.userDirection,
       500
@@ -271,11 +359,14 @@ function normalizeDecision(value) {
     ),
     title: cleanText(source.title, 220),
     why: cleanText(source.why, 500),
-    decisionRequested: cleanText(
+    decisionRequested: cleanLegacyResponsibilityCopy(
       source.decision_requested || source.decisionRequested,
       500
     ),
-    doneWhen: cleanText(source.done_when || source.doneWhen, 500),
+    doneWhen: cleanLegacyResponsibilityCopy(
+      source.done_when || source.doneWhen,
+      500
+    ),
     severity: cleanText(source.severity, 40),
     choices: Array.isArray(source.choices)
       ? source.choices.map((choice) => cleanText(choice, 120)).filter(Boolean)
@@ -288,7 +379,7 @@ function normalizeReceipt(value) {
   return {
     receiptId: cleanText(source.receipt_id || source.receiptId, 180),
     label: cleanText(source.label, 180),
-    summary: cleanText(source.summary, 500),
+    summary: cleanLegacyResponsibilityCopy(source.summary, 500),
     status: cleanText(source.status, 60),
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
     estimatedMinutesSaved: toCount(
@@ -328,11 +419,11 @@ function normalizeDispatch(value) {
     project: cleanText(source.project, 100) || 'Company',
     status: cleanText(source.status, 60) || 'unknown',
     reason: cleanText(source.reason, 240),
-    summary: cleanText(source.summary, 500),
+    summary: cleanLegacyResponsibilityCopy(source.summary, 500),
     outcomeStatus: cleanText(source.outcome_status || source.outcomeStatus, 60),
     requiresDecision:
       source.requires_decision === true || source.requiresDecision === true,
-    recommendedNextAction: cleanText(
+    recommendedNextAction: cleanLegacyResponsibilityCopy(
       source.recommended_next_action || source.recommendedNextAction,
       500
     ),
@@ -379,16 +470,20 @@ function normalizeDispatchResult(value, dispatch, legacyDestinations) {
       cleanText(dispatch.status, 60) ||
       'unknown',
     headline:
-      cleanText(source.headline, 500) || cleanText(dispatch.summary, 500),
+      cleanLegacyResponsibilityCopy(source.headline, 500) ||
+      cleanLegacyResponsibilityCopy(dispatch.summary, 500),
     completedWork: Array.isArray(source.completed_work || source.completedWork)
       ? (source.completed_work || source.completedWork)
-          .map((item) => cleanText(item, 300))
+          .map((item) => cleanLegacyResponsibilityCopy(item, 300))
           .filter(Boolean)
           .slice(0, 6)
       : [],
     nextAction:
-      cleanText(source.next_action || source.nextAction, 500) ||
-      cleanText(
+      cleanLegacyResponsibilityCopy(
+        source.next_action || source.nextAction,
+        500
+      ) ||
+      cleanLegacyResponsibilityCopy(
         dispatch.recommended_next_action || dispatch.recommendedNextAction,
         500
       ),
@@ -557,6 +652,10 @@ function cleanFilename(value) {
     .trim()
     .slice(0, 160);
   return filename && filename !== '.' && filename !== '..' ? filename : '';
+}
+
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 function normalizeTextMimeType(value) {

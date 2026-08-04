@@ -3,10 +3,27 @@ import test from 'node:test';
 
 import {
   buildCompanyOperatorCommand,
+  cleanLegacyResponsibilityCopy,
   companySnapshotFreshness,
   normalizeCompanyOperatorSettings,
   normalizeCompanyOperatorSnapshot
 } from '../../src/features/company-operator/core.mjs';
+
+test('repairs vague legacy responsibility copy without changing named people', () => {
+  const legacy =
+    'Assign one accountable Bioventurehub owner now. That owner should verify the external deadline and reconcile the invitation before any response.';
+
+  assert.equal(
+    cleanLegacyResponsibilityCopy(legacy),
+    'Verify the external deadline and reconcile the invitation before any response.'
+  );
+  assert.equal(
+    cleanLegacyResponsibilityCopy(
+      'Mette owns the clinical review and will finish it on Friday.'
+    ),
+    'Mette owns the clinical review and will finish it on Friday.'
+  );
+});
 
 test('normalizes a bounded mobile Company snapshot', () => {
   const snapshot = normalizeCompanyOperatorSnapshot({
