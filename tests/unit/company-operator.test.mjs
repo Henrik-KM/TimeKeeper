@@ -25,6 +25,53 @@ test('repairs vague legacy responsibility copy without changing named people', (
   );
 });
 
+test('drops empty legacy meeting cases and repairs substantive legacy priority copy', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    today: {
+      project: 'AstraZeneca',
+      title: 'AZ/IFLAI meeting',
+      next_action:
+        'Turn AZ/IFLAI meeting into a verified delivery decision: result, open technical question, commercial implication, and target date.'
+    },
+    priorities: [
+      {
+        issue_id: 'priority:az-empty',
+        project: 'AstraZeneca',
+        title: 'AZ/IFLAI meeting',
+        next_action:
+          'Turn AZ/IFLAI meeting into a verified delivery decision: result, open technical question, commercial implication, and target date.'
+      },
+      {
+        issue_id: 'priority:zoom-provider',
+        project: 'Zoom',
+        title: 'Meeting assets for Discussion on publication are ready!',
+        next_action: 'Review the meeting assets.'
+      },
+      {
+        issue_id: 'priority:magik',
+        project: 'MAGIK',
+        title: 'Promising PoC results',
+        next_action:
+          'Turn Promising PoC results into a verified delivery decision: result, open technical question, commercial implication, and target date.',
+        done_when:
+          'MAGIK has a decision-ready result summary, resolved technical next step, and target date.'
+      }
+    ]
+  });
+
+  assert.equal(snapshot.today.title, '');
+  assert.deepEqual(
+    snapshot.priorities.map((item) => item.title),
+    ['Promising PoC results']
+  );
+  assert.match(snapshot.priorities[0].nextAction, /Record what happened/);
+  assert.equal(
+    snapshot.priorities[0].doneWhen,
+    'The latest customer outcome, remaining technical questions, and specific next deliverable are recorded.'
+  );
+});
+
 test('normalizes a bounded mobile Company snapshot', () => {
   const snapshot = normalizeCompanyOperatorSnapshot({
     schema_version: 1,

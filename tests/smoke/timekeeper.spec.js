@@ -1624,6 +1624,20 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
         current_state: 'meeting_followup',
         next_action: 'Prepare the evidence-backed customer follow-up.',
         done_when: 'The next step is explicit and ready for review.'
+      },
+      {
+        issue_id: 'priority:az-empty-meeting',
+        evidence_fingerprint: 'evidence-az-empty-meeting',
+        project: 'AstraZeneca',
+        title: 'AZ/IFLAI meeting',
+        business_lane: 'customer_delivery',
+        priority_score: 48,
+        confidence: 'medium',
+        current_state: 'blocked',
+        next_action:
+          'Turn AZ/IFLAI meeting into a verified delivery decision: result, open technical question, commercial implication, and target date.',
+        done_when:
+          'AstraZeneca has a decision-ready result summary, resolved technical next step, and target date.'
       }
     ],
     work_products: {
@@ -1792,6 +1806,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Commercial workbook'
+  );
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'AZ/IFLAI meeting'
   );
   await expect(page.locator('#companyPageContent img')).toHaveCount(0);
 

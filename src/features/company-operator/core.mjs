@@ -135,6 +135,20 @@ export function cleanLegacyResponsibilityCopy(value, limit = 500) {
   if (text.toLowerCase() === 'assign an owner.') {
     return 'Confirm the remaining human-only step.';
   }
+  const vagueDelivery =
+    /^Turn (.+) into a verified delivery decision: result, open technical question, commercial implication, and target date\.$/i.exec(
+      text
+    );
+  if (vagueDelivery) {
+    return `Review the latest cited customer record for ${vagueDelivery[1].trim()}. Record what happened, what the customer asked for, and what IFLAI must produce next, then prepare that deliverable.`;
+  }
+  if (
+    /^.+ has a decision-ready result summary, resolved technical next step, and target date\.$/i.test(
+      text
+    )
+  ) {
+    return 'The latest customer outcome, remaining technical questions, and specific next deliverable are recorded.';
+  }
   const replacements = [
     [
       'a verified owner, next action, and target date',
@@ -280,14 +294,25 @@ export function companySnapshotFreshness(snapshot, now = new Date()) {
 
 function normalizeToday(value) {
   const source = asRecord(value);
+  const title = cleanText(source.title, 220);
+  const nextAction = cleanText(source.next_action || source.nextAction, 500);
+  if (isUnsupportedLegacyPriority(title, nextAction)) {
+    return {
+      status: 'waiting_for_supported_priority',
+      project: 'Company',
+      title: '',
+      nextAction: '',
+      why: '',
+      doneWhen: '',
+      confidence: 'unknown',
+      userDirection: ''
+    };
+  }
   return {
     status: cleanText(source.status, 80),
     project: cleanText(source.project, 100) || 'Company',
-    title: cleanText(source.title, 220),
-    nextAction: cleanLegacyResponsibilityCopy(
-      source.next_action || source.nextAction,
-      500
-    ),
+    title,
+    nextAction: cleanLegacyResponsibilityCopy(nextAction, 500),
     why: cleanText(source.why, 500),
     doneWhen: cleanLegacyResponsibilityCopy(
       source.done_when || source.doneWhen,
@@ -302,6 +327,9 @@ function normalizePriority(value) {
   const source = asRecord(value);
   const issueId = cleanText(source.issue_id || source.issueId, 160);
   if (!issueId) return null;
+  const title = cleanText(source.title, 220);
+  const nextAction = cleanText(source.next_action || source.nextAction, 500);
+  if (isUnsupportedLegacyPriority(title, nextAction)) return null;
   return {
     issueId,
     evidenceFingerprint: cleanText(
@@ -309,7 +337,7 @@ function normalizePriority(value) {
       128
     ),
     project: cleanText(source.project, 100) || 'Company',
-    title: cleanText(source.title, 220),
+    title,
     businessLane: cleanText(source.business_lane || source.businessLane, 80),
     businessImpact: cleanText(
       source.business_impact || source.businessImpact,
@@ -318,10 +346,7 @@ function normalizePriority(value) {
     priorityScore: toCount(source.priority_score ?? source.priorityScore),
     confidence: cleanText(source.confidence, 40) || 'unknown',
     currentState: cleanText(source.current_state || source.currentState, 120),
-    nextAction: cleanLegacyResponsibilityCopy(
-      source.next_action || source.nextAction,
-      500
-    ),
+    nextAction: cleanLegacyResponsibilityCopy(nextAction, 500),
     doneWhen: cleanLegacyResponsibilityCopy(
       source.done_when || source.doneWhen,
       500
@@ -332,6 +357,30 @@ function normalizePriority(value) {
     ),
     steered: source.steered === true
   };
+}
+
+function isUnsupportedLegacyPriority(title, nextAction) {
+  const normalizedTitle = cleanText(title, 220)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  if (
+    normalizedTitle.startsWith('meeting assets for ') &&
+    normalizedTitle.endsWith(' are ready')
+  ) {
+    return true;
+  }
+  const words = normalizedTitle.split(/\s+/).filter(Boolean);
+  const genericMeeting =
+    words.length >= 2 &&
+    words.length <= 7 &&
+    ['call', 'discussion', 'meeting'].includes(words.at(-1));
+  return (
+    genericMeeting &&
+    /^Turn .+ into a verified delivery decision: result, open technical question, commercial implication, and target date\.$/i.test(
+      cleanText(nextAction, 500)
+    )
+  );
 }
 
 function normalizeAsset(value) {
