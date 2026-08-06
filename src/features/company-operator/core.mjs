@@ -31,6 +31,8 @@ const LEGACY_PREVIEW_KINDS = new Set([
   'internal_brief',
   'meeting_brief'
 ]);
+const INTERNAL_CITATION_PATTERN =
+  /\b(?:commitment|decision|doc|email|outlook|project|slack|zoom):[A-Za-z0-9_-]{12,}/;
 
 export function normalizeCompanyOperatorSettings(value = {}) {
   const source = asRecord(value);
@@ -456,26 +458,41 @@ function normalizeDispatch(value) {
   const commandId = cleanText(source.command_id || source.commandId, 120);
   const dispatchId = cleanText(source.dispatch_id || source.dispatchId, 160);
   if (!commandId && !dispatchId) return null;
+  const project = cleanText(source.project, 100) || 'Company';
   const legacyDestinations = normalizeArray(
     source.deliverables,
     normalizeLegacyDeliverable,
     2
   );
+  const normalizedResult = normalizeDispatchResult(
+    source.result,
+    source,
+    legacyDestinations
+  );
+  const unusable = isUnusableLegacyDispatch(source, normalizedResult);
+  const unusableSummary = `The ${project} run did not produce a usable deliverable because the readable source facts were missing.`;
   return {
     dispatchId,
     commandId,
     issueId: cleanText(source.issue_id || source.issueId, 160),
-    project: cleanText(source.project, 100) || 'Company',
-    status: cleanText(source.status, 60) || 'unknown',
+    project,
+    status: unusable ? 'failed' : cleanText(source.status, 60) || 'unknown',
     reason: cleanText(source.reason, 240),
-    summary: cleanLegacyResponsibilityCopy(source.summary, 500),
-    outcomeStatus: cleanText(source.outcome_status || source.outcomeStatus, 60),
+    summary: unusable
+      ? unusableSummary
+      : cleanLegacyResponsibilityCopy(source.summary, 500),
+    outcomeStatus: unusable
+      ? 'failed'
+      : cleanText(source.outcome_status || source.outcomeStatus, 60),
     requiresDecision:
-      source.requires_decision === true || source.requiresDecision === true,
-    recommendedNextAction: cleanLegacyResponsibilityCopy(
-      source.recommended_next_action || source.recommendedNextAction,
-      500
-    ),
+      !unusable &&
+      (source.requires_decision === true || source.requiresDecision === true),
+    recommendedNextAction: unusable
+      ? ''
+      : cleanLegacyResponsibilityCopy(
+          source.recommended_next_action || source.recommendedNextAction,
+          500
+        ),
     model: cleanText(source.model, 100),
     reasoningEffort: cleanText(
       source.reasoning_effort || source.reasoningEffort,
@@ -494,7 +511,15 @@ function normalizeDispatch(value) {
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
     durationSeconds: toCount(source.duration_seconds ?? source.durationSeconds),
     artifactCount: toCount(source.artifact_count ?? source.artifactCount),
-    result: normalizeDispatchResult(source.result, source, legacyDestinations),
+    result: unusable
+      ? {
+          status: 'failed',
+          headline: unusableSummary,
+          completedWork: [],
+          nextAction: '',
+          destinations: []
+        }
+      : normalizedResult,
     estimatedMinutesSaved: toCount(
       source.estimated_minutes_saved ?? source.estimatedMinutesSaved
     ),
@@ -503,6 +528,30 @@ function normalizeDispatch(value) {
       80
     )
   };
+}
+
+function isUnusableLegacyDispatch(dispatch, result) {
+  const outcomeStatus = normalizedKey(
+    dispatch.outcome_status || dispatch.outcomeStatus || result.status
+  );
+  if (outcomeStatus !== 'completed') return false;
+  const summary = cleanText(dispatch.summary || result.headline, 1000);
+  const nextAction = cleanText(
+    dispatch.recommended_next_action ||
+      dispatch.recommendedNextAction ||
+      result.nextAction,
+    1000
+  );
+  const combined = [summary, nextAction, ...result.completedWork]
+    .join(' ')
+    .toLowerCase();
+  return (
+    INTERNAL_CITATION_PATTERN.test(nextAction) ||
+    combined.includes('no readable payload') ||
+    combined.includes('evidence-bound') ||
+    combined.includes('packet-grounded') ||
+    combined.includes('separated unknown')
+  );
 }
 
 function normalizeDispatchResult(value, dispatch, legacyDestinations) {
@@ -554,8 +603,8 @@ function normalizeLegacyDeliverable(value) {
     mode: 'preview',
     label: cleanText(source.label, 180) || 'Codex result',
     kind,
-    location: 'Private Company brief',
-    actionLabel: 'Read brief',
+    location: 'Available here in the app',
+    actionLabel: 'View full output',
     previewContent: content,
     downloadContent: '',
     filename: '',
@@ -593,7 +642,10 @@ function normalizeResultDestination(value) {
     if (!previewContent || !/^[0-9a-f]{64}$/.test(base.sha256)) return null;
     return {
       ...base,
-      actionLabel: 'Read brief',
+      location: 'Available here in the app',
+      actionLabel:
+        cleanText(source.action_label || source.actionLabel, 80) ||
+        'View full output',
       previewContent,
       downloadContent: '',
       filename: '',

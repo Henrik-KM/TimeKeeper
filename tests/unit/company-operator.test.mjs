@@ -211,6 +211,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
     snapshot.dispatches.recent[0].result.destinations[0].previewContent,
     '# Decision brief\n\n- Assign an owner.'
   );
+  assert.equal(
+    snapshot.dispatches.recent[0].result.destinations[0].actionLabel,
+    'View full output'
+  );
+  assert.equal(
+    snapshot.dispatches.recent[0].result.destinations[0].location,
+    'Available here in the app'
+  );
   assert.deepEqual(
     snapshot.dispatches.recent[0].result.destinations.map((item) => item.type),
     ['internal_brief', 'github_change', 'private_file']
@@ -268,6 +276,56 @@ test('legacy dispatches preview only explicitly classified briefs', () => {
     snapshot.dispatches.recent[0].result.destinations[0].type,
     'internal_brief'
   );
+});
+
+test('does not present a thin evidence wrapper as completed work', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    dispatches: {
+      recent: [
+        {
+          dispatch_id: 'dispatch:unusable-aventix-result',
+          project: 'Aventix',
+          status: 'verified',
+          outcome_status: 'completed',
+          summary: 'Completed an evidence-bound Aventix decision brief.',
+          recommended_next_action:
+            'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+          result: {
+            status: 'completed',
+            headline: 'Completed an evidence-bound Aventix decision brief.',
+            completed_work: [
+              'Separated unknown technical and commercial details.'
+            ],
+            next_action:
+              'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+            destinations: [
+              {
+                type: 'internal_brief',
+                mode: 'preview',
+                label: 'Aventix brief',
+                preview_content: 'No usable deliverable was prepared.',
+                sha256: 'a'.repeat(64),
+                verified: true
+              }
+            ]
+          }
+        }
+      ]
+    }
+  });
+
+  const dispatch = snapshot.dispatches.recent[0];
+  assert.equal(dispatch.status, 'failed');
+  assert.equal(dispatch.result.status, 'failed');
+  assert.match(
+    dispatch.result.headline,
+    /did not produce a usable deliverable/
+  );
+  assert.deepEqual(dispatch.result.completedWork, []);
+  assert.deepEqual(dispatch.result.destinations, []);
+  assert.equal(dispatch.result.nextAction, '');
+  assert.doesNotMatch(JSON.stringify(dispatch), /282fd75/);
 });
 
 test('builds an expiring allowlisted command without source content', () => {

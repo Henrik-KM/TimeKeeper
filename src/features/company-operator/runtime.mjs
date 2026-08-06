@@ -577,7 +577,7 @@ export function createCompanyOperatorController({
       ? snapshot.dispatches.recent.slice(0, 5)
       : [];
     if (!pending.length && !recent.length) return null;
-    const section = sectionBlock('Codex results');
+    const section = sectionBlock('Company work results');
     pending.forEach((item) => {
       const row = element('article', 'company-dispatch-card in-progress');
       row.appendChild(element('strong', '', item.label || 'Company priority'));
@@ -618,27 +618,45 @@ export function createCompanyOperatorController({
             displayDispatchStatus(dispatch)
         )
       );
+      if (dispatch.result.destinations.length) {
+        row.appendChild(
+          element('span', 'company-result-output-label', 'Output')
+        );
+        dispatch.result.destinations.forEach((destination) => {
+          row.appendChild(resultDestination(destination));
+        });
+      } else if (['blocked', 'failed'].includes(dispatch.result.status)) {
+        row.appendChild(
+          element(
+            'span',
+            'company-result-missing',
+            'No usable output was produced.'
+          )
+        );
+      }
+      if (dispatch.result.nextAction) {
+        const nextLabel = dispatch.requiresDecision
+          ? 'Your decision'
+          : dispatch.result.status === 'completed'
+            ? 'Recommended next'
+            : 'What happens next';
+        row.appendChild(
+          element(
+            'span',
+            'company-dispatch-next',
+            `${nextLabel}: ${dispatch.result.nextAction}`
+          )
+        );
+      }
       if (dispatch.result.completedWork.length) {
         const completed = element('details', 'company-result-completed');
-        completed.appendChild(element('summary', '', 'What was completed'));
+        completed.appendChild(element('summary', '', 'Work included'));
         const list = element('ul');
         dispatch.result.completedWork.forEach((item) => {
           list.appendChild(element('li', '', item));
         });
         completed.appendChild(list);
         row.appendChild(completed);
-      }
-      dispatch.result.destinations.forEach((destination) => {
-        row.appendChild(resultDestination(destination));
-      });
-      if (dispatch.result.nextAction) {
-        row.appendChild(
-          element(
-            'span',
-            'company-dispatch-next',
-            `${dispatch.requiresDecision ? 'Your decision' : 'Next step'}: ${dispatch.result.nextAction}`
-          )
-        );
       }
       const details = [
         [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
@@ -1055,9 +1073,9 @@ function displayDispatchStatus(dispatch) {
 
 function displayResultStatus(value) {
   const labels = {
-    blocked: 'Needs attention',
+    blocked: 'Not completed',
     completed: 'Completed',
-    failed: 'Needs attention',
+    failed: 'Not completed',
     needs_decision: 'Decision needed',
     verified: 'Completed'
   };

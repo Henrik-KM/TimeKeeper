@@ -1747,6 +1747,35 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
             ]
           },
           time_tracking_status: 'session_persisted'
+        },
+        {
+          dispatch_id: 'dispatch:unusable-aventix-result',
+          command_id: 'mobile-unusable-aventix-result',
+          project: 'Aventix',
+          status: 'verified',
+          summary: 'Completed an evidence-bound Aventix decision brief.',
+          outcome_status: 'completed',
+          recommended_next_action:
+            'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+          result: {
+            status: 'completed',
+            headline: 'Completed an evidence-bound Aventix decision brief.',
+            completed_work: [
+              'Separated unknown technical and commercial details.'
+            ],
+            next_action:
+              'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+            destinations: [
+              {
+                type: 'internal_brief',
+                mode: 'preview',
+                label: 'Aventix evidence brief',
+                preview_content: 'No usable deliverable was prepared.',
+                sha256: 'c'.repeat(64),
+                verified: true
+              }
+            ]
+          }
         }
       ]
     },
@@ -1850,7 +1879,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     page.locator('#companyPageContent .company-primary-card')
   ).toContainText('Albany');
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Codex results'
+    'Company work results'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Decision needed'
@@ -1870,6 +1899,25 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Your decision: Verify the external deadline before any response.'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText('Output');
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'View full output'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Available here in the app'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'The Aventix run did not produce a usable deliverable'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'No usable output was produced.'
+  );
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'commitment:282fd75'
+  );
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'evidence-bound Aventix'
   );
   await expect(page.locator('#companyPageContent')).not.toContainText(
     'accountable Bioventurehub owner'
