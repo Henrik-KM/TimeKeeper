@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-07T20:13:02.440Z",
+  "updatedAt": "2026-08-07T20:18:02.630Z",
   "dayStart": "2026-08-06T22:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-07T20:13:03.029Z",
+    "observedAt": "2026-08-07T20:18:07.824Z",
     "primary": {
       "usedPercent": 100,
       "remainingPercent": 0,
@@ -4598,6 +4598,80 @@
         }
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-9f2a5d2c58ad430f4f863f3f",
+      "threadId": "019fdd30-4d67-7dd1-b28c-311a936d1b59",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-07T17:06:16.584Z",
+      "endTime": "2026-08-07T19:59:44.181Z",
+      "wallSeconds": 10407,
+      "focusFactor": 0.7883,
+      "effectiveSeconds": 8203,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 6,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 10407,
+          "effectiveSeconds": 5203
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 8,
+          "effectiveSeconds": 1
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 17136,
+          "effectiveSeconds": 2998
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-ae89c299be4f9635143a90e4",
+        "codex-7b6efb33bbbadfad36ba6e42",
+        "codex-246a68b3b073c78c99c46ed7",
+        "codex-55cc0f8863a516335bf0f9cf",
+        "codex-cabab645aa6e027b5caa422f",
+        "codex-f80b18f5037ff9f3f797e20a",
+        "codex-bf015be140ada56636221d27",
+        "codex-7050b6a3dadacbdf021f06a2",
+        "codex-c3ade1b2c02ec84624587509",
+        "codex-a21eaffb6df375da533432b0",
+        "codex-6c66568c4967a632a824947d",
+        "codex-76a35edf68622dc113fbc109",
+        "codex-f690c17147dd7f1ebe4e4ca6"
+      ],
+      "description": "Codex: Design end-to-end torsion workflow"
     }
   ]
 }
