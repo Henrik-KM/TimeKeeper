@@ -13,6 +13,8 @@ const SNAPSHOT_KEY = 'timekeeperCompanyOperatorSnapshot';
 const PENDING_KEY = 'timekeeperCompanyOperatorPendingCommands';
 const RECEIPTS_KEY = 'timekeeperCompanyOperatorReceipts';
 const POLL_INTERVAL_MS = 60 * 1000;
+const CODEX_ACTIONS = new Set(['add_direction', 'work_next']);
+const HIDE_PRIORITY_ACTIONS = new Set(['mark_handled', 'snooze', 'work_next']);
 
 export function createCompanyOperatorController({
   root,
@@ -163,7 +165,7 @@ export function createCompanyOperatorController({
           queuedAt: new Date().toISOString()
         }
       ]);
-      showToast('Queued. The company operator will pick this up shortly.');
+      showToast(priorityActionFeedback(action));
     } catch (error) {
       showToast(companyErrorMessage(error));
     } finally {
@@ -342,12 +344,21 @@ export function createCompanyOperatorController({
           remaining.push(item);
           continue;
         }
-        const status = String(remote.payload.status || 'unknown');
+        let status = String(remote.payload.status || 'unknown');
+        let reason = String(remote.payload.reason || '');
+        if (
+          item.action === 'mark_handled' &&
+          status === 'blocked' &&
+          reason === 'priority_no_longer_available'
+        ) {
+          status = 'applied';
+          reason = '';
+        }
         if (['queued', 'accepted', 'processing', 'running'].includes(status)) {
           remaining.push({
             ...item,
             status,
-            reason: String(remote.payload.reason || ''),
+            reason,
             dispatch: safeRemoteDispatch(remote.payload.dispatch)
           });
           continue;
@@ -359,7 +370,7 @@ export function createCompanyOperatorController({
           issueId: item.issueId || '',
           evidenceFingerprint: item.evidenceFingerprint || '',
           status,
-          reason: String(remote.payload.reason || ''),
+          reason,
           processedAt: String(remote.payload.processed_at || ''),
           dispatch: safeRemoteDispatch(remote.payload.dispatch)
         });
@@ -370,7 +381,7 @@ export function createCompanyOperatorController({
     }
     savePending(remaining);
     saveReceipts(completed.slice(-30));
-    if (applied) showToast('Your Company direction has been applied.');
+    if (applied) showToast('Company change synced.');
   }
 
   function render() {
@@ -510,11 +521,13 @@ export function createCompanyOperatorController({
 
   function visiblePriorities() {
     const pending = loadPending().filter(
-      (item) => item.action === 'work_next' && item.issueId
+      (item) => HIDE_PRIORITY_ACTIONS.has(item.action) && item.issueId
     );
     const applied = loadReceipts().filter(
       (item) =>
-        item.action === 'work_next' && item.status === 'applied' && item.issueId
+        HIDE_PRIORITY_ACTIONS.has(item.action) &&
+        item.status === 'applied' &&
+        item.issueId
     );
     const remoteInProgress = Array.isArray(snapshot?.dispatches?.inProgress)
       ? snapshot.dispatches.inProgress
@@ -682,6 +695,12 @@ export function createCompanyOperatorController({
 
   function commandStatus() {
     const pending = loadPending();
+    const codexPending = pending.filter((item) =>
+      CODEX_ACTIONS.has(item.action)
+    );
+    const syncingPending = pending.filter(
+      (item) => !CODEX_ACTIONS.has(item.action)
+    );
     const receipts = loadReceipts().slice(-5).reverse();
     if (
       !pending.length &&
@@ -690,12 +709,21 @@ export function createCompanyOperatorController({
       return null;
     }
     const section = element('section', 'company-command-status');
-    if (pending.length) {
+    if (codexPending.length) {
       section.appendChild(
         element(
           'p',
           'company-queued',
-          `${pending.length} Codex job${pending.length === 1 ? '' : 's'} queued or in progress`
+          `${codexPending.length} Codex job${codexPending.length === 1 ? '' : 's'} queued or in progress`
+        )
+      );
+    }
+    if (syncingPending.length) {
+      section.appendChild(
+        element(
+          'p',
+          'company-queued',
+          `${syncingPending.length} Company change${syncingPending.length === 1 ? '' : 's'} syncing`
         )
       );
     }
@@ -711,6 +739,22 @@ export function createCompanyOperatorController({
         );
       });
     return section;
+  }
+
+  function priorityActionFeedback(action) {
+    if (action === 'mark_handled') {
+      return 'Marked handled. Showing the next priority.';
+    }
+    if (action === 'snooze') {
+      return 'Paused. Showing the next priority.';
+    }
+    if (action === 'work_next') {
+      return 'Sent to Codex. Showing the next priority.';
+    }
+    if (action === 'add_direction') {
+      return 'Direction sent to Codex.';
+    }
+    return 'Company change syncing.';
   }
 
   function sourceSection() {

@@ -1922,6 +1922,35 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   expect(resultLayout.choiceHeight).toBeGreaterThanOrEqual(44);
 
+  const handledRequest = page.waitForRequest(
+    (candidate) =>
+      candidate.method() === 'PUT' &&
+      candidate.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Handled' }).click();
+  const handledDialog = page.getByRole('dialog', {
+    name: 'Mark this handled?'
+  });
+  await handledDialog.getByRole('button', { name: 'Mark handled' }).click();
+  const handledPayload = (await handledRequest).postDataJSON();
+  const handledCommand = JSON.parse(
+    Buffer.from(handledPayload.content, 'base64').toString('utf8')
+  );
+  expect(handledCommand.action).toBe('mark_handled');
+  expect(handledCommand.target.issue_id).toBe('priority:albany');
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'Marked handled. Showing the next priority.'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 Company change syncing'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 Codex job queued or in progress'
+  );
+  await expect(
+    page.locator('#companyPageContent .company-primary-card')
+  ).toHaveCount(0);
+
   const directionRequest = page.waitForRequest(
     (candidate) =>
       candidate.method() === 'PUT' &&
