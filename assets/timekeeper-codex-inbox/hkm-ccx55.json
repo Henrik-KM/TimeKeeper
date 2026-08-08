@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-08T20:54:40.614Z",
+  "updatedAt": "2026-08-08T20:58:02.415Z",
   "dayStart": "2026-08-07T22:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-08T20:54:41.439Z",
+    "observedAt": "2026-08-08T20:58:03.875Z",
     "primary": {
       "usedPercent": 1,
       "remainingPercent": 99,
@@ -3826,6 +3826,68 @@
         }
       ],
       "description": "Codex: OperatorDispatchVerification"
+    },
+    {
+      "id": "codex-7910f9730160cb44cfbd528f",
+      "threadId": "019fe319-72f8-7fa2-8903-8ed879436293",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-08T20:38:56.413Z",
+      "endTime": "2026-08-08T20:39:49.787Z",
+      "wallSeconds": 53,
+      "focusFactor": 0.4984,
+      "effectiveSeconds": 26,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 52,
+          "effectiveSeconds": 26
+        }
+      ],
+      "description": "Codex: Albany"
+    },
+    {
+      "id": "codex-0d7fbf82b434bf8c3b231464",
+      "threadId": "019fe31a-aacd-7812-a6aa-f87ea8652a1e",
+      "projectKey": "AZgent",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-08T20:40:04.175Z",
+      "endTime": "2026-08-08T20:40:22.195Z",
+      "wallSeconds": 18,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 7,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "high",
+          "factor": 0.4,
+          "wallSeconds": 17,
+          "effectiveSeconds": 6
+        }
+      ],
+      "description": "Codex: AZgent"
     }
   ]
 }
