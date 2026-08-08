@@ -1172,6 +1172,26 @@ tr:nth-child(even) td {
   background: #f0fdf4;
 }
 
+.company-dispatch-card.done {
+  border-color: #86efac;
+  background: #f0fdf4;
+}
+
+.company-dispatch-card.needs-you {
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+.company-dispatch-card.problem {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.company-result-groups {
+  display: grid;
+  gap: 0.75rem;
+}
+
 .company-dispatch-card.blocked,
 .company-dispatch-card.failed {
   border-color: #fca5a5;

@@ -196,6 +196,21 @@ export function createCompanyOperatorController({
     });
   }
 
+  async function answerDispatch(dispatch, choice = '') {
+    const priority = {
+      issueId: dispatch.issueId,
+      evidenceFingerprint: dispatch.evidenceFingerprint,
+      project: dispatch.project,
+      title: dispatch.result.headline,
+      userDirection: choice
+    };
+    if (choice) {
+      await queuePriorityAction('add_direction', priority, { note: choice });
+      return;
+    }
+    await addDirection(priority);
+  }
+
   async function snooze(priority) {
     const values = await openFormDialog({
       title: `Pause ${priority.project || 'this work'}`,
@@ -386,6 +401,11 @@ export function createCompanyOperatorController({
 
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
+    const dispatches = compactDispatchSection();
+    if (dispatches) root.appendChild(dispatches);
+    if (snapshot.decisions.pending.length) {
+      root.appendChild(decisionSection(snapshot.decisions.pending));
+    }
     const priorities = visiblePriorities();
     const primary = priorities[0];
     if (primary) root.appendChild(primaryCard(primary));
@@ -396,20 +416,16 @@ export function createCompanyOperatorController({
           'The next supported priority will appear here as soon as one is available.'
         )
       );
+    } else if (!snapshot.decisions.pending.length) {
+      root.appendChild(
+        card(
+          'Nothing needs you',
+          'No company action is worth your time right now.'
+        )
+      );
     }
-    root.appendChild(commandStatus());
-    const dispatches = dispatchSection();
-    if (dispatches) root.appendChild(dispatches);
-    if (snapshot.decisions.pending.length) {
-      root.appendChild(decisionSection(snapshot.decisions.pending));
-    }
-    if (snapshot.workProducts.assets.length) {
-      root.appendChild(workProductSection(snapshot.workProducts.assets));
-    }
-    if (priorities.length > 1) {
-      root.appendChild(prioritySection(priorities.slice(1)));
-    }
-    root.appendChild(handledSection());
+    const commands = commandStatus();
+    if (commands) root.appendChild(commands);
     root.appendChild(sourceSection());
     root.appendChild(connectionFooter());
   }
@@ -431,19 +447,14 @@ export function createCompanyOperatorController({
 
   function primaryCard(priority) {
     const section = element('section', 'company-primary-card');
-    section.appendChild(element('p', 'company-eyebrow', 'What matters today'));
+    section.appendChild(element('p', 'company-eyebrow', 'Up next'));
     section.appendChild(element('h3', '', priority.project));
     section.appendChild(element('p', 'company-priority-title', priority.title));
     section.appendChild(
-      labelledText(
-        'Do this next',
-        priority.nextAction || snapshot.today.nextAction
-      )
-    );
-    section.appendChild(
-      labelledText(
-        'Finished when',
-        priority.doneWhen || snapshot.today.doneWhen
+      element(
+        'p',
+        'company-next-action',
+        priority.nextAction || 'Ready to work'
       )
     );
     if (priority.userDirection) {
@@ -453,7 +464,7 @@ export function createCompanyOperatorController({
     }
     const actions = element('div', 'company-action-grid');
     actions.appendChild(
-      button('Work on this now', 'primary', () =>
+      button('Do this now', 'primary', () =>
         queuePriorityAction('work_next', priority)
       )
     );
@@ -497,43 +508,6 @@ export function createCompanyOperatorController({
     return section;
   }
 
-  function workProductSection(assets) {
-    const section = sectionBlock('Prepared for you');
-    assets.forEach((asset) => {
-      const details = element('details', 'company-work-product');
-      const summary = element('summary');
-      summary.appendChild(element('strong', '', asset.title));
-      summary.appendChild(element('span', '', formatAssetType(asset.format)));
-      details.appendChild(summary);
-      if (asset.purpose) details.appendChild(element('p', '', asset.purpose));
-      if (asset.content) {
-        details.appendChild(
-          element('div', 'company-work-content', asset.content)
-        );
-      }
-      section.appendChild(details);
-    });
-    return section;
-  }
-
-  function prioritySection(priorities) {
-    const section = sectionBlock('Other supported priorities');
-    priorities.forEach((priority) => {
-      const item = element('article', 'company-list-card');
-      item.appendChild(element('p', 'company-eyebrow', priority.project));
-      item.appendChild(element('h4', '', priority.title));
-      if (priority.nextAction)
-        item.appendChild(element('p', '', priority.nextAction));
-      item.appendChild(
-        button('Make this first', 'secondary', () =>
-          queuePriorityAction('set_priority', priority)
-        )
-      );
-      section.appendChild(item);
-    });
-    return section;
-  }
-
   function visiblePriorities() {
     const pending = loadPending().filter(
       (item) => item.action === 'work_next' && item.issueId
@@ -571,132 +545,111 @@ export function createCompanyOperatorController({
     });
   }
 
-  function dispatchSection() {
-    const pending = loadPending().filter((item) => item.action === 'work_next');
+  function compactDispatchSection() {
+    const pending = loadPending().filter((item) =>
+      ['add_direction', 'work_next'].includes(item.action)
+    );
     const recent = Array.isArray(snapshot?.dispatches?.recent)
       ? snapshot.dispatches.recent.slice(0, 5)
       : [];
     if (!pending.length && !recent.length) return null;
-    const section = sectionBlock('Company work results');
-    pending.forEach((item) => {
-      const row = element('article', 'company-dispatch-card in-progress');
-      row.appendChild(element('strong', '', item.label || 'Company priority'));
-      row.appendChild(
-        element(
-          'span',
-          '',
-          item.status === 'processing'
-            ? 'Codex is working on this now'
-            : 'Queued for the desktop Codex worker'
-        )
+    const wrapper = element('div', 'company-result-groups');
+    if (pending.length) {
+      const inProgress = sectionBlock('In progress');
+      pending.forEach((item) => {
+        const row = element('article', 'company-dispatch-card in-progress');
+        row.appendChild(element('strong', '', item.label || 'Company work'));
+        row.appendChild(element('span', '', 'Codex is working on this now'));
+        inProgress.appendChild(row);
+      });
+      wrapper.appendChild(inProgress);
+    }
+    const needsYou = recent.filter((dispatch) =>
+      ['needs_decision', 'needs_you'].includes(dispatch.result.status)
+    );
+    const done = recent.filter((dispatch) =>
+      ['completed', 'done'].includes(dispatch.result.status)
+    );
+    const problems = recent.filter(
+      (dispatch) => !needsYou.includes(dispatch) && !done.includes(dispatch)
+    );
+    if (done.length) {
+      const section = sectionBlock('Done for you');
+      done.forEach((dispatch) =>
+        section.appendChild(compactDispatchCard(dispatch, 'done'))
       );
-      row.appendChild(element('small', '', 'Tracked as IFLAI Codex time'));
-      section.appendChild(row);
-    });
-    recent.forEach((dispatch) => {
-      const row = element(
-        'article',
-        `company-dispatch-card ${dispatch.status}`
+      wrapper.appendChild(section);
+    }
+    if (needsYou.length) {
+      const section = sectionBlock('Needs you');
+      needsYou.forEach((dispatch) =>
+        section.appendChild(compactDispatchCard(dispatch, 'needs-you'))
       );
-      row.appendChild(
-        element(
-          'span',
-          `company-result-status ${dispatch.result.status}`,
-          displayResultStatus(dispatch.result.status)
-        )
+      wrapper.appendChild(section);
+    }
+    if (problems.length) {
+      const section = sectionBlock('System status', true);
+      problems.forEach((dispatch) =>
+        section.appendChild(compactDispatchCard(dispatch, 'problem'))
       );
-      row.appendChild(
-        element('strong', '', dispatch.project || 'Company work')
-      );
-      row.appendChild(
-        element(
-          'span',
-          '',
-          dispatch.result.headline ||
-            dispatch.summary ||
-            dispatch.reason ||
-            displayDispatchStatus(dispatch)
-        )
-      );
-      if (dispatch.result.destinations.length) {
-        row.appendChild(
-          element('span', 'company-result-output-label', 'Output')
-        );
-        dispatch.result.destinations.forEach((destination) => {
-          row.appendChild(resultDestination(destination));
-        });
-      } else if (['blocked', 'failed'].includes(dispatch.result.status)) {
-        row.appendChild(
-          element(
-            'span',
-            'company-result-missing',
-            'No usable output was produced.'
-          )
-        );
-      }
-      if (dispatch.result.nextAction) {
-        const nextLabel = dispatch.requiresDecision
-          ? 'Your decision'
-          : dispatch.result.status === 'completed'
-            ? 'Recommended next'
-            : 'What happens next';
-        row.appendChild(
-          element(
-            'span',
-            'company-dispatch-next',
-            `${nextLabel}: ${dispatch.result.nextAction}`
-          )
-        );
-      }
-      if (dispatch.result.completedWork.length) {
-        const completed = element('details', 'company-result-completed');
-        completed.appendChild(element('summary', '', 'Work included'));
-        const list = element('ul');
-        dispatch.result.completedWork.forEach((item) => {
-          list.appendChild(element('li', '', item));
-        });
-        completed.appendChild(list);
-        row.appendChild(completed);
-      }
-      const details = [
-        [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
-        displayModelTier(dispatch.modelRoutingTier),
-        dispatch.executionRepo,
-        formatDispatchDuration(dispatch.durationSeconds),
-        dispatch.timeTrackingStatus === 'session_persisted'
-          ? 'IFLAI time session saved'
-          : ''
-      ].filter(Boolean);
-      if (details.length) {
-        const runDetails = element('details', 'company-run-details');
-        runDetails.appendChild(element('summary', '', 'Run details'));
-        runDetails.appendChild(element('small', '', details.join(' · ')));
-        row.appendChild(runDetails);
-      }
-      section.appendChild(row);
-    });
-    return section;
+      wrapper.appendChild(section);
+    }
+    return wrapper;
   }
 
-  function resultDestination(destination) {
-    if (destination.mode === 'preview') {
-      const reader = element('details', 'company-result-destination preview');
-      const opener = element('summary');
-      opener.appendChild(element('strong', '', destination.actionLabel));
-      opener.appendChild(
+  function compactDispatchCard(dispatch, tone) {
+    const row = element('article', `company-dispatch-card ${tone}`);
+    row.appendChild(element('p', 'company-eyebrow', dispatch.project));
+    row.appendChild(
+      element('strong', '', dispatch.result.headline || 'Company work updated')
+    );
+    if (dispatch.result.message) {
+      row.appendChild(element('span', '', dispatch.result.message));
+    }
+    if (tone === 'needs-you') {
+      const request = dispatch.result.userRequest;
+      row.appendChild(
         element(
-          'span',
-          '',
-          [destination.label, destination.location].filter(Boolean).join(' · ')
+          'p',
+          'company-dispatch-next',
+          request.instruction || dispatch.result.nextAction
         )
       );
-      reader.appendChild(opener);
-      reader.appendChild(
-        element('pre', 'company-result-preview', destination.previewContent)
+      if (request.reason) row.appendChild(element('small', '', request.reason));
+      const actions = element('div', 'company-action-grid');
+      request.choices.forEach((choice) => {
+        actions.appendChild(
+          button(choice, 'primary', () => answerDispatch(dispatch, choice))
+        );
+      });
+      actions.appendChild(
+        button('Add context', 'secondary', () => answerDispatch(dispatch))
       );
-      return reader;
+      row.appendChild(actions);
     }
+    if (tone === 'done') {
+      dispatch.result.destinations.forEach((destination) => {
+        row.appendChild(compactResultDestination(destination));
+      });
+    }
+    const details = [
+      [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
+      dispatch.executionRepo,
+      formatDispatchDuration(dispatch.durationSeconds),
+      dispatch.timeTrackingStatus === 'session_persisted'
+        ? 'IFLAI time recorded'
+        : ''
+    ].filter(Boolean);
+    if (details.length) {
+      const runDetails = element('details', 'company-run-details');
+      runDetails.appendChild(element('summary', '', 'Details'));
+      runDetails.appendChild(element('small', '', details.join(' · ')));
+      row.appendChild(runDetails);
+    }
+    return row;
+  }
 
+  function compactResultDestination(destination) {
     const item = element('div', 'company-result-destination');
     const description = element('div', 'company-result-location');
     description.appendChild(element('strong', '', destination.label));
@@ -704,7 +657,7 @@ export function createCompanyOperatorController({
       element(
         'span',
         '',
-        [destination.location, formatFileSize(destination.bytes)]
+        [destination.location, destination.reference]
           .filter(Boolean)
           .join(' · ')
       )
@@ -713,13 +666,7 @@ export function createCompanyOperatorController({
       description.appendChild(element('small', '', destination.statusText));
     }
     item.appendChild(description);
-    if (destination.mode === 'download') {
-      item.appendChild(
-        button(destination.actionLabel, 'secondary', () =>
-          downloadPrivateResult(destination)
-        )
-      );
-    } else if (destination.mode === 'open') {
+    if (destination.mode === 'open') {
       const link = element(
         'a',
         'btn secondary company-result-action',
@@ -733,25 +680,15 @@ export function createCompanyOperatorController({
     return item;
   }
 
-  function downloadPrivateResult(destination) {
-    const blob = new Blob([destination.downloadContent], {
-      type: destination.mimeType
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = destination.filename;
-    link.hidden = true;
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 0);
-    showToast('Private result downloaded.');
-  }
-
   function commandStatus() {
     const pending = loadPending();
     const receipts = loadReceipts().slice(-5).reverse();
+    if (
+      !pending.length &&
+      !receipts.some((item) => item.status !== 'applied')
+    ) {
+      return null;
+    }
     const section = element('section', 'company-command-status');
     if (pending.length) {
       section.appendChild(
@@ -762,42 +699,17 @@ export function createCompanyOperatorController({
         )
       );
     }
-    receipts.forEach((receipt) => {
-      section.appendChild(
-        element(
-          'p',
-          `company-receipt ${receipt.status}`,
-          `${receipt.label}: ${receipt.status === 'applied' ? 'Applied' : receipt.reason || 'Needs attention'}`
-        )
-      );
-    });
-    return section;
-  }
-
-  function handledSection() {
-    const section = sectionBlock('Handled for you', true);
-    const summary = element(
-      'p',
-      'company-handled-summary',
-      `${snapshot.handled.todayVerifiedActions} useful actions completed today`
-    );
-    section.appendChild(summary);
-    snapshot.handled.receipts.slice(0, 6).forEach((receipt) => {
-      const item = element('article', 'company-receipt-card');
-      item.appendChild(element('strong', '', receipt.label));
-      if (receipt.summary)
-        item.appendChild(element('span', '', receipt.summary));
-      const details = [
-        [receipt.model, receipt.reasoningEffort].filter(Boolean).join(' / '),
-        receipt.executionRepo,
-        receipt.estimatedMinutesSaved
-          ? `${receipt.estimatedMinutesSaved} min saved`
-          : ''
-      ].filter(Boolean);
-      if (details.length)
-        item.appendChild(element('small', '', details.join(' · ')));
-      section.appendChild(item);
-    });
+    receipts
+      .filter((receipt) => receipt.status !== 'applied')
+      .forEach((receipt) => {
+        section.appendChild(
+          element(
+            'p',
+            `company-receipt ${receipt.status}`,
+            `${receipt.label}: ${receipt.status === 'applied' ? 'Applied' : receipt.reason || 'Needs attention'}`
+          )
+        );
+      });
     return section;
   }
 
@@ -1063,59 +975,12 @@ function safeRemoteDispatch(value) {
   };
 }
 
-function displayDispatchStatus(dispatch) {
-  if (dispatch.status === 'verified') return 'Completed and verified';
-  if (dispatch.status === 'processing') return 'Codex is working on this now';
-  if (dispatch.status === 'blocked') return 'Needs a decision or more evidence';
-  if (dispatch.status === 'failed') return 'Codex work needs attention';
-  return 'Codex work updated';
-}
-
-function displayResultStatus(value) {
-  const labels = {
-    blocked: 'Not completed',
-    completed: 'Completed',
-    failed: 'Not completed',
-    needs_decision: 'Decision needed',
-    verified: 'Completed'
-  };
-  return labels[String(value || '').toLowerCase()] || 'Updated';
-}
-
-function displayModelTier(value) {
-  const labels = {
-    lightweight: 'Lightweight task',
-    standard: 'Standard task',
-    complex: 'Complex task',
-    challenging: 'Challenging task',
-    frontier: 'Exceptional challenge',
-    fixed: 'Fixed model setting'
-  };
-  return labels[String(value || '').toLowerCase()] || '';
-}
-
 function formatDispatchDuration(value) {
   const seconds = Math.max(0, Math.round(Number(value) || 0));
   if (!seconds) return '';
   if (seconds < 60) return `${seconds}s`;
   const minutes = Math.round(seconds / 60);
   return `${minutes} min`;
-}
-
-function formatFileSize(value) {
-  const bytes = Math.max(0, Math.round(Number(value) || 0));
-  if (!bytes) return '';
-  if (bytes < 1024) return `${bytes} B`;
-  return `${(bytes / 1024).toFixed(bytes < 10 * 1024 ? 1 : 0)} KB`;
-}
-
-function formatAssetType(value) {
-  const labels = {
-    commercial_response_workbook: 'Commercial workbook',
-    evidence_backed_decision_brief: 'Decision brief',
-    evidence_backed_execution_packet: 'Execution packet'
-  };
-  return labels[value] || 'Prepared work';
 }
 
 function displaySource(value) {

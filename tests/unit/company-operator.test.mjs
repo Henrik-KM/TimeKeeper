@@ -242,6 +242,84 @@ test('normalizes a bounded mobile Company snapshot', () => {
   assert.equal(snapshot.priorities[0].title, '<img src=x onerror=alert(1)>');
 });
 
+test('normalizes concise action-first company results', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    dispatches: {
+      recent: [
+        {
+          dispatch_id: 'dispatch:done',
+          command_id: 'mobile-done',
+          issue_id: 'priority:aventix',
+          evidence_fingerprint: 'evidence-aventix-1',
+          project: 'Aventix',
+          status: 'verified',
+          outcome_status: 'done',
+          result: {
+            status: 'done',
+            headline: 'Fixed the validation bug',
+            message: 'The fix is tested and committed locally.',
+            completed_work: ['Updated validation.'],
+            destinations: [
+              {
+                type: 'local_commit',
+                mode: 'none',
+                label: 'Aventix local commit',
+                location: 'Aventix',
+                reference: 'abcdef123456',
+                status_text: 'Committed locally and not pushed.',
+                verified: true
+              }
+            ],
+            user_request: { instruction: '', reason: '', choices: [] },
+            verification: {
+              proof_kind: 'local_commit',
+              reference: 'abcdef123456',
+              summary: 'Focused tests passed.'
+            }
+          }
+        },
+        {
+          dispatch_id: 'dispatch:question',
+          command_id: 'mobile-question',
+          issue_id: 'priority:magik',
+          evidence_fingerprint: 'evidence-magik-1',
+          project: 'MAGIK',
+          status: 'verified',
+          outcome_status: 'needs_you',
+          requires_decision: true,
+          result: {
+            status: 'needs_you',
+            headline: 'Choose the pilot deadline',
+            message: 'The implementation depends on the customer deadline.',
+            destinations: [],
+            user_request: {
+              instruction: 'Which deadline should I use?',
+              reason: 'No deadline is in the available sources.',
+              choices: ['September', 'October']
+            }
+          }
+        }
+      ]
+    }
+  });
+
+  const [done, question] = snapshot.dispatches.recent;
+  assert.equal(done.evidenceFingerprint, 'evidence-aventix-1');
+  assert.equal(done.result.message, 'The fix is tested and committed locally.');
+  assert.equal(done.result.destinations[0].type, 'local_commit');
+  assert.equal(done.result.destinations[0].reference, 'abcdef123456');
+  assert.equal(done.result.destinations[0].previewContent, '');
+  assert.equal(
+    question.result.userRequest.instruction,
+    'Which deadline should I use?'
+  );
+  assert.deepEqual(question.result.userRequest.choices, [
+    'September',
+    'October'
+  ]);
+});
+
 test('legacy dispatches preview only explicitly classified briefs', () => {
   const snapshot = normalizeCompanyOperatorSnapshot({
     schema_version: 1,

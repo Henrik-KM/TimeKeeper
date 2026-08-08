@@ -1642,17 +1642,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     ],
     work_products: {
       status: 'ready',
-      title: 'Customer delivery priorities',
-      summary: 'Prepared the strongest supported customer work.',
-      assets: [
-        {
-          asset_id: 'priority:avantor',
-          title: 'Avantor commercial response',
-          format: 'commercial_response_workbook',
-          purpose: 'Collect the inputs needed for a commercial response.',
-          content: '100 cameras\n500 cameras\n1,000 cameras\n2,000 cameras'
-        }
-      ]
+      title: '',
+      summary: '',
+      assets: []
     },
     decisions: {
       pending_count: 1,
@@ -1687,94 +1679,89 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       in_progress: [],
       recent: [
         {
-          dispatch_id: 'dispatch:older-work',
-          command_id: 'mobile-older-work',
-          issue_id: 'priority:older',
+          dispatch_id: 'dispatch:magik-question',
+          command_id: 'mobile-magik-question',
+          issue_id: 'priority:magik-question',
+          evidence_fingerprint: 'evidence-magik-question-1',
           project: 'MAGIK',
           status: 'verified',
-          summary: 'Completed an earlier evidence-backed deliverable.',
-          outcome_status: 'needs_decision',
+          summary: 'Choose the pilot deadline.',
+          outcome_status: 'needs_you',
           requires_decision: true,
-          recommended_next_action:
-            'Assign one accountable Bioventurehub owner now. That owner should verify the external deadline before any response.',
-          model: 'gpt-5.6-sol',
-          reasoning_effort: 'max',
-          model_routing_tier: 'frontier',
-          execution_repo: 'email-helper',
-          duration_seconds: 125,
-          artifact_count: 2,
+          recommended_next_action: 'Which pilot deadline should I use?',
+          model: 'gpt-5.6-terra',
+          reasoning_effort: 'medium',
+          model_routing_tier: 'standard',
+          execution_repo: 'MAGIK',
+          duration_seconds: 42,
+          artifact_count: 0,
           result: {
-            status: 'needs_decision',
-            headline: 'Completed an earlier evidence-backed deliverable.',
-            completed_work: [
-              'Reviewed the supported evidence.',
-              'Prepared the decision brief.'
-            ],
-            next_action:
-              'Assign one accountable Bioventurehub owner now. That owner should verify the external deadline before any response.',
-            destinations: [
-              {
-                type: 'internal_brief',
-                mode: 'preview',
-                label: 'MAGIK opportunity decision brief',
-                location: 'Private Company brief',
-                preview_content:
-                  '# Completed decision brief\n\n- Assign an owner.\n- Confirm the deadline.\n\n<img src=x onerror=alert(1)>',
-                bytes: 2140,
-                sha256: 'a'.repeat(64),
-                verified: true
-              },
-              {
-                type: 'private_file',
-                mode: 'download',
-                label: 'Supporting notes',
-                location: 'Private download',
-                download_content: 'Supporting evidence notes',
-                filename: 'supporting-notes.md',
-                mime_type: 'text/markdown;charset=utf-8',
-                bytes: 25,
-                sha256: 'b'.repeat(64),
-                verified: true
-              },
-              {
-                type: 'github_change',
-                mode: 'open',
-                label: 'Implemented change',
-                location: 'GitHub',
-                url: 'https://github.com/Henrik-KM/TimeKeeper/commit/abc',
-                verified: true
-              }
-            ]
+            status: 'needs_you',
+            headline: 'Choose the pilot deadline',
+            message: 'The implementation depends on the customer deadline.',
+            completed_work: [],
+            next_action: 'Which pilot deadline should I use?',
+            destinations: [],
+            user_request: {
+              instruction: 'Which pilot deadline should I use?',
+              reason:
+                'No deadline is present in the available company sources.',
+              choices: ['September', 'October']
+            },
+            verification: {
+              proof_kind: 'needs_user',
+              summary: 'No repository changes were made.'
+            }
           },
           time_tracking_status: 'session_persisted'
         },
         {
-          dispatch_id: 'dispatch:unusable-aventix-result',
-          command_id: 'mobile-unusable-aventix-result',
+          dispatch_id: 'dispatch:aventix-done',
+          command_id: 'mobile-aventix-done',
+          issue_id: 'priority:aventix-done',
+          evidence_fingerprint: 'evidence-aventix-done-1',
           project: 'Aventix',
           status: 'verified',
-          summary: 'Completed an evidence-bound Aventix decision brief.',
-          outcome_status: 'completed',
-          recommended_next_action:
-            'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+          summary: 'Fixed the Aventix validation bug.',
+          outcome_status: 'done',
+          model: 'gpt-5.6-terra',
+          reasoning_effort: 'medium',
+          model_routing_tier: 'standard',
+          execution_repo: 'Aventix',
+          duration_seconds: 96,
+          time_tracking_status: 'session_persisted',
           result: {
-            status: 'completed',
-            headline: 'Completed an evidence-bound Aventix decision brief.',
-            completed_work: [
-              'Separated unknown technical and commercial details.'
-            ],
-            next_action:
-              'Provide a summary for commitment:282fd75ae731ee2876495959:3198242ea5e1.',
+            status: 'done',
+            headline: 'Fixed the Aventix validation bug',
+            message: 'The fix is implemented, tested, and committed locally.',
+            completed_work: ['Updated validation and added a regression test.'],
+            next_action: '',
             destinations: [
               {
-                type: 'internal_brief',
-                mode: 'preview',
-                label: 'Aventix evidence brief',
-                preview_content: 'No usable deliverable was prepared.',
-                sha256: 'c'.repeat(64),
+                type: 'local_commit',
+                mode: 'none',
+                label: 'Aventix local commit',
+                location: 'Aventix',
+                reference: 'abcdef1234567890',
+                status_text: 'Committed locally and not pushed.',
+                verified: true
+              },
+              {
+                type: 'updated_file',
+                mode: 'none',
+                label: 'src/validation.py',
+                location: 'Aventix',
+                reference: 'src/validation.py',
+                status_text: 'Included in the verified local commit.',
                 verified: true
               }
-            ]
+            ],
+            user_request: { instruction: '', reason: '', choices: [] },
+            verification: {
+              proof_kind: 'local_commit',
+              reference: 'abcdef1234567890',
+              summary: 'Focused tests passed.'
+            }
           }
         }
       ]
@@ -1833,7 +1820,12 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   await expect(page.locator('#companyPageContent')).toContainText(
     'Prepare the tiered pricing and total-cost response.'
   );
+  await expect(page.locator('#companyPageContent')).toContainText('Needs you');
   await expect(page.locator('#companyPageContent')).toContainText(
+    'Done for you'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText('Up next');
+  await expect(page.locator('#companyPageContent')).not.toContainText(
     'Commercial workbook'
   );
   await expect(page.locator('#companyPageContent')).not.toContainText(
@@ -1861,7 +1853,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       request.method() === 'PUT' &&
       request.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByRole('button', { name: 'Work on this now' }).click();
+  await page.getByRole('button', { name: 'Do this now' }).click();
   const request = await commandRequest;
   const requestBody = request.postDataJSON();
   const command = JSON.parse(
@@ -1879,77 +1871,73 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     page.locator('#companyPageContent .company-primary-card')
   ).toContainText('Albany');
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Company work results'
+    'Which pilot deadline should I use?'
   );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'Decision needed'
-  );
-  await expect(page.getByText('gpt-5.6-sol / max')).toBeHidden();
+  await expect(page.getByText('gpt-5.6-terra / medium').first()).toBeHidden();
   await page
     .locator('#companyPageContent .company-run-details summary')
+    .first()
     .click();
   await expect(page.locator('#companyPageContent')).toContainText(
-    'gpt-5.6-sol / max'
+    'gpt-5.6-terra / medium'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    'IFLAI time session saved'
+    'IFLAI time recorded'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Exceptional challenge'
+    'Aventix local commit'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Your decision: Verify the external deadline before any response.'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText('Output');
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'View full output'
+    'Committed locally and not pushed.'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Available here in the app'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'The Aventix run did not produce a usable deliverable'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'No usable output was produced.'
+    'src/validation.py'
   );
   await expect(page.locator('#companyPageContent')).not.toContainText(
     'commitment:282fd75'
   );
   await expect(page.locator('#companyPageContent')).not.toContainText(
-    'evidence-bound Aventix'
+    'evidence-bound'
   );
   await expect(page.locator('#companyPageContent')).not.toContainText(
-    'accountable Bioventurehub owner'
+    'assign an owner'
   );
-  await page
-    .locator('#companyPageContent .company-result-destination.preview summary')
-    .click();
+  await expect(page.locator('#companyPageContent pre')).toHaveCount(0);
   await expect(
     page.locator('#companyPageContent .company-result-preview')
-  ).toContainText('Confirm the deadline.');
-  const downloadPromise = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Download file' }).click();
-  const download = await downloadPromise;
-  expect(download.suggestedFilename()).toBe('supporting-notes.md');
-  const changeLink = page.getByRole('link', { name: 'View changes' });
-  await expect(changeLink).toHaveAttribute(
-    'href',
-    'https://github.com/Henrik-KM/TimeKeeper/commit/abc'
+  ).toHaveCount(0);
+  await expect(page.getByRole('button', { name: 'Download file' })).toHaveCount(
+    0
   );
-  await expect(changeLink).toHaveAttribute('target', '_blank');
   await expect(page.locator('#companyPageContent img')).toHaveCount(0);
   const resultLayout = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
-    readerHeight: document
-      .querySelector('.company-result-destination.preview summary')
+    choiceHeight: document
+      .querySelector('.company-dispatch-card.needs-you .btn')
       ?.getBoundingClientRect().height
   }));
   expect(resultLayout.scrollWidth).toBeLessThanOrEqual(
     resultLayout.viewportWidth + 2
   );
-  expect(resultLayout.readerHeight).toBeGreaterThanOrEqual(44);
+  expect(resultLayout.choiceHeight).toBeGreaterThanOrEqual(44);
+
+  const directionRequest = page.waitForRequest(
+    (candidate) =>
+      candidate.method() === 'PUT' &&
+      candidate.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'September' }).click();
+  const directionPayload = (await directionRequest).postDataJSON();
+  const directionCommand = JSON.parse(
+    Buffer.from(directionPayload.content, 'base64').toString('utf8')
+  );
+  expect(directionCommand.action).toBe('add_direction');
+  expect(directionCommand.target.issue_id).toBe('priority:magik-question');
+  expect(directionCommand.target.evidence_fingerprint).toBe(
+    'evidence-magik-question-1'
+  );
+  expect(directionCommand.params.note).toBe('September');
   const storage = await page.evaluate(() => ({
     normalData: localStorage.getItem('timekeeperDataPro') || '',
     token: localStorage.getItem('timekeeperCompanyOperatorToken') || ''

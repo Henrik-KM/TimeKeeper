@@ -17,12 +17,15 @@ const ALLOWED_ACTIONS = new Set([
   'work_next'
 ]);
 const RESULT_DESTINATION_TYPES = new Set([
+  'closed_state',
   'github_change',
   'internal_brief',
+  'local_commit',
   'onedrive_document',
   'outlook_draft',
   'private_file',
   'sharepoint_document',
+  'updated_file',
   'website'
 ]);
 const LEGACY_PREVIEW_KINDS = new Set([
@@ -475,6 +478,10 @@ function normalizeDispatch(value) {
     dispatchId,
     commandId,
     issueId: cleanText(source.issue_id || source.issueId, 160),
+    evidenceFingerprint: cleanText(
+      source.evidence_fingerprint || source.evidenceFingerprint,
+      128
+    ),
     project,
     status: unusable ? 'failed' : cleanText(source.status, 60) || 'unknown',
     reason: cleanText(source.reason, 240),
@@ -515,9 +522,12 @@ function normalizeDispatch(value) {
       ? {
           status: 'failed',
           headline: unusableSummary,
+          message: unusableSummary,
           completedWork: [],
           nextAction: '',
-          destinations: []
+          destinations: [],
+          userRequest: { instruction: '', reason: '', choices: [] },
+          verification: { proofKind: '', reference: '', summary: '' }
         }
       : normalizedResult,
     estimatedMinutesSaved: toCount(
@@ -556,6 +566,8 @@ function isUnusableLegacyDispatch(dispatch, result) {
 
 function normalizeDispatchResult(value, dispatch, legacyDestinations) {
   const source = asRecord(value);
+  const userRequest = asRecord(source.user_request || source.userRequest);
+  const verification = asRecord(source.verification);
   const destinations = normalizeArray(
     source.destinations,
     normalizeResultDestination,
@@ -570,6 +582,10 @@ function normalizeDispatchResult(value, dispatch, legacyDestinations) {
     headline:
       cleanLegacyResponsibilityCopy(source.headline, 500) ||
       cleanLegacyResponsibilityCopy(dispatch.summary, 500),
+    message:
+      cleanLegacyResponsibilityCopy(source.message, 320) ||
+      cleanLegacyResponsibilityCopy(dispatch.message, 320) ||
+      cleanLegacyResponsibilityCopy(dispatch.summary, 320),
     completedWork: Array.isArray(source.completed_work || source.completedWork)
       ? (source.completed_work || source.completedWork)
           .map((item) => cleanLegacyResponsibilityCopy(item, 300))
@@ -585,7 +601,25 @@ function normalizeDispatchResult(value, dispatch, legacyDestinations) {
         dispatch.recommended_next_action || dispatch.recommendedNextAction,
         500
       ),
-    destinations: destinations.length ? destinations : legacyDestinations
+    destinations: destinations.length ? destinations : legacyDestinations,
+    userRequest: {
+      instruction: cleanLegacyResponsibilityCopy(userRequest.instruction, 240),
+      reason: cleanLegacyResponsibilityCopy(userRequest.reason, 180),
+      choices: Array.isArray(userRequest.choices)
+        ? userRequest.choices
+            .map((choice) => cleanLegacyResponsibilityCopy(choice, 80))
+            .filter(Boolean)
+            .slice(0, 3)
+        : []
+    },
+    verification: {
+      proofKind: cleanText(
+        verification.proof_kind || verification.proofKind,
+        40
+      ),
+      reference: cleanText(verification.reference, 80),
+      summary: cleanText(verification.summary, 240)
+    }
   };
 }
 
@@ -688,6 +722,23 @@ function normalizeResultDestination(value) {
   if (mode === 'none' && type === 'private_file') {
     return {
       ...base,
+      actionLabel: '',
+      previewContent: '',
+      downloadContent: '',
+      filename: '',
+      mimeType: '',
+      url: ''
+    };
+  }
+  if (
+    mode === 'none' &&
+    ['closed_state', 'local_commit', 'updated_file'].includes(type)
+  ) {
+    const reference = cleanText(source.reference, 240);
+    if (!reference) return null;
+    return {
+      ...base,
+      reference,
       actionLabel: '',
       previewContent: '',
       downloadContent: '',
