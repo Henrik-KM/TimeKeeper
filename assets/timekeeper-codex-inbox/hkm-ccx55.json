@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-08T18:33:02.156Z",
+  "updatedAt": "2026-08-08T18:38:02.128Z",
   "dayStart": "2026-08-07T22:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-08T18:33:02.948Z",
+    "observedAt": "2026-08-08T18:38:02.831Z",
     "primary": {
       "usedPercent": 15,
       "remainingPercent": 85,
@@ -3732,6 +3732,37 @@
         }
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-c10218fa72a96e9e926b12d5",
+      "threadId": "019fe295-8103-7eb2-96c3-3be4f93479ce",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-08T18:14:37.322Z",
+      "endTime": "2026-08-08T18:16:06.776Z",
+      "wallSeconds": 89,
+      "focusFactor": 0.3507,
+      "effectiveSeconds": 31,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 88,
+          "effectiveSeconds": 30
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
