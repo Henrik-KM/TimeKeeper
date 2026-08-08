@@ -2,17 +2,17 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-08T09:03:03.021Z",
+  "updatedAt": "2026-08-08T09:08:02.517Z",
   "dayStart": "2026-08-07T22:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-08T09:03:07.805Z",
+    "observedAt": "2026-08-08T09:08:04.608Z",
     "primary": {
-      "usedPercent": 6,
-      "remainingPercent": 94,
+      "usedPercent": 7,
+      "remainingPercent": 93,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-15T06:34:12.000Z"
     },
@@ -3507,6 +3507,37 @@
         "codex-c24cb863821a0515d328a6ed"
       ],
       "description": "Codex: Design end-to-end torsion workflow"
+    },
+    {
+      "id": "codex-9f651771664277e511e0a82a",
+      "threadId": "019fe08b-b7c7-7661-9520-576f6b5691d2",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-08T08:44:41.712Z",
+      "endTime": "2026-08-08T08:46:03.159Z",
+      "wallSeconds": 81,
+      "focusFactor": 0.3508,
+      "effectiveSeconds": 28,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 80,
+          "effectiveSeconds": 28
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
