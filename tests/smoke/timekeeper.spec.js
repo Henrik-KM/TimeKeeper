@@ -3711,6 +3711,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
     source: 'timekeeper-codex-bridge',
     machineId: 'desktop-a',
     updatedAt: '2026-06-13T10:00:00.000Z',
+    retractedExternalIds: ['codex-failed-startup'],
     usageLimits: {
       observedAt: '2026-06-13T10:30:00.000Z',
       primary: {
@@ -3803,6 +3804,18 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
       })
     ],
     entries: [
+      {
+        ...entryFixture({
+          id: 'failed-startup-entry',
+          projectId: 'iflai',
+          description: 'Codex: failed startup',
+          startTime: '2026-06-13T07:59:56.000Z',
+          endTime: '2026-06-13T08:00:00.000Z',
+          hours: 0.01
+        }),
+        source: 'codex',
+        externalId: 'codex-failed-startup'
+      },
       {
         ...entryFixture({
           id: 'old-parent-entry',
@@ -3975,6 +3988,9 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   expect(data.entries.map((entry) => entry.externalId)).not.toContain(
     'codex-subagent-old'
   );
+  expect(data.entries.map((entry) => entry.externalId)).not.toContain(
+    'codex-failed-startup'
+  );
   expect(data.codexIntegration.usageLimits).toEqual(
     expect.objectContaining({
       observedAt: '2026-06-13T10:30:00.000Z',
@@ -4001,7 +4017,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
     )
     .toMatchObject({
       imported: 1,
-      reconciled: 2,
+      reconciled: 3,
       updated: 2
     });
 

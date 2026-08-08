@@ -5,7 +5,10 @@ import path from 'node:path';
 import test from 'node:test';
 
 import {
+  buildCodexSessionGroupPartitions,
+  hasCreditableCodexActivity,
   makeCodexPayloadKey,
+  parseArgs,
   readCodexSessionSummary,
   sanitizeAppServerUsageLimits
 } from '../../scripts/codex-usage-bridge.mjs';
@@ -22,6 +25,11 @@ import {
 function jsonl(events) {
   return events.map((event) => JSON.stringify(event)).join('\n');
 }
+
+test('help is parsed as a no-publish bridge command', () => {
+  assert.equal(parseArgs(['--help']).help, true);
+  assert.equal(parseArgs(['-h']).help, true);
+});
 
 function session({ cwd, id = 'thread-1', timestamps = [] }) {
   return jsonl([
@@ -414,7 +422,112 @@ test('streamed session parsing keeps the first subagent identity', async () => {
     assert.equal(summary.meta.sessionId, 'parent-thread');
     assert.equal(summary.meta.threadSource, 'subagent');
     assert.equal(summary.meta.isSubagent, true);
+    assert.equal(summary.hasAssistantActivity, true);
     assert.equal(summary.activity.at(-1).model, 'gpt-5.6-sol');
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('input-only failed startups are not creditable Codex work', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'timekeeper-codex-')
+  );
+  const failedPath = path.join(directory, 'failed-startup.jsonl');
+  const completedPath = path.join(directory, 'completed-turn.jsonl');
+  const base = [
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'session_meta',
+      payload: {
+        id: 'operator-session',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI\\Albany'
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:00:01.000Z',
+      type: 'response_item',
+      payload: { type: 'message', role: 'developer', content: [] }
+    },
+    {
+      timestamp: '2026-06-13T09:00:04.000Z',
+      type: 'response_item',
+      payload: { type: 'message', role: 'user', content: [] }
+    }
+  ];
+
+  try {
+    await fs.writeFile(failedPath, jsonl(base), 'utf8');
+    await fs.writeFile(
+      completedPath,
+      jsonl([
+        ...base,
+        {
+          timestamp: '2026-06-13T09:00:06.000Z',
+          type: 'response_item',
+          payload: { type: 'message', role: 'assistant', content: [] }
+        }
+      ]),
+      'utf8'
+    );
+    const failed = await readCodexSessionSummary(
+      failedPath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+    const completed = await readCodexSessionSummary(
+      completedPath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+
+    assert.equal(failed.hasAssistantActivity, false);
+    assert.equal(hasCreditableCodexActivity([failed]), false);
+    assert.equal(completed.hasAssistantActivity, true);
+    assert.equal(hasCreditableCodexActivity([failed, completed]), true);
+    const partitioned = buildCodexSessionGroupPartitions({
+      sessionGroups: [[failed], [completed]],
+      trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+      now: new Date('2026-06-14T00:00:00.000Z')
+    });
+    assert.ok(partitioned.records.length > 0);
+    assert.ok(partitioned.retractedExternalIds.length > 0);
+    assert.equal(
+      partitioned.records.some((record) =>
+        partitioned.retractedExternalIds.includes(record.id)
+      ),
+      false
+    );
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
+test('legacy agent-message events remain creditable without response items', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'timekeeper-codex-')
+  );
+  const filePath = path.join(directory, 'legacy-completed-turn.jsonl');
+  try {
+    await fs.writeFile(
+      filePath,
+      jsonl([
+        {
+          timestamp: '2026-06-13T09:00:00.000Z',
+          type: 'session_meta',
+          payload: { id: 'legacy-session', cwd: 'C:\\GitHub\\IFLAI' }
+        },
+        {
+          timestamp: '2026-06-13T09:00:04.000Z',
+          type: 'event_msg',
+          payload: { type: 'agent_message' }
+        }
+      ]),
+      'utf8'
+    );
+    const summary = await readCodexSessionSummary(
+      filePath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+    assert.equal(summary.hasAssistantActivity, true);
   } finally {
     await fs.rm(directory, { recursive: true, force: true });
   }

@@ -3666,6 +3666,17 @@ import {
         )[0] || config.usageLimits;
     payloads.forEach((payload) => {
       const records = Array.isArray(payload?.records) ? payload.records : [];
+      const retractedIds = Array.isArray(payload?.retractedExternalIds)
+        ? [
+            ...new Set(
+              payload.retractedExternalIds
+                .map((id) => String(id || '').trim())
+                .filter(Boolean)
+            )
+          ]
+        : [];
+      reconciled += reconcileCodexSupersededEntries(retractedIds);
+      retractedIds.forEach((id) => importedIds.add(id));
       records.forEach((record) => {
         const recordId = String(record?.id || '').trim();
         let projectId = String(record?.timekeeperProjectId || '').trim();

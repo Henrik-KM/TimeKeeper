@@ -22,9 +22,13 @@ const defaultBranch = 'main';
 const defaultConfigPath = 'assets/timekeeper-codex-config.json';
 const defaultInboxPath = 'assets/timekeeper-codex-inbox';
 
-function parseArgs(argv = process.argv.slice(2)) {
+export function parseArgs(argv = process.argv.slice(2)) {
   const options = {};
   argv.forEach((arg) => {
+    if (arg === '--help' || arg === '-h') {
+      options.help = true;
+      return;
+    }
     if (arg === '--dry-run') {
       options.dryRun = true;
       return;
@@ -460,6 +464,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
   let firstTimestamp = null;
   let lastTimestampMs = null;
   let hasSessionMeta = false;
+  let hasAssistantActivity = false;
   let usageLimits = null;
   const lineReader = readline.createInterface({
     input: createReadStream(filePath, { encoding: 'utf8' }),
@@ -469,7 +474,11 @@ export async function readCodexSessionSummary(filePath, windowStart) {
     if (!line) continue;
     const timestamp = getJsonLineTimestamp(line);
     if (timestamp && !firstTimestamp) firstTimestamp = timestamp;
-    if (/"type"\s*:\s*"(session_meta|turn_context|event_msg)"/.test(line)) {
+    if (
+      /"type"\s*:\s*"(session_meta|turn_context|event_msg|response_item)"/.test(
+        line
+      )
+    ) {
       try {
         const event = JSON.parse(line);
         const payload = event?.payload || {};
@@ -494,22 +503,38 @@ export async function readCodexSessionSummary(filePath, windowStart) {
           activeEffort = String(
             payload.effort || payload.reasoning_effort || activeEffort || ''
           ).trim();
-        } else if (
-          event?.type === 'event_msg' &&
-          payload.type === 'token_count' &&
-          payload.rate_limits
-        ) {
-          const candidate = sanitizeCodexUsageLimits(
-            payload.rate_limits,
-            timestamp
-          );
+        } else if (event?.type === 'response_item') {
+          const role = String(payload.role || '')
+            .trim()
+            .toLowerCase();
+          const inputOnlyMessage =
+            payload.type === 'message' &&
+            ['developer', 'system', 'user'].includes(role);
+          if (!inputOnlyMessage) hasAssistantActivity = true;
+        } else if (event?.type === 'event_msg') {
+          const activityType = String(payload.type || '').trim();
           if (
-            candidate &&
-            (!usageLimits ||
-              Date.parse(candidate.observedAt) >
-                Date.parse(usageLimits.observedAt))
+            activityType === 'agent_message' ||
+            activityType === 'agent_reasoning' ||
+            /^(?:exec_command|patch_apply|mcp_|tool_|web_search)/.test(
+              activityType
+            )
           ) {
-            usageLimits = candidate;
+            hasAssistantActivity = true;
+          }
+          if (activityType === 'token_count' && payload.rate_limits) {
+            const candidate = sanitizeCodexUsageLimits(
+              payload.rate_limits,
+              timestamp
+            );
+            if (
+              candidate &&
+              (!usageLimits ||
+                Date.parse(candidate.observedAt) >
+                  Date.parse(usageLimits.observedAt))
+            ) {
+              usageLimits = candidate;
+            }
           }
         }
       } catch {
@@ -536,7 +561,65 @@ export async function readCodexSessionSummary(filePath, windowStart) {
     }
   }
   if (!meta.timestamp) meta.timestamp = firstTimestamp;
-  return { meta, timestamps, activity, usageLimits, sourceFile: filePath };
+  return {
+    meta,
+    timestamps,
+    activity,
+    hasAssistantActivity,
+    usageLimits,
+    sourceFile: filePath
+  };
+}
+
+export function hasCreditableCodexActivity(sessions = []) {
+  return (
+    Array.isArray(sessions) &&
+    sessions.some((session) => session?.hasAssistantActivity === true)
+  );
+}
+
+/**
+ * @param {{
+ *   sessionGroups?: Array<Array<Record<string, any>>>,
+ *   trackedProjects?: Array<object>,
+ *   mappings?: Array<object>,
+ *   threadNamesById?: Map<string, string>,
+ *   now?: Date,
+ *   focusFactor?: number,
+ *   focusPolicy?: object
+ * }} options
+ */
+export function buildCodexSessionGroupPartitions({
+  sessionGroups = [],
+  trackedProjects = [],
+  mappings = [],
+  threadNamesById = new Map(),
+  now = new Date(),
+  focusFactor,
+  focusPolicy
+} = {}) {
+  const records = [];
+  const retractedExternalIds = [];
+  sessionGroups.forEach((sessions) => {
+    const groupRecords = buildCodexUsageRecordsFromSessionGroup({
+      sessions,
+      trackedProjects,
+      mappings,
+      threadNamesById,
+      now,
+      focusFactor,
+      focusPolicy
+    });
+    if (hasCreditableCodexActivity(sessions)) {
+      records.push(...groupRecords);
+    } else {
+      retractedExternalIds.push(...groupRecords.map((record) => record.id));
+    }
+  });
+  return {
+    records,
+    retractedExternalIds: [...new Set(retractedExternalIds)]
+  };
 }
 
 async function readJsonFile(filePath, fallback) {
@@ -653,17 +736,15 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     group.push(summary);
     sessionGroups.set(groupId, group);
   });
-  const records = Array.from(sessionGroups.values()).flatMap((sessions) =>
-    buildCodexUsageRecordsFromSessionGroup({
-      sessions,
-      trackedProjects: config.trackedProjects || config.projects || [],
-      mappings: config.mappings || [],
-      threadNamesById,
-      now,
-      focusFactor: config.focusFactor,
-      focusPolicy: config.focusPolicy
-    })
-  );
+  const { records, retractedExternalIds } = buildCodexSessionGroupPartitions({
+    sessionGroups: Array.from(sessionGroups.values()),
+    trackedProjects: config.trackedProjects || config.projects || [],
+    mappings: config.mappings || [],
+    threadNamesById,
+    now,
+    focusFactor: config.focusFactor,
+    focusPolicy: config.focusPolicy
+  });
   const allUniqueRecords = Array.from(
     new Map(records.map((record) => [record.id, record])).values()
   ).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
@@ -700,6 +781,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     recentLookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
     policyBackfillRepositories: [...backfillRepositories],
     usageLimits,
+    retractedExternalIds,
     records: uniqueRecords
   };
 }
@@ -711,6 +793,9 @@ export function makeCodexPayloadKey(payload = {}) {
       JSON.stringify({
         rangeStart: payload.rangeStart,
         usageLimits: payload.usageLimits || null,
+        retractedExternalIds: Array.isArray(payload.retractedExternalIds)
+          ? payload.retractedExternalIds
+          : [],
         records: Array.isArray(payload.records) ? payload.records : []
       })
     )
@@ -718,6 +803,12 @@ export function makeCodexPayloadKey(payload = {}) {
 }
 
 export async function runCodexUsageBridge(rawArgs = parseArgs()) {
+  if (rawArgs.help) {
+    process.stdout.write(
+      'Usage: node scripts/codex-usage-bridge.mjs [--dry-run] [--force] [--key=value]\n'
+    );
+    return { skipped: true, reason: 'help', records: [] };
+  }
   const options = buildOptions(rawArgs);
   const payload = await buildCodexInboxPayload(options);
   if (payload.skipped) {
