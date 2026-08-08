@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-08T07:53:02.389Z",
+  "updatedAt": "2026-08-08T07:58:02.440Z",
   "dayStart": "2026-08-07T22:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-08T07:53:03.078Z",
+    "observedAt": "2026-08-08T07:58:03.069Z",
     "primary": {
       "usedPercent": 3,
       "remainingPercent": 97,
@@ -3473,6 +3473,38 @@
         "codex-6c66568c4967a632a824947d",
         "codex-76a35edf68622dc113fbc109",
         "codex-f690c17147dd7f1ebe4e4ca6"
+      ],
+      "description": "Codex: Design end-to-end torsion workflow"
+    },
+    {
+      "id": "codex-b549acb7ff5d2497651e0414",
+      "threadId": "019fdd30-4d67-7dd1-b28c-311a936d1b59",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-08T06:33:57.836Z",
+      "endTime": "2026-08-08T07:40:19.085Z",
+      "wallSeconds": 3981,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1990,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 3981,
+          "effectiveSeconds": 1990
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-c24cb863821a0515d328a6ed"
       ],
       "description": "Codex: Design end-to-end torsion workflow"
     }
