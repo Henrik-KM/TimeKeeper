@@ -2,17 +2,17 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T08:18:02.137Z",
+  "updatedAt": "2026-08-09T08:23:02.157Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-08-02T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-09T08:18:02.861Z",
+    "observedAt": "2026-08-09T08:23:03.547Z",
     "primary": {
-      "usedPercent": 16,
-      "remainingPercent": 84,
+      "usedPercent": 17,
+      "remainingPercent": 83,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-15T20:29:47.000Z"
     },
@@ -2801,6 +2801,59 @@
         }
       ],
       "description": "Codex: IFLAI"
+    },
+    {
+      "id": "codex-0919053591149a298f9ee629",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T06:52:38.212Z",
+      "endTime": "2026-08-09T08:02:53.620Z",
+      "wallSeconds": 4215,
+      "focusFactor": 0.6051,
+      "effectiveSeconds": 2550,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 4215,
+          "effectiveSeconds": 2529
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 153,
+          "effectiveSeconds": 21
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-815d0c8241c494cfcb230ae9",
+        "codex-1d67a56d1f0727e3486064f6"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-c06c478eb42c6a99d6471a2a",
