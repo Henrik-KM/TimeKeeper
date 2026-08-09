@@ -826,6 +826,11 @@ export function createCompanyOperatorController({
       [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
       dispatch.executionRepo,
       dispatch.executionBranch ? `Branch ${dispatch.executionBranch}` : '',
+      dispatch.executionBranchPendingCommitCount
+        ? `${dispatch.executionBranchPendingCommitCount} pending Company Operator ${
+            dispatch.executionBranchPendingCommitCount === 1 ? 'commit' : 'commits'
+          }`
+        : '',
       formatDispatchDuration(dispatch.durationSeconds),
       dispatch.timeTrackingStatus === 'session_persisted'
         ? 'IFLAI time recorded'

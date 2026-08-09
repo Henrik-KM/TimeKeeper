@@ -1744,6 +1744,8 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           reasoning_effort: 'medium',
           model_routing_tier: 'standard',
           execution_repo: 'Aventix',
+          execution_branch: 'codex/company-operator',
+          execution_branch_pending_commit_count: 1,
           duration_seconds: 96,
           time_tracking_status: 'session_persisted',
           result: {
@@ -1922,6 +1924,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'IFLAI time recorded'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 pending Company Operator commit'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Aventix local commit'

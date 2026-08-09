@@ -466,6 +466,10 @@ function normalizeReceipt(value) {
       source.execution_branch || source.executionBranch,
       180
     ),
+    executionBranchPendingCommitCount: toCount(
+      source.execution_branch_pending_commit_count ??
+        source.executionBranchPendingCommitCount
+    ),
     isolatedExecution:
       source.isolated_execution === true || source.isolatedExecution === true,
     sessionId: cleanText(source.session_id || source.sessionId, 140)
@@ -532,6 +536,10 @@ function normalizeDispatch(value) {
     executionBranch: cleanText(
       source.execution_branch || source.executionBranch,
       180
+    ),
+    executionBranchPendingCommitCount: toCount(
+      source.execution_branch_pending_commit_count ??
+        source.executionBranchPendingCommitCount
     ),
     isolatedExecution:
       source.isolated_execution === true || source.isolatedExecution === true,

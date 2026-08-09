@@ -139,6 +139,8 @@ test('normalizes a bounded mobile Company snapshot', () => {
           reasoning_effort: 'max',
           model_routing_tier: 'frontier',
           execution_repo: 'email-helper',
+          execution_branch: 'codex/company-operator',
+          execution_branch_pending_commit_count: 2,
           duration_seconds: 125,
           result: {
             status: 'needs_decision',
@@ -190,6 +192,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
   });
 
   assert.equal(snapshot.today.project, 'Avantor');
+  assert.equal(
+    snapshot.dispatches.recent[0].executionBranch,
+    'codex/company-operator'
+  );
+  assert.equal(
+    snapshot.dispatches.recent[0].executionBranchPendingCommitCount,
+    2
+  );
   assert.equal(snapshot.priorities[0].issueId, 'priority:avantor');
   assert.equal(
     snapshot.workProducts.assets[0].format,
