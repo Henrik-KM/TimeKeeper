@@ -313,6 +313,20 @@ export function createCompanyOperatorController({
     );
   }
 
+  async function retryOpportunities() {
+    await queuePriorityAction(
+      'retry_opportunities',
+      {
+        issueId: '',
+        opportunityId: '',
+        evidenceFingerprint: '',
+        project: 'Opportunity scan',
+        title: 'Opportunity scan'
+      },
+      {}
+    );
+  }
+
   async function snooze(priority) {
     const values = await openFormDialog({
       title: `Pause ${priority.project || 'this work'}`,
@@ -690,13 +704,59 @@ export function createCompanyOperatorController({
         element('p', 'company-handled-summary', opportunities.summary)
       );
     }
-    if (!opportunities.cards.length) {
+    const funnel = opportunities.funnel;
+    if (
+      funnel.drafted ||
+      funnel.sent ||
+      funnel.replied ||
+      funnel.meetings ||
+      funnel.followupDue
+    ) {
       section.appendChild(
-        card(
-          'No verified outreach today',
-          `Checked ${opportunities.sourceCount} public sources and ${opportunities.relationshipCount} known relationships. Nothing strong enough passed the evidence and contact checks.`
+        element(
+          'p',
+          'company-draft-types',
+          `Drafted ${funnel.drafted} · Sent ${funnel.sent} · Replies ${funnel.replied} · Meetings ${funnel.meetings}${funnel.followupDue ? ` · ${funnel.followupDue} follow-up${funnel.followupDue === 1 ? '' : 's'} due` : ''}`
         )
       );
+    }
+    if (!opportunities.cards.length) {
+      const failed =
+        ['blocked', 'failed'].includes(opportunities.status) ||
+        opportunities.phase === 'failed';
+      if (failed) {
+        const retrying =
+          ['pending', 'running'].includes(opportunities.retryStatus) ||
+          loadPending().some((item) => item.action === 'retry_opportunities');
+        const retryCard = card(
+          retrying
+            ? 'Opportunity scan retry queued'
+            : 'Opportunity scan needs a retry',
+          opportunities.failureReason ||
+            'Candidate research did not complete, so this is not a confirmed “nothing found” result.'
+        );
+        if (retrying) {
+          retryCard.appendChild(
+            element(
+              'small',
+              'company-feedback-status',
+              'The next weekday automation run will continue it.'
+            )
+          );
+        } else if (opportunities.canRetry) {
+          retryCard.appendChild(
+            button('Retry scan', 'primary', () => retryOpportunities())
+          );
+        }
+        section.appendChild(retryCard);
+      } else {
+        section.appendChild(
+          card(
+            'No verified outreach today',
+            `Checked ${opportunities.sourceCount} public sources and ${opportunities.relationshipCount} known relationships. Nothing strong enough passed the evidence and contact checks.`
+          )
+        );
+      }
       return section;
     }
     opportunities.cards.forEach((opportunity) =>
@@ -1401,6 +1461,9 @@ export function createCompanyOperatorController({
     }
     if (action === 'rate_opportunity') {
       return 'Opportunity feedback queued.';
+    }
+    if (action === 'retry_opportunities') {
+      return 'Opportunity scan retry queued.';
     }
     return 'Company change syncing.';
   }

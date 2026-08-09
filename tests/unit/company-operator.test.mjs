@@ -138,6 +138,7 @@ test('normalizes a bounded mobile Company snapshot', () => {
     opportunities: {
       available: true,
       status: 'ready',
+      phase: 'outlook_drafting_complete',
       summary: '1 verified first-contact draft is ready in Outlook.',
       generated_at: '2026-08-03T11:45:00.000Z',
       source_count: 6,
@@ -148,6 +149,13 @@ test('normalizes a bounded mobile Company snapshot', () => {
         ready_for_draft: 0,
         drafted: 1,
         contact_missing: 1
+      },
+      funnel: {
+        drafted: 4,
+        sent: 3,
+        replied: 2,
+        meetings: 1,
+        followup_due: 1
       },
       cards: [
         {
@@ -165,6 +173,8 @@ test('normalizes a bounded mobile Company snapshot', () => {
           ],
           action_taken: 'Prepared and verified a first-contact draft.',
           score: 91,
+          priority_score: 97,
+          priority_reasons: ['qualification 91', 'named verified contact +2'],
           confidence: 'high',
           source_freshness: 'Today',
           outlook_url: 'https://outlook.office.com/mail/drafts/id-1'
@@ -292,6 +302,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
     'The company has launched a new imaging platform.',
     'It publishes an OEM partnership route.'
   ]);
+  assert.deepEqual(snapshot.opportunities.funnel, {
+    drafted: 4,
+    sent: 3,
+    replied: 2,
+    meetings: 1,
+    followupDue: 1
+  });
+  assert.equal(snapshot.opportunities.cards[0].priorityScore, 97);
   assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');
   assert.equal(snapshot.dispatches.recent[0].model, 'gpt-5.6-sol');
   assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
@@ -735,6 +753,15 @@ test('builds an expiring allowlisted command without source content', () => {
     'opportunity-evidence-1'
   );
   assert.equal(opportunityFeedback.params.rating, 'useful');
+
+  const retry = buildCompanyOperatorCommand({
+    commandId: 'mobile-opportunity-retry-001',
+    action: 'retry_opportunities',
+    snapshot: { stateVersion: 'state-1' },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(retry.action, 'retry_opportunities');
+  assert.deepEqual(retry.params, {});
 });
 
 test('uses the dedicated private repository defaults and reports stale state', () => {

@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v20';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v21';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1707,6 +1707,13 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
         ready_for_draft: 0,
         drafted: 1,
         contact_missing: 0
+      },
+      funnel: {
+        drafted: 3,
+        sent: 2,
+        replied: 1,
+        meetings: 1,
+        followup_due: 0
       },
       cards: [
         {
@@ -1917,6 +1924,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'New opportunities'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Drafted 3 · Sent 2 · Replies 1 · Meetings 1'
   );
   const opportunityCard = page.locator(
     '#companyPageContent .company-dispatch-card.opportunity'
@@ -2183,6 +2193,101 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'opportunity-evidence-1'
   );
   expect(opportunityFeedbackCommand.params.rating).toBe('useful');
+});
+
+test('mobile Company tab distinguishes a failed opportunity scan and queues retry', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem('timekeeperCompanyOperatorToken', 'github_pat_test');
+  });
+  const failedState = {
+    schema_version: 1,
+    generated_at: '2026-08-03T12:00:00.000Z',
+    status: 'ready',
+    state_version: 'failed-opportunity-state',
+    priorities: [],
+    missions: { active: [], completed_today: [] },
+    decisions: { pending: [] },
+    handled: { receipts: [] },
+    dispatches: { in_progress: [], recent: [] },
+    sources: { items: [] },
+    opportunities: {
+      available: true,
+      status: 'blocked',
+      phase: 'failed',
+      summary:
+        'The opportunity scan stopped before qualification finished; no outreach draft was created.',
+      failure_reason:
+        'Candidate research finished, but the evidence review did not complete. Retry the scan.',
+      can_retry: true,
+      source_count: 7,
+      relationship_count: 4,
+      counts: {},
+      funnel: {},
+      cards: []
+    }
+  };
+  await page.route('https://api.github.com/**', async (route, request) => {
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          sha: 'state-sha',
+          content: Buffer.from(JSON.stringify(failedState)).toString('base64')
+        })
+      });
+      return;
+    }
+    if (
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+    ) {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { path: 'company-operator/commands' } })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  await expect(page.getByText('Opportunity scan needs a retry')).toBeVisible();
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'No verified outreach today'
+  );
+  const retryRequest = page.waitForRequest(
+    (candidate) =>
+      candidate.method() === 'PUT' &&
+      candidate.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Retry scan' }).click();
+  const commandPayload = (await retryRequest).postDataJSON();
+  const command = JSON.parse(
+    Buffer.from(commandPayload.content, 'base64').toString('utf8')
+  );
+  expect(command.action).toBe('retry_opportunities');
+  await expect(
+    page.getByRole('heading', { name: 'Opportunity scan retry queued' })
+  ).toBeVisible();
 });
 
 test('mobile Company tab presents missions before the next priority', async ({

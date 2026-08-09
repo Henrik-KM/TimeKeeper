@@ -12,6 +12,7 @@ const ALLOWED_ACTIONS = new Set([
   'add_direction',
   'mark_handled',
   'rate_opportunity',
+  'retry_opportunities',
   'rate_result',
   'record_decision',
   'set_priority',
@@ -300,6 +301,8 @@ export function buildCompanyOperatorCommand({
       rating: cleanText(paramsSource.rating, 40),
       note: cleanText(paramsSource.note, 500)
     };
+  } else if (normalizedAction === 'retry_opportunities') {
+    payload.params = {};
   } else {
     payload.params = {
       note: cleanText(paramsSource.note, 800),
@@ -469,9 +472,11 @@ function normalizeOpportunities(value) {
     'outlook_draft',
     source.outlook_url || source.outlookUrl
   );
+  const funnel = asRecord(source.funnel);
   return {
     available: source.available === true,
     status: cleanText(source.status, 80),
+    phase: cleanText(source.phase, 80),
     summary: cleanText(source.summary, 320),
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
     ageHours: toOptionalNumber(source.age_hours ?? source.ageHours),
@@ -486,9 +491,26 @@ function normalizeOpportunities(value) {
       drafted: toCount(counts.drafted),
       contactMissing: toCount(counts.contact_missing ?? counts.contactMissing)
     },
+    funnel: {
+      drafted: toCount(funnel.drafted),
+      sent: toCount(funnel.sent),
+      replied: toCount(funnel.replied),
+      meetings: toCount(funnel.meetings),
+      followupDue: toCount(funnel.followup_due ?? funnel.followupDue)
+    },
     cards: normalizeArray(source.cards, normalizeOpportunity, 3),
     usefulRate: toOptionalRate(source.useful_rate ?? source.usefulRate),
     sampleSize: toCount(source.sample_size ?? source.sampleSize),
+    canRetry: source.can_retry === true || source.canRetry === true,
+    failureReason: cleanText(
+      source.failure_reason || source.failureReason,
+      320
+    ),
+    lastSuccessAt: cleanText(
+      source.last_success_at || source.lastSuccessAt,
+      80
+    ),
+    retryStatus: cleanText(source.retry_status || source.retryStatus, 60),
     outlookUrl
   };
 }
@@ -516,6 +538,14 @@ function normalizeOpportunity(value) {
     whyNow: normalizeTextArray(source.why_now || source.whyNow, 2, 180),
     actionTaken: cleanText(source.action_taken || source.actionTaken, 260),
     score: toCount(source.score),
+    priorityScore: toCount(
+      source.priority_score ?? source.priorityScore ?? source.score
+    ),
+    priorityReasons: normalizeTextArray(
+      source.priority_reasons || source.priorityReasons,
+      4,
+      160
+    ),
     confidence: cleanText(source.confidence, 40),
     sourceFreshness: cleanText(
       source.source_freshness || source.sourceFreshness,
