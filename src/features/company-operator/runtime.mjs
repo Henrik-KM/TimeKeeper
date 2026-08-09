@@ -516,7 +516,8 @@ export function createCompanyOperatorController({
       !missions.working &&
       !missions.needsYou &&
       !dispatches.needsYou &&
-      !dispatches.inProgress
+      !dispatches.inProgress &&
+      !snapshot.emailDrafting.needsUser
     ) {
       root.appendChild(
         card(
@@ -525,6 +526,8 @@ export function createCompanyOperatorController({
         )
       );
     }
+    const emailDrafting = emailDraftingSection();
+    if (emailDrafting) root.appendChild(emailDrafting);
     if (dispatches.problems) root.appendChild(dispatches.problems);
     const commands = commandStatus();
     if (commands) root.appendChild(commands);
@@ -581,6 +584,58 @@ export function createCompanyOperatorController({
     return `${Math.round(hours / 24)}d old`;
   }
 
+  function emailDraftingSection() {
+    const drafting = snapshot.emailDrafting;
+    if (!drafting?.available) return null;
+    const section = sectionBlock('Email drafting', true);
+    const card = element('article', 'company-dispatch-card email-drafting');
+    card.appendChild(
+      element(
+        'strong',
+        '',
+        drafting.summary || 'Email drafting is running normally.'
+      )
+    );
+    card.appendChild(
+      element(
+        'p',
+        'company-handled-summary',
+        `${drafting.readyInOutlook} ready in Outlook · ${drafting.beingRefreshed} being refreshed${drafting.waitingForSafeContext ? ` · ${drafting.waitingForSafeContext} waiting for context` : ''}`
+      )
+    );
+    if (drafting.verificationFailures) {
+      card.appendChild(
+        element(
+          'p',
+          'company-dispatch-next',
+          `${drafting.verificationFailures} draft${drafting.verificationFailures === 1 ? '' : 's'} could not be safely verified.`
+        )
+      );
+    }
+    const usefulness =
+      drafting.trackedSentCount < 10 || drafting.usableRate === null
+        ? `Usefulness baseline: ${drafting.trackedSentCount} sent draft${drafting.trackedSentCount === 1 ? '' : 's'} tracked`
+        : `Useful without a full rewrite: ${Math.round(drafting.usableRate * 100)}% of ${drafting.trackedSentCount} tracked sent drafts`;
+    card.appendChild(element('small', '', usefulness));
+    if (drafting.outlookUrl) {
+      card.appendChild(
+        compactResultDestination({
+          label: 'Outlook drafts',
+          location: drafting.readyInOutlook
+            ? `${drafting.readyInOutlook} ready to review`
+            : 'Open your Drafts folder',
+          reference: '',
+          statusText: '',
+          mode: 'open',
+          actionLabel: 'Open Outlook drafts',
+          url: drafting.outlookUrl
+        })
+      );
+    }
+    section.appendChild(card);
+    return section;
+  }
+
   function missionSections() {
     const source = snapshot.missions;
     const active = Array.isArray(source.active) ? source.active : [];
@@ -613,9 +668,11 @@ export function createCompanyOperatorController({
             `${ordered.length - 1} other active mission${ordered.length === 2 ? '' : 's'}`
           )
         );
-        ordered.slice(1).forEach((mission) =>
-          more.appendChild(missionCard(mission, 'working compact'))
-        );
+        ordered
+          .slice(1)
+          .forEach((mission) =>
+            more.appendChild(missionCard(mission, 'working compact'))
+          );
         section.appendChild(more);
       }
       sections.working = section;
@@ -624,7 +681,10 @@ export function createCompanyOperatorController({
     if (completedToday.length) {
       const section = sectionBlock('Completed for you');
       const scorecard = source.scorecard;
-      if (scorecard.missionsCompletedToday || scorecard.estimatedMinutesSavedToday) {
+      if (
+        scorecard.missionsCompletedToday ||
+        scorecard.estimatedMinutesSavedToday
+      ) {
         section.appendChild(
           element(
             'p',
@@ -675,9 +735,11 @@ export function createCompanyOperatorController({
             `${waitingRows.length - 1} more question${waitingRows.length === 2 ? '' : 's'}`
           )
         );
-        waitingRows.slice(1).forEach((mission) =>
-          more.appendChild(missionCard(mission, 'needs-you compact'))
-        );
+        waitingRows
+          .slice(1)
+          .forEach((mission) =>
+            more.appendChild(missionCard(mission, 'needs-you compact'))
+          );
         section.appendChild(more);
       }
       sections.needsYou = section;
@@ -703,9 +765,7 @@ export function createCompanyOperatorController({
       const actions = element('div', 'company-action-grid');
       (request.choices || []).forEach((choice) => {
         actions.appendChild(
-          button(choice.label, 'primary', () =>
-            answerMission(mission, choice)
-          )
+          button(choice.label, 'primary', () => answerMission(mission, choice))
         );
       });
       actions.appendChild(
@@ -720,9 +780,7 @@ export function createCompanyOperatorController({
         row.appendChild(compactResultDestination(destination))
       );
     } else {
-      row.appendChild(
-        element('span', '', missionProgressLabel(mission))
-      );
+      row.appendChild(element('span', '', missionProgressLabel(mission)));
       if (mission.latestUpdate) {
         row.appendChild(element('small', '', mission.latestUpdate));
       }
@@ -754,7 +812,8 @@ export function createCompanyOperatorController({
     }
     const details = element('details', 'company-run-details');
     details.appendChild(element('summary', '', 'Finish line and progress'));
-    if (mission.doneWhen) details.appendChild(element('p', '', mission.doneWhen));
+    if (mission.doneWhen)
+      details.appendChild(element('p', '', mission.doneWhen));
     details.appendChild(
       element(
         'small',
@@ -779,7 +838,7 @@ export function createCompanyOperatorController({
     if (mission.status === 'queued') {
       return 'Ready for the next Codex step.';
     }
-    return 'Codex will continue this mission within today\'s work budget.';
+    return "Codex will continue this mission within today's work budget.";
   }
 
   function missionCommandPending(mission) {
@@ -1067,7 +1126,9 @@ export function createCompanyOperatorController({
       dispatch.executionBranch ? `Branch ${dispatch.executionBranch}` : '',
       dispatch.executionBranchPendingCommitCount
         ? `${dispatch.executionBranchPendingCommitCount} pending Company Operator ${
-            dispatch.executionBranchPendingCommitCount === 1 ? 'commit' : 'commits'
+            dispatch.executionBranchPendingCommitCount === 1
+              ? 'commit'
+              : 'commits'
           }`
         : '',
       formatDispatchDuration(dispatch.durationSeconds),

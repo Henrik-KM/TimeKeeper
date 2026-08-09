@@ -76,6 +76,7 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const dispatches = asRecord(source.dispatches);
   const missions = asRecord(source.missions);
   const sources = asRecord(source.sources);
+  const emailDrafting = asRecord(source.email_drafting || source.emailDrafting);
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
@@ -123,6 +124,7 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
       ),
       receipts: normalizeArray(handled.receipts, normalizeReceipt, 10)
     },
+    emailDrafting: normalizeEmailDrafting(emailDrafting),
     dispatches: {
       inProgressCount: toCount(
         dispatches.in_progress_count ?? dispatches.inProgressCount
@@ -393,6 +395,54 @@ function normalizePriority(value) {
   };
 }
 
+function normalizeEmailDrafting(value) {
+  const source = asRecord(value);
+  const usableRate = toOptionalRate(source.usable_rate ?? source.usableRate);
+  const targetUsableRate = toOptionalRate(
+    source.target_usable_rate ?? source.targetUsableRate
+  );
+  const authoringSuccessRate = toOptionalRate(
+    source.authoring_success_rate ?? source.authoringSuccessRate
+  );
+  const outlookUrl = normalizeDestinationUrl(
+    'outlook_draft',
+    source.outlook_url || source.outlookUrl
+  );
+  const status = cleanText(source.status, 40);
+  const summary = cleanText(source.summary, 320);
+  return {
+    available: Boolean(status || summary || outlookUrl),
+    status,
+    needsUser: source.needs_user === true || source.needsUser === true,
+    summary,
+    readyInOutlook: toCount(source.ready_in_outlook ?? source.readyInOutlook),
+    beingRefreshed: toCount(source.being_refreshed ?? source.beingRefreshed),
+    waitingForSafeContext: toCount(
+      source.waiting_for_safe_context ?? source.waitingForSafeContext
+    ),
+    unsafeOrDuplicate: toCount(
+      source.unsafe_or_duplicate ?? source.unsafeOrDuplicate
+    ),
+    verificationFailures: toCount(
+      source.verification_failures ?? source.verificationFailures
+    ),
+    verificationAutoRecovered: toCount(
+      source.verification_auto_recovered ?? source.verificationAutoRecovered
+    ),
+    trackedSentCount: toCount(
+      source.tracked_sent_count ?? source.trackedSentCount
+    ),
+    usableRate,
+    targetUsableRate,
+    targetStatus: cleanText(source.target_status || source.targetStatus, 40),
+    authoringSuccessRate,
+    medianAuthoringSeconds: toOptionalNumber(
+      source.median_authoring_seconds ?? source.medianAuthoringSeconds
+    ),
+    outlookUrl
+  };
+}
+
 function normalizeMission(value) {
   const source = asRecord(value);
   const missionId = cleanText(source.mission_id || source.missionId, 100);
@@ -421,10 +471,7 @@ function normalizeMission(value) {
     currentStep: {
       title: cleanLegacyResponsibilityCopy(currentStep.title, 180),
       status: cleanText(currentStep.status, 40),
-      startedAt: cleanText(
-        currentStep.started_at || currentStep.startedAt,
-        80
-      )
+      startedAt: cleanText(currentStep.started_at || currentStep.startedAt, 80)
     },
     latestUpdate: cleanLegacyResponsibilityCopy(
       source.latest_update || source.latestUpdate,
@@ -443,10 +490,7 @@ function normalizeMission(value) {
         userRequest.dispatch_id || userRequest.dispatchId,
         180
       ),
-      instruction: cleanLegacyResponsibilityCopy(
-        userRequest.instruction,
-        240
-      ),
+      instruction: cleanLegacyResponsibilityCopy(userRequest.instruction, 240),
       reason: cleanLegacyResponsibilityCopy(userRequest.reason, 180),
       choices: Array.isArray(userRequest.choices)
         ? userRequest.choices
@@ -492,8 +536,7 @@ function normalizeMissionScorecard(value) {
       source.verified_outputs_today ?? source.verifiedOutputsToday
     ),
     estimatedMinutesSavedToday: toCount(
-      source.estimated_minutes_saved_today ??
-        source.estimatedMinutesSavedToday
+      source.estimated_minutes_saved_today ?? source.estimatedMinutesSavedToday
     ),
     openDecisions: toCount(source.open_decisions ?? source.openDecisions)
   };
@@ -1091,6 +1134,18 @@ function cleanText(value, limit) {
 function toCount(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(0, Math.round(number)) : 0;
+}
+
+function toOptionalRate(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : null;
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.max(0, number) : null;
 }
 
 /** @returns {Record<string, any>} */

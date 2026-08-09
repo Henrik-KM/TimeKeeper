@@ -115,6 +115,25 @@ test('normalizes a bounded mobile Company snapshot', () => {
       ]
     },
     handled: { today_verified_actions: 3, receipts: [] },
+    email_drafting: {
+      status: 'improving',
+      needs_user: false,
+      summary:
+        '2 drafts are ready in Outlook. 3 older drafts are being refreshed.',
+      ready_in_outlook: 2,
+      being_refreshed: 3,
+      waiting_for_safe_context: 1,
+      unsafe_or_duplicate: 1,
+      verification_failures: 0,
+      verification_auto_recovered: 1,
+      tracked_sent_count: 8,
+      usable_rate: 0.75,
+      target_usable_rate: 0.75,
+      target_status: 'collecting_baseline',
+      authoring_success_rate: 0.9,
+      median_authoring_seconds: 42.5,
+      outlook_url: 'https://outlook.office.com/mail/drafts'
+    },
     dispatches: {
       in_progress_count: 1,
       in_progress: [
@@ -210,6 +229,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
     '100 cameras\n500 cameras'
   );
   assert.equal(snapshot.handled.todayVerifiedActions, 3);
+  assert.equal(snapshot.emailDrafting.readyInOutlook, 2);
+  assert.equal(snapshot.emailDrafting.beingRefreshed, 3);
+  assert.equal(snapshot.emailDrafting.waitingForSafeContext, 1);
+  assert.equal(snapshot.emailDrafting.usableRate, 0.75);
+  assert.equal(
+    snapshot.emailDrafting.outlookUrl,
+    'https://outlook.office.com/mail/drafts'
+  );
   assert.equal(snapshot.dispatches.inProgressCount, 1);
   assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');
   assert.equal(snapshot.dispatches.recent[0].model, 'gpt-5.6-sol');
@@ -345,7 +372,10 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
     snapshot.missions.active[1].userRequest.choices[0].label,
     'Direct'
   );
-  assert.equal(snapshot.missions.completedToday[0].destinations[0].type, 'local_commit');
+  assert.equal(
+    snapshot.missions.completedToday[0].destinations[0].type,
+    'local_commit'
+  );
   assert.equal(snapshot.missions.budget.stepsRemaining, 3);
 });
 

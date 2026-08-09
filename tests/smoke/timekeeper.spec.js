@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v18';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v19';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1673,6 +1673,25 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           estimated_minutes_saved: 35
         }
       ]
+    },
+    email_drafting: {
+      status: 'improving',
+      needs_user: false,
+      summary:
+        '2 drafts are ready in Outlook. 3 older drafts are being refreshed.',
+      ready_in_outlook: 2,
+      being_refreshed: 3,
+      waiting_for_safe_context: 1,
+      unsafe_or_duplicate: 0,
+      verification_failures: 0,
+      verification_auto_recovered: 1,
+      tracked_sent_count: 8,
+      usable_rate: 0.75,
+      target_usable_rate: 0.75,
+      target_status: 'collecting_baseline',
+      authoring_success_rate: 0.9,
+      median_authoring_seconds: 42.5,
+      outlook_url: 'https://outlook.office.com/mail/drafts'
     },
     dispatches: {
       in_progress_count: 0,
@@ -1843,6 +1862,18 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Done for you'
   );
   await expect(page.locator('#companyPageContent')).toContainText('Up next');
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Email drafting'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '2 ready in Outlook · 3 being refreshed · 1 waiting for context'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Usefulness baseline: 8 sent drafts tracked'
+  );
+  await expect(
+    page.getByRole('link', { name: 'Open Outlook drafts' })
+  ).toHaveAttribute('href', 'https://outlook.office.com/mail/drafts');
   const sectionOrder = await page.evaluate(() => ({
     priority: document
       .querySelector('#companyPageContent .company-primary-card')
@@ -2110,7 +2141,8 @@ test('mobile Company tab presents missions before the next priority', async ({
         evidence_fingerprint: 'evidence-avantor-delivery-1',
         project: 'Avantor',
         objective: 'Finish the tested camera configuration for the customer.',
-        done_when: 'The tested configuration is available in a verified local commit.',
+        done_when:
+          'The tested configuration is available in a verified local commit.',
         status: 'active',
         step_count: 1,
         latest_update: 'Implemented the supported device configuration.',
@@ -2124,7 +2156,8 @@ test('mobile Company tab presents missions before the next priority', async ({
           evidence_fingerprint: 'evidence-avantor-delivery-1',
           project: 'Avantor',
           objective: 'Finish the tested camera configuration for the customer.',
-          done_when: 'The tested configuration is available in a verified local commit.',
+          done_when:
+            'The tested configuration is available in a verified local commit.',
           status: 'active',
           step_count: 1,
           latest_update: 'Implemented the supported device configuration.',
@@ -2248,7 +2281,9 @@ test('mobile Company tab presents missions before the next priority', async ({
     return Object.fromEntries(
       ['Working now', 'Completed for you', 'Needs you'].map((label) => [
         label,
-        headings.find((heading) => heading.textContent === label)?.getBoundingClientRect().top
+        headings
+          .find((heading) => heading.textContent === label)
+          ?.getBoundingClientRect().top
       ])
     );
   });
@@ -2277,9 +2312,13 @@ test('mobile Company tab presents missions before the next priority', async ({
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
     minimumActionHeight: Math.min(
-      ...[...document.querySelectorAll('#companyPageContent .company-action-grid .btn')].map(
-        (button) => button.getBoundingClientRect().height
-      ).filter((height) => height > 0)
+      ...[
+        ...document.querySelectorAll(
+          '#companyPageContent .company-action-grid .btn'
+        )
+      ]
+        .map((button) => button.getBoundingClientRect().height)
+        .filter((height) => height > 0)
     )
   }));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
