@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T16:38:03.726Z",
+  "updatedAt": "2026-08-09T16:43:01.770Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-05-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-09T16:38:10.351Z",
+    "observedAt": "2026-08-09T16:43:03.579Z",
     "primary": {
       "usedPercent": 48,
       "remainingPercent": 52,
@@ -17291,6 +17291,59 @@
         "codex-f52472bffe89a88b0050fd4a"
       ],
       "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-727eb4fe7a914ae58cb05efd",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T14:31:22.812Z",
+      "endTime": "2026-08-09T16:23:49.126Z",
+      "wallSeconds": 6746,
+      "focusFactor": 0.6898,
+      "effectiveSeconds": 4653,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 699,
+          "effectiveSeconds": 349
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 6046,
+          "effectiveSeconds": 3627
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 4829,
+          "effectiveSeconds": 676
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-3627964306ed20bb639b98a4",
+        "codex-39a815ebd1784cb02895ba61"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-00c9e0fe9c3faadd15a4e736",
