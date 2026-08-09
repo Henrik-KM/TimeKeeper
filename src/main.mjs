@@ -714,6 +714,10 @@ import {
   }
 
   let wealthChartInstance = null;
+  function createChartIfAvailable(context, config) {
+    if (typeof Chart === 'undefined') return null;
+    return new Chart(context, config);
+  }
   function addWealthHistoryEntry(dateStr, amountRaw, noteRaw = '') {
     const parsedDate = parseISODateOnly(dateStr);
     if (!parsedDate) return { ok: false, reason: 'date' };
@@ -1016,7 +1020,7 @@ import {
       });
     }
     if (wealthChartInstance) wealthChartInstance.destroy();
-    wealthChartInstance = new Chart(chartEl.getContext('2d'), {
+    wealthChartInstance = createChartIfAvailable(chartEl.getContext('2d'), {
       type: 'line',
       data: { datasets },
       options: {
@@ -1430,6 +1434,11 @@ import {
       sol: 0.45
     },
     modelOverrides: {},
+    repositoryMultipliers: {
+      research: 0.5
+    },
+    repositoryBackfillDays: 90,
+    repositoryMultiplierPolicyVersion: 4,
     effortAdjustments: {
       low: -0.05,
       medium: 0,
@@ -2574,6 +2583,15 @@ import {
   //   'denied'  - Permission to write to the backup directory has been denied.
   let backupPermissionState = 'missing';
   let backupWarningMessage = '';
+  const autoSyncToggle = document.getElementById('autoSyncToggle');
+  const autoSyncStatusElem = document.getElementById('autoSyncStatus');
+  const autoSyncWarningElem = document.getElementById('autoSyncWarning');
+  const lastBackupStatusElem = document.getElementById('lastBackupStatus');
+  const chooseBtn = document.getElementById('chooseBackupDirBtn');
+  const backupNowBtn = document.getElementById('backupNowBtn');
+  const verifyBackupBtn = document.getElementById('verifyBackupBtn');
+  const mobileSyncSetupBtn = document.getElementById('mobileSyncSetupBtn');
+  const restoreBackupBtn = document.getElementById('restoreBackupBtn');
   let codexRemoteContextTimer = null;
   let codexRemoteContextPublishPromise = null;
   let codexRemoteContextQueued = false;
@@ -3320,7 +3338,7 @@ import {
   }
 
   function getCodexLegacyPathMappings(projects = getCodexTrackedProjects()) {
-    return projects.flatMap((project) => [
+    const mappings = projects.flatMap((project) => [
       {
         matchType: 'pathIncludes',
         match: `GitHub\\${project.name}`,
@@ -3342,6 +3360,27 @@ import {
         projectId: project.projectId
       }
     ]);
+    const iflaiProject = projects.find(
+      (project) =>
+        String(project.name || '')
+          .trim()
+          .toLowerCase() === 'iflai'
+    );
+    if (iflaiProject) {
+      mappings.push(
+        {
+          matchType: 'pathIncludes',
+          match: 'C:\\Users\\ccx55\\Documents\\RiskNav',
+          projectId: iflaiProject.projectId
+        },
+        {
+          matchType: 'pathIncludes',
+          match: 'C:/Users/ccx55/Documents/RiskNav',
+          projectId: iflaiProject.projectId
+        }
+      );
+    }
+    return mappings;
   }
 
   function findCodexProjectByName(name) {
@@ -6016,6 +6055,7 @@ import {
       typeof window !== 'undefined' &&
       typeof window.matchMedia === 'function' &&
       window.matchMedia('(max-width: 640px)').matches;
+    const chartsAvailable = typeof Chart !== 'undefined';
     const truncateLabel = (label, maxLen = 18) => {
       const text = String(label ?? '');
       if (text.length <= maxLen) return text;
@@ -6144,7 +6184,7 @@ import {
     const barLabels = monthByProject.map((row) => row.name);
     const barHours = monthByProject.map((row) => row.worked);
     const barTargets = monthByProject.map((row) => row.target);
-    if (barLabels.length > 0) {
+    if (barLabels.length > 0 && chartsAvailable) {
       const barCard = document.createElement('div');
       barCard.style.marginBottom = '1rem';
       const barTitle = document.createElement('h3');
@@ -6236,7 +6276,7 @@ import {
       dailyTargetData.push(dayTarget);
     }
     // Only render chart if there is at least one project
-    if (dailyLabels.length > 0 && data.projects.length > 0) {
+    if (dailyLabels.length > 0 && data.projects.length > 0 && chartsAvailable) {
       const lineCard = document.createElement('div');
       lineCard.style.marginBottom = '1rem';
       const lineTitle = document.createElement('h3');
@@ -6311,6 +6351,7 @@ import {
     });
     burndownCharts = {};
     data.projects.forEach((project) => {
+      if (!chartsAvailable) return;
       // Compute daily cumulative hours from project creation to now
       const createdAt = getProjectStartDate(project);
       const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
@@ -6437,7 +6478,7 @@ import {
 
     // ---------- Build Hours by Project bar chart ----------
     const hoursCanvas = document.getElementById('hoursByProjectChart');
-    if (hoursCanvas) {
+    if (hoursCanvas && chartsAvailable) {
       if (isMobile) {
         const parent = hoursCanvas.parentElement;
         const alreadyWrapped =
@@ -10665,7 +10706,7 @@ import {
     }
     // Weekly scatter chart
     const weeklyCanvas = document.getElementById('weeklyScatter');
-    if (weeklyCanvas) {
+    if (weeklyCanvas && typeof Chart !== 'undefined') {
       if (!weeklyScatterChart) {
         const ctx = weeklyCanvas.getContext('2d');
         weeklyScatterChart = new Chart(ctx, {
@@ -10718,7 +10759,7 @@ import {
     }
     // Monthly scatter chart
     const monthlyCanvas = document.getElementById('monthlyScatter');
-    if (monthlyCanvas) {
+    if (monthlyCanvas && typeof Chart !== 'undefined') {
       if (!monthlyScatterChart) {
         const ctx2 = monthlyCanvas.getContext('2d');
         monthlyScatterChart = new Chart(ctx2, {
@@ -11096,7 +11137,7 @@ import {
   // against the expected cumulative hours (linear budget burn) from project start to deadline.
   function renderBurndownChart(projectId) {
     const canvas = document.getElementById('burndownChart');
-    if (!canvas || !Chart) return;
+    if (!canvas || typeof Chart === 'undefined') return;
     const ctx = canvas.getContext('2d');
     // Destroy existing chart if present
     if (window.burndownChart) {
@@ -16732,15 +16773,6 @@ import {
   window.addEventListener('hashchange', applyLaunchRoute);
 
   // Initialize auto sync toggle and status message
-  const autoSyncToggle = document.getElementById('autoSyncToggle');
-  const autoSyncStatusElem = document.getElementById('autoSyncStatus');
-  const autoSyncWarningElem = document.getElementById('autoSyncWarning');
-  const lastBackupStatusElem = document.getElementById('lastBackupStatus');
-  const chooseBtn = document.getElementById('chooseBackupDirBtn');
-  const backupNowBtn = document.getElementById('backupNowBtn');
-  const verifyBackupBtn = document.getElementById('verifyBackupBtn');
-  const mobileSyncSetupBtn = document.getElementById('mobileSyncSetupBtn');
-  const restoreBackupBtn = document.getElementById('restoreBackupBtn');
   function syncAutoSyncToggleUI() {
     if (!autoSyncToggle) return;
     const shouldCheck =

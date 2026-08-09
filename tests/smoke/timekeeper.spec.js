@@ -3993,6 +3993,9 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
 test('Codex inbox reconciles delegated entries and imports seven recent days once', async ({
   page
 }) => {
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+  await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort());
   await freezeTime(page, '2026-06-13T12:00:00');
   const inboxPayload = {
     version: 2,
@@ -4210,6 +4213,11 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
 
   await page.goto('/');
   await gotoSection(page, 'importExport', 'Import / Export');
+
+  expect(pageErrors).toEqual([]);
+  await expect(page.locator('#codexIntegrationStatus')).toContainText(
+    'Codex import ON'
+  );
 
   await expect
     .poll(async () =>
@@ -4469,10 +4477,25 @@ test('Codex config publish retries after a stale GitHub sha', async ({
         luna: 0.25,
         terra: 0.35,
         sol: 0.45
-      }
+      },
+      repositoryMultipliers: { research: 0.5 },
+      repositoryBackfillDays: 90,
+      repositoryMultiplierPolicyVersion: 4
     },
     trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }]
   });
+  expect(publishedConfig.mappings).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        match: 'C:\\Users\\ccx55\\Documents\\RiskNav',
+        projectId: 'iflai'
+      }),
+      expect.objectContaining({
+        match: 'C:/Users/ccx55/Documents/RiskNav',
+        projectId: 'iflai'
+      })
+    ])
+  );
   expect(JSON.stringify(publishedConfig)).not.toContain('Polish');
   await expect(page.locator('#codexIntegrationStatus')).not.toContainText(
     'error'
