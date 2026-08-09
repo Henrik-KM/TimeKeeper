@@ -473,6 +473,7 @@ function normalizeOpportunities(value) {
     source.outlook_url || source.outlookUrl
   );
   const funnel = asRecord(source.funnel);
+  const qualification = asRecord(source.qualification);
   return {
     available: source.available === true,
     status: cleanText(source.status, 80),
@@ -497,6 +498,17 @@ function normalizeOpportunities(value) {
       replied: toCount(funnel.replied),
       meetings: toCount(funnel.meetings),
       followupDue: toCount(funnel.followup_due ?? funnel.followupDue)
+    },
+    qualification: {
+      candidates: toCount(qualification.candidates),
+      completed: toCount(qualification.completed),
+      cached: toCount(qualification.cached),
+      failed: toCount(qualification.failed),
+      pending: toCount(qualification.pending),
+      unresolved: toCount(qualification.unresolved),
+      automaticRetry:
+        qualification.automatic_retry === true ||
+        qualification.automaticRetry === true
     },
     cards: normalizeArray(source.cards, normalizeOpportunity, 3),
     usefulRate: toOptionalRate(source.useful_rate ?? source.usefulRate),

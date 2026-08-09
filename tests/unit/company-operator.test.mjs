@@ -157,6 +157,15 @@ test('normalizes a bounded mobile Company snapshot', () => {
         meetings: 1,
         followup_due: 1
       },
+      qualification: {
+        candidates: 12,
+        completed: 9,
+        cached: 4,
+        failed: 3,
+        pending: 0,
+        unresolved: 3,
+        automatic_retry: true
+      },
       cards: [
         {
           opportunity_id: 'opportunity:imaging-partner',
@@ -308,6 +317,15 @@ test('normalizes a bounded mobile Company snapshot', () => {
     replied: 2,
     meetings: 1,
     followupDue: 1
+  });
+  assert.deepEqual(snapshot.opportunities.qualification, {
+    candidates: 12,
+    completed: 9,
+    cached: 4,
+    failed: 3,
+    pending: 0,
+    unresolved: 3,
+    automaticRetry: true
   });
   assert.equal(snapshot.opportunities.cards[0].priorityScore, 97);
   assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');

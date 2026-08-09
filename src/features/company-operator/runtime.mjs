@@ -720,6 +720,13 @@ export function createCompanyOperatorController({
         )
       );
     }
+    const qualification = opportunities.qualification;
+    if (qualification?.candidates) {
+      const progress = qualification.unresolved
+        ? `${qualification.completed} of ${qualification.candidates} candidate checks completed · ${qualification.unresolved} retrying automatically`
+        : `${qualification.completed} of ${qualification.candidates} candidate checks completed`;
+      section.appendChild(element('p', 'company-draft-types', progress));
+    }
     if (!opportunities.cards.length) {
       const failed =
         ['blocked', 'failed'].includes(opportunities.status) ||
@@ -749,6 +756,13 @@ export function createCompanyOperatorController({
           );
         }
         section.appendChild(retryCard);
+      } else if (qualification?.unresolved) {
+        section.appendChild(
+          card(
+            'Still checking opportunities',
+            `Completed ${qualification.completed} of ${qualification.candidates} candidate checks. The remaining ${qualification.unresolved} will retry automatically; completed work has been kept.`
+          )
+        );
       } else {
         section.appendChild(
           card(

@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v21';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v22';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1714,6 +1714,15 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
         replied: 1,
         meetings: 1,
         followup_due: 0
+      },
+      qualification: {
+        candidates: 3,
+        completed: 3,
+        cached: 1,
+        failed: 0,
+        pending: 0,
+        unresolved: 0,
+        automatic_retry: false
       },
       cards: [
         {
@@ -1927,6 +1936,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Drafted 3 · Sent 2 · Replies 1 · Meetings 1'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '3 of 3 candidate checks completed'
   );
   const opportunityCard = page.locator(
     '#companyPageContent .company-dispatch-card.opportunity'
@@ -2193,6 +2205,94 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'opportunity-evidence-1'
   );
   expect(opportunityFeedbackCommand.params.rating).toBe('useful');
+});
+
+test('mobile Company tab keeps partial opportunity work and retries unfinished candidates', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem('timekeeperCompanyOperatorToken', 'github_pat_test');
+  });
+  const partialState = {
+    schema_version: 1,
+    generated_at: '2026-08-03T12:00:00.000Z',
+    status: 'ready',
+    state_version: 'partial-opportunity-state',
+    priorities: [],
+    missions: { active: [], completed_today: [] },
+    decisions: { pending: [] },
+    handled: { receipts: [] },
+    dispatches: { in_progress: [], recent: [] },
+    sources: { items: [] },
+    opportunities: {
+      available: true,
+      status: 'ready_partial',
+      phase: 'partial_no_qualified_drafts',
+      summary:
+        'No verified outreach is worth drafting right now. 3 unfinished candidate checks will retry automatically.',
+      failure_reason:
+        'Completed candidate work was kept; unfinished checks will retry automatically.',
+      can_retry: true,
+      source_count: 7,
+      relationship_count: 4,
+      counts: {},
+      funnel: {},
+      qualification: {
+        candidates: 12,
+        completed: 9,
+        cached: 4,
+        failed: 3,
+        pending: 0,
+        unresolved: 3,
+        automatic_retry: true
+      },
+      cards: []
+    }
+  };
+  await page.route('https://api.github.com/**', async (route, request) => {
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({
+          sha: 'state-sha',
+          content: Buffer.from(JSON.stringify(partialState)).toString('base64')
+        })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  await expect(
+    page.getByRole('heading', { name: 'Still checking opportunities' })
+  ).toBeVisible();
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '9 of 12 candidate checks completed'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '3 retrying automatically'
+  );
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'No verified outreach today'
+  );
+  await expect(page.getByRole('button', { name: 'Retry scan' })).toHaveCount(0);
 });
 
 test('mobile Company tab distinguishes a failed opportunity scan and queues retry', async ({
