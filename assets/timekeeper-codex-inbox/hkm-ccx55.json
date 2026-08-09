@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T21:18:02.153Z",
+  "updatedAt": "2026-08-09T21:23:02.131Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-05-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-09T21:18:04.365Z",
+    "observedAt": "2026-08-09T21:23:04.376Z",
     "primary": {
       "usedPercent": 70,
       "remainingPercent": 30,
@@ -17454,6 +17454,51 @@
       ],
       "supersedesExternalIds": [
         "codex-7d51f07f91da8f52d323266e"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-808e5789dcf20cda817e63cf",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T17:49:18.572Z",
+      "endTime": "2026-08-09T21:02:13.165Z",
+      "wallSeconds": 11574,
+      "focusFactor": 0.6677,
+      "effectiveSeconds": 7728,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 11574,
+          "effectiveSeconds": 6944
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 5600,
+          "effectiveSeconds": 784
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-28c76719547bd3f3fd4026de",
+        "codex-6baee4ca946a25e53cf28a59",
+        "codex-f5745db1a6058d7b7474fdb0",
+        "codex-6f1619286141096c5af33396"
       ],
       "description": "Codex: email-helper"
     }
