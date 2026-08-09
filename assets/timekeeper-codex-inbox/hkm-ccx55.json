@@ -2,17 +2,17 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T07:08:02.068Z",
+  "updatedAt": "2026-08-09T07:13:02.067Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-08-02T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-09T07:08:02.774Z",
+    "observedAt": "2026-08-09T07:13:02.854Z",
     "primary": {
-      "usedPercent": 5,
-      "remainingPercent": 95,
+      "usedPercent": 6,
+      "remainingPercent": 94,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-15T20:29:47.000Z"
     },
@@ -2630,6 +2630,68 @@
         }
       ],
       "description": "Codex: IFLAI"
+    },
+    {
+      "id": "codex-c06c478eb42c6a99d6471a2a",
+      "threadId": "019fe54d-6977-7b61-820a-7881121a5888",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T06:54:47.968Z",
+      "endTime": "2026-08-09T06:55:07.662Z",
+      "wallSeconds": 19,
+      "focusFactor": 0.3528,
+      "effectiveSeconds": 6,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 18,
+          "effectiveSeconds": 6
+        }
+      ],
+      "description": "Codex: IFLAI"
+    },
+    {
+      "id": "codex-d461df691804c8d87af3e34e",
+      "threadId": "019fe54d-e86a-7832-aa6f-56941e89d52a",
+      "projectKey": "AZgent",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T06:55:16.674Z",
+      "endTime": "2026-08-09T06:55:55.483Z",
+      "wallSeconds": 38,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 15,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "high",
+          "factor": 0.4,
+          "wallSeconds": 38,
+          "effectiveSeconds": 15
+        }
+      ],
+      "description": "Codex: AZgent"
     }
   ]
 }
