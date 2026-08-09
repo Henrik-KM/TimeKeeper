@@ -1706,7 +1706,23 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
               instruction: 'Which pilot deadline should I use?',
               reason:
                 'No deadline is present in the available company sources.',
-              choices: ['September', 'October']
+              choices: [
+                {
+                  id: 'provide_deadline',
+                  label: 'Provide deadline',
+                  kind: 'details',
+                  fields: [
+                    {
+                      id: 'pilot_deadline',
+                      label: 'Pilot deadline',
+                      type: 'date',
+                      required: true,
+                      placeholder: '',
+                      options: []
+                    }
+                  ]
+                }
+              ]
             },
             verification: {
               proof_kind: 'needs_user',
@@ -1825,6 +1841,15 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Done for you'
   );
   await expect(page.locator('#companyPageContent')).toContainText('Up next');
+  const sectionOrder = await page.evaluate(() => ({
+    priority: document
+      .querySelector('#companyPageContent .company-primary-card')
+      ?.getBoundingClientRect().top,
+    question: [...document.querySelectorAll('#companyPageContent h3')]
+      .find((heading) => heading.textContent === 'Needs you')
+      ?.getBoundingClientRect().top
+  }));
+  expect(sectionOrder.priority).toBeLessThan(sectionOrder.question);
   await expect(page.locator('#companyPageContent')).not.toContainText(
     'Commercial workbook'
   );
@@ -1848,12 +1873,26 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   expect(mobileLayout.actionHeights).toHaveLength(4);
   expect(Math.min(...mobileLayout.actionHeights)).toBeGreaterThanOrEqual(44);
 
+  const feedbackRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Useful' }).click();
+  const feedbackPayload = (await feedbackRequest).postDataJSON();
+  const feedbackCommand = JSON.parse(
+    Buffer.from(feedbackPayload.content, 'base64').toString('utf8')
+  );
+  expect(feedbackCommand.action).toBe('rate_result');
+  expect(feedbackCommand.params.dispatch_id).toBe('dispatch:aventix-done');
+  expect(feedbackCommand.params.rating).toBe('useful');
+
   const commandRequest = page.waitForRequest(
     (request) =>
       request.method() === 'PUT' &&
       request.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByRole('button', { name: 'Do this now' }).click();
+  await page.getByRole('button', { name: 'Start now' }).click();
   const request = await commandRequest;
   const requestBody = request.postDataJSON();
   const command = JSON.parse(
@@ -1915,23 +1954,28 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     scrollWidth: document.documentElement.scrollWidth,
     choiceHeight: document
       .querySelector('.company-dispatch-card.needs-you .btn')
-      ?.getBoundingClientRect().height
+      ?.getBoundingClientRect().height,
+    questionFontSize: Number.parseFloat(
+      getComputedStyle(
+        document.querySelector(
+          '.company-dispatch-card.needs-you .company-dispatch-next'
+        )
+      ).fontSize
+    )
   }));
   expect(resultLayout.scrollWidth).toBeLessThanOrEqual(
     resultLayout.viewportWidth + 2
   );
   expect(resultLayout.choiceHeight).toBeGreaterThanOrEqual(44);
+  expect(resultLayout.questionFontSize).toBeGreaterThanOrEqual(16);
 
   const handledRequest = page.waitForRequest(
     (candidate) =>
       candidate.method() === 'PUT' &&
       candidate.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByRole('button', { name: 'Handled' }).click();
-  const handledDialog = page.getByRole('dialog', {
-    name: 'Mark this handled?'
-  });
-  await handledDialog.getByRole('button', { name: 'Mark handled' }).click();
+  await page.getByText('More actions').click();
+  await page.getByRole('button', { name: 'Already handled' }).click();
   const handledPayload = (await handledRequest).postDataJSON();
   const handledCommand = JSON.parse(
     Buffer.from(handledPayload.content, 'base64').toString('utf8')
@@ -1942,7 +1986,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Marked handled. Showing the next priority.'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    '1 Company change syncing'
+    '2 Company changes syncing'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     '1 Codex job queued or in progress'
@@ -1956,7 +2000,10 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       candidate.method() === 'PUT' &&
       candidate.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByRole('button', { name: 'September' }).click();
+  await page.getByRole('button', { name: 'Provide deadline' }).click();
+  const answerDialog = page.getByRole('dialog', { name: 'Provide deadline' });
+  await answerDialog.getByLabel('Pilot deadline').fill('2026-09-30');
+  await answerDialog.getByRole('button', { name: 'Resume work' }).click();
   const directionPayload = (await directionRequest).postDataJSON();
   const directionCommand = JSON.parse(
     Buffer.from(directionPayload.content, 'base64').toString('utf8')
@@ -1966,7 +2013,11 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   expect(directionCommand.target.evidence_fingerprint).toBe(
     'evidence-magik-question-1'
   );
-  expect(directionCommand.params.note).toBe('September');
+  expect(directionCommand.params.dispatch_id).toBe('dispatch:magik-question');
+  expect(directionCommand.params.option_id).toBe('provide_deadline');
+  expect(directionCommand.params.answers).toEqual([
+    { field_id: 'pilot_deadline', value: '2026-09-30' }
+  ]);
   const storage = await page.evaluate(() => ({
     normalData: localStorage.getItem('timekeeperDataPro') || '',
     token: localStorage.getItem('timekeeperCompanyOperatorToken') || ''

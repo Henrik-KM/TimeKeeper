@@ -11,6 +11,7 @@ export const DEFAULT_COMPANY_OPERATOR_SETTINGS = Object.freeze({
 const ALLOWED_ACTIONS = new Set([
   'add_direction',
   'mark_handled',
+  'rate_result',
   'record_decision',
   'set_priority',
   'snooze',
@@ -261,10 +262,19 @@ export function buildCompanyOperatorCommand({
       note: cleanText(paramsSource.note, 500),
       defer_until: cleanText(paramsSource.deferUntil, 80)
     };
+  } else if (normalizedAction === 'rate_result') {
+    payload.params = {
+      dispatch_id: cleanText(paramsSource.dispatchId, 180),
+      rating: cleanText(paramsSource.rating, 40),
+      note: cleanText(paramsSource.note, 500)
+    };
   } else {
     payload.params = {
-      note: cleanText(paramsSource.note, 500),
-      until: cleanText(paramsSource.until, 80)
+      note: cleanText(paramsSource.note, 800),
+      until: cleanText(paramsSource.until, 80),
+      dispatch_id: cleanText(paramsSource.dispatchId, 180),
+      option_id: cleanText(paramsSource.optionId, 48),
+      answers: normalizeAnswerValues(paramsSource.answers)
     };
   }
   return payload;
@@ -452,6 +462,12 @@ function normalizeReceipt(value) {
       source.execution_repo || source.executionRepo,
       120
     ),
+    executionBranch: cleanText(
+      source.execution_branch || source.executionBranch,
+      180
+    ),
+    isolatedExecution:
+      source.isolated_execution === true || source.isolatedExecution === true,
     sessionId: cleanText(source.session_id || source.sessionId, 140)
   };
 }
@@ -513,6 +529,12 @@ function normalizeDispatch(value) {
       source.execution_repo || source.executionRepo,
       120
     ),
+    executionBranch: cleanText(
+      source.execution_branch || source.executionBranch,
+      180
+    ),
+    isolatedExecution:
+      source.isolated_execution === true || source.isolatedExecution === true,
     sessionId: cleanText(source.session_id || source.sessionId, 140),
     startedAt: cleanText(source.started_at || source.startedAt, 80),
     finishedAt: cleanText(source.finished_at || source.finishedAt, 80),
@@ -607,7 +629,7 @@ function normalizeDispatchResult(value, dispatch, legacyDestinations) {
       reason: cleanLegacyResponsibilityCopy(userRequest.reason, 180),
       choices: Array.isArray(userRequest.choices)
         ? userRequest.choices
-            .map((choice) => cleanLegacyResponsibilityCopy(choice, 80))
+            .map(normalizeUserRequestChoice)
             .filter(Boolean)
             .slice(0, 3)
         : []
@@ -621,6 +643,69 @@ function normalizeDispatchResult(value, dispatch, legacyDestinations) {
       summary: cleanText(verification.summary, 240)
     }
   };
+}
+
+function normalizeUserRequestChoice(value) {
+  if (typeof value === 'string') {
+    const label = cleanLegacyResponsibilityCopy(value, 48);
+    return label
+      ? {
+          id: normalizedKey(label).slice(0, 48),
+          label,
+          kind: 'decision',
+          fields: []
+        }
+      : null;
+  }
+  const source = asRecord(value);
+  const label = cleanLegacyResponsibilityCopy(source.label, 48);
+  const id = cleanText(source.id, 48) || normalizedKey(label).slice(0, 48);
+  const kind = normalizedKey(source.kind);
+  if (!id || !label || !['decision', 'details'].includes(kind)) return null;
+  return {
+    id,
+    label,
+    kind,
+    fields: normalizeArray(source.fields, normalizeUserRequestField, 5)
+  };
+}
+
+function normalizeUserRequestField(value) {
+  const source = asRecord(value);
+  const label = cleanLegacyResponsibilityCopy(source.label, 80);
+  const id = cleanText(source.id, 48) || normalizedKey(label).slice(0, 48);
+  const type = normalizedKey(source.type);
+  if (!id || !label || !['text', 'textarea', 'date', 'select'].includes(type)) {
+    return null;
+  }
+  const options = Array.isArray(source.options)
+    ? source.options
+        .map((item) => cleanText(item, 80))
+        .filter(Boolean)
+        .slice(0, 8)
+    : [];
+  if (type === 'select' && !options.length) return null;
+  return {
+    id,
+    label,
+    type,
+    required: source.required === true,
+    placeholder: cleanText(source.placeholder, 160),
+    options
+  };
+}
+
+function normalizeAnswerValues(value) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      const source = asRecord(item);
+      const fieldId = cleanText(source.fieldId || source.field_id, 48);
+      const answer = cleanText(source.value, 400);
+      return fieldId && answer ? { field_id: fieldId, value: answer } : null;
+    })
+    .filter(Boolean)
+    .slice(0, 5);
 }
 
 function normalizeLegacyDeliverable(value) {

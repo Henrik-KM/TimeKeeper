@@ -159,13 +159,14 @@ export function createCompanyOperatorController({
           label: priority.project || priority.title || 'Company priority',
           issueId: priority.issueId,
           evidenceFingerprint: priority.evidenceFingerprint,
+          dispatchId: String(params.dispatchId || ''),
           project: priority.project || 'Company',
           title: priority.title || '',
           status: 'queued',
           queuedAt: new Date().toISOString()
         }
       ]);
-      showToast(priorityActionFeedback(action));
+      showToast(priorityActionFeedback(action, params));
     } catch (error) {
       showToast(companyErrorMessage(error));
     } finally {
@@ -175,7 +176,7 @@ export function createCompanyOperatorController({
     }
   }
 
-  async function addDirection(priority) {
+  async function addDirection(priority, extraParams = {}) {
     const values = await openFormDialog({
       title: `Steer ${priority.project || 'this work'}`,
       fields: [
@@ -194,23 +195,104 @@ export function createCompanyOperatorController({
     });
     if (!values?.note?.trim()) return;
     await queuePriorityAction('add_direction', priority, {
+      ...extraParams,
       note: values.note
     });
   }
 
-  async function answerDispatch(dispatch, choice = '') {
+  async function answerDispatch(dispatch, choice = null) {
     const priority = {
       issueId: dispatch.issueId,
       evidenceFingerprint: dispatch.evidenceFingerprint,
       project: dispatch.project,
       title: dispatch.result.headline,
-      userDirection: choice
+      userDirection: ''
     };
     if (choice) {
-      await queuePriorityAction('add_direction', priority, { note: choice });
+      const fields = Array.isArray(choice.fields) ? choice.fields : [];
+      let answers = [];
+      if (fields.length) {
+        const values = await openFormDialog({
+          title: choice.label || dispatch.result.headline,
+          fields: fields.map((field) => ({
+            name: field.id,
+            label: field.label,
+            type: field.type,
+            rows: field.type === 'textarea' ? 4 : undefined,
+            required: field.required,
+            placeholder: field.placeholder,
+            options:
+              field.type === 'select'
+                ? field.options.map((option) => ({
+                    value: option,
+                    label: option
+                  }))
+                : undefined,
+            value: ''
+          })),
+          submitLabel: 'Resume work'
+        });
+        if (!values) return;
+        answers = fields
+          .map((field) => ({
+            fieldId: field.id,
+            value: String(values[field.id] || '').trim()
+          }))
+          .filter((answer) => answer.value);
+      }
+      await queuePriorityAction('add_direction', priority, {
+        dispatchId: dispatch.dispatchId,
+        optionId: choice.id,
+        answers
+      });
       return;
     }
-    await addDirection(priority);
+    await addDirection(priority, { dispatchId: dispatch.dispatchId });
+  }
+
+  async function rateDispatch(dispatch, rating = '') {
+    let selectedRating = rating;
+    let note = '';
+    if (!selectedRating) {
+      const values = await openFormDialog({
+        title: 'Improve future Company work',
+        fields: [
+          {
+            name: 'rating',
+            label: 'What was wrong?',
+            type: 'select',
+            required: true,
+            value: 'not_useful',
+            options: [
+              { value: 'not_useful', label: 'Not useful' },
+              { value: 'wrong_priority', label: 'Wrong priority' },
+              { value: 'already_handled', label: 'Already handled' }
+            ]
+          },
+          {
+            name: 'note',
+            label: 'What should improve? (optional)',
+            type: 'textarea',
+            rows: 3,
+            value: ''
+          }
+        ],
+        submitLabel: 'Save feedback'
+      });
+      if (!values) return;
+      selectedRating = values.rating;
+      note = values.note || '';
+    }
+    await queuePriorityAction(
+      'rate_result',
+      {
+        issueId: dispatch.issueId,
+        evidenceFingerprint: dispatch.evidenceFingerprint,
+        project: dispatch.project,
+        title: dispatch.result.headline
+      },
+      { dispatchId: dispatch.dispatchId, rating: selectedRating, note }
+    );
   }
 
   async function snooze(priority) {
@@ -239,13 +321,6 @@ export function createCompanyOperatorController({
   }
 
   async function markHandled(priority) {
-    const confirmed = await requestConfirm({
-      title: 'Mark this handled?',
-      message:
-        'This hides the current evidence-backed item. It will reappear automatically if new evidence arrives.',
-      confirmLabel: 'Mark handled'
-    });
-    if (!confirmed) return;
     await queuePriorityAction('mark_handled', priority);
   }
 
@@ -369,6 +444,7 @@ export function createCompanyOperatorController({
           action: item.action,
           issueId: item.issueId || '',
           evidenceFingerprint: item.evidenceFingerprint || '',
+          dispatchId: item.dispatchId || '',
           status,
           reason,
           processedAt: String(remote.payload.processed_at || ''),
@@ -412,11 +488,9 @@ export function createCompanyOperatorController({
 
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
-    const dispatches = compactDispatchSection();
-    if (dispatches) root.appendChild(dispatches);
-    if (snapshot.decisions.pending.length) {
-      root.appendChild(decisionSection(snapshot.decisions.pending));
-    }
+    const dispatches = compactDispatchSections();
+    if (dispatches.inProgress) root.appendChild(dispatches.inProgress);
+    if (dispatches.done) root.appendChild(dispatches.done);
     const priorities = visiblePriorities();
     const primary = priorities[0];
     if (primary) root.appendChild(primaryCard(primary));
@@ -427,7 +501,11 @@ export function createCompanyOperatorController({
           'The next supported priority will appear here as soon as one is available.'
         )
       );
-    } else if (!snapshot.decisions.pending.length) {
+    }
+    if (dispatches.needsYou) root.appendChild(dispatches.needsYou);
+    if (snapshot.decisions.pending.length) {
+      root.appendChild(decisionSection(snapshot.decisions.pending));
+    } else if (!primary && !dispatches.needsYou && !dispatches.inProgress) {
       root.appendChild(
         card(
           'Nothing needs you',
@@ -435,6 +513,7 @@ export function createCompanyOperatorController({
         )
       );
     }
+    if (dispatches.problems) root.appendChild(dispatches.problems);
     const commands = commandStatus();
     if (commands) root.appendChild(commands);
     root.appendChild(sourceSection());
@@ -443,17 +522,51 @@ export function createCompanyOperatorController({
 
   function statusBanner(freshness) {
     const banner = element('div', `company-status ${freshness.status}`);
-    banner.appendChild(element('strong', '', freshness.label));
+    banner.appendChild(
+      element(
+        'strong',
+        '',
+        freshness.label.replace(/^Updated/, 'Dashboard synced')
+      )
+    );
     banner.appendChild(
       element(
         'span',
         '',
         snapshot.sources.attentionCount
-          ? `${snapshot.sources.attentionCount} source updates need attention`
+          ? sourceAttentionSummary()
           : 'Company information is connected'
       )
     );
     return banner;
+  }
+
+  function sourceAttentionSummary() {
+    const items = snapshot.sources.items
+      .filter(
+        (source) => !['ready', 'configured', 'disabled'].includes(source.status)
+      )
+      .map((source) => {
+        const age = formatSourceAge(source.updatedAt);
+        if (source.status === 'awaiting_transcript_export') {
+          return `${displaySource(source.name)} transcript missing`;
+        }
+        return [displaySource(source.name), age].filter(Boolean).join(' ');
+      });
+    return items.slice(0, 2).join(' · ') || 'Some information needs refreshing';
+  }
+
+  function formatSourceAge(value) {
+    const timestamp = new Date(value || '');
+    if (Number.isNaN(timestamp.getTime())) return '';
+    const minutes = Math.max(
+      0,
+      Math.round((Date.now() - timestamp.getTime()) / 60000)
+    );
+    if (minutes < 60) return `${Math.max(1, minutes)}m old`;
+    const hours = Math.round(minutes / 60);
+    if (hours < 48) return `${hours}h old`;
+    return `${Math.round(hours / 24)}d old`;
   }
 
   function primaryCard(priority) {
@@ -475,18 +588,25 @@ export function createCompanyOperatorController({
     }
     const actions = element('div', 'company-action-grid');
     actions.appendChild(
-      button('Do this now', 'primary', () =>
+      button('Start now', 'primary', () =>
         queuePriorityAction('work_next', priority)
       )
     );
     actions.appendChild(
       button('Add direction', 'secondary', () => addDirection(priority))
     );
-    actions.appendChild(button('Pause', 'secondary', () => snooze(priority)));
-    actions.appendChild(
-      button('Handled', 'secondary', () => markHandled(priority))
-    );
     section.appendChild(actions);
+    const more = element('details', 'company-more-actions');
+    more.appendChild(element('summary', '', 'More actions'));
+    const secondaryActions = element('div', 'company-action-grid');
+    secondaryActions.appendChild(
+      button('Pause', 'secondary', () => snooze(priority))
+    );
+    secondaryActions.appendChild(
+      button('Already handled', 'secondary', () => markHandled(priority))
+    );
+    more.appendChild(secondaryActions);
+    section.appendChild(more);
     return section;
   }
 
@@ -558,15 +678,24 @@ export function createCompanyOperatorController({
     });
   }
 
-  function compactDispatchSection() {
+  function compactDispatchSections() {
     const pending = loadPending().filter((item) =>
       ['add_direction', 'work_next'].includes(item.action)
     );
+    const pendingIssues = new Set(
+      pending.map((item) => item.issueId).filter(Boolean)
+    );
     const recent = Array.isArray(snapshot?.dispatches?.recent)
-      ? snapshot.dispatches.recent.slice(0, 5)
+      ? snapshot.dispatches.recent
+          .filter((dispatch) => !pendingIssues.has(dispatch.issueId))
+          .slice(0, 5)
       : [];
-    if (!pending.length && !recent.length) return null;
-    const wrapper = element('div', 'company-result-groups');
+    const sections = {
+      inProgress: null,
+      done: null,
+      needsYou: null,
+      problems: null
+    };
     if (pending.length) {
       const inProgress = sectionBlock('In progress');
       pending.forEach((item) => {
@@ -575,7 +704,7 @@ export function createCompanyOperatorController({
         row.appendChild(element('span', '', 'Codex is working on this now'));
         inProgress.appendChild(row);
       });
-      wrapper.appendChild(inProgress);
+      sections.inProgress = inProgress;
     }
     const needsYou = recent.filter((dispatch) =>
       ['needs_decision', 'needs_you'].includes(dispatch.result.status)
@@ -588,26 +717,54 @@ export function createCompanyOperatorController({
     );
     if (done.length) {
       const section = sectionBlock('Done for you');
-      done.forEach((dispatch) =>
-        section.appendChild(compactDispatchCard(dispatch, 'done'))
-      );
-      wrapper.appendChild(section);
+      section.appendChild(compactDispatchCard(done[0], 'done'));
+      if (done.length > 1) {
+        const earlier = element('details', 'company-result-backlog');
+        earlier.appendChild(
+          element(
+            'summary',
+            '',
+            `${done.length - 1} earlier result${done.length === 2 ? '' : 's'}`
+          )
+        );
+        done.slice(1).forEach((dispatch) => {
+          const card = compactDispatchCard(dispatch, 'done');
+          card.classList.add('compact');
+          earlier.appendChild(card);
+        });
+        section.appendChild(earlier);
+      }
+      sections.done = section;
     }
     if (needsYou.length) {
       const section = sectionBlock('Needs you');
-      needsYou.forEach((dispatch) =>
-        section.appendChild(compactDispatchCard(dispatch, 'needs-you'))
-      );
-      wrapper.appendChild(section);
+      section.appendChild(compactDispatchCard(needsYou[0], 'needs-you'));
+      if (needsYou.length > 1) {
+        const backlog = element('details', 'company-question-backlog');
+        backlog.appendChild(
+          element(
+            'summary',
+            '',
+            `${needsYou.length - 1} more question${needsYou.length === 2 ? '' : 's'}`
+          )
+        );
+        needsYou.slice(1).forEach((dispatch) => {
+          const card = compactDispatchCard(dispatch, 'needs-you');
+          card.classList.add('compact');
+          backlog.appendChild(card);
+        });
+        section.appendChild(backlog);
+      }
+      sections.needsYou = section;
     }
     if (problems.length) {
       const section = sectionBlock('System status', true);
       problems.forEach((dispatch) =>
         section.appendChild(compactDispatchCard(dispatch, 'problem'))
       );
-      wrapper.appendChild(section);
+      sections.problems = section;
     }
-    return wrapper;
+    return sections;
   }
 
   function compactDispatchCard(dispatch, tone) {
@@ -616,7 +773,7 @@ export function createCompanyOperatorController({
     row.appendChild(
       element('strong', '', dispatch.result.headline || 'Company work updated')
     );
-    if (dispatch.result.message) {
+    if (dispatch.result.message && tone !== 'needs-you') {
       row.appendChild(element('span', '', dispatch.result.message));
     }
     if (tone === 'needs-you') {
@@ -628,11 +785,12 @@ export function createCompanyOperatorController({
           request.instruction || dispatch.result.nextAction
         )
       );
-      if (request.reason) row.appendChild(element('small', '', request.reason));
       const actions = element('div', 'company-action-grid');
       request.choices.forEach((choice) => {
         actions.appendChild(
-          button(choice, 'primary', () => answerDispatch(dispatch, choice))
+          button(choice.label, 'primary', () =>
+            answerDispatch(dispatch, choice)
+          )
         );
       });
       actions.appendChild(
@@ -644,10 +802,30 @@ export function createCompanyOperatorController({
       dispatch.result.destinations.forEach((destination) => {
         row.appendChild(compactResultDestination(destination));
       });
+      const feedback = element('div', 'company-feedback-actions');
+      const feedbackStatus = dispatchFeedbackStatus(dispatch);
+      if (feedbackStatus === 'pending') {
+        feedback.appendChild(
+          element('span', 'company-feedback-status', 'Feedback syncing')
+        );
+      } else if (feedbackStatus === 'saved') {
+        feedback.appendChild(
+          element('span', 'company-feedback-status saved', 'Feedback saved')
+        );
+      } else {
+        feedback.appendChild(
+          button('Useful', 'secondary', () => rateDispatch(dispatch, 'useful'))
+        );
+        feedback.appendChild(
+          button('Needs improvement', 'secondary', () => rateDispatch(dispatch))
+        );
+      }
+      row.appendChild(feedback);
     }
     const details = [
       [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
       dispatch.executionRepo,
+      dispatch.executionBranch ? `Branch ${dispatch.executionBranch}` : '',
       formatDispatchDuration(dispatch.durationSeconds),
       dispatch.timeTrackingStatus === 'session_persisted'
         ? 'IFLAI time recorded'
@@ -656,6 +834,11 @@ export function createCompanyOperatorController({
     if (details.length) {
       const runDetails = element('details', 'company-run-details');
       runDetails.appendChild(element('summary', '', 'Details'));
+      if (tone === 'needs-you' && dispatch.result.userRequest.reason) {
+        runDetails.appendChild(
+          element('p', '', dispatch.result.userRequest.reason)
+        );
+      }
       runDetails.appendChild(element('small', '', details.join(' · ')));
       row.appendChild(runDetails);
     }
@@ -741,7 +924,7 @@ export function createCompanyOperatorController({
     return section;
   }
 
-  function priorityActionFeedback(action) {
+  function priorityActionFeedback(action, params = {}) {
     if (action === 'mark_handled') {
       return 'Marked handled. Showing the next priority.';
     }
@@ -752,9 +935,38 @@ export function createCompanyOperatorController({
       return 'Sent to Codex. Showing the next priority.';
     }
     if (action === 'add_direction') {
-      return 'Direction sent to Codex.';
+      return params.dispatchId
+        ? 'Answer sent. Codex will resume this case.'
+        : 'Direction sent to Codex.';
+    }
+    if (action === 'rate_result') {
+      return 'Feedback queued. It will shape future Company work after the next sync.';
     }
     return 'Company change syncing.';
+  }
+
+  function dispatchFeedbackStatus(dispatch) {
+    if (!dispatch?.dispatchId) return '';
+    if (
+      loadPending().some(
+        (item) =>
+          item.action === 'rate_result' &&
+          item.dispatchId === dispatch.dispatchId
+      )
+    ) {
+      return 'pending';
+    }
+    if (
+      loadReceipts().some(
+        (item) =>
+          item.action === 'rate_result' &&
+          item.dispatchId === dispatch.dispatchId &&
+          item.status === 'applied'
+      )
+    ) {
+      return 'saved';
+    }
+    return '';
   }
 
   function sourceSection() {
@@ -769,7 +981,12 @@ export function createCompanyOperatorController({
           source.status === 'ready' || source.status === 'configured'
             ? 'ready'
             : 'attention',
-          source.statusText || source.status
+          [
+            source.statusText || source.status,
+            formatSourceAge(source.updatedAt)
+          ]
+            .filter(Boolean)
+            .join(' · ')
         )
       );
       details.appendChild(row);

@@ -999,7 +999,8 @@ tr:nth-child(even) td {
   border: 1px solid #dbe3ef;
   border-radius: 0.75rem;
   background: #f8fafc;
-  font-size: 0.82rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .company-status.fresh {
@@ -1087,6 +1088,23 @@ tr:nth-child(even) td {
   margin: 0;
 }
 
+.company-more-actions,
+.company-result-backlog,
+.company-question-backlog {
+  margin-top: 0.65rem;
+}
+
+.company-more-actions > summary,
+.company-result-backlog > summary,
+.company-question-backlog > summary {
+  min-height: 2.75rem;
+  cursor: pointer;
+  align-content: center;
+  color: #475569;
+  font-size: 0.95rem;
+  font-weight: 750;
+}
+
 .company-list-card,
 .company-receipt-card,
 .company-dispatch-card,
@@ -1159,7 +1177,7 @@ tr:nth-child(even) td {
 
 .company-dispatch-card {
   display: grid;
-  gap: 0.3rem;
+  gap: 0.5rem;
 }
 
 .company-dispatch-card.in-progress {
@@ -1199,15 +1217,45 @@ tr:nth-child(even) td {
 }
 
 .company-dispatch-card span,
-.company-dispatch-card small,
 .company-receipt-card small {
   color: #475569;
-  font-size: 0.8rem;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .company-dispatch-card .company-dispatch-next {
+  margin: 0.15rem 0;
   color: #92400e;
+  font-size: 1rem;
   font-weight: 700;
+  line-height: 1.4;
+}
+
+.company-feedback-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-top: 0.35rem;
+}
+
+.company-feedback-actions .btn {
+  min-height: 2.75rem;
+  margin: 0;
+}
+
+.company-feedback-status {
+  grid-column: 1 / -1;
+  padding: 0.7rem 0.8rem;
+  border-radius: 0.65rem;
+  background: #f1f5f9;
+  color: #475569;
+  font-weight: 700;
+  text-align: center;
+}
+
+.company-feedback-status.saved {
+  background: #ecfdf5;
+  color: #166534;
 }
 
 .company-result-output-label {
@@ -1299,7 +1347,8 @@ tr:nth-child(even) td {
 .company-result-location span,
 .company-result-location small {
   color: #64748b;
-  font-size: 0.74rem;
+  font-size: 0.9rem;
+  line-height: 1.4;
 }
 
 .company-result-location {
@@ -1329,6 +1378,16 @@ tr:nth-child(even) td {
 .company-run-details small {
   display: block;
   padding: 0 0 0.45rem;
+  color: #64748b;
+  font-size: 0.82rem;
+  line-height: 1.45;
+}
+
+.company-run-details p {
+  margin: 0 0 0.5rem;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.45;
 }
 
 .company-receipt-card span,

@@ -296,7 +296,23 @@ test('normalizes concise action-first company results', () => {
             user_request: {
               instruction: 'Which deadline should I use?',
               reason: 'No deadline is in the available sources.',
-              choices: ['September', 'October']
+              choices: [
+                {
+                  id: 'provide_deadline',
+                  label: 'Provide deadline',
+                  kind: 'details',
+                  fields: [
+                    {
+                      id: 'pilot_deadline',
+                      label: 'Pilot deadline',
+                      type: 'date',
+                      required: true,
+                      placeholder: '',
+                      options: []
+                    }
+                  ]
+                }
+              ]
             }
           }
         }
@@ -315,8 +331,21 @@ test('normalizes concise action-first company results', () => {
     'Which deadline should I use?'
   );
   assert.deepEqual(question.result.userRequest.choices, [
-    'September',
-    'October'
+    {
+      id: 'provide_deadline',
+      label: 'Provide deadline',
+      kind: 'details',
+      fields: [
+        {
+          id: 'pilot_deadline',
+          label: 'Pilot deadline',
+          type: 'date',
+          required: true,
+          placeholder: '',
+          options: []
+        }
+      ]
+    }
   ]);
 });
 
@@ -447,6 +476,51 @@ test('builds an expiring allowlisted command without source content', () => {
     now: new Date('2026-08-03T12:00:00.000Z')
   });
   assert.equal(decision.params.decision_fingerprint, 'decision-evidence-1');
+
+  const answer = buildCompanyOperatorCommand({
+    commandId: 'mobile-answer-001',
+    action: 'add_direction',
+    snapshot: { stateVersion: 'state-1' },
+    target: {
+      issueId: 'priority:magik',
+      evidenceFingerprint: 'evidence-magik-1'
+    },
+    params: {
+      dispatchId: 'dispatch:magik-question',
+      optionId: 'both_facts',
+      answers: [
+        { fieldId: 'measured_result', value: 'Tracking passed at 30 fps.' },
+        {
+          fieldId: 'customer_response',
+          value: 'AstraZeneca asked for the next test.'
+        }
+      ]
+    },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(answer.params.dispatch_id, 'dispatch:magik-question');
+  assert.equal(answer.params.option_id, 'both_facts');
+  assert.deepEqual(answer.params.answers, [
+    { field_id: 'measured_result', value: 'Tracking passed at 30 fps.' },
+    {
+      field_id: 'customer_response',
+      value: 'AstraZeneca asked for the next test.'
+    }
+  ]);
+
+  const feedback = buildCompanyOperatorCommand({
+    commandId: 'mobile-feedback-001',
+    action: 'rate_result',
+    snapshot: { stateVersion: 'state-1' },
+    params: {
+      dispatchId: 'dispatch:done',
+      rating: 'wrong_priority',
+      note: 'Focus on customer delivery.'
+    },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(feedback.params.rating, 'wrong_priority');
+  assert.equal(feedback.params.dispatch_id, 'dispatch:done');
 });
 
 test('uses the dedicated private repository defaults and reports stale state', () => {
