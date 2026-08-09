@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v19';
+const CACHE_NAME = 'timekeeper-app-v20';
 const APP_SHELL = [
   './',
   './index.html',
@@ -66,8 +66,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '16') return;
-          url.searchParams.set('timekeeper-update', '16');
+          if (url.searchParams.get('timekeeper-update') === '17') return;
+          url.searchParams.set('timekeeper-update', '17');
           client.navigate(url.href).catch(() => undefined);
         });
       })

@@ -11,6 +11,7 @@ export const DEFAULT_COMPANY_OPERATOR_SETTINGS = Object.freeze({
 const ALLOWED_ACTIONS = new Set([
   'add_direction',
   'mark_handled',
+  'rate_opportunity',
   'rate_result',
   'record_decision',
   'set_priority',
@@ -77,6 +78,7 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const missions = asRecord(source.missions);
   const sources = asRecord(source.sources);
   const emailDrafting = asRecord(source.email_drafting || source.emailDrafting);
+  const opportunities = asRecord(source.opportunities);
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
@@ -125,6 +127,7 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
       receipts: normalizeArray(handled.receipts, normalizeReceipt, 10)
     },
     emailDrafting: normalizeEmailDrafting(emailDrafting),
+    opportunities: normalizeOpportunities(opportunities),
     dispatches: {
       inProgressCount: toCount(
         dispatches.in_progress_count ?? dispatches.inProgressCount
@@ -271,7 +274,8 @@ export function buildCompanyOperatorCommand({
     target: {
       issue_id: cleanText(targetSource.issueId, 160),
       evidence_fingerprint: cleanText(targetSource.evidenceFingerprint, 128),
-      mission_id: cleanText(targetSource.missionId, 100)
+      mission_id: cleanText(targetSource.missionId, 100),
+      opportunity_id: cleanText(targetSource.opportunityId, 180)
     },
     params: {}
   };
@@ -286,6 +290,13 @@ export function buildCompanyOperatorCommand({
   } else if (normalizedAction === 'rate_result') {
     payload.params = {
       dispatch_id: cleanText(paramsSource.dispatchId, 180),
+      rating: cleanText(paramsSource.rating, 40),
+      note: cleanText(paramsSource.note, 500)
+    };
+  } else if (normalizedAction === 'rate_opportunity') {
+    payload.params = {
+      opportunity_id: cleanText(targetSource.opportunityId, 180),
+      evidence_fingerprint: cleanText(targetSource.evidenceFingerprint, 128),
       rating: cleanText(paramsSource.rating, 40),
       note: cleanText(paramsSource.note, 500)
     };
@@ -410,6 +421,7 @@ function normalizeEmailDrafting(value) {
   );
   const status = cleanText(source.status, 40);
   const summary = cleanText(source.summary, 320);
+  const draftTypes = asRecord(source.draft_types || source.draftTypes);
   return {
     available: Boolean(status || summary || outlookUrl),
     status,
@@ -439,7 +451,80 @@ function normalizeEmailDrafting(value) {
     medianAuthoringSeconds: toOptionalNumber(
       source.median_authoring_seconds ?? source.medianAuthoringSeconds
     ),
+    draftTypes: {
+      replies: toCount(draftTypes.replies),
+      followups: toCount(draftTypes.followups),
+      firstContacts: toCount(
+        draftTypes.first_contacts ?? draftTypes.firstContacts
+      )
+    },
     outlookUrl
+  };
+}
+
+function normalizeOpportunities(value) {
+  const source = asRecord(value);
+  const counts = asRecord(source.counts);
+  const outlookUrl = normalizeDestinationUrl(
+    'outlook_draft',
+    source.outlook_url || source.outlookUrl
+  );
+  return {
+    available: source.available === true,
+    status: cleanText(source.status, 80),
+    summary: cleanText(source.summary, 320),
+    generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
+    ageHours: toOptionalNumber(source.age_hours ?? source.ageHours),
+    sourceCount: toCount(source.source_count ?? source.sourceCount),
+    relationshipCount: toCount(
+      source.relationship_count ?? source.relationshipCount
+    ),
+    counts: {
+      found: toCount(counts.found),
+      qualified: toCount(counts.qualified),
+      readyForDraft: toCount(counts.ready_for_draft ?? counts.readyForDraft),
+      drafted: toCount(counts.drafted),
+      contactMissing: toCount(counts.contact_missing ?? counts.contactMissing)
+    },
+    cards: normalizeArray(source.cards, normalizeOpportunity, 3),
+    usefulRate: toOptionalRate(source.useful_rate ?? source.usefulRate),
+    sampleSize: toCount(source.sample_size ?? source.sampleSize),
+    outlookUrl
+  };
+}
+
+function normalizeOpportunity(value) {
+  const source = asRecord(value);
+  const opportunityId = cleanText(
+    source.opportunity_id || source.opportunityId,
+    180
+  );
+  const evidenceFingerprint = cleanText(
+    source.evidence_fingerprint || source.evidenceFingerprint,
+    128
+  );
+  if (!opportunityId || !evidenceFingerprint) return null;
+  return {
+    opportunityId,
+    evidenceFingerprint,
+    company: cleanText(source.company, 120),
+    contactLabel: cleanText(source.contact_label || source.contactLabel, 100),
+    lane: cleanText(source.lane, 40),
+    motion: cleanText(source.motion, 100),
+    status: cleanText(source.status, 60),
+    statusLabel: cleanText(source.status_label || source.statusLabel, 80),
+    whyNow: normalizeTextArray(source.why_now || source.whyNow, 2, 180),
+    actionTaken: cleanText(source.action_taken || source.actionTaken, 260),
+    score: toCount(source.score),
+    confidence: cleanText(source.confidence, 40),
+    sourceFreshness: cleanText(
+      source.source_freshness || source.sourceFreshness,
+      80
+    ),
+    outlookUrl: normalizeDestinationUrl(
+      'outlook_draft',
+      source.outlook_url || source.outlookUrl
+    )
   };
 }
 
@@ -1099,6 +1184,14 @@ function normalizeSource(value) {
 function normalizeArray(value, normalizer, limit) {
   if (!Array.isArray(value)) return [];
   return value.map(normalizer).filter(Boolean).slice(0, limit);
+}
+
+function normalizeTextArray(value, limit, textLimit) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => cleanText(item, textLimit))
+    .filter(Boolean)
+    .slice(0, limit);
 }
 
 function normalizeRepository(value) {

@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v19';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v20';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1691,6 +1691,47 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       target_status: 'collecting_baseline',
       authoring_success_rate: 0.9,
       median_authoring_seconds: 42.5,
+      draft_types: { replies: 1, followups: 1, first_contacts: 1 },
+      outlook_url: 'https://outlook.office.com/mail/drafts'
+    },
+    opportunities: {
+      available: true,
+      status: 'ready',
+      summary: '1 verified first-contact draft is ready in Outlook.',
+      generated_at: '2026-08-03T11:57:00.000Z',
+      source_count: 6,
+      relationship_count: 2,
+      counts: {
+        found: 3,
+        qualified: 1,
+        ready_for_draft: 0,
+        drafted: 1,
+        contact_missing: 0
+      },
+      cards: [
+        {
+          opportunity_id: 'opportunity:imaging-partner',
+          evidence_fingerprint: 'opportunity-evidence-1',
+          company: 'Imaging Partner',
+          contact_label: 'Partnerships team',
+          lane: 'net_new',
+          motion: 'oem_or_distribution',
+          status: 'drafted',
+          status_label: 'Draft ready in Outlook',
+          why_now: [
+            'The company launched a new imaging platform.',
+            'It publishes an OEM partnership route.'
+          ],
+          action_taken: 'Prepared and verified a concise first-contact draft.',
+          score: 92,
+          confidence: 'high',
+          source_freshness: 'Today',
+          outlook_url:
+            'https://outlook.office.com/mail/drafts/id-imaging-partner'
+        }
+      ],
+      useful_rate: 0.67,
+      sample_size: 6,
       outlook_url: 'https://outlook.office.com/mail/drafts'
     },
     dispatches: {
@@ -1871,6 +1912,28 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   await expect(page.locator('#companyPageContent')).toContainText(
     'Usefulness baseline: 8 sent drafts tracked'
   );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 reply · 1 follow-up · 1 first contact'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'New opportunities'
+  );
+  const opportunityCard = page.locator(
+    '#companyPageContent .company-dispatch-card.opportunity'
+  );
+  await expect(opportunityCard).toContainText('Imaging Partner');
+  await expect(opportunityCard).toContainText(
+    'The company launched a new imaging platform.'
+  );
+  await expect(opportunityCard).toContainText(
+    'Prepared and verified a concise first-contact draft.'
+  );
+  await expect(
+    opportunityCard.getByRole('link', { name: 'Open draft' })
+  ).toHaveAttribute(
+    'href',
+    'https://outlook.office.com/mail/drafts/id-imaging-partner'
+  );
   await expect(
     page.getByRole('link', { name: 'Open Outlook drafts' })
   ).toHaveAttribute('href', 'https://outlook.office.com/mail/drafts');
@@ -1898,6 +1961,11 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       ...document.querySelectorAll(
         '#companyPageContent .company-primary-card .company-action-grid .btn'
       )
+    ].map((button) => button.getBoundingClientRect().height),
+    opportunityActionHeights: [
+      ...document.querySelectorAll(
+        '#companyPageContent .company-dispatch-card.opportunity .company-action-grid .btn'
+      )
     ].map((button) => button.getBoundingClientRect().height)
   }));
   expect(mobileLayout.scrollWidth).toBeLessThanOrEqual(
@@ -1905,13 +1973,20 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   expect(mobileLayout.actionHeights).toHaveLength(4);
   expect(Math.min(...mobileLayout.actionHeights)).toBeGreaterThanOrEqual(44);
+  expect(mobileLayout.opportunityActionHeights).toHaveLength(5);
+  expect(
+    Math.min(...mobileLayout.opportunityActionHeights)
+  ).toBeGreaterThanOrEqual(44);
 
   const feedbackRequest = page.waitForRequest(
     (request) =>
       request.method() === 'PUT' &&
       request.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByRole('button', { name: 'Useful' }).click();
+  await page
+    .locator('#companyPageContent .company-dispatch-card.done')
+    .getByRole('button', { name: 'Useful' })
+    .click();
   const feedbackPayload = (await feedbackRequest).postDataJSON();
   const feedbackCommand = JSON.parse(
     Buffer.from(feedbackPayload.content, 'base64').toString('utf8')
@@ -2010,7 +2085,11 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       candidate.method() === 'PUT' &&
       candidate.url().includes('/contents/company-operator/commands/')
   );
-  await page.getByText('More actions').click();
+  await page
+    .locator(
+      '#companyPageContent .company-primary-card .company-more-actions summary'
+    )
+    .click();
   await page.getByRole('button', { name: 'Already handled' }).click();
   const handledPayload = (await handledRequest).postDataJSON();
   const handledCommand = JSON.parse(
@@ -2083,6 +2162,27 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'decision-evidence-1'
   );
   expect(decisionCommand.params.decision).toBe('approve');
+
+  const opportunityFeedbackRequest = page.waitForRequest(
+    (candidate) =>
+      candidate.method() === 'PUT' &&
+      candidate.url().includes('/contents/company-operator/commands/')
+  );
+  await opportunityCard.getByRole('button', { name: 'Useful' }).click();
+  const opportunityFeedbackPayload = (
+    await opportunityFeedbackRequest
+  ).postDataJSON();
+  const opportunityFeedbackCommand = JSON.parse(
+    Buffer.from(opportunityFeedbackPayload.content, 'base64').toString('utf8')
+  );
+  expect(opportunityFeedbackCommand.action).toBe('rate_opportunity');
+  expect(opportunityFeedbackCommand.target.opportunity_id).toBe(
+    'opportunity:imaging-partner'
+  );
+  expect(opportunityFeedbackCommand.target.evidence_fingerprint).toBe(
+    'opportunity-evidence-1'
+  );
+  expect(opportunityFeedbackCommand.params.rating).toBe('useful');
 });
 
 test('mobile Company tab presents missions before the next priority', async ({

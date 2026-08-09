@@ -143,7 +143,8 @@ export function createCompanyOperatorController({
         target: {
           issueId: priority.issueId,
           evidenceFingerprint: priority.evidenceFingerprint,
-          missionId: priority.missionId
+          missionId: priority.missionId,
+          opportunityId: priority.opportunityId
         },
         params
       });
@@ -161,6 +162,7 @@ export function createCompanyOperatorController({
           issueId: priority.issueId,
           evidenceFingerprint: priority.evidenceFingerprint,
           missionId: priority.missionId || '',
+          opportunityId: priority.opportunityId || '',
           dispatchId: String(params.dispatchId || ''),
           project: priority.project || 'Company',
           title: priority.title || '',
@@ -294,6 +296,20 @@ export function createCompanyOperatorController({
         title: dispatch.result.headline
       },
       { dispatchId: dispatch.dispatchId, rating: selectedRating, note }
+    );
+  }
+
+  async function rateOpportunity(opportunity, rating) {
+    await queuePriorityAction(
+      'rate_opportunity',
+      {
+        issueId: '',
+        opportunityId: opportunity.opportunityId,
+        evidenceFingerprint: opportunity.evidenceFingerprint,
+        project: opportunity.company,
+        title: opportunity.company
+      },
+      { rating }
     );
   }
 
@@ -447,6 +463,7 @@ export function createCompanyOperatorController({
           issueId: item.issueId || '',
           evidenceFingerprint: item.evidenceFingerprint || '',
           dispatchId: item.dispatchId || '',
+          opportunityId: item.opportunityId || '',
           status,
           reason,
           processedAt: String(remote.payload.processed_at || ''),
@@ -511,13 +528,18 @@ export function createCompanyOperatorController({
     }
     if (snapshot.decisions.pending.length) {
       root.appendChild(decisionSection(snapshot.decisions.pending));
-    } else if (
+    }
+    const opportunities = opportunitySection();
+    if (opportunities) root.appendChild(opportunities);
+    if (
+      !snapshot.decisions.pending.length &&
       !primary &&
       !missions.working &&
       !missions.needsYou &&
       !dispatches.needsYou &&
       !dispatches.inProgress &&
-      !snapshot.emailDrafting.needsUser
+      !snapshot.emailDrafting.needsUser &&
+      !snapshot.opportunities.cards.length
     ) {
       root.appendChild(
         card(
@@ -596,6 +618,29 @@ export function createCompanyOperatorController({
         drafting.summary || 'Email drafting is running normally.'
       )
     );
+    const draftTypes = drafting.draftTypes || {
+      replies: 0,
+      followups: 0,
+      firstContacts: 0
+    };
+    const typeSummary = [
+      draftTypes.replies
+        ? `${draftTypes.replies} ${draftTypes.replies === 1 ? 'reply' : 'replies'}`
+        : '',
+      draftTypes.followups
+        ? `${draftTypes.followups} follow-up${draftTypes.followups === 1 ? '' : 's'}`
+        : '',
+      draftTypes.firstContacts
+        ? `${draftTypes.firstContacts} first contact${draftTypes.firstContacts === 1 ? '' : 's'}`
+        : ''
+    ]
+      .filter(Boolean)
+      .join(' · ');
+    if (typeSummary) {
+      card.appendChild(
+        element('p', 'company-draft-types', `Draft mix: ${typeSummary}`)
+      );
+    }
     card.appendChild(
       element(
         'p',
@@ -634,6 +679,113 @@ export function createCompanyOperatorController({
     }
     section.appendChild(card);
     return section;
+  }
+
+  function opportunitySection() {
+    const opportunities = snapshot.opportunities;
+    if (!opportunities?.available) return null;
+    const section = sectionBlock('New opportunities', true);
+    if (opportunities.summary) {
+      section.appendChild(
+        element('p', 'company-handled-summary', opportunities.summary)
+      );
+    }
+    if (!opportunities.cards.length) {
+      section.appendChild(
+        card(
+          'No verified outreach today',
+          `Checked ${opportunities.sourceCount} public sources and ${opportunities.relationshipCount} known relationships. Nothing strong enough passed the evidence and contact checks.`
+        )
+      );
+      return section;
+    }
+    opportunities.cards.forEach((opportunity) =>
+      section.appendChild(opportunityCard(opportunity))
+    );
+    return section;
+  }
+
+  function opportunityCard(opportunity) {
+    const row = element(
+      'article',
+      `company-dispatch-card opportunity ${opportunity.status}`
+    );
+    row.appendChild(
+      element(
+        'p',
+        'company-eyebrow',
+        opportunity.statusLabel || 'Opportunity found'
+      )
+    );
+    row.appendChild(element('strong', '', opportunity.company));
+    if (opportunity.contactLabel) {
+      row.appendChild(element('span', '', opportunity.contactLabel));
+    }
+    if (opportunity.whyNow.length) {
+      const reasons = element('ul', 'company-opportunity-reasons');
+      opportunity.whyNow.forEach((reason) =>
+        reasons.appendChild(element('li', '', reason))
+      );
+      row.appendChild(reasons);
+    }
+    if (opportunity.actionTaken) {
+      row.appendChild(
+        element('p', 'company-dispatch-next', opportunity.actionTaken)
+      );
+    }
+    if (opportunity.status === 'drafted' && opportunity.outlookUrl) {
+      row.appendChild(
+        compactResultDestination({
+          label: `Draft to ${opportunity.contactLabel || opportunity.company}`,
+          location: 'Saved in Outlook',
+          reference: '',
+          statusText: '',
+          mode: 'open',
+          actionLabel: 'Open draft',
+          url: opportunity.outlookUrl
+        })
+      );
+    }
+    const feedbackStatus = opportunityFeedbackStatus(opportunity);
+    if (feedbackStatus) {
+      row.appendChild(
+        element(
+          'small',
+          'company-feedback-status',
+          feedbackStatus === 'saved' ? 'Feedback saved' : 'Feedback syncing'
+        )
+      );
+      return row;
+    }
+    const actions = element('div', 'company-action-grid');
+    actions.appendChild(
+      button('Useful', 'primary', () => rateOpportunity(opportunity, 'useful'))
+    );
+    actions.appendChild(
+      button('Not relevant', 'secondary', () =>
+        rateOpportunity(opportunity, 'not_relevant')
+      )
+    );
+    row.appendChild(actions);
+    const more = element('details', 'company-more-actions');
+    more.appendChild(element('summary', '', 'More actions'));
+    const secondary = element('div', 'company-action-grid');
+    secondary.appendChild(
+      button('Wrong person', 'secondary', () =>
+        rateOpportunity(opportunity, 'wrong_person')
+      )
+    );
+    secondary.appendChild(
+      button('Already known', 'secondary', () =>
+        rateOpportunity(opportunity, 'already_known')
+      )
+    );
+    secondary.appendChild(
+      button('Pause', 'secondary', () => rateOpportunity(opportunity, 'snooze'))
+    );
+    more.appendChild(secondary);
+    row.appendChild(more);
+    return row;
   }
 
   function missionSections() {
@@ -1247,6 +1399,9 @@ export function createCompanyOperatorController({
     if (action === 'rate_result') {
       return 'Feedback queued. It will shape future Company work after the next sync.';
     }
+    if (action === 'rate_opportunity') {
+      return 'Opportunity feedback queued.';
+    }
     return 'Company change syncing.';
   }
 
@@ -1266,6 +1421,30 @@ export function createCompanyOperatorController({
         (item) =>
           item.action === 'rate_result' &&
           item.dispatchId === dispatch.dispatchId &&
+          item.status === 'applied'
+      )
+    ) {
+      return 'saved';
+    }
+    return '';
+  }
+
+  function opportunityFeedbackStatus(opportunity) {
+    if (!opportunity?.opportunityId) return '';
+    if (
+      loadPending().some(
+        (item) =>
+          item.action === 'rate_opportunity' &&
+          item.opportunityId === opportunity.opportunityId
+      )
+    ) {
+      return 'pending';
+    }
+    if (
+      loadReceipts().some(
+        (item) =>
+          item.action === 'rate_opportunity' &&
+          item.opportunityId === opportunity.opportunityId &&
           item.status === 'applied'
       )
     ) {

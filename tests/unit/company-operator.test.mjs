@@ -132,6 +132,46 @@ test('normalizes a bounded mobile Company snapshot', () => {
       target_status: 'collecting_baseline',
       authoring_success_rate: 0.9,
       median_authoring_seconds: 42.5,
+      draft_types: { replies: 1, followups: 1, first_contacts: 2 },
+      outlook_url: 'https://outlook.office.com/mail/drafts'
+    },
+    opportunities: {
+      available: true,
+      status: 'ready',
+      summary: '1 verified first-contact draft is ready in Outlook.',
+      generated_at: '2026-08-03T11:45:00.000Z',
+      source_count: 6,
+      relationship_count: 2,
+      counts: {
+        found: 4,
+        qualified: 1,
+        ready_for_draft: 0,
+        drafted: 1,
+        contact_missing: 1
+      },
+      cards: [
+        {
+          opportunity_id: 'opportunity:imaging-partner',
+          evidence_fingerprint: 'opportunity-evidence-1',
+          company: 'Imaging Partner',
+          contact_label: 'Partnerships team',
+          lane: 'net_new',
+          motion: 'oem_or_distribution',
+          status: 'drafted',
+          status_label: 'Draft ready in Outlook',
+          why_now: [
+            'The company has launched a new imaging platform.',
+            'It publishes an OEM partnership route.'
+          ],
+          action_taken: 'Prepared and verified a first-contact draft.',
+          score: 91,
+          confidence: 'high',
+          source_freshness: 'Today',
+          outlook_url: 'https://outlook.office.com/mail/drafts/id-1'
+        }
+      ],
+      useful_rate: 0.67,
+      sample_size: 6,
       outlook_url: 'https://outlook.office.com/mail/drafts'
     },
     dispatches: {
@@ -233,11 +273,25 @@ test('normalizes a bounded mobile Company snapshot', () => {
   assert.equal(snapshot.emailDrafting.beingRefreshed, 3);
   assert.equal(snapshot.emailDrafting.waitingForSafeContext, 1);
   assert.equal(snapshot.emailDrafting.usableRate, 0.75);
+  assert.deepEqual(snapshot.emailDrafting.draftTypes, {
+    replies: 1,
+    followups: 1,
+    firstContacts: 2
+  });
   assert.equal(
     snapshot.emailDrafting.outlookUrl,
     'https://outlook.office.com/mail/drafts'
   );
   assert.equal(snapshot.dispatches.inProgressCount, 1);
+  assert.equal(snapshot.opportunities.cards.length, 1);
+  assert.equal(
+    snapshot.opportunities.cards[0].opportunityId,
+    'opportunity:imaging-partner'
+  );
+  assert.deepEqual(snapshot.opportunities.cards[0].whyNow, [
+    'The company has launched a new imaging platform.',
+    'It publishes an OEM partnership route.'
+  ]);
   assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');
   assert.equal(snapshot.dispatches.recent[0].model, 'gpt-5.6-sol');
   assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
@@ -660,6 +714,27 @@ test('builds an expiring allowlisted command without source content', () => {
   });
   assert.equal(feedback.params.rating, 'wrong_priority');
   assert.equal(feedback.params.dispatch_id, 'dispatch:done');
+
+  const opportunityFeedback = buildCompanyOperatorCommand({
+    commandId: 'mobile-opportunity-feedback-001',
+    action: 'rate_opportunity',
+    snapshot: { stateVersion: 'state-1' },
+    target: {
+      opportunityId: 'opportunity:imaging-partner',
+      evidenceFingerprint: 'opportunity-evidence-1'
+    },
+    params: { rating: 'useful', note: '' },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(
+    opportunityFeedback.target.opportunity_id,
+    'opportunity:imaging-partner'
+  );
+  assert.equal(
+    opportunityFeedback.target.evidence_fingerprint,
+    'opportunity-evidence-1'
+  );
+  assert.equal(opportunityFeedback.params.rating, 'useful');
 });
 
 test('uses the dedicated private repository defaults and reports stale state', () => {

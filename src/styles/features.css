@@ -1209,6 +1209,32 @@ tr:nth-child(even) td {
   background: #f0fdf4;
 }
 
+.company-dispatch-card.opportunity.drafted {
+  border-color: #86efac;
+  background: linear-gradient(145deg, #f0fdf4, #ffffff 90%);
+}
+
+.company-dispatch-card.opportunity.contact_missing {
+  border-color: #fbbf24;
+  background: #fffbeb;
+}
+
+.company-opportunity-reasons {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0;
+  padding-left: 1.15rem;
+  color: #334155;
+  line-height: 1.4;
+}
+
+.company-draft-types {
+  margin: 0;
+  color: #334155;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
 .company-dispatch-card.needs-you {
   border-color: #fbbf24;
   background: #fffbeb;
