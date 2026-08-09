@@ -2,17 +2,17 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T07:58:02.115Z",
+  "updatedAt": "2026-08-09T12:23:02.489Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-08-02T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-09T07:58:02.840Z",
+    "observedAt": "2026-08-09T12:23:03.355Z",
     "primary": {
-      "usedPercent": 15,
-      "remainingPercent": 85,
+      "usedPercent": 35,
+      "remainingPercent": 65,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-15T20:29:47.000Z"
     },
@@ -453,7 +453,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-3d9de079dae0320baddbb69c",
+      "id": "codex-4614480fd21a120973852d6d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -465,14 +465,22 @@
       "effectiveSeconds": 1999,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 3333,
           "effectiveSeconds": 1999
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-3d9de079dae0320baddbb69c"
       ],
       "description": "Codex: email-helper"
     },
@@ -813,7 +821,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-0dfad4ea3ba3867cfbe21a6f",
+      "id": "codex-142b607c159b267faa57c4bf",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -825,14 +833,22 @@
       "effectiveSeconds": 165,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 275,
           "effectiveSeconds": 165
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-0dfad4ea3ba3867cfbe21a6f"
       ],
       "description": "Codex: email-helper"
     },
@@ -861,7 +877,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-c2ca74bd205cff6c4c4fd5c5",
+      "id": "codex-c2639403533332bc02ad2926",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -873,14 +889,22 @@
       "effectiveSeconds": 1916,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 3194,
           "effectiveSeconds": 1916
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-c2ca74bd205cff6c4c4fd5c5"
       ],
       "description": "Codex: email-helper"
     },
@@ -981,7 +1005,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-d356a69ea34d59b946a96075",
+      "id": "codex-ec76eadfe21f32153b86cb8f",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -993,21 +1017,32 @@
       "effectiveSeconds": 282,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 565,
           "effectiveSeconds": 282
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-d356a69ea34d59b946a96075"
       ],
       "description": "Codex: email-helper"
     },
@@ -1379,7 +1414,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-97217313ef23dde7bbd4e123",
+      "id": "codex-fb7e71b78f7321833b360682",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1391,19 +1426,27 @@
       "effectiveSeconds": 233,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 466,
           "effectiveSeconds": 233
         }
       ],
+      "supersedesExternalIds": [
+        "codex-97217313ef23dde7bbd4e123"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-bab8490929d874555d2accff",
+      "id": "codex-ec68f158c4dc0ca8b4ca424e",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1415,26 +1458,37 @@
       "effectiveSeconds": 424,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 707,
           "effectiveSeconds": 424
         }
       ],
+      "supersedesExternalIds": [
+        "codex-bab8490929d874555d2accff"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-750b56bc0ba8bc5b0caab292",
+      "id": "codex-8267fa40aa29b45f22fa45b2",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1446,14 +1500,22 @@
       "effectiveSeconds": 1600,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 2668,
           "effectiveSeconds": 1600
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-750b56bc0ba8bc5b0caab292"
       ],
       "description": "Codex: email-helper"
     },
@@ -1489,7 +1551,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-873ea549224edebf6941f407",
+      "id": "codex-d83d5842c7cb2ad04f195e4e",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1501,19 +1563,27 @@
       "effectiveSeconds": 531,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 885,
           "effectiveSeconds": 531
         }
       ],
+      "supersedesExternalIds": [
+        "codex-873ea549224edebf6941f407"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-715073e53bcc2d715db0d4d5",
+      "id": "codex-06420fa852f2395da23914f4",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1525,21 +1595,32 @@
       "effectiveSeconds": 799,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1597,
           "effectiveSeconds": 798
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-715073e53bcc2d715db0d4d5"
       ],
       "description": "Codex: email-helper"
     },
@@ -1568,7 +1649,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-e64824df562ad4747ed84c65",
+      "id": "codex-cadb4c1e4721075f1b4ffe81",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1580,19 +1661,27 @@
       "effectiveSeconds": 15,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 31,
           "effectiveSeconds": 15
         }
       ],
+      "supersedesExternalIds": [
+        "codex-e64824df562ad4747ed84c65"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-ceb5acb48f4bdd3aa6a7d65a",
+      "id": "codex-15ab25c6782f2706d04f713d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1604,19 +1693,27 @@
       "effectiveSeconds": 429,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 858,
           "effectiveSeconds": 429
         }
       ],
+      "supersedesExternalIds": [
+        "codex-ceb5acb48f4bdd3aa6a7d65a"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-10c9ab4b2ac1b7bcf44b5ae9",
+      "id": "codex-ea2bb0ad57473747cdf45d38",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1628,19 +1725,27 @@
       "effectiveSeconds": 69,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 139,
           "effectiveSeconds": 69
         }
       ],
+      "supersedesExternalIds": [
+        "codex-10c9ab4b2ac1b7bcf44b5ae9"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-8ce63c6cc2c1347540185744",
+      "id": "codex-45004627c0d8b7b20ca325fa",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1652,14 +1757,22 @@
       "effectiveSeconds": 696,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1393,
           "effectiveSeconds": 696
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-8ce63c6cc2c1347540185744"
       ],
       "description": "Codex: email-helper"
     },
@@ -1688,7 +1801,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-4ecc133ffe7519444363b8b7",
+      "id": "codex-459e0db00bd762d87da97231",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1700,26 +1813,37 @@
       "effectiveSeconds": 524,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 874,
           "effectiveSeconds": 524
         }
       ],
+      "supersedesExternalIds": [
+        "codex-4ecc133ffe7519444363b8b7"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-99481082eec512c08ff64ba5",
+      "id": "codex-1ba46e10c5e14a4eeabd342d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1731,21 +1855,32 @@
       "effectiveSeconds": 170,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 379,
           "effectiveSeconds": 170
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-99481082eec512c08ff64ba5"
       ],
       "description": "Codex: email-helper"
     },
@@ -1781,7 +1916,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-9bb1593df5bad072b8a38af2",
+      "id": "codex-036e9880fb62aa6259417144",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1793,21 +1928,32 @@
       "effectiveSeconds": 1269,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 2115,
           "effectiveSeconds": 1269
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-9bb1593df5bad072b8a38af2"
       ],
       "description": "Codex: email-helper"
     },
@@ -1843,7 +1989,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-b22975ede8ecfcd3c0895bc9",
+      "id": "codex-7c7bc54a3dbac16a0fd160ce",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1855,21 +2001,32 @@
       "effectiveSeconds": 150,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 334,
           "effectiveSeconds": 150
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-b22975ede8ecfcd3c0895bc9"
       ],
       "description": "Codex: email-helper"
     },
@@ -2408,7 +2565,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-7e8ddc7e1dc823209265c130",
+      "id": "codex-408f26b6dcb0107a364aa333",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -2420,28 +2577,42 @@
       "effectiveSeconds": 5867,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 8402,
           "effectiveSeconds": 5041
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1651,
           "effectiveSeconds": 825
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-7e8ddc7e1dc823209265c130"
       ],
       "description": "Codex: email-helper"
     },
@@ -2632,6 +2803,59 @@
       "description": "Codex: IFLAI"
     },
     {
+      "id": "codex-0919053591149a298f9ee629",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T06:52:38.212Z",
+      "endTime": "2026-08-09T08:02:53.620Z",
+      "wallSeconds": 4215,
+      "focusFactor": 0.6051,
+      "effectiveSeconds": 2550,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 4215,
+          "effectiveSeconds": 2529
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 153,
+          "effectiveSeconds": 21
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-815d0c8241c494cfcb230ae9",
+        "codex-1d67a56d1f0727e3486064f6"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
       "id": "codex-c06c478eb42c6a99d6471a2a",
       "threadId": "019fe54d-6977-7b61-820a-7881121a5888",
       "projectKey": "IFLAI",
@@ -2692,6 +2916,493 @@
         }
       ],
       "description": "Codex: AZgent"
+    },
+    {
+      "id": "codex-c52a52da1fd719919212300b",
+      "threadId": "019fdd30-4d67-7dd1-b28c-311a936d1b59",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-09T06:56:16.246Z",
+      "endTime": "2026-08-09T09:32:54.249Z",
+      "wallSeconds": 9398,
+      "focusFactor": 0.5785,
+      "effectiveSeconds": 5436,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 2019,
+          "effectiveSeconds": 1009
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 7378,
+          "effectiveSeconds": 4427
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-f93a5ac2a4faf05f2a50e8e3"
+      ],
+      "description": "Codex: Design end-to-end torsion workflow"
+    },
+    {
+      "id": "codex-7f9998b690b187a6c26472dc",
+      "threadId": "019fe592-0db7-7792-9fdb-efe0aafef069",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:09:42.718Z",
+      "endTime": "2026-08-09T08:10:31.512Z",
+      "wallSeconds": 48,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 19,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "high",
+          "factor": 0.4,
+          "wallSeconds": 47,
+          "effectiveSeconds": 19
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-877bccceeab1caf9c4f3b7e7",
+      "threadId": "019fe592-f4ff-71e1-80c9-b892be64c979",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:10:41.690Z",
+      "endTime": "2026-08-09T08:11:04.455Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.3553,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 2,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 20,
+          "effectiveSeconds": 7
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-ab0bc77f9a67f265126d6f47",
+      "threadId": "019fe593-67e3-7730-9d24-92e2924c735d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:11:11.430Z",
+      "endTime": "2026-08-09T08:12:35.266Z",
+      "wallSeconds": 83,
+      "focusFactor": 0.4993,
+      "effectiveSeconds": 41,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 83,
+          "effectiveSeconds": 41
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-a6f4e347998beaebea816798",
+      "threadId": "019fe596-a546-73e1-8c16-2723a7dfe17d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:14:43.626Z",
+      "endTime": "2026-08-09T08:17:16.462Z",
+      "wallSeconds": 152,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 76,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 151,
+          "effectiveSeconds": 75
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-c1530cc6abdde50f3a5fae86",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-09T08:16:56.166Z",
+      "endTime": "2026-08-09T08:18:07.447Z",
+      "wallSeconds": 71,
+      "focusFactor": 0.6,
+      "effectiveSeconds": 42,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 71,
+          "effectiveSeconds": 42
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
+    },
+    {
+      "id": "codex-5e49e38ab578ce541b01daa0",
+      "threadId": "019fe59b-36fb-77e3-8b3d-2b51eb6d86be",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:19:43.207Z",
+      "endTime": "2026-08-09T08:20:05.374Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "high",
+          "factor": 0.4,
+          "wallSeconds": 16,
+          "effectiveSeconds": 6
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-16a531d641e4802ed04cecfc",
+      "threadId": "019fe59b-ab79-79a1-85e1-51c7999f31b9",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:20:12.923Z",
+      "endTime": "2026-08-09T08:21:13.978Z",
+      "wallSeconds": 61,
+      "focusFactor": 0.3503,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 60,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-2f7fd108c199040431efdab3",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T08:21:50.355Z",
+      "endTime": "2026-08-09T08:58:30.536Z",
+      "wallSeconds": 2200,
+      "focusFactor": 0.5872,
+      "effectiveSeconds": 1292,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 2,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 2199,
+          "effectiveSeconds": 1099
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 5,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1365,
+          "effectiveSeconds": 191
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-f683dedeb29401947e320484",
+        "codex-b7bb601a46db2dc081ba90d2",
+        "codex-ef3c3877fe90ff3828c46354"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-ead9f6531d9156d56c9b5498",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T09:19:47.619Z",
+      "endTime": "2026-08-09T11:59:34.269Z",
+      "wallSeconds": 9586,
+      "focusFactor": 0.5871,
+      "effectiveSeconds": 5628,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 210,
+          "effectiveSeconds": 105
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
+          "wallSeconds": 8693,
+          "effectiveSeconds": 5216
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
+          "wallSeconds": 682,
+          "effectiveSeconds": 307
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-a61831648f61fa3996c0c0ca"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-2fdf90cdd88148405e963c18",
+      "threadId": "019fe5d2-3644-76b0-a074-223365c28932",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-09T09:19:47.840Z",
+      "endTime": "2026-08-09T09:20:13.925Z",
+      "wallSeconds": 26,
+      "focusFactor": 0.354,
+      "effectiveSeconds": 9,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 2,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-terra",
+          "effort": "medium",
+          "factor": 0.35,
+          "wallSeconds": 23,
+          "effectiveSeconds": 8
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-38f7f37861b371828652a12d",
+      "threadId": "019fdd30-4d67-7dd1-b28c-311a936d1b59",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-09T09:53:55.813Z",
+      "endTime": "2026-08-09T10:25:19.556Z",
+      "wallSeconds": 1883,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 941,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 1883,
+          "effectiveSeconds": 941
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-3e714b35d80b8e62458495d0"
+      ],
+      "description": "Codex: Design end-to-end torsion workflow"
+    },
+    {
+      "id": "codex-db40f660b481ce24977bde7a",
+      "threadId": "019fdd30-4d67-7dd1-b28c-311a936d1b59",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-09T11:12:41.260Z",
+      "endTime": "2026-08-09T11:38:57.407Z",
+      "wallSeconds": 1576,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 788,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 1576,
+          "effectiveSeconds": 788
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-a0fe14f3d5f06fc979657da8"
+      ],
+      "description": "Codex: Design end-to-end torsion workflow"
+    },
+    {
+      "id": "codex-ac033c37dfce0d47cc57933d",
+      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-09T11:28:58.433Z",
+      "endTime": "2026-08-09T11:59:29.630Z",
+      "wallSeconds": 1831,
+      "focusFactor": 0.6,
+      "effectiveSeconds": 1098,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 1831,
+          "effectiveSeconds": 1098
+        }
+      ],
+      "description": "Codex: Execute research project end to end"
     }
   ]
 }
