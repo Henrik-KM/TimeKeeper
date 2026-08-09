@@ -2,14 +2,14 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-09T07:58:02.115Z",
+  "updatedAt": "2026-08-09T08:03:02.215Z",
   "dayStart": "2026-08-08T22:00:00.000Z",
   "rangeStart": "2026-08-02T22:00:00.000Z",
   "lookbackDays": 7,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [],
   "usageLimits": {
-    "observedAt": "2026-08-09T07:58:02.840Z",
+    "observedAt": "2026-08-09T08:03:02.807Z",
     "primary": {
       "usedPercent": 15,
       "remainingPercent": 85,
@@ -453,7 +453,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-3d9de079dae0320baddbb69c",
+      "id": "codex-4614480fd21a120973852d6d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -465,14 +465,22 @@
       "effectiveSeconds": 1999,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 3333,
           "effectiveSeconds": 1999
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-3d9de079dae0320baddbb69c"
       ],
       "description": "Codex: email-helper"
     },
@@ -813,7 +821,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-0dfad4ea3ba3867cfbe21a6f",
+      "id": "codex-142b607c159b267faa57c4bf",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -825,14 +833,22 @@
       "effectiveSeconds": 165,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 275,
           "effectiveSeconds": 165
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-0dfad4ea3ba3867cfbe21a6f"
       ],
       "description": "Codex: email-helper"
     },
@@ -861,7 +877,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-c2ca74bd205cff6c4c4fd5c5",
+      "id": "codex-c2639403533332bc02ad2926",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -873,14 +889,22 @@
       "effectiveSeconds": 1916,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 3194,
           "effectiveSeconds": 1916
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-c2ca74bd205cff6c4c4fd5c5"
       ],
       "description": "Codex: email-helper"
     },
@@ -981,7 +1005,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-d356a69ea34d59b946a96075",
+      "id": "codex-ec76eadfe21f32153b86cb8f",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -993,21 +1017,32 @@
       "effectiveSeconds": 282,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 565,
           "effectiveSeconds": 282
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-d356a69ea34d59b946a96075"
       ],
       "description": "Codex: email-helper"
     },
@@ -1379,7 +1414,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-97217313ef23dde7bbd4e123",
+      "id": "codex-fb7e71b78f7321833b360682",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1391,19 +1426,27 @@
       "effectiveSeconds": 233,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 466,
           "effectiveSeconds": 233
         }
       ],
+      "supersedesExternalIds": [
+        "codex-97217313ef23dde7bbd4e123"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-bab8490929d874555d2accff",
+      "id": "codex-ec68f158c4dc0ca8b4ca424e",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1415,26 +1458,37 @@
       "effectiveSeconds": 424,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 707,
           "effectiveSeconds": 424
         }
       ],
+      "supersedesExternalIds": [
+        "codex-bab8490929d874555d2accff"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-750b56bc0ba8bc5b0caab292",
+      "id": "codex-8267fa40aa29b45f22fa45b2",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1446,14 +1500,22 @@
       "effectiveSeconds": 1600,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 2668,
           "effectiveSeconds": 1600
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-750b56bc0ba8bc5b0caab292"
       ],
       "description": "Codex: email-helper"
     },
@@ -1489,7 +1551,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-873ea549224edebf6941f407",
+      "id": "codex-d83d5842c7cb2ad04f195e4e",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1501,19 +1563,27 @@
       "effectiveSeconds": 531,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 885,
           "effectiveSeconds": 531
         }
       ],
+      "supersedesExternalIds": [
+        "codex-873ea549224edebf6941f407"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-715073e53bcc2d715db0d4d5",
+      "id": "codex-06420fa852f2395da23914f4",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1525,21 +1595,32 @@
       "effectiveSeconds": 799,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1597,
           "effectiveSeconds": 798
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-715073e53bcc2d715db0d4d5"
       ],
       "description": "Codex: email-helper"
     },
@@ -1568,7 +1649,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-e64824df562ad4747ed84c65",
+      "id": "codex-cadb4c1e4721075f1b4ffe81",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1580,19 +1661,27 @@
       "effectiveSeconds": 15,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 31,
           "effectiveSeconds": 15
         }
       ],
+      "supersedesExternalIds": [
+        "codex-e64824df562ad4747ed84c65"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-ceb5acb48f4bdd3aa6a7d65a",
+      "id": "codex-15ab25c6782f2706d04f713d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1604,19 +1693,27 @@
       "effectiveSeconds": 429,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 858,
           "effectiveSeconds": 429
         }
       ],
+      "supersedesExternalIds": [
+        "codex-ceb5acb48f4bdd3aa6a7d65a"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-10c9ab4b2ac1b7bcf44b5ae9",
+      "id": "codex-ea2bb0ad57473747cdf45d38",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1628,19 +1725,27 @@
       "effectiveSeconds": 69,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 139,
           "effectiveSeconds": 69
         }
       ],
+      "supersedesExternalIds": [
+        "codex-10c9ab4b2ac1b7bcf44b5ae9"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-8ce63c6cc2c1347540185744",
+      "id": "codex-45004627c0d8b7b20ca325fa",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1652,14 +1757,22 @@
       "effectiveSeconds": 696,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1393,
           "effectiveSeconds": 696
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-8ce63c6cc2c1347540185744"
       ],
       "description": "Codex: email-helper"
     },
@@ -1688,7 +1801,7 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-4ecc133ffe7519444363b8b7",
+      "id": "codex-459e0db00bd762d87da97231",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1700,26 +1813,37 @@
       "effectiveSeconds": 524,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 874,
           "effectiveSeconds": 524
         }
       ],
+      "supersedesExternalIds": [
+        "codex-4ecc133ffe7519444363b8b7"
+      ],
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-99481082eec512c08ff64ba5",
+      "id": "codex-1ba46e10c5e14a4eeabd342d",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1731,21 +1855,32 @@
       "effectiveSeconds": 170,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 379,
           "effectiveSeconds": 170
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-99481082eec512c08ff64ba5"
       ],
       "description": "Codex: email-helper"
     },
@@ -1781,7 +1916,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-9bb1593df5bad072b8a38af2",
+      "id": "codex-036e9880fb62aa6259417144",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1793,21 +1928,32 @@
       "effectiveSeconds": 1269,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 2115,
           "effectiveSeconds": 1269
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-9bb1593df5bad072b8a38af2"
       ],
       "description": "Codex: email-helper"
     },
@@ -1843,7 +1989,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-b22975ede8ecfcd3c0895bc9",
+      "id": "codex-7c7bc54a3dbac16a0fd160ce",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -1855,21 +2001,32 @@
       "effectiveSeconds": 150,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 334,
           "effectiveSeconds": 150
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-b22975ede8ecfcd3c0895bc9"
       ],
       "description": "Codex: email-helper"
     },
@@ -2408,7 +2565,7 @@
       "description": "Codex: email-helper"
     },
     {
-      "id": "codex-7e8ddc7e1dc823209265c130",
+      "id": "codex-408f26b6dcb0107a364aa333",
       "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
       "projectKey": "email-helper",
       "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
@@ -2420,28 +2577,42 @@
       "effectiveSeconds": 5867,
       "focusPolicyVersion": 3,
       "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "medium",
           "factor": 0.45,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.45,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "max",
           "factor": 0.6,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.6,
           "wallSeconds": 8402,
           "effectiveSeconds": 5041
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1651,
           "effectiveSeconds": 825
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-7e8ddc7e1dc823209265c130"
       ],
       "description": "Codex: email-helper"
     },
