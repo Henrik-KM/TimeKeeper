@@ -139,6 +139,8 @@ test('normalizes a bounded mobile Company snapshot', () => {
           reasoning_effort: 'max',
           model_routing_tier: 'frontier',
           execution_repo: 'email-helper',
+          execution_branch: 'codex/company-operator',
+          execution_branch_pending_commit_count: 2,
           duration_seconds: 125,
           result: {
             status: 'needs_decision',
@@ -190,6 +192,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
   });
 
   assert.equal(snapshot.today.project, 'Avantor');
+  assert.equal(
+    snapshot.dispatches.recent[0].executionBranch,
+    'codex/company-operator'
+  );
+  assert.equal(
+    snapshot.dispatches.recent[0].executionBranchPendingCommitCount,
+    2
+  );
   assert.equal(snapshot.priorities[0].issueId, 'priority:avantor');
   assert.equal(
     snapshot.workProducts.assets[0].format,
@@ -240,6 +250,103 @@ test('normalizes a bounded mobile Company snapshot', () => {
     'decision-evidence-1'
   );
   assert.equal(snapshot.priorities[0].title, '<img src=x onerror=alert(1)>');
+});
+
+test('normalizes persistent missions, questions, progress, and verified outputs', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    missions: {
+      status: 'ready',
+      active_count: 2,
+      waiting_count: 1,
+      completed_today_count: 1,
+      budget: {
+        automatic_steps_today: 3,
+        automatic_minutes_today: 24,
+        steps_remaining: 3,
+        minutes_remaining: 66
+      },
+      primary: {
+        mission_id: 'mission:avantor',
+        issue_id: 'priority:avantor',
+        evidence_fingerprint: 'evidence-1',
+        project: 'Avantor',
+        objective: 'Finish the camera delivery package.',
+        done_when: 'The tested package is available in a local commit.',
+        status: 'active',
+        step_count: 2,
+        latest_update: 'Implemented the validated configuration.',
+        current_step: {
+          title: 'Run the final validation',
+          status: 'running'
+        }
+      },
+      active: [
+        {
+          mission_id: 'mission:avantor',
+          issue_id: 'priority:avantor',
+          evidence_fingerprint: 'evidence-1',
+          project: 'Avantor',
+          objective: 'Finish the camera delivery package.',
+          status: 'active'
+        },
+        {
+          mission_id: 'mission:albany',
+          issue_id: 'priority:albany',
+          evidence_fingerprint: 'evidence-2',
+          project: 'Albany',
+          objective: 'Confirm the delivery route.',
+          status: 'waiting_for_decision',
+          user_request: {
+            dispatch_id: 'dispatch:albany',
+            instruction: 'Choose direct delivery or partner delivery.',
+            choices: [
+              {
+                id: 'direct',
+                label: 'Direct',
+                kind: 'decision',
+                fields: []
+              }
+            ]
+          }
+        }
+      ],
+      completed_today: [
+        {
+          mission_id: 'mission:done',
+          issue_id: 'priority:done',
+          evidence_fingerprint: 'evidence-3',
+          project: 'Aventix',
+          objective: 'Repair the data export.',
+          status: 'completed',
+          destinations: [
+            {
+              type: 'local_commit',
+              mode: 'none',
+              label: 'Aventix local commit',
+              reference: 'abc123',
+              location: 'Aventix',
+              verified: true
+            }
+          ]
+        }
+      ]
+    }
+  });
+
+  assert.equal(snapshot.missions.activeCount, 2);
+  assert.equal(snapshot.missions.primary.currentStep.status, 'running');
+  assert.equal(snapshot.missions.primary.stepCount, 2);
+  assert.equal(
+    snapshot.missions.active[1].userRequest.dispatchId,
+    'dispatch:albany'
+  );
+  assert.equal(
+    snapshot.missions.active[1].userRequest.choices[0].label,
+    'Direct'
+  );
+  assert.equal(snapshot.missions.completedToday[0].destinations[0].type, 'local_commit');
+  assert.equal(snapshot.missions.budget.stepsRemaining, 3);
 });
 
 test('normalizes concise action-first company results', () => {
@@ -442,7 +549,8 @@ test('builds an expiring allowlisted command without source content', () => {
     snapshot: { stateVersion: 'state-1' },
     target: {
       issueId: 'priority:avantor',
-      evidenceFingerprint: 'evidence-1'
+      evidenceFingerprint: 'evidence-1',
+      missionId: 'mission:avantor'
     },
     params: { note: 'Focus on the pricing assumptions.' },
     now: new Date('2026-08-03T12:00:00.000Z')
@@ -451,6 +559,7 @@ test('builds an expiring allowlisted command without source content', () => {
   assert.equal(command.source, 'timekeeper_mobile');
   assert.equal(command.action, 'work_next');
   assert.equal(command.target.issue_id, 'priority:avantor');
+  assert.equal(command.target.mission_id, 'mission:avantor');
   assert.equal(command.params.note, 'Focus on the pricing assumptions.');
   assert.equal(command.expires_at, '2026-08-05T12:00:00.000Z');
   assert.doesNotMatch(JSON.stringify(command), /email.body|slack.message/i);

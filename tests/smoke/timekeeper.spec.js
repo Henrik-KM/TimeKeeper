@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v17';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v18';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1744,6 +1744,8 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           reasoning_effort: 'medium',
           model_routing_tier: 'standard',
           execution_repo: 'Aventix',
+          execution_branch: 'codex/company-operator',
+          execution_branch_pending_commit_count: 1,
           duration_seconds: 96,
           time_tracking_status: 'session_persisted',
           result: {
@@ -1849,7 +1851,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       .find((heading) => heading.textContent === 'Needs you')
       ?.getBoundingClientRect().top
   }));
-  expect(sectionOrder.priority).toBeLessThan(sectionOrder.question);
+  expect(sectionOrder.question).toBeLessThan(sectionOrder.priority);
   await expect(page.locator('#companyPageContent')).not.toContainText(
     'Commercial workbook'
   );
@@ -1922,6 +1924,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'IFLAI time recorded'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 pending Company Operator commit'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
     'Aventix local commit'
@@ -2047,6 +2052,238 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'decision-evidence-1'
   );
   expect(decisionCommand.params.decision).toBe('approve');
+});
+
+test('mobile Company tab presents missions before the next priority', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-03T12:00:00.000Z');
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorToken',
+      'github_pat_private_company_mission_test'
+    );
+  });
+  const snapshot = {
+    schema_version: 1,
+    generated_at: '2026-08-03T11:59:00.000Z',
+    status: 'ready',
+    state_version: 'state-missions-1',
+    today: {},
+    priorities: [
+      {
+        issue_id: 'priority:vwr-avantor',
+        evidence_fingerprint: 'evidence-vwr-1',
+        project: 'VWR/Avantor',
+        title: 'Camera pilot follow-through',
+        priority_score: 84,
+        next_action: 'Prepare the next customer-ready pilot deliverable.',
+        done_when: 'The deliverable is tested and ready at a named location.'
+      }
+    ],
+    missions: {
+      status: 'ready',
+      active_count: 1,
+      waiting_count: 1,
+      completed_today_count: 1,
+      budget: {
+        automatic_steps_today: 2,
+        automatic_minutes_today: 18,
+        steps_remaining: 4,
+        minutes_remaining: 72
+      },
+      primary: {
+        mission_id: 'mission:avantor',
+        issue_id: 'priority:avantor-delivery',
+        evidence_fingerprint: 'evidence-avantor-delivery-1',
+        project: 'Avantor',
+        objective: 'Finish the tested camera configuration for the customer.',
+        done_when: 'The tested configuration is available in a verified local commit.',
+        status: 'active',
+        step_count: 1,
+        latest_update: 'Implemented the supported device configuration.',
+        current_step: { title: '', status: '' },
+        is_primary: true
+      },
+      active: [
+        {
+          mission_id: 'mission:avantor',
+          issue_id: 'priority:avantor-delivery',
+          evidence_fingerprint: 'evidence-avantor-delivery-1',
+          project: 'Avantor',
+          objective: 'Finish the tested camera configuration for the customer.',
+          done_when: 'The tested configuration is available in a verified local commit.',
+          status: 'active',
+          step_count: 1,
+          latest_update: 'Implemented the supported device configuration.',
+          is_primary: true
+        },
+        {
+          mission_id: 'mission:albany',
+          issue_id: 'priority:albany-route',
+          evidence_fingerprint: 'evidence-albany-route-1',
+          project: 'Albany',
+          objective: 'Prepare the agreed customer delivery route.',
+          done_when: 'The selected route is implemented and ready for review.',
+          status: 'waiting_for_decision',
+          user_request: {
+            dispatch_id: 'dispatch:albany-route',
+            instruction: 'Choose direct delivery or partner delivery.',
+            reason: 'Both are supported; the commercial choice is protected.',
+            choices: [
+              {
+                id: 'direct',
+                label: 'Direct delivery',
+                kind: 'decision',
+                fields: []
+              },
+              {
+                id: 'partner',
+                label: 'Partner delivery',
+                kind: 'decision',
+                fields: []
+              }
+            ]
+          }
+        }
+      ],
+      completed_today: [
+        {
+          mission_id: 'mission:aventix',
+          issue_id: 'priority:aventix-export',
+          evidence_fingerprint: 'evidence-aventix-export-1',
+          project: 'Aventix',
+          objective: 'Repair the customer data export.',
+          status: 'completed',
+          latest_update: 'The export fix passed its regression test.',
+          destinations: [
+            {
+              type: 'local_commit',
+              mode: 'none',
+              label: 'Aventix local commit',
+              location: 'Aventix',
+              reference: '1234567890abcdef',
+              status_text: 'Committed locally and not pushed.',
+              verified: true
+            }
+          ]
+        }
+      ]
+    },
+    work_products: { status: 'ready', assets: [] },
+    decisions: { pending_count: 0, deferred_count: 0, pending: [] },
+    handled: { today_verified_actions: 1, receipts: [] },
+    dispatches: { in_progress_count: 0, in_progress: [], recent: [] },
+    sources: {
+      status: 'ready',
+      attention_count: 0,
+      items: [{ name: 'outlook', status: 'ready', status_text: 'Up to date' }]
+    }
+  };
+  const encodedSnapshot = Buffer.from(JSON.stringify(snapshot)).toString(
+    'base64'
+  );
+  await page.route('https://api.github.com/**', async (route) => {
+    const request = route.request();
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encodedSnapshot, sha: 'state-sha' })
+      });
+      return;
+    }
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/receipts/')
+    ) {
+      await route.fulfill({ status: 404, body: '{}' });
+      return;
+    }
+    if (
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+    ) {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { path: 'company-operator/commands' } })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  const content = page.locator('#companyPageContent');
+  await expect(content).toContainText('Working now');
+  await expect(content).toContainText('Completed for you');
+  await expect(content).toContainText('Needs you');
+  await expect(content).toContainText('Up next');
+  await expect(content).toContainText(
+    'Finish the tested camera configuration for the customer.'
+  );
+  await expect(content).toContainText('Aventix local commit');
+  await expect(content).toContainText(
+    'Choose direct delivery or partner delivery.'
+  );
+  await expect(content).toContainText('VWR/Avantor');
+  const order = await page.evaluate(() => {
+    const headings = [...document.querySelectorAll('#companyPageContent h3')];
+    return Object.fromEntries(
+      ['Working now', 'Completed for you', 'Needs you'].map((label) => [
+        label,
+        headings.find((heading) => heading.textContent === label)?.getBoundingClientRect().top
+      ])
+    );
+  });
+  const upNext = await page
+    .locator('#companyPageContent .company-primary-card')
+    .evaluate((node) => node.getBoundingClientRect().top);
+  expect(order['Working now']).toBeLessThan(order['Completed for you']);
+  expect(order['Completed for you']).toBeLessThan(order['Needs you']);
+  expect(order['Needs you']).toBeLessThan(upNext);
+
+  const commandRequest = page.waitForRequest(
+    (request) =>
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+  );
+  await page.getByRole('button', { name: 'Continue now' }).click();
+  const commandPayload = (await commandRequest).postDataJSON();
+  const command = JSON.parse(
+    Buffer.from(commandPayload.content, 'base64').toString('utf8')
+  );
+  expect(command.action).toBe('work_next');
+  expect(command.target.issue_id).toBe('priority:avantor-delivery');
+  expect(command.target.mission_id).toBe('mission:avantor');
+
+  const layout = await page.evaluate(() => ({
+    viewportWidth: window.innerWidth,
+    scrollWidth: document.documentElement.scrollWidth,
+    minimumActionHeight: Math.min(
+      ...[...document.querySelectorAll('#companyPageContent .company-action-grid .btn')].map(
+        (button) => button.getBoundingClientRect().height
+      ).filter((height) => height > 0)
+    )
+  }));
+  expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);
+  expect(layout.minimumActionHeight).toBeGreaterThanOrEqual(44);
 });
 
 test('mobile shell exposes Now bar More menu sync status charts and richer quick timers', async ({

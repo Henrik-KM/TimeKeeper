@@ -142,7 +142,8 @@ export function createCompanyOperatorController({
         snapshot,
         target: {
           issueId: priority.issueId,
-          evidenceFingerprint: priority.evidenceFingerprint
+          evidenceFingerprint: priority.evidenceFingerprint,
+          missionId: priority.missionId
         },
         params
       });
@@ -159,6 +160,7 @@ export function createCompanyOperatorController({
           label: priority.project || priority.title || 'Company priority',
           issueId: priority.issueId,
           evidenceFingerprint: priority.evidenceFingerprint,
+          missionId: priority.missionId || '',
           dispatchId: String(params.dispatchId || ''),
           project: priority.project || 'Company',
           title: priority.title || '',
@@ -489,8 +491,13 @@ export function createCompanyOperatorController({
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
     const dispatches = compactDispatchSections();
-    if (dispatches.inProgress) root.appendChild(dispatches.inProgress);
-    if (dispatches.done) root.appendChild(dispatches.done);
+    const missions = missionSections();
+    if (missions.working) root.appendChild(missions.working);
+    else if (dispatches.inProgress) root.appendChild(dispatches.inProgress);
+    if (missions.completed) root.appendChild(missions.completed);
+    else if (dispatches.done) root.appendChild(dispatches.done);
+    if (missions.needsYou) root.appendChild(missions.needsYou);
+    else if (dispatches.needsYou) root.appendChild(dispatches.needsYou);
     const priorities = visiblePriorities();
     const primary = priorities[0];
     if (primary) root.appendChild(primaryCard(primary));
@@ -502,10 +509,15 @@ export function createCompanyOperatorController({
         )
       );
     }
-    if (dispatches.needsYou) root.appendChild(dispatches.needsYou);
     if (snapshot.decisions.pending.length) {
       root.appendChild(decisionSection(snapshot.decisions.pending));
-    } else if (!primary && !dispatches.needsYou && !dispatches.inProgress) {
+    } else if (
+      !primary &&
+      !missions.working &&
+      !missions.needsYou &&
+      !dispatches.needsYou &&
+      !dispatches.inProgress
+    ) {
       root.appendChild(
         card(
           'Nothing needs you',
@@ -567,6 +579,233 @@ export function createCompanyOperatorController({
     const hours = Math.round(minutes / 60);
     if (hours < 48) return `${hours}h old`;
     return `${Math.round(hours / 24)}d old`;
+  }
+
+  function missionSections() {
+    const source = snapshot.missions;
+    const active = Array.isArray(source.active) ? source.active : [];
+    const completedToday = Array.isArray(source.completedToday)
+      ? source.completedToday
+      : [];
+    const workingRows = active.filter((mission) =>
+      ['active', 'queued', 'waiting_for_source'].includes(mission.status)
+    );
+    const waitingRows = active.filter(
+      (mission) => mission.status === 'waiting_for_decision'
+    );
+    const sections = { working: null, completed: null, needsYou: null };
+
+    if (workingRows.length) {
+      const section = sectionBlock('Working now');
+      const primaryId = source.primary?.missionId;
+      const ordered = [...workingRows].sort((left, right) => {
+        if (left.missionId === primaryId) return -1;
+        if (right.missionId === primaryId) return 1;
+        return right.priorityScore - left.priorityScore;
+      });
+      section.appendChild(missionCard(ordered[0], 'working'));
+      if (ordered.length > 1) {
+        const more = element('details', 'company-result-backlog');
+        more.appendChild(
+          element(
+            'summary',
+            '',
+            `${ordered.length - 1} other active mission${ordered.length === 2 ? '' : 's'}`
+          )
+        );
+        ordered.slice(1).forEach((mission) =>
+          more.appendChild(missionCard(mission, 'working compact'))
+        );
+        section.appendChild(more);
+      }
+      sections.working = section;
+    }
+
+    if (completedToday.length) {
+      const section = sectionBlock('Completed for you');
+      const scorecard = source.scorecard;
+      if (scorecard.missionsCompletedToday || scorecard.estimatedMinutesSavedToday) {
+        section.appendChild(
+          element(
+            'p',
+            'company-handled-summary',
+            [
+              scorecard.missionsCompletedToday
+                ? `${scorecard.missionsCompletedToday} finished today`
+                : '',
+              scorecard.estimatedMinutesSavedToday
+                ? `about ${scorecard.estimatedMinutesSavedToday} minutes saved`
+                : ''
+            ]
+              .filter(Boolean)
+              .join(' · ')
+          )
+        );
+      }
+      section.appendChild(missionCard(completedToday.at(-1), 'completed'));
+      if (completedToday.length > 1) {
+        const more = element('details', 'company-result-backlog');
+        more.appendChild(
+          element(
+            'summary',
+            '',
+            `${completedToday.length - 1} earlier completion${completedToday.length === 2 ? '' : 's'}`
+          )
+        );
+        completedToday
+          .slice(0, -1)
+          .reverse()
+          .forEach((mission) =>
+            more.appendChild(missionCard(mission, 'completed compact'))
+          );
+        section.appendChild(more);
+      }
+      sections.completed = section;
+    }
+
+    if (waitingRows.length) {
+      const section = sectionBlock('Needs you');
+      section.appendChild(missionCard(waitingRows[0], 'needs-you'));
+      if (waitingRows.length > 1) {
+        const more = element('details', 'company-question-backlog');
+        more.appendChild(
+          element(
+            'summary',
+            '',
+            `${waitingRows.length - 1} more question${waitingRows.length === 2 ? '' : 's'}`
+          )
+        );
+        waitingRows.slice(1).forEach((mission) =>
+          more.appendChild(missionCard(mission, 'needs-you compact'))
+        );
+        section.appendChild(more);
+      }
+      sections.needsYou = section;
+    }
+    return sections;
+  }
+
+  function missionCard(mission, tone) {
+    const row = element('article', `company-dispatch-card mission ${tone}`);
+    row.appendChild(element('p', 'company-eyebrow', mission.project));
+    row.appendChild(
+      element('strong', '', mission.objective || 'Company mission')
+    );
+    if (tone.includes('needs-you')) {
+      const request = mission.userRequest || {};
+      row.appendChild(
+        element(
+          'p',
+          'company-dispatch-next',
+          request.instruction || 'One answer is needed to continue.'
+        )
+      );
+      const actions = element('div', 'company-action-grid');
+      (request.choices || []).forEach((choice) => {
+        actions.appendChild(
+          button(choice.label, 'primary', () =>
+            answerMission(mission, choice)
+          )
+        );
+      });
+      actions.appendChild(
+        button('Add context', 'secondary', () => answerMission(mission))
+      );
+      row.appendChild(actions);
+    } else if (tone.includes('completed')) {
+      if (mission.latestUpdate) {
+        row.appendChild(element('span', '', mission.latestUpdate));
+      }
+      (mission.destinations || []).forEach((destination) =>
+        row.appendChild(compactResultDestination(destination))
+      );
+    } else {
+      row.appendChild(
+        element('span', '', missionProgressLabel(mission))
+      );
+      if (mission.latestUpdate) {
+        row.appendChild(element('small', '', mission.latestUpdate));
+      }
+      if (!missionCommandPending(mission)) {
+        const actions = element('div', 'company-action-grid');
+        actions.appendChild(
+          button(
+            mission.status === 'queued' ? 'Work now' : 'Continue now',
+            'primary',
+            () => queuePriorityAction('work_next', mission)
+          )
+        );
+        actions.appendChild(
+          button('Add direction', 'secondary', () => addDirection(mission))
+        );
+        row.appendChild(actions);
+        const more = element('details', 'company-more-actions');
+        more.appendChild(element('summary', '', 'More actions'));
+        const secondary = element('div', 'company-action-grid');
+        secondary.appendChild(
+          button('Pause', 'secondary', () => snooze(mission))
+        );
+        secondary.appendChild(
+          button('Already handled', 'secondary', () => markHandled(mission))
+        );
+        more.appendChild(secondary);
+        row.appendChild(more);
+      }
+    }
+    const details = element('details', 'company-run-details');
+    details.appendChild(element('summary', '', 'Finish line and progress'));
+    if (mission.doneWhen) details.appendChild(element('p', '', mission.doneWhen));
+    details.appendChild(
+      element(
+        'small',
+        '',
+        `${mission.stepCount} verified step${mission.stepCount === 1 ? '' : 's'} recorded`
+      )
+    );
+    row.appendChild(details);
+    return row;
+  }
+
+  function missionProgressLabel(mission) {
+    if (missionCommandPending(mission)) {
+      return 'The next Codex step is queued or running.';
+    }
+    if (mission.status === 'waiting_for_source') {
+      return 'Waiting for the next information refresh; no input needed from you.';
+    }
+    if (mission.currentStep?.status === 'running') {
+      return mission.currentStep.title || 'Codex is working on this now.';
+    }
+    if (mission.status === 'queued') {
+      return 'Ready for the next Codex step.';
+    }
+    return 'Codex will continue this mission within today\'s work budget.';
+  }
+
+  function missionCommandPending(mission) {
+    return loadPending().some(
+      (item) =>
+        CODEX_ACTIONS.has(item.action) &&
+        item.issueId === mission.issueId &&
+        (!item.evidenceFingerprint ||
+          item.evidenceFingerprint === mission.evidenceFingerprint)
+    );
+  }
+
+  async function answerMission(mission, choice = null) {
+    await answerDispatch(
+      {
+        dispatchId: mission.userRequest?.dispatchId || '',
+        issueId: mission.issueId,
+        evidenceFingerprint: mission.evidenceFingerprint,
+        project: mission.project,
+        result: {
+          headline: mission.objective,
+          userRequest: mission.userRequest
+        }
+      },
+      choice
+    );
   }
 
   function primaryCard(priority) {
@@ -826,6 +1065,11 @@ export function createCompanyOperatorController({
       [dispatch.model, dispatch.reasoningEffort].filter(Boolean).join(' / '),
       dispatch.executionRepo,
       dispatch.executionBranch ? `Branch ${dispatch.executionBranch}` : '',
+      dispatch.executionBranchPendingCommitCount
+        ? `${dispatch.executionBranchPendingCommitCount} pending Company Operator ${
+            dispatch.executionBranchPendingCommitCount === 1 ? 'commit' : 'commits'
+          }`
+        : '',
       formatDispatchDuration(dispatch.durationSeconds),
       dispatch.timeTrackingStatus === 'session_persisted'
         ? 'IFLAI time recorded'
