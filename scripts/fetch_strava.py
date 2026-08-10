@@ -4,12 +4,20 @@ from datetime import datetime, timedelta, timezone
 
 import requests
 
-from strava_score_features import (
-    SCORE_MODEL_VERSION,
-    derive_stream_score_features,
-    estimate_hr_reference,
-    get_summary_score_features,
-)
+if __package__:
+    from .strava_score_features import (
+        SCORE_MODEL_VERSION,
+        derive_stream_score_features,
+        estimate_hr_reference,
+        get_summary_score_features,
+    )
+else:
+    from strava_score_features import (
+        SCORE_MODEL_VERSION,
+        derive_stream_score_features,
+        estimate_hr_reference,
+        get_summary_score_features,
+    )
 
 CLIENT_ID = os.environ.get("STRAVA_CLIENT_ID", "").strip()
 CLIENT_SECRET = os.environ.get("STRAVA_CLIENT_SECRET", "").strip()
@@ -28,7 +36,6 @@ STREAM_KEYS = (
 
 OUTFILE = "assets/strava.json"
 TOKEN_FILE = "_private/strava_token.json"
-OVERRIDES_FILE = "assets/strava_overrides.json"
 
 
 class StravaConfigurationError(RuntimeError):
@@ -244,37 +251,20 @@ def enrich_activity(activity: dict, access_token: str) -> dict:
     return activity
 
 
-def load_exertion_overrides() -> dict[str, dict[str, float | bool]]:
-    if not os.path.exists(OVERRIDES_FILE):
-        return {}
-    with open(OVERRIDES_FILE, "r", encoding="utf-8") as overrides_file:
-        payload = json.load(overrides_file)
-    overrides: dict[str, dict[str, float | bool]] = {}
-    for key, value in payload.items():
-        record: dict[str, float | bool] = {}
-        if isinstance(value, dict):
-            exertion = value.get("exertion")
-            if isinstance(value.get("faulty"), bool) and value.get("faulty"):
-                record["faulty"] = True
-        else:
-            exertion = value
-        if isinstance(exertion, (int, float)):
-            record["exertion"] = float(exertion)
-        if record:
-            overrides[str(key)] = record
-    return overrides
-
-
-def has_v2_score_features(activity: dict | None) -> bool:
+def has_final_score_features(activity: dict | None) -> bool:
     if not isinstance(activity, dict):
         return False
     features = activity.get("score_features")
     if not isinstance(features, dict):
         return False
     try:
-        return int(features.get("version") or 0) >= SCORE_MODEL_VERSION
+        if int(features.get("version") or 0) < SCORE_MODEL_VERSION:
+            return False
     except (TypeError, ValueError):
         return False
+    if features.get("source") == "streams":
+        return True
+    return features.get("stream_status") == "unavailable"
 
 
 def slim(activity: dict) -> dict:
@@ -376,7 +366,6 @@ def main() -> None:
                 "Missing STRAVA_CLIENT_ID or STRAVA_CLIENT_SECRET."
             )
         refresh_tokens = load_refresh_token_candidates()
-        overrides = load_exertion_overrides()
         existing_payload = read_existing_payload() or {}
         existing_activities = existing_payload.get("activities") or []
         existing_by_id = {
@@ -425,8 +414,8 @@ def main() -> None:
                     )
                 else:
                     try:
-                        enriched = enrich_activity(activity, access_token)
                         detail_requests += 1
+                        enriched = enrich_activity(activity, access_token)
                     except requests.HTTPError as error:
                         status_code = get_http_status_code(error)
                         if status_code == 429:
@@ -444,7 +433,8 @@ def main() -> None:
                     except requests.RequestException as error:
                         print(
                             "Skipping Strava activity "
-                            f"{activity.get('id')} details after request error: {error}."
+                            f"{activity.get('id')} details after request "
+                            f"error: {error}."
                         )
             enriched_activities.append(enriched)
 
@@ -459,10 +449,11 @@ def main() -> None:
             existing = existing_by_id.get(str(payload.get("id")))
             cached_features = (
                 existing.get("score_features")
-                if has_v2_score_features(existing)
+                if has_final_score_features(existing)
                 else None
             )
             score_features = cached_features
+            stream_status = "deferred"
 
             if score_features is None and stream_requests_enabled and payload.get("id"):
                 if stream_requests >= STREAM_REQUEST_LIMIT:
@@ -473,10 +464,13 @@ def main() -> None:
                     )
                 else:
                     try:
-                        streams = get_activity_streams(access_token, payload["id"])
                         stream_requests += 1
+                        streams = get_activity_streams(access_token, payload["id"])
                         score_features = derive_stream_score_features(
                             activity, streams, hr_reference
+                        )
+                        stream_status = (
+                            "complete" if score_features is not None else "unavailable"
                         )
                     except requests.HTTPError as error:
                         status_code = get_http_status_code(error)
@@ -486,24 +480,33 @@ def main() -> None:
                                 "Strava stream rate limit reached; deriving "
                                 "remaining features from activity summaries."
                             )
+                        elif status_code in {400, 404}:
+                            stream_status = "unavailable"
+                            print(
+                                "Strava activity "
+                                f"{activity.get('id')} has no usable streams."
+                            )
                         else:
+                            stream_status = "retry"
                             print(
                                 "Skipping Strava activity "
                                 f"{activity.get('id')} streams after HTTP "
                                 f"{status_code or 'error'}."
                             )
                     except requests.RequestException as error:
+                        stream_status = "retry"
                         print(
                             "Skipping Strava activity "
-                            f"{activity.get('id')} streams after request error: {error}."
+                            f"{activity.get('id')} streams after request "
+                            f"error: {error}."
                         )
 
             if score_features is None:
                 score_features = get_summary_score_features(activity, hr_reference)
+                score_features["stream_status"] = stream_status
+            elif score_features.get("source") == "streams":
+                score_features["stream_status"] = "complete"
             payload["score_features"] = score_features
-            override = overrides.get(str(payload.get("id")))
-            payload["exertion"] = override.get("exertion") if override else None
-            payload["faulty"] = bool(override.get("faulty")) if override else False
             slimmed.append(payload)
 
         merged = merge_activities(existing_activities, slimmed)
@@ -531,7 +534,7 @@ def main() -> None:
         message = str(error)
         write_failure_payload(message)
         raise SystemExit(1) from error
-    except (requests.RequestException, json.JSONDecodeError, KeyError, Exception) as error:
+    except Exception as error:
         message = f"Unexpected error while fetching Strava data: {error}"
         write_failure_payload(message)
         raise SystemExit(1) from error
