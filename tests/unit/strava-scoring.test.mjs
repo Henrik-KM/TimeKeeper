@@ -137,34 +137,42 @@ test('legacy score metadata is preserved but ignored by automatic scoring', () =
   assert.equal(resolveStravaExertion(overridden), 3.8);
 });
 
-test(
-  'dense strength outranks a moderate cardio workout of similar duration',
-  () => {
-    const strength = computeStrengthCredit(features());
-    const cardio = computeCardioCredit(
-      features({
-        strength_minutes: 0,
-        cardio_zone_minutes: [0, 0, 70, 0, 0],
-        strength_density: 0
-      })
-    );
+test('dense strength outranks a moderate cardio workout of similar duration', () => {
+  const strength = computeStrengthCredit(features());
+  const cardio = computeCardioCredit(
+    features({
+      strength_minutes: 0,
+      cardio_zone_minutes: [0, 0, 70, 0, 0],
+      strength_density: 0
+    })
+  );
 
-    assert.ok(strength > cardio + 1);
-    assert.ok(strength > 4.5);
-    assert.ok(cardio < 4);
-  }
-);
+  assert.ok(strength > cardio + 1);
+  assert.ok(strength > 4.5);
+  assert.ok(cardio < 4);
+});
 
-test(
-  'secondary modality adds limited credit and never creates two workouts',
-  () => {
-    assert.equal(combineWorkoutComponents(5.2, 0.8), 5.4);
-    assert.equal(combineWorkoutComponents(4, 4), 5);
-    assert.equal(combineWorkoutComponents(6, 6), 6);
-  }
-);
+test('secondary modality adds limited credit and never creates two workouts', () => {
+  assert.equal(combineWorkoutComponents(5.2, 0.8), 5.4);
+  assert.equal(combineWorkoutComponents(4, 4), 5);
+  assert.equal(combineWorkoutComponents(6, 6), 7);
+  assert.equal(combineWorkoutComponents(9, 6), 10);
+});
 
-test('adjacent Strava records are scored as one bounded mixed session', () => {
+test('long dense strength sessions can exceed six points', () => {
+  const strength = computeStrengthCredit(
+    features({
+      active_minutes: 240,
+      strength_minutes: 240,
+      strength_density: 1,
+      strength_factor: 1.1
+    })
+  );
+
+  assert.ok(strength > 6);
+});
+
+test('adjacent Strava records are scored as one mixed session', () => {
   const warmup = activity({
     id: 10,
     name: 'Warm-up ride',
@@ -221,7 +229,6 @@ test('adjacent Strava records are scored as one bounded mixed session', () => {
 
   const sessionScore = resolveStravaExertion(lifting);
   assert.ok(sessionScore > 4.5);
-  assert.ok(sessionScore <= 6);
   assert.equal(resolveStravaExertion(warmup), null);
   assert.equal(resolveStravaExertion(cooldown), null);
 
@@ -358,52 +365,45 @@ test('missing moving time can be estimated conservatively from distance and spee
   assert.ok(score < 3);
 });
 
-test(
-  'manual and reported exertion values do not replace automatic scoring',
-  () => {
-    const baseline = activity({
-      id: 30,
-      moving_time_min: 60.3,
-      elapsed_time_min: 60.3
-    });
-    const overridden = activity({
-      ...baseline,
-      id: 31,
-      exertion: 99,
-      local_exertion: 99,
-      reported_exertion: 10
-    });
+test('manual and reported exertion values do not replace automatic scoring', () => {
+  const baseline = activity({
+    id: 30,
+    moving_time_min: 60.3,
+    elapsed_time_min: 60.3
+  });
+  const overridden = activity({
+    ...baseline,
+    id: 31,
+    exertion: 99,
+    local_exertion: 99,
+    reported_exertion: 10
+  });
 
-    assert.equal(estimateStravaExertion(baseline), 3.8);
-    assert.equal(estimateStravaExertion(overridden), 3.8);
-  }
-);
+  assert.equal(estimateStravaExertion(baseline), 3.8);
+  assert.equal(estimateStravaExertion(overridden), 3.8);
+});
 
-test(
-  'stream-derived mixed features retain a bounded secondary contribution',
-  () => {
-    const mixed = activity({
-      id: 40,
-      score_features: features({
-        active_minutes: 80,
-        strength_minutes: 65,
-        cardio_zone_minutes: [0, 0, 15, 0, 0],
-        strength_density: 0.65
-      })
-    });
-    const pureStrength = activity({
-      id: 41,
-      score_features: features({
-        active_minutes: 65,
-        strength_minutes: 65,
-        strength_density: 0.65
-      })
-    });
+test('stream-derived mixed features retain a bounded secondary contribution', () => {
+  const mixed = activity({
+    id: 40,
+    score_features: features({
+      active_minutes: 80,
+      strength_minutes: 65,
+      cardio_zone_minutes: [0, 0, 15, 0, 0],
+      strength_density: 0.65
+    })
+  });
+  const pureStrength = activity({
+    id: 41,
+    score_features: features({
+      active_minutes: 65,
+      strength_minutes: 65,
+      strength_density: 0.65
+    })
+  });
 
-    const mixedScore = getStravaWorkoutScoreBreakdown(mixed);
-    const strengthScore = getStravaWorkoutScoreBreakdown(pureStrength);
-    assert.ok(mixedScore.total > strengthScore.total);
-    assert.ok(mixedScore.total - strengthScore.total < 1);
-    assert.ok(mixedScore.total <= 6);
-  }
-);
+  const mixedScore = getStravaWorkoutScoreBreakdown(mixed);
+  const strengthScore = getStravaWorkoutScoreBreakdown(pureStrength);
+  assert.ok(mixedScore.total > strengthScore.total);
+  assert.ok(mixedScore.total - strengthScore.total < 1);
+});

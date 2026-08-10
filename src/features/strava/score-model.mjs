@@ -2,7 +2,7 @@ export const STRAVA_SCORE_MODEL_VERSION = 2;
 export const STRAVA_FEATURE_VERSION = 2;
 export const STRAVA_SCORE_DEFAULT_SCALE = 1;
 
-const MAX_SESSION_SCORE = 6;
+const SCORE_CURVE_SCALE = 6;
 const CARDIO_LOAD_SCALE = 70;
 const CARDIO_ZONE_WEIGHTS = [0.2, 0.45, 0.9, 1.45, 2.1];
 const RECOVERY_ZONE_WEIGHTS = [0.5, 1, 2, 3, 4];
@@ -169,11 +169,7 @@ export function getStravaActivityActiveMinutes(activity, modality) {
 
   if (elapsed !== null) {
     if (!hasMoving || moving < 5) return Math.min(360, elapsed);
-    return Math.min(
-      360,
-      elapsed,
-      Math.max(moving + 30, moving * 1.5, 15)
-    );
+    return Math.min(360, elapsed, Math.max(moving + 30, moving * 1.5, 15));
   }
   return hasMoving ? Math.min(360, moving) : 0;
 }
@@ -303,23 +299,21 @@ export function computeStrengthCredit(features) {
   const density = clampScoreValue(features?.strength_density, 0, 1);
   const factor = clampScoreValue(features?.strength_factor ?? 1, 0.5, 1.1);
   const base =
-    MAX_SESSION_SCORE * (1 - Math.exp(-Math.max(0, minutes - 5) / 45));
+    SCORE_CURVE_SCALE * (1 - Math.exp(-Math.max(0, minutes - 5) / 45));
   const durationQuality = 0.1 * clampScoreValue((minutes - 60) / 45, 0, 1);
   const multiplier = 0.9 + 0.2 * density + durationQuality;
-  return clampScoreValue(base * multiplier * factor, 0, MAX_SESSION_SCORE);
+  return Math.max(0, base * multiplier * factor);
 }
 
 export function computeCardioCredit(features) {
-  const zoneMinutes = normalizeCardioZoneMinutes(
-    features?.cardio_zone_minutes
-  );
+  const zoneMinutes = normalizeCardioZoneMinutes(features?.cardio_zone_minutes);
   const load = zoneMinutes.reduce(
     (sum, minutes, index) => sum + minutes * CARDIO_ZONE_WEIGHTS[index],
     0
   );
   if (load <= 0) return 0;
-  const score = MAX_SESSION_SCORE * (1 - Math.exp(-load / CARDIO_LOAD_SCALE));
-  return clampScoreValue(score, 0, MAX_SESSION_SCORE);
+  const score = SCORE_CURVE_SCALE * (1 - Math.exp(-load / CARDIO_LOAD_SCALE));
+  return Math.max(0, score);
 }
 
 export function computeStravaRecoveryLoad(features) {
@@ -330,15 +324,11 @@ export function computeStravaRecoveryLoad(features) {
 }
 
 export function combineWorkoutComponents(strengthCredit, cardioCredit) {
-  const strength = clampScoreValue(strengthCredit, 0, MAX_SESSION_SCORE);
-  const cardio = clampScoreValue(cardioCredit, 0, MAX_SESSION_SCORE);
+  const strength = clampScoreValue(strengthCredit, 0, Number.POSITIVE_INFINITY);
+  const cardio = clampScoreValue(cardioCredit, 0, Number.POSITIVE_INFINITY);
   const primary = Math.max(strength, cardio);
   const secondary = Math.min(strength, cardio);
-  return clampScoreValue(
-    primary + Math.min(1, 0.25 * secondary),
-    0,
-    MAX_SESSION_SCORE
-  );
+  return primary + Math.min(1, 0.25 * secondary);
 }
 
 export function getStravaWorkoutScoreBreakdown(activity) {
