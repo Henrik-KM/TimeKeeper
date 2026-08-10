@@ -9,14 +9,22 @@ import {
   computeStrengthCredit,
   estimateStravaExertion,
   getCachedStravaScoreBreakdown,
+  getStravaActivityModality,
   getStravaWorkoutScoreBreakdown,
   groupStravaActivitiesIntoSessions,
   resolveStravaExertion
 } from '../../src/features/strava/core.mjs';
+import { createWorkoutRuntime } from '../../src/features/workouts/runtime.mjs';
 
+let nextActivityId = 1_000;
+
+/**
+ * @param {Record<string, any>} [overrides]
+ * @returns {Record<string, any>}
+ */
 function activity(overrides = {}) {
   return {
-    id: Math.floor(Math.random() * 1_000_000_000),
+    id: nextActivityId++,
     name: 'Workout',
     type: 'WeightTraining',
     sport_type: 'WeightTraining',
@@ -29,6 +37,10 @@ function activity(overrides = {}) {
   };
 }
 
+/**
+ * @param {Record<string, any>} [overrides]
+ * @returns {Record<string, any>}
+ */
 function features(overrides = {}) {
   return {
     version: STRAVA_SCORE_MODEL_VERSION,
@@ -54,6 +66,49 @@ test('strength scoring is not driven by average heart rate', () => {
 
   assert.equal(lowHr, highHr);
   assert.equal(lowHr, 4.4);
+});
+
+test('known field sports remain cardio without manual classification', () => {
+  assert.equal(
+    getStravaActivityModality(
+      activity({ type: 'Tennis', sport_type: 'Tennis', distance_km: 0 })
+    ),
+    'cardio'
+  );
+});
+
+test('strength fallback includes normal rest between sets', () => {
+  const restingStrength = activity({
+    id: 3,
+    moving_time_min: 30,
+    elapsed_time_min: 60
+  });
+
+  assert.equal(estimateStravaExertion(restingStrength), 3.8);
+});
+
+test('legacy score metadata is preserved but ignored by automatic scoring', () => {
+  const overridden = activity({
+    id: 4,
+    moving_time_min: 60,
+    elapsed_time_min: 60,
+    exertion: 9,
+    local_exertion: 8,
+    faulty: true,
+    local_faulty: true,
+    estimated_exertion: 7,
+    reported_exertion: 6
+  });
+
+  computeStravaScoreScale([overridden]);
+
+  assert.equal(overridden.exertion, 9);
+  assert.equal(overridden.local_exertion, 8);
+  assert.equal(overridden.faulty, true);
+  assert.equal(overridden.local_faulty, true);
+  assert.equal(overridden.estimated_exertion, 7);
+  assert.equal(overridden.reported_exertion, 6);
+  assert.equal(resolveStravaExertion(overridden), 3.8);
 });
 
 test(
@@ -138,16 +193,80 @@ test('adjacent Strava records are scored as one bounded mixed session', () => {
   assert.equal(model.modelVersion, STRAVA_SCORE_MODEL_VERSION);
   assert.equal(model.sessions, 1);
 
-  const sessionScore = resolveStravaExertion(warmup);
+  const sessionScore = resolveStravaExertion(lifting);
   assert.ok(sessionScore > 4.5);
   assert.ok(sessionScore <= 6);
-  assert.equal(resolveStravaExertion(lifting), null);
+  assert.equal(resolveStravaExertion(warmup), null);
   assert.equal(resolveStravaExertion(cooldown), null);
 
-  const breakdown = getCachedStravaScoreBreakdown(warmup);
+  const breakdown = getCachedStravaScoreBreakdown(lifting);
   assert.equal(breakdown.sessionActivityCount, 3);
   assert.equal(breakdown.sessionPrimary, true);
   assert.ok(breakdown.strength > breakdown.cardio);
+});
+
+test('workout runtime scores adjacent Strava records as one session', () => {
+  const warmup = activity({
+    id: 50,
+    name: 'Warm-up ride',
+    type: 'Ride',
+    sport_type: 'Ride',
+    start_date: '2026-08-03T08:00:00Z',
+    moving_time_min: 12,
+    elapsed_time_min: 12,
+    score_features: features({
+      active_minutes: 12,
+      strength_minutes: 0,
+      cardio_zone_minutes: [0, 0, 12, 0, 0],
+      strength_density: 0
+    })
+  });
+  const lifting = activity({
+    id: 51,
+    start_date: '2026-08-03T08:14:00Z',
+    moving_time_min: 70,
+    elapsed_time_min: 70,
+    score_features: features({
+      active_minutes: 70,
+      strength_minutes: 70,
+      strength_density: 0.7
+    })
+  });
+  const cooldown = activity({
+    id: 52,
+    name: 'Cooldown',
+    type: 'Ride',
+    sport_type: 'Ride',
+    start_date: '2026-08-03T09:26:00Z',
+    moving_time_min: 10,
+    elapsed_time_min: 10,
+    score_features: features({
+      active_minutes: 10,
+      strength_minutes: 0,
+      cardio_zone_minutes: [0, 10, 0, 0, 0],
+      strength_density: 0
+    })
+  });
+  const records = [cooldown, lifting, warmup];
+  const expectedSession = groupStravaActivitiesIntoSessions(records)[0];
+  const expectedScore = resolveStravaExertion(expectedSession.activity);
+  const runtime = createWorkoutRuntime({
+    ensureFitnessDefaults: () => ({ pointSettings: {} }),
+    ensureWorkoutData: () => ({ entries: [] }),
+    isWeekPaused: () => false,
+    processWorkoutWeekIfNeeded: () => {},
+    applyStravaExertionOverrides: (activities) => activities,
+    resolveStravaExertion,
+    getStravaActivities: () => records
+  });
+
+  const stats = runtime.collectWorkoutPoints({
+    start: new Date('2026-08-03T00:00:00Z'),
+    end: new Date('2026-08-04T00:00:00Z')
+  });
+
+  assert.equal(stats.counts.strava, 1);
+  assert.equal(stats.totalPoints, expectedScore);
 });
 
 test('paused elapsed time does not generate cardio credit', () => {
@@ -161,6 +280,56 @@ test('paused elapsed time does not generate cardio credit', () => {
     max_hr: 180
   });
   assert.equal(estimateStravaExertion(pausedRide), 0);
+});
+
+test('explicit zero moving time does not fall back to elapsed cardio time', () => {
+  const stoppedRide = activity({
+    id: 21,
+    type: 'Ride',
+    sport_type: 'Ride',
+    moving_time_min: 0,
+    elapsed_time_min: 75,
+    distance_km: 10,
+    avg_speed_kmh: 20,
+    avg_hr: 145,
+    max_hr: 180
+  });
+
+  assert.equal(estimateStravaExertion(stoppedRide), null);
+});
+
+test('missing moving time does not treat all elapsed cardio time as active', () => {
+  const incompleteRide = activity({
+    id: 22,
+    type: 'Ride',
+    sport_type: 'Ride',
+    elapsed_time_min: 75,
+    distance_km: 0,
+    avg_speed_kmh: null,
+    avg_hr: 145,
+    max_hr: 180
+  });
+  delete incompleteRide.moving_time_min;
+
+  assert.equal(estimateStravaExertion(incompleteRide), null);
+});
+
+test('missing moving time can be estimated conservatively from distance and speed', () => {
+  const estimatedRide = activity({
+    id: 23,
+    type: 'Ride',
+    sport_type: 'Ride',
+    elapsed_time_min: 90,
+    distance_km: 10,
+    avg_speed_kmh: 20,
+    avg_hr: 145,
+    max_hr: 180
+  });
+  delete estimatedRide.moving_time_min;
+
+  const score = estimateStravaExertion(estimatedRide);
+  assert.ok(score > 0);
+  assert.ok(score < 3);
 });
 
 test(
