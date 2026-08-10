@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 
 import {
+  STRAVA_FEATURE_VERSION,
   STRAVA_SCORE_MODEL_VERSION,
   combineWorkoutComponents,
   computeCardioCredit,
@@ -44,6 +45,7 @@ function activity(overrides = {}) {
 function features(overrides = {}) {
   return {
     version: STRAVA_SCORE_MODEL_VERSION,
+    feature_version: STRAVA_FEATURE_VERSION,
     source: 'test',
     active_minutes: 75,
     strength_minutes: 75,
@@ -66,6 +68,30 @@ test('strength scoring is not driven by average heart rate', () => {
 
   assert.equal(lowHr, highHr);
   assert.equal(lowHr, 4.4);
+});
+
+test('stale stream features fall back to the current automatic model', () => {
+  const staleRide = activity({
+    id: 5,
+    type: 'Ride',
+    sport_type: 'Ride',
+    moving_time_min: 60,
+    elapsed_time_min: 60,
+    avg_hr: 145,
+    score_features: {
+      version: STRAVA_SCORE_MODEL_VERSION,
+      source: 'streams',
+      active_minutes: 60,
+      strength_minutes: 60,
+      cardio_zone_minutes: [0, 0, 0, 0, 0],
+      strength_density: 1
+    }
+  });
+
+  const breakdown = getStravaWorkoutScoreBreakdown(staleRide);
+  assert.equal(breakdown.features.source, 'summary');
+  assert.equal(breakdown.features.strength_minutes, 0);
+  assert.ok(breakdown.cardio > 0);
 });
 
 test('known field sports remain cardio without manual classification', () => {
