@@ -3,7 +3,7 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v18';
+const CACHE_NAME = 'timekeeper-app-v19';
 const APP_SHELL = [
   './',
   './index.html',
@@ -17,6 +17,8 @@ const APP_SHELL = [
   './src/features/time-usage/core.mjs',
   './src/features/strava/core.mjs',
   './src/features/strava/import.mjs',
+  './src/features/strava/score-model.mjs',
+  './src/features/strava/sessions.mjs',
   './src/features/wealth/core.mjs',
   './src/features/workouts/runtime.mjs',
   './src/features/company-operator/core.mjs',
@@ -66,8 +68,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '16') return;
-          url.searchParams.set('timekeeper-update', '16');
+          if (url.searchParams.get('timekeeper-update') === '17') return;
+          url.searchParams.set('timekeeper-update', '17');
           client.navigate(url.href).catch(() => undefined);
         });
       })
