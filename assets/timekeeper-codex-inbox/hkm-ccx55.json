@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-10T14:28:02.264Z",
+  "updatedAt": "2026-08-10T14:33:02.245Z",
   "dayStart": "2026-08-09T22:00:00.000Z",
   "rangeStart": "2026-05-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-10T14:28:03.643Z",
+    "observedAt": "2026-08-10T14:33:03.734Z",
     "primary": {
       "usedPercent": 93,
       "remainingPercent": 7,
@@ -17580,6 +17580,51 @@
       "supersedesExternalIds": [
         "codex-d48e69998de5d6741f06b995",
         "codex-a4710adb60392299414620c4"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-28864c6a3f410f78ebb0e5dd",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-10T12:28:42.580Z",
+      "endTime": "2026-08-10T14:11:06.761Z",
+      "wallSeconds": 6144,
+      "focusFactor": 0.517,
+      "effectiveSeconds": 3176,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 6144,
+          "effectiveSeconds": 3072
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 746,
+          "effectiveSeconds": 104
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-1b27971150292565b29c26bd",
+        "codex-b88d7f0968dd130fe49b23a0",
+        "codex-505a6ee8903d8108d02492cc",
+        "codex-f80db6321ec8f987ad62319c"
       ],
       "description": "Codex: email-helper"
     }
