@@ -12,6 +12,7 @@ class StravaScoreFeaturesTest(unittest.TestCase):
         complete = {
             "score_features": {
                 "version": 2,
+                "feature_version": 2,
                 "source": "streams",
                 "stream_status": "complete",
             }
@@ -19,6 +20,7 @@ class StravaScoreFeaturesTest(unittest.TestCase):
         deferred = {
             "score_features": {
                 "version": 2,
+                "feature_version": 2,
                 "source": "summary",
                 "stream_status": "deferred",
             }
@@ -26,13 +28,22 @@ class StravaScoreFeaturesTest(unittest.TestCase):
         unavailable = {
             "score_features": {
                 "version": 2,
+                "feature_version": 2,
                 "source": "summary",
                 "stream_status": "unavailable",
+            }
+        }
+        stale = {
+            "score_features": {
+                "version": 2,
+                "source": "streams",
+                "stream_status": "complete",
             }
         }
         self.assertTrue(has_final_score_features(complete))
         self.assertFalse(has_final_score_features(deferred))
         self.assertTrue(has_final_score_features(unavailable))
+        self.assertFalse(has_final_score_features(stale))
 
     def test_zero_moving_time_does_not_fall_back_to_elapsed_cardio_time(self):
         minutes = get_effective_active_minutes(
@@ -94,6 +105,22 @@ class StravaScoreFeaturesTest(unittest.TestCase):
         features = derive_stream_score_features(
             {"sport_type": "Run", "type": "Run"},
             {"time": times, "heartrate": [145] * len(times)},
+            190,
+        )
+        self.assertIsNotNone(features)
+        self.assertEqual(features["strength_block_minutes"], 0)
+        self.assertGreaterEqual(features["cardio_block_minutes"], 29)
+
+    def test_indoor_ride_uses_moving_stream_when_velocity_is_zero(self):
+        times = list(range(0, 30 * 60, 10))
+        features = derive_stream_score_features(
+            {"sport_type": "Ride", "type": "Ride"},
+            {
+                "time": times,
+                "heartrate": [145] * len(times),
+                "moving": [True] * len(times),
+                "velocity_smooth": [0.0] * len(times),
+            },
             190,
         )
         self.assertIsNotNone(features)
