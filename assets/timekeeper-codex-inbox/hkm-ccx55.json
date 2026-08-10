@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-10T20:28:01.749Z",
+  "updatedAt": "2026-08-10T20:33:01.896Z",
   "dayStart": "2026-08-09T22:00:00.000Z",
   "rangeStart": "2026-05-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-10T20:28:03.182Z",
+    "observedAt": "2026-08-10T20:33:03.429Z",
     "primary": {
       "usedPercent": 94,
       "remainingPercent": 6,
@@ -17699,6 +17699,38 @@
       ],
       "supersedesExternalIds": [
         "codex-9ce75ad87a6949cfbbd65525"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-6d708cbcdc18e6751703f134",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-10T19:42:14.344Z",
+      "endTime": "2026-08-10T20:14:58.252Z",
+      "wallSeconds": 1963,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 785,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 1963,
+          "effectiveSeconds": 785
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-5c0d385fb12f5bf2a5f2014c"
       ],
       "description": "Codex: email-helper"
     }
