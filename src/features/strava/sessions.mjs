@@ -1,4 +1,5 @@
 import {
+  STRAVA_FEATURE_VERSION,
   STRAVA_SCORE_MODEL_VERSION,
   clampScoreValue,
   getStravaActivityActiveMinutes,
@@ -77,6 +78,7 @@ function mergeSessionFeatures(activities, sessionSpanMinutes) {
 
   return {
     version: STRAVA_SCORE_MODEL_VERSION,
+    feature_version: STRAVA_FEATURE_VERSION,
     source: activities.length > 1 ? 'session' : records[0]?.source || 'summary',
     active_minutes: Math.min(
       activeMinutes,
