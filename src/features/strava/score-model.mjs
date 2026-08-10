@@ -80,6 +80,28 @@ function toPositiveNumber(value) {
   return Number.isFinite(numeric) && numeric > 0 ? numeric : null;
 }
 
+function toNonNegativeNumber(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) && numeric >= 0 ? numeric : null;
+}
+
+function hasExplicitValue(value) {
+  return value !== undefined && value !== null && value !== '';
+}
+
+function estimateCardioMinutesFromDistance(activity, elapsedMinutes) {
+  const distanceKm = toPositiveNumber(activity?.distance_km);
+  const speedKmh = toPositiveNumber(activity?.avg_speed_kmh);
+  if (distanceKm === null || speedKmh === null) return 0;
+  const estimated = (distanceKm / speedKmh) * 60;
+  if (!Number.isFinite(estimated) || estimated <= 0) return 0;
+  return Math.min(
+    360,
+    estimated,
+    elapsedMinutes === null ? estimated : elapsedMinutes
+  );
+}
+
 export function normalizeCardioZoneMinutes(raw) {
   let values;
   if (Array.isArray(raw)) {
@@ -123,29 +145,36 @@ export function getStravaActivityModality(activity) {
 }
 
 export function getStravaActivityActiveMinutes(activity, modality) {
-  const featureMinutes = toPositiveNumber(
+  const featureRaw =
     activity?.score_features?.active_minutes ??
-      activity?.score_features?.effective_active_minutes
-  );
-  if (featureMinutes !== null) return Math.min(360, featureMinutes);
-
-  const moving = toPositiveNumber(
-    activity?.effective_active_minutes ?? activity?.moving_time_min
-  );
-  const elapsed = toPositiveNumber(activity?.elapsed_time_min);
-  if (modality === 'cardio') {
-    if (moving !== null) return Math.min(360, moving);
-    return elapsed !== null ? Math.min(360, elapsed) : 0;
+    activity?.score_features?.effective_active_minutes;
+  const featureMinutes = toNonNegativeNumber(featureRaw);
+  if (hasExplicitValue(featureRaw) && featureMinutes !== null) {
+    return Math.min(360, featureMinutes);
   }
+
+  const movingRaw =
+    activity?.effective_active_minutes ?? activity?.moving_time_min;
+  const moving = toNonNegativeNumber(movingRaw);
+  const hasMoving = hasExplicitValue(movingRaw) && moving !== null;
+  const elapsed = toPositiveNumber(activity?.elapsed_time_min);
+
+  if (modality === 'cardio') {
+    if (hasMoving) {
+      return Math.min(360, moving, elapsed === null ? moving : elapsed);
+    }
+    return estimateCardioMinutesFromDistance(activity, elapsed);
+  }
+
   if (elapsed !== null) {
-    if (moving === null || moving < 5) return Math.min(360, elapsed);
+    if (!hasMoving || moving < 5) return Math.min(360, elapsed);
     return Math.min(
       360,
       elapsed,
       Math.max(moving + 30, moving * 1.5, 15)
     );
   }
-  return moving !== null ? Math.min(360, moving) : 0;
+  return hasMoving ? Math.min(360, moving) : 0;
 }
 
 function getAverageHrZone(activity, hrReference) {
