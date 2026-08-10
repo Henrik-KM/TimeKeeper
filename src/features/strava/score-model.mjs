@@ -18,9 +18,11 @@ const MOBILITY_TYPES = new Set(['pilates', 'yoga']);
 const CARDIO_TYPES = new Set([
   'alpineski',
   'backcountryski',
+  'badminton',
   'canoeing',
   'ebikeride',
   'elliptical',
+  'golf',
   'gravelride',
   'handcycle',
   'hike',
@@ -30,6 +32,8 @@ const CARDIO_TYPES = new Set([
   'kitesurf',
   'mountainbikeride',
   'nordicski',
+  'pickleball',
+  'racquetball',
   'ride',
   'rockclimbing',
   'rollerski',
@@ -40,9 +44,12 @@ const CARDIO_TYPES = new Set([
   'snowboard',
   'snowshoe',
   'soccer',
+  'squash',
   'stairstepper',
   'standuppaddling',
   'surfing',
+  'tabletennis',
+  'tennis',
   'swim',
   'trailrun',
   'velomobile',
@@ -130,8 +137,14 @@ export function getStravaActivityActiveMinutes(activity, modality) {
     if (moving !== null) return Math.min(360, moving);
     return elapsed !== null ? Math.min(360, elapsed) : 0;
   }
-  if (moving !== null && moving >= 5) return Math.min(360, moving);
-  if (elapsed !== null) return Math.min(360, elapsed);
+  if (elapsed !== null) {
+    if (moving === null || moving < 5) return Math.min(360, elapsed);
+    return Math.min(
+      360,
+      elapsed,
+      Math.max(moving + 30, moving * 1.5, 15)
+    );
+  }
   return moving !== null ? Math.min(360, moving) : 0;
 }
 
