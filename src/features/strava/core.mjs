@@ -116,14 +116,6 @@ export function computeStravaScoreScale(activities) {
   sessionScoreByActivityKey = new Map();
   sessionBreakdownByActivityKey = new Map();
   const normalizedActivities = Array.isArray(activities) ? activities : [];
-  normalizedActivities.forEach((activity) => {
-    if (!activity || typeof activity !== 'object') return;
-    delete activity.exertion;
-    delete activity.local_exertion;
-    delete activity.faulty;
-    delete activity.local_faulty;
-    delete activity.estimated_exertion;
-  });
   const sessions = groupStravaActivitiesIntoSessions(normalizedActivities);
 
   sessions.forEach((session) => {
