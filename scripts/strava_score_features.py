@@ -2,6 +2,7 @@ import math
 import statistics
 
 SCORE_MODEL_VERSION = 2
+STREAM_FEATURE_VERSION = 2
 DEFAULT_MAX_HR = 190.0
 
 STRENGTH_TYPES = {"weighttraining"}
@@ -198,6 +199,7 @@ def get_summary_score_features(activity: dict, hr_reference: float) -> dict:
     cardio_minutes = sum(zone_minutes)
     return {
         "version": SCORE_MODEL_VERSION,
+        "feature_version": STREAM_FEATURE_VERSION,
         "source": "summary",
         "active_minutes": round(strength_minutes + cardio_minutes, 2),
         "effective_active_minutes": round(strength_minutes + cardio_minutes, 2),
@@ -346,43 +348,52 @@ def derive_stream_score_features(
 
     has_hr = isinstance(heartrate_stream, list) and bool(heartrate_stream)
     has_moving_stream = isinstance(moving_stream, list) and bool(moving_stream)
-    has_detailed_motion = any(
+    has_detailed_stream = any(
         isinstance(stream, list) and bool(stream)
         for stream in (cadence_stream, watts_stream, velocity_stream)
     )
-    has_movement_signal = has_moving_stream or has_detailed_motion
-    if not has_hr and not has_movement_signal:
+    if not has_hr and not has_moving_stream and not has_detailed_stream:
         return None
 
     modality = get_modality(activity)
-    if modality == "hybrid" and not has_movement_signal:
-        return None
-
     heart_rates = [
         numeric_stream_value(heartrate_stream, index)
         for index in range(sample_count)
     ]
+    moving_flags = [
+        bool(safe_stream_value(moving_stream, index))
+        for index in range(sample_count)
+    ]
+    detailed_locomotion_flags = []
+    for index in range(sample_count):
+        cadence = numeric_stream_value(cadence_stream, index) or 0.0
+        watts = numeric_stream_value(watts_stream, index) or 0.0
+        velocity = numeric_stream_value(velocity_stream, index) or 0.0
+        detailed_locomotion_flags.append(
+            bool(cadence >= 20 or watts >= 35 or velocity >= 0.8)
+        )
+    has_meaningful_detailed_motion = any(detailed_locomotion_flags)
+    has_movement_signal = has_moving_stream or has_meaningful_detailed_motion
+    if modality == "hybrid" and not has_movement_signal:
+        return None
+
     density_active_flags: list[bool] = []
     locomotion_flags: list[bool] = []
     for index in range(sample_count):
         heart_rate = heart_rates[index]
-        moving_value = safe_stream_value(moving_stream, index)
-        moving = bool(moving_value) if moving_value is not None else False
-        cadence = numeric_stream_value(cadence_stream, index) or 0.0
-        watts = numeric_stream_value(watts_stream, index) or 0.0
-        velocity = numeric_stream_value(velocity_stream, index) or 0.0
-        detailed_locomotion = bool(
-            (moving and velocity >= 0.5)
-            or cadence >= 20
-            or watts >= 35
-            or velocity >= 0.8
-        )
-        if has_detailed_motion:
-            locomotion = detailed_locomotion
-        elif has_moving_stream:
-            locomotion = moving
+        moving = moving_flags[index]
+        detailed_locomotion = detailed_locomotion_flags[index]
+        if modality == "cardio":
+            locomotion = (
+                detailed_locomotion
+                if has_meaningful_detailed_motion
+                else moving
+            )
         else:
-            locomotion = False
+            # A generic moving flag is too permissive for strength-tagged
+            # activities. Require cadence, power or velocity evidence before
+            # assigning any part of them to cardio.
+            locomotion = detailed_locomotion
 
         hr_work = bool(
             heart_rate is not None and heart_rate / hr_reference >= 0.62
@@ -393,13 +404,12 @@ def derive_stream_score_features(
         if modality in {"strength", "hybrid", "mobility"}:
             density_active = locomotion or hr_work or (not has_hr and moving)
         else:
-            density_active = locomotion or (
-                not has_movement_signal and hr_cardio_active
-            )
+            density_active = locomotion or hr_cardio_active
 
         locomotion_flags.append(locomotion)
         density_active_flags.append(density_active)
 
+    has_affirmative_locomotion = any(locomotion_flags)
     detected_strength = (
         find_strength_like_samples(
             locomotion_flags, heart_rates, durations, hr_reference
@@ -434,7 +444,7 @@ def derive_stream_score_features(
                     and (
                         locomotion_flags[index]
                         or (
-                            not has_movement_signal
+                            not has_affirmative_locomotion
                             and density_active_flags[index]
                         )
                     )
@@ -491,6 +501,7 @@ def derive_stream_score_features(
     effective_minutes = strength_minutes + cardio_minutes
     return {
         "version": SCORE_MODEL_VERSION,
+        "feature_version": STREAM_FEATURE_VERSION,
         "source": "streams",
         "active_minutes": round(effective_minutes, 2),
         "effective_active_minutes": round(effective_minutes, 2),
