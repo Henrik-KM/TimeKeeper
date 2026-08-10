@@ -15,9 +15,11 @@ MOBILITY_TYPES = {"pilates", "yoga"}
 CARDIO_TYPES = {
     "alpineski",
     "backcountryski",
+    "badminton",
     "canoeing",
     "ebikeride",
     "elliptical",
+    "golf",
     "gravelride",
     "handcycle",
     "hike",
@@ -27,6 +29,8 @@ CARDIO_TYPES = {
     "kitesurf",
     "mountainbikeride",
     "nordicski",
+    "pickleball",
+    "racquetball",
     "ride",
     "rockclimbing",
     "rollerski",
@@ -37,9 +41,12 @@ CARDIO_TYPES = {
     "snowboard",
     "snowshoe",
     "soccer",
+    "squash",
     "stairstepper",
     "standuppaddling",
     "surfing",
+    "tabletennis",
+    "tennis",
     "swim",
     "trailrun",
     "velomobile",
@@ -77,14 +84,50 @@ def get_modality(activity: dict) -> str:
     return "strength"
 
 
+def parse_non_negative_number(value: object) -> float | None:
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return None
+    if not math.isfinite(numeric) or numeric < 0:
+        return None
+    return numeric
+
+
+def estimate_cardio_seconds_from_distance(activity: dict) -> float:
+    distance = parse_non_negative_number(activity.get("distance"))
+    average_speed = parse_non_negative_number(activity.get("average_speed"))
+    if not distance or not average_speed:
+        return 0.0
+    estimate = distance / average_speed
+    return estimate if math.isfinite(estimate) and estimate > 0 else 0.0
+
+
 def get_effective_active_minutes(activity: dict, modality: str) -> float:
-    moving = max(0.0, float(activity.get("moving_time") or 0) / 60.0)
-    elapsed = max(0.0, float(activity.get("elapsed_time") or 0) / 60.0)
+    moving_seconds = parse_non_negative_number(activity.get("moving_time"))
+    elapsed_seconds = parse_non_negative_number(activity.get("elapsed_time"))
+    has_moving_time = "moving_time" in activity and moving_seconds is not None
+
     if modality == "cardio":
-        return min(360.0, moving or elapsed)
-    if moving >= 5.0:
-        return min(360.0, moving)
-    return min(360.0, elapsed or moving)
+        if has_moving_time:
+            active_seconds = moving_seconds
+        else:
+            active_seconds = estimate_cardio_seconds_from_distance(activity)
+        if elapsed_seconds is not None:
+            active_seconds = min(active_seconds, elapsed_seconds)
+        return min(360.0, active_seconds / 60.0)
+
+    moving = (moving_seconds or 0.0) / 60.0
+    elapsed = (elapsed_seconds or 0.0) / 60.0
+    if elapsed > 0:
+        if not has_moving_time or moving < 5.0:
+            return min(360.0, elapsed)
+        return min(
+            360.0,
+            elapsed,
+            max(moving + 30.0, moving * 1.5, 15.0),
+        )
+    return min(360.0, moving)
 
 
 def estimate_hr_reference(activities: list[dict], existing: list[dict]) -> float:
@@ -105,7 +148,7 @@ def estimate_hr_reference(activities: list[dict], existing: list[dict]) -> float
     percentile_index = min(
         len(observed) - 1, max(0, math.ceil(0.95 * len(observed)) - 1)
     )
-    return max(185.0, observed[percentile_index])
+    return max(DEFAULT_MAX_HR, observed[percentile_index])
 
 
 def get_hr_zone(heart_rate: float | None, hr_reference: float) -> int:
@@ -195,26 +238,64 @@ def get_sample_durations(times: list) -> list[float]:
     positive_steps = [
         numeric_times[index + 1] - numeric_times[index]
         for index in range(len(numeric_times) - 1)
-        if 0 < numeric_times[index + 1] - numeric_times[index] <= 30
+        if 0 < numeric_times[index + 1] - numeric_times[index] <= 300
     ]
     default_step = statistics.median(positive_steps) if positive_steps else 1.0
+    maximum_step = max(30.0, min(300.0, default_step * 3.0))
     durations: list[float] = []
     for index, value in enumerate(numeric_times):
-        if index + 1 < len(numeric_times):
-            step = numeric_times[index + 1] - value
-        else:
-            step = default_step
-        durations.append(min(30.0, max(0.0, step)))
+        if index + 1 >= len(numeric_times):
+            durations.append(0.0)
+            continue
+        step = numeric_times[index + 1] - value
+        durations.append(min(maximum_step, max(0.0, step)))
     return durations
 
 
-def find_stable_cardio_samples(
+def percentile(values: list[float], fraction: float) -> float:
+    ordered = sorted(values)
+    if not ordered:
+        return 0.0
+    position = (len(ordered) - 1) * min(1.0, max(0.0, fraction))
+    lower_index = math.floor(position)
+    upper_index = math.ceil(position)
+    if lower_index == upper_index:
+        return ordered[lower_index]
+    weight = position - lower_index
+    return (
+        ordered[lower_index] * (1.0 - weight)
+        + ordered[upper_index] * weight
+    )
+
+
+def count_work_recovery_cycles(values: list[float]) -> int:
+    if len(values) < 4:
+        return 0
+    low = percentile(values, 0.30)
+    high = percentile(values, 0.70)
+    if high - low < 10.0:
+        return 0
+
+    cycles = 0
+    state = "seek_low"
+    for value in values:
+        if state == "seek_low":
+            if value <= low:
+                state = "seek_high"
+        elif value >= high:
+            cycles += 1
+            state = "seek_low"
+    return cycles
+
+
+def find_strength_like_samples(
+    locomotion_flags: list[bool],
     heart_rates: list[float | None],
     durations: list[float],
     hr_reference: float,
-    minimum_minutes: float,
+    minimum_minutes: float = 8.0,
 ) -> set[int]:
-    stable_indices: set[int] = set()
+    strength_indices: set[int] = set()
     segment: list[int] = []
 
     def close_segment() -> None:
@@ -226,19 +307,27 @@ def find_stable_cardio_samples(
             for index in segment
             if heart_rates[index] is not None
         ]
-        if duration >= minimum_minutes * 60 and len(values) >= 2:
-            variability = statistics.pstdev(values)
-            if variability <= 12:
-                stable_indices.update(segment)
+        high_enough = any(value / hr_reference >= 0.62 for value in values)
+        if (
+            duration >= minimum_minutes * 60
+            and high_enough
+            and count_work_recovery_cycles(values) >= 2
+        ):
+            strength_indices.update(segment)
         segment.clear()
 
     for index, heart_rate in enumerate(heart_rates):
-        if heart_rate is not None and heart_rate / hr_reference >= 0.65:
+        candidate = bool(
+            not locomotion_flags[index]
+            and heart_rate is not None
+            and heart_rate / hr_reference >= 0.45
+        )
+        if candidate:
             segment.append(index)
         else:
             close_segment()
     close_segment()
-    return stable_indices
+    return strength_indices
 
 
 def derive_stream_score_features(
@@ -256,27 +345,25 @@ def derive_stream_score_features(
     velocity_stream = streams.get("velocity_smooth")
 
     has_hr = isinstance(heartrate_stream, list) and bool(heartrate_stream)
-    has_movement_signal = any(
+    has_moving_stream = isinstance(moving_stream, list) and bool(moving_stream)
+    has_detailed_motion = any(
         isinstance(stream, list) and bool(stream)
-        for stream in (moving_stream, cadence_stream, watts_stream, velocity_stream)
+        for stream in (cadence_stream, watts_stream, velocity_stream)
     )
+    has_movement_signal = has_moving_stream or has_detailed_motion
     if not has_hr and not has_movement_signal:
         return None
 
     modality = get_modality(activity)
+    if modality == "hybrid" and not has_movement_signal:
+        return None
+
     heart_rates = [
         numeric_stream_value(heartrate_stream, index)
         for index in range(sample_count)
     ]
-    stable_cardio = find_stable_cardio_samples(
-        heart_rates,
-        durations,
-        hr_reference,
-        6.0 if modality == "hybrid" else 8.0,
-    )
-
     density_active_flags: list[bool] = []
-    cardio_flags: list[bool] = []
+    locomotion_flags: list[bool] = []
     for index in range(sample_count):
         heart_rate = heart_rates[index]
         moving_value = safe_stream_value(moving_stream, index)
@@ -284,48 +371,50 @@ def derive_stream_score_features(
         cadence = numeric_stream_value(cadence_stream, index) or 0.0
         watts = numeric_stream_value(watts_stream, index) or 0.0
         velocity = numeric_stream_value(velocity_stream, index) or 0.0
-        explicit_locomotion = bool(
+        detailed_locomotion = bool(
             (moving and velocity >= 0.5)
             or cadence >= 20
             or watts >= 35
             or velocity >= 0.8
         )
+        if has_detailed_motion:
+            locomotion = detailed_locomotion
+        elif has_moving_stream:
+            locomotion = moving
+        else:
+            locomotion = False
+
         hr_work = bool(
             heart_rate is not None and heart_rate / hr_reference >= 0.62
         )
         hr_cardio_active = bool(
             heart_rate is not None and heart_rate / hr_reference >= 0.45
         )
-        stable = index in stable_cardio
-
         if modality in {"strength", "hybrid", "mobility"}:
-            density_active = explicit_locomotion or hr_work or (not has_hr and moving)
+            density_active = locomotion or hr_work or (not has_hr and moving)
         else:
-            density_active = explicit_locomotion or moving or hr_cardio_active
-
-        if modality == "mobility":
-            cardio = False
-        else:
-            cardio = explicit_locomotion or (
-                stable and modality in {"cardio", "hybrid"}
+            density_active = locomotion or (
+                not has_movement_signal and hr_cardio_active
             )
 
+        locomotion_flags.append(locomotion)
         density_active_flags.append(density_active)
-        cardio_flags.append(cardio)
 
-    if modality == "cardio":
-        non_cardio_active_seconds = sum(
-            duration
-            for duration, active, cardio in zip(
-                durations, density_active_flags, cardio_flags, strict=True
-            )
-            if active and not cardio
+    detected_strength = (
+        find_strength_like_samples(
+            locomotion_flags, heart_rates, durations, hr_reference
         )
-        if non_cardio_active_seconds < 8 * 60:
-            cardio_flags = list(density_active_flags)
+        if modality == "cardio" and has_movement_signal and has_hr
+        else set()
+    )
 
-    strength_flags = [False] * sample_count
+    cardio_flags: list[bool] = []
+    strength_flags: list[bool] = [False] * sample_count
     if modality in {"strength", "hybrid", "mobility"}:
+        cardio_flags = [
+            locomotion and modality != "mobility"
+            for locomotion in locomotion_flags
+        ]
         evidence_indices = [
             index
             for index in range(sample_count)
@@ -338,9 +427,25 @@ def derive_stream_score_features(
                 strength_flags[index] = not cardio_flags[index]
     else:
         for index in range(sample_count):
-            strength_flags[index] = bool(
-                density_active_flags[index] and not cardio_flags[index]
+            strength_flags[index] = index in detected_strength
+            cardio_flags.append(
+                bool(
+                    not strength_flags[index]
+                    and (
+                        locomotion_flags[index]
+                        or (
+                            not has_movement_signal
+                            and density_active_flags[index]
+                        )
+                    )
+                )
             )
+            if strength_flags[index]:
+                heart_rate = heart_rates[index]
+                density_active_flags[index] = bool(
+                    heart_rate is not None
+                    and heart_rate / hr_reference >= 0.62
+                )
 
     zone_seconds = [0.0, 0.0, 0.0, 0.0, 0.0]
     cardio_seconds = 0.0
