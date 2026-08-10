@@ -7,6 +7,7 @@ import requests
 if __package__:
     from .strava_score_features import (
         SCORE_MODEL_VERSION,
+        STREAM_FEATURE_VERSION,
         derive_stream_score_features,
         estimate_hr_reference,
         get_summary_score_features,
@@ -14,6 +15,7 @@ if __package__:
 else:
     from strava_score_features import (
         SCORE_MODEL_VERSION,
+        STREAM_FEATURE_VERSION,
         derive_stream_score_features,
         estimate_hr_reference,
         get_summary_score_features,
@@ -259,6 +261,11 @@ def has_final_score_features(activity: dict | None) -> bool:
         return False
     try:
         if int(features.get("version") or 0) < SCORE_MODEL_VERSION:
+            return False
+    except (TypeError, ValueError):
+        return False
+    try:
+        if int(features.get("feature_version") or 0) < STREAM_FEATURE_VERSION:
             return False
     except (TypeError, ValueError):
         return False
