@@ -90,21 +90,57 @@ export function computeStravaRawScore(activity) {
   return score > 0 ? score : null;
 }
 
+function getSessionPrimaryIndex(session) {
+  let primaryIndex = 0;
+  let primaryScore = Number.NEGATIVE_INFINITY;
+  let primaryMinutes = Number.NEGATIVE_INFINITY;
+
+  session.activities.forEach((activity, index) => {
+    const breakdown = getStravaWorkoutScoreBreakdown(activity);
+    const score = Number(breakdown.total) || 0;
+    const minutes = Number(breakdown.features?.active_minutes) || 0;
+    if (
+      score > primaryScore ||
+      (Math.abs(score - primaryScore) < 1e-9 && minutes > primaryMinutes)
+    ) {
+      primaryIndex = index;
+      primaryScore = score;
+      primaryMinutes = minutes;
+    }
+  });
+
+  return primaryIndex;
+}
+
 export function computeStravaScoreScale(activities) {
   sessionScoreByActivityKey = new Map();
   sessionBreakdownByActivityKey = new Map();
-  const sessions = groupStravaActivitiesIntoSessions(activities);
+  const normalizedActivities = Array.isArray(activities) ? activities : [];
+  normalizedActivities.forEach((activity) => {
+    if (!activity || typeof activity !== 'object') return;
+    delete activity.exertion;
+    delete activity.local_exertion;
+    delete activity.faulty;
+    delete activity.local_faulty;
+    delete activity.estimated_exertion;
+  });
+  const sessions = groupStravaActivitiesIntoSessions(normalizedActivities);
 
   sessions.forEach((session) => {
     const breakdown = getStravaWorkoutScoreBreakdown(session.activity);
+    const primaryIndex = getSessionPrimaryIndex(session);
     session.activities.forEach((activity, index) => {
       const key = getActivityKey(activity);
       if (!key) return;
-      sessionScoreByActivityKey.set(key, index === 0 ? breakdown.total : null);
+      const sessionPrimary = index === primaryIndex;
+      sessionScoreByActivityKey.set(
+        key,
+        sessionPrimary ? breakdown.total : null
+      );
       sessionBreakdownByActivityKey.set(key, {
         ...breakdown,
         sessionActivityCount: session.activities.length,
-        sessionPrimary: index === 0
+        sessionPrimary
       });
     });
   });
