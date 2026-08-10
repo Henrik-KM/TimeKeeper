@@ -1,4 +1,5 @@
 export const STRAVA_SCORE_MODEL_VERSION = 2;
+export const STRAVA_FEATURE_VERSION = 2;
 export const STRAVA_SCORE_DEFAULT_SCALE = 1;
 
 const MAX_SESSION_SCORE = 6;
@@ -214,6 +215,7 @@ function buildSummaryFeatures(activity) {
 
   return {
     version: STRAVA_SCORE_MODEL_VERSION,
+    feature_version: STRAVA_FEATURE_VERSION,
     source: 'summary',
     active_minutes: activeMinutes,
     strength_minutes: strengthMinutes,
@@ -256,6 +258,7 @@ function normalizeScoreFeatures(activity, rawFeatures) {
 
   return {
     version: STRAVA_SCORE_MODEL_VERSION,
+    feature_version: STRAVA_FEATURE_VERSION,
     source: String(rawFeatures?.source || fallback.source),
     active_minutes:
       activeMinutes > 0 ? activeMinutes : strengthMinutes + cardioMinutes,
@@ -286,7 +289,8 @@ export function getStravaScoreFeatures(activity) {
   if (
     rawFeatures &&
     typeof rawFeatures === 'object' &&
-    Number(rawFeatures.version) >= STRAVA_SCORE_MODEL_VERSION
+    Number(rawFeatures.version) >= STRAVA_SCORE_MODEL_VERSION &&
+    Number(rawFeatures.feature_version) >= STRAVA_FEATURE_VERSION
   ) {
     return normalizeScoreFeatures(activity, rawFeatures);
   }
