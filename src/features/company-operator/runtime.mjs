@@ -1,6 +1,12 @@
 import { uuid } from '../../shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from '../../shared/ui.mjs';
 import {
+  getPrivateBridgeSettings,
+  getPrivateBridgeToken,
+  savePrivateBridgeSettings,
+  savePrivateBridgeToken
+} from '../private-bridge/core.mjs';
+import {
   buildCompanyOperatorCommand,
   companySnapshotFreshness,
   normalizeCompanyOperatorSettings,
@@ -8,7 +14,6 @@ import {
 } from './core.mjs';
 
 const SETTINGS_KEY = 'timekeeperCompanyOperatorSettings';
-const TOKEN_KEY = 'timekeeperCompanyOperatorToken';
 const SNAPSHOT_KEY = 'timekeeperCompanyOperatorSnapshot';
 const PENDING_KEY = 'timekeeperCompanyOperatorPendingCommands';
 const RECEIPTS_KEY = 'timekeeperCompanyOperatorReceipts';
@@ -19,7 +24,8 @@ const HIDE_PRIORITY_ACTIONS = new Set(['mark_handled', 'snooze', 'work_next']);
 export function createCompanyOperatorController({
   root,
   connectButton,
-  refreshButton
+  refreshButton,
+  onSnapshotChange
 }) {
   let snapshot = loadSnapshot();
   let busy = false;
@@ -57,6 +63,7 @@ export function createCompanyOperatorController({
       }
       snapshot = normalized;
       localStorage.setItem(SNAPSHOT_KEY, JSON.stringify(normalized));
+      notifySnapshotChange();
       await checkPendingReceipts();
       if (announce) showToast('Company information refreshed.');
       return normalized;
@@ -72,13 +79,14 @@ export function createCompanyOperatorController({
 
   async function configureConnection() {
     const settings = getSettings();
+    const bridgeSettings = getPrivateBridgeSettings();
     const values = await openFormDialog({
       title: hasConnection() ? 'Company connection' : 'Connect Company',
       fields: [
         {
           name: 'repository',
           label: 'Private GitHub repository',
-          value: settings.repository,
+          value: bridgeSettings.repository || settings.repository,
           required: true,
           placeholder: 'owner/private-repository'
         },
@@ -90,7 +98,7 @@ export function createCompanyOperatorController({
           type: 'password',
           value: '',
           required: !hasConnection(),
-          placeholder: 'Access only to the private Company bridge repository'
+          placeholder: 'Access only to the private TimeKeeper sync repository'
         }
       ],
       submitLabel: 'Connect'
@@ -101,15 +109,19 @@ export function createCompanyOperatorController({
       repository: values.repository
     });
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(next));
+    savePrivateBridgeSettings({
+      repository: next.repository,
+      branch: next.branch
+    });
     if (String(values.token || '').trim()) {
-      localStorage.setItem(TOKEN_KEY, String(values.token).trim());
+      savePrivateBridgeToken(values.token);
     }
     render();
     const connected = await refresh({ announce: false });
     showToast(
       connected
-        ? 'Company workspace connected.'
-        : 'Connection saved, but the private workspace could not be read.'
+        ? 'Company sync connected.'
+        : 'Connection saved, but Company information could not be loaded.'
     );
   }
 
@@ -122,12 +134,14 @@ export function createCompanyOperatorController({
       danger: true
     });
     if (!confirmed) return;
-    [SETTINGS_KEY, TOKEN_KEY, SNAPSHOT_KEY, PENDING_KEY, RECEIPTS_KEY].forEach(
-      (key) => localStorage.removeItem(key)
+    [SETTINGS_KEY, SNAPSHOT_KEY, PENDING_KEY, RECEIPTS_KEY].forEach((key) =>
+      localStorage.removeItem(key)
     );
+    savePrivateBridgeToken('');
     snapshot = null;
+    notifySnapshotChange();
     render();
-    showToast('Company workspace disconnected from this device.');
+    showToast('Company sync disconnected from this device.');
   }
 
   async function queuePriorityAction(action, priority, params = {}) {
@@ -500,8 +514,8 @@ export function createCompanyOperatorController({
     if (!hasConnection()) {
       root.appendChild(
         card(
-          'Connect your private Company workspace',
-          'Enter a fine-grained GitHub token with access only to the private TimeKeeper bridge repository. Company information is kept separate from normal TimeKeeper backups.',
+          'Connect Company to TimeKeeper',
+          'Enter a fine-grained GitHub token limited to the private TimeKeeper sync repository. Company information stays out of normal TimeKeeper backups.',
           [button('Connect Company', 'primary', configureConnection)]
         )
       );
@@ -521,17 +535,19 @@ export function createCompanyOperatorController({
 
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
+    root.appendChild(companyOverviewCard());
     const dispatches = compactDispatchSections();
     const missions = missionSections();
-    if (missions.working) root.appendChild(missions.working);
-    else if (dispatches.inProgress) root.appendChild(dispatches.inProgress);
-    if (missions.completed) root.appendChild(missions.completed);
-    else if (dispatches.done) root.appendChild(dispatches.done);
     if (missions.needsYou) root.appendChild(missions.needsYou);
     else if (dispatches.needsYou) root.appendChild(dispatches.needsYou);
+    if (missions.completed) root.appendChild(missions.completed);
+    else if (dispatches.done) root.appendChild(dispatches.done);
+    if (missions.working) root.appendChild(missions.working);
+    else if (dispatches.inProgress) root.appendChild(dispatches.inProgress);
+    if (missions.upNext) root.appendChild(missions.upNext);
     const priorities = visiblePriorities();
     const primary = priorities[0];
-    if (primary) root.appendChild(primaryCard(primary));
+    if (primary && !missions.upNext) root.appendChild(primaryCard(primary));
     else if (loadPending().some((item) => item.action === 'work_next')) {
       root.appendChild(
         card(
@@ -545,30 +561,140 @@ export function createCompanyOperatorController({
     }
     const opportunities = opportunitySection();
     if (opportunities) root.appendChild(opportunities);
-    if (
-      !snapshot.decisions.pending.length &&
-      !primary &&
-      !missions.working &&
-      !missions.needsYou &&
-      !dispatches.needsYou &&
-      !dispatches.inProgress &&
-      !snapshot.emailDrafting.needsUser &&
-      !snapshot.opportunities.cards.length
-    ) {
-      root.appendChild(
-        card(
-          'Nothing needs you',
-          'No company action is worth your time right now.'
-        )
-      );
-    }
     const emailDrafting = emailDraftingSection();
     if (emailDrafting) root.appendChild(emailDrafting);
     if (dispatches.problems) root.appendChild(dispatches.problems);
+    if (missions.waiting) root.appendChild(missions.waiting);
     const commands = commandStatus();
     if (commands) root.appendChild(commands);
     root.appendChild(sourceSection());
     root.appendChild(connectionFooter());
+  }
+
+  function companyOverviewCard() {
+    const summary = snapshot.companySummary;
+    const fallback = fallbackCompanyOverview();
+    const state = summary.state || fallback.state;
+    const labels = {
+      needs_you: 'You need to do this',
+      ready: 'Ready for you',
+      working: 'Codex is working',
+      up_next: 'Up next',
+      waiting: 'Waiting',
+      clear: 'Nothing needs you'
+    };
+    const fallbackDetails = {
+      needs_you: 'Open the item below for the exact decision or missing input.',
+      ready: 'A verified result is ready below.',
+      working: 'The current task is still running.',
+      up_next: 'This is the next supported company task.',
+      waiting:
+        'No useful next step is available until the stated dependency changes.',
+      clear: 'No company action is worth your time right now.'
+    };
+    const wrapper = element(
+      'section',
+      `company-primary-card company-overview ${state}`
+    );
+    wrapper.appendChild(
+      element('p', 'company-eyebrow', labels[state] || labels.clear)
+    );
+    wrapper.appendChild(
+      element(
+        'h3',
+        '',
+        summary.headline ||
+          fallback.headline ||
+          (state === 'clear' ? 'Nothing needs you' : 'Company status')
+      )
+    );
+    wrapper.appendChild(
+      element(
+        'p',
+        'company-priority-title',
+        summary.detail ||
+          fallback.detail ||
+          fallbackDetails[state] ||
+          fallbackDetails.clear
+      )
+    );
+    if (summary.destination) {
+      wrapper.appendChild(compactResultDestination(summary.destination));
+    }
+    return wrapper;
+  }
+
+  function fallbackCompanyOverview() {
+    const decisions = snapshot.decisions?.pending || [];
+    if (decisions.length) {
+      const decision = decisions[0];
+      return {
+        state: 'needs_you',
+        headline: decision.decisionRequested || decision.title,
+        detail: decision.why || decision.doneWhen
+      };
+    }
+    const active = snapshot.missions?.active || [];
+    const needsYou = active.find(
+      (mission) => mission.status === 'waiting_for_decision'
+    );
+    if (needsYou) {
+      return {
+        state: 'needs_you',
+        headline:
+          needsYou.userAction ||
+          needsYou.userRequest?.instruction ||
+          needsYou.headline ||
+          needsYou.objective,
+        detail:
+          needsYou.waitingReason ||
+          needsYou.userRequest?.reason ||
+          needsYou.doneWhen
+      };
+    }
+    const completed = snapshot.missions?.completedToday?.[0];
+    if (completed) {
+      return {
+        state: 'ready',
+        headline: completed.headline || completed.objective,
+        detail: completed.resultSummary || completed.latestUpdate
+      };
+    }
+    const working = active.find((mission) => mission.status === 'active');
+    if (working) {
+      return {
+        state: 'working',
+        headline: working.headline || working.objective,
+        detail: working.latestUpdate || working.doneWhen
+      };
+    }
+    const queued = active.find((mission) => mission.status === 'queued');
+    if (queued) {
+      return {
+        state: 'up_next',
+        headline: queued.headline || queued.objective,
+        detail: queued.userAction || queued.doneWhen
+      };
+    }
+    const priority = snapshot.priorities?.[0];
+    if (priority) {
+      return {
+        state: 'up_next',
+        headline: priority.nextAction || priority.title,
+        detail: priority.why || priority.doneWhen
+      };
+    }
+    const waiting = active.find(
+      (mission) => mission.status === 'waiting_for_source'
+    );
+    if (waiting) {
+      return {
+        state: 'waiting',
+        headline: waiting.headline || waiting.objective,
+        detail: waiting.waitingReason || waiting.doneWhen
+      };
+    }
+    return { state: 'clear', headline: '', detail: '' };
   }
 
   function statusBanner(freshness) {
@@ -868,13 +994,21 @@ export function createCompanyOperatorController({
     const completedToday = Array.isArray(source.completedToday)
       ? source.completedToday
       : [];
-    const workingRows = active.filter((mission) =>
-      ['active', 'queued', 'waiting_for_source'].includes(mission.status)
+    const workingRows = active.filter((mission) => mission.status === 'active');
+    const queuedRows = active.filter((mission) => mission.status === 'queued');
+    const waitingSourceRows = active.filter(
+      (mission) => mission.status === 'waiting_for_source'
     );
     const waitingRows = active.filter(
       (mission) => mission.status === 'waiting_for_decision'
     );
-    const sections = { working: null, completed: null, needsYou: null };
+    const sections = {
+      working: null,
+      completed: null,
+      needsYou: null,
+      upNext: null,
+      waiting: null
+    };
 
     if (workingRows.length) {
       const section = sectionBlock('Working now');
@@ -970,6 +1104,19 @@ export function createCompanyOperatorController({
       }
       sections.needsYou = section;
     }
+    if (queuedRows.length) {
+      const ordered = [...queuedRows].sort(
+        (left, right) => right.priorityScore - left.priorityScore
+      );
+      const section = sectionBlock('Up next');
+      section.appendChild(missionCard(ordered[0], 'up-next'));
+      sections.upNext = section;
+    }
+    if (waitingSourceRows.length) {
+      const section = sectionBlock('Waiting', true);
+      section.appendChild(missionCard(waitingSourceRows[0], 'waiting'));
+      sections.waiting = section;
+    }
     return sections;
   }
 
@@ -977,7 +1124,11 @@ export function createCompanyOperatorController({
     const row = element('article', `company-dispatch-card mission ${tone}`);
     row.appendChild(element('p', 'company-eyebrow', mission.project));
     row.appendChild(
-      element('strong', '', mission.objective || 'Company mission')
+      element(
+        'strong',
+        '',
+        mission.headline || mission.objective || 'Company mission'
+      )
     );
     if (tone.includes('needs-you')) {
       const request = mission.userRequest || {};
@@ -985,9 +1136,16 @@ export function createCompanyOperatorController({
         element(
           'p',
           'company-dispatch-next',
-          request.instruction || 'One answer is needed to continue.'
+          mission.userAction ||
+            request.instruction ||
+            'One answer is needed to continue.'
         )
       );
+      if (mission.waitingReason || request.reason) {
+        row.appendChild(
+          element('small', '', mission.waitingReason || request.reason)
+        );
+      }
       const actions = element('div', 'company-action-grid');
       (request.choices || []).forEach((choice) => {
         actions.appendChild(
@@ -999,11 +1157,35 @@ export function createCompanyOperatorController({
       );
       row.appendChild(actions);
     } else if (tone.includes('completed')) {
-      if (mission.latestUpdate) {
-        row.appendChild(element('span', '', mission.latestUpdate));
+      if (mission.resultSummary || mission.latestUpdate) {
+        row.appendChild(
+          element('span', '', mission.resultSummary || mission.latestUpdate)
+        );
       }
-      (mission.destinations || []).forEach((destination) =>
-        row.appendChild(compactResultDestination(destination))
+      (mission.destinations || [])
+        .filter((destination) =>
+          [
+            'closed_state',
+            'github_change',
+            'local_commit',
+            'onedrive_document',
+            'outlook_draft',
+            'sharepoint_document',
+            'updated_file',
+            'website'
+          ].includes(destination.type)
+        )
+        .forEach((destination) =>
+          row.appendChild(compactResultDestination(destination))
+        );
+    } else if (tone.includes('waiting')) {
+      row.appendChild(
+        element(
+          'span',
+          '',
+          mission.waitingReason ||
+            'Waiting for the next information refresh; no input needed from you.'
+        )
       );
     } else {
       row.appendChild(element('span', '', missionProgressLabel(mission)));
@@ -1558,7 +1740,7 @@ export function createCompanyOperatorController({
   function connectionFooter() {
     const footer = element('div', 'company-connection-footer');
     footer.appendChild(
-      element('span', '', `Private workspace: ${getSettings().repository}`)
+      element('span', '', `Private sync: ${getSettings().repository}`)
     );
     footer.appendChild(button('Disconnect', 'secondary', disconnect));
     return footer;
@@ -1629,11 +1811,16 @@ export function createCompanyOperatorController({
   }
 
   function hasConnection() {
-    return Boolean(localStorage.getItem(TOKEN_KEY));
+    return Boolean(getPrivateBridgeToken());
   }
 
   function getSettings() {
-    return normalizeCompanyOperatorSettings(readLocalJson(SETTINGS_KEY));
+    const privateSettings = getPrivateBridgeSettings();
+    return normalizeCompanyOperatorSettings({
+      ...readLocalJson(SETTINGS_KEY),
+      repository: privateSettings.repository,
+      branch: privateSettings.branch
+    });
   }
 
   async function readRemoteJson(path, { allowMissing = false } = {}) {
@@ -1670,7 +1857,7 @@ export function createCompanyOperatorController({
   function githubHeaders() {
     return {
       Accept: 'application/vnd.github+json',
-      Authorization: `Bearer ${localStorage.getItem(TOKEN_KEY) || ''}`,
+      Authorization: `Bearer ${getPrivateBridgeToken()}`,
       'X-GitHub-Api-Version': '2022-11-28'
     };
   }
@@ -1741,8 +1928,18 @@ export function createCompanyOperatorController({
     }
   }
 
+  function notifySnapshotChange() {
+    if (typeof onSnapshotChange === 'function') {
+      onSnapshotChange(snapshot);
+    }
+  }
+
+  function getSnapshot() {
+    return snapshot;
+  }
+
   render();
-  return { setActive, refresh, render };
+  return { setActive, refresh, render, getSnapshot, hasConnection };
 }
 
 function companyErrorMessage(error) {
@@ -1751,10 +1948,10 @@ function companyErrorMessage(error) {
     return 'The private Company token is not valid.';
   }
   if (message.includes('github_http_403')) {
-    return 'The token does not have access to the private Company workspace.';
+    return 'The token does not have access to private Company sync.';
   }
   if (message.includes('github_http_404')) {
-    return 'The private Company workspace is not ready yet.';
+    return 'Private Company sync is not ready yet.';
   }
   return 'Company information could not be refreshed. Your TimeKeeper data is unaffected.';
 }

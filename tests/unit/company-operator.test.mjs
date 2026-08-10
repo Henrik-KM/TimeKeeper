@@ -84,6 +84,20 @@ test('normalizes a bounded mobile Company snapshot', () => {
       next_action: 'Prepare the tiered commercial response.',
       done_when: 'Every tier and approval is explicit.'
     },
+    company_summary: {
+      state: 'needs_you',
+      headline: 'Choose the pricing direction',
+      detail: 'Choose standard or pilot pricing.',
+      deep_link: '#company',
+      mission_id: 'mission:avantor',
+      counts: {
+        needs_you: 1,
+        ready: 0,
+        working: 1,
+        up_next: 2,
+        waiting: 0
+      }
+    },
     priorities: [
       {
         issue_id: 'priority:avantor',
@@ -266,7 +280,17 @@ test('normalizes a bounded mobile Company snapshot', () => {
         }
       ]
     },
-    sources: { status: 'ready', attention_count: 0, items: [] }
+    sources: { status: 'ready', attention_count: 0, items: [] },
+    mobile_notifications: {
+      available: true,
+      public_key: 'A'.repeat(65),
+      subscriptions_path: 'mobile-notifications/subscriptions.json',
+      weekday_time: '07:45',
+      late_until: '10:00',
+      timezone: 'Europe/Berlin',
+      quiet_hours: ['20:00-07:00'],
+      privacy_mode: 'private'
+    }
   });
 
   assert.equal(snapshot.today.project, 'Avantor');
@@ -367,6 +391,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
     'decision-evidence-1'
   );
   assert.equal(snapshot.priorities[0].title, '<img src=x onerror=alert(1)>');
+  assert.equal(snapshot.companySummary.state, 'needs_you');
+  assert.equal(
+    snapshot.companySummary.headline,
+    'Choose the pricing direction'
+  );
+  assert.equal(snapshot.companySummary.counts.upNext, 2);
+  assert.equal(snapshot.mobileNotifications.available, true);
+  assert.equal(snapshot.mobileNotifications.weekdayTime, '07:45');
 });
 
 test('normalizes persistent missions, questions, progress, and verified outputs', () => {
@@ -388,9 +420,12 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
         issue_id: 'priority:avantor',
         evidence_fingerprint: 'evidence-1',
         project: 'Avantor',
+        headline: 'Finish the camera delivery package',
         objective: 'Finish the camera delivery package.',
         done_when: 'The tested package is available in a local commit.',
         status: 'active',
+        business_lane: 'customer_delivery',
+        result_summary: 'The supported camera configuration is implemented.',
         step_count: 2,
         latest_update: 'Implemented the validated configuration.',
         current_step: {
@@ -412,8 +447,11 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
           issue_id: 'priority:albany',
           evidence_fingerprint: 'evidence-2',
           project: 'Albany',
+          headline: 'Choose the Albany delivery route',
           objective: 'Confirm the delivery route.',
           status: 'waiting_for_decision',
+          user_action: 'Choose direct delivery or partner delivery.',
+          waiting_reason: 'Both routes are supported, but neither is approved.',
           user_request: {
             dispatch_id: 'dispatch:albany',
             instruction: 'Choose direct delivery or partner delivery.',
@@ -455,6 +493,15 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
   assert.equal(snapshot.missions.primary.currentStep.status, 'running');
   assert.equal(snapshot.missions.primary.stepCount, 2);
   assert.equal(
+    snapshot.missions.primary.headline,
+    'Finish the camera delivery package'
+  );
+  assert.equal(snapshot.missions.primary.businessLane, 'customer_delivery');
+  assert.equal(
+    snapshot.missions.active[1].userAction,
+    'Choose direct delivery or partner delivery.'
+  );
+  assert.equal(
     snapshot.missions.active[1].userRequest.dispatchId,
     'dispatch:albany'
   );
@@ -467,6 +514,27 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
     'local_commit'
   );
   assert.equal(snapshot.missions.budget.stepsRemaining, 3);
+});
+
+test('uses a mission objective as the headline when older snapshots have no headline', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    missions: {
+      active: [
+        {
+          mission_id: 'mission:legacy',
+          project: 'Avantor',
+          objective: 'Finish the tested camera configuration for the customer.',
+          status: 'active'
+        }
+      ]
+    }
+  });
+
+  assert.equal(
+    snapshot.missions.active[0].headline,
+    'Finish the tested camera configuration for the customer.'
+  );
 });
 
 test('normalizes concise action-first company results', () => {

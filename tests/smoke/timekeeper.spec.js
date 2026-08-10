@@ -729,7 +729,7 @@ test('entries preserve active elapsed time and group Codex records by project-da
   expect(saved.elapsedSeconds).toBe(3600);
 });
 
-test('mobile Today stays focused on timers without extra review panels', async ({
+test('mobile Today stays a brief holistic overview without extra review panels', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -757,7 +757,11 @@ test('mobile Today stays focused on timers without extra review panels', async (
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toContainText('Today');
   await expect(commandPanel).toContainText('Timer');
-  await expect(commandPanel).toContainText('Target');
+  await expect(commandPanel).toContainText('Work target');
+  await expect(commandPanel).toContainText('No target set');
+  await expect(commandPanel).toContainText('Workout');
+  await expect(commandPanel).toContainText('Company');
+  await expect(commandPanel.locator('.mobile-today-card')).toHaveCount(4);
   await expect(commandPanel).not.toContainText('Project lanes');
   await expect(commandPanel).not.toContainText('Learned pace');
   await expect(commandPanel).not.toContainText('Weekends off');
@@ -1542,7 +1546,7 @@ test('mobile Company tab explains its one-time private connection', async ({
     page.getByRole('heading', { name: 'Company', exact: true })
   ).toBeVisible();
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Connect your private Company workspace'
+    'Connect Company to TimeKeeper'
   );
   await page.getByRole('button', { name: 'Connect Company' }).click();
   const dialog = page.getByRole('dialog', { name: 'Connect Company' });
@@ -1554,13 +1558,54 @@ test('mobile Company tab explains its one-time private connection', async ({
   await dialog.getByRole('button', { name: 'Cancel' }).click();
 });
 
+test('mobile Company tab never contradicts the canonical company state', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-03T12:00:00.000Z');
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperPrivateBridgeToken',
+      'github_pat_private_company_test'
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSnapshot',
+      JSON.stringify({
+        schema_version: 1,
+        generated_at: '2026-08-03T11:58:00.000Z',
+        status: 'ready',
+        state_version: 'canonical-state-test',
+        company_summary: {
+          state: 'needs_you',
+          headline: 'AstraZeneca: Provide the images or review feedback',
+          detail: 'The requested material is not in the available sources.',
+          counts: { needs_you: 1 }
+        }
+      })
+    );
+  });
+
+  await page.goto('/#company');
+
+  await expect(
+    page.getByRole('heading', {
+      name: 'AstraZeneca: Provide the images or review feedback'
+    })
+  ).toBeVisible();
+  await expect(page.getByText('You need to do this')).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Nothing needs you' })
+  ).toHaveCount(0);
+});
+
 test('service worker never caches private cross-origin API responses', async () => {
   const serviceWorker = await readFile('service-worker.js', 'utf8');
 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v22';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v24';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -1597,6 +1642,21 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       why: 'A live customer request needs a decision-ready response.',
       done_when: 'Every requested tier, assumption, and approval is explicit.',
       confidence: 'medium'
+    },
+    company_summary: {
+      state: 'needs_you',
+      headline: 'Choose the pricing direction',
+      detail: 'Choose the supported pricing direction.',
+      deep_link: '#company',
+      mission_id: '',
+      generated_at: '2026-08-03T11:58:00.000Z',
+      counts: {
+        needs_you: 1,
+        ready: 1,
+        working: 0,
+        up_next: 2,
+        waiting: 0
+      }
     },
     priorities: [
       {
@@ -1961,7 +2021,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   ).toHaveAttribute('href', 'https://outlook.office.com/mail/drafts');
   const sectionOrder = await page.evaluate(() => ({
     priority: document
-      .querySelector('#companyPageContent .company-primary-card')
+      .querySelector(
+        '#companyPageContent .company-primary-card:not(.company-overview)'
+      )
       ?.getBoundingClientRect().top,
     question: [...document.querySelectorAll('#companyPageContent h3')]
       .find((heading) => heading.textContent === 'Needs you')
@@ -1975,6 +2037,19 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'AZ/IFLAI meeting'
   );
   await expect(page.locator('#companyPageContent img')).toHaveCount(0);
+
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const companyTodayCard = page
+    .locator('#todayCommandPanel .mobile-today-card')
+    .filter({ hasText: 'Company · Needs you' });
+  await expect(companyTodayCard).toContainText('Choose the pricing direction');
+  await expect(page.locator('#todayCommandPanel')).toContainText(
+    'Choose the supported pricing direction.'
+  );
+  await companyTodayCard.click();
+  await expect(
+    page.getByRole('heading', { name: 'Company', exact: true })
+  ).toBeVisible();
 
   const mobileLayout = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
@@ -2037,7 +2112,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Codex job queued or in progress'
   );
   await expect(
-    page.locator('#companyPageContent .company-primary-card')
+    page.locator(
+      '#companyPageContent .company-primary-card:not(.company-overview)'
+    )
   ).toContainText('Albany');
   await expect(page.locator('#companyPageContent')).toContainText(
     'Which pilot deadline should I use?'
@@ -2109,7 +2186,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await page
     .locator(
-      '#companyPageContent .company-primary-card .company-more-actions summary'
+      '#companyPageContent .company-primary-card:not(.company-overview) .company-more-actions summary'
     )
     .click();
   await page.getByRole('button', { name: 'Already handled' }).click();
@@ -2129,7 +2206,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     '1 Codex job queued or in progress'
   );
   await expect(
-    page.locator('#companyPageContent .company-primary-card')
+    page.locator(
+      '#companyPageContent .company-primary-card:not(.company-overview)'
+    )
   ).toHaveCount(0);
 
   const directionRequest = page.waitForRequest(
@@ -2593,11 +2672,11 @@ test('mobile Company tab presents missions before the next priority', async ({
     );
   });
   const upNext = await page
-    .locator('#companyPageContent .company-primary-card')
+    .locator('#companyPageContent .company-primary-card:not(.company-overview)')
     .evaluate((node) => node.getBoundingClientRect().top);
-  expect(order['Working now']).toBeLessThan(order['Completed for you']);
-  expect(order['Completed for you']).toBeLessThan(order['Needs you']);
-  expect(order['Needs you']).toBeLessThan(upNext);
+  expect(order['Needs you']).toBeLessThan(order['Completed for you']);
+  expect(order['Completed for you']).toBeLessThan(order['Working now']);
+  expect(order['Working now']).toBeLessThan(upNext);
 
   const commandRequest = page.waitForRequest(
     (request) =>
@@ -2836,8 +2915,8 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toBeVisible();
-  await expect(commandPanel).toContainText('Target');
-  await expect(commandPanel).toContainText('Daily workout target');
+  await expect(commandPanel).toContainText('Work target');
+  await expect(commandPanel).toContainText('Workout');
   await expect(commandPanel).not.toContainText('Favorites');
   await expect(commandPanel).not.toContainText('Weekly budget');
   await expect(commandPanel).toContainText('Most used timers');
@@ -2922,7 +3001,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(page.locator('#weeklyScatter')).toBeVisible();
 });
 
-test('mobile Today shows daily workout target without quick finance actions', async ({
+test('mobile Today shows the workout overview without quick finance actions', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -2966,7 +3045,8 @@ test('mobile Today shows daily workout target without quick finance actions', as
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Daily workout target');
+  await expect(commandPanel).toContainText('Workout');
+  await expect(commandPanel).toContainText('Morning Run');
   await expect(commandPanel).not.toContainText('Weekly budget');
   await expect(
     commandPanel.getByRole('button', { name: 'Log usual workout' })
@@ -2982,11 +3062,11 @@ test('mobile Today shows daily workout target without quick finance actions', as
   ).toHaveCount(0);
   await commandPanel
     .locator('.mobile-today-card')
-    .filter({ hasText: 'Daily workout target' })
+    .filter({ hasText: 'Workout' })
     .click();
-  const workoutDialog = page.getByRole('dialog', { name: 'Log workout' });
-  await expect(workoutDialog).toBeVisible();
-  await workoutDialog.getByRole('button', { name: 'Close' }).last().click();
+  await expect(
+    page.getByRole('heading', { name: 'Workouts', exact: true })
+  ).toBeVisible();
 });
 
 test('mobile Today one-click timers use repeated manual history before recent one-offs', async ({
@@ -4644,8 +4724,9 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   await expect(page.locator('#statsGrid')).toContainText('5% remaining');
   await expect(page.locator('#statsGrid')).toContainText('1-week limit');
   await expect(page.locator('#statsGrid')).toContainText('Resets in');
-  await expect(page.locator('#todayCommandPanel')).toContainText('Codex');
-  await expect(page.locator('#todayCommandPanel')).toContainText('5%');
+  await expect(page.locator('#todayCommandPanel')).toContainText(
+    'Codex capacity is low'
+  );
   await expect(page.locator('#todayCommandPanel')).toContainText('Resets in');
   await expect
     .poll(() =>
@@ -4682,11 +4763,13 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoSection(page, 'dashboard', 'Dashboard');
   const mobileCodexUsage = page.locator(
-    '#todayCommandPanel .mobile-today-card.codex'
+    '#todayCommandPanel .mobile-today-attention'
   );
   await expect(mobileCodexUsage).toBeVisible();
-  await expect(mobileCodexUsage.locator('strong')).toHaveText('5%');
-  await expect(mobileCodexUsage).toContainText('Remaining - Resets in');
+  await expect(mobileCodexUsage.locator('strong')).toHaveText(
+    'Codex capacity is low'
+  );
+  await expect(mobileCodexUsage).toContainText('Resets in');
   await mobileCodexUsage.click();
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');

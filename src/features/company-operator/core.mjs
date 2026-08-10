@@ -1,3 +1,5 @@
+import { normalizeMobileNotificationConfig } from '../private-bridge/core.mjs';
+
 export const COMPANY_OPERATOR_SCHEMA_VERSION = 1;
 
 export const DEFAULT_COMPANY_OPERATOR_SETTINGS = Object.freeze({
@@ -80,12 +82,16 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const sources = asRecord(source.sources);
   const emailDrafting = asRecord(source.email_drafting || source.emailDrafting);
   const opportunities = asRecord(source.opportunities);
+  const companySummary = asRecord(
+    source.company_summary || source.companySummary
+  );
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
     status: cleanText(source.status, 80) || 'unknown',
     stateVersion: cleanText(source.state_version || source.stateVersion, 128),
     today: normalizeToday(source.today),
+    companySummary: normalizeCompanySummary(companySummary),
     priorities,
     missions: {
       status: cleanText(missions.status, 80),
@@ -146,6 +152,30 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
         sources.attention_count ?? sources.attentionCount
       ),
       items: normalizeArray(sources.items, normalizeSource, 12)
+    },
+    mobileNotifications: normalizeMobileNotificationConfig(
+      source.mobile_notifications || source.mobileNotifications
+    )
+  };
+}
+
+function normalizeCompanySummary(value) {
+  const source = asRecord(value);
+  const counts = asRecord(source.counts);
+  return {
+    state: cleanText(source.state, 40),
+    headline: cleanText(source.headline, 180),
+    detail: cleanLegacyResponsibilityCopy(source.detail, 240),
+    deepLink: cleanText(source.deep_link || source.deepLink, 60) || '#company',
+    missionId: cleanText(source.mission_id || source.missionId, 100),
+    destination: normalizeResultDestination(source.destination),
+    generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
+    counts: {
+      needsYou: toCount(counts.needs_you ?? counts.needsYou),
+      ready: toCount(counts.ready),
+      working: toCount(counts.working),
+      upNext: toCount(counts.up_next ?? counts.upNext),
+      waiting: toCount(counts.waiting)
     }
   };
 }
@@ -572,6 +602,7 @@ function normalizeOpportunity(value) {
 
 function normalizeMission(value) {
   const source = asRecord(value);
+  const issueSnapshot = asRecord(source.issue_snapshot || source.issueSnapshot);
   const missionId = cleanText(source.mission_id || source.missionId, 100);
   if (!missionId) return null;
   const currentStep = asRecord(source.current_step || source.currentStep);
@@ -584,12 +615,19 @@ function normalizeMission(value) {
       128
     ),
     project: cleanText(source.project, 100) || 'Company',
+    headline:
+      cleanText(source.headline, 180) ||
+      cleanText(issueSnapshot.title, 180) ||
+      cleanLegacyResponsibilityCopy(source.objective, 180) ||
+      cleanText(source.project, 100) ||
+      'Company',
     objective: cleanLegacyResponsibilityCopy(source.objective, 500),
     doneWhen: cleanLegacyResponsibilityCopy(
       source.done_when || source.doneWhen,
       500
     ),
     outputType: cleanText(source.output_type || source.outputType, 40),
+    businessLane: cleanText(source.business_lane || source.businessLane, 80),
     status: cleanText(source.status, 40) || 'queued',
     priorityScore: toCount(source.priority_score ?? source.priorityScore),
     userPinned: source.user_pinned === true || source.userPinned === true,
@@ -603,6 +641,18 @@ function normalizeMission(value) {
     latestUpdate: cleanLegacyResponsibilityCopy(
       source.latest_update || source.latestUpdate,
       320
+    ),
+    resultSummary: cleanLegacyResponsibilityCopy(
+      source.result_summary || source.resultSummary,
+      240
+    ),
+    userAction: cleanLegacyResponsibilityCopy(
+      source.user_action || source.userAction,
+      240
+    ),
+    waitingReason: cleanLegacyResponsibilityCopy(
+      source.waiting_reason || source.waitingReason,
+      240
     ),
     stepCount: toCount(source.step_count ?? source.stepCount),
     updatedAt: cleanText(source.updated_at || source.updatedAt, 80),

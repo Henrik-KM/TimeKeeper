@@ -11,11 +11,13 @@ Saved browser data stays compatible with the existing `localStorage` schema. No 
 
 The Dashboard includes an App Health panel that summarizes local data, backup/snapshot state, Strava feed freshness, desktop blocker status, and offline app cache status. It can also repair common local-data integrity problems such as duplicate IDs, orphaned entries, invalid focus values, and broken stopped-entry durations.
 
+On mobile, **Today** is the short whole-life overview: one card each for the current or next timer, today's work target, workout progress, and Company. At most one important exception appears above those cards, such as a stale timer, a company decision, a ready company result, a missed workout target, a budget overrun, or a backup conflict. The underlying detail remains in the existing Timer, Projects, Workouts, Company, Finances, and Backup screens.
+
 ## Mobile Company workspace
 
 The mobile bottom bar includes a **Company** tab. It shows the current evidence-backed company priority, the next concrete action, prepared internal work, decisions that genuinely need judgment, work already handled, and source freshness.
 
-Connect it once from **Company > Connect** with a fine-grained GitHub token that has Contents read/write access only to the private `Henrik-KM/timekeeper-private-context` repository. The token, cached Company view, pending instructions, and receipts are stored separately from `timekeeperDataPro`, so they are not included in normal TimeKeeper exports or backups.
+Connect it once from **Company > Connect** with a fine-grained GitHub token that has Contents read/write access only to the private `Henrik-KM/timekeeper-private-context` repository. Company and Codex private sync now share that one connection. Existing Company or Codex tokens and repository settings migrate automatically. The token, cached Company view, pending instructions, and receipts are stored separately from `timekeeperDataPro`, so they are not included in normal TimeKeeper exports or backups.
 
 Mobile controls can add direction, reprioritize, pause or mark an item handled, record a decision, or ask the desktop operator to work on the next safe item. They cannot send mail, post to Slack, change calendars, deploy, delete data, or make legal or financial commitments. The desktop operator validates freshness and evidence before applying each instruction and returns a receipt to the app.
 

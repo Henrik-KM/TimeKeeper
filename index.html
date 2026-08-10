@@ -266,7 +266,7 @@
           <input id="stravaImportInput" type="file" accept="application/json,.json,text/csv,.csv" />
         </div>
         <div class="card" style="margin-top:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Codex Integration</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Codex &amp; Secure Sync</h3>
           <p id="codexIntegrationStatus" class="status-muted">Codex import is not configured.</p>
           <div id="codexIntegrationSummary" class="codex-integration-summary"></div>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
@@ -306,8 +306,18 @@
           <div id="backupSnapshotsPanel" class="backup-snapshots-panel"></div>
         </div>
         <div class="card" style="margin-top:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">App Install &amp; Reminders</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">App Install &amp; Alerts</h3>
           <div id="pwaStatusPanel" class="pwa-status-panel"></div>
+          <div class="mobile-alert-settings">
+            <div>
+              <strong>Mobile daily brief</strong>
+              <p id="mobileAlertStatus" class="status-muted">Checking mobile alert setup.</p>
+            </div>
+            <div class="mobile-alert-actions">
+              <button id="enableMobileAlertsBtn" type="button" class="btn primary" disabled>Enable Mobile Alerts</button>
+              <button id="disableMobileAlertsBtn" type="button" class="btn secondary" disabled>Disable</button>
+            </div>
+          </div>
           <div class="reminder-settings">
             <label class="switch-label">
               <input type="checkbox" id="reminderEnableToggle" />
@@ -525,6 +535,6 @@
       </section>
     </div>
     <div id="mobileNowBar" class="mobile-now-bar hidden" aria-live="polite"></div>
-    <script type="module" src="src/main.mjs?v=16"></script>
+    <script type="module" src="src/main.mjs?v=18"></script>
   </body>
 </html>
