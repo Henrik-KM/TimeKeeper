@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-12T14:23:02.599Z",
+  "updatedAt": "2026-08-12T14:28:02.683Z",
   "dayStart": "2026-08-11T22:00:00.000Z",
   "rangeStart": "2026-05-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-12T14:23:03.985Z",
+    "observedAt": "2026-08-12T14:28:03.880Z",
     "primary": {
       "usedPercent": 20,
       "remainingPercent": 80,
@@ -17952,6 +17952,37 @@
         "codex-b7123980bba7ea98e5627d1a"
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b602f9b0d4d3c0fd77c027be",
+      "threadId": "019f3b9f-7d07-7943-9bb8-fd36d7c1e00e",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-12T12:03:05.241Z",
+      "endTime": "2026-08-12T14:07:14.349Z",
+      "wallSeconds": 7449,
+      "focusFactor": 0.5828,
+      "effectiveSeconds": 4341,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "wallSeconds": 6165,
+          "effectiveSeconds": 3699
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 1283,
+          "effectiveSeconds": 641
+        }
+      ],
+      "description": "Codex: Apply Henrik style guide"
     },
     {
       "id": "codex-bee18179a947ba3bf4f6e046",
