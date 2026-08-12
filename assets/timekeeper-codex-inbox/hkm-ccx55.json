@@ -2,16 +2,16 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-12T21:58:03.129Z",
-  "dayStart": "2026-08-11T22:00:00.000Z",
-  "rangeStart": "2026-05-14T22:00:00.000Z",
+  "updatedAt": "2026-08-12T22:03:03.146Z",
+  "dayStart": "2026-08-12T22:00:00.000Z",
+  "rangeStart": "2026-05-15T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-12T21:58:04.365Z",
+    "observedAt": "2026-08-12T22:03:04.409Z",
     "primary": {
       "usedPercent": 32,
       "remainingPercent": 68,
@@ -14871,152 +14871,6 @@
       "description": "Codex: Execute research project end to end"
     },
     {
-      "id": "codex-378bea5a8c6b168fcfcc7906",
-      "threadId": "019fd69a-7884-71f1-89cf-bd27b97b08a8",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-06T10:24:39.504Z",
-      "endTime": "2026-08-06T10:26:11.418Z",
-      "wallSeconds": 91,
-      "focusFactor": 0.3531,
-      "effectiveSeconds": 32,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "wallSeconds": 5,
-          "effectiveSeconds": 2
-        },
-        {
-          "model": "gpt-5.6-terra",
-          "effort": "medium",
-          "factor": 0.35,
-          "wallSeconds": 86,
-          "effectiveSeconds": 30
-        }
-      ],
-      "description": "Codex: email-helper"
-    },
-    {
-      "id": "codex-036e9880fb62aa6259417144",
-      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-06T10:49:00.830Z",
-      "endTime": "2026-08-06T11:24:16.442Z",
-      "wallSeconds": 2115,
-      "focusFactor": 0.6,
-      "effectiveSeconds": 1269,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.45,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "max",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 2115,
-          "effectiveSeconds": 1269
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-9bb1593df5bad072b8a38af2"
-      ],
-      "description": "Codex: email-helper"
-    },
-    {
-      "id": "codex-a128e8973d8ffe41013debb4",
-      "threadId": "019fd6c2-9c38-7201-a614-d4013a629dfa",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-06T11:08:26.659Z",
-      "endTime": "2026-08-06T11:09:19.480Z",
-      "wallSeconds": 52,
-      "focusFactor": 0.3512,
-      "effectiveSeconds": 18,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "model": "gpt-5.6-terra",
-          "effort": "medium",
-          "factor": 0.35,
-          "wallSeconds": 51,
-          "effectiveSeconds": 18
-        }
-      ],
-      "description": "Codex: email-helper"
-    },
-    {
-      "id": "codex-7c7bc54a3dbac16a0fd160ce",
-      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-06T14:45:03.172Z",
-      "endTime": "2026-08-06T14:50:37.970Z",
-      "wallSeconds": 334,
-      "focusFactor": 0.4502,
-      "effectiveSeconds": 150,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "max",
-          "factor": 0.6,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.6,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "medium",
-          "factor": 0.45,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.45,
-          "wallSeconds": 334,
-          "effectiveSeconds": 150
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-b22975ede8ecfcd3c0895bc9"
-      ],
-      "description": "Codex: email-helper"
-    },
-    {
       "id": "codex-a8b5456a4af7a2713a680a3d",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
       "projectKey": "Research",
@@ -15049,37 +14903,6 @@
         "codex-b6f718683f77f1f43238f29e"
       ],
       "description": "Codex: Execute research project end to end"
-    },
-    {
-      "id": "codex-69702ca5a666e30c2b7825f2",
-      "threadId": "019fd78d-13a2-7ae3-aaa6-deb18e829381",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-06T14:49:35.258Z",
-      "endTime": "2026-08-06T14:51:16.754Z",
-      "wallSeconds": 101,
-      "focusFactor": 0.4991,
-      "effectiveSeconds": 50,
-      "focusPolicyVersion": 3,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 100,
-          "effectiveSeconds": 50
-        }
-      ],
-      "description": "Codex: email-helper"
     },
     {
       "id": "codex-d61feb149d161bde22a93840",
