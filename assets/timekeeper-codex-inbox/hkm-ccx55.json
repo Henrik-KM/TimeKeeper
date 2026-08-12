@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-12T12:53:01.771Z",
+  "updatedAt": "2026-08-12T13:08:40.686Z",
   "dayStart": "2026-08-11T22:00:00.000Z",
   "rangeStart": "2026-05-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-12T12:53:05.805Z",
+    "observedAt": "2026-08-12T13:08:41.672Z",
     "primary": {
       "usedPercent": 18,
       "remainingPercent": 82,
@@ -17952,6 +17952,37 @@
         "codex-b7123980bba7ea98e5627d1a"
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-bee18179a947ba3bf4f6e046",
+      "threadId": "019f36a2-e4f4-7b20-b4c9-dbeab91847ab",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-12T12:47:08.098Z",
+      "endTime": "2026-08-12T12:50:40.202Z",
+      "wallSeconds": 212,
+      "focusFactor": 0.4307,
+      "effectiveSeconds": 91,
+      "focusPolicyVersion": 3,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.5",
+          "effort": "medium",
+          "factor": 0.4,
+          "wallSeconds": 81,
+          "effectiveSeconds": 32
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "medium",
+          "factor": 0.45,
+          "wallSeconds": 130,
+          "effectiveSeconds": 58
+        }
+      ],
+      "description": "Codex: Official Outlook Email Helper"
     }
   ]
 }
