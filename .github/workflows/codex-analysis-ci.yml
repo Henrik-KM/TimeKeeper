@@ -13,15 +13,13 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.head_ref || github.ref_name }}
 
       - uses: actions/setup-node@v4
         with:
@@ -31,19 +29,25 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Normalize formatting on the pull-request branch
-        if: github.event_name == 'pull_request'
-        run: |
-          npx prettier --write codex-analysis.html docs/codex-analysis.md scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
-          if git diff --quiet; then
-            echo "Formatting is already normalized."
-            exit 0
-          fi
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add codex-analysis.html docs/codex-analysis.md scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
-          git commit -m "Format Codex analysis implementation [skip ci]"
-          git push origin "HEAD:${GITHUB_HEAD_REF}"
+      - name: Normalize files for validation and handoff
+        run: npx prettier --write codex-analysis.html docs/codex-analysis.md scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
+
+      - name: Upload normalized implementation
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-analysis-formatted
+          if-no-files-found: error
+          retention-days: 1
+          path: |
+            codex-analysis.html
+            docs/codex-analysis.md
+            scripts/codex-usage-history.mjs
+            src/features/codex/analytics.mjs
+            src/features/codex/analysis-page.mjs
+            tests/unit/codex-analytics.test.mjs
+            tests/unit/codex-usage-history.test.mjs
+            .github/workflows/codex-analysis-ci.yml
+            .github/workflows/codex-usage-history.yml
 
       - name: Check syntax
         run: |
