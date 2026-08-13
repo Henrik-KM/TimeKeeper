@@ -1,6 +1,7 @@
 export const STRAVA_SCORE_MODEL_VERSION = 2;
 export const STRAVA_FEATURE_VERSION = 2;
 export const STRAVA_SCORE_DEFAULT_SCALE = 1;
+export const STRAVA_SCORE_CALIBRATION = 0.79;
 
 const SCORE_CURVE_SCALE = 6;
 const CARDIO_LOAD_SCALE = 70;
@@ -302,7 +303,7 @@ export function computeStrengthCredit(features) {
     SCORE_CURVE_SCALE * (1 - Math.exp(-Math.max(0, minutes - 5) / 45));
   const durationQuality = 0.1 * clampScoreValue((minutes - 60) / 45, 0, 1);
   const multiplier = 0.9 + 0.2 * density + durationQuality;
-  return Math.max(0, base * multiplier * factor);
+  return Math.max(0, base * multiplier * factor * STRAVA_SCORE_CALIBRATION);
 }
 
 export function computeCardioCredit(features) {
@@ -313,7 +314,7 @@ export function computeCardioCredit(features) {
   );
   if (load <= 0) return 0;
   const score = SCORE_CURVE_SCALE * (1 - Math.exp(-load / CARDIO_LOAD_SCALE));
-  return Math.max(0, score);
+  return Math.max(0, score * STRAVA_SCORE_CALIBRATION);
 }
 
 export function computeStravaRecoveryLoad(features) {

@@ -1,5 +1,6 @@
 import {
   STRAVA_FEATURE_VERSION,
+  STRAVA_SCORE_CALIBRATION,
   STRAVA_SCORE_DEFAULT_SCALE,
   STRAVA_SCORE_MODEL_VERSION,
   combineWorkoutComponents,
@@ -14,6 +15,7 @@ import { groupStravaActivitiesIntoSessions } from './sessions.mjs';
 
 export {
   STRAVA_FEATURE_VERSION,
+  STRAVA_SCORE_CALIBRATION,
   STRAVA_SCORE_DEFAULT_SCALE,
   STRAVA_SCORE_MODEL_VERSION,
   combineWorkoutComponents,

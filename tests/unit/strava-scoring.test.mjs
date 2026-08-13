@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   STRAVA_FEATURE_VERSION,
+  STRAVA_SCORE_CALIBRATION,
   STRAVA_SCORE_MODEL_VERSION,
   combineWorkoutComponents,
   computeCardioCredit,
@@ -67,7 +68,7 @@ test('strength scoring is not driven by average heart rate', () => {
   );
 
   assert.equal(lowHr, highHr);
-  assert.equal(lowHr, 4.4);
+  assert.equal(lowHr, 3.5);
 });
 
 test('stale stream features fall back to the current automatic model', () => {
@@ -110,7 +111,7 @@ test('strength fallback includes normal rest between sets', () => {
     elapsed_time_min: 60
   });
 
-  assert.equal(estimateStravaExertion(restingStrength), 3.8);
+  assert.equal(estimateStravaExertion(restingStrength), 3);
 });
 
 test('legacy score metadata is preserved but ignored by automatic scoring', () => {
@@ -134,7 +135,17 @@ test('legacy score metadata is preserved but ignored by automatic scoring', () =
   assert.equal(overridden.local_faulty, true);
   assert.equal(overridden.estimated_exertion, 7);
   assert.equal(overridden.reported_exertion, 6);
-  assert.equal(resolveStravaExertion(overridden), 3.8);
+  assert.equal(resolveStravaExertion(overridden), 3);
+});
+
+test('v2 remains aligned with the historical v1 aggregate point scale', () => {
+  const historicalV1Total = 295.7;
+  const uncalibratedV2Total = 375;
+  const calibratedV2Total = uncalibratedV2Total * STRAVA_SCORE_CALIBRATION;
+
+  assert.ok(
+    Math.abs(calibratedV2Total - historicalV1Total) / historicalV1Total < 0.01
+  );
 });
 
 test('dense strength outranks a moderate cardio workout of similar duration', () => {
@@ -148,7 +159,7 @@ test('dense strength outranks a moderate cardio workout of similar duration', ()
   );
 
   assert.ok(strength > cardio + 1);
-  assert.ok(strength > 4.5);
+  assert.ok(strength > 3.5);
   assert.ok(cardio < 4);
 });
 
@@ -228,7 +239,7 @@ test('adjacent Strava records are scored as one mixed session', () => {
   assert.equal(model.sessions, 1);
 
   const sessionScore = resolveStravaExertion(lifting);
-  assert.ok(sessionScore > 4.5);
+  assert.ok(sessionScore > 3.5);
   assert.equal(resolveStravaExertion(warmup), null);
   assert.equal(resolveStravaExertion(cooldown), null);
 
@@ -379,8 +390,8 @@ test('manual and reported exertion values do not replace automatic scoring', () 
     reported_exertion: 10
   });
 
-  assert.equal(estimateStravaExertion(baseline), 3.8);
-  assert.equal(estimateStravaExertion(overridden), 3.8);
+  assert.equal(estimateStravaExertion(baseline), 3);
+  assert.equal(estimateStravaExertion(overridden), 3);
 });
 
 test('stream-derived mixed features retain a bounded secondary contribution', () => {
