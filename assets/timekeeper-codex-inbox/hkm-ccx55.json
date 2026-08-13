@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-13T20:13:01.945Z",
+  "updatedAt": "2026-08-13T20:18:01.939Z",
   "dayStart": "2026-08-12T22:00:00.000Z",
   "rangeStart": "2026-05-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-13T20:13:03.069Z",
+    "observedAt": "2026-08-13T20:18:03.010Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -19855,6 +19855,65 @@
         }
       ],
       "description": "Codex: Apply Henrik style guide"
+    },
+    {
+      "id": "codex-810cae2d375a048206a1c5a0",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-13T17:16:11.867Z",
+      "endTime": "2026-08-13T19:59:14.215Z",
+      "wallSeconds": 9782,
+      "focusFactor": 0.4282,
+      "effectiveSeconds": 4188,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 9782,
+          "effectiveSeconds": 3912
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1967,
+          "effectiveSeconds": 275
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-70d5a1a9f58cafab08112481",
+        "codex-3f0ab5b04780ac4bb2d3b587"
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
