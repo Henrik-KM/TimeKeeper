@@ -13,6 +13,7 @@ import {
   getDefaultMachineId,
   getLocalDayStart,
   getLocalLookbackStart,
+  isCodexFastModeActive,
   parseTimestamp,
   sanitizeMachineId
 } from './codex-usage-core.mjs';
@@ -461,6 +462,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
   const activity = [];
   let activeModel = '';
   let activeEffort = '';
+  let activeFastMode = false;
   let firstTimestamp = null;
   let lastTimestampMs = null;
   let hasSessionMeta = false;
@@ -503,6 +505,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
           activeEffort = String(
             payload.effort || payload.reasoning_effort || activeEffort || ''
           ).trim();
+          activeFastMode = isCodexFastModeActive(payload);
         } else if (event?.type === 'response_item') {
           const role = String(payload.role || '')
             .trim()
@@ -548,14 +551,16 @@ export async function readCodexSessionSummary(filePath, windowStart) {
         activity.push({
           timestamp,
           model: activeModel,
-          effort: activeEffort
+          effort: activeEffort,
+          fastMode: activeFastMode
         });
         lastTimestampMs = timestampMs;
       } else if (activity.length) {
         activity[activity.length - 1] = {
           timestamp,
           model: activeModel,
-          effort: activeEffort
+          effort: activeEffort,
+          fastMode: activeFastMode
         };
       }
     }

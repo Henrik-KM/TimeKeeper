@@ -7,10 +7,11 @@ export const DEFAULT_IDLE_GAP_MS = 15 * 60 * 1000;
 export const DEFAULT_MATURE_MS = 17 * 60 * 1000;
 export const DEFAULT_CODEX_LOOKBACK_DAYS = 7;
 export const DEFAULT_CODEX_FOCUS_POLICY = {
-  version: 3,
+  version: 5,
   defaultFactor: DEFAULT_CODEX_FOCUS_FACTOR,
   minimumFactor: 0.2,
   maximumFactor: 0.8,
+  fastModeMultiplier: 1.2,
   delegationCredit: 0.35,
   modelBaseFactors: {
     luna: 0.25,
@@ -89,6 +90,13 @@ export function normalizeCodexFocusPolicy(
     ),
     minimumFactor,
     maximumFactor,
+    fastModeMultiplier: Math.max(
+      0.01,
+      getFiniteNumber(
+        source.fastModeMultiplier,
+        DEFAULT_CODEX_FOCUS_POLICY.fastModeMultiplier
+      )
+    ),
     delegationCredit: Math.max(
       0,
       getFiniteNumber(
@@ -143,16 +151,26 @@ export function normalizeCodexEffort(value = '') {
   return normalized;
 }
 
+export function isCodexFastModeActive(payload = {}) {
+  return (
+    payload?.realtime_active === true ||
+    payload?.fast_mode === true ||
+    payload?.fastMode === true
+  );
+}
+
 /**
  * @param {{
  *   model?: string,
  *   effort?: string,
+ *   fastMode?: boolean,
  *   policy: ReturnType<typeof normalizeCodexFocusPolicy>
  * }} options
  */
 function resolveNormalizedCodexFocusFactor({
   model = '',
   effort = '',
+  fastMode = false,
   policy
 }) {
   const normalizedModel = String(model || '')
@@ -175,10 +193,14 @@ function resolveNormalizedCodexFocusFactor({
   const adjustment = hasModelRule
     ? getFiniteNumber(policy.effortAdjustments[normalizedEffort], 0)
     : 0;
+  const appliedFastModeMultiplier = fastMode ? policy.fastModeMultiplier : 1;
   const factor = Number(
     Math.min(
       policy.maximumFactor,
-      Math.max(policy.minimumFactor, baseFactor + adjustment)
+      Math.max(
+        policy.minimumFactor,
+        (baseFactor + adjustment) * appliedFastModeMultiplier
+      )
     ).toFixed(4)
   );
   return {
@@ -186,6 +208,8 @@ function resolveNormalizedCodexFocusFactor({
     model: normalizedModel,
     modelFamily,
     effort: normalizedEffort,
+    fastMode: fastMode === true,
+    fastModeMultiplier: appliedFastModeMultiplier,
     policyVersion: policy.version,
     source: hasModelRule ? 'model-effort' : 'default'
   };
@@ -194,12 +218,14 @@ function resolveNormalizedCodexFocusFactor({
 export function resolveCodexFocusFactor({
   model = '',
   effort = '',
+  fastMode = false,
   focusPolicy = {},
   fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
 } = {}) {
   return resolveNormalizedCodexFocusFactor({
     model,
     effort,
+    fastMode,
     policy: normalizeCodexFocusPolicy(focusPolicy, fallbackFactor)
   });
 }
@@ -404,6 +430,7 @@ export function getCodexSessionActivity(events = [], dayStart = null) {
   const minTime = dayStart instanceof Date ? dayStart.getTime() : null;
   let activeModel = '';
   let activeEffort = '';
+  let activeFastMode = false;
   const activity = [];
   events.forEach((event) => {
     if (event?.type === 'turn_context') {
@@ -414,6 +441,7 @@ export function getCodexSessionActivity(events = [], dayStart = null) {
           activeEffort ||
           ''
       ).trim();
+      activeFastMode = isCodexFastModeActive(event?.payload);
     }
     const timestamp = parseTimestamp(event?.timestamp);
     if (!timestamp || (minTime !== null && timestamp.getTime() < minTime)) {
@@ -422,7 +450,8 @@ export function getCodexSessionActivity(events = [], dayStart = null) {
     const point = {
       timestamp,
       model: activeModel,
-      effort: activeEffort
+      effort: activeEffort,
+      fastMode: activeFastMode
     };
     const previous = activity[activity.length - 1];
     if (previous && previous.timestamp.getTime() === timestamp.getTime()) {
@@ -493,7 +522,8 @@ export function buildModelWeightedActiveSpans(
           ? point.timestamp
           : parseTimestamp(point?.timestamp),
       model: String(point?.model || '').trim(),
-      effort: String(point?.effort || '').trim()
+      effort: String(point?.effort || '').trim(),
+      fastMode: point?.fastMode === true
     }))
     .filter((point) => point.timestamp)
     .sort(
@@ -513,6 +543,8 @@ export function buildModelWeightedActiveSpans(
       model: item.model || 'unknown',
       effort: item.effort || 'unknown',
       factor: item.factor,
+      fastMode: item.fastMode,
+      fastModeMultiplier: item.fastModeMultiplier,
       wallSeconds: Math.floor(item.wallMs / 1000),
       effectiveSeconds: Math.floor(item.effectiveMs / 1000)
     }));
@@ -543,19 +575,25 @@ export function buildModelWeightedActiveSpans(
     const resolved = resolveNormalizedCodexFocusFactor({
       model: previous.model,
       effort: previous.effort,
+      fastMode: previous.fastMode,
       policy
     });
     const weightedGap = gap * resolved.factor;
     activeMs += gap;
     effectiveMs += weightedGap;
     spanEnd = current.timestamp;
-    const key = [resolved.model, resolved.effort, resolved.factor].join(
-      '\u001f'
-    );
+    const key = [
+      resolved.model,
+      resolved.effort,
+      resolved.fastMode,
+      resolved.factor
+    ].join('\u001f');
     const currentBreakdown = breakdown.get(key) || {
       model: resolved.model,
       effort: resolved.effort,
       factor: resolved.factor,
+      fastMode: resolved.fastMode,
+      fastModeMultiplier: resolved.fastModeMultiplier,
       wallMs: 0,
       effectiveMs: 0
     };
@@ -616,7 +654,7 @@ export function makeCodexRecordId(parts = []) {
  * @param {{
  *   meta?: { id?: string, cwd?: string },
  *   timestamps?: Array<Date>,
- *   activity?: Array<{ timestamp: Date, model?: string, effort?: string }>,
+ *   activity?: Array<{ timestamp: Date, model?: string, effort?: string, fastMode?: boolean }>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
@@ -728,7 +766,8 @@ function buildCodexActivityIntervals(
           ? point.timestamp
           : parseTimestamp(point?.timestamp),
       model: String(point?.model || '').trim(),
-      effort: String(point?.effort || '').trim()
+      effort: String(point?.effort || '').trim(),
+      fastMode: point?.fastMode === true
     }))
     .filter((point) => point.timestamp)
     .sort(
@@ -747,6 +786,7 @@ function buildCodexActivityIntervals(
     const resolved = resolveNormalizedCodexFocusFactor({
       model: previous.model,
       effort: previous.effort,
+      fastMode: previous.fastMode,
       policy
     });
     const interval = {
@@ -757,6 +797,8 @@ function buildCodexActivityIntervals(
       creditMultiplier,
       model: resolved.model,
       effort: resolved.effort,
+      fastMode: resolved.fastMode,
+      fastModeMultiplier: resolved.fastModeMultiplier,
       role,
       sessionId: String(session?.meta?.id || '').trim()
     };
@@ -767,6 +809,7 @@ function buildCodexActivityIntervals(
       last.factor === interval.factor &&
       last.model === interval.model &&
       last.effort === interval.effort &&
+      last.fastMode === interval.fastMode &&
       last.role === interval.role &&
       last.sessionId === interval.sessionId
     ) {
@@ -836,6 +879,7 @@ function aggregateCodexIntervals(intervals = []) {
           interval.role,
           interval.model,
           interval.effort,
+          interval.fastMode,
           interval.factor,
           interval.creditMultiplier
         ].join('\u001f');
@@ -844,6 +888,8 @@ function aggregateCodexIntervals(intervals = []) {
           model: interval.model,
           effort: interval.effort,
           factor: interval.factor,
+          fastMode: interval.fastMode,
+          fastModeMultiplier: interval.fastModeMultiplier,
           creditMultiplier: interval.creditMultiplier,
           wallMs: 0,
           effectiveMs: 0
@@ -877,6 +923,8 @@ function aggregateCodexIntervals(intervals = []) {
       model: item.model || 'unknown',
       effort: item.effort || 'unknown',
       factor: item.factor,
+      fastMode: item.fastMode,
+      fastModeMultiplier: item.fastModeMultiplier,
       creditMultiplier: item.creditMultiplier,
       creditedFactor: Number((item.factor * item.creditMultiplier).toFixed(4)),
       wallSeconds: Math.floor(item.wallMs / 1000),
@@ -903,7 +951,7 @@ function aggregateCodexIntervals(intervals = []) {
  *       cwd?: string,
  *       isSubagent?: boolean
  *     },
- *     activity?: Array<{ timestamp: Date, model?: string, effort?: string }>,
+ *     activity?: Array<{ timestamp: Date, model?: string, effort?: string, fastMode?: boolean }>,
  *     sourceFile?: string
  *   }>,
  *   trackedProjects?: Array<object>,

@@ -1423,10 +1423,11 @@ import {
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
   const CODEX_FOCUS_FACTOR = 0.4;
   const CODEX_FOCUS_POLICY = {
-    version: 3,
+    version: 5,
     defaultFactor: CODEX_FOCUS_FACTOR,
     minimumFactor: 0.2,
     maximumFactor: 0.8,
+    fastModeMultiplier: 1.2,
     delegationCredit: 0.35,
     modelBaseFactors: {
       luna: 0.25,

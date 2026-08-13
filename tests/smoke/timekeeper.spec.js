@@ -4469,9 +4469,10 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     version: 5,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 3,
+      version: 5,
       defaultFactor: 0.4,
       minimumFactor: 0.2,
+      fastModeMultiplier: 1.2,
       delegationCredit: 0.35,
       modelBaseFactors: {
         luna: 0.25,
