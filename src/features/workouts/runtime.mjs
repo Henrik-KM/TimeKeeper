@@ -599,10 +599,10 @@ export function createWorkoutRuntime({
       options.weekEnd instanceof Date
         ? new Date(options.weekEnd)
         : (() => {
-          const end = new Date(weekStart);
-          end.setDate(end.getDate() + 7);
-          return end;
-        })();
+            const end = new Date(weekStart);
+            end.setDate(end.getDate() + 7);
+            return end;
+          })();
     const fitness = options.fitness || ensureFitnessDefaults();
     const plan = getWorkoutPointPlan(fitness);
     const boundedStart = weekStart < plan.start ? plan.start : weekStart;

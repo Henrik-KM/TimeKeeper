@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v18';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v19';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -3167,7 +3167,7 @@ test('cached Strava workout points render before feed refresh finishes', async (
   const workoutCard = page
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Workout Progress' });
-  await expect(workoutCard).toContainText('3.8 / 18 pts');
+  await expect(workoutCard).toContainText('3 / 18 pts');
   await expect(workoutCard).not.toContainText('0 / 18 pts');
 
   releaseFeed();

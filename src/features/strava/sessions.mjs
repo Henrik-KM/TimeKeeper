@@ -48,10 +48,7 @@ function mergeSessionFeatures(activities, sessionSpanMinutes) {
       0,
       Number(features.work_recovery_cycles) || 0
     );
-    hrReference = Math.max(
-      hrReference,
-      Number(features.hr_max_reference) || 0
-    );
+    hrReference = Math.max(hrReference, Number(features.hr_max_reference) || 0);
   });
 
   const originalStrengthMinutes = strengthMinutes;
