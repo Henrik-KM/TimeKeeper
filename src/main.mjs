@@ -3689,7 +3689,6 @@ import {
 
   function importCodexInboxPayloads(payloads = []) {
     const config = getCodexIntegrationConfig();
-    const previousUsageLimits = JSON.stringify(config.usageLimits);
     const importedIds = getCodexExistingExternalIds(config);
     const windowStart = getCodexImportWindowStart();
     let imported = 0;
@@ -3785,10 +3784,18 @@ import {
         if (alreadyImported) {
           const existingPolicyVersion =
             Number(existingEntry?.codexFocusPolicyVersion) || 0;
+          const codexMetadataChanged =
+            existingEntry &&
+            Object.entries(codexMetadata).some(
+              ([key, value]) =>
+                JSON.stringify(existingEntry[key] ?? null) !==
+                JSON.stringify(value ?? null)
+            );
           if (
             existingEntry &&
             focusPolicyVersion &&
-            focusPolicyVersion > existingPolicyVersion
+            focusPolicyVersion >= existingPolicyVersion &&
+            codexMetadataChanged
           ) {
             Object.assign(existingEntry, codexMetadata);
             updated += 1;
@@ -3825,13 +3832,11 @@ import {
       reconciled,
       updated
     };
-    const usageChanged =
-      JSON.stringify(config.usageLimits) !== previousUsageLimits;
     if (imported > 0 || reconciled > 0 || updated > 0) {
       saveData();
       refreshAllViews();
     } else {
-      if (usageChanged) persistDataToLocalStorage();
+      persistDataToLocalStorage();
       updateDashboard();
       updateCodexIntegrationPanel();
       updateCodexPage();
