@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-13T11:13:02.843Z",
+  "updatedAt": "2026-08-13T11:18:02.591Z",
   "dayStart": "2026-08-12T22:00:00.000Z",
   "rangeStart": "2026-05-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-13T11:13:04.562Z",
+    "observedAt": "2026-08-13T11:18:04.141Z",
     "primary": {
       "usedPercent": 23,
       "remainingPercent": 77,
@@ -19383,6 +19383,50 @@
         "codex-532c974157779742fa7ff386"
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-1b310274c09ad58700ee2f91",
+      "threadId": "019f3b9f-7d07-7943-9bb8-fd36d7c1e00e",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-13T03:47:55.033Z",
+      "endTime": "2026-08-13T11:00:48.226Z",
+      "wallSeconds": 25973,
+      "focusFactor": 0.5335,
+      "effectiveSeconds": 13855,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2835,
+          "effectiveSeconds": 1417
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 7223,
+          "effectiveSeconds": 2889
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 15913,
+          "effectiveSeconds": 9548
+        }
+      ],
+      "description": "Codex: Apply Henrik style guide"
     },
     {
       "id": "codex-d1d0d545504b2a226c5f0c04",
