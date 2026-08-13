@@ -79,6 +79,10 @@ function formatPercent(value, decimals = 0) {
   return Number.isFinite(value) ? `${(value * 100).toFixed(decimals)}%` : '—';
 }
 
+function formatQuotaPercent(value, decimals = 0) {
+  return Number.isFinite(value) ? `${value.toFixed(decimals)}%` : '—';
+}
+
 function formatHours(value, decimals = 1) {
   return Number.isFinite(value) ? `${value.toFixed(decimals)} h` : '—';
 }
@@ -159,7 +163,9 @@ function renderMetricCards(analytics) {
       value: Number.isFinite(analytics.overall.effectiveHoursPerUsagePoint)
         ? `${analytics.overall.effectiveHoursPerUsagePoint.toFixed(2)} h/pt`
         : 'Collecting',
-      detail: 'Effective hours per quota percentage point'
+      detail: `${formatHours(
+        analytics.overall.measuredEffectiveHours
+      )} measured effective time`
     },
     {
       label: 'Attributed usage',
@@ -281,6 +287,21 @@ const efficiencyColumns = [
   {
     key: 'wallHours',
     label: 'Active',
+    title: 'Total active time in the selected range',
+    numeric: true,
+    format: (value) => formatHours(value)
+  },
+  {
+    key: 'measuredWallHours',
+    label: 'Measured active',
+    title: 'Active time overlapping quota-history coverage',
+    numeric: true,
+    format: (value) => formatHours(value)
+  },
+  {
+    key: 'measuredEffectiveHours',
+    label: 'Measured effective',
+    title: 'Effective time overlapping quota-history coverage',
     numeric: true,
     format: (value) => formatHours(value)
   },
@@ -382,6 +403,12 @@ function renderTables(analytics) {
         format: (value) => formatHours(value)
       },
       {
+        key: 'measuredWallHours',
+        label: 'Measured active',
+        numeric: true,
+        format: (value) => formatHours(value)
+      },
+      {
         key: 'usagePoints',
         label: 'Quota used',
         numeric: true,
@@ -428,10 +455,7 @@ function renderDataQuality(analytics) {
   ];
   rows.forEach(([label, value]) => {
     const row = makeElement('div', 'quality-row');
-    row.append(
-      makeElement('span', '', label),
-      makeElement('strong', '', value)
-    );
+    row.append(makeElement('span', '', label), makeElement('strong', '', value));
     container.appendChild(row);
   });
 }
@@ -460,6 +484,8 @@ function buildCsv(analytics) {
     'model',
     'effective_hours',
     'active_hours',
+    'measured_active_hours',
+    'measured_effective_hours',
     'quota_points',
     'quota_points_per_active_hour',
     'effective_hours_per_quota_point',
@@ -471,6 +497,8 @@ function buildCsv(analytics) {
     row.label,
     row.effectiveHours,
     row.wallHours,
+    row.measuredWallHours,
+    row.measuredEffectiveHours,
     row.usagePoints,
     row.usagePerWallHour ?? '',
     row.effectiveHoursPerUsagePoint ?? '',
@@ -545,6 +573,5 @@ async function initialize() {
 initialize().catch((error) => {
   console.error(error);
   byId('loadingState').className = 'fatal-state';
-  byId('loadingState').textContent =
-    `Codex analysis failed: ${error.message || error}`;
+  byId('loadingState').textContent = `Codex analysis failed: ${error.message || error}`;
 });
