@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0f172a" />
+    <title>Codex Analysis · TimeKeeper</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family:
+          Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+          "Segoe UI", sans-serif;
+        --ink: #0f172a;
+        --muted: #64748b;
+        --line: #dbe4ef;
+        --surface: #ffffff;
+        --canvas: #f3f6fa;
+        --primary: #2563eb;
+        --primary-soft: #dbeafe;
+        --positive: #047857;
+        --positive-soft: #d1fae5;
+        --warning: #b45309;
+        --warning-soft: #fef3c7;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        background: var(--canvas);
+        color: var(--ink);
+      }
+      button,
+      a {
+        font: inherit;
+      }
+      .shell {
+        width: min(1500px, calc(100% - 32px));
+        margin: 0 auto;
+        padding: 28px 0 56px;
+      }
+      .page-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 24px;
+        margin-bottom: 20px;
+      }
+      .eyebrow {
+        margin: 0 0 6px;
+        color: var(--primary);
+        font-size: 0.78rem;
+        font-weight: 750;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+      h1 {
+        margin: 0;
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        letter-spacing: -0.04em;
+      }
+      .subtitle {
+        max-width: 760px;
+        margin: 10px 0 0;
+        color: var(--muted);
+        line-height: 1.5;
+      }
+      .header-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: flex-end;
+      }
+      .button,
+      .range-button {
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--surface);
+        color: var(--ink);
+        padding: 9px 13px;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 650;
+      }
+      .button:hover,
+      .range-button:hover {
+        border-color: #94a3b8;
+      }
+      .button.primary {
+        background: var(--ink);
+        color: white;
+        border-color: var(--ink);
+      }
+      .toolbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 16px;
+        margin: 18px 0;
+      }
+      .range-controls {
+        display: flex;
+        gap: 6px;
+      }
+      .range-button {
+        padding: 7px 11px;
+      }
+      .range-button.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: white;
+      }
+      .toolbar-meta {
+        text-align: right;
+        color: var(--muted);
+        font-size: 0.86rem;
+      }
+      .toolbar-meta strong {
+        display: block;
+        color: var(--ink);
+      }
+      .measurement-banner {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 14px 16px;
+        margin-bottom: 16px;
+        background: var(--surface);
+      }
+      .measurement-banner.ready {
+        background: var(--positive-soft);
+        border-color: #86efac;
+      }
+      .measurement-banner.partial {
+        background: var(--warning-soft);
+        border-color: #fcd34d;
+      }
+      .measurement-banner.collecting {
+        background: var(--primary-soft);
+        border-color: #93c5fd;
+      }
+      .measurement-banner span {
+        color: #334155;
+        line-height: 1.45;
+      }
+      .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(0, 1fr));
+        gap: 12px;
+        margin-bottom: 18px;
+      }
+      .metric-card,
+      .section-card {
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(15, 23, 42, 0.04);
+      }
+      .metric-card {
+        padding: 15px;
+        min-height: 132px;
+        display: flex;
+        flex-direction: column;
+      }
+      .metric-label {
+        color: var(--muted);
+        font-size: 0.78rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+      .metric-value {
+        margin-top: auto;
+        font-size: 1.45rem;
+        letter-spacing: -0.03em;
+      }
+      .metric-detail {
+        color: var(--muted);
+        line-height: 1.35;
+        margin-top: 5px;
+      }
+      .section-card {
+        padding: 20px;
+        margin-top: 14px;
+      }
+      .section-header {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        align-items: baseline;
+        margin-bottom: 14px;
+      }
+      .section-header h2 {
+        margin: 0;
+        font-size: 1.12rem;
+      }
+      .section-header p {
+        margin: 0;
+        color: var(--muted);
+        font-size: 0.84rem;
+      }
+      .insight-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .insight {
+        border-left: 4px solid #94a3b8;
+        border-radius: 10px;
+        background: #f8fafc;
+        padding: 13px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+      .insight.positive {
+        border-color: var(--positive);
+        background: var(--positive-soft);
+      }
+      .insight.warning {
+        border-color: var(--warning);
+        background: var(--warning-soft);
+      }
+      .insight span {
+        color: #475569;
+        line-height: 1.42;
+        font-size: 0.9rem;
+      }
+      .table-scroll {
+        overflow-x: auto;
+      }
+      .analysis-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.88rem;
+      }
+      .analysis-table th,
+      .analysis-table td {
+        padding: 11px 10px;
+        border-bottom: 1px solid #e8eef5;
+        text-align: left;
+        white-space: nowrap;
+      }
+      .analysis-table th {
+        color: #475569;
+        font-size: 0.73rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        background: #f8fafc;
+      }
+      .analysis-table tr:last-child td {
+        border-bottom: 0;
+      }
+      .analysis-table td:first-child {
+        font-weight: 700;
+      }
+      .analysis-table .numeric {
+        font-variant-numeric: tabular-nums;
+      }
+      .confidence {
+        display: inline-flex;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        font-weight: 750;
+      }
+      .confidence.high {
+        color: #065f46;
+        background: #d1fae5;
+      }
+      .confidence.medium {
+        color: #92400e;
+        background: #fef3c7;
+      }
+      .confidence.low {
+        color: #475569;
+        background: #e2e8f0;
+      }
+      .two-column {
+        display: grid;
+        grid-template-columns: 1.15fr 0.85fr;
+        gap: 14px;
+      }
+      .quality-list {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 8px;
+      }
+      .quality-row {
+        background: #f8fafc;
+        border-radius: 10px;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .quality-row span {
+        color: var(--muted);
+      }
+      .empty-state,
+      #loadingState,
+      .fatal-state {
+        color: var(--muted);
+        padding: 28px 4px;
+        line-height: 1.5;
+      }
+      .fatal-state {
+        color: #991b1b;
+        background: #fee2e2;
+        border: 1px solid #fecaca;
+        border-radius: 12px;
+        padding: 16px;
+      }
+      .definition-note {
+        margin: 18px 0 0;
+        color: var(--muted);
+        font-size: 0.8rem;
+        line-height: 1.5;
+      }
+      @media (max-width: 1150px) {
+        .metric-grid {
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+        .insight-grid {
+          grid-template-columns: 1fr;
+        }
+        .quality-list {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+      @media (max-width: 760px) {
+        .shell {
+          width: min(100% - 20px, 1500px);
+          padding-top: 18px;
+        }
+        .page-header,
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+        .header-actions {
+          justify-content: flex-start;
+        }
+        .toolbar-meta {
+          text-align: left;
+        }
+        .metric-grid,
+        .two-column,
+        .quality-list {
+          grid-template-columns: 1fr;
+        }
+        .metric-card {
+          min-height: 110px;
+        }
+        .section-card {
+          padding: 14px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="shell">
+      <header class="page-header">
+        <div>
+          <p class="eyebrow">TimeKeeper · Codex intelligence</p>
+          <h1>Codex Analysis</h1>
+          <p class="subtitle">
+            Model and effort efficiency, quota burn, effective-time yield,
+            delegation leverage, project economics, and measurement quality.
+            Quota metrics use percentage points of the measured Codex limit
+            window—not estimated tokens.
+          </p>
+        </div>
+        <div class="header-actions">
+          <a class="button" href="index.html">Back to TimeKeeper</a>
+          <button id="refreshAnalysis" class="button" type="button">
+            Refresh
+          </button>
+          <button id="exportCsv" class="button primary" type="button">
+            Export model CSV
+          </button>
+        </div>
+      </header>
+
+      <div id="loadingState">
+        Loading local TimeKeeper activity and measured Codex usage history…
+      </div>
+
+      <div id="analysisContent" hidden>
+        <div class="toolbar">
+          <div
+            id="rangeControls"
+            class="range-controls"
+            aria-label="Analysis range"
+          ></div>
+          <div class="toolbar-meta">
+            <strong id="rangeLabel">Last 7 days</strong>
+            <span id="updatedAt"></span>
+          </div>
+        </div>
+
+        <div id="measurementBanner" class="measurement-banner"></div>
+        <section id="metricCards" class="metric-grid"></section>
+
+        <section class="section-card">
+          <div class="section-header">
+            <h2>Useful findings</h2>
+            <p>
+              Only measured claims are promoted; low-confidence model rows stay
+              directional.
+            </p>
+          </div>
+          <div id="insights" class="insight-grid"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-header">
+            <h2>Model efficiency</h2>
+            <p>
+              Quota burn is lower-is-better; effective hours per usage point is
+              higher-is-better.
+            </p>
+          </div>
+          <div id="modelTable"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-header">
+            <h2>Model × effort</h2>
+            <p>
+              Separates the same model at different reasoning-effort settings.
+            </p>
+          </div>
+          <div id="modelEffortTable"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-header">
+            <h2>Project efficiency</h2>
+            <p>Shows where quota is converted into the most credited work.</p>
+          </div>
+          <div id="projectTable"></div>
+        </section>
+
+        <div class="two-column">
+          <section class="section-card">
+            <div class="section-header">
+              <h2>Recent daily trend</h2>
+              <p>Latest 14 measured days in the selected range.</p>
+            </div>
+            <div id="dailyTable"></div>
+          </section>
+
+          <section class="section-card">
+            <div class="section-header">
+              <h2>Measurement quality</h2>
+              <p>Use this before trusting small differences.</p>
+            </div>
+            <div id="dataQuality" class="quality-list"></div>
+          </section>
+        </div>
+
+        <p class="definition-note">
+          Attribution method: each positive quota change is assigned to
+          overlapping imported Codex activity in proportion to model active
+          time. Reset transitions, negative deltas, anomalous jumps, and large
+          history gaps are excluded. Model segments do not carry exact
+          timestamps, so mixed-model sessions are proportionally allocated and
+          marked with confidence levels.
+        </p>
+      </div>
+    </main>
+    <script
+      type="module"
+      src="src/features/codex/analysis-page.mjs?v=1"
+    ></script>
+  </body>
+</html>
