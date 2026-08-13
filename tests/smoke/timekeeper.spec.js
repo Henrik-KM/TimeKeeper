@@ -1560,7 +1560,175 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v19';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v20';");
+  expect(serviceWorker).toContain("'./codex-analysis.html'");
+  expect(serviceWorker).toContain(
+    "'./src/features/codex/analysis-page.mjs?v=1'"
+  );
+  expect(serviceWorker).toContain(
+    "'./assets/timekeeper-codex-usage-history.json'"
+  );
+});
+
+test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-13T12:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'analysis-project', name: 'Analysis Project' })
+    ],
+    entries: [
+      {
+        id: 'analysis-session-a',
+        externalId: 'analysis-session-a',
+        source: 'Codex',
+        projectId: 'analysis-project',
+        startTime: '2026-08-13T09:00:00.000Z',
+        endTime: '2026-08-13T10:00:00.000Z',
+        elapsedSeconds: 3600,
+        duration: 2700,
+        focusFactor: 0.75,
+        codexModelBreakdown: [
+          {
+            role: 'parent',
+            model: 'model-a',
+            effort: 'high',
+            wallSeconds: 3600,
+            effectiveSeconds: 2700
+          }
+        ]
+      },
+      {
+        id: 'analysis-session-b',
+        externalId: 'analysis-session-b',
+        source: 'Codex',
+        projectId: 'analysis-project',
+        startTime: '2026-08-13T10:00:00.000Z',
+        endTime: '2026-08-13T11:00:00.000Z',
+        elapsedSeconds: 3600,
+        duration: 1800,
+        focusFactor: 0.5,
+        codexModelBreakdown: [
+          {
+            role: 'parent',
+            model: 'model-b',
+            effort: 'medium',
+            wallSeconds: 3600,
+            effectiveSeconds: 1800
+          }
+        ]
+      }
+    ],
+    codexIntegration: {
+      usageLimits: {
+        observedAt: '2026-08-13T12:00:00.000Z',
+        primary: {
+          usedPercent: 16,
+          remainingPercent: 84,
+          windowMinutes: 10080,
+          resetsAt: '2026-08-20T00:00:00.000Z'
+        },
+        secondary: {
+          usedPercent: 24,
+          remainingPercent: 76,
+          windowMinutes: 1440,
+          resetsAt: '2026-08-14T00:00:00.000Z'
+        }
+      }
+    }
+  });
+  await page.route('**/assets/timekeeper-codex-usage-history.json**', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        samples: [
+          {
+            observedAt: '2026-08-13T09:00:00.000Z',
+            primary: {
+              usedPercent: 10,
+              remainingPercent: 90,
+              windowMinutes: 10080,
+              resetsAt: '2026-08-20T00:00:00.000Z'
+            },
+            secondary: {
+              usedPercent: 20,
+              remainingPercent: 80,
+              windowMinutes: 1440,
+              resetsAt: '2026-08-14T00:00:00.000Z'
+            }
+          },
+          {
+            observedAt: '2026-08-13T10:00:00.000Z',
+            primary: {
+              usedPercent: 12,
+              remainingPercent: 88,
+              windowMinutes: 10080,
+              resetsAt: '2026-08-20T00:00:00.000Z'
+            },
+            secondary: {
+              usedPercent: 22,
+              remainingPercent: 78,
+              windowMinutes: 1440,
+              resetsAt: '2026-08-14T00:00:00.000Z'
+            }
+          }
+        ]
+      })
+    })
+  );
+
+  await page.goto('/codex-analysis.html');
+  await expect(
+    page.getByRole('heading', { name: 'Codex Analysis' })
+  ).toBeVisible();
+  await expect(page.locator('#windowSelect')).toHaveValue('primary');
+  await expect(page.locator('#modelTable tbody tr')).toHaveCount(2);
+
+  const canvasState = await page.evaluate(() =>
+    /** @type {HTMLCanvasElement[]} */ ([
+      ...document.querySelectorAll('.chart-canvas')
+    ]).map((canvas) => {
+      const context = canvas.getContext('2d');
+      const pixels = context.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      ).data;
+      return {
+        width: canvas.width,
+        height: canvas.height,
+        hasInk: [...pixels].some((value, index) => index % 4 === 3 && value > 0)
+      };
+    })
+  );
+  expect(canvasState).toHaveLength(5);
+  expect(
+    canvasState.every(
+      (canvas) => canvas.width > 0 && canvas.height > 0 && canvas.hasInk
+    )
+  ).toBe(true);
+
+  await page.locator('#windowSelect').selectOption('secondary');
+  await expect(page.locator('#metricCards')).toContainText('24% used');
+  await page.locator('#filterModel').selectOption('model-a');
+  await expect(page.locator('#modelTable tbody tr')).toHaveCount(1);
+  await expect(page.locator('#modelTable')).toContainText('model-a');
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#exportCsv').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain('secondary');
+  const csv = await download.createReadStream();
+  expect(csv).toBeTruthy();
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true);
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -2110,7 +2278,8 @@ test('mobile Company tab presents missions before the next priority', async ({
         evidence_fingerprint: 'evidence-avantor-delivery-1',
         project: 'Avantor',
         objective: 'Finish the tested camera configuration for the customer.',
-        done_when: 'The tested configuration is available in a verified local commit.',
+        done_when:
+          'The tested configuration is available in a verified local commit.',
         status: 'active',
         step_count: 1,
         latest_update: 'Implemented the supported device configuration.',
@@ -2124,7 +2293,8 @@ test('mobile Company tab presents missions before the next priority', async ({
           evidence_fingerprint: 'evidence-avantor-delivery-1',
           project: 'Avantor',
           objective: 'Finish the tested camera configuration for the customer.',
-          done_when: 'The tested configuration is available in a verified local commit.',
+          done_when:
+            'The tested configuration is available in a verified local commit.',
           status: 'active',
           step_count: 1,
           latest_update: 'Implemented the supported device configuration.',
@@ -2248,7 +2418,9 @@ test('mobile Company tab presents missions before the next priority', async ({
     return Object.fromEntries(
       ['Working now', 'Completed for you', 'Needs you'].map((label) => [
         label,
-        headings.find((heading) => heading.textContent === label)?.getBoundingClientRect().top
+        headings
+          .find((heading) => heading.textContent === label)
+          ?.getBoundingClientRect().top
       ])
     );
   });
@@ -2277,9 +2449,13 @@ test('mobile Company tab presents missions before the next priority', async ({
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
     minimumActionHeight: Math.min(
-      ...[...document.querySelectorAll('#companyPageContent .company-action-grid .btn')].map(
-        (button) => button.getBoundingClientRect().height
-      ).filter((height) => height > 0)
+      ...[
+        ...document.querySelectorAll(
+          '#companyPageContent .company-action-grid .btn'
+        )
+      ]
+        .map((button) => button.getBoundingClientRect().height)
+        .filter((height) => height > 0)
     )
   }));
   expect(layout.scrollWidth).toBeLessThanOrEqual(layout.viewportWidth + 2);

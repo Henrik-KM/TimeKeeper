@@ -93,3 +93,30 @@ test('retains a bounded, chronological history', () => {
   assert.equal(merged[0].observedAt, '2026-08-13T09:00:00.000Z');
   assert.equal(merged[2].primary.usedPercent, 13);
 });
+
+test('backfill mode keeps historical state changes and deduplicates timestamps', () => {
+  const merged = mergeUsageHistory(
+    [candidate('2026-08-13T08:00:00.000Z', 10)],
+    [
+      candidate('2026-08-13T08:30:00.000Z', 10, '2026-08-20T00:00:04.000Z'),
+      candidate('2026-08-13T09:00:00.000Z', 11),
+      candidate('2026-08-13T09:00:00.000Z', 12),
+      candidate('2026-08-13T10:00:00.000Z', 12)
+    ],
+    {
+      now: new Date('2026-08-13T11:00:00.000Z'),
+      heartbeatMinutes: 60,
+      includeAllCandidates: true
+    }
+  );
+
+  assert.deepEqual(
+    merged.map((sample) => sample.observedAt),
+    [
+      '2026-08-13T08:00:00.000Z',
+      '2026-08-13T09:00:00.000Z',
+      '2026-08-13T10:00:00.000Z'
+    ]
+  );
+  assert.equal(merged[1].primary.usedPercent, 12);
+});

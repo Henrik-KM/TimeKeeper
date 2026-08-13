@@ -2,8 +2,10 @@ const HOUR_SECONDS = 60 * 60;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_USAGE_GAP_HOURS = 3;
 const DEFAULT_MAX_USAGE_DELTA = 40;
+const DEFAULT_RESET_TIME_TOLERANCE_MINUTES = 5;
 
 function finiteNumber(value, fallback = 0) {
+  if (value === null || value === undefined || value === '') return fallback;
   const number = Number(value);
   return Number.isFinite(number) ? number : fallback;
 }
@@ -73,8 +75,12 @@ export function normalizeCodexUsageSample(sample, windowKey = 'primary') {
     sample.usageLimits?.observedAt;
   const observedMs = parseTime(observedAt);
   if (observedMs === null) return null;
-  let usedPercent = Number(window.usedPercent);
-  let remainingPercent = Number(window.remainingPercent);
+  const toNumber = (value) =>
+    value === null || value === undefined || value === ''
+      ? Number.NaN
+      : Number(value);
+  let usedPercent = toNumber(window.usedPercent);
+  let remainingPercent = toNumber(window.remainingPercent);
   if (!Number.isFinite(usedPercent) && Number.isFinite(remainingPercent)) {
     usedPercent = 100 - remainingPercent;
   }
@@ -116,7 +122,11 @@ function dedupeUsageSamples(samples) {
   );
 }
 
-function sameUsageWindow(previous, current) {
+function sameUsageWindow(
+  previous,
+  current,
+  resetTimeToleranceMs = DEFAULT_RESET_TIME_TOLERANCE_MINUTES * 60 * 1000
+) {
   if (!previous || !current) return false;
   if (
     previous.windowMinutes > 0 &&
@@ -126,6 +136,11 @@ function sameUsageWindow(previous, current) {
     return false;
   }
   if (previous.resetsAt && current.resetsAt) {
+    const previousResetMs = parseTime(previous.resetsAt);
+    const currentResetMs = parseTime(current.resetsAt);
+    if (previousResetMs !== null && currentResetMs !== null) {
+      return Math.abs(currentResetMs - previousResetMs) <= resetTimeToleranceMs;
+    }
     return previous.resetsAt === current.resetsAt;
   }
   return current.usedPercent >= previous.usedPercent;
@@ -136,7 +151,8 @@ export function computeCodexUsageIntervals(
   {
     windowKey = 'primary',
     maxGapHours = DEFAULT_MAX_USAGE_GAP_HOURS,
-    maxUsageDelta = DEFAULT_MAX_USAGE_DELTA
+    maxUsageDelta = DEFAULT_MAX_USAGE_DELTA,
+    resetTimeToleranceMinutes = DEFAULT_RESET_TIME_TOLERANCE_MINUTES
   } = {}
 ) {
   const rawSamples = Array.isArray(usageHistory)
@@ -158,7 +174,13 @@ export function computeCodexUsageIntervals(
     const current = samples[index];
     const durationMs = current.observedMs - previous.observedMs;
     if (durationMs <= 0) continue;
-    if (!sameUsageWindow(previous, current)) {
+    if (
+      !sameUsageWindow(
+        previous,
+        current,
+        Math.max(0, resetTimeToleranceMinutes) * 60 * 1000
+      )
+    ) {
       resetTransitions += 1;
       continue;
     }
@@ -277,9 +299,7 @@ function normalizeModelBreakdown(entry, session) {
         factor: positiveNumber(row?.creditedFactor ?? row?.factor, 0)
       };
     })
-    .filter(
-      (row) => row.wallSeconds > 0 || row.effectiveSeconds > 0 || row.factor > 0
-    );
+    .filter((row) => row.wallSeconds > 0 || row.effectiveSeconds > 0);
   if (rows.length) return rows;
   return [
     {
@@ -513,6 +533,8 @@ function rankRows(rows, selector, direction = 'desc') {
 
 function buildInsights(analytics) {
   const insights = [];
+  const selectedWindow =
+    analytics.windowKey === 'secondary' ? 'secondary' : 'primary';
   const qualified = analytics.byModel.filter(
     (row) => row.confidence !== 'low' && row.usagePoints > 0
   );
@@ -568,7 +590,7 @@ function buildInsights(analytics) {
     insights.push({
       tone: projected >= 100 ? 'warning' : 'neutral',
       title: 'Projected quota at reset',
-      detail: `At the measured burn rate, the primary window would reach approximately ${projected.toFixed(0)}% used by reset.`
+      detail: `At the measured burn rate, the ${selectedWindow} window would reach approximately ${projected.toFixed(0)}% used by reset.`
     });
   }
   return insights.slice(0, 6);
@@ -581,14 +603,16 @@ export function buildCodexAnalytics({
   rangeDays = 7,
   now = new Date(),
   windowKey = 'primary',
-  maxUsageGapHours = DEFAULT_MAX_USAGE_GAP_HOURS
+  maxUsageGapHours = DEFAULT_MAX_USAGE_GAP_HOURS,
+  resetTimeToleranceMinutes = DEFAULT_RESET_TIME_TOLERANCE_MINUTES
 } = {}) {
   const nowMs = parseTime(now) ?? Date.now();
   const requestedRangeDays = clamp(positiveNumber(rangeDays, 7), 1 / 24, 365);
   const requestedStartMs = nowMs - requestedRangeDays * DAY_MS;
   const usage = computeCodexUsageIntervals(usageHistory, {
     windowKey,
-    maxGapHours: maxUsageGapHours
+    maxGapHours: maxUsageGapHours,
+    resetTimeToleranceMinutes
   });
   const sessions = normalizeCodexSessions(entries, projects).filter(
     (session) => session.endMs > requestedStartMs && session.startMs < nowMs
@@ -617,15 +641,17 @@ export function buildCodexAnalytics({
     overlappingMeasurementEndMs > overlappingMeasurementStartMs;
   const measurementStartMs = hasMeasurementWindow
     ? overlappingMeasurementStartMs
-    : requestedStartMs;
+    : null;
   const measurementEndMs = hasMeasurementWindow
     ? overlappingMeasurementEndMs
-    : nowMs;
-  const clippedIntervals = usage.intervals
-    .map((interval) =>
-      clipInterval(interval, measurementStartMs, measurementEndMs)
-    )
-    .filter(Boolean);
+    : null;
+  const clippedIntervals = hasMeasurementWindow
+    ? usage.intervals
+        .map((interval) =>
+          clipInterval(interval, measurementStartMs, measurementEndMs)
+        )
+        .filter(Boolean)
+    : [];
 
   const maps = {
     model: new Map(),
@@ -646,11 +672,9 @@ export function buildCodexAnalytics({
   sessions.forEach((session) => {
     const rangeClip = getSessionClip(session, requestedStartMs, nowMs);
     if (!rangeClip) return;
-    const measurementClip = getSessionClip(
-      session,
-      measurementStartMs,
-      measurementEndMs
-    );
+    const measurementClip = hasMeasurementWindow
+      ? getSessionClip(session, measurementStartMs, measurementEndMs)
+      : null;
     const measurementFraction = measurementClip?.fraction ?? 0;
     totalWallSeconds += session.wallSeconds * rangeClip.fraction;
     totalEffectiveSeconds += session.effectiveSeconds * rangeClip.fraction;
@@ -794,10 +818,9 @@ export function buildCodexAnalytics({
     (total, interval) => total + interval.usagePoints,
     0
   );
-  const measurementHours = Math.max(
-    0,
-    (measurementEndMs - measurementStartMs) / (60 * 60 * 1000)
-  );
+  const measurementHours = hasMeasurementWindow
+    ? Math.max(0, (measurementEndMs - measurementStartMs) / (60 * 60 * 1000))
+    : 0;
   const latestSample = relevantSamples
     .filter((sample) => sample.observedMs <= nowMs)
     .slice(-1)[0];
@@ -844,11 +867,9 @@ export function buildCodexAnalytics({
     };
     row.wallSeconds += session.wallSeconds * clip.fraction;
     row.effectiveSeconds += session.effectiveSeconds * clip.fraction;
-    const measurementClip = getSessionClip(
-      session,
-      measurementStartMs,
-      measurementEndMs
-    );
+    const measurementClip = hasMeasurementWindow
+      ? getSessionClip(session, measurementStartMs, measurementEndMs)
+      : null;
     if (measurementClip) {
       row.measuredWallSeconds += session.wallSeconds * measurementClip.fraction;
       row.measuredEffectiveSeconds +=
@@ -891,8 +912,12 @@ export function buildCodexAnalytics({
     measurementState,
     coverage: {
       requestedStartAt: new Date(requestedStartMs).toISOString(),
-      measurementStartAt: new Date(measurementStartMs).toISOString(),
-      measurementEndAt: new Date(measurementEndMs).toISOString(),
+      measurementStartAt: measurementStartMs
+        ? new Date(measurementStartMs).toISOString()
+        : null,
+      measurementEndAt: measurementEndMs
+        ? new Date(measurementEndMs).toISOString()
+        : null,
       measurementHours: round(measurementHours),
       requestedHours: round(requestedHours),
       timeCoverage: round(timeCoverage),
@@ -950,7 +975,21 @@ export function buildCodexAnalytics({
     byEffort,
     byProject,
     byRole,
-    daily
+    daily,
+    quotaTimeline: clippedIntervals.map((interval) => ({
+      startAt: interval.startAt,
+      endAt: interval.endAt,
+      usagePoints: round(interval.usagePoints),
+      currentUsedPercent: interval.currentUsedPercent,
+      resetsAt: interval.resetsAt
+    })),
+    quotaTrajectory: relevantSamples.map((sample) => ({
+      observedAt: sample.observedAt,
+      usedPercent: sample.usedPercent,
+      remainingPercent: sample.remainingPercent,
+      resetsAt: sample.resetsAt,
+      windowKey: sample.windowKey
+    }))
   };
   analytics.insights = buildInsights(analytics);
   return analytics;

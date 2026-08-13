@@ -6,12 +6,35 @@ const USAGE_HISTORY_URL = new URL(
   import.meta.url
 );
 const RANGE_OPTIONS = [1, 7, 30, 90];
+const CHART_COLORS = [
+  '#2563eb',
+  '#047857',
+  '#b45309',
+  '#7c3aed',
+  '#be123c',
+  '#0891b2'
+];
 
 const state = {
   rangeDays: 7,
+  windowKey: 'primary',
   analytics: null,
   data: null,
-  usageHistory: []
+  usageHistory: [],
+  filters: {
+    model: 'all',
+    effort: 'all',
+    project: 'all',
+    minMeasuredHours: 0,
+    minUsagePoints: 0,
+    hideUnknown: true
+  },
+  sort: {
+    model: { key: 'usagePerWallHour', direction: 'desc' },
+    modelEffort: { key: 'effectiveHours', direction: 'desc' },
+    project: { key: 'effectiveHoursPerUsagePoint', direction: 'desc' },
+    daily: { key: 'date', direction: 'desc' }
+  }
 };
 
 function byId(id) {
@@ -45,8 +68,8 @@ function getCurrentUsageSample(data) {
   return {
     observedAt:
       usageLimits.observedAt ||
-      integration.lastUsageAt ||
-      integration.lastImportAt ||
+      integration?.lastUsageAt ||
+      integration?.lastImportAt ||
       new Date().toISOString(),
     primary: usageLimits.primary || null,
     secondary: usageLimits.secondary || null,
@@ -72,25 +95,25 @@ async function loadUsageHistory(data) {
 }
 
 function formatNumber(value, decimals = 1) {
-  return Number.isFinite(value) ? value.toFixed(decimals) : '—';
+  return Number.isFinite(value) ? value.toFixed(decimals) : '-';
 }
 
 function formatPercent(value, decimals = 0) {
-  return Number.isFinite(value) ? `${(value * 100).toFixed(decimals)}%` : '—';
+  return Number.isFinite(value) ? `${(value * 100).toFixed(decimals)}%` : '-';
 }
 
 function formatQuotaPercent(value, decimals = 0) {
-  return Number.isFinite(value) ? `${value.toFixed(decimals)}%` : '—';
+  return Number.isFinite(value) ? `${value.toFixed(decimals)}%` : '-';
 }
 
 function formatHours(value, decimals = 1) {
-  return Number.isFinite(value) ? `${value.toFixed(decimals)} h` : '—';
+  return Number.isFinite(value) ? `${value.toFixed(decimals)} h` : '-';
 }
 
 function formatDateTime(value) {
-  if (!value) return '—';
+  if (!value) return '-';
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return '—';
+  if (Number.isNaN(date.getTime())) return '-';
   return date.toLocaleString(undefined, {
     month: 'short',
     day: 'numeric',
@@ -114,6 +137,31 @@ function makeElement(tag, className = '', text = '') {
   return element;
 }
 
+function windowHasData(samples, windowKey) {
+  return samples.some((sample) => {
+    const window = sample?.[windowKey];
+    const hasNumber = (value) =>
+      value !== null &&
+      value !== undefined &&
+      value !== '' &&
+      Number.isFinite(Number(value));
+    return (
+      window &&
+      (hasNumber(window.usedPercent) || hasNumber(window.remainingPercent))
+    );
+  });
+}
+
+function windowLabel(windowKey) {
+  return windowKey === 'secondary'
+    ? 'Secondary quota window'
+    : 'Primary quota window';
+}
+
+function rangeLabel(rangeDays) {
+  return rangeDays === 1 ? 'Last 24 hours' : `Last ${rangeDays} days`;
+}
+
 function renderMeasurementBanner(analytics) {
   const banner = byId('measurementBanner');
   banner.className = `measurement-banner ${analytics.measurementState}`;
@@ -121,17 +169,17 @@ function renderMeasurementBanner(analytics) {
   const title = makeElement('strong');
   const detail = makeElement('span');
   if (analytics.measurementState === 'ready') {
-    title.textContent = 'Measured quota efficiency';
+    title.textContent = `Measured ${windowLabel(analytics.windowKey).toLowerCase()}`;
     detail.textContent =
-      'Usage rates are based on reset-safe quota changes aligned with imported Codex activity.';
+      'Usage rates use reset-safe quota changes aligned with imported Codex activity.';
   } else if (analytics.measurementState === 'partial') {
     title.textContent = 'Preliminary quota efficiency';
     detail.textContent =
-      'The model rankings are usable, but history or activity attribution is still incomplete. Treat low-confidence rows as directional.';
+      'History or activity attribution is incomplete. Treat low-confidence rows as directional.';
   } else {
     title.textContent = 'Collecting usage history';
     detail.textContent =
-      'Time and focus metrics are available now. Usage-per-hour and effective-time-per-usage will appear after at least two quota snapshots have been collected.';
+      'Time and focus metrics are available now. Efficiency ratios need at least two usable quota snapshots in this window.';
   }
   banner.append(title, detail);
 }
@@ -141,9 +189,9 @@ function renderMetricCards(analytics) {
   cards.replaceChildren();
   const metrics = [
     {
-      label: 'Primary quota',
+      label: `${titleCase(analytics.windowKey)} quota`,
       value: Number.isFinite(analytics.overall.latestUsedPercent)
-        ? `${analytics.overall.latestUsedPercent.toFixed(0)}% used`
+        ? `${formatQuotaPercent(analytics.overall.latestUsedPercent)} used`
         : 'Unavailable',
       detail: analytics.overall.resetsAt
         ? `Resets ${formatDateTime(analytics.overall.resetsAt)}`
@@ -163,22 +211,20 @@ function renderMetricCards(analytics) {
       value: Number.isFinite(analytics.overall.effectiveHoursPerUsagePoint)
         ? `${analytics.overall.effectiveHoursPerUsagePoint.toFixed(2)} h/pt`
         : 'Collecting',
-      detail: `${formatHours(
-        analytics.overall.measuredEffectiveHours
-      )} measured effective time`
+      detail: `${formatHours(analytics.overall.measuredEffectiveHours)} measured effective time`
     },
     {
       label: 'Attributed usage',
       value: formatPercent(analytics.overall.attributionRate),
-      detail: `${formatNumber(analytics.overall.attributedUsagePoints, 2)} of ${formatNumber(
-        analytics.overall.totalUsagePoints,
+      detail: `${formatNumber(
+        analytics.overall.attributedUsagePoints,
         2
-      )} quota points`
+      )} of ${formatNumber(analytics.overall.totalUsagePoints, 2)} quota points`
     },
     {
       label: 'Effective time',
       value: formatHours(analytics.overall.totalEffectiveHours),
-      detail: `${formatHours(analytics.overall.totalWallHours)} active · ${formatPercent(
+      detail: `${formatHours(analytics.overall.totalWallHours)} active - ${formatPercent(
         analytics.overall.focusConversion
       )} credited`
     },
@@ -228,16 +274,78 @@ function renderInsights(analytics) {
 }
 
 function confidenceBadge(confidence) {
-  return `<span class="confidence ${confidence}">${titleCase(confidence)}</span>`;
+  return makeElement('span', `confidence ${confidence}`, titleCase(confidence));
+}
+
+function isUnknownRow(row) {
+  return [row?.key, row?.label, row?.model, row?.effort]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes('unknown'));
+}
+
+function applyFilters(rows, tableKey) {
+  const filters = state.filters;
+  return rows.filter((row) => {
+    if (filters.hideUnknown && isUnknownRow(row)) return false;
+    if (tableKey === 'model' && filters.model !== 'all') {
+      if (row.key !== filters.model) return false;
+    }
+    if (tableKey === 'modelEffort') {
+      if (filters.model !== 'all' && row.model !== filters.model) return false;
+      if (filters.effort !== 'all' && row.effort !== filters.effort)
+        return false;
+    }
+    if (tableKey === 'project' && filters.project !== 'all') {
+      if (row.key !== filters.project) return false;
+    }
+    if (
+      Number.isFinite(filters.minMeasuredHours) &&
+      row.measuredWallHours < filters.minMeasuredHours
+    ) {
+      return false;
+    }
+    if (
+      Number.isFinite(filters.minUsagePoints) &&
+      row.usagePoints < filters.minUsagePoints
+    ) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function sortValue(row, key) {
+  const value = row?.[key];
+  return typeof value === 'string' ? value.toLowerCase() : value;
+}
+
+function sortRows(rows, tableKey) {
+  const sort = state.sort[tableKey] || { key: 'label', direction: 'asc' };
+  return rows.slice().sort((left, right) => {
+    const leftValue = sortValue(left, sort.key);
+    const rightValue = sortValue(right, sort.key);
+    const leftMissing =
+      leftValue === null || leftValue === undefined || leftValue === '';
+    const rightMissing =
+      rightValue === null || rightValue === undefined || rightValue === '';
+    if (leftMissing || rightMissing) {
+      if (leftMissing && rightMissing) return 0;
+      return leftMissing ? 1 : -1;
+    }
+    const comparison =
+      typeof leftValue === 'number' && typeof rightValue === 'number'
+        ? leftValue - rightValue
+        : String(leftValue).localeCompare(String(rightValue));
+    return sort.direction === 'asc' ? comparison : -comparison;
+  });
 }
 
 function formatCell(column, row) {
   const value = row[column.key];
-  if (column.format) return column.format(value, row);
-  return value ?? '—';
+  return column.format ? column.format(value, row) : (value ?? '-');
 }
 
-function renderTable(containerId, rows, columns, emptyMessage) {
+function renderTable(containerId, rows, columns, emptyMessage, tableKey) {
   const container = byId(containerId);
   container.replaceChildren();
   if (!rows.length) {
@@ -248,21 +356,47 @@ function renderTable(containerId, rows, columns, emptyMessage) {
   const table = makeElement('table', 'analysis-table');
   const head = document.createElement('thead');
   const headRow = document.createElement('tr');
+  const activeSort = state.sort[tableKey];
   columns.forEach((column) => {
     const header = document.createElement('th');
-    header.textContent = column.label;
-    if (column.title) header.title = column.title;
+    const sortKey = column.sortKey || column.key;
+    const button = makeElement('button', 'table-sort-button', column.label);
+    button.type = 'button';
+    button.title = column.title || `Sort by ${column.label}`;
+    button.setAttribute(
+      'aria-sort',
+      activeSort?.key === sortKey
+        ? activeSort.direction === 'asc'
+          ? 'ascending'
+          : 'descending'
+        : 'none'
+    );
+    button.addEventListener('click', () => {
+      const current = state.sort[tableKey] || {
+        key: sortKey,
+        direction: 'asc'
+      };
+      state.sort[tableKey] = {
+        key: sortKey,
+        direction:
+          current.key === sortKey && current.direction === 'asc'
+            ? 'desc'
+            : 'asc'
+      };
+      render();
+    });
+    header.appendChild(button);
     headRow.appendChild(header);
   });
   head.appendChild(headRow);
   const body = document.createElement('tbody');
-  rows.forEach((row) => {
+  sortRows(rows, tableKey).forEach((row) => {
     const tr = document.createElement('tr');
     columns.forEach((column) => {
       const cell = document.createElement('td');
       const formatted = formatCell(column, row);
-      if (column.html) {
-        cell.innerHTML = String(formatted);
+      if (column.render) {
+        cell.appendChild(column.render(formatted, row));
       } else {
         cell.textContent = String(formatted);
       }
@@ -277,7 +411,7 @@ function renderTable(containerId, rows, columns, emptyMessage) {
 }
 
 const efficiencyColumns = [
-  { key: 'label', label: 'Model' },
+  { key: 'label', label: 'Name' },
   {
     key: 'effectiveHours',
     label: 'Effective',
@@ -308,10 +442,10 @@ const efficiencyColumns = [
   {
     key: 'usagePoints',
     label: 'Quota used',
-    title: 'Percentage points consumed in the measured primary limit window',
+    title: 'Percentage points consumed in the selected quota window',
     numeric: true,
     format: (value) =>
-      Number.isFinite(value) ? `${value.toFixed(2)} pts` : '—'
+      Number.isFinite(value) ? `${value.toFixed(2)} pts` : '-'
   },
   {
     key: 'usagePerWallHour',
@@ -319,7 +453,7 @@ const efficiencyColumns = [
     title: 'Lower is more quota-efficient',
     numeric: true,
     format: (value) =>
-      Number.isFinite(value) ? `${value.toFixed(2)} pts/h` : '—'
+      Number.isFinite(value) ? `${value.toFixed(2)} pts/h` : '-'
   },
   {
     key: 'effectiveHoursPerUsagePoint',
@@ -327,7 +461,7 @@ const efficiencyColumns = [
     title: 'Higher is more quota-efficient',
     numeric: true,
     format: (value) =>
-      Number.isFinite(value) ? `${value.toFixed(2)} h/pt` : '—'
+      Number.isFinite(value) ? `${value.toFixed(2)} h/pt` : '-'
   },
   {
     key: 'focusConversion',
@@ -344,48 +478,47 @@ const efficiencyColumns = [
   {
     key: 'confidence',
     label: 'Confidence',
-    html: true,
-    format: (value) => confidenceBadge(value)
+    title:
+      'Confidence considers measured time, quota points, and interval count',
+    format: (value) => value,
+    render: (value) => confidenceBadge(value)
   }
 ];
 
 function renderTables(analytics) {
-  const modelRows = analytics.byModel.slice().sort((left, right) => {
-    if (
-      Number.isFinite(left.usagePerWallHour) &&
-      Number.isFinite(right.usagePerWallHour)
-    ) {
-      return right.usagePerWallHour - left.usagePerWallHour;
-    }
-    return right.effectiveHours - left.effectiveHours;
-  });
+  const modelRows = applyFilters(analytics.byModel, 'model');
+  const modelEffortRows = applyFilters(analytics.byModelEffort, 'modelEffort');
+  const projectRows = applyFilters(analytics.byProject, 'project');
   renderTable(
     'modelTable',
     modelRows,
     efficiencyColumns,
-    'No imported Codex model activity exists in this range.'
+    'No imported Codex model activity exists in this range.',
+    'model'
   );
   renderTable(
     'modelEffortTable',
-    analytics.byModelEffort,
+    modelEffortRows,
     [
-      { ...efficiencyColumns[0], label: 'Model · effort' },
+      { ...efficiencyColumns[0], label: 'Model / effort' },
       ...efficiencyColumns.slice(1)
     ],
-    'No model-and-effort breakdown is available.'
+    'No model-and-effort breakdown is available.',
+    'modelEffort'
   );
   renderTable(
     'projectTable',
-    analytics.byProject,
+    projectRows,
     [
       { ...efficiencyColumns[0], label: 'Project' },
       ...efficiencyColumns.slice(1)
     ],
-    'No project-level Codex activity exists in this range.'
+    'No project-level Codex activity exists in this range.',
+    'project'
   );
   renderTable(
     'dailyTable',
-    analytics.daily.slice(-14).reverse(),
+    analytics.daily.slice(-14),
     [
       { key: 'date', label: 'Date' },
       {
@@ -403,6 +536,7 @@ function renderTables(analytics) {
       {
         key: 'measuredWallHours',
         label: 'Measured active',
+        title: 'Active time overlapping quota-history coverage',
         numeric: true,
         format: (value) => formatHours(value)
       },
@@ -411,17 +545,18 @@ function renderTables(analytics) {
         label: 'Quota used',
         numeric: true,
         format: (value) =>
-          Number.isFinite(value) ? `${value.toFixed(2)} pts` : '—'
+          Number.isFinite(value) ? `${value.toFixed(2)} pts` : '-'
       },
       {
         key: 'usagePerWallHour',
         label: 'Usage / active h',
         numeric: true,
         format: (value) =>
-          Number.isFinite(value) ? `${value.toFixed(2)} pts/h` : '—'
+          Number.isFinite(value) ? `${value.toFixed(2)} pts/h` : '-'
       }
     ],
-    'Daily measurements will appear once usage history accumulates.'
+    'Daily measurements will appear once usage history accumulates.',
+    'daily'
   );
 }
 
@@ -429,6 +564,8 @@ function renderDataQuality(analytics) {
   const container = byId('dataQuality');
   container.replaceChildren();
   const rows = [
+    ['Window', titleCase(analytics.windowKey)],
+    ['Measurement state', titleCase(analytics.measurementState)],
     ['Quota snapshots', String(analytics.coverage.sampleCount)],
     ['Measured intervals', String(analytics.coverage.intervalCount)],
     ['Measurement coverage', formatPercent(analytics.coverage.timeCoverage)],
@@ -446,6 +583,7 @@ function renderDataQuality(analytics) {
       'Skipped large snapshot gaps',
       String(analytics.coverage.skippedLargeGaps)
     ],
+    ['Skipped anomalous deltas', String(analytics.coverage.skippedAnomalies)],
     ['Detected reset transitions', String(analytics.coverage.resetTransitions)]
   ];
   rows.forEach(([label, value]) => {
@@ -468,17 +606,421 @@ function updateRangeControls() {
       rangeDays === 1 ? '24h' : `${rangeDays}d`
     );
     button.type = 'button';
+    button.setAttribute('aria-pressed', String(rangeDays === state.rangeDays));
     button.addEventListener('click', () => {
       state.rangeDays = rangeDays;
-      updateRangeControls();
       render();
     });
     container.appendChild(button);
   });
 }
 
-function buildCsv(analytics) {
+function renderWindowControls() {
+  const select = /** @type {HTMLSelectElement} */ (byId('windowSelect'));
+  const secondaryAvailable = windowHasData(state.usageHistory, 'secondary');
+  const options = [
+    {
+      key: 'primary',
+      label: 'Primary quota window',
+      available: windowHasData(state.usageHistory, 'primary')
+    }
+  ];
+  if (secondaryAvailable) {
+    options.push({
+      key: 'secondary',
+      label: 'Secondary quota window',
+      available: true
+    });
+  }
+  if (!options.some((option) => option.key === state.windowKey)) {
+    state.windowKey = options[0].key;
+  }
+  select.replaceChildren();
+  options.forEach((option) => {
+    const element = document.createElement('option');
+    element.value = option.key;
+    element.textContent = option.available
+      ? option.label
+      : `${option.label} - no snapshots`;
+    element.disabled = !option.available;
+    select.appendChild(element);
+  });
+  select.value = state.windowKey;
+  select.onchange = () => {
+    state.windowKey = select.value;
+    render();
+  };
+}
+
+function setSelectOptions(select, allLabel, rows, valueGetter, labelGetter) {
+  const values = new Map();
+  rows.forEach((row) => {
+    const value = valueGetter(row);
+    if (value && !values.has(value)) values.set(value, labelGetter(row));
+  });
+  select.replaceChildren();
+  const all = document.createElement('option');
+  all.value = 'all';
+  all.textContent = allLabel;
+  select.appendChild(all);
+  [...values.entries()]
+    .sort((left, right) => left[1].localeCompare(right[1]))
+    .forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      select.appendChild(option);
+    });
+}
+
+function renderFilterControls(analytics) {
+  setSelectOptions(
+    byId('filterModel'),
+    'All models',
+    analytics.byModel,
+    (row) => row.key,
+    (row) => row.label
+  );
+  setSelectOptions(
+    byId('filterEffort'),
+    'All efforts',
+    analytics.byEffort,
+    (row) => row.key,
+    (row) => titleCase(row.label)
+  );
+  setSelectOptions(
+    byId('filterProject'),
+    'All projects',
+    analytics.byProject,
+    (row) => row.key,
+    (row) => row.label
+  );
+  const modelFilter = /** @type {HTMLSelectElement} */ (byId('filterModel'));
+  const effortFilter = /** @type {HTMLSelectElement} */ (byId('filterEffort'));
+  const projectFilter = /** @type {HTMLSelectElement} */ (
+    byId('filterProject')
+  );
+  modelFilter.value = state.filters.model;
+  effortFilter.value = state.filters.effort;
+  projectFilter.value = state.filters.project;
+  modelFilter.onchange = () => {
+    state.filters.model = modelFilter.value;
+    render();
+  };
+  effortFilter.onchange = () => {
+    state.filters.effort = effortFilter.value;
+    render();
+  };
+  projectFilter.onchange = () => {
+    state.filters.project = projectFilter.value;
+    render();
+  };
+  const minMeasured = /** @type {HTMLInputElement} */ (
+    byId('minMeasuredHours')
+  );
+  const minUsage = /** @type {HTMLInputElement} */ (byId('minUsagePoints'));
+  const hideUnknown = /** @type {HTMLInputElement} */ (byId('hideUnknown'));
+  minMeasured.value = String(state.filters.minMeasuredHours || '');
+  minUsage.value = String(state.filters.minUsagePoints || '');
+  hideUnknown.checked = state.filters.hideUnknown;
+  minMeasured.onchange = () => {
+    state.filters.minMeasuredHours = Math.max(
+      0,
+      Number(minMeasured.value) || 0
+    );
+    render();
+  };
+  minUsage.onchange = () => {
+    state.filters.minUsagePoints = Math.max(0, Number(minUsage.value) || 0);
+    render();
+  };
+  hideUnknown.onchange = () => {
+    state.filters.hideUnknown = hideUnknown.checked;
+    render();
+  };
+  const visible = applyFilters(analytics.byModel, 'model').length;
+  byId('filterSummary').textContent =
+    `${visible} of ${analytics.byModel.length} model rows shown. Filters affect tables and charts, not the overall totals above.`;
+}
+
+function prepareCanvas(canvas) {
+  const rect = canvas.getBoundingClientRect();
+  const width = Math.max(280, Math.floor(rect.width || 600));
+  const height = 230;
+  const deviceScale = window.devicePixelRatio || 1;
+  canvas.width = Math.floor(width * deviceScale);
+  canvas.height = Math.floor(height * deviceScale);
+  const context = canvas.getContext('2d');
+  context.setTransform(deviceScale, 0, 0, deviceScale, 0, 0);
+  context.clearRect(0, 0, width, height);
+  context.font = '12px system-ui, sans-serif';
+  context.lineJoin = 'round';
+  return { context, width, height };
+}
+
+function drawEmptyChart(canvas, message) {
+  const { context, width, height } = prepareCanvas(canvas);
+  context.fillStyle = '#64748b';
+  context.textAlign = 'center';
+  context.fillText(message, width / 2, height / 2);
+}
+
+function drawGrid(context, left, top, plotWidth, plotHeight, maxValue, suffix) {
+  context.strokeStyle = '#dbe4ef';
+  context.fillStyle = '#64748b';
+  context.lineWidth = 1;
+  context.textAlign = 'right';
+  for (let index = 0; index <= 4; index += 1) {
+    const value = (maxValue * index) / 4;
+    const y = top + plotHeight - (plotHeight * index) / 4;
+    context.beginPath();
+    context.moveTo(left, y);
+    context.lineTo(left + plotWidth, y);
+    context.stroke();
+    context.fillText(`${value.toFixed(1)}${suffix}`, left - 7, y + 4);
+  }
+}
+
+function truncateLabel(value, maxLength = 16) {
+  const label = String(value || '-');
+  return label.length > maxLength
+    ? `${label.slice(0, maxLength - 1)}...`
+    : label;
+}
+
+function drawBarChart(canvas, items, emptyMessage, suffix = '') {
+  if (!items.length) {
+    drawEmptyChart(canvas, emptyMessage);
+    return;
+  }
+  const { context, width, height } = prepareCanvas(canvas);
+  const left = 48;
+  const top = 14;
+  const right = 12;
+  const bottom = 54;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const maxValue = Math.max(1, ...items.map((item) => item.value));
+  drawGrid(context, left, top, plotWidth, plotHeight, maxValue, suffix);
+  const slotWidth = plotWidth / items.length;
+  const barWidth = Math.max(4, Math.min(44, slotWidth * 0.68));
+  items.forEach((item, index) => {
+    const x = left + slotWidth * index + (slotWidth - barWidth) / 2;
+    const barHeight = (item.value / maxValue) * plotHeight;
+    const y = top + plotHeight - barHeight;
+    context.fillStyle = CHART_COLORS[index % CHART_COLORS.length];
+    context.fillRect(x, y, barWidth, barHeight);
+    if (items.length <= 16) {
+      context.fillStyle = '#334155';
+      context.textAlign = 'center';
+      context.fillText(
+        item.value.toFixed(1),
+        x + barWidth / 2,
+        Math.max(top + 11, y - 5)
+      );
+    }
+    context.save();
+    context.translate(x + barWidth / 2, top + plotHeight + 10);
+    context.rotate(-Math.PI / 5);
+    context.fillStyle = '#64748b';
+    context.textAlign = 'right';
+    context.fillText(truncateLabel(item.label), 0, 0);
+    context.restore();
+  });
+}
+
+function compactTimeline(intervals, maxItems = 48) {
+  if (intervals.length <= maxItems) {
+    return intervals.map((interval) => ({
+      label: formatDateTime(interval.startAt),
+      value: interval.usagePoints
+    }));
+  }
+  const bucketSize = Math.ceil(intervals.length / maxItems);
+  const buckets = [];
+  for (let index = 0; index < intervals.length; index += bucketSize) {
+    const bucket = intervals.slice(index, index + bucketSize);
+    buckets.push({
+      label: formatDateTime(bucket[0].startAt),
+      value: bucket.reduce((total, interval) => total + interval.usagePoints, 0)
+    });
+  }
+  return buckets;
+}
+
+function drawQuotaBurnChart(analytics) {
+  drawBarChart(
+    byId('quotaBurnChart'),
+    compactTimeline(analytics.quotaTimeline),
+    'Quota burn will appear after usable snapshots accumulate.',
+    ' pts'
+  );
+}
+
+function drawModelYieldChart(analytics) {
+  const rows = applyFilters(analytics.byModel, 'model').filter(
+    (row) =>
+      Number.isFinite(row.usagePerWallHour) &&
+      Number.isFinite(row.effectiveHoursPerUsagePoint)
+  );
+  if (!rows.length) {
+    drawEmptyChart(
+      byId('modelYieldChart'),
+      'Measured model yield is still collecting.'
+    );
+    return;
+  }
+  const { context, width, height } = prepareCanvas(byId('modelYieldChart'));
+  const left = 48;
+  const top = 18;
+  const right = 18;
+  const bottom = 36;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const maxX = Math.max(1, ...rows.map((row) => row.usagePerWallHour));
+  const maxY = Math.max(
+    1,
+    ...rows.map((row) => row.effectiveHoursPerUsagePoint)
+  );
+  drawGrid(context, left, top, plotWidth, plotHeight, maxY, ' h');
+  context.strokeStyle = '#94a3b8';
+  context.beginPath();
+  context.moveTo(left, top + plotHeight);
+  context.lineTo(left + plotWidth, top + plotHeight);
+  context.stroke();
+  context.fillStyle = '#64748b';
+  context.textAlign = 'center';
+  context.fillText(
+    'Quota points per measured active hour',
+    left + plotWidth / 2,
+    height - 8
+  );
+  rows.forEach((row, index) => {
+    const x = left + (row.usagePerWallHour / maxX) * plotWidth;
+    const y =
+      top + plotHeight - (row.effectiveHoursPerUsagePoint / maxY) * plotHeight;
+    context.fillStyle = CHART_COLORS[index % CHART_COLORS.length];
+    context.beginPath();
+    context.arc(x, y, 5, 0, Math.PI * 2);
+    context.fill();
+    context.fillStyle = '#334155';
+    context.textAlign = x > width - 90 ? 'right' : 'left';
+    context.fillText(
+      truncateLabel(row.label),
+      x + (x > width - 90 ? -8 : 8),
+      y - 8
+    );
+  });
+}
+
+function drawModelEffortChart(analytics) {
+  const rows = applyFilters(analytics.byModelEffort, 'modelEffort')
+    .filter(
+      (row) => Number.isFinite(row.effectiveHours) && row.effectiveHours > 0
+    )
+    .slice(0, 24)
+    .map((row) => ({ label: row.label, value: row.effectiveHours }));
+  drawBarChart(
+    byId('modelEffortChart'),
+    rows,
+    'No model-and-effort time in this range.',
+    ' h'
+  );
+}
+
+function drawProjectEfficiencyChart(analytics) {
+  const rows = applyFilters(analytics.byProject, 'project')
+    .filter(
+      (row) =>
+        Number.isFinite(row.effectiveHoursPerUsagePoint) &&
+        row.effectiveHoursPerUsagePoint > 0
+    )
+    .slice(0, 24)
+    .map((row) => ({
+      label: row.label,
+      value: row.effectiveHoursPerUsagePoint
+    }));
+  drawBarChart(
+    byId('projectEfficiencyChart'),
+    rows,
+    'Project efficiency is still collecting.',
+    ' h'
+  );
+}
+
+function resetMatches(left, right) {
+  if (!left || !right) return false;
+  const leftMs = Date.parse(left);
+  const rightMs = Date.parse(right);
+  return Number.isFinite(leftMs) && Number.isFinite(rightMs)
+    ? Math.abs(leftMs - rightMs) <= 5 * 60 * 1000
+    : left === right;
+}
+
+function drawQuotaTrajectoryChart(analytics) {
+  const points = analytics.quotaTrajectory.filter((point) =>
+    Number.isFinite(point.usedPercent)
+  );
+  if (!points.length) {
+    drawEmptyChart(
+      byId('quotaTrajectoryChart'),
+      'Quota trajectory is still collecting.'
+    );
+    return;
+  }
+  const { context, width, height } = prepareCanvas(
+    byId('quotaTrajectoryChart')
+  );
+  const left = 48;
+  const top = 14;
+  const right = 18;
+  const bottom = 30;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  drawGrid(context, left, top, plotWidth, plotHeight, 100, '%');
+  context.strokeStyle = '#2563eb';
+  context.lineWidth = 2;
+  points.forEach((point, index) => {
+    const x =
+      points.length === 1
+        ? left + plotWidth / 2
+        : left + (index / (points.length - 1)) * plotWidth;
+    const y = top + plotHeight - (point.usedPercent / 100) * plotHeight;
+    const previous = points[index - 1];
+    if (!previous || !resetMatches(previous.resetsAt, point.resetsAt)) {
+      context.beginPath();
+      context.moveTo(x, y);
+    } else {
+      context.lineTo(x, y);
+    }
+    context.stroke();
+    context.fillStyle = '#2563eb';
+    context.beginPath();
+    context.arc(x, y, 3, 0, Math.PI * 2);
+    context.fill();
+  });
+  context.fillStyle = '#64748b';
+  context.textAlign = 'left';
+  context.fillText(formatDateTime(points[0].observedAt), left, height - 8);
+  context.textAlign = 'right';
+  context.fillText(
+    formatDateTime(points.at(-1).observedAt),
+    width - right,
+    height - 8
+  );
+}
+
+function drawCharts(analytics) {
+  drawQuotaBurnChart(analytics);
+  drawModelYieldChart(analytics);
+  drawModelEffortChart(analytics);
+  drawProjectEfficiencyChart(analytics);
+  drawQuotaTrajectoryChart(analytics);
+}
+
+export function buildCsv(analytics, rows = analytics?.byModel || []) {
   const headers = [
+    'window_key',
     'model',
     'effective_hours',
     'active_hours',
@@ -491,7 +1033,8 @@ function buildCsv(analytics) {
     'sessions',
     'confidence'
   ];
-  const rows = analytics.byModel.map((row) => [
+  const values = rows.map((row) => [
+    analytics?.windowKey || 'primary',
     row.label,
     row.effectiveHours,
     row.wallHours,
@@ -504,7 +1047,7 @@ function buildCsv(analytics) {
     row.sessions,
     row.confidence
   ]);
-  return [headers, ...rows]
+  return [headers, ...values]
     .map((row) =>
       row
         .map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`)
@@ -515,11 +1058,14 @@ function buildCsv(analytics) {
 
 function exportCsv() {
   if (!state.analytics) return;
-  const blob = new Blob([buildCsv(state.analytics)], { type: 'text/csv' });
+  const rows = applyFilters(state.analytics.byModel, 'model');
+  const blob = new Blob([buildCsv(state.analytics, rows)], {
+    type: 'text/csv'
+  });
   const url = URL.createObjectURL(blob);
   const anchor = document.createElement('a');
   anchor.href = url;
-  anchor.download = `timekeeper-codex-analysis-${state.rangeDays}d.csv`;
+  anchor.download = `timekeeper-codex-analysis-${state.windowKey}-${state.rangeDays}d.csv`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
@@ -533,19 +1079,22 @@ function render() {
     projects: state.data.projects || [],
     usageHistory: state.usageHistory,
     rangeDays: state.rangeDays,
+    windowKey: state.windowKey,
     now: new Date()
   });
   state.analytics = analytics;
-  byId('rangeLabel').textContent =
-    state.rangeDays === 1 ? 'Last 24 hours' : `Last ${state.rangeDays} days`;
-  byId('updatedAt').textContent = `Calculated ${formatDateTime(
-    analytics.generatedAt
-  )}`;
+  updateRangeControls();
+  renderWindowControls();
+  byId('rangeLabel').textContent = rangeLabel(state.rangeDays);
+  byId('updatedAt').textContent =
+    `Calculated ${formatDateTime(analytics.generatedAt)}`;
+  renderFilterControls(analytics);
   renderMeasurementBanner(analytics);
   renderMetricCards(analytics);
   renderInsights(analytics);
   renderTables(analytics);
   renderDataQuality(analytics);
+  drawCharts(analytics);
 }
 
 async function initialize() {
@@ -554,6 +1103,9 @@ async function initialize() {
   byId('refreshAnalysis').addEventListener('click', () =>
     window.location.reload()
   );
+  window.addEventListener('resize', () => {
+    if (state.analytics) drawCharts(state.analytics);
+  });
   state.data = readTimekeeperData();
   if (!state.data) {
     byId('loadingState').className = 'fatal-state';
@@ -568,9 +1120,11 @@ async function initialize() {
   render();
 }
 
-initialize().catch((error) => {
-  console.error(error);
-  byId('loadingState').className = 'fatal-state';
-  byId('loadingState').textContent =
-    `Codex analysis failed: ${error.message || error}`;
-});
+if (typeof document !== 'undefined') {
+  initialize().catch((error) => {
+    console.error(error);
+    byId('loadingState').className = 'fatal-state';
+    byId('loadingState').textContent =
+      `Codex analysis failed: ${error.message || error}`;
+  });
+}

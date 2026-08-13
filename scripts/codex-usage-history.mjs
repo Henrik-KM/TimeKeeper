@@ -1,6 +1,8 @@
+import { execFile } from 'node:child_process';
 import { promises as fs } from 'node:fs';
 import path from 'node:path';
 import process from 'node:process';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 
 export const DEFAULT_INBOX_DIR = 'assets/timekeeper-codex-inbox';
@@ -8,6 +10,9 @@ export const DEFAULT_OUTPUT_FILE = 'assets/timekeeper-codex-usage-history.json';
 export const DEFAULT_RETENTION_DAYS = 90;
 export const DEFAULT_HEARTBEAT_MINUTES = 60;
 export const DEFAULT_MAX_SAMPLES = 5000;
+export const DEFAULT_BACKFILL_MAX_COMMITS = 5000;
+
+const execFileAsync = promisify(execFile);
 
 function parseTimestamp(value) {
   const timestamp = Date.parse(String(value || ''));
@@ -15,6 +20,7 @@ function parseTimestamp(value) {
 }
 
 function finiteNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
   const number = Number(value);
   return Number.isFinite(number) ? number : null;
 }
@@ -72,6 +78,36 @@ function stateKey(sample) {
   });
 }
 
+function sameWindowState(left, right) {
+  if (!left && !right) return true;
+  if (!left || !right) return false;
+  if (left.usedPercent !== right.usedPercent) return false;
+  if (
+    left.windowMinutes > 0 &&
+    right.windowMinutes > 0 &&
+    left.windowMinutes !== right.windowMinutes
+  ) {
+    return false;
+  }
+  if (!left.resetsAt || !right.resetsAt) {
+    return left.resetsAt === right.resetsAt;
+  }
+  const leftResetMs = parseTimestamp(left.resetsAt);
+  const rightResetMs = parseTimestamp(right.resetsAt);
+  return (
+    leftResetMs !== null &&
+    rightResetMs !== null &&
+    Math.abs(leftResetMs - rightResetMs) <= 5 * 60 * 1000
+  );
+}
+
+function sameSampleState(left, right) {
+  return (
+    sameWindowState(left?.primary, right?.primary) &&
+    sameWindowState(left?.secondary, right?.secondary)
+  );
+}
+
 function sampleKey(sample) {
   return `${sample.observedAt}|${stateKey(sample)}`;
 }
@@ -108,37 +144,41 @@ export function mergeUsageHistory(
     now = new Date(),
     retentionDays = DEFAULT_RETENTION_DAYS,
     heartbeatMinutes = DEFAULT_HEARTBEAT_MINUTES,
-    maxSamples = DEFAULT_MAX_SAMPLES
+    maxSamples = DEFAULT_MAX_SAMPLES,
+    includeAllCandidates = false
   } = {}
 ) {
   const nowMs = parseTimestamp(now) ?? Date.now();
   const cutoffMs = nowMs - Math.max(1, retentionDays) * 24 * 60 * 60 * 1000;
-  const normalized = (Array.isArray(existingHistory) ? existingHistory : [])
+  const existing = (Array.isArray(existingHistory) ? existingHistory : [])
     .map(normalizeExistingSample)
     .filter((sample) => parseTimestamp(sample.observedAt) >= cutoffMs);
-  const current = chooseCurrentCandidate(candidates);
-  if (current) {
-    const currentMs = parseTimestamp(current.observedAt);
-    const last = normalized
-      .slice()
-      .sort(
-        (left, right) =>
-          parseTimestamp(left.observedAt) - parseTimestamp(right.observedAt)
-      )
-      .slice(-1)[0];
+  const normalizedCandidates = (Array.isArray(candidates) ? candidates : [])
+    .map(normalizeExistingSample)
+    .filter((sample) => parseTimestamp(sample.observedAt) >= cutoffMs);
+  const selectedCandidates = includeAllCandidates
+    ? normalizedCandidates
+    : [chooseCurrentCandidate(normalizedCandidates)].filter(Boolean);
+  const byTimestamp = new Map();
+  [...existing, ...selectedCandidates]
+    .sort(
+      (left, right) =>
+        parseTimestamp(left.observedAt) - parseTimestamp(right.observedAt)
+    )
+    .forEach((sample) => {
+      byTimestamp.set(sample.observedAt, sample);
+    });
+  const normalized = [];
+  byTimestamp.forEach((sample) => {
+    const sampleMs = parseTimestamp(sample.observedAt);
+    const last = normalized[normalized.length - 1];
     const lastMs = last ? parseTimestamp(last.observedAt) : null;
-    const stateChanged = !last || stateKey(last) !== stateKey(current);
+    const stateChanged = !last || !sameSampleState(last, sample);
     const heartbeatDue =
       lastMs === null ||
-      currentMs - lastMs >= Math.max(1, heartbeatMinutes) * 60 * 1000;
-    if (
-      currentMs !== null &&
-      currentMs >= cutoffMs &&
-      (stateChanged || heartbeatDue)
-    ) {
-      normalized.push(current);
-    }
-  }
+      sampleMs - lastMs >= Math.max(1, heartbeatMinutes) * 60 * 1000;
+    if (stateChanged || heartbeatDue) normalized.push(sample);
+  });
   const deduped = new Map();
   normalized.forEach((sample) => {
     deduped.set(sampleKey(sample), sample);
@@ -150,6 +190,75 @@ export function mergeUsageHistory(
     )
     .slice(-Math.max(2, maxSamples));
   return samples;
+}
+
+async function runGit(args, gitDirectory) {
+  const result = await execFileAsync('git', args, {
+    cwd: gitDirectory,
+    maxBuffer: 20 * 1024 * 1024
+  });
+  return result.stdout;
+}
+
+export async function readHistoricalUsageCandidatesFromGit({
+  gitDirectory = process.cwd(),
+  since = null,
+  until = new Date(),
+  maxCommits = DEFAULT_BACKFILL_MAX_COMMITS
+} = {}) {
+  const untilMs = parseTimestamp(until) ?? Date.now();
+  const sinceMs = parseTimestamp(since);
+  if (sinceMs === null || sinceMs >= untilMs) return [];
+  const commits = [
+    ...new Set(
+      (
+        await runGit(
+          [
+            'log',
+            '--format=%H',
+            `--since=${new Date(sinceMs).toISOString()}`,
+            `--until=${new Date(untilMs).toISOString()}`,
+            '--',
+            'assets/timekeeper-codex-inbox'
+          ],
+          gitDirectory
+        )
+      ).split(/\r?\n/)
+    )
+  ]
+    .map((commit) => commit.trim())
+    .filter(Boolean)
+    .slice(0, Math.max(1, maxCommits));
+  if (!commits.length) return [];
+  const files = (
+    await runGit(
+      [
+        'ls-tree',
+        '-r',
+        '--name-only',
+        'HEAD',
+        '--',
+        'assets/timekeeper-codex-inbox'
+      ],
+      gitDirectory
+    )
+  )
+    .split(/\r?\n/)
+    .map((file) => file.trim())
+    .filter((file) => file.toLowerCase().endsWith('.json'));
+  const candidates = [];
+  for (const commit of commits) {
+    for (const file of files) {
+      try {
+        const text = await runGit(['show', `${commit}:${file}`], gitDirectory);
+        const candidate = normalizeUsageCandidate(JSON.parse(text), file);
+        if (candidate) candidates.push(candidate);
+      } catch {
+        // The file may not exist yet in an older commit or may be malformed.
+      }
+    }
+  }
+  return candidates;
 }
 
 export async function readInboxCandidates(inboxDir = DEFAULT_INBOX_DIR) {
@@ -182,9 +291,12 @@ export async function readInboxCandidates(inboxDir = DEFAULT_INBOX_DIR) {
 async function readHistoryFile(outputFile) {
   try {
     const parsed = JSON.parse(await fs.readFile(outputFile, 'utf8'));
-    return Array.isArray(parsed?.samples) ? parsed.samples : [];
+    return {
+      samples: Array.isArray(parsed?.samples) ? parsed.samples : [],
+      backfill: parsed?.backfill || null
+    };
   } catch (error) {
-    if (error?.code === 'ENOENT') return [];
+    if (error?.code === 'ENOENT') return { samples: [], backfill: null };
     throw error;
   }
 }
@@ -195,22 +307,49 @@ export async function updateCodexUsageHistory({
   now = new Date(),
   retentionDays = DEFAULT_RETENTION_DAYS,
   heartbeatMinutes = DEFAULT_HEARTBEAT_MINUTES,
-  maxSamples = DEFAULT_MAX_SAMPLES
+  maxSamples = DEFAULT_MAX_SAMPLES,
+  backfillDays = 0,
+  backfillMaxCommits = DEFAULT_BACKFILL_MAX_COMMITS,
+  gitDirectory = process.cwd()
 } = {}) {
-  const existing = await readHistoryFile(outputFile);
+  const existingPayload = await readHistoryFile(outputFile);
   const candidates = await readInboxCandidates(inboxDir);
-  const samples = mergeUsageHistory(existing, candidates, {
+  const backfillCandidates =
+    Number(backfillDays) > 0
+      ? await readHistoricalUsageCandidatesFromGit({
+          gitDirectory,
+          since: new Date(
+            (parseTimestamp(now) ?? Date.now()) -
+              Number(backfillDays) * 24 * 60 * 60 * 1000
+          ),
+          until: now,
+          maxCommits: backfillMaxCommits
+        })
+      : [];
+  const allCandidates = [...backfillCandidates, ...candidates];
+  const samples = mergeUsageHistory(existingPayload.samples, allCandidates, {
     now,
     retentionDays,
     heartbeatMinutes,
-    maxSamples
+    maxSamples,
+    includeAllCandidates: backfillCandidates.length > 0
   });
+  const backfill = backfillCandidates.length
+    ? {
+        source: 'git history of assets/timekeeper-codex-inbox/*.json',
+        requestedDays: Number(backfillDays),
+        candidateCount: backfillCandidates.length,
+        recoveredFrom: samples[0]?.observedAt || null,
+        recoveredThrough: samples.at(-1)?.observedAt || null
+      }
+    : existingPayload.backfill;
   const payload = {
     version: 1,
     generatedAt: new Date(parseTimestamp(now) ?? Date.now()).toISOString(),
     retentionDays,
     heartbeatMinutes,
     source: 'timekeeper-codex-inbox-sampler',
+    ...(backfill ? { backfill } : {}),
     samples
   };
   const nextText = `${JSON.stringify(payload, null, 2)}\n`;
@@ -258,7 +397,11 @@ if (isCli) {
     retentionDays: Number(args.retentionDays) || DEFAULT_RETENTION_DAYS,
     heartbeatMinutes:
       Number(args.heartbeatMinutes) || DEFAULT_HEARTBEAT_MINUTES,
-    maxSamples: Number(args.maxSamples) || DEFAULT_MAX_SAMPLES
+    maxSamples: Number(args.maxSamples) || DEFAULT_MAX_SAMPLES,
+    backfillDays: Number(args.backfillDays) || 0,
+    backfillMaxCommits:
+      Number(args.backfillMaxCommits) || DEFAULT_BACKFILL_MAX_COMMITS,
+    gitDirectory: args.gitDirectory || process.cwd()
   })
     .then(({ changed, payload }) => {
       process.stdout.write(

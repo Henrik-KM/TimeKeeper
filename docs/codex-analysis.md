@@ -1,35 +1,94 @@
 # Codex analysis measurement model
 
-The Codex analysis page separates three quantities that were previously mixed together:
+The deep Codex analysis page is available from the Codex section in
+TimeKeeper and directly at `codex-analysis.html`. It reads the same browser
+local `timekeeperDataPro` data as the main app and does not create a second
+entry store.
+
+## Measurement definitions
+
+The page keeps three quantities separate:
 
 1. **Active time**: wall-clock seconds attributed to Codex model activity.
-2. **Effective time**: TimeKeeper's credited time after model, effort, repository and delegation policy weights.
-3. **Quota usage**: percentage-point changes in the observed Codex limit window.
+2. **Effective time**: TimeKeeper credited time after model, effort,
+   repository, and delegation policy weights.
+3. **Quota usage**: positive percentage-point changes in an observed Codex
+   limit window.
 
-The first implementation deliberately labels quota use as percentage points rather than tokens. Codex currently exposes a limit-window percentage in the local session/status data, while exact billable token consumption is not consistently available in the TimeKeeper import records.
+Quota usage is not tokens, cost, or billing. The imported records do not
+consistently expose exact billable token consumption, so the page never
+estimates it from elapsed time or model names.
 
-## Metrics
+The selected range's full active and effective totals are independent from
+quota-history coverage. Efficiency denominators use only activity overlapping
+actual quota snapshots. A session can therefore contribute to full-range time
+without contributing to measured efficiency.
 
-- **Usage / active hour**: quota percentage points divided by model active hours. Lower is better.
-- **Effective hours / usage point**: credited hours divided by quota percentage points. Higher is better.
+## Metrics and controls
+
+- **Usage / active hour**: quota percentage points divided by measured active
+  hours. Lower is better.
+- **Effective hours / usage point**: measured credited hours divided by quota
+  percentage points. Higher is better.
 - **Focus conversion**: effective seconds divided by active seconds.
-- **Usage share**: the model's attributed percentage of measured quota change.
-- **Subagent share**: the portion of model active time classified as delegated/subagent work.
+- **Usage share**: a model's attributed share of measured quota change.
+- **Subagent share**: the portion of model active time classified as delegated
+  work.
+
+The page supports 24-hour, 7-day, 30-day, and 90-day ranges. Where the data
+exists, the quota-window selector supports both primary and secondary windows.
+Model, effort, and project filters, minimum measured-time and quota-point
+thresholds, unknown-row visibility, sortable tables, charts, and CSV export
+all operate on the displayed breakdowns without changing the overall totals.
 
 ## Attribution
 
-The sampler records the current primary and secondary limit windows every ten minutes, while compressing unchanged samples to an hourly heartbeat. The analytics engine then:
+The scheduled sampler records primary and secondary limit windows every ten
+minutes. Unchanged states are compressed to hourly heartbeats, while state
+changes are retained immediately. The history is bounded to 90 days.
+
+The analytics engine:
 
 1. sorts snapshots chronologically;
-2. rejects reset transitions, negative deltas, anomalous jumps and gaps longer than three hours;
-3. finds imported Codex sessions overlapping each positive quota delta;
-4. allocates the delta in proportion to overlapping model active time;
-5. aggregates the result by model, model × effort, effort, project and role.
+2. treats small reset-time timestamp jitter as the same quota window;
+3. rejects reset transitions, negative deltas, anomalous jumps, and gaps
+   longer than three hours;
+4. finds imported Codex sessions overlapping each positive quota delta;
+5. allocates the delta in proportion to overlapping model active time;
+6. aggregates the result by model, model and effort, effort, project, and
+   parent/subagent role.
 
-A mixed-model session contains aggregate model durations but no exact per-model timestamps. Its quota is therefore allocated proportionally within the session. The page exposes low, medium and high confidence labels so small or weakly measured differences are not presented as established rankings.
+Allocation is conserved: the model breakdown sums to the attributed quota
+points. Quota with no overlapping activity remains explicitly unattributed.
+Mixed-model sessions contain aggregate model durations without exact per-model
+timestamps, so their allocation is proportional and receives a lower
+confidence qualification.
 
-## Current integration state
+## Historical backfill
 
-The initial page is available at `codex-analysis.html`. It reads imported Codex entries from the same browser's `timekeeperDataPro` localStorage and quota history from `assets/timekeeper-codex-usage-history.json`.
+The one-time backfill command can inspect bounded Git history of
+`assets/timekeeper-codex-inbox/*.json`:
 
-The next integration step is to add a clear **Deep analysis** action to the existing Codex page and decide whether the analysis should remain a dedicated route or become embedded tabs inside the current page.
+```text
+node scripts/codex-usage-history.mjs --backfill-days=30
+```
+
+It reads actual historical `usageLimits` snapshots, compresses them through the
+same merge path, preserves reset boundaries, and records a `backfill` metadata
+object in the published history. Normal scheduled runs do not scan Git
+history; they only sample the current inbox files.
+
+The current one-time recovery found 4,697 usable candidates and compressed them
+to 675 samples covering 23 July 2026 through 13 August 2026. Earlier inbox
+commits did not contain usable `usageLimits` data, so the backfill must not
+claim more than that recovered interval. A future run should preserve the
+recorded recovery metadata rather than silently invent older values.
+
+## Confidence and limitations
+
+Confidence considers measured active time, quota points, and the number of
+attributed intervals. Sparse history displays collecting or partial language.
+Low-confidence differences must not be treated as established model rankings.
+The page also reports skipped gaps, anomalous deltas, reset transitions,
+unknown-model share, mixed-model share, and quota attribution coverage so that
+small comparisons can be judged in context.
