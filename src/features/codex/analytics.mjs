@@ -415,8 +415,7 @@ function addTimeToAggregate(
   aggregate.measuredEffectiveSeconds +=
     segment.effectiveSeconds * measurementFraction;
   aggregate.sessions.add(session.id);
-  aggregate.delegatedSessions +=
-    session.delegatedSessionCount * rangeFraction;
+  aggregate.delegatedSessions += session.delegatedSessionCount * rangeFraction;
   if (segment.role === 'subagent') {
     aggregate.subagentWallSeconds += wallSeconds;
   } else {
@@ -472,9 +471,7 @@ function finalizeAggregate(aggregate, totalAttributedUsagePoints) {
     effectiveHoursPerUsagePoint: round(
       safeDivide(measuredEffectiveHours, usagePoints)
     ),
-    wallHoursPerUsagePoint: round(
-      safeDivide(measuredWallHours, usagePoints)
-    ),
+    wallHoursPerUsagePoint: round(safeDivide(measuredWallHours, usagePoints)),
     focusConversion: round(
       safeDivide(aggregate.effectiveSeconds, aggregate.wallSeconds)
     ),
@@ -519,10 +516,7 @@ function buildInsights(analytics) {
   const qualified = analytics.byModel.filter(
     (row) => row.confidence !== 'low' && row.usagePoints > 0
   );
-  const highestBurn = rankRows(
-    qualified,
-    (row) => row.usagePerWallHour
-  )[0];
+  const highestBurn = rankRows(qualified, (row) => row.usagePerWallHour)[0];
   if (highestBurn) {
     insights.push({
       tone: 'warning',
@@ -661,8 +655,7 @@ export function buildCodexAnalytics({
     totalWallSeconds += session.wallSeconds * rangeClip.fraction;
     totalEffectiveSeconds += session.effectiveSeconds * rangeClip.fraction;
     measuredWallSeconds += session.wallSeconds * measurementFraction;
-    measuredEffectiveSeconds +=
-      session.effectiveSeconds * measurementFraction;
+    measuredEffectiveSeconds += session.effectiveSeconds * measurementFraction;
     sessionDurationsMinutes.push(
       (session.wallSeconds * rangeClip.fraction) / 60
     );
@@ -789,9 +782,7 @@ export function buildCodexAnalytics({
 
   const finalizeMap = (map) =>
     [...map.values()]
-      .map((aggregate) =>
-        finalizeAggregate(aggregate, attributedUsagePoints)
-      )
+      .map((aggregate) => finalizeAggregate(aggregate, attributedUsagePoints))
       .sort((left, right) => right.effectiveHours - left.effectiveHours);
   const byModel = finalizeMap(maps.model);
   const byModelEffort = finalizeMap(maps.modelEffort);
@@ -859,8 +850,7 @@ export function buildCodexAnalytics({
       measurementEndMs
     );
     if (measurementClip) {
-      row.measuredWallSeconds +=
-        session.wallSeconds * measurementClip.fraction;
+      row.measuredWallSeconds += session.wallSeconds * measurementClip.fraction;
       row.measuredEffectiveSeconds +=
         session.effectiveSeconds * measurementClip.fraction;
     }
@@ -917,9 +907,7 @@ export function buildCodexAnalytics({
       totalWallHours: round(totalWallSeconds / HOUR_SECONDS),
       totalEffectiveHours: round(totalEffectiveSeconds / HOUR_SECONDS),
       measuredWallHours: round(measuredWallSeconds / HOUR_SECONDS),
-      measuredEffectiveHours: round(
-        measuredEffectiveSeconds / HOUR_SECONDS
-      ),
+      measuredEffectiveHours: round(measuredEffectiveSeconds / HOUR_SECONDS),
       totalUsagePoints: round(totalUsagePoints),
       attributedUsagePoints: round(attributedUsagePoints),
       unattributedUsagePoints: round(
