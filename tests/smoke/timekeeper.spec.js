@@ -1560,7 +1560,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v18';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v19';");
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -3990,7 +3990,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
-test('Codex inbox reconciles delegated entries and imports seven recent days once', async ({
+test('Codex inbox reconciles delegated entries and recalibrates changed records once', async ({
   page
 }) => {
   const pageErrors = [];
@@ -4144,7 +4144,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         externalId: 'codex-today',
         focusFactor: 1.68,
         manualFactor: 1.68,
-        codexFocusPolicyVersion: 2,
+        codexFocusPolicyVersion: 3,
         codexModelBreakdown: [],
         codexDelegatedSessionCount: 4,
         codexDelegationCredit: 0.35
@@ -4319,6 +4319,15 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
   await page.getByRole('button', { name: 'Import Now' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('timekeeperDataPro')).codexIntegration
+            .lastImportSummary
+      )
+    )
+    .toMatchObject({ imported: 0, updated: 0 });
   data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
