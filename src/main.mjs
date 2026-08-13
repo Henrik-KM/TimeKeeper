@@ -48,6 +48,7 @@ import {
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
 import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
+import { buildCodexAnalytics } from './features/codex/analytics.mjs';
 import {
   computeUnionSeconds,
   getEntryElapsedSeconds,
@@ -2981,6 +2982,8 @@ import {
   };
   let codexImportPromise = null;
   let codexImportTimer = null;
+  let codexUsageHistoryAssetPromise = null;
+  let codexPageRenderToken = 0;
   let codexImportRuntimeStatus = {
     pending: false,
     checkedAt: null,
@@ -9932,6 +9935,245 @@ import {
     };
   }
 
+  function getCodexCurrentUsageSample() {
+    const integration = data?.codexIntegration;
+    const usageLimits =
+      integration?.usageLimits ||
+      integration?.lastUsageLimits ||
+      data?.codexUsageLimits;
+    if (!usageLimits?.primary) return null;
+    return {
+      observedAt:
+        usageLimits.observedAt ||
+        integration?.lastUsageAt ||
+        integration?.lastImportAt ||
+        new Date().toISOString(),
+      primary: usageLimits.primary,
+      secondary: usageLimits.secondary || null,
+      sourceMachineId: 'browser-cache'
+    };
+  }
+
+  function loadCodexUsageHistory() {
+    if (!codexUsageHistoryAssetPromise) {
+      codexUsageHistoryAssetPromise = fetch(
+        'assets/timekeeper-codex-usage-history.json',
+        { cache: 'no-store' }
+      )
+        .then((response) => (response.ok ? response.json() : []))
+        .then((payload) => {
+          if (Array.isArray(payload)) return payload;
+          return Array.isArray(payload?.samples) ? payload.samples : [];
+        })
+        .catch(() => []);
+    }
+    return codexUsageHistoryAssetPromise.then((samples) => {
+      const current = getCodexCurrentUsageSample();
+      return current ? [...samples, current] : samples;
+    });
+  }
+
+  function loadCodexPageAnalytics() {
+    return loadCodexUsageHistory().then((usageHistory) =>
+      buildCodexAnalytics({
+        entries: data.entries,
+        projects: data.projects,
+        usageHistory,
+        rangeDays: 7,
+        now: new Date(),
+        windowKey: 'primary'
+      })
+    );
+  }
+
+  function formatCodexAnalyticsHours(value) {
+    return Number.isFinite(value) ? `${value.toFixed(1)} h` : 'Collecting';
+  }
+
+  function formatCodexAnalyticsPoints(value, suffix = ' pts/day') {
+    return Number.isFinite(value)
+      ? `${value.toFixed(2)}${suffix}`
+      : 'Collecting';
+  }
+
+  function formatCodexAnalyticsRatio(value, suffix) {
+    return Number.isFinite(value)
+      ? `${value.toFixed(2)}${suffix}`
+      : 'Collecting';
+  }
+
+  function renderCodexKeyTakeaways(section, report, usage, analytics = null) {
+    section.replaceChildren();
+    const title = document.createElement('h3');
+    title.textContent = 'Key Takeaways - Last 7 Days';
+    section.appendChild(title);
+
+    const grid = document.createElement('div');
+    grid.className = 'codex-metric-grid codex-takeaway-grid';
+    const weightedFocus =
+      report.week.wallSeconds > 0
+        ? report.week.effectiveSeconds / report.week.wallSeconds
+        : 0;
+    appendCodexMetric(
+      grid,
+      'Quota remaining',
+      usage?.remainingLabel || usage?.value || 'Unavailable',
+      usage?.resetLabel || 'Waiting for a quota snapshot'
+    );
+    appendCodexMetric(
+      grid,
+      'Effective time',
+      formatDuration(report.week.effectiveSeconds),
+      `${formatDuration(report.week.wallSeconds)} active`
+    );
+    appendCodexMetric(
+      grid,
+      'Focus conversion',
+      formatFocusPercent(weightedFocus),
+      'Effective time / active time'
+    );
+
+    const overall = analytics?.overall;
+    appendCodexMetric(
+      grid,
+      'Quota burn',
+      formatCodexAnalyticsPoints(overall?.burnPerDay),
+      overall && Number.isFinite(overall.projectedUsedAtReset)
+        ? `${overall.projectedUsedAtReset.toFixed(0)}% projected at reset`
+        : analytics
+          ? 'Needs a measured interval'
+          : 'Loading measured quota history'
+    );
+    appendCodexMetric(
+      grid,
+      'Effective yield',
+      formatCodexAnalyticsRatio(overall?.effectiveHoursPerUsagePoint, ' h/pt'),
+      overall
+        ? `${formatCodexAnalyticsHours(overall.measuredEffectiveHours)} measured`
+        : 'Measured quota history only'
+    );
+
+    const topModel = report.models[0];
+    const topModelFocus =
+      topModel?.wallSeconds > 0
+        ? topModel.effectiveSeconds / topModel.wallSeconds
+        : 0;
+    appendCodexMetric(
+      grid,
+      'Top model + reasoning',
+      topModel?.model || 'No sessions',
+      topModel
+        ? `${topModel.effort || 'Reasoning unavailable'} - ${formatDuration(topModel.effectiveSeconds)} effective - ${formatFocusPercent(topModelFocus)} focus`
+        : 'Imported sessions will appear here'
+    );
+    section.appendChild(grid);
+
+    const insights = document.createElement('div');
+    insights.className = 'codex-insight-list';
+    if (analytics?.insights?.length) {
+      analytics.insights.slice(0, 3).forEach((insight) => {
+        const item = document.createElement('div');
+        item.className = `codex-insight ${insight.tone || 'neutral'}`;
+        const insightTitle = document.createElement('strong');
+        insightTitle.textContent = insight.title;
+        const detail = document.createElement('span');
+        detail.textContent = insight.detail;
+        item.appendChild(insightTitle);
+        item.appendChild(detail);
+        insights.appendChild(item);
+      });
+    } else {
+      const status = document.createElement('p');
+      status.className = 'status-muted';
+      status.textContent =
+        'Quota efficiency is collecting. Time and focus metrics are already available.';
+      insights.appendChild(status);
+    }
+    const note = document.createElement('small');
+    note.className = 'codex-summary-note';
+    note.textContent =
+      'Usage efficiency uses measured quota history; total time includes all imported sessions.';
+    insights.appendChild(note);
+    section.appendChild(insights);
+  }
+
+  function renderCodexModelList(modelList, models, analytics = null) {
+    modelList.replaceChildren();
+    if (!models.length) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent =
+        'Model details will appear after Codex sessions import.';
+      modelList.appendChild(empty);
+      return;
+    }
+
+    const getModelEffortKey = (model, effort) => {
+      const modelKey = String(model || '')
+        .trim()
+        .toLowerCase();
+      const effortKey = String(effort || '')
+        .trim()
+        .toLowerCase();
+      return `${modelKey === 'unknown model' ? 'unknown' : modelKey || 'unknown'}::${effortKey || 'unknown'}`;
+    };
+    const usageByModelEffort = new Map(
+      (analytics?.byModelEffort || []).map((row) => [
+        getModelEffortKey(row.model, row.effort),
+        row
+      ])
+    );
+    const heading = document.createElement('div');
+    heading.className = 'codex-model-row codex-model-heading';
+    [
+      'Model',
+      'Reasoning level',
+      'Effective',
+      'Active',
+      'Focus',
+      'Quota efficiency'
+    ].forEach((labelText) => {
+      const label = document.createElement('span');
+      label.textContent = labelText;
+      heading.appendChild(label);
+    });
+    modelList.appendChild(heading);
+
+    models.forEach((model) => {
+      const row = document.createElement('div');
+      row.className = 'codex-model-row';
+      const focus =
+        model.wallSeconds > 0 ? model.effectiveSeconds / model.wallSeconds : 0;
+      const usage = usageByModelEffort.get(
+        getModelEffortKey(model.model, model.effort)
+      );
+      const quotaDetail = usage
+        ? `${Number.isFinite(usage.usagePoints) ? `${usage.usagePoints.toFixed(2)} pts` : 'Collecting'} - ${Number.isFinite(usage.effectiveHoursPerUsagePoint) ? `${usage.effectiveHoursPerUsagePoint.toFixed(2)} h/pt` : 'yield collecting'}`
+        : 'Collecting measured quota';
+      const cells = [
+        ['Model', model.model, 'strong'],
+        ['Reasoning level', model.effort || 'Unavailable', 'span'],
+        ['Effective', formatDuration(model.effectiveSeconds), 'span'],
+        ['Active', formatDuration(model.wallSeconds), 'span'],
+        ['Focus', formatFocusPercent(focus), 'span'],
+        ['Quota efficiency', quotaDetail, 'span']
+      ];
+      cells.forEach(([labelText, valueText, valueTag]) => {
+        const cell = document.createElement('div');
+        cell.className = 'codex-model-cell';
+        const label = document.createElement('span');
+        label.className = 'codex-model-cell-label';
+        label.textContent = labelText;
+        const value = document.createElement(valueTag);
+        value.textContent = valueText;
+        cell.appendChild(label);
+        cell.appendChild(value);
+        row.appendChild(cell);
+      });
+      modelList.appendChild(row);
+    });
+  }
+
   function getCodexUsageCard() {
     const usage = getCodexUsageSummary();
     if (!usage) return null;
@@ -10093,6 +10335,7 @@ import {
   function updateCodexPage() {
     const content = document.getElementById('codexPageContent');
     if (!content) return;
+    const renderToken = ++codexPageRenderToken;
     content.replaceChildren();
     const config = getCodexIntegrationConfig();
     const usage = getCodexUsageSummary();
@@ -10142,6 +10385,9 @@ import {
       );
     }
     limits.appendChild(limitGrid);
+
+    const takeaways = appendCodexPageSection(content, 'Key Takeaways');
+    renderCodexKeyTakeaways(takeaways, report, usage);
 
     const activity = appendCodexPageSection(content, 'Activity');
     const activityGrid = document.createElement('div');
@@ -10220,27 +10466,7 @@ import {
     const models = appendCodexPageSection(content, 'Models and Effort');
     const modelList = document.createElement('div');
     modelList.className = 'codex-model-list';
-    if (!report.models.length) {
-      const empty = document.createElement('p');
-      empty.className = 'status-muted';
-      empty.textContent =
-        'Model details will appear after Codex sessions import.';
-      modelList.appendChild(empty);
-    }
-    report.models.forEach((model) => {
-      const row = document.createElement('div');
-      row.className = 'codex-model-row';
-      const name = document.createElement('strong');
-      name.textContent = model.model;
-      const effort = document.createElement('span');
-      effort.textContent = model.effort || 'effort unavailable';
-      const duration = document.createElement('span');
-      duration.textContent = `${formatDuration(model.effectiveSeconds)} effective`;
-      row.appendChild(name);
-      row.appendChild(effort);
-      row.appendChild(duration);
-      modelList.appendChild(row);
-    });
+    renderCodexModelList(modelList, report.models);
     models.appendChild(modelList);
 
     const recent = appendCodexPageSection(content, 'Recent Sessions');
@@ -10311,6 +10537,16 @@ import {
       'Model and effort weighted'
     );
     bridge.appendChild(bridgeGrid);
+
+    loadCodexPageAnalytics()
+      .then((analytics) => {
+        if (renderToken !== codexPageRenderToken) return;
+        renderCodexKeyTakeaways(takeaways, report, usage, analytics);
+        renderCodexModelList(modelList, report.models, analytics);
+      })
+      .catch(() => {
+        // Local activity and focus summaries remain useful without quota history.
+      });
 
     const refreshButton = document.getElementById('codexPageRefreshBtn');
     if (refreshButton) {
