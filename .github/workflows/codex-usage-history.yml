@@ -1,0 +1,48 @@
+name: Update Codex usage history
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: codex-usage-history
+  cancel-in-progress: false
+
+jobs:
+  sample:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Sample current Codex limit state
+        run: node scripts/codex-usage-history.mjs
+
+      - name: Commit usage history when changed
+        run: |
+          if git diff --quiet -- assets/timekeeper-codex-usage-history.json; then
+            echo "No new Codex usage sample to publish."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add assets/timekeeper-codex-usage-history.json
+          git commit -m "Update Codex usage history [skip ci]"
+          for attempt in 1 2 3; do
+            git pull --rebase origin "${GITHUB_REF_NAME}"
+            if git push; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Unable to push Codex usage history after three attempts."
+          exit 1
