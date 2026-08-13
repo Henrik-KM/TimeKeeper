@@ -1,0 +1,48 @@
+name: Codex analysis checks
+
+on:
+  pull_request:
+    paths:
+      - "codex-analysis.html"
+      - "src/features/codex/**"
+      - "scripts/codex-usage-history.mjs"
+      - "tests/unit/codex-analytics.test.mjs"
+      - "tests/unit/codex-usage-history.test.mjs"
+      - ".github/workflows/codex-analysis-ci.yml"
+      - ".github/workflows/codex-usage-history.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check syntax
+        run: |
+          node --check scripts/codex-usage-history.mjs
+          node --check src/features/codex/analytics.mjs
+          node --check src/features/codex/analysis-page.mjs
+
+      - name: Run focused unit tests
+        run: node --test tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs
+
+      - name: Check formatting
+        run: npx prettier --check codex-analysis.html docs/codex-analysis.md scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
+
+      - name: Lint new JavaScript
+        run: npx eslint scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs
+
+      - name: Type-check repository
+        run: npm run typecheck
