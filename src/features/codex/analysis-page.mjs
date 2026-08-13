@@ -350,17 +350,15 @@ const efficiencyColumns = [
 ];
 
 function renderTables(analytics) {
-  const modelRows = analytics.byModel
-    .slice()
-    .sort((left, right) => {
-      if (
-        Number.isFinite(left.usagePerWallHour) &&
-        Number.isFinite(right.usagePerWallHour)
-      ) {
-        return right.usagePerWallHour - left.usagePerWallHour;
-      }
-      return right.effectiveHours - left.effectiveHours;
-    });
+  const modelRows = analytics.byModel.slice().sort((left, right) => {
+    if (
+      Number.isFinite(left.usagePerWallHour) &&
+      Number.isFinite(right.usagePerWallHour)
+    ) {
+      return right.usagePerWallHour - left.usagePerWallHour;
+    }
+    return right.effectiveHours - left.effectiveHours;
+  });
   renderTable(
     'modelTable',
     modelRows,
@@ -448,14 +446,14 @@ function renderDataQuality(analytics) {
       'Skipped large snapshot gaps',
       String(analytics.coverage.skippedLargeGaps)
     ],
-    [
-      'Detected reset transitions',
-      String(analytics.coverage.resetTransitions)
-    ]
+    ['Detected reset transitions', String(analytics.coverage.resetTransitions)]
   ];
   rows.forEach(([label, value]) => {
     const row = makeElement('div', 'quality-row');
-    row.append(makeElement('span', '', label), makeElement('strong', '', value));
+    row.append(
+      makeElement('span', '', label),
+      makeElement('strong', '', value)
+    );
     container.appendChild(row);
   });
 }
@@ -573,5 +571,6 @@ async function initialize() {
 initialize().catch((error) => {
   console.error(error);
   byId('loadingState').className = 'fatal-state';
-  byId('loadingState').textContent = `Codex analysis failed: ${error.message || error}`;
+  byId('loadingState').textContent =
+    `Codex analysis failed: ${error.message || error}`;
 });
