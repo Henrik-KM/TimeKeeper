@@ -3,13 +3,13 @@ name: Codex analysis checks
 on:
   pull_request:
     paths:
-      - "codex-analysis.html"
-      - "src/features/codex/**"
-      - "scripts/codex-usage-history.mjs"
-      - "tests/unit/codex-analytics.test.mjs"
-      - "tests/unit/codex-usage-history.test.mjs"
-      - ".github/workflows/codex-analysis-ci.yml"
-      - ".github/workflows/codex-usage-history.yml"
+      - 'codex-analysis.html'
+      - 'src/features/codex/**'
+      - 'scripts/codex-usage-history.mjs'
+      - 'tests/unit/codex-analytics.test.mjs'
+      - 'tests/unit/codex-usage-history.test.mjs'
+      - '.github/workflows/codex-analysis-ci.yml'
+      - '.github/workflows/codex-usage-history.yml'
   workflow_dispatch:
 
 permissions:
@@ -23,7 +23,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: "22"
+          node-version: '22'
           cache: npm
 
       - name: Install dependencies
