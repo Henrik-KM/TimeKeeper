@@ -4514,6 +4514,12 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage).toContainText('5%');
   await expect(codexPage).toContainText('Resets in');
+  await expect(codexPage).toContainText('Key Takeaways - Last 7 Days');
+  await expect(codexPage.locator('.codex-model-heading')).toContainText(
+    'Reasoning level'
+  );
+  await expect(codexPage).toContainText('ultra');
+  await expect(codexPage).toContainText('Quota burn');
   await expect(codexPage).toContainText('Last 7 Days');
   await expect(codexPage).toContainText('2');
   await expect(codexPage).toContainText('IFLAI');
@@ -4521,6 +4527,16 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(codexPage).toContainText('Connected');
 
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    codexPage
+      .locator('.codex-model-cell-label', { hasText: 'Reasoning level' })
+      .first()
+  ).toBeVisible();
+  await expect(
+    codexPage
+      .locator('.codex-model-cell-label', { hasText: 'Quota efficiency' })
+      .first()
+  ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
   const mobileCodexUsage = page.locator(
     '#todayCommandPanel .mobile-today-card.codex'
