@@ -381,6 +381,8 @@ function makeAggregate(key, label, extras = {}) {
     label,
     wallSeconds: 0,
     effectiveSeconds: 0,
+    measuredWallSeconds: 0,
+    measuredEffectiveSeconds: 0,
     usagePoints: 0,
     sessions: new Set(),
     allocatedIntervals: new Set(),
@@ -398,13 +400,23 @@ function ensureAggregate(map, key, label, extras) {
   return map.get(key);
 }
 
-function addTimeToAggregate(aggregate, segment, session, fraction) {
-  const wallSeconds = segment.wallSeconds * fraction;
-  const effectiveSeconds = segment.effectiveSeconds * fraction;
+function addTimeToAggregate(
+  aggregate,
+  segment,
+  session,
+  rangeFraction,
+  measurementFraction
+) {
+  const wallSeconds = segment.wallSeconds * rangeFraction;
+  const effectiveSeconds = segment.effectiveSeconds * rangeFraction;
   aggregate.wallSeconds += wallSeconds;
   aggregate.effectiveSeconds += effectiveSeconds;
+  aggregate.measuredWallSeconds += segment.wallSeconds * measurementFraction;
+  aggregate.measuredEffectiveSeconds +=
+    segment.effectiveSeconds * measurementFraction;
   aggregate.sessions.add(session.id);
-  aggregate.delegatedSessions += session.delegatedSessionCount * fraction;
+  aggregate.delegatedSessions +=
+    session.delegatedSessionCount * rangeFraction;
   if (segment.role === 'subagent') {
     aggregate.subagentWallSeconds += wallSeconds;
   } else {
@@ -426,17 +438,20 @@ function getSegmentWeight(segment) {
 function finalizeAggregate(aggregate, totalAttributedUsagePoints) {
   const wallHours = aggregate.wallSeconds / HOUR_SECONDS;
   const effectiveHours = aggregate.effectiveSeconds / HOUR_SECONDS;
+  const measuredWallHours = aggregate.measuredWallSeconds / HOUR_SECONDS;
+  const measuredEffectiveHours =
+    aggregate.measuredEffectiveSeconds / HOUR_SECONDS;
   const usagePoints = aggregate.usagePoints;
   let confidence = 'low';
   if (
     usagePoints >= 2 &&
-    wallHours >= 2 &&
+    measuredWallHours >= 2 &&
     aggregate.allocatedIntervals.size >= 3
   ) {
     confidence = 'high';
   } else if (
     usagePoints >= 0.5 &&
-    wallHours >= 0.5 &&
+    measuredWallHours >= 0.5 &&
     aggregate.allocatedIntervals.size >= 1
   ) {
     confidence = 'medium';
@@ -447,19 +462,23 @@ function finalizeAggregate(aggregate, totalAttributedUsagePoints) {
     allocatedIntervals: aggregate.allocatedIntervals.size,
     wallHours: round(wallHours),
     effectiveHours: round(effectiveHours),
+    measuredWallHours: round(measuredWallHours),
+    measuredEffectiveHours: round(measuredEffectiveHours),
     usagePoints: round(usagePoints),
-    usagePerWallHour: round(safeDivide(usagePoints, wallHours)),
-    usagePerEffectiveHour: round(safeDivide(usagePoints, effectiveHours)),
-    effectiveHoursPerUsagePoint: round(
-      safeDivide(effectiveHours, usagePoints)
+    usagePerWallHour: round(safeDivide(usagePoints, measuredWallHours)),
+    usagePerEffectiveHour: round(
+      safeDivide(usagePoints, measuredEffectiveHours)
     ),
-    wallHoursPerUsagePoint: round(safeDivide(wallHours, usagePoints)),
+    effectiveHoursPerUsagePoint: round(
+      safeDivide(measuredEffectiveHours, usagePoints)
+    ),
+    wallHoursPerUsagePoint: round(
+      safeDivide(measuredWallHours, usagePoints)
+    ),
     focusConversion: round(
       safeDivide(aggregate.effectiveSeconds, aggregate.wallSeconds)
     ),
-    usageShare: round(
-      safeDivide(usagePoints, totalAttributedUsagePoints)
-    ),
+    usageShare: round(safeDivide(usagePoints, totalAttributedUsagePoints)),
     subagentShare: round(
       safeDivide(
         aggregate.subagentWallSeconds,
@@ -571,11 +590,7 @@ export function buildCodexAnalytics({
   maxUsageGapHours = DEFAULT_MAX_USAGE_GAP_HOURS
 } = {}) {
   const nowMs = parseTime(now) ?? Date.now();
-  const requestedRangeDays = clamp(
-    positiveNumber(rangeDays, 7),
-    1 / 24,
-    365
-  );
+  const requestedRangeDays = clamp(positiveNumber(rangeDays, 7), 1 / 24, 365);
   const requestedStartMs = nowMs - requestedRangeDays * DAY_MS;
   const usage = computeCodexUsageIntervals(usageHistory, {
     windowKey,
@@ -628,20 +643,29 @@ export function buildCodexAnalytics({
   let unknownModelEffectiveSeconds = 0;
   let totalEffectiveSeconds = 0;
   let totalWallSeconds = 0;
+  let measuredEffectiveSeconds = 0;
+  let measuredWallSeconds = 0;
   let subagentWallSeconds = 0;
   const sessionDurationsMinutes = [];
   let mixedModelSessions = 0;
 
   sessions.forEach((session) => {
-    const clip = getSessionClip(
+    const rangeClip = getSessionClip(session, requestedStartMs, nowMs);
+    if (!rangeClip) return;
+    const measurementClip = getSessionClip(
       session,
       measurementStartMs,
       measurementEndMs
     );
-    if (!clip) return;
-    totalWallSeconds += session.wallSeconds * clip.fraction;
-    totalEffectiveSeconds += session.effectiveSeconds * clip.fraction;
-    sessionDurationsMinutes.push((session.wallSeconds * clip.fraction) / 60);
+    const measurementFraction = measurementClip?.fraction ?? 0;
+    totalWallSeconds += session.wallSeconds * rangeClip.fraction;
+    totalEffectiveSeconds += session.effectiveSeconds * rangeClip.fraction;
+    measuredWallSeconds += session.wallSeconds * measurementFraction;
+    measuredEffectiveSeconds +=
+      session.effectiveSeconds * measurementFraction;
+    sessionDurationsMinutes.push(
+      (session.wallSeconds * rangeClip.fraction) / 60
+    );
     const distinctModels = new Set(
       session.modelBreakdown
         .filter((segment) => getSegmentWeight(segment) > 0)
@@ -674,14 +698,20 @@ export function buildCodexAnalytics({
         projectAggregate,
         roleAggregate
       ].forEach((aggregate) =>
-        addTimeToAggregate(aggregate, segment, session, clip.fraction)
+        addTimeToAggregate(
+          aggregate,
+          segment,
+          session,
+          rangeClip.fraction,
+          measurementFraction
+        )
       );
       if (model === 'unknown') {
         unknownModelEffectiveSeconds +=
-          segment.effectiveSeconds * clip.fraction;
+          segment.effectiveSeconds * rangeClip.fraction;
       }
       if (role === 'subagent') {
-        subagentWallSeconds += segment.wallSeconds * clip.fraction;
+        subagentWallSeconds += segment.wallSeconds * rangeClip.fraction;
       }
     });
   });
@@ -802,27 +832,38 @@ export function buildCodexAnalytics({
       date: key,
       usagePoints: 0,
       wallSeconds: 0,
-      effectiveSeconds: 0
+      effectiveSeconds: 0,
+      measuredWallSeconds: 0,
+      measuredEffectiveSeconds: 0
     };
     row.usagePoints += interval.usagePoints;
     dailyMap.set(key, row);
   });
   sessions.forEach((session) => {
-    const clip = getSessionClip(
-      session,
-      measurementStartMs,
-      measurementEndMs
-    );
+    const clip = getSessionClip(session, requestedStartMs, nowMs);
     if (!clip) return;
-    const key = dateKey(Math.max(session.startMs, measurementStartMs));
+    const key = dateKey(Math.max(session.startMs, requestedStartMs));
     const row = dailyMap.get(key) || {
       date: key,
       usagePoints: 0,
       wallSeconds: 0,
-      effectiveSeconds: 0
+      effectiveSeconds: 0,
+      measuredWallSeconds: 0,
+      measuredEffectiveSeconds: 0
     };
     row.wallSeconds += session.wallSeconds * clip.fraction;
     row.effectiveSeconds += session.effectiveSeconds * clip.fraction;
+    const measurementClip = getSessionClip(
+      session,
+      measurementStartMs,
+      measurementEndMs
+    );
+    if (measurementClip) {
+      row.measuredWallSeconds +=
+        session.wallSeconds * measurementClip.fraction;
+      row.measuredEffectiveSeconds +=
+        session.effectiveSeconds * measurementClip.fraction;
+    }
     dailyMap.set(key, row);
   });
   const daily = [...dailyMap.values()]
@@ -832,16 +873,17 @@ export function buildCodexAnalytics({
       usagePoints: round(row.usagePoints),
       wallHours: round(row.wallSeconds / HOUR_SECONDS),
       effectiveHours: round(row.effectiveSeconds / HOUR_SECONDS),
+      measuredWallHours: round(row.measuredWallSeconds / HOUR_SECONDS),
+      measuredEffectiveHours: round(
+        row.measuredEffectiveSeconds / HOUR_SECONDS
+      ),
       usagePerWallHour: round(
-        safeDivide(row.usagePoints, row.wallSeconds / HOUR_SECONDS)
+        safeDivide(row.usagePoints, row.measuredWallSeconds / HOUR_SECONDS)
       )
     }));
 
   let measurementState = 'collecting';
-  const attributionRate = safeDivide(
-    attributedUsagePoints,
-    totalUsagePoints
-  );
+  const attributionRate = safeDivide(attributedUsagePoints, totalUsagePoints);
   const requestedHours = requestedRangeDays * 24;
   const timeCoverage = safeDivide(measurementHours, requestedHours);
   if (hasMeasurementWindow && relevantSamples.length >= 2) {
@@ -874,6 +916,10 @@ export function buildCodexAnalytics({
       sessions: sessions.length,
       totalWallHours: round(totalWallSeconds / HOUR_SECONDS),
       totalEffectiveHours: round(totalEffectiveSeconds / HOUR_SECONDS),
+      measuredWallHours: round(measuredWallSeconds / HOUR_SECONDS),
+      measuredEffectiveHours: round(
+        measuredEffectiveSeconds / HOUR_SECONDS
+      ),
       totalUsagePoints: round(totalUsagePoints),
       attributedUsagePoints: round(attributedUsagePoints),
       unattributedUsagePoints: round(
@@ -884,10 +930,10 @@ export function buildCodexAnalytics({
       ),
       attributionRate: round(attributionRate),
       usagePerWallHour: round(
-        safeDivide(totalUsagePoints, totalWallSeconds / HOUR_SECONDS)
+        safeDivide(totalUsagePoints, measuredWallSeconds / HOUR_SECONDS)
       ),
       effectiveHoursPerUsagePoint: round(
-        safeDivide(totalEffectiveSeconds / HOUR_SECONDS, totalUsagePoints)
+        safeDivide(measuredEffectiveSeconds / HOUR_SECONDS, totalUsagePoints)
       ),
       focusConversion: round(
         safeDivide(totalEffectiveSeconds, totalWallSeconds)
