@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-13T12:23:02.836Z",
+  "updatedAt": "2026-08-13T12:28:02.720Z",
   "dayStart": "2026-08-12T22:00:00.000Z",
   "rangeStart": "2026-05-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-13T12:23:04.321Z",
+    "observedAt": "2026-08-13T12:28:03.848Z",
     "primary": {
       "usedPercent": 24,
       "remainingPercent": 76,
@@ -19645,6 +19645,52 @@
         }
       ],
       "description": "Codex: Create editable vector PDFs"
+    },
+    {
+      "id": "codex-e29928a29501e316781c1a39",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-13T10:04:21.733Z",
+      "endTime": "2026-08-13T12:07:58.819Z",
+      "wallSeconds": 7417,
+      "focusFactor": 0.4017,
+      "effectiveSeconds": 2979,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 127,
+          "effectiveSeconds": 63
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 7289,
+          "effectiveSeconds": 2915
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-b845374cbbd20929e2f480c8"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-53f980453155af7681738490",
