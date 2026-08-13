@@ -186,3 +186,40 @@ test('reports collecting state before two usage samples exist', () => {
   assert.equal(analytics.overall.totalUsagePoints, 0);
   assert.equal(analytics.coverage.sampleCount, 1);
 });
+
+test('keeps full-range time totals separate from measured quota denominators', () => {
+  const entries = [
+    codexEntry({
+      id: 'codex-old',
+      startTime: '2026-08-13T02:00:00.000Z',
+      endTime: '2026-08-13T03:00:00.000Z',
+      model: 'model-a',
+      effectiveSeconds: 1800
+    }),
+    codexEntry({
+      id: 'codex-measured',
+      startTime: '2026-08-13T09:00:00.000Z',
+      endTime: '2026-08-13T10:00:00.000Z',
+      model: 'model-a',
+      effectiveSeconds: 3600
+    })
+  ];
+  const analytics = buildCodexAnalytics({
+    entries,
+    projects: [{ id: 'project-1', name: 'IFLAI' }],
+    usageHistory: [
+      sample('2026-08-13T09:00:00.000Z', 10),
+      sample('2026-08-13T10:00:00.000Z', 12)
+    ],
+    rangeDays: 1,
+    now: new Date('2026-08-13T10:00:00.000Z')
+  });
+
+  const model = analytics.byModel.find((row) => row.key === 'model-a');
+  assert.equal(model.effectiveHours, 1.5);
+  assert.equal(model.measuredEffectiveHours, 1);
+  assert.equal(model.usagePoints, 2);
+  assert.equal(model.effectiveHoursPerUsagePoint, 0.5);
+  assert.equal(analytics.overall.totalEffectiveHours, 1.5);
+  assert.equal(analytics.overall.measuredEffectiveHours, 1);
+});
