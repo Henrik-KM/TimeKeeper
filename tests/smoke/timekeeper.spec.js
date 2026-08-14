@@ -4509,6 +4509,17 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(page.locator('#statsGrid')).toContainText('5% remaining');
   await expect(page.locator('#statsGrid')).toContainText('1-week limit');
   await expect(page.locator('#statsGrid')).toContainText('Resets in');
+  const codexUsageCard = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Codex Usage' });
+  await expect(codexUsageCard).toContainText('% used /');
+  await expect(codexUsageCard).toContainText('% expected by now');
+  await expect(codexUsageCard.locator('.progress-bar')).toHaveCount(2);
+  const codexProgressWidths = await codexUsageCard
+    .locator('.progress-bar .fill')
+    .evaluateAll((fills) => fills.map((fill) => fill.style.width));
+  expect(parseFloat(codexProgressWidths[0])).toBe(95);
+  expect(parseFloat(codexProgressWidths[1])).toBeGreaterThan(0);
   await expect(page.locator('#todayCommandPanel')).toContainText('Codex');
   await expect(page.locator('#todayCommandPanel')).toContainText('5%');
   await expect(page.locator('#todayCommandPanel')).toContainText('Resets in');

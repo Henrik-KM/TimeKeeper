@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   buildCodexAnalytics,
+  computeCodexQuotaProgress,
   computeCodexUsageIntervals,
   normalizeCodexSessions
 } from '../../src/features/codex/analytics.mjs';
@@ -34,6 +35,47 @@ function sampleWithSecondary(observedAt, primaryUsed, secondaryUsed) {
     }
   };
 }
+
+test('computes quota use and expected use for the current weekly window', () => {
+  const result = computeCodexQuotaProgress(
+    {
+      remainingPercent: 40,
+      windowMinutes: 10080,
+      resetsAt: '2026-08-20T12:00:00.000Z'
+    },
+    new Date('2026-08-17T12:00:00.000Z')
+  );
+
+  assert.deepEqual(result, {
+    usedPercent: 60,
+    remainingPercent: 40,
+    expectedUsedPercent: 57.1,
+    expectedRemainingPercent: 42.9,
+    windowStartAt: '2026-08-13T12:00:00.000Z',
+    resetsAt: '2026-08-20T12:00:00.000Z'
+  });
+});
+
+test('does not compare quota pacing after the reset or without a window', () => {
+  assert.equal(
+    computeCodexQuotaProgress(
+      {
+        usedPercent: 20,
+        windowMinutes: 10080,
+        resetsAt: '2026-08-20T12:00:00.000Z'
+      },
+      new Date('2026-08-20T12:00:00.000Z')
+    ),
+    null
+  );
+  assert.equal(
+    computeCodexQuotaProgress(
+      { usedPercent: 20, resetsAt: '2026-08-20T12:00:00.000Z' },
+      new Date('2026-08-17T12:00:00.000Z')
+    ),
+    null
+  );
+});
 
 function codexEntry({
   id,

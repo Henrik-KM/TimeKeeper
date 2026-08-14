@@ -108,6 +108,43 @@ export function normalizeCodexUsageSample(sample, windowKey = 'primary') {
   };
 }
 
+export function computeCodexQuotaProgress(quotaWindow, now = new Date()) {
+  if (!quotaWindow || typeof quotaWindow !== 'object') return null;
+  const nowMs = parseTime(now);
+  const resetMs = parseTime(quotaWindow.resetsAt);
+  const windowMinutes = positiveNumber(quotaWindow.windowMinutes, 0);
+  if (nowMs === null || resetMs === null || windowMinutes <= 0) return null;
+
+  const windowStartMs = resetMs - windowMinutes * 60 * 1000;
+  if (windowStartMs >= resetMs || nowMs >= resetMs) return null;
+  const rawUsedPercent = finiteNumber(quotaWindow.usedPercent, Number.NaN);
+  const rawRemainingPercent = finiteNumber(
+    quotaWindow.remainingPercent,
+    Number.NaN
+  );
+  const usedPercent = Number.isFinite(rawUsedPercent)
+    ? rawUsedPercent
+    : Number.isFinite(rawRemainingPercent)
+      ? 100 - rawRemainingPercent
+      : Number.NaN;
+  if (!Number.isFinite(usedPercent)) return null;
+
+  const expectedUsedPercent = clamp(
+    ((nowMs - windowStartMs) / (resetMs - windowStartMs)) * 100,
+    0,
+    100
+  );
+  const normalizedUsedPercent = clamp(usedPercent, 0, 100);
+  return {
+    usedPercent: round(normalizedUsedPercent, 1),
+    remainingPercent: round(100 - normalizedUsedPercent, 1),
+    expectedUsedPercent: round(expectedUsedPercent, 1),
+    expectedRemainingPercent: round(100 - expectedUsedPercent, 1),
+    windowStartAt: new Date(windowStartMs).toISOString(),
+    resetsAt: new Date(resetMs).toISOString()
+  };
+}
+
 function dedupeUsageSamples(samples) {
   const byTimestamp = new Map();
   samples.forEach((sample) => {

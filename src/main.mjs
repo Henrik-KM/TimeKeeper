@@ -48,7 +48,10 @@ import {
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
 import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
-import { buildCodexAnalytics } from './features/codex/analytics.mjs';
+import {
+  buildCodexAnalytics,
+  computeCodexQuotaProgress
+} from './features/codex/analytics.mjs';
 import {
   computeUnionSeconds,
   getEntryElapsedSeconds,
@@ -9900,6 +9903,8 @@ import {
         windowLabel: '',
         statusLabel: '',
         secondaryLabel: '',
+        primaryWindow: null,
+        isStale: true,
         tone: 'muted'
       };
     }
@@ -9921,6 +9926,8 @@ import {
       todayDetail: `${resetLabel}${isStale ? ` - measured ${formatRelativeTime(usage.observedAt)}` : ''}`,
       resetLabel,
       windowLabel: formatCodexUsageWindow(primary.windowMinutes),
+      primaryWindow: primary,
+      isStale,
       statusLabel: isStale
         ? `Usage measured ${formatRelativeTime(usage.observedAt)}`
         : `Measured ${formatRelativeTime(usage.observedAt)}`,
@@ -10185,14 +10192,47 @@ import {
         changeLabel: usage.todayValue
       };
     }
+    const quotaProgress = usage.isStale
+      ? null
+      : computeCodexQuotaProgress(usage.primaryWindow, new Date());
+    const usedPercent = quotaProgress
+      ? quotaProgress.usedPercent
+      : Math.min(100, Math.max(0, 100 - usage.remainingPercent));
+    if (quotaProgress) {
+      const pacingDifference =
+        quotaProgress.usedPercent - quotaProgress.expectedUsedPercent;
+      const pacingLabel =
+        Math.abs(pacingDifference) <= 5
+          ? 'On expected pace'
+          : pacingDifference > 0
+            ? `Quota usage ${formatCodexUsagePercent(Math.abs(pacingDifference))} pts above expected`
+            : `Quota usage ${formatCodexUsagePercent(Math.abs(pacingDifference))} pts below expected`;
+      const pacingTone =
+        pacingDifference > 5
+          ? 'negative'
+          : pacingDifference < -5
+            ? 'positive'
+            : 'neutral';
+      return {
+        title: 'Codex Usage',
+        value: usage.value,
+        progress: usedPercent,
+        timeProgress: quotaProgress.expectedUsedPercent,
+        icon: 'AI',
+        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(quotaProgress.expectedUsedPercent)}% expected by now`,
+        scheduleLabel: pacingLabel,
+        scheduleTone: pacingTone,
+        metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`
+      };
+    }
     return {
       title: 'Codex Usage',
       value: usage.value,
-      progress: usage.remainingPercent,
+      progress: usedPercent,
       icon: 'AI',
-      progressLabel: `${usage.windowLabel} limit - ${usage.resetLabel}`,
+      progressLabel: `${formatCodexUsagePercent(usedPercent)}% used - weekly pacing unavailable`,
       scheduleLabel: usage.statusLabel,
-      metaLabel: usage.secondaryLabel
+      metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel}${usage.secondaryLabel ? ` - ${usage.secondaryLabel}` : ''}`
     };
   }
 
@@ -10780,11 +10820,19 @@ import {
           const sched = document.createElement('div');
           sched.className = 'stat-change';
           sched.textContent = card.scheduleLabel;
-          // Colour code the schedule: green for ahead, red for behind, amber for on schedule
-          const text = card.scheduleLabel.toLowerCase();
-          if (text.includes('ahead')) sched.style.color = '#15803d';
-          else if (text.includes('behind')) sched.style.color = '#b91c1c';
-          else sched.style.color = '#92400e';
+          if (card.scheduleTone === 'positive') {
+            sched.style.color = '#15803d';
+          } else if (card.scheduleTone === 'negative') {
+            sched.style.color = '#b91c1c';
+          } else if (card.scheduleTone === 'neutral') {
+            sched.style.color = '#92400e';
+          } else {
+            // Colour code the schedule: green for ahead, red for behind, amber for on schedule
+            const text = card.scheduleLabel.toLowerCase();
+            if (text.includes('ahead')) sched.style.color = '#15803d';
+            else if (text.includes('behind')) sched.style.color = '#b91c1c';
+            else sched.style.color = '#92400e';
+          }
           div.appendChild(sched);
         }
         if (card.metaLabel) {
