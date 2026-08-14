@@ -1605,7 +1605,208 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v24';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v25';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=18'");
+  expect(serviceWorker).toContain("'./codex-analysis.html'");
+  expect(serviceWorker).toContain(
+    "'./src/features/codex/analysis-page.mjs?v=1'"
+  );
+  expect(serviceWorker).toContain(
+    "'./assets/timekeeper-codex-usage-history.json'"
+  );
+});
+
+test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-13T12:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'analysis-project', name: 'Analysis Project' })
+    ],
+    entries: [
+      {
+        id: 'analysis-session-a',
+        externalId: 'analysis-session-a',
+        source: 'Codex',
+        projectId: 'analysis-project',
+        startTime: '2026-08-13T09:00:00.000Z',
+        endTime: '2026-08-13T10:00:00.000Z',
+        elapsedSeconds: 3600,
+        duration: 2700,
+        focusFactor: 0.75,
+        codexModelBreakdown: [
+          {
+            role: 'parent',
+            model: 'model-a',
+            effort: 'high',
+            wallSeconds: 3600,
+            effectiveSeconds: 2700
+          }
+        ]
+      },
+      {
+        id: 'analysis-session-b',
+        externalId: 'analysis-session-b',
+        source: 'Codex',
+        projectId: 'analysis-project',
+        startTime: '2026-08-13T10:00:00.000Z',
+        endTime: '2026-08-13T11:00:00.000Z',
+        elapsedSeconds: 3600,
+        duration: 1800,
+        focusFactor: 0.5,
+        codexModelBreakdown: [
+          {
+            role: 'parent',
+            model: 'model-b',
+            effort: 'medium',
+            wallSeconds: 3600,
+            effectiveSeconds: 1800
+          }
+        ]
+      }
+    ],
+    codexIntegration: {
+      enabled: true,
+      usageLimits: {
+        observedAt: '2026-08-13T12:00:00.000Z',
+        primary: {
+          usedPercent: 16,
+          remainingPercent: 84,
+          windowMinutes: 10080,
+          resetsAt: '2026-08-20T00:00:00.000Z'
+        },
+        secondary: {
+          usedPercent: 24,
+          remainingPercent: 76,
+          windowMinutes: 1440,
+          resetsAt: '2026-08-14T00:00:00.000Z'
+        }
+      }
+    }
+  });
+  await page.route('**/assets/timekeeper-codex-usage-history.json**', (route) =>
+    route.fulfill({
+      contentType: 'application/json',
+      body: JSON.stringify({
+        samples: [
+          {
+            observedAt: '2026-08-13T09:00:00.000Z',
+            primary: {
+              usedPercent: 10,
+              remainingPercent: 90,
+              windowMinutes: 10080,
+              resetsAt: '2026-08-20T00:00:00.000Z'
+            },
+            secondary: {
+              usedPercent: 20,
+              remainingPercent: 80,
+              windowMinutes: 1440,
+              resetsAt: '2026-08-14T00:00:00.000Z'
+            }
+          },
+          {
+            observedAt: '2026-08-13T10:00:00.000Z',
+            primary: {
+              usedPercent: 12,
+              remainingPercent: 88,
+              windowMinutes: 10080,
+              resetsAt: '2026-08-20T00:00:00.000Z'
+            },
+            secondary: {
+              usedPercent: 22,
+              remainingPercent: 78,
+              windowMinutes: 1440,
+              resetsAt: '2026-08-14T00:00:00.000Z'
+            }
+          }
+        ]
+      })
+    })
+  );
+
+  await page.goto('/codex-analysis.html');
+  await expect(
+    page.getByRole('heading', { name: 'Codex Analysis' })
+  ).toBeVisible();
+  await expect(page.locator('#windowSelect')).toHaveValue('primary');
+  await expect(page.locator('#modelTable tbody tr')).toHaveCount(2);
+
+  const canvasState = await page.evaluate(() =>
+    /** @type {HTMLCanvasElement[]} */ ([
+      ...document.querySelectorAll('.chart-canvas')
+    ]).map((canvas) => {
+      const context = canvas.getContext('2d');
+      const pixels = context.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      ).data;
+      return {
+        width: canvas.width,
+        height: canvas.height,
+        hasInk: [...pixels].some((value, index) => index % 4 === 3 && value > 0)
+      };
+    })
+  );
+  expect(canvasState).toHaveLength(5);
+  expect(
+    canvasState.every(
+      (canvas) => canvas.width > 0 && canvas.height > 0 && canvas.hasInk
+    )
+  ).toBe(true);
+
+  await page.locator('#windowSelect').selectOption('secondary');
+  await expect(page.locator('#metricCards')).toContainText('24% used');
+  await page.locator('#filterModel').selectOption('model-a');
+  await expect(page.locator('#modelTable tbody tr')).toHaveCount(1);
+  await expect(page.locator('#modelTable')).toContainText('model-a');
+
+  const downloadPromise = page.waitForEvent('download');
+  await page.locator('#exportCsv').click();
+  const download = await downloadPromise;
+  expect(download.suggestedFilename()).toContain('secondary');
+  const csv = await download.createReadStream();
+  expect(csv).toBeTruthy();
+
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true);
+
+  await page.goto('/');
+  await gotoSection(page, 'codex', 'Codex');
+  const codexPage = page.locator('#codexPageContent');
+  await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
+    '4.80 pts/eff h'
+  );
+  const modelSection = codexPage
+    .locator('.codex-report-section')
+    .filter({ hasText: 'Model + Reasoning - Last 7 Days' });
+  await expect(modelSection).toBeVisible();
+  const modelARow = modelSection
+    .locator('.codex-model-row')
+    .filter({ hasText: 'model-a' });
+  await expect(modelARow).toContainText('high');
+  await expect(modelARow).toContainText('2.67 pts/eff h');
+  await expect(modelARow).toContainText('0.38 eff h/pt');
+  await expect(modelARow).toContainText('0.8 h');
+  const sectionTitles = await codexPage
+    .locator(':scope > .codex-report-section > h3')
+    .allTextContents();
+  expect(sectionTitles.slice(0, 3)).toEqual([
+    'Usage Limits',
+    'Key Takeaways - Last 7 Days',
+    'Model + Reasoning - Last 7 Days'
+  ]);
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true);
 });
 
 test('mobile Company tab loads private priorities and queues safe steering', async ({
@@ -3591,7 +3792,7 @@ test('cached Strava workout points render before feed refresh finishes', async (
   const workoutCard = page
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Workout Progress' });
-  await expect(workoutCard).toContainText('3.8 / 18 pts');
+  await expect(workoutCard).toContainText('3 / 18 pts');
   await expect(workoutCard).not.toContainText('0 / 18 pts');
 
   releaseFeed();
@@ -4414,7 +4615,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
     .not.toContain('ghp_test_focus_bridge');
 });
 
-test('Codex inbox reconciles delegated entries and imports seven recent days once', async ({
+test('Codex inbox reconciles delegated entries and recalibrates changed records once', async ({
   page
 }) => {
   const pageErrors = [];
@@ -4568,7 +4769,7 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
         externalId: 'codex-today',
         focusFactor: 1.68,
         manualFactor: 1.68,
-        codexFocusPolicyVersion: 2,
+        codexFocusPolicyVersion: 3,
         codexModelBreakdown: [],
         codexDelegatedSessionCount: 4,
         codexDelegationCredit: 0.35
@@ -4744,6 +4945,15 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
 
   await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
   await page.getByRole('button', { name: 'Import Now' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('timekeeperDataPro')).codexIntegration
+            .lastImportSummary
+      )
+    )
+    .toMatchObject({ imported: 0, updated: 0 });
   data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
@@ -4754,6 +4964,12 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage).toContainText('5%');
   await expect(codexPage).toContainText('Resets in');
+  await expect(codexPage).toContainText('Key Takeaways - Last 7 Days');
+  await expect(codexPage.locator('.codex-model-heading')).toContainText(
+    'Reasoning level'
+  );
+  await expect(codexPage).toContainText('ultra');
+  await expect(codexPage).toContainText('Quota burn');
   await expect(codexPage).toContainText('Last 7 Days');
   await expect(codexPage).toContainText('2');
   await expect(codexPage).toContainText('IFLAI');
@@ -4761,6 +4977,18 @@ test('Codex inbox reconciles delegated entries and imports seven recent days onc
   await expect(codexPage).toContainText('Connected');
 
   await page.setViewportSize({ width: 390, height: 844 });
+  await expect(
+    codexPage
+      .locator('.codex-model-cell-label', { hasText: 'Reasoning level' })
+      .first()
+  ).toBeVisible();
+  await expect(
+    codexPage
+      .locator('.codex-model-cell-label', {
+        hasText: 'Usage / effective hour'
+      })
+      .first()
+  ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
   const mobileCodexUsage = page.locator(
     '#todayCommandPanel .mobile-today-attention'
@@ -4896,9 +5124,10 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     version: 5,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 3,
+      version: 5,
       defaultFactor: 0.4,
       minimumFactor: 0.2,
+      fastModeMultiplier: 1.2,
       delegationCredit: 0.35,
       modelBaseFactors: {
         luna: 0.25,

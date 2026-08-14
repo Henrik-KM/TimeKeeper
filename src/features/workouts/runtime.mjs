@@ -3,6 +3,7 @@ import {
   parseLocalDateString
 } from '../../shared/runtime-helpers.mjs';
 import { uuid } from '../../shared/id.mjs';
+import { groupStravaActivitiesIntoSessions } from '../strava/core.mjs';
 
 export const FITNESS_MODES = {
   gentle: { label: 'Gentle (6% / 4%)', alpha: 0.06, beta: 0.04 },
@@ -558,11 +559,15 @@ export function createWorkoutRuntime({
       }
     });
     const activities = applyStravaExertionOverrides(getStravaActivities());
-    activities.forEach((activity) => {
-      if (!activity || !activity.start_date) return;
-      const ts = Date.parse(activity.start_date);
+    const sessions = groupStravaActivitiesIntoSessions(activities);
+    sessions.forEach((session) => {
+      const sessionActivity = session?.activity;
+      if (!sessionActivity || !sessionActivity.start_date) return;
+      const ts = Number.isFinite(session.startMs)
+        ? session.startMs
+        : Date.parse(sessionActivity.start_date);
       if (!Number.isFinite(ts) || ts < startMs || ts >= endMs) return;
-      const exertion = resolveStravaExertion(activity);
+      const exertion = resolveStravaExertion(sessionActivity);
       if (exertion === null) return;
       totalPoints += exertion;
       counts.strava += 1;

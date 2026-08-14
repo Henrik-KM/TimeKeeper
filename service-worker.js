@@ -3,12 +3,15 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v24';
+const CACHE_NAME = 'timekeeper-app-v25';
 const APP_SHELL = [
   './',
   './index.html',
+  './codex-analysis.html',
   './style.css',
   './src/main.mjs?v=18',
+  './src/features/codex/analysis-page.mjs?v=1',
+  './src/features/codex/analytics.mjs',
   './src/shared/runtime-helpers.mjs',
   './src/shared/id.mjs',
   './src/shared/ui.mjs',
@@ -17,6 +20,8 @@ const APP_SHELL = [
   './src/features/time-usage/core.mjs',
   './src/features/strava/core.mjs',
   './src/features/strava/import.mjs',
+  './src/features/strava/score-model.mjs',
+  './src/features/strava/sessions.mjs',
   './src/features/wealth/core.mjs',
   './src/features/workouts/runtime.mjs',
   './src/features/company-operator/core.mjs',
@@ -29,6 +34,7 @@ const APP_SHELL = [
   './src/styles/layout.css',
   './assets/strava.json',
   './assets/strava_overrides.json',
+  './assets/timekeeper-codex-usage-history.json',
   './assets/timekeeper-icon.svg',
   './manifest.webmanifest'
 ];
@@ -68,8 +74,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '20') return;
-          url.searchParams.set('timekeeper-update', '20');
+          if (url.searchParams.get('timekeeper-update') === '21') return;
+          url.searchParams.set('timekeeper-update', '21');
           client.navigate(url.href).catch(() => undefined);
         });
       })
@@ -96,7 +102,7 @@ sw.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() =>
-        caches.match(event.request).then((cached) => {
+        caches.match(event.request, { ignoreSearch: true }).then((cached) => {
           if (cached) return cached;
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');

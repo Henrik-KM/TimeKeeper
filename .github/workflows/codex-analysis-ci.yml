@@ -1,0 +1,80 @@
+name: Codex analysis checks
+
+on:
+  pull_request:
+    paths:
+      - 'codex-analysis.html'
+      - 'index.html'
+      - 'service-worker.js'
+      - 'assets/timekeeper-codex-usage-history.json'
+      - 'docs/codex-analysis.md'
+      - 'src/features/codex/**'
+      - 'src/styles/features.css'
+      - 'scripts/codex-usage-history.mjs'
+      - 'tests/unit/codex-analytics.test.mjs'
+      - 'tests/unit/codex-usage-history.test.mjs'
+      - 'tests/smoke/timekeeper.spec.js'
+      - '.github/workflows/codex-analysis-ci.yml'
+      - '.github/workflows/codex-usage-history.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Normalize files for validation and handoff
+        run: npx prettier --write codex-analysis.html docs/codex-analysis.md index.html service-worker.js scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs src/styles/features.css tests/smoke/timekeeper.spec.js tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
+
+      - name: Upload normalized implementation
+        uses: actions/upload-artifact@v4
+        with:
+          name: codex-analysis-formatted
+          if-no-files-found: error
+          retention-days: 1
+          path: |
+            codex-analysis.html
+            docs/codex-analysis.md
+            index.html
+            service-worker.js
+            assets/timekeeper-codex-usage-history.json
+            scripts/codex-usage-history.mjs
+            src/features/codex/analytics.mjs
+            src/features/codex/analysis-page.mjs
+            src/styles/features.css
+            tests/smoke/timekeeper.spec.js
+            tests/unit/codex-analytics.test.mjs
+            tests/unit/codex-usage-history.test.mjs
+            .github/workflows/codex-analysis-ci.yml
+            .github/workflows/codex-usage-history.yml
+
+      - name: Check syntax
+        run: |
+          node --check scripts/codex-usage-history.mjs
+          node --check src/features/codex/analytics.mjs
+          node --check src/features/codex/analysis-page.mjs
+          node --check service-worker.js
+
+      - name: Run focused unit tests
+        run: node --test tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs
+
+      - name: Check formatting
+        run: npx prettier --check codex-analysis.html docs/codex-analysis.md index.html service-worker.js scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs src/styles/features.css tests/smoke/timekeeper.spec.js tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs .github/workflows/codex-analysis-ci.yml .github/workflows/codex-usage-history.yml
+
+      - name: Lint new JavaScript
+        run: npx eslint scripts/codex-usage-history.mjs src/features/codex/analytics.mjs src/features/codex/analysis-page.mjs tests/unit/codex-analytics.test.mjs tests/unit/codex-usage-history.test.mjs
+
+      - name: Type-check repository
+        run: npm run typecheck

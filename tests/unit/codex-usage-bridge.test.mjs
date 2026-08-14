@@ -165,6 +165,14 @@ test('resolves model and effort focus factors with a safe unknown fallback', () 
     resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
     0.4
   );
+  const fastSolHigh = resolveCodexFocusFactor({
+    model: 'gpt-5.6-sol',
+    effort: 'high',
+    fastMode: true
+  });
+  assert.equal(fastSolHigh.factor, 0.6);
+  assert.equal(fastSolHigh.fastMode, true);
+  assert.equal(fastSolHigh.fastModeMultiplier, 1.2);
 });
 
 test('keeps the lowered Codex model scale evenly spaced', () => {
@@ -429,6 +437,59 @@ test('streamed session parsing keeps the first subagent identity', async () => {
   }
 });
 
+test('streamed session parsing retains Fast mode for focus weighting', async () => {
+  const directory = await fs.mkdtemp(
+    path.join(os.tmpdir(), 'timekeeper-codex-')
+  );
+  const filePath = path.join(directory, 'fast-mode.jsonl');
+  const text = jsonl([
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'session_meta',
+      payload: {
+        id: 'fast-mode-thread',
+        cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI\\email-helper'
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:00:00.000Z',
+      type: 'turn_context',
+      payload: {
+        model: 'gpt-5.6-sol',
+        effort: 'high',
+        realtime_active: true
+      }
+    },
+    {
+      timestamp: '2026-06-13T09:10:00.000Z',
+      type: 'response_item',
+      payload: { type: 'message' }
+    }
+  ]);
+
+  try {
+    await fs.writeFile(filePath, text, 'utf8');
+    const summary = await readCodexSessionSummary(
+      filePath,
+      new Date('2026-06-13T00:00:00.000Z')
+    );
+    assert.equal(summary.activity[0].fastMode, true);
+    assert.equal(summary.activity.at(-1).fastMode, true);
+
+    const records = buildCodexUsageRecordsFromSessionData({
+      ...summary,
+      trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+      now: new Date('2026-06-13T10:00:00.000Z')
+    });
+    assert.equal(records[0].focusFactor, 0.6);
+    assert.equal(records[0].effectiveSeconds, 360);
+    assert.equal(records[0].modelBreakdown[0].fastMode, true);
+    assert.equal(records[0].modelBreakdown[0].fastModeMultiplier, 1.2);
+  } finally {
+    await fs.rm(directory, { recursive: true, force: true });
+  }
+});
+
 test('input-only failed startups are not creditable Codex work', async () => {
   const directory = await fs.mkdtemp(
     path.join(os.tmpdir(), 'timekeeper-codex-')
@@ -576,12 +637,14 @@ test('weights one Codex span across model changes without splitting it', () => {
   assert.equal(records[0].wallSeconds, 1200);
   assert.equal(records[0].effectiveSeconds, 480);
   assert.equal(records[0].focusFactor, 0.4);
-  assert.equal(records[0].focusPolicyVersion, 3);
+  assert.equal(records[0].focusPolicyVersion, 5);
   assert.deepEqual(records[0].modelBreakdown, [
     {
       model: 'gpt-5.6-sol',
       effort: 'ultra',
       factor: 0.6,
+      fastMode: false,
+      fastModeMultiplier: 1,
       wallSeconds: 600,
       effectiveSeconds: 360
     },
@@ -589,6 +652,8 @@ test('weights one Codex span across model changes without splitting it', () => {
       model: 'gpt-5.6-luna',
       effort: 'low',
       factor: 0.2,
+      fastMode: false,
+      fastModeMultiplier: 1,
       wallSeconds: 600,
       effectiveSeconds: 120
     }
@@ -633,11 +698,57 @@ test('halves model-weighted focus for an autonomous research repository', () => 
       effort: 'high',
       baseFactor: 0.5,
       factor: 0.25,
+      fastMode: false,
+      fastModeMultiplier: 1,
       repositoryMultiplier: 0.5,
       wallSeconds: 600,
       effectiveSeconds: 150
     }
   ]);
+});
+
+test('applies the Research multiplier after Fast mode weighting', () => {
+  const records = buildCodexUsageRecordsFromSessionData({
+    meta: {
+      id: 'fast-autonomous-research',
+      cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\Anders\\Research'
+    },
+    activity: [
+      {
+        timestamp: new Date('2026-06-13T09:00:00.000Z'),
+        model: 'gpt-5.6-sol',
+        effort: 'high',
+        fastMode: true
+      },
+      {
+        timestamp: new Date('2026-06-13T09:10:00.000Z'),
+        model: 'gpt-5.6-sol',
+        effort: 'high',
+        fastMode: true
+      }
+    ],
+    trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
+    now: new Date('2026-06-13T10:00:00.000Z'),
+    focusPolicy: {
+      version: 5,
+      fastModeMultiplier: 1.2,
+      repositoryMultipliers: { research: 0.5 }
+    }
+  });
+
+  assert.equal(records[0].focusFactor, 0.3);
+  assert.equal(records[0].effectiveSeconds, 180);
+  assert.deepEqual(records[0].modelBreakdown[0], {
+    model: 'gpt-5.6-sol',
+    effort: 'high',
+    baseFactor: 0.6,
+    factor: 0.3,
+    fastMode: true,
+    fastModeMultiplier: 1.2,
+    repositoryMultiplier: 0.5,
+    wallSeconds: 600,
+    effectiveSeconds: 180
+  });
 });
 
 test('consolidates delegated sessions with uncapped discounted subagent credit', () => {
@@ -695,6 +806,8 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
       factor: 0.6,
+      fastMode: false,
+      fastModeMultiplier: 1,
       creditMultiplier: 1,
       creditedFactor: 0.6,
       wallSeconds: 600,
@@ -705,6 +818,8 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
       factor: 0.6,
+      fastMode: false,
+      fastModeMultiplier: 1,
       creditMultiplier: 0.35,
       creditedFactor: 0.21,
       wallSeconds: 2400,
