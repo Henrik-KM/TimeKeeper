@@ -1560,8 +1560,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v21';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=17'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v22';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=18'");
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/analysis-page.mjs?v=1'"
