@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-14T14:48:01.705Z",
+  "updatedAt": "2026-08-14T14:53:01.725Z",
   "dayStart": "2026-08-13T22:00:00.000Z",
   "rangeStart": "2026-05-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-14T14:48:03.124Z",
+    "observedAt": "2026-08-14T14:53:03.163Z",
     "primary": {
       "usedPercent": 47,
       "remainingPercent": 53,
@@ -20234,6 +20234,52 @@
       ],
       "supersedesExternalIds": [
         "codex-d6fb31a5345451452c9060ef"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-3a5112f5a0efa89613bef838",
+      "threadId": "019fb20e-0b2f-7721-88ec-017856429747",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-14T14:30:53.790Z",
+      "endTime": "2026-08-14T14:34:22.189Z",
+      "wallSeconds": 208,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 104,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 208,
+          "effectiveSeconds": 104
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-c664fa3ef15a18c24a7608b7"
       ],
       "description": "Codex: email-helper"
     }
