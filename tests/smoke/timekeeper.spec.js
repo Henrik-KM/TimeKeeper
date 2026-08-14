@@ -1560,7 +1560,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v20';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v21';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=17'");
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/analysis-page.mjs?v=1'"
@@ -1622,6 +1623,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
       }
     ],
     codexIntegration: {
+      enabled: true,
       usageLimits: {
         observedAt: '2026-08-13T12:00:00.000Z',
         primary: {
@@ -1724,6 +1726,37 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   const csv = await download.createReadStream();
   expect(csv).toBeTruthy();
 
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true);
+
+  await page.goto('/');
+  await gotoSection(page, 'codex', 'Codex');
+  const codexPage = page.locator('#codexPageContent');
+  await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
+    '4.80 pts/eff h'
+  );
+  const modelSection = codexPage
+    .locator('.codex-report-section')
+    .filter({ hasText: 'Model + Reasoning - Last 7 Days' });
+  await expect(modelSection).toBeVisible();
+  const modelARow = modelSection
+    .locator('.codex-model-row')
+    .filter({ hasText: 'model-a' });
+  await expect(modelARow).toContainText('high');
+  await expect(modelARow).toContainText('2.67 pts/eff h');
+  await expect(modelARow).toContainText('0.38 eff h/pt');
+  await expect(modelARow).toContainText('0.8 h');
+  const sectionTitles = await codexPage
+    .locator(':scope > .codex-report-section > h3')
+    .allTextContents();
+  expect(sectionTitles.slice(0, 3)).toEqual([
+    'Usage Limits',
+    'Key Takeaways - Last 7 Days',
+    'Model + Reasoning - Last 7 Days'
+  ]);
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
@@ -4534,7 +4567,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   ).toBeVisible();
   await expect(
     codexPage
-      .locator('.codex-model-cell-label', { hasText: 'Quota efficiency' })
+      .locator('.codex-model-cell-label', {
+        hasText: 'Usage / effective hour'
+      })
       .first()
   ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');

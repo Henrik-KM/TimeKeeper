@@ -149,6 +149,8 @@ test('ranks quota burn and effective-time yield by model', () => {
   assert.equal(modelB.usagePoints, 1);
   assert.equal(modelA.usagePerWallHour, 3);
   assert.equal(modelB.usagePerWallHour, 1);
+  assert.equal(modelA.usagePerEffectiveHour, 6);
+  assert.equal(modelB.usagePerEffectiveHour, 1);
   assert.equal(modelA.effectiveHoursPerUsagePoint, 0.1667);
   assert.equal(modelB.effectiveHoursPerUsagePoint, 1);
   assert.equal(
@@ -156,6 +158,7 @@ test('ranks quota burn and effective-time yield by model', () => {
     analytics.overall.attributedUsagePoints
   );
   assert.equal(analytics.overall.attributionRate, 1);
+  assert.equal(analytics.overall.usagePerEffectiveHour, 2.6667);
   assert.equal(analytics.measurementState, 'partial');
 });
 

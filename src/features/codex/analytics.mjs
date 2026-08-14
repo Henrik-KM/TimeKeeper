@@ -945,6 +945,9 @@ export function buildCodexAnalytics({
       usagePerWallHour: round(
         safeDivide(totalUsagePoints, measuredWallSeconds / HOUR_SECONDS)
       ),
+      usagePerEffectiveHour: round(
+        safeDivide(totalUsagePoints, measuredEffectiveSeconds / HOUR_SECONDS)
+      ),
       effectiveHoursPerUsagePoint: round(
         safeDivide(measuredEffectiveSeconds / HOUR_SECONDS, totalUsagePoints)
       ),

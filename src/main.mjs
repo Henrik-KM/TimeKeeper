@@ -10002,7 +10002,7 @@ import {
       : 'Collecting';
   }
 
-  function renderCodexKeyTakeaways(section, report, usage, analytics = null) {
+  function renderCodexKeyTakeaways(section, report, analytics = null) {
     section.replaceChildren();
     const title = document.createElement('h3');
     title.textContent = 'Key Takeaways - Last 7 Days';
@@ -10014,12 +10014,6 @@ import {
       report.week.wallSeconds > 0
         ? report.week.effectiveSeconds / report.week.wallSeconds
         : 0;
-    appendCodexMetric(
-      grid,
-      'Quota remaining',
-      usage?.remainingLabel || usage?.value || 'Unavailable',
-      usage?.resetLabel || 'Waiting for a quota snapshot'
-    );
     appendCodexMetric(
       grid,
       'Effective time',
@@ -10046,55 +10040,27 @@ import {
     );
     appendCodexMetric(
       grid,
+      'Usage / effective hour',
+      formatCodexAnalyticsRatio(overall?.usagePerEffectiveHour, ' pts/eff h'),
+      overall
+        ? `${formatCodexAnalyticsHours(overall.measuredEffectiveHours)} measured - ${Number.isFinite(overall.attributionRate) ? `${Math.round(overall.attributionRate * 100)}% attributed` : 'attribution collecting'} - ${analytics.measurementState} coverage`
+        : 'Measured quota history only'
+    );
+    appendCodexMetric(
+      grid,
       'Effective yield',
       formatCodexAnalyticsRatio(overall?.effectiveHoursPerUsagePoint, ' h/pt'),
       overall
         ? `${formatCodexAnalyticsHours(overall.measuredEffectiveHours)} measured`
         : 'Measured quota history only'
     );
-
-    const topModel = report.models[0];
-    const topModelFocus =
-      topModel?.wallSeconds > 0
-        ? topModel.effectiveSeconds / topModel.wallSeconds
-        : 0;
-    appendCodexMetric(
-      grid,
-      'Top model + reasoning',
-      topModel?.model || 'No sessions',
-      topModel
-        ? `${topModel.effort || 'Reasoning unavailable'} - ${formatDuration(topModel.effectiveSeconds)} effective - ${formatFocusPercent(topModelFocus)} focus`
-        : 'Imported sessions will appear here'
-    );
     section.appendChild(grid);
 
-    const insights = document.createElement('div');
-    insights.className = 'codex-insight-list';
-    if (analytics?.insights?.length) {
-      analytics.insights.slice(0, 3).forEach((insight) => {
-        const item = document.createElement('div');
-        item.className = `codex-insight ${insight.tone || 'neutral'}`;
-        const insightTitle = document.createElement('strong');
-        insightTitle.textContent = insight.title;
-        const detail = document.createElement('span');
-        detail.textContent = insight.detail;
-        item.appendChild(insightTitle);
-        item.appendChild(detail);
-        insights.appendChild(item);
-      });
-    } else {
-      const status = document.createElement('p');
-      status.className = 'status-muted';
-      status.textContent =
-        'Quota efficiency is collecting. Time and focus metrics are already available.';
-      insights.appendChild(status);
-    }
     const note = document.createElement('small');
     note.className = 'codex-summary-note';
     note.textContent =
       'Usage efficiency uses measured quota history; total time includes all imported sessions.';
-    insights.appendChild(note);
-    section.appendChild(insights);
+    section.appendChild(note);
   }
 
   function renderCodexModelList(modelList, models, analytics = null) {
@@ -10129,9 +10095,9 @@ import {
       'Model',
       'Reasoning level',
       'Effective',
-      'Active',
-      'Focus',
-      'Quota efficiency'
+      'Measured effective',
+      'Usage / effective hour',
+      'Effective / quota point'
     ].forEach((labelText) => {
       const label = document.createElement('span');
       label.textContent = labelText;
@@ -10147,18 +10113,47 @@ import {
       const usage = usageByModelEffort.get(
         getModelEffortKey(model.model, model.effort)
       );
-      const quotaDetail = usage
-        ? `${Number.isFinite(usage.usagePoints) ? `${usage.usagePoints.toFixed(2)} pts` : 'Collecting'} - ${Number.isFinite(usage.effectiveHoursPerUsagePoint) ? `${usage.effectiveHoursPerUsagePoint.toFixed(2)} h/pt` : 'yield collecting'}`
-        : 'Collecting measured quota';
+      const hasMeasurement =
+        analytics && analytics.measurementState !== 'collecting';
+      const quotaDetail =
+        hasMeasurement && usage
+          ? `${usage.usagePoints.toFixed(2)} quota pts - ${usage.confidence} confidence`
+          : 'Waiting for measured quota history';
       const cells = [
-        ['Model', model.model, 'strong'],
-        ['Reasoning level', model.effort || 'Unavailable', 'span'],
-        ['Effective', formatDuration(model.effectiveSeconds), 'span'],
-        ['Active', formatDuration(model.wallSeconds), 'span'],
-        ['Focus', formatFocusPercent(focus), 'span'],
-        ['Quota efficiency', quotaDetail, 'span']
+        ['Model', model.model, 'strong', ''],
+        ['Reasoning level', model.effort || 'Unavailable', 'span', ''],
+        [
+          'Effective',
+          formatDuration(model.effectiveSeconds),
+          'span',
+          `${formatDuration(model.wallSeconds)} active - ${formatFocusPercent(focus)} focus`
+        ],
+        [
+          'Measured effective',
+          hasMeasurement && usage
+            ? formatCodexAnalyticsHours(usage.measuredEffectiveHours)
+            : 'Collecting',
+          'span',
+          'Time overlapping quota history'
+        ],
+        [
+          'Usage / effective hour',
+          Number.isFinite(usage?.usagePerEffectiveHour)
+            ? `${usage.usagePerEffectiveHour.toFixed(2)} pts/eff h`
+            : 'Collecting',
+          'span',
+          quotaDetail
+        ],
+        [
+          'Effective / quota point',
+          Number.isFinite(usage?.effectiveHoursPerUsagePoint)
+            ? `${usage.effectiveHoursPerUsagePoint.toFixed(2)} eff h/pt`
+            : 'Collecting',
+          'span',
+          quotaDetail
+        ]
       ];
-      cells.forEach(([labelText, valueText, valueTag]) => {
+      cells.forEach(([labelText, valueText, valueTag, detailText]) => {
         const cell = document.createElement('div');
         cell.className = 'codex-model-cell';
         const label = document.createElement('span');
@@ -10168,6 +10163,11 @@ import {
         value.textContent = valueText;
         cell.appendChild(label);
         cell.appendChild(value);
+        if (detailText) {
+          const detail = document.createElement('small');
+          detail.textContent = detailText;
+          cell.appendChild(detail);
+        }
         row.appendChild(cell);
       });
       modelList.appendChild(row);
@@ -10203,8 +10203,7 @@ import {
   function getCodexPageData() {
     const now = new Date();
     const todayStart = startOfLocalDay(now);
-    const rangeStart = new Date(todayStart);
-    rangeStart.setDate(rangeStart.getDate() - 6);
+    const rangeStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     const entries = data.entries
       .filter(
         (entry) =>
@@ -10387,7 +10386,16 @@ import {
     limits.appendChild(limitGrid);
 
     const takeaways = appendCodexPageSection(content, 'Key Takeaways');
-    renderCodexKeyTakeaways(takeaways, report, usage);
+    renderCodexKeyTakeaways(takeaways, report);
+
+    const models = appendCodexPageSection(
+      content,
+      'Model + Reasoning - Last 7 Days'
+    );
+    const modelList = document.createElement('div');
+    modelList.className = 'codex-model-list';
+    renderCodexModelList(modelList, report.models);
+    models.appendChild(modelList);
 
     const activity = appendCodexPageSection(content, 'Activity');
     const activityGrid = document.createElement('div');
@@ -10463,12 +10471,6 @@ import {
     });
     projects.appendChild(projectList);
 
-    const models = appendCodexPageSection(content, 'Models and Effort');
-    const modelList = document.createElement('div');
-    modelList.className = 'codex-model-list';
-    renderCodexModelList(modelList, report.models);
-    models.appendChild(modelList);
-
     const recent = appendCodexPageSection(content, 'Recent Sessions');
     const recentList = document.createElement('div');
     recentList.className = 'codex-session-list';
@@ -10541,7 +10543,7 @@ import {
     loadCodexPageAnalytics()
       .then((analytics) => {
         if (renderToken !== codexPageRenderToken) return;
-        renderCodexKeyTakeaways(takeaways, report, usage, analytics);
+        renderCodexKeyTakeaways(takeaways, report, analytics);
         renderCodexModelList(modelList, report.models, analytics);
       })
       .catch(() => {
