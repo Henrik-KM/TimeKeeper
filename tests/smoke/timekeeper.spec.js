@@ -1712,7 +1712,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v24';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v25';");
   expect(serviceWorker).toContain("'./src/main.mjs?v=20'");
   expect(serviceWorker).toContain(
     "url.searchParams.set('timekeeper-update', '22')"
@@ -1725,7 +1725,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=24')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=25')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1917,6 +1917,134 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
+    )
+  ).toBe(true);
+});
+
+test('mobile Company request panel queues one bounded operator request', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-14T09:30:00.000Z');
+  await seedLocalStorage(page, { projects: [], entries: [] });
+  await page.addInitScript(() => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorToken',
+      'github_pat_private_company_test'
+    );
+  });
+  const snapshot = {
+    schema_version: 1,
+    generated_at: '2026-08-14T09:29:00.000Z',
+    status: 'ready',
+    state_version: 'state-request-panel-1',
+    priorities: [
+      {
+        issue_id: 'priority:avantor',
+        evidence_fingerprint: 'evidence-avantor-1',
+        project: 'Avantor',
+        title: 'Prepare customer delivery',
+        next_action: 'Update the customer delivery checklist.'
+      }
+    ],
+    missions: { active: [] },
+    dispatches: { in_progress: [], recent: [] },
+    decisions: { pending: [] },
+    handled: { receipts: [] },
+    sources: { status: 'ready', attention_count: 0, items: [] }
+  };
+  const encodedSnapshot = Buffer.from(JSON.stringify(snapshot)).toString(
+    'base64'
+  );
+  await page.route('https://api.github.com/**', async (route) => {
+    const request = route.request();
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encodedSnapshot, sha: 'state-sha' })
+      });
+      return;
+    }
+    if (
+      request.method() === 'GET' &&
+      request.url().includes('/contents/company-operator/receipts/')
+    ) {
+      await route.fulfill({ status: 404, body: '{}' });
+      return;
+    }
+    if (
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+    ) {
+      await route.fulfill({
+        status: 201,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: { path: 'company-operator/commands' } })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  const panel = page.locator('.company-request-panel');
+  await expect(
+    panel.getByRole('heading', { name: 'Ask Company Operator' })
+  ).toBeVisible();
+  const submit = panel.getByRole('button', { name: 'Send request' });
+  await expect(submit).toBeDisabled();
+  await panel.getByLabel('Project').selectOption('Avantor');
+  await panel
+    .getByLabel('What should Company Operator do?')
+    .fill('Update the customer delivery checklist and verify the result.');
+
+  const requestPromise = page.waitForRequest(
+    (request) =>
+      request.method() === 'PUT' &&
+      request.url().includes('/contents/company-operator/commands/')
+  );
+  await submit.click();
+  const queuedRequest = await requestPromise;
+  const requestBody = queuedRequest.postDataJSON();
+  const command = JSON.parse(
+    Buffer.from(requestBody.content, 'base64').toString('utf8')
+  );
+
+  expect(command.action).toBe('request_work');
+  expect(command.source).toBe('timekeeper_mobile');
+  expect(command.state_version).toBe('state-request-panel-1');
+  expect(command.target).toEqual({
+    issue_id: '',
+    evidence_fingerprint: '',
+    mission_id: ''
+  });
+  expect(command.params.project).toBe('Avantor');
+  expect(command.params.note).toBe(
+    'Update the customer delivery checklist and verify the result.'
+  );
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'Request queued'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    '1 Codex job queued or in progress'
+  );
+  expect(
+    await page.evaluate(
+      () => document.documentElement.scrollWidth <= window.innerWidth + 2
     )
   ).toBe(true);
 });

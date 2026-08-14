@@ -13,7 +13,7 @@ const SNAPSHOT_KEY = 'timekeeperCompanyOperatorSnapshot';
 const PENDING_KEY = 'timekeeperCompanyOperatorPendingCommands';
 const RECEIPTS_KEY = 'timekeeperCompanyOperatorReceipts';
 const POLL_INTERVAL_MS = 60 * 1000;
-const CODEX_ACTIONS = new Set(['add_direction', 'work_next']);
+const CODEX_ACTIONS = new Set(['add_direction', 'request_work', 'work_next']);
 const HIDE_PRIORITY_ACTIONS = new Set(['mark_handled', 'snooze', 'work_next']);
 
 export function createCompanyOperatorController({
@@ -25,6 +25,8 @@ export function createCompanyOperatorController({
   let busy = false;
   let active = false;
   let pollTimer = null;
+  let requestDraft = '';
+  let requestProject = '';
 
   connectButton?.addEventListener('click', () => configureConnection());
   refreshButton?.addEventListener('click', () => refresh({ announce: true }));
@@ -171,6 +173,59 @@ export function createCompanyOperatorController({
       showToast(priorityActionFeedback(action, params));
     } catch (error) {
       showToast(companyErrorMessage(error));
+    } finally {
+      busy = false;
+      updateButtons();
+      render();
+    }
+  }
+
+  async function queueCompanyRequest(note, project) {
+    const request = String(note || '').trim();
+    const selectedProject = String(project || '').trim();
+    if (!snapshot || !request || !selectedProject || busy) return false;
+    busy = true;
+    updateButtons();
+    const commandId = `mobile-${uuid()}`;
+    try {
+      const command = buildCompanyOperatorCommand({
+        commandId,
+        action: 'request_work',
+        snapshot,
+        params: {
+          note: request,
+          project: selectedProject
+        }
+      });
+      await writeRemoteJson(
+        `${getSettings().commandsPath}/${commandId}.json`,
+        command,
+        'Queue private TimeKeeper Company work request'
+      );
+      savePending([
+        ...loadPending(),
+        {
+          commandId,
+          action: 'request_work',
+          label: request.slice(0, 120),
+          issueId: '',
+          evidenceFingerprint: '',
+          missionId: '',
+          dispatchId: '',
+          project: command.params.project,
+          title: request.slice(0, 220),
+          status: 'queued',
+          queuedAt: new Date().toISOString()
+        }
+      ]);
+      requestDraft = '';
+      showToast(
+        'Request queued. Company Operator will apply its normal safety and verification gates.'
+      );
+      return true;
+    } catch (error) {
+      showToast(companyErrorMessage(error));
+      return false;
     } finally {
       busy = false;
       updateButtons();
@@ -492,6 +547,7 @@ export function createCompanyOperatorController({
     root.appendChild(statusBanner(freshness));
     const overview = companyOverviewCard();
     if (overview) root.appendChild(overview);
+    root.appendChild(companyRequestPanel());
     const dispatches = compactDispatchSections();
     const missions = missionSections();
     if (missions.working) root.appendChild(missions.working);
@@ -605,6 +661,102 @@ export function createCompanyOperatorController({
       section.appendChild(compactResultDestination(summary.destination));
     }
     return section;
+  }
+
+  function companyRequestPanel() {
+    const section = element('section', 'company-section company-request-panel');
+    section.appendChild(element('h3', '', 'Ask Company Operator'));
+    section.appendChild(
+      element(
+        'p',
+        'company-request-intro',
+        'Describe one concrete result. The request uses the existing Company Operator safety, approval, and verification gates.'
+      )
+    );
+
+    const form = element('form', 'company-request-form');
+    const requestLabel = element(
+      'label',
+      '',
+      'What should Company Operator do?'
+    );
+    requestLabel.htmlFor = 'companyOperatorRequest';
+    const requestInput = element('textarea', 'company-request-input');
+    requestInput.id = 'companyOperatorRequest';
+    requestInput.name = 'request';
+    requestInput.rows = 4;
+    requestInput.maxLength = 800;
+    requestInput.required = true;
+    requestInput.placeholder =
+      'Example: Update the customer delivery checklist and verify the result.';
+    requestInput.value = requestDraft;
+
+    const projectLabel = element('label', '', 'Project');
+    projectLabel.htmlFor = 'companyOperatorRequestProject';
+    const projectSelect = element('select', 'company-request-project');
+    projectSelect.id = 'companyOperatorRequestProject';
+    projectSelect.name = 'project';
+    companyRequestProjects().forEach((project) => {
+      const option = element('option', '', project);
+      option.value = project;
+      projectSelect.appendChild(option);
+    });
+    if (
+      [...projectSelect.options].some(
+        (option) => option.value === requestProject
+      )
+    ) {
+      projectSelect.value = requestProject;
+    } else {
+      requestProject = projectSelect.value;
+    }
+
+    const submit = button('Send request', 'primary', () => {});
+    submit.type = 'submit';
+    submit.disabled = busy || !requestDraft.trim() || !projectSelect.value;
+    requestInput.addEventListener('input', () => {
+      requestDraft = requestInput.value;
+      submit.disabled = busy || !requestDraft.trim() || !projectSelect.value;
+    });
+    projectSelect.addEventListener('change', () => {
+      requestProject = projectSelect.value;
+    });
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      if (busy || !requestInput.value.trim()) return;
+      submit.disabled = true;
+      await queueCompanyRequest(requestInput.value, projectSelect.value);
+    });
+
+    form.appendChild(requestLabel);
+    form.appendChild(requestInput);
+    form.appendChild(projectLabel);
+    form.appendChild(projectSelect);
+    form.appendChild(submit);
+    section.appendChild(form);
+    section.appendChild(
+      element(
+        'p',
+        'company-request-safety',
+        'This queues local, guarded Company work. It does not send email, publish, deploy, or approve commitments.'
+      )
+    );
+    return section;
+  }
+
+  function companyRequestProjects() {
+    const projects = [
+      snapshot.missions.primary?.project,
+      ...snapshot.priorities.map((priority) => priority.project),
+      ...snapshot.missions.active.map((mission) => mission.project),
+      ...snapshot.requestProjects,
+      ...snapshot.missions.completedToday.map((mission) => mission.project)
+    ];
+    return [
+      ...new Set(
+        projects.map((value) => String(value || '').trim()).filter(Boolean)
+      )
+    ].slice(0, 20);
   }
 
   function formatSourceAge(value) {
@@ -1255,6 +1407,9 @@ export function createCompanyOperatorController({
       return params.dispatchId
         ? 'Answer sent. Codex will resume this case.'
         : 'Direction sent to Codex.';
+    }
+    if (action === 'request_work') {
+      return 'Request queued. Company Operator will start it after the next bridge sync.';
     }
     if (action === 'rate_result') {
       return 'Feedback queued. It will shape future Company work after the next sync.';
