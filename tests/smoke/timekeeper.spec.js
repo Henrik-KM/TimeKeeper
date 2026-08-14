@@ -1644,7 +1644,24 @@ test('mobile Company tab puts current status before dated historical work', asyn
     'Confirm the AstraZeneca launch decision'
   );
   await expect(content).toContainText('Recent completed work');
-  await expect(content).toContainText('Completed on 2026-07-29');
+  const completedResults = content.locator(
+    'section:has(> h3:text-is("Recent completed work")) .company-completed-results'
+  );
+  await expect(completedResults).not.toHaveAttribute('open', '');
+  await expect(completedResults).toContainText(
+    '1 recent result · View details'
+  );
+  await expect(
+    completedResults.getByText('Completed on 2026-07-29')
+  ).toBeHidden();
+  const compactHeight = await completedResults.evaluate(
+    (node) => node.closest('section').getBoundingClientRect().height
+  );
+  expect(compactHeight).toBeLessThan(150);
+  await completedResults.locator('> summary').click();
+  await expect(
+    completedResults.getByText('Completed on 2026-07-29')
+  ).toBeVisible();
   await expect(content).not.toContainText('Done for you');
   await expect(content).not.toContainText('Nothing needs you');
   const order = await page.evaluate(() => ({
@@ -1712,7 +1729,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v25';");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v26';");
   expect(serviceWorker).toContain("'./src/main.mjs?v=20'");
   expect(serviceWorker).toContain(
     "url.searchParams.set('timekeeper-update', '22')"
@@ -2040,7 +2057,7 @@ test('mobile Company request panel queues one bounded operator request', async (
     'Request queued'
   );
   await expect(page.locator('#companyPageContent')).toContainText(
-    '1 Codex job queued or in progress'
+    '1 Company request queued'
   );
   expect(
     await page.evaluate(
@@ -2366,6 +2383,11 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       request.method() === 'PUT' &&
       request.url().includes('/contents/company-operator/commands/')
   );
+  await page
+    .locator(
+      '#companyPageContent section:has(> h3:text-is("Recent completed work")) .company-completed-results > summary'
+    )
+    .click();
   await page.getByRole('button', { name: 'Useful' }).click();
   const feedbackPayload = (await feedbackRequest).postDataJSON();
   const feedbackCommand = JSON.parse(
@@ -2402,8 +2424,14 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.getByText('gpt-5.6-terra / medium').first()).toBeHidden();
   await page
-    .locator('#companyPageContent .company-run-details summary')
-    .first()
+    .locator(
+      '#companyPageContent section:has(> h3:text-is("Recent completed work")) .company-completed-results > summary'
+    )
+    .click();
+  await page
+    .locator(
+      '#companyPageContent .company-dispatch-card.done .company-run-details > summary'
+    )
     .click();
   await expect(page.locator('#companyPageContent')).toContainText(
     'gpt-5.6-terra / medium'
@@ -2509,6 +2537,15 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   expect(directionCommand.params.answers).toEqual([
     { field_id: 'pilot_deadline', value: '2026-09-30' }
   ]);
+  await expect(
+    page.getByRole('heading', { name: 'Needs you', exact: true })
+  ).toHaveCount(0);
+  await expect(page.locator('#companyPageContent')).not.toContainText(
+    'You need to do this'
+  );
+  await expect(page.locator('#companyPageContent')).toContainText(
+    'Answer queued for Company Operator'
+  );
   const storage = await page.evaluate(() => ({
     normalData: localStorage.getItem('timekeeperDataPro') || '',
     token: localStorage.getItem('timekeeperCompanyOperatorToken') || ''
@@ -2726,7 +2763,17 @@ test('mobile Company tab presents missions before the next priority', async ({
   await expect(content).toContainText(
     'Finish the tested camera configuration for the customer.'
   );
-  await expect(content).toContainText('Aventix local commit');
+  const completedMissions = content.locator(
+    'section:has(> h3:text-is("Completed for you")) .company-completed-results'
+  );
+  await expect(completedMissions).toContainText('1 completion · View details');
+  await expect(
+    completedMissions.getByText('Aventix local commit')
+  ).toBeHidden();
+  await completedMissions.locator('> summary').click();
+  await expect(
+    completedMissions.getByText('Aventix local commit')
+  ).toBeVisible();
   await expect(content).toContainText(
     'Choose direct delivery or partner delivery.'
   );
