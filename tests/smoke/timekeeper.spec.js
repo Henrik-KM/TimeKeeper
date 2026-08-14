@@ -729,7 +729,7 @@ test('entries preserve active elapsed time and group Codex records by project-da
   expect(saved.elapsedSeconds).toBe(3600);
 });
 
-test('mobile Today stays a brief holistic overview without extra review panels', async ({
+test('mobile Today stays focused on timers without extra review panels', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -757,11 +757,7 @@ test('mobile Today stays a brief holistic overview without extra review panels',
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toContainText('Today');
   await expect(commandPanel).toContainText('Timer');
-  await expect(commandPanel).toContainText('Work target');
-  await expect(commandPanel).toContainText('No target set');
-  await expect(commandPanel).toContainText('Workout');
-  await expect(commandPanel).toContainText('Company');
-  await expect(commandPanel.locator('.mobile-today-card')).toHaveCount(4);
+  await expect(commandPanel).toContainText('Target');
   await expect(commandPanel).not.toContainText('Project lanes');
   await expect(commandPanel).not.toContainText('Learned pace');
   await expect(commandPanel).not.toContainText('Weekends off');
@@ -1546,7 +1542,7 @@ test('mobile Company tab explains its one-time private connection', async ({
     page.getByRole('heading', { name: 'Company', exact: true })
   ).toBeVisible();
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Connect Company to TimeKeeper'
+    'Connect your private Company workspace'
   );
   await page.getByRole('button', { name: 'Connect Company' }).click();
   const dialog = page.getByRole('dialog', { name: 'Connect Company' });
@@ -1558,55 +1554,14 @@ test('mobile Company tab explains its one-time private connection', async ({
   await dialog.getByRole('button', { name: 'Cancel' }).click();
 });
 
-test('mobile Company tab never contradicts the canonical company state', async ({
-  page
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await freezeTime(page, '2026-08-03T12:00:00.000Z');
-  await seedLocalStorage(page, { projects: [], entries: [] });
-  await page.addInitScript(() => {
-    localStorage.setItem(
-      'timekeeperPrivateBridgeToken',
-      'github_pat_private_company_test'
-    );
-    localStorage.setItem(
-      'timekeeperCompanyOperatorSnapshot',
-      JSON.stringify({
-        schema_version: 1,
-        generated_at: '2026-08-03T11:58:00.000Z',
-        status: 'ready',
-        state_version: 'canonical-state-test',
-        company_summary: {
-          state: 'needs_you',
-          headline: 'AstraZeneca: Provide the images or review feedback',
-          detail: 'The requested material is not in the available sources.',
-          counts: { needs_you: 1 }
-        }
-      })
-    );
-  });
-
-  await page.goto('/#company');
-
-  await expect(
-    page.getByRole('heading', {
-      name: 'AstraZeneca: Provide the images or review feedback'
-    })
-  ).toBeVisible();
-  await expect(page.getByText('You need to do this')).toBeVisible();
-  await expect(
-    page.getByRole('heading', { name: 'Nothing needs you' })
-  ).toHaveCount(0);
-});
-
 test('service worker never caches private cross-origin API responses', async () => {
   const serviceWorker = await readFile('service-worker.js', 'utf8');
 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v25';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=18'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v21';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=17'");
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/analysis-page.mjs?v=1'"
@@ -1844,21 +1799,6 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       done_when: 'Every requested tier, assumption, and approval is explicit.',
       confidence: 'medium'
     },
-    company_summary: {
-      state: 'needs_you',
-      headline: 'Choose the pricing direction',
-      detail: 'Choose the supported pricing direction.',
-      deep_link: '#company',
-      mission_id: '',
-      generated_at: '2026-08-03T11:58:00.000Z',
-      counts: {
-        needs_you: 1,
-        ready: 1,
-        working: 0,
-        up_next: 2,
-        waiting: 0
-      }
-    },
     priorities: [
       {
         issue_id: 'priority:avantor',
@@ -1934,82 +1874,6 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
           estimated_minutes_saved: 35
         }
       ]
-    },
-    email_drafting: {
-      status: 'improving',
-      needs_user: false,
-      summary:
-        '2 drafts are ready in Outlook. 3 older drafts are being refreshed.',
-      ready_in_outlook: 2,
-      being_refreshed: 3,
-      waiting_for_safe_context: 1,
-      unsafe_or_duplicate: 0,
-      verification_failures: 0,
-      verification_auto_recovered: 1,
-      tracked_sent_count: 8,
-      usable_rate: 0.75,
-      target_usable_rate: 0.75,
-      target_status: 'collecting_baseline',
-      authoring_success_rate: 0.9,
-      median_authoring_seconds: 42.5,
-      draft_types: { replies: 1, followups: 1, first_contacts: 1 },
-      outlook_url: 'https://outlook.office.com/mail/drafts'
-    },
-    opportunities: {
-      available: true,
-      status: 'ready',
-      summary: '1 verified first-contact draft is ready in Outlook.',
-      generated_at: '2026-08-03T11:57:00.000Z',
-      source_count: 6,
-      relationship_count: 2,
-      counts: {
-        found: 3,
-        qualified: 1,
-        ready_for_draft: 0,
-        drafted: 1,
-        contact_missing: 0
-      },
-      funnel: {
-        drafted: 3,
-        sent: 2,
-        replied: 1,
-        meetings: 1,
-        followup_due: 0
-      },
-      qualification: {
-        candidates: 3,
-        completed: 3,
-        cached: 1,
-        failed: 0,
-        pending: 0,
-        unresolved: 0,
-        automatic_retry: false
-      },
-      cards: [
-        {
-          opportunity_id: 'opportunity:imaging-partner',
-          evidence_fingerprint: 'opportunity-evidence-1',
-          company: 'Imaging Partner',
-          contact_label: 'Partnerships team',
-          lane: 'net_new',
-          motion: 'oem_or_distribution',
-          status: 'drafted',
-          status_label: 'Draft ready in Outlook',
-          why_now: [
-            'The company launched a new imaging platform.',
-            'It publishes an OEM partnership route.'
-          ],
-          action_taken: 'Prepared and verified a concise first-contact draft.',
-          score: 92,
-          confidence: 'high',
-          source_freshness: 'Today',
-          outlook_url:
-            'https://outlook.office.com/mail/drafts/id-imaging-partner'
-        }
-      ],
-      useful_rate: 0.67,
-      sample_size: 6,
-      outlook_url: 'https://outlook.office.com/mail/drafts'
     },
     dispatches: {
       in_progress_count: 0,
@@ -2180,51 +2044,9 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Done for you'
   );
   await expect(page.locator('#companyPageContent')).toContainText('Up next');
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'Email drafting'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    '2 ready in Outlook · 3 being refreshed · 1 waiting for context'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'Usefulness baseline: 8 sent drafts tracked'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    '1 reply · 1 follow-up · 1 first contact'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'New opportunities'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    'Drafted 3 · Sent 2 · Replies 1 · Meetings 1'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    '3 of 3 candidate checks completed'
-  );
-  const opportunityCard = page.locator(
-    '#companyPageContent .company-dispatch-card.opportunity'
-  );
-  await expect(opportunityCard).toContainText('Imaging Partner');
-  await expect(opportunityCard).toContainText(
-    'The company launched a new imaging platform.'
-  );
-  await expect(opportunityCard).toContainText(
-    'Prepared and verified a concise first-contact draft.'
-  );
-  await expect(
-    opportunityCard.getByRole('link', { name: 'Open draft' })
-  ).toHaveAttribute(
-    'href',
-    'https://outlook.office.com/mail/drafts/id-imaging-partner'
-  );
-  await expect(
-    page.getByRole('link', { name: 'Open Outlook drafts' })
-  ).toHaveAttribute('href', 'https://outlook.office.com/mail/drafts');
   const sectionOrder = await page.evaluate(() => ({
     priority: document
-      .querySelector(
-        '#companyPageContent .company-primary-card:not(.company-overview)'
-      )
+      .querySelector('#companyPageContent .company-primary-card')
       ?.getBoundingClientRect().top,
     question: [...document.querySelectorAll('#companyPageContent h3')]
       .find((heading) => heading.textContent === 'Needs you')
@@ -2239,30 +2061,12 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent img')).toHaveCount(0);
 
-  await gotoSection(page, 'dashboard', 'Dashboard');
-  const companyTodayCard = page
-    .locator('#todayCommandPanel .mobile-today-card')
-    .filter({ hasText: 'Company · Needs you' });
-  await expect(companyTodayCard).toContainText('Choose the pricing direction');
-  await expect(page.locator('#todayCommandPanel')).toContainText(
-    'Choose the supported pricing direction.'
-  );
-  await companyTodayCard.click();
-  await expect(
-    page.getByRole('heading', { name: 'Company', exact: true })
-  ).toBeVisible();
-
   const mobileLayout = await page.evaluate(() => ({
     viewportWidth: window.innerWidth,
     scrollWidth: document.documentElement.scrollWidth,
     actionHeights: [
       ...document.querySelectorAll(
         '#companyPageContent .company-primary-card .company-action-grid .btn'
-      )
-    ].map((button) => button.getBoundingClientRect().height),
-    opportunityActionHeights: [
-      ...document.querySelectorAll(
-        '#companyPageContent .company-dispatch-card.opportunity .company-action-grid .btn'
       )
     ].map((button) => button.getBoundingClientRect().height)
   }));
@@ -2271,20 +2075,13 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   expect(mobileLayout.actionHeights).toHaveLength(4);
   expect(Math.min(...mobileLayout.actionHeights)).toBeGreaterThanOrEqual(44);
-  expect(mobileLayout.opportunityActionHeights).toHaveLength(5);
-  expect(
-    Math.min(...mobileLayout.opportunityActionHeights)
-  ).toBeGreaterThanOrEqual(44);
 
   const feedbackRequest = page.waitForRequest(
     (request) =>
       request.method() === 'PUT' &&
       request.url().includes('/contents/company-operator/commands/')
   );
-  await page
-    .locator('#companyPageContent .company-dispatch-card.done')
-    .getByRole('button', { name: 'Useful' })
-    .click();
+  await page.getByRole('button', { name: 'Useful' }).click();
   const feedbackPayload = (await feedbackRequest).postDataJSON();
   const feedbackCommand = JSON.parse(
     Buffer.from(feedbackPayload.content, 'base64').toString('utf8')
@@ -2313,9 +2110,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'Codex job queued or in progress'
   );
   await expect(
-    page.locator(
-      '#companyPageContent .company-primary-card:not(.company-overview)'
-    )
+    page.locator('#companyPageContent .company-primary-card')
   ).toContainText('Albany');
   await expect(page.locator('#companyPageContent')).toContainText(
     'Which pilot deadline should I use?'
@@ -2385,11 +2180,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
       candidate.method() === 'PUT' &&
       candidate.url().includes('/contents/company-operator/commands/')
   );
-  await page
-    .locator(
-      '#companyPageContent .company-primary-card:not(.company-overview) .company-more-actions summary'
-    )
-    .click();
+  await page.getByText('More actions').click();
   await page.getByRole('button', { name: 'Already handled' }).click();
   const handledPayload = (await handledRequest).postDataJSON();
   const handledCommand = JSON.parse(
@@ -2407,9 +2198,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     '1 Codex job queued or in progress'
   );
   await expect(
-    page.locator(
-      '#companyPageContent .company-primary-card:not(.company-overview)'
-    )
+    page.locator('#companyPageContent .company-primary-card')
   ).toHaveCount(0);
 
   const directionRequest = page.waitForRequest(
@@ -2464,210 +2253,6 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
     'decision-evidence-1'
   );
   expect(decisionCommand.params.decision).toBe('approve');
-
-  const opportunityFeedbackRequest = page.waitForRequest(
-    (candidate) =>
-      candidate.method() === 'PUT' &&
-      candidate.url().includes('/contents/company-operator/commands/')
-  );
-  await opportunityCard.getByRole('button', { name: 'Useful' }).click();
-  const opportunityFeedbackPayload = (
-    await opportunityFeedbackRequest
-  ).postDataJSON();
-  const opportunityFeedbackCommand = JSON.parse(
-    Buffer.from(opportunityFeedbackPayload.content, 'base64').toString('utf8')
-  );
-  expect(opportunityFeedbackCommand.action).toBe('rate_opportunity');
-  expect(opportunityFeedbackCommand.target.opportunity_id).toBe(
-    'opportunity:imaging-partner'
-  );
-  expect(opportunityFeedbackCommand.target.evidence_fingerprint).toBe(
-    'opportunity-evidence-1'
-  );
-  expect(opportunityFeedbackCommand.params.rating).toBe('useful');
-});
-
-test('mobile Company tab keeps partial opportunity work and retries unfinished candidates', async ({
-  page
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await seedLocalStorage(page, { projects: [], entries: [] });
-  await page.addInitScript(() => {
-    localStorage.setItem(
-      'timekeeperCompanyOperatorSettings',
-      JSON.stringify({
-        repository: 'Henrik-KM/timekeeper-private-context',
-        branch: 'main',
-        statePath: 'company-operator/state.json',
-        commandsPath: 'company-operator/commands',
-        receiptsPath: 'company-operator/receipts'
-      })
-    );
-    localStorage.setItem('timekeeperCompanyOperatorToken', 'github_pat_test');
-  });
-  const partialState = {
-    schema_version: 1,
-    generated_at: '2026-08-03T12:00:00.000Z',
-    status: 'ready',
-    state_version: 'partial-opportunity-state',
-    priorities: [],
-    missions: { active: [], completed_today: [] },
-    decisions: { pending: [] },
-    handled: { receipts: [] },
-    dispatches: { in_progress: [], recent: [] },
-    sources: { items: [] },
-    opportunities: {
-      available: true,
-      status: 'ready_partial',
-      phase: 'partial_no_qualified_drafts',
-      summary:
-        'No verified outreach is worth drafting right now. 3 unfinished candidate checks will retry automatically.',
-      failure_reason:
-        'Completed candidate work was kept; unfinished checks will retry automatically.',
-      can_retry: true,
-      source_count: 7,
-      relationship_count: 4,
-      counts: {},
-      funnel: {},
-      qualification: {
-        candidates: 12,
-        completed: 9,
-        cached: 4,
-        failed: 3,
-        pending: 0,
-        unresolved: 3,
-        automatic_retry: true
-      },
-      cards: []
-    }
-  };
-  await page.route('https://api.github.com/**', async (route, request) => {
-    if (
-      request.method() === 'GET' &&
-      request.url().includes('/contents/company-operator/state.json')
-    ) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          sha: 'state-sha',
-          content: Buffer.from(JSON.stringify(partialState)).toString('base64')
-        })
-      });
-      return;
-    }
-    await route.fulfill({ status: 404, body: '{}' });
-  });
-
-  await page.goto('/#company');
-  await expect(
-    page.getByRole('heading', { name: 'Still checking opportunities' })
-  ).toBeVisible();
-  await expect(page.locator('#companyPageContent')).toContainText(
-    '9 of 12 candidate checks completed'
-  );
-  await expect(page.locator('#companyPageContent')).toContainText(
-    '3 retrying automatically'
-  );
-  await expect(page.locator('#companyPageContent')).not.toContainText(
-    'No verified outreach today'
-  );
-  await expect(page.getByRole('button', { name: 'Retry scan' })).toHaveCount(0);
-});
-
-test('mobile Company tab distinguishes a failed opportunity scan and queues retry', async ({
-  page
-}) => {
-  await page.setViewportSize({ width: 390, height: 844 });
-  await seedLocalStorage(page, { projects: [], entries: [] });
-  await page.addInitScript(() => {
-    localStorage.setItem(
-      'timekeeperCompanyOperatorSettings',
-      JSON.stringify({
-        repository: 'Henrik-KM/timekeeper-private-context',
-        branch: 'main',
-        statePath: 'company-operator/state.json',
-        commandsPath: 'company-operator/commands',
-        receiptsPath: 'company-operator/receipts'
-      })
-    );
-    localStorage.setItem('timekeeperCompanyOperatorToken', 'github_pat_test');
-  });
-  const failedState = {
-    schema_version: 1,
-    generated_at: '2026-08-03T12:00:00.000Z',
-    status: 'ready',
-    state_version: 'failed-opportunity-state',
-    priorities: [],
-    missions: { active: [], completed_today: [] },
-    decisions: { pending: [] },
-    handled: { receipts: [] },
-    dispatches: { in_progress: [], recent: [] },
-    sources: { items: [] },
-    opportunities: {
-      available: true,
-      status: 'blocked',
-      phase: 'failed',
-      summary:
-        'The opportunity scan stopped before qualification finished; no outreach draft was created.',
-      failure_reason:
-        'Candidate research finished, but the evidence review did not complete. Retry the scan.',
-      can_retry: true,
-      source_count: 7,
-      relationship_count: 4,
-      counts: {},
-      funnel: {},
-      cards: []
-    }
-  };
-  await page.route('https://api.github.com/**', async (route, request) => {
-    if (
-      request.method() === 'GET' &&
-      request.url().includes('/contents/company-operator/state.json')
-    ) {
-      await route.fulfill({
-        status: 200,
-        contentType: 'application/json',
-        body: JSON.stringify({
-          sha: 'state-sha',
-          content: Buffer.from(JSON.stringify(failedState)).toString('base64')
-        })
-      });
-      return;
-    }
-    if (
-      request.method() === 'PUT' &&
-      request.url().includes('/contents/company-operator/commands/')
-    ) {
-      await route.fulfill({
-        status: 201,
-        contentType: 'application/json',
-        body: JSON.stringify({ content: { path: 'company-operator/commands' } })
-      });
-      return;
-    }
-    await route.fulfill({ status: 404, body: '{}' });
-  });
-
-  await page.goto('/#company');
-  await expect(page.getByText('Opportunity scan needs a retry')).toBeVisible();
-  await expect(page.locator('#companyPageContent')).not.toContainText(
-    'No verified outreach today'
-  );
-  const retryRequest = page.waitForRequest(
-    (candidate) =>
-      candidate.method() === 'PUT' &&
-      candidate.url().includes('/contents/company-operator/commands/')
-  );
-  await page.getByRole('button', { name: 'Retry scan' }).click();
-  const commandPayload = (await retryRequest).postDataJSON();
-  const command = JSON.parse(
-    Buffer.from(commandPayload.content, 'base64').toString('utf8')
-  );
-  expect(command.action).toBe('retry_opportunities');
-  await expect(
-    page.getByRole('heading', { name: 'Opportunity scan retry queued' })
-  ).toBeVisible();
 });
 
 test('mobile Company tab presents missions before the next priority', async ({
@@ -2873,11 +2458,11 @@ test('mobile Company tab presents missions before the next priority', async ({
     );
   });
   const upNext = await page
-    .locator('#companyPageContent .company-primary-card:not(.company-overview)')
+    .locator('#companyPageContent .company-primary-card')
     .evaluate((node) => node.getBoundingClientRect().top);
-  expect(order['Needs you']).toBeLessThan(order['Completed for you']);
-  expect(order['Completed for you']).toBeLessThan(order['Working now']);
-  expect(order['Working now']).toBeLessThan(upNext);
+  expect(order['Working now']).toBeLessThan(order['Completed for you']);
+  expect(order['Completed for you']).toBeLessThan(order['Needs you']);
+  expect(order['Needs you']).toBeLessThan(upNext);
 
   const commandRequest = page.waitForRequest(
     (request) =>
@@ -3116,8 +2701,8 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
   await expect(commandPanel).toBeVisible();
-  await expect(commandPanel).toContainText('Work target');
-  await expect(commandPanel).toContainText('Workout');
+  await expect(commandPanel).toContainText('Target');
+  await expect(commandPanel).toContainText('Daily workout target');
   await expect(commandPanel).not.toContainText('Favorites');
   await expect(commandPanel).not.toContainText('Weekly budget');
   await expect(commandPanel).toContainText('Most used timers');
@@ -3202,7 +2787,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   await expect(page.locator('#weeklyScatter')).toBeVisible();
 });
 
-test('mobile Today shows the workout overview without quick finance actions', async ({
+test('mobile Today shows daily workout target without quick finance actions', async ({
   page
 }) => {
   await page.setViewportSize({ width: 390, height: 844 });
@@ -3246,8 +2831,7 @@ test('mobile Today shows the workout overview without quick finance actions', as
   await page.goto('/');
   await gotoSection(page, 'dashboard', 'Dashboard');
   const commandPanel = page.locator('#todayCommandPanel');
-  await expect(commandPanel).toContainText('Workout');
-  await expect(commandPanel).toContainText('Morning Run');
+  await expect(commandPanel).toContainText('Daily workout target');
   await expect(commandPanel).not.toContainText('Weekly budget');
   await expect(
     commandPanel.getByRole('button', { name: 'Log usual workout' })
@@ -3263,11 +2847,11 @@ test('mobile Today shows the workout overview without quick finance actions', as
   ).toHaveCount(0);
   await commandPanel
     .locator('.mobile-today-card')
-    .filter({ hasText: 'Workout' })
+    .filter({ hasText: 'Daily workout target' })
     .click();
-  await expect(
-    page.getByRole('heading', { name: 'Workouts', exact: true })
-  ).toBeVisible();
+  const workoutDialog = page.getByRole('dialog', { name: 'Log workout' });
+  await expect(workoutDialog).toBeVisible();
+  await workoutDialog.getByRole('button', { name: 'Close' }).last().click();
 });
 
 test('mobile Today one-click timers use repeated manual history before recent one-offs', async ({
@@ -4925,9 +4509,8 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(page.locator('#statsGrid')).toContainText('5% remaining');
   await expect(page.locator('#statsGrid')).toContainText('1-week limit');
   await expect(page.locator('#statsGrid')).toContainText('Resets in');
-  await expect(page.locator('#todayCommandPanel')).toContainText(
-    'Codex capacity is low'
-  );
+  await expect(page.locator('#todayCommandPanel')).toContainText('Codex');
+  await expect(page.locator('#todayCommandPanel')).toContainText('5%');
   await expect(page.locator('#todayCommandPanel')).toContainText('Resets in');
   await expect
     .poll(() =>
@@ -4991,13 +4574,11 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
   const mobileCodexUsage = page.locator(
-    '#todayCommandPanel .mobile-today-attention'
+    '#todayCommandPanel .mobile-today-card.codex'
   );
   await expect(mobileCodexUsage).toBeVisible();
-  await expect(mobileCodexUsage.locator('strong')).toHaveText(
-    'Codex capacity is low'
-  );
-  await expect(mobileCodexUsage).toContainText('Resets in');
+  await expect(mobileCodexUsage.locator('strong')).toHaveText('5%');
+  await expect(mobileCodexUsage).toContainText('Remaining - Resets in');
   await mobileCodexUsage.click();
   await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');

@@ -1085,21 +1085,6 @@ tr:nth-child(even) td {
   background: linear-gradient(145deg, #eff6ff, #ffffff 75%);
 }
 
-.company-overview.needs_you {
-  border-color: #fecaca;
-  background: linear-gradient(145deg, #fef2f2, #ffffff 75%);
-}
-
-.company-overview.ready {
-  border-color: #bbf7d0;
-  background: linear-gradient(145deg, #f0fdf4, #ffffff 75%);
-}
-
-.company-overview.waiting,
-.company-overview.clear {
-  background: #f8fafc;
-}
-
 .company-primary-card h3,
 .company-section h3,
 .company-empty-card h3 {
@@ -1272,32 +1257,6 @@ tr:nth-child(even) td {
 .company-dispatch-card.done {
   border-color: #86efac;
   background: #f0fdf4;
-}
-
-.company-dispatch-card.opportunity.drafted {
-  border-color: #86efac;
-  background: linear-gradient(145deg, #f0fdf4, #ffffff 90%);
-}
-
-.company-dispatch-card.opportunity.contact_missing {
-  border-color: #fbbf24;
-  background: #fffbeb;
-}
-
-.company-opportunity-reasons {
-  display: grid;
-  gap: 0.35rem;
-  margin: 0;
-  padding-left: 1.15rem;
-  color: #334155;
-  line-height: 1.4;
-}
-
-.company-draft-types {
-  margin: 0;
-  color: #334155;
-  font-size: 0.9rem;
-  font-weight: 700;
 }
 
 .company-dispatch-card.needs-you {
@@ -1740,29 +1699,6 @@ tr:nth-child(even) td {
   margin-bottom: 0.75rem;
 }
 
-.mobile-alert-settings {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 0.9rem;
-  padding: 0.75rem;
-  border: 1px solid #dbe3ef;
-  border-radius: 0.65rem;
-  background: #f8fafc;
-}
-
-.mobile-alert-settings p {
-  margin: 0.2rem 0 0;
-}
-
-.mobile-alert-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
-}
-
 .reminder-settings {
   display: flex;
   flex-wrap: wrap;
@@ -2144,11 +2080,6 @@ tr:nth-child(even) td {
     background: #eff6ff;
   }
 
-  .mobile-today-card.success {
-    border-color: #bbf7d0;
-    background: #f0fdf4;
-  }
-
   .mobile-today-card.warm {
     border-color: #fde68a;
     background: #fffbeb;
@@ -2182,45 +2113,6 @@ tr:nth-child(even) td {
     font-size: 0.78rem;
     font-weight: 650;
     line-height: 1.25;
-  }
-
-  .mobile-today-attention {
-    display: grid;
-    gap: 0.15rem;
-    width: 100%;
-    padding: 0.7rem 0.8rem;
-    border: 1px solid #fed7aa;
-    border-radius: 0.65rem;
-    background: #fff7ed;
-    color: #7c2d12;
-    cursor: pointer;
-    text-align: left;
-  }
-
-  .mobile-today-attention.high,
-  .mobile-today-attention.critical {
-    border-color: #fecaca;
-    background: #fef2f2;
-    color: #991b1b;
-  }
-
-  .mobile-today-attention > span {
-    font-size: 0.7rem;
-    font-weight: 850;
-    letter-spacing: 0.025em;
-    text-transform: uppercase;
-  }
-
-  .mobile-today-attention > strong {
-    font-size: 0.95rem;
-    line-height: 1.2;
-  }
-
-  .mobile-today-attention > small {
-    color: inherit;
-    font-size: 0.78rem;
-    line-height: 1.25;
-    opacity: 0.85;
   }
 
   .mobile-today-actions {
@@ -2558,17 +2450,6 @@ tr:nth-child(even) td {
   .billing-view-toolbar .btn,
   .billing-view-toolbar select,
   .reminder-settings .btn {
-    width: 100%;
-  }
-
-  .mobile-alert-settings,
-  .mobile-alert-actions {
-    align-items: stretch;
-    flex-direction: column;
-  }
-
-  .mobile-alert-actions,
-  .mobile-alert-actions .btn {
     width: 100%;
   }
 

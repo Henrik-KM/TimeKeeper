@@ -58,18 +58,6 @@ import {
   normalizeEntryTiming
 } from './features/time-usage/core.mjs';
 import { createCompanyOperatorController } from './features/company-operator/runtime.mjs';
-import { companySnapshotFreshness } from './features/company-operator/core.mjs';
-import {
-  getPrivateBridgeSettings,
-  getPrivateBridgeToken,
-  migratePrivateBridgeConnection,
-  savePrivateBridgeSettings,
-  savePrivateBridgeToken
-} from './features/private-bridge/core.mjs';
-import {
-  buildCompanyTodayCard,
-  chooseTodayAttention
-} from './features/today/core.mjs';
 import {
   applyFitnessDefaults,
   applyWorkoutDefaults,
@@ -1417,6 +1405,7 @@ import {
     return [...fallback];
   }
 
+  const CODEX_INTEGRATION_TOKEN_KEY = 'timekeeperCodexIntegrationToken';
   const CODEX_DEFAULT_REPOSITORY = 'Henrik-KM/TimeKeeper';
   const CODEX_DEFAULT_BRANCH = 'main';
   const CODEX_DEFAULT_CONFIG_PATH = 'assets/timekeeper-codex-config.json';
@@ -1461,8 +1450,6 @@ import {
       ultra: 0.15
     }
   };
-
-  migratePrivateBridgeConnection();
 
   function normalizeGitHubRepository(value = '') {
     const repository = String(value || '')
@@ -3323,18 +3310,20 @@ import {
 
   function getCodexIntegrationConfig() {
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
-    const privateBridge = getPrivateBridgeSettings();
-    data.codexIntegration.contextRepository = privateBridge.repository;
-    data.codexIntegration.contextBranch = privateBridge.branch;
     return data.codexIntegration;
   }
 
   function getCodexIntegrationToken() {
-    return getPrivateBridgeToken();
+    return String(localStorage.getItem(CODEX_INTEGRATION_TOKEN_KEY) || '');
   }
 
   function saveCodexIntegrationToken(token) {
-    savePrivateBridgeToken(token);
+    const normalized = String(token || '').trim();
+    if (normalized) {
+      localStorage.setItem(CODEX_INTEGRATION_TOKEN_KEY, normalized);
+    } else {
+      localStorage.removeItem(CODEX_INTEGRATION_TOKEN_KEY);
+    }
   }
 
   function getCodexTrackedProjects() {
@@ -3636,10 +3625,6 @@ import {
       return;
     }
     data.codexIntegration = next;
-    savePrivateBridgeSettings({
-      repository: next.contextRepository,
-      branch: next.contextBranch
-    });
     saveCodexIntegrationToken(values.token);
     saveData();
     updateCodexIntegrationPanel();
@@ -7677,13 +7662,8 @@ import {
   const companyOperatorController = createCompanyOperatorController({
     root: document.getElementById('companyPageContent'),
     connectButton: document.getElementById('companyPageConnectBtn'),
-    refreshButton: document.getElementById('companyPageRefreshBtn'),
-    onSnapshotChange: () => {
-      renderTodayCommandPanel();
-      updateMobileAlertSettingsPanel();
-    }
+    refreshButton: document.getElementById('companyPageRefreshBtn')
   });
-  updateMobileAlertSettingsPanel();
   const defaultSectionId = 'timer';
   const sectionIds = new Set(
     Array.from(document.querySelectorAll('.section')).map(
@@ -7729,9 +7709,7 @@ import {
     if (!sectionId || !sectionIds.has(sectionId)) return;
     const { updateHash = true, resetScroll = true } = options;
     activeSectionId = sectionId;
-    companyOperatorController.setActive(
-      sectionId === 'company' || sectionId === 'dashboard'
-    );
+    companyOperatorController.setActive(sectionId === 'company');
     navList
       .querySelectorAll('li')
       .forEach((item) => item.classList.remove('active'));
@@ -14725,197 +14703,6 @@ import {
     sheet.addAction('Close', 'secondary', sheet.close);
   }
 
-  function buildMobileTodayState({ runningEntries, stats, recommendation }) {
-    const now = new Date();
-    const running = runningEntries[0] || null;
-    const runningProject = running ? getEntryProject(running) : null;
-    const recommendedHours = recommendation
-      ? formatRecommendationHours(
-          getDailyPlanRecommendedRemaining(recommendation.dailyPlan)
-        )
-      : '';
-    const workoutSummary = getWorkoutMobileSummary(now);
-    const favoriteWorkout = getFavoriteWorkoutPreset();
-    const snapshot = companyOperatorController.getSnapshot();
-    const freshness = snapshot
-      ? companySnapshotFreshness(snapshot, now)
-      : { status: 'unknown', ageMinutes: null };
-    const companyCard = buildCompanyTodayCard(snapshot, {
-      freshness: freshness.status
-    });
-    const cards = {
-      timer: {
-        label: running ? 'Timer · Running' : 'Timer',
-        value: running
-          ? runningProject?.name || 'Running timer'
-          : recommendation
-            ? `Next: ${recommendation.project.name}`
-            : 'Ready to start',
-        detail: running
-          ? `${formatDuration(getEntryElapsedSeconds(running, now))} elapsed`
-          : recommendation
-            ? `${recommendedHours}h recommended today`
-            : 'Open Timer to choose a project',
-        tone: running ? 'warm' : ''
-      },
-      work: {
-        label: 'Work target',
-        value:
-          stats.dailyTarget > 0
-            ? `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`
-            : 'No target set',
-        detail:
-          stats.dailyTarget <= 0
-            ? 'Open Projects to set one'
-            : recommendation
-              ? `Next: ${recommendation.project.name} · ${recommendedHours}h`
-              : 'Daily target covered',
-        tone:
-          stats.dailyTarget <= 0
-            ? 'muted'
-            : stats.todayHours + 0.01 < stats.dailyTarget
-              ? 'primary'
-              : 'success'
-      },
-      workout: {
-        label: 'Workout',
-        value: favoriteWorkout?.name || workoutSummary.state,
-        detail: `${workoutSummary.label} · ${workoutSummary.detail}`,
-        tone: workoutSummary.tone
-      },
-      company: companyCard
-    };
-
-    const oldestTimer = runningEntries
-      .map((entry) => ({
-        entry,
-        minutes: (now - new Date(entry.startTime)) / 60000
-      }))
-      .filter((item) => Number.isFinite(item.minutes))
-      .sort((left, right) => right.minutes - left.minutes)[0];
-    const reminderSettings = ensureReminderSettings();
-    const finance = _getFinanceBudgetSnapshot(now);
-    const weeklyOver = Math.max(
-      0,
-      Number(finance.weekly?.spent || 0) - Number(finance.weekly?.budget || 0)
-    );
-    const codexUsage = getCodexUsageSummary();
-    const companyAgeHours = Number.isFinite(freshness.ageMinutes)
-      ? freshness.ageMinutes / 60
-      : null;
-    const attention = chooseTodayAttention([
-      {
-        active:
-          Boolean(oldestTimer) &&
-          oldestTimer.minutes >= reminderSettings.staleTimerMinutes,
-        kind: 'timer',
-        severity: 'high',
-        urgency: 95,
-        title: 'Timer may still be running',
-        detail: oldestTimer
-          ? `${getEntryProject(oldestTimer.entry)?.name || 'Timer'} · ${Math.round(oldestTimer.minutes)} minutes`
-          : '',
-        deepLink: '#timer',
-        pushEligible: true,
-        fingerprint: oldestTimer ? `timer:${oldestTimer.entry.id}` : ''
-      },
-      {
-        active: companyCard.state === 'needs_you',
-        kind: 'company',
-        severity: 'high',
-        urgency: 90,
-        title: companyCard.attentionTitle || companyCard.value,
-        detail: companyCard.attentionDetail || companyCard.detail,
-        deepLink: '#company',
-        pushEligible: true,
-        fingerprint:
-          companyCard.missionId || snapshot?.stateVersion || 'company-needs-you'
-      },
-      {
-        active: companyCard.state === 'ready',
-        kind: 'company',
-        severity: 'normal',
-        urgency: 75,
-        title: companyCard.attentionTitle || companyCard.value,
-        detail: companyCard.attentionDetail || companyCard.detail,
-        deepLink: '#company',
-        pushEligible: true,
-        fingerprint:
-          companyCard.missionId || snapshot?.stateVersion || 'company-ready'
-      },
-      {
-        active: workoutSummary.weeklyPlan.scheduleDelta <= -2,
-        kind: 'workout',
-        severity: 'normal',
-        urgency: 55,
-        title: 'Workout target is behind',
-        detail: `${formatPoints(Math.abs(workoutSummary.weeklyPlan.scheduleDelta))} points behind this week`,
-        deepLink: '#todo',
-        pushEligible: true,
-        fingerprint: `workout:${getWeekKey(now)}`
-      },
-      {
-        active: weeklyOver > 0 && Number(finance.weekly?.budget || 0) > 0,
-        kind: 'finance',
-        severity: 'normal',
-        urgency: 45,
-        title: 'Weekly budget needs a check',
-        detail: `${formatSek(weeklyOver)} above the weekly budget`,
-        deepLink: '#grocery',
-        pushEligible: true,
-        fingerprint: `finance:${getWeekKey(now)}:${Math.round(weeklyOver)}`
-      },
-      {
-        active: Boolean(backupConflict),
-        kind: 'sync',
-        severity: 'high',
-        urgency: 85,
-        title: 'Backup conflict needs resolving',
-        detail: backupConflict
-          ? formatBackupConflictWarning(backupConflict)
-          : '',
-        deepLink: '#sync',
-        pushEligible: true,
-        fingerprint: 'backup-conflict'
-      },
-      {
-        active:
-          companyOperatorController.hasConnection() &&
-          (companyAgeHours === null || companyAgeHours > 30),
-        kind: 'sync',
-        severity: 'normal',
-        urgency: 35,
-        title: 'Company update is stale',
-        detail: 'Refresh Company for current priorities.',
-        deepLink: '#company',
-        pushEligible: false,
-        fingerprint: `company-stale:${snapshot?.generatedAt || 'unknown'}`
-      },
-      {
-        active:
-          Boolean(codexUsage) &&
-          Number.isFinite(codexUsage.remainingPercent) &&
-          codexUsage.remainingPercent <= 10,
-        kind: 'codex',
-        severity: 'normal',
-        urgency: 65,
-        title: 'Codex capacity is low',
-        detail: [codexUsage?.remainingLabel, codexUsage?.resetLabel]
-          .filter(Boolean)
-          .join(' · '),
-        deepLink: '#codex',
-        pushEligible: false,
-        fingerprint: `codex:${codexUsage?.remainingPercent || 0}`
-      }
-    ]);
-    return { cards, attention };
-  }
-
-  function activateTodayLink(link) {
-    const section = getSectionFromHash(link);
-    activateSection(section);
-  }
-
   function renderMobileTodayCommandPanel({
     panel,
     runningEntries,
@@ -14925,12 +14712,10 @@ import {
   }) {
     if (!isMobileViewport()) return false;
     panel.classList.add('mobile-today-panel');
-    const { cards, attention } = buildMobileTodayState({
-      runningEntries,
-      activeEntries,
-      stats,
-      recommendation
-    });
+    const running = runningEntries[0] || null;
+    const runningProject = running ? getEntryProject(running) : null;
+    const workoutSummary = getWorkoutMobileSummary();
+    const codexUsage = getCodexUsageSummary();
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -14939,55 +14724,84 @@ import {
     header.appendChild(title);
     const target = document.createElement('div');
     target.className = 'today-command-meta';
-    target.textContent = 'Your brief overview';
+    target.textContent = `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`;
     header.appendChild(target);
     panel.appendChild(header);
 
-    if (attention) {
-      const alert = document.createElement('button');
-      alert.type = 'button';
-      alert.className = `mobile-today-attention ${attention.severity}`;
-      const alertLabel = document.createElement('span');
-      alertLabel.textContent = 'Needs attention';
-      const alertTitle = document.createElement('strong');
-      alertTitle.textContent = attention.title;
-      const alertDetail = document.createElement('small');
-      alertDetail.textContent = attention.detail;
-      alert.appendChild(alertLabel);
-      alert.appendChild(alertTitle);
-      if (attention.detail) alert.appendChild(alertDetail);
-      alert.addEventListener('click', () =>
-        activateTodayLink(attention.deepLink)
-      );
-      panel.appendChild(alert);
-    }
-
     const primary = document.createElement('div');
     primary.className = 'mobile-today-primary';
-    const appendTodayCard = (cardModel, onClick) => {
+    const appendTodayCard = (label, value, className, onClick, detail = '') => {
       const card = document.createElement('button');
       card.type = 'button';
-      card.className = `mobile-today-card${cardModel.tone ? ` ${cardModel.tone}` : ''}`;
+      card.className = `mobile-today-card${className ? ` ${className}` : ''}`;
       const span = document.createElement('span');
-      span.textContent = cardModel.label;
+      span.textContent = label;
       const strong = document.createElement('strong');
-      strong.textContent = cardModel.value;
+      strong.textContent = value;
       card.appendChild(span);
       card.appendChild(strong);
-      if (cardModel.detail) {
+      if (detail) {
         const small = document.createElement('small');
         small.className = 'mobile-today-card-detail';
-        small.textContent = cardModel.detail;
+        small.textContent = detail;
         card.appendChild(small);
       }
       card.addEventListener('click', onClick);
       primary.appendChild(card);
       return card;
     };
-    appendTodayCard(cards.timer, () => activateSection('timer'));
-    appendTodayCard(cards.work, () => activateSection('projects'));
-    appendTodayCard(cards.workout, () => activateSection('todo'));
-    appendTodayCard(cards.company, () => activateSection('company'));
+    appendTodayCard(
+      running ? 'Running now' : 'Timer',
+      running ? runningProject?.name || 'Running timer' : 'No active timer',
+      running ? 'warm' : '',
+      () => activateSection('timer')
+    );
+    appendTodayCard(
+      'Next',
+      recommendation
+        ? recommendation.project.name
+        : activeEntries.length
+          ? `${activeEntries.length} active`
+          : 'Caught up',
+      'primary',
+      () => {
+        if (recommendation) {
+          startTimerShortcut(
+            {
+              project: recommendation.project,
+              description: '',
+              focusFactor: DEFAULT_FOCUS_FACTOR
+            },
+            { navigate: true }
+          );
+        } else {
+          activateSection('timer');
+        }
+      }
+    );
+    appendTodayCard(
+      'Target',
+      `${formatDuration(Math.round(stats.todayHours * 3600))} / ${stats.dailyTarget.toFixed(1)}h`,
+      '',
+      () => activateSection('timer')
+    );
+    appendTodayCard(
+      'Daily workout target',
+      workoutSummary.label,
+      workoutSummary.tone,
+      () => openMobileWorkoutSheet(getFavoriteWorkoutPreset())
+    );
+    if (codexUsage) {
+      appendTodayCard(
+        'Codex',
+        codexUsage.remainingLabel || codexUsage.value,
+        `codex ${codexUsage.tone}`.trim(),
+        () => activateSection('codex'),
+        Number.isFinite(codexUsage.remainingPercent)
+          ? `Remaining - ${codexUsage.todayDetail}`
+          : codexUsage.todayValue
+      );
+    }
     panel.appendChild(primary);
 
     const runningProjectIds = new Set(
@@ -15103,11 +14917,8 @@ import {
     );
     const codexUsage = getCodexUsageSummary();
     if (codexUsage) {
-      const codexCapacityLow =
-        Number.isFinite(codexUsage.remainingPercent) &&
-        codexUsage.remainingPercent <= 10;
       addItem(
-        codexCapacityLow ? 'Codex capacity is low' : 'Codex',
+        'Codex',
         [codexUsage.todayValue, codexUsage.todayDetail]
           .filter(Boolean)
           .join(' - '),
@@ -16754,25 +16565,6 @@ import {
     }
   }
 
-  function updateMobileAlertSettingsPanel() {
-    const status = document.getElementById('mobileAlertStatus');
-    const enable = document.getElementById('enableMobileAlertsBtn');
-    const disable = document.getElementById('disableMobileAlertsBtn');
-    if (!status || !enable || !disable) return;
-    enable.disabled = true;
-    disable.disabled = true;
-    const notificationConfig =
-      companyOperatorController.getSnapshot()?.mobileNotifications;
-    if (!companyOperatorController.hasConnection()) {
-      status.textContent = 'Connect Company first.';
-    } else if (!notificationConfig?.available) {
-      status.textContent = 'Mobile alerts are not set up on the desktop yet.';
-    } else {
-      status.textContent =
-        "Ready once you allow this device's private push address to be saved.";
-    }
-  }
-
   function updateReminderSettingsPanel() {
     const settings = ensureReminderSettings();
     const toggle = document.getElementById('reminderEnableToggle');
@@ -17201,16 +16993,10 @@ import {
       today: 'dashboard',
       dashboard: 'dashboard',
       timer: 'timer',
-      projects: 'projects',
       entries: 'entries',
       'quick-log': 'entries',
-      workouts: 'todo',
-      todo: 'todo',
-      finances: 'grocery',
-      grocery: 'grocery',
       reports: 'analytics',
       analytics: 'analytics',
-      codex: 'codex',
       company: 'company',
       sync: 'importExport',
       backup: 'importExport'
