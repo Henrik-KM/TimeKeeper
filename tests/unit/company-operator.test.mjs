@@ -84,6 +84,20 @@ test('normalizes a bounded mobile Company snapshot', () => {
       next_action: 'Prepare the tiered commercial response.',
       done_when: 'Every tier and approval is explicit.'
     },
+    company_summary: {
+      state: 'needs_you',
+      headline: 'Choose the pricing direction',
+      detail: 'Choose standard or pilot pricing.',
+      deep_link: '#company',
+      mission_id: 'mission:avantor',
+      counts: {
+        needs_you: 1,
+        ready: 0,
+        working: 1,
+        up_next: 2,
+        waiting: 0
+      }
+    },
     priorities: [
       {
         issue_id: 'priority:avantor',
@@ -115,6 +129,84 @@ test('normalizes a bounded mobile Company snapshot', () => {
       ]
     },
     handled: { today_verified_actions: 3, receipts: [] },
+    email_drafting: {
+      status: 'improving',
+      needs_user: false,
+      summary:
+        '2 drafts are ready in Outlook. 3 older drafts are being refreshed.',
+      ready_in_outlook: 2,
+      being_refreshed: 3,
+      waiting_for_safe_context: 1,
+      unsafe_or_duplicate: 1,
+      verification_failures: 0,
+      verification_auto_recovered: 1,
+      tracked_sent_count: 8,
+      usable_rate: 0.75,
+      target_usable_rate: 0.75,
+      target_status: 'collecting_baseline',
+      authoring_success_rate: 0.9,
+      median_authoring_seconds: 42.5,
+      draft_types: { replies: 1, followups: 1, first_contacts: 2 },
+      outlook_url: 'https://outlook.office.com/mail/drafts'
+    },
+    opportunities: {
+      available: true,
+      status: 'ready',
+      phase: 'outlook_drafting_complete',
+      summary: '1 verified first-contact draft is ready in Outlook.',
+      generated_at: '2026-08-03T11:45:00.000Z',
+      source_count: 6,
+      relationship_count: 2,
+      counts: {
+        found: 4,
+        qualified: 1,
+        ready_for_draft: 0,
+        drafted: 1,
+        contact_missing: 1
+      },
+      funnel: {
+        drafted: 4,
+        sent: 3,
+        replied: 2,
+        meetings: 1,
+        followup_due: 1
+      },
+      qualification: {
+        candidates: 12,
+        completed: 9,
+        cached: 4,
+        failed: 3,
+        pending: 0,
+        unresolved: 3,
+        automatic_retry: true
+      },
+      cards: [
+        {
+          opportunity_id: 'opportunity:imaging-partner',
+          evidence_fingerprint: 'opportunity-evidence-1',
+          company: 'Imaging Partner',
+          contact_label: 'Partnerships team',
+          lane: 'net_new',
+          motion: 'oem_or_distribution',
+          status: 'drafted',
+          status_label: 'Draft ready in Outlook',
+          why_now: [
+            'The company has launched a new imaging platform.',
+            'It publishes an OEM partnership route.'
+          ],
+          action_taken: 'Prepared and verified a first-contact draft.',
+          score: 91,
+          priority_score: 97,
+          priority_reasons: ['qualification 91', 'named verified contact +2'],
+          confidence: 'high',
+          source_freshness: 'Today',
+          outlook_url: 'https://outlook.office.com/mail/drafts/id-1'
+        }
+      ],
+      useful_rate: 0.67,
+      sample_size: 6,
+      outlook_url: 'https://outlook.office.com/mail/drafts'
+    },
     dispatches: {
       in_progress_count: 1,
       in_progress: [
@@ -188,7 +280,17 @@ test('normalizes a bounded mobile Company snapshot', () => {
         }
       ]
     },
-    sources: { status: 'ready', attention_count: 0, items: [] }
+    sources: { status: 'ready', attention_count: 0, items: [] },
+    mobile_notifications: {
+      available: true,
+      public_key: 'A'.repeat(65),
+      subscriptions_path: 'mobile-notifications/subscriptions.json',
+      weekday_time: '07:45',
+      late_until: '10:00',
+      timezone: 'Europe/Berlin',
+      quiet_hours: ['20:00-07:00'],
+      privacy_mode: 'private'
+    }
   });
 
   assert.equal(snapshot.today.project, 'Avantor');
@@ -210,7 +312,46 @@ test('normalizes a bounded mobile Company snapshot', () => {
     '100 cameras\n500 cameras'
   );
   assert.equal(snapshot.handled.todayVerifiedActions, 3);
+  assert.equal(snapshot.emailDrafting.readyInOutlook, 2);
+  assert.equal(snapshot.emailDrafting.beingRefreshed, 3);
+  assert.equal(snapshot.emailDrafting.waitingForSafeContext, 1);
+  assert.equal(snapshot.emailDrafting.usableRate, 0.75);
+  assert.deepEqual(snapshot.emailDrafting.draftTypes, {
+    replies: 1,
+    followups: 1,
+    firstContacts: 2
+  });
+  assert.equal(
+    snapshot.emailDrafting.outlookUrl,
+    'https://outlook.office.com/mail/drafts'
+  );
   assert.equal(snapshot.dispatches.inProgressCount, 1);
+  assert.equal(snapshot.opportunities.cards.length, 1);
+  assert.equal(
+    snapshot.opportunities.cards[0].opportunityId,
+    'opportunity:imaging-partner'
+  );
+  assert.deepEqual(snapshot.opportunities.cards[0].whyNow, [
+    'The company has launched a new imaging platform.',
+    'It publishes an OEM partnership route.'
+  ]);
+  assert.deepEqual(snapshot.opportunities.funnel, {
+    drafted: 4,
+    sent: 3,
+    replied: 2,
+    meetings: 1,
+    followupDue: 1
+  });
+  assert.deepEqual(snapshot.opportunities.qualification, {
+    candidates: 12,
+    completed: 9,
+    cached: 4,
+    failed: 3,
+    pending: 0,
+    unresolved: 3,
+    automaticRetry: true
+  });
+  assert.equal(snapshot.opportunities.cards[0].priorityScore, 97);
   assert.equal(snapshot.dispatches.inProgress[0].issueId, 'priority:avantor');
   assert.equal(snapshot.dispatches.recent[0].model, 'gpt-5.6-sol');
   assert.equal(snapshot.dispatches.recent[0].durationSeconds, 125);
@@ -250,6 +391,14 @@ test('normalizes a bounded mobile Company snapshot', () => {
     'decision-evidence-1'
   );
   assert.equal(snapshot.priorities[0].title, '<img src=x onerror=alert(1)>');
+  assert.equal(snapshot.companySummary.state, 'needs_you');
+  assert.equal(
+    snapshot.companySummary.headline,
+    'Choose the pricing direction'
+  );
+  assert.equal(snapshot.companySummary.counts.upNext, 2);
+  assert.equal(snapshot.mobileNotifications.available, true);
+  assert.equal(snapshot.mobileNotifications.weekdayTime, '07:45');
 });
 
 test('normalizes persistent missions, questions, progress, and verified outputs', () => {
@@ -271,9 +420,12 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
         issue_id: 'priority:avantor',
         evidence_fingerprint: 'evidence-1',
         project: 'Avantor',
+        headline: 'Finish the camera delivery package',
         objective: 'Finish the camera delivery package.',
         done_when: 'The tested package is available in a local commit.',
         status: 'active',
+        business_lane: 'customer_delivery',
+        result_summary: 'The supported camera configuration is implemented.',
         step_count: 2,
         latest_update: 'Implemented the validated configuration.',
         current_step: {
@@ -295,8 +447,11 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
           issue_id: 'priority:albany',
           evidence_fingerprint: 'evidence-2',
           project: 'Albany',
+          headline: 'Choose the Albany delivery route',
           objective: 'Confirm the delivery route.',
           status: 'waiting_for_decision',
+          user_action: 'Choose direct delivery or partner delivery.',
+          waiting_reason: 'Both routes are supported, but neither is approved.',
           user_request: {
             dispatch_id: 'dispatch:albany',
             instruction: 'Choose direct delivery or partner delivery.',
@@ -338,6 +493,15 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
   assert.equal(snapshot.missions.primary.currentStep.status, 'running');
   assert.equal(snapshot.missions.primary.stepCount, 2);
   assert.equal(
+    snapshot.missions.primary.headline,
+    'Finish the camera delivery package'
+  );
+  assert.equal(snapshot.missions.primary.businessLane, 'customer_delivery');
+  assert.equal(
+    snapshot.missions.active[1].userAction,
+    'Choose direct delivery or partner delivery.'
+  );
+  assert.equal(
     snapshot.missions.active[1].userRequest.dispatchId,
     'dispatch:albany'
   );
@@ -345,8 +509,32 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
     snapshot.missions.active[1].userRequest.choices[0].label,
     'Direct'
   );
-  assert.equal(snapshot.missions.completedToday[0].destinations[0].type, 'local_commit');
+  assert.equal(
+    snapshot.missions.completedToday[0].destinations[0].type,
+    'local_commit'
+  );
   assert.equal(snapshot.missions.budget.stepsRemaining, 3);
+});
+
+test('uses a mission objective as the headline when older snapshots have no headline', () => {
+  const snapshot = normalizeCompanyOperatorSnapshot({
+    schema_version: 1,
+    missions: {
+      active: [
+        {
+          mission_id: 'mission:legacy',
+          project: 'Avantor',
+          objective: 'Finish the tested camera configuration for the customer.',
+          status: 'active'
+        }
+      ]
+    }
+  });
+
+  assert.equal(
+    snapshot.missions.active[0].headline,
+    'Finish the tested camera configuration for the customer.'
+  );
 });
 
 test('normalizes concise action-first company results', () => {
@@ -630,6 +818,36 @@ test('builds an expiring allowlisted command without source content', () => {
   });
   assert.equal(feedback.params.rating, 'wrong_priority');
   assert.equal(feedback.params.dispatch_id, 'dispatch:done');
+
+  const opportunityFeedback = buildCompanyOperatorCommand({
+    commandId: 'mobile-opportunity-feedback-001',
+    action: 'rate_opportunity',
+    snapshot: { stateVersion: 'state-1' },
+    target: {
+      opportunityId: 'opportunity:imaging-partner',
+      evidenceFingerprint: 'opportunity-evidence-1'
+    },
+    params: { rating: 'useful', note: '' },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(
+    opportunityFeedback.target.opportunity_id,
+    'opportunity:imaging-partner'
+  );
+  assert.equal(
+    opportunityFeedback.target.evidence_fingerprint,
+    'opportunity-evidence-1'
+  );
+  assert.equal(opportunityFeedback.params.rating, 'useful');
+
+  const retry = buildCompanyOperatorCommand({
+    commandId: 'mobile-opportunity-retry-001',
+    action: 'retry_opportunities',
+    snapshot: { stateVersion: 'state-1' },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(retry.action, 'retry_opportunities');
+  assert.deepEqual(retry.params, {});
 });
 
 test('uses the dedicated private repository defaults and reports stale state', () => {

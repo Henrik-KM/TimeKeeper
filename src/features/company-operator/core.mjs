@@ -1,3 +1,5 @@
+import { normalizeMobileNotificationConfig } from '../private-bridge/core.mjs';
+
 export const COMPANY_OPERATOR_SCHEMA_VERSION = 1;
 
 export const DEFAULT_COMPANY_OPERATOR_SETTINGS = Object.freeze({
@@ -11,6 +13,8 @@ export const DEFAULT_COMPANY_OPERATOR_SETTINGS = Object.freeze({
 const ALLOWED_ACTIONS = new Set([
   'add_direction',
   'mark_handled',
+  'rate_opportunity',
+  'retry_opportunities',
   'rate_result',
   'record_decision',
   'set_priority',
@@ -76,12 +80,18 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const dispatches = asRecord(source.dispatches);
   const missions = asRecord(source.missions);
   const sources = asRecord(source.sources);
+  const emailDrafting = asRecord(source.email_drafting || source.emailDrafting);
+  const opportunities = asRecord(source.opportunities);
+  const companySummary = asRecord(
+    source.company_summary || source.companySummary
+  );
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
     status: cleanText(source.status, 80) || 'unknown',
     stateVersion: cleanText(source.state_version || source.stateVersion, 128),
     today: normalizeToday(source.today),
+    companySummary: normalizeCompanySummary(companySummary),
     priorities,
     missions: {
       status: cleanText(missions.status, 80),
@@ -123,6 +133,8 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
       ),
       receipts: normalizeArray(handled.receipts, normalizeReceipt, 10)
     },
+    emailDrafting: normalizeEmailDrafting(emailDrafting),
+    opportunities: normalizeOpportunities(opportunities),
     dispatches: {
       inProgressCount: toCount(
         dispatches.in_progress_count ?? dispatches.inProgressCount
@@ -140,6 +152,30 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
         sources.attention_count ?? sources.attentionCount
       ),
       items: normalizeArray(sources.items, normalizeSource, 12)
+    },
+    mobileNotifications: normalizeMobileNotificationConfig(
+      source.mobile_notifications || source.mobileNotifications
+    )
+  };
+}
+
+function normalizeCompanySummary(value) {
+  const source = asRecord(value);
+  const counts = asRecord(source.counts);
+  return {
+    state: cleanText(source.state, 40),
+    headline: cleanText(source.headline, 180),
+    detail: cleanLegacyResponsibilityCopy(source.detail, 240),
+    deepLink: cleanText(source.deep_link || source.deepLink, 60) || '#company',
+    missionId: cleanText(source.mission_id || source.missionId, 100),
+    destination: normalizeResultDestination(source.destination),
+    generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
+    counts: {
+      needsYou: toCount(counts.needs_you ?? counts.needsYou),
+      ready: toCount(counts.ready),
+      working: toCount(counts.working),
+      upNext: toCount(counts.up_next ?? counts.upNext),
+      waiting: toCount(counts.waiting)
     }
   };
 }
@@ -269,7 +305,8 @@ export function buildCompanyOperatorCommand({
     target: {
       issue_id: cleanText(targetSource.issueId, 160),
       evidence_fingerprint: cleanText(targetSource.evidenceFingerprint, 128),
-      mission_id: cleanText(targetSource.missionId, 100)
+      mission_id: cleanText(targetSource.missionId, 100),
+      opportunity_id: cleanText(targetSource.opportunityId, 180)
     },
     params: {}
   };
@@ -287,6 +324,15 @@ export function buildCompanyOperatorCommand({
       rating: cleanText(paramsSource.rating, 40),
       note: cleanText(paramsSource.note, 500)
     };
+  } else if (normalizedAction === 'rate_opportunity') {
+    payload.params = {
+      opportunity_id: cleanText(targetSource.opportunityId, 180),
+      evidence_fingerprint: cleanText(targetSource.evidenceFingerprint, 128),
+      rating: cleanText(paramsSource.rating, 40),
+      note: cleanText(paramsSource.note, 500)
+    };
+  } else if (normalizedAction === 'retry_opportunities') {
+    payload.params = {};
   } else {
     payload.params = {
       note: cleanText(paramsSource.note, 800),
@@ -393,8 +439,170 @@ function normalizePriority(value) {
   };
 }
 
+function normalizeEmailDrafting(value) {
+  const source = asRecord(value);
+  const usableRate = toOptionalRate(source.usable_rate ?? source.usableRate);
+  const targetUsableRate = toOptionalRate(
+    source.target_usable_rate ?? source.targetUsableRate
+  );
+  const authoringSuccessRate = toOptionalRate(
+    source.authoring_success_rate ?? source.authoringSuccessRate
+  );
+  const outlookUrl = normalizeDestinationUrl(
+    'outlook_draft',
+    source.outlook_url || source.outlookUrl
+  );
+  const status = cleanText(source.status, 40);
+  const summary = cleanText(source.summary, 320);
+  const draftTypes = asRecord(source.draft_types || source.draftTypes);
+  return {
+    available: Boolean(status || summary || outlookUrl),
+    status,
+    needsUser: source.needs_user === true || source.needsUser === true,
+    summary,
+    readyInOutlook: toCount(source.ready_in_outlook ?? source.readyInOutlook),
+    beingRefreshed: toCount(source.being_refreshed ?? source.beingRefreshed),
+    waitingForSafeContext: toCount(
+      source.waiting_for_safe_context ?? source.waitingForSafeContext
+    ),
+    unsafeOrDuplicate: toCount(
+      source.unsafe_or_duplicate ?? source.unsafeOrDuplicate
+    ),
+    verificationFailures: toCount(
+      source.verification_failures ?? source.verificationFailures
+    ),
+    verificationAutoRecovered: toCount(
+      source.verification_auto_recovered ?? source.verificationAutoRecovered
+    ),
+    trackedSentCount: toCount(
+      source.tracked_sent_count ?? source.trackedSentCount
+    ),
+    usableRate,
+    targetUsableRate,
+    targetStatus: cleanText(source.target_status || source.targetStatus, 40),
+    authoringSuccessRate,
+    medianAuthoringSeconds: toOptionalNumber(
+      source.median_authoring_seconds ?? source.medianAuthoringSeconds
+    ),
+    draftTypes: {
+      replies: toCount(draftTypes.replies),
+      followups: toCount(draftTypes.followups),
+      firstContacts: toCount(
+        draftTypes.first_contacts ?? draftTypes.firstContacts
+      )
+    },
+    outlookUrl
+  };
+}
+
+function normalizeOpportunities(value) {
+  const source = asRecord(value);
+  const counts = asRecord(source.counts);
+  const outlookUrl = normalizeDestinationUrl(
+    'outlook_draft',
+    source.outlook_url || source.outlookUrl
+  );
+  const funnel = asRecord(source.funnel);
+  const qualification = asRecord(source.qualification);
+  return {
+    available: source.available === true,
+    status: cleanText(source.status, 80),
+    phase: cleanText(source.phase, 80),
+    summary: cleanText(source.summary, 320),
+    generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
+    ageHours: toOptionalNumber(source.age_hours ?? source.ageHours),
+    sourceCount: toCount(source.source_count ?? source.sourceCount),
+    relationshipCount: toCount(
+      source.relationship_count ?? source.relationshipCount
+    ),
+    counts: {
+      found: toCount(counts.found),
+      qualified: toCount(counts.qualified),
+      readyForDraft: toCount(counts.ready_for_draft ?? counts.readyForDraft),
+      drafted: toCount(counts.drafted),
+      contactMissing: toCount(counts.contact_missing ?? counts.contactMissing)
+    },
+    funnel: {
+      drafted: toCount(funnel.drafted),
+      sent: toCount(funnel.sent),
+      replied: toCount(funnel.replied),
+      meetings: toCount(funnel.meetings),
+      followupDue: toCount(funnel.followup_due ?? funnel.followupDue)
+    },
+    qualification: {
+      candidates: toCount(qualification.candidates),
+      completed: toCount(qualification.completed),
+      cached: toCount(qualification.cached),
+      failed: toCount(qualification.failed),
+      pending: toCount(qualification.pending),
+      unresolved: toCount(qualification.unresolved),
+      automaticRetry:
+        qualification.automatic_retry === true ||
+        qualification.automaticRetry === true
+    },
+    cards: normalizeArray(source.cards, normalizeOpportunity, 3),
+    usefulRate: toOptionalRate(source.useful_rate ?? source.usefulRate),
+    sampleSize: toCount(source.sample_size ?? source.sampleSize),
+    canRetry: source.can_retry === true || source.canRetry === true,
+    failureReason: cleanText(
+      source.failure_reason || source.failureReason,
+      320
+    ),
+    lastSuccessAt: cleanText(
+      source.last_success_at || source.lastSuccessAt,
+      80
+    ),
+    retryStatus: cleanText(source.retry_status || source.retryStatus, 60),
+    outlookUrl
+  };
+}
+
+function normalizeOpportunity(value) {
+  const source = asRecord(value);
+  const opportunityId = cleanText(
+    source.opportunity_id || source.opportunityId,
+    180
+  );
+  const evidenceFingerprint = cleanText(
+    source.evidence_fingerprint || source.evidenceFingerprint,
+    128
+  );
+  if (!opportunityId || !evidenceFingerprint) return null;
+  return {
+    opportunityId,
+    evidenceFingerprint,
+    company: cleanText(source.company, 120),
+    contactLabel: cleanText(source.contact_label || source.contactLabel, 100),
+    lane: cleanText(source.lane, 40),
+    motion: cleanText(source.motion, 100),
+    status: cleanText(source.status, 60),
+    statusLabel: cleanText(source.status_label || source.statusLabel, 80),
+    whyNow: normalizeTextArray(source.why_now || source.whyNow, 2, 180),
+    actionTaken: cleanText(source.action_taken || source.actionTaken, 260),
+    score: toCount(source.score),
+    priorityScore: toCount(
+      source.priority_score ?? source.priorityScore ?? source.score
+    ),
+    priorityReasons: normalizeTextArray(
+      source.priority_reasons || source.priorityReasons,
+      4,
+      160
+    ),
+    confidence: cleanText(source.confidence, 40),
+    sourceFreshness: cleanText(
+      source.source_freshness || source.sourceFreshness,
+      80
+    ),
+    outlookUrl: normalizeDestinationUrl(
+      'outlook_draft',
+      source.outlook_url || source.outlookUrl
+    )
+  };
+}
+
 function normalizeMission(value) {
   const source = asRecord(value);
+  const issueSnapshot = asRecord(source.issue_snapshot || source.issueSnapshot);
   const missionId = cleanText(source.mission_id || source.missionId, 100);
   if (!missionId) return null;
   const currentStep = asRecord(source.current_step || source.currentStep);
@@ -407,12 +615,19 @@ function normalizeMission(value) {
       128
     ),
     project: cleanText(source.project, 100) || 'Company',
+    headline:
+      cleanText(source.headline, 180) ||
+      cleanText(issueSnapshot.title, 180) ||
+      cleanLegacyResponsibilityCopy(source.objective, 180) ||
+      cleanText(source.project, 100) ||
+      'Company',
     objective: cleanLegacyResponsibilityCopy(source.objective, 500),
     doneWhen: cleanLegacyResponsibilityCopy(
       source.done_when || source.doneWhen,
       500
     ),
     outputType: cleanText(source.output_type || source.outputType, 40),
+    businessLane: cleanText(source.business_lane || source.businessLane, 80),
     status: cleanText(source.status, 40) || 'queued',
     priorityScore: toCount(source.priority_score ?? source.priorityScore),
     userPinned: source.user_pinned === true || source.userPinned === true,
@@ -421,14 +636,23 @@ function normalizeMission(value) {
     currentStep: {
       title: cleanLegacyResponsibilityCopy(currentStep.title, 180),
       status: cleanText(currentStep.status, 40),
-      startedAt: cleanText(
-        currentStep.started_at || currentStep.startedAt,
-        80
-      )
+      startedAt: cleanText(currentStep.started_at || currentStep.startedAt, 80)
     },
     latestUpdate: cleanLegacyResponsibilityCopy(
       source.latest_update || source.latestUpdate,
       320
+    ),
+    resultSummary: cleanLegacyResponsibilityCopy(
+      source.result_summary || source.resultSummary,
+      240
+    ),
+    userAction: cleanLegacyResponsibilityCopy(
+      source.user_action || source.userAction,
+      240
+    ),
+    waitingReason: cleanLegacyResponsibilityCopy(
+      source.waiting_reason || source.waitingReason,
+      240
     ),
     stepCount: toCount(source.step_count ?? source.stepCount),
     updatedAt: cleanText(source.updated_at || source.updatedAt, 80),
@@ -443,10 +667,7 @@ function normalizeMission(value) {
         userRequest.dispatch_id || userRequest.dispatchId,
         180
       ),
-      instruction: cleanLegacyResponsibilityCopy(
-        userRequest.instruction,
-        240
-      ),
+      instruction: cleanLegacyResponsibilityCopy(userRequest.instruction, 240),
       reason: cleanLegacyResponsibilityCopy(userRequest.reason, 180),
       choices: Array.isArray(userRequest.choices)
         ? userRequest.choices
@@ -492,8 +713,7 @@ function normalizeMissionScorecard(value) {
       source.verified_outputs_today ?? source.verifiedOutputsToday
     ),
     estimatedMinutesSavedToday: toCount(
-      source.estimated_minutes_saved_today ??
-        source.estimatedMinutesSavedToday
+      source.estimated_minutes_saved_today ?? source.estimatedMinutesSavedToday
     ),
     openDecisions: toCount(source.open_decisions ?? source.openDecisions)
   };
@@ -1058,6 +1278,14 @@ function normalizeArray(value, normalizer, limit) {
   return value.map(normalizer).filter(Boolean).slice(0, limit);
 }
 
+function normalizeTextArray(value, limit, textLimit) {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => cleanText(item, textLimit))
+    .filter(Boolean)
+    .slice(0, limit);
+}
+
 function normalizeRepository(value) {
   const repository = cleanText(value, 180).replace(/^\/+|\/+$/g, '');
   return /^[A-Za-z0-9_.-]+\/[A-Za-z0-9_.-]+$/.test(repository)
@@ -1091,6 +1319,18 @@ function cleanText(value, limit) {
 function toCount(value) {
   const number = Number(value);
   return Number.isFinite(number) ? Math.max(0, Math.round(number)) : 0;
+}
+
+function toOptionalRate(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.min(1, Math.max(0, number)) : null;
+}
+
+function toOptionalNumber(value) {
+  if (value === null || value === undefined || value === '') return null;
+  const number = Number(value);
+  return Number.isFinite(number) ? Math.max(0, number) : null;
 }
 
 /** @returns {Record<string, any>} */
