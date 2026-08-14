@@ -1646,6 +1646,7 @@ test('mobile Company tab puts current status before dated historical work', asyn
   await expect(content).toContainText('Recent completed work');
   await expect(content).toContainText('Completed on 2026-07-29');
   await expect(content).not.toContainText('Done for you');
+  await expect(content).not.toContainText('Nothing needs you');
   const order = await page.evaluate(() => ({
     current: document
       .querySelector('#companyPageContent .company-overview')

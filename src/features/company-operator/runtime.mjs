@@ -518,7 +518,8 @@ export function createCompanyOperatorController({
       !missions.working &&
       !missions.needsYou &&
       !dispatches.needsYou &&
-      !dispatches.inProgress
+      !dispatches.inProgress &&
+      !overview
     ) {
       root.appendChild(
         card(
