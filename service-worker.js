@@ -9,7 +9,7 @@ const APP_SHELL = [
   './index.html',
   './codex-analysis.html',
   './style.css',
-  './src/main.mjs?v=20',
+  './src/main.mjs?v=21',
   './src/features/codex/analysis-page.mjs?v=1',
   './src/features/codex/analytics.mjs',
   './src/shared/runtime-helpers.mjs',
@@ -72,8 +72,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '22') return;
-          url.searchParams.set('timekeeper-update', '22');
+          if (url.searchParams.get('timekeeper-update') === '23') return;
+          url.searchParams.set('timekeeper-update', '23');
           client.navigate(url.href).catch(() => undefined);
         });
       })

@@ -1730,9 +1730,9 @@ test('service worker never caches private cross-origin API responses', async () 
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
   expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v26';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=20'");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=21'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '22')"
+    "url.searchParams.set('timekeeper-update', '23')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1923,12 +1923,20 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   await expect(modelARow).toContainText('2.67 pts/eff h');
   await expect(modelARow).toContainText('0.38 eff h/pt');
   await expect(modelARow).toContainText('0.8 h');
+  const sourceAverages = codexPage
+    .locator('.codex-report-section')
+    .filter({ hasText: 'Average Effective Hours - You vs Codex' });
+  await expect(sourceAverages).toContainText('This week');
+  await expect(sourceAverages).toContainText('0.31 h/day');
+  await expect(sourceAverages).toContainText('1h 15m 0s total');
+  await expect(sourceAverages).toContainText('This month');
   const sectionTitles = await codexPage
     .locator(':scope > .codex-report-section > h3')
     .allTextContents();
-  expect(sectionTitles.slice(0, 3)).toEqual([
+  expect(sectionTitles.slice(0, 4)).toEqual([
     'Usage Limits',
     'Key Takeaways - Last 7 Days',
+    'Average Effective Hours - You vs Codex',
     'Model + Reasoning - Last 7 Days'
   ]);
   expect(
@@ -4923,7 +4931,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(mobileCodexUsage.locator('strong')).toHaveText('5%');
   await expect(mobileCodexUsage).toContainText('Remaining - Resets in');
   await mobileCodexUsage.click();
-  await expect(page.getByRole('heading', { name: 'Codex' })).toBeVisible();
+  await expect(
+    page.getByRole('heading', { name: 'Codex', exact: true })
+  ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
   await gotoSection(page, 'codex', 'Codex');
   await expect(page.locator('#codex')).toBeVisible();

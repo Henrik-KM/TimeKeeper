@@ -994,6 +994,62 @@ tr:nth-child(even) td {
   font-size: 0.78rem;
 }
 
+.codex-source-average-list {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid #e2e8f0;
+}
+
+.codex-source-average-row {
+  display: grid;
+  grid-template-columns: minmax(9rem, 1.1fr) repeat(2, minmax(8rem, 1fr));
+  align-items: center;
+  gap: 0.75rem;
+  min-width: 0;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.codex-source-average-heading {
+  padding-top: 0.45rem;
+  padding-bottom: 0.45rem;
+  color: #64748b;
+  font-size: 0.7rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
+.codex-source-average-cell {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.codex-source-average-cell strong,
+.codex-source-average-cell small,
+.codex-source-average-cell span {
+  overflow-wrap: anywhere;
+}
+
+.codex-source-average-cell strong {
+  color: #0f172a;
+  font-size: 1.05rem;
+}
+
+.codex-source-average-cell small,
+.codex-source-average-period small {
+  color: #64748b;
+  font-size: 0.72rem;
+}
+
+.codex-source-average-cell-label {
+  display: none;
+  color: #64748b;
+  font-size: 0.68rem;
+  font-weight: 750;
+  text-transform: uppercase;
+}
+
 .codex-session-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
@@ -1948,6 +2004,23 @@ tr:nth-child(even) td {
     font-size: 0.68rem;
     font-weight: 750;
     text-transform: uppercase;
+  }
+
+  .codex-source-average-heading {
+    display: none;
+  }
+
+  .codex-source-average-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.6rem;
+  }
+
+  .codex-source-average-period {
+    grid-column: 1 / -1;
+  }
+
+  .codex-source-average-cell-label {
+    display: block;
   }
 
   .codex-session-row {

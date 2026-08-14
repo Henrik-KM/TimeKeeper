@@ -50,6 +50,7 @@ import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
 import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
 import {
   buildCodexAnalytics,
+  buildCodexSourceAverages,
   computeCodexQuotaProgress
 } from './features/codex/analytics.mjs';
 import {
@@ -10181,6 +10182,63 @@ import {
     });
   }
 
+  function renderCodexSourceAverages(section, averages) {
+    const list = document.createElement('div');
+    list.className = 'codex-source-average-list';
+    const heading = document.createElement('div');
+    heading.className = 'codex-source-average-row codex-source-average-heading';
+    ['Period', 'You', 'Codex'].forEach((labelText) => {
+      const label = document.createElement('span');
+      label.textContent = labelText;
+      heading.appendChild(label);
+    });
+    list.appendChild(heading);
+
+    ['week', 'month'].forEach((periodKey) => {
+      const period = averages?.[periodKey];
+      if (!period) return;
+      const row = document.createElement('div');
+      row.className = 'codex-source-average-row';
+      const periodCell = document.createElement('div');
+      periodCell.className =
+        'codex-source-average-cell codex-source-average-period';
+      const periodLabel = document.createElement('strong');
+      periodLabel.textContent = period.label;
+      const periodDetail = document.createElement('small');
+      periodDetail.textContent = `${period.daysElapsed} elapsed day${period.daysElapsed === 1 ? '' : 's'}`;
+      periodCell.appendChild(periodLabel);
+      periodCell.appendChild(periodDetail);
+      row.appendChild(periodCell);
+
+      [
+        [period.meAverageHoursPerDay, period.meEffectiveSeconds],
+        [period.codexAverageHoursPerDay, period.codexEffectiveSeconds]
+      ].forEach(([averageHours, totalSeconds]) => {
+        const cell = document.createElement('div');
+        cell.className = 'codex-source-average-cell';
+        const label = document.createElement('span');
+        label.className = 'codex-source-average-cell-label';
+        label.textContent = 'Average effective';
+        const value = document.createElement('strong');
+        value.textContent = `${Number(averageHours || 0).toFixed(2)} h/day`;
+        const detail = document.createElement('small');
+        detail.textContent = `${formatDuration(totalSeconds)} total`;
+        cell.appendChild(label);
+        cell.appendChild(value);
+        cell.appendChild(detail);
+        row.appendChild(cell);
+      });
+      list.appendChild(row);
+    });
+    section.appendChild(list);
+
+    const note = document.createElement('small');
+    note.className = 'codex-summary-note';
+    note.textContent =
+      'Average is effective hours per elapsed calendar day in the current period; totals include completed entries only.';
+    section.appendChild(note);
+  }
+
   function getCodexUsageCard() {
     const usage = getCodexUsageSummary();
     if (!usage) return null;
@@ -10427,6 +10485,15 @@ import {
 
     const takeaways = appendCodexPageSection(content, 'Key Takeaways');
     renderCodexKeyTakeaways(takeaways, report);
+
+    const sourceAverages = appendCodexPageSection(
+      content,
+      'Average Effective Hours - You vs Codex'
+    );
+    renderCodexSourceAverages(
+      sourceAverages,
+      buildCodexSourceAverages(data.entries, new Date())
+    );
 
     const models = appendCodexPageSection(
       content,

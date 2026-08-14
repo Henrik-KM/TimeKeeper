@@ -3,6 +3,7 @@ import test from 'node:test';
 
 import {
   buildCodexAnalytics,
+  buildCodexSourceAverages,
   computeCodexQuotaProgress,
   computeCodexUsageIntervals,
   normalizeCodexSessions
@@ -11,6 +12,55 @@ import { buildCsv } from '../../src/features/codex/analysis-page.mjs';
 
 const RESET_ONE = '2026-08-20T00:00:00.000Z';
 const RESET_TWO = '2026-08-27T00:00:00.000Z';
+
+test('splits current week and month effective hours between me and Codex', () => {
+  const summary = buildCodexSourceAverages(
+    [
+      {
+        id: 'me-week-a',
+        startTime: '2026-08-10T08:00:00.000Z',
+        duration: 2 * 60 * 60
+      },
+      {
+        id: 'me-week-b',
+        startTime: '2026-08-13T08:00:00.000Z',
+        duration: 60 * 60
+      },
+      {
+        id: 'codex-week',
+        source: 'Codex',
+        startTime: '2026-08-11T08:00:00.000Z',
+        duration: 4 * 60 * 60
+      },
+      {
+        id: 'me-month',
+        startTime: '2026-08-01T08:00:00.000Z',
+        duration: 5 * 60 * 60
+      },
+      {
+        id: 'codex-month',
+        source: 'Codex',
+        startTime: '2026-08-02T08:00:00.000Z',
+        duration: 6 * 60 * 60
+      },
+      {
+        id: 'outside-period',
+        startTime: '2026-07-31T08:00:00.000Z',
+        duration: 20 * 60 * 60
+      }
+    ],
+    new Date('2026-08-14T12:00:00.000Z')
+  );
+
+  assert.equal(summary.week.daysElapsed, 5);
+  assert.equal(summary.week.meEffectiveSeconds, 3 * 60 * 60);
+  assert.equal(summary.week.codexEffectiveSeconds, 4 * 60 * 60);
+  assert.equal(summary.week.meAverageHoursPerDay, 0.6);
+  assert.equal(summary.week.codexAverageHoursPerDay, 0.8);
+  assert.equal(summary.month.daysElapsed, 14);
+  assert.equal(summary.month.meEffectiveSeconds, 8 * 60 * 60);
+  assert.equal(summary.month.codexEffectiveSeconds, 10 * 60 * 60);
+});
 
 function sample(observedAt, usedPercent, resetsAt = RESET_ONE) {
   return {

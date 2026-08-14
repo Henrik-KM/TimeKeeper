@@ -394,6 +394,91 @@ export function normalizeCodexSessions(entries, projects = []) {
     .sort((left, right) => left.startMs - right.startMs);
 }
 
+function getLocalPeriodStart(date, period) {
+  if (period === 'month') {
+    return new Date(date.getFullYear(), date.getMonth(), 1);
+  }
+  const dayOfWeek = date.getDay();
+  const daysFromMonday = (dayOfWeek + 6) % 7;
+  return new Date(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate() - daysFromMonday
+  );
+}
+
+function getElapsedCalendarDays(start, end) {
+  const startDay = Date.UTC(
+    start.getFullYear(),
+    start.getMonth(),
+    start.getDate()
+  );
+  const endDay = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  return Math.max(1, Math.floor((endDay - startDay) / DAY_MS) + 1);
+}
+
+function sumSourceEffectiveSeconds(entries, startMs, endMs, source) {
+  return (Array.isArray(entries) ? entries : []).reduce((total, entry) => {
+    if (!entry || entry.isRunning) return total;
+    const entryStartMs = parseTime(
+      entry.startTime || entry.timestamp || entry.createdAt
+    );
+    if (
+      entryStartMs === null ||
+      entryStartMs < startMs ||
+      entryStartMs > endMs
+    ) {
+      return total;
+    }
+    const isCodex = isCodexEntry(entry);
+    if ((source === 'codex') !== isCodex) return total;
+    return total + positiveNumber(entry.duration, 0);
+  }, 0);
+}
+
+export function buildCodexSourceAverages(entries = [], now = new Date()) {
+  const nowMs = parseTime(now);
+  if (nowMs === null) return null;
+  const current = new Date(nowMs);
+  const buildPeriod = (key, label) => {
+    const start = getLocalPeriodStart(current, key);
+    const startMs = start.getTime();
+    const daysElapsed = getElapsedCalendarDays(start, current);
+    const meEffectiveSeconds = sumSourceEffectiveSeconds(
+      entries,
+      startMs,
+      nowMs,
+      'me'
+    );
+    const codexEffectiveSeconds = sumSourceEffectiveSeconds(
+      entries,
+      startMs,
+      nowMs,
+      'codex'
+    );
+    return {
+      key,
+      label,
+      startAt: start.toISOString(),
+      daysElapsed,
+      meEffectiveSeconds: round(meEffectiveSeconds, 0),
+      codexEffectiveSeconds: round(codexEffectiveSeconds, 0),
+      meAverageHoursPerDay: round(
+        meEffectiveSeconds / HOUR_SECONDS / daysElapsed,
+        2
+      ),
+      codexAverageHoursPerDay: round(
+        codexEffectiveSeconds / HOUR_SECONDS / daysElapsed,
+        2
+      )
+    };
+  };
+  return {
+    week: buildPeriod('week', 'This week'),
+    month: buildPeriod('month', 'This month')
+  };
+}
+
 function overlapMs(startA, endA, startB, endB) {
   return Math.max(0, Math.min(endA, endB) - Math.max(startA, startB));
 }
