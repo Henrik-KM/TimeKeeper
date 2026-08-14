@@ -1554,14 +1554,169 @@ test('mobile Company tab explains its one-time private connection', async ({
   await dialog.getByRole('button', { name: 'Cancel' }).click();
 });
 
+test('mobile Company tab puts current status before dated historical work', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-14T09:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'saved-project', name: 'Saved Project' })],
+    entries: [entryFixture({ id: 'saved-entry', projectId: 'saved-project' })]
+  });
+  const snapshot = {
+    schema_version: 1,
+    generated_at: '2026-08-14T08:59:00.000Z',
+    status: 'attention',
+    state_version: 'state-current-company-1',
+    company_summary: {
+      state: 'needs_you',
+      headline: 'Confirm the AstraZeneca launch decision',
+      detail: 'Choose the supported launch path before company work continues.',
+      generated_at: '2026-08-14T08:59:00.000Z',
+      counts: { needs_you: 1, ready: 0, working: 0, up_next: 1, waiting: 0 }
+    },
+    priorities: [],
+    dispatches: {
+      recent: [
+        {
+          dispatch_id: 'dispatch:albany-history',
+          command_id: 'command:albany-history',
+          project: 'Albany',
+          status: 'verified',
+          outcome_status: 'done',
+          finished_at: '2026-07-29T13:00:00.000Z',
+          result: {
+            status: 'done',
+            headline: 'Albany wait status recorded',
+            message: 'The historical outcome remains available for reference.',
+            destinations: []
+          }
+        }
+      ]
+    },
+    sources: { status: 'ready', attention_count: 0, items: [] }
+  };
+  const encodedSnapshot = Buffer.from(JSON.stringify(snapshot)).toString(
+    'base64'
+  );
+  await page.addInitScript((initialSnapshot) => {
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSettings',
+      JSON.stringify({
+        repository: 'Henrik-KM/timekeeper-private-context',
+        branch: 'main',
+        statePath: 'company-operator/state.json',
+        commandsPath: 'company-operator/commands',
+        receiptsPath: 'company-operator/receipts'
+      })
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorToken',
+      'github_pat_private_company_test'
+    );
+    localStorage.setItem(
+      'timekeeperCodexIntegrationToken',
+      'github_pat_distinct_codex_test'
+    );
+    localStorage.setItem(
+      'timekeeperCompanyOperatorSnapshot',
+      JSON.stringify(initialSnapshot)
+    );
+  }, snapshot);
+  await page.route('https://api.github.com/**', async (route) => {
+    if (
+      route.request().method() === 'GET' &&
+      route.request().url().includes('/contents/company-operator/state.json')
+    ) {
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({ content: encodedSnapshot, sha: 'state-sha' })
+      });
+      return;
+    }
+    await route.fulfill({ status: 404, body: '{}' });
+  });
+
+  await page.goto('/#company');
+  const content = page.locator('#companyPageContent');
+  await expect(content).toContainText(
+    'Confirm the AstraZeneca launch decision'
+  );
+  await expect(content).toContainText('Recent completed work');
+  await expect(content).toContainText('Completed on 2026-07-29');
+  await expect(content).not.toContainText('Done for you');
+  await expect(content).not.toContainText('Nothing needs you');
+  const order = await page.evaluate(() => ({
+    current: document
+      .querySelector('#companyPageContent .company-overview')
+      ?.getBoundingClientRect().top,
+    history: [...document.querySelectorAll('#companyPageContent h3')]
+      .find((heading) => heading.textContent === 'Recent completed work')
+      ?.getBoundingClientRect().top
+  }));
+  expect(order.current).toBeLessThan(order.history);
+  const saved = await page.evaluate(() => ({
+    data: JSON.parse(localStorage.getItem('timekeeperDataPro') || '{}'),
+    companyToken: localStorage.getItem('timekeeperCompanyOperatorToken'),
+    codexToken: localStorage.getItem('timekeeperCodexIntegrationToken')
+  }));
+  expect(saved.data.projects[0].name).toBe('Saved Project');
+  expect(saved.companyToken).toBe('github_pat_private_company_test');
+  expect(saved.codexToken).toBe('github_pat_distinct_codex_test');
+});
+
+test('storage failure during legacy token writes cannot stop app startup', async ({
+  page
+}) => {
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'startup-project', name: 'Startup Project' })
+    ],
+    entries: []
+  });
+  await page.addInitScript(() => {
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (
+        [
+          'timekeeperPrivateBridgeToken',
+          'timekeeperCompanyOperatorToken',
+          'timekeeperCodexIntegrationToken'
+        ].includes(String(key))
+      ) {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      }
+      return originalSetItem.call(this, key, value);
+    };
+  });
+  const pageErrors = [];
+  page.on('pageerror', (error) => pageErrors.push(error.message));
+
+  await page.goto('/');
+  await expect(
+    page.getByRole('heading', { name: 'Timer', exact: true })
+  ).toBeVisible();
+  const savedProject = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem('timekeeperDataPro') || '{}')
+        .projects?.[0]
+  );
+  expect(savedProject.name).toBe('Startup Project');
+  expect(pageErrors).toEqual([]);
+});
+
 test('service worker never caches private cross-origin API responses', async () => {
   const serviceWorker = await readFile('service-worker.js', 'utf8');
 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v23';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=19'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v24';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=20'");
+  expect(serviceWorker).toContain(
+    "url.searchParams.set('timekeeper-update', '22')"
+  );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/analysis-page.mjs?v=1'"
@@ -1570,9 +1725,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(
-    ".register('./service-worker.js?v=23')"
-  );
+  expect(mainSource).toContain(".register('./service-worker.js?v=24')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -2045,7 +2198,7 @@ test('mobile Company tab loads private priorities and queues safe steering', asy
   );
   await expect(page.locator('#companyPageContent')).toContainText('Needs you');
   await expect(page.locator('#companyPageContent')).toContainText(
-    'Done for you'
+    'Recent completed work'
   );
   await expect(page.locator('#companyPageContent')).toContainText('Up next');
   const sectionOrder = await page.evaluate(() => ({

@@ -76,12 +76,16 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
   const dispatches = asRecord(source.dispatches);
   const missions = asRecord(source.missions);
   const sources = asRecord(source.sources);
+  const companySummary = asRecord(
+    source.company_summary || source.companySummary
+  );
   return {
     schemaVersion: COMPANY_OPERATOR_SCHEMA_VERSION,
     generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
     status: cleanText(source.status, 80) || 'unknown',
     stateVersion: cleanText(source.state_version || source.stateVersion, 128),
     today: normalizeToday(source.today),
+    companySummary: normalizeCompanySummary(companySummary),
     priorities,
     missions: {
       status: cleanText(missions.status, 80),
@@ -140,6 +144,27 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
         sources.attention_count ?? sources.attentionCount
       ),
       items: normalizeArray(sources.items, normalizeSource, 12)
+    }
+  };
+}
+
+function normalizeCompanySummary(value) {
+  const source = asRecord(value);
+  const counts = asRecord(source.counts);
+  return {
+    state: cleanText(source.state, 40),
+    headline: cleanText(source.headline, 180),
+    detail: cleanLegacyResponsibilityCopy(source.detail, 240),
+    deepLink: cleanText(source.deep_link || source.deepLink, 60) || '#company',
+    missionId: cleanText(source.mission_id || source.missionId, 100),
+    destination: normalizeResultDestination(source.destination),
+    generatedAt: cleanText(source.generated_at || source.generatedAt, 80),
+    counts: {
+      needsYou: toCount(counts.needs_you ?? counts.needsYou),
+      ready: toCount(counts.ready),
+      working: toCount(counts.working),
+      upNext: toCount(counts.up_next ?? counts.upNext),
+      waiting: toCount(counts.waiting)
     }
   };
 }
@@ -421,10 +446,7 @@ function normalizeMission(value) {
     currentStep: {
       title: cleanLegacyResponsibilityCopy(currentStep.title, 180),
       status: cleanText(currentStep.status, 40),
-      startedAt: cleanText(
-        currentStep.started_at || currentStep.startedAt,
-        80
-      )
+      startedAt: cleanText(currentStep.started_at || currentStep.startedAt, 80)
     },
     latestUpdate: cleanLegacyResponsibilityCopy(
       source.latest_update || source.latestUpdate,
@@ -443,10 +465,7 @@ function normalizeMission(value) {
         userRequest.dispatch_id || userRequest.dispatchId,
         180
       ),
-      instruction: cleanLegacyResponsibilityCopy(
-        userRequest.instruction,
-        240
-      ),
+      instruction: cleanLegacyResponsibilityCopy(userRequest.instruction, 240),
       reason: cleanLegacyResponsibilityCopy(userRequest.reason, 180),
       choices: Array.isArray(userRequest.choices)
         ? userRequest.choices
@@ -492,8 +511,7 @@ function normalizeMissionScorecard(value) {
       source.verified_outputs_today ?? source.verifiedOutputsToday
     ),
     estimatedMinutesSavedToday: toCount(
-      source.estimated_minutes_saved_today ??
-        source.estimatedMinutesSavedToday
+      source.estimated_minutes_saved_today ?? source.estimatedMinutesSavedToday
     ),
     openDecisions: toCount(source.open_decisions ?? source.openDecisions)
   };
