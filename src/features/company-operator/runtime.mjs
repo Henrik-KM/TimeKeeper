@@ -632,10 +632,7 @@ export function createCompanyOperatorController({
     const summary = snapshot.companySummary;
     if (!summary?.headline && !summary?.detail) return null;
     const answerQueued =
-      summary.state === 'needs_you' &&
-      (summary.missionId
-        ? pendingCompanyAnswerExists('', '', summary.missionId)
-        : pendingCompanyAnswerExists());
+      summary.state === 'needs_you' && companySummaryAnswerPending(summary);
     const labels = {
       needs_you: 'You need to do this',
       ready: 'Ready for you',
@@ -1017,12 +1014,6 @@ export function createCompanyOperatorController({
     const pendingAnswers = loadPending().filter(
       (item) => item.action === 'add_direction' && Boolean(item.dispatchId)
     );
-    if (!issueId && !evidenceFingerprint && !missionId) {
-      return (
-        pendingAnswers.length === 1 &&
-        Number(snapshot?.companySummary?.counts?.needsYou || 0) <= 1
-      );
-    }
     return pendingAnswers.some(
       (item) =>
         (!issueId || item.issueId === issueId) &&
@@ -1030,6 +1021,22 @@ export function createCompanyOperatorController({
         (!evidenceFingerprint ||
           !item.evidenceFingerprint ||
           item.evidenceFingerprint === evidenceFingerprint)
+    );
+  }
+
+  function companySummaryAnswerPending(summary) {
+    if (summary.missionId) {
+      return pendingCompanyAnswerExists('', '', summary.missionId);
+    }
+    const questions = (snapshot?.dispatches?.recent || []).filter((dispatch) =>
+      ['needs_decision', 'needs_you'].includes(dispatch.result.status)
+    );
+    if (questions.length !== 1 || Number(summary.counts?.needsYou || 0) > 1) {
+      return false;
+    }
+    return pendingCompanyAnswerExists(
+      questions[0].issueId,
+      questions[0].evidenceFingerprint
     );
   }
 
@@ -1163,12 +1170,17 @@ export function createCompanyOperatorController({
     const pending = loadPending().filter((item) =>
       ['add_direction', 'work_next'].includes(item.action)
     );
-    const pendingIssues = new Set(
-      pending.map((item) => item.issueId).filter(Boolean)
-    );
     const recent = Array.isArray(snapshot?.dispatches?.recent)
       ? snapshot.dispatches.recent
-          .filter((dispatch) => !pendingIssues.has(dispatch.issueId))
+          .filter(
+            (dispatch) =>
+              !pending.some(
+                (item) =>
+                  item.issueId === dispatch.issueId &&
+                  (!item.evidenceFingerprint ||
+                    item.evidenceFingerprint === dispatch.evidenceFingerprint)
+              )
+          )
           .slice(0, 5)
       : [];
     const sections = {
