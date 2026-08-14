@@ -107,6 +107,7 @@ test('normalizes a bounded mobile Company snapshot', () => {
         next_action: 'Prepare pricing and total cost.'
       }
     ],
+    request_projects: ['Avantor', 'Albany', 'Avantor'],
     work_products: {
       assets: [
         {
@@ -230,6 +231,7 @@ test('normalizes a bounded mobile Company snapshot', () => {
     2
   );
   assert.equal(snapshot.priorities[0].issueId, 'priority:avantor');
+  assert.deepEqual(snapshot.requestProjects, ['Avantor', 'Albany']);
   assert.equal(
     snapshot.workProducts.assets[0].format,
     'commercial_response_workbook'
@@ -595,6 +597,28 @@ test('builds an expiring allowlisted command without source content', () => {
   assert.equal(command.params.note, 'Focus on the pricing assumptions.');
   assert.equal(command.expires_at, '2026-08-05T12:00:00.000Z');
   assert.doesNotMatch(JSON.stringify(command), /email.body|slack.message/i);
+
+  const request = buildCompanyOperatorCommand({
+    commandId: 'mobile-request-001',
+    action: 'request_work',
+    snapshot: { stateVersion: 'state-1' },
+    params: {
+      project: 'Avantor',
+      note: 'Update the customer delivery checklist and verify it.'
+    },
+    now: new Date('2026-08-03T12:00:00.000Z')
+  });
+  assert.equal(request.action, 'request_work');
+  assert.deepEqual(request.target, {
+    issue_id: '',
+    evidence_fingerprint: '',
+    mission_id: ''
+  });
+  assert.equal(request.params.project, 'Avantor');
+  assert.equal(
+    request.params.note,
+    'Update the customer delivery checklist and verify it.'
+  );
   assert.throws(
     () =>
       buildCompanyOperatorCommand({

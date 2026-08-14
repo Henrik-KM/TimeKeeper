@@ -1085,6 +1085,68 @@ tr:nth-child(even) td {
   background: linear-gradient(145deg, #eff6ff, #ffffff 75%);
 }
 
+.company-request-panel {
+  border-color: #bfdbfe;
+  background: linear-gradient(145deg, #f8fbff, #ffffff 72%);
+}
+
+.company-request-intro,
+.company-request-safety {
+  margin: 0;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.company-request-form {
+  display: grid;
+  gap: 0.55rem;
+  margin-top: 0.85rem;
+}
+
+.company-request-form label {
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 750;
+}
+
+.company-request-input,
+.company-request-project {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 2.75rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 0.7rem;
+  background: #ffffff;
+  color: #0f172a;
+  font: inherit;
+}
+
+.company-request-input {
+  min-height: 7rem;
+  padding: 0.75rem;
+  resize: vertical;
+}
+
+.company-request-project {
+  padding: 0 0.75rem;
+}
+
+.company-request-input:focus,
+.company-request-project:focus {
+  border-color: #2563eb;
+  outline: 3px solid rgba(37, 99, 235, 0.16);
+}
+
+.company-request-form .btn {
+  min-height: 2.9rem;
+  margin: 0.15rem 0 0;
+}
+
+.company-request-safety {
+  margin-top: 0.7rem;
+  font-size: 0.78rem;
+}
+
 .company-primary-card h3,
 .company-section h3,
 .company-empty-card h3 {

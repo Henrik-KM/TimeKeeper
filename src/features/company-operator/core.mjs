@@ -13,6 +13,7 @@ const ALLOWED_ACTIONS = new Set([
   'mark_handled',
   'rate_result',
   'record_decision',
+  'request_work',
   'set_priority',
   'snooze',
   'work_next'
@@ -87,6 +88,17 @@ export function normalizeCompanyOperatorSnapshot(value = {}) {
     today: normalizeToday(source.today),
     companySummary: normalizeCompanySummary(companySummary),
     priorities,
+    requestProjects: Array.isArray(
+      source.request_projects || source.requestProjects
+    )
+      ? [
+          ...new Set(
+            (source.request_projects || source.requestProjects)
+              .map((value) => cleanText(value, 100))
+              .filter(Boolean)
+          )
+        ].slice(0, 20)
+      : [],
     missions: {
       status: cleanText(missions.status, 80),
       activeCount: toCount(missions.active_count ?? missions.activeCount),
@@ -315,6 +327,7 @@ export function buildCompanyOperatorCommand({
   } else {
     payload.params = {
       note: cleanText(paramsSource.note, 800),
+      project: cleanText(paramsSource.project, 100),
       until: cleanText(paramsSource.until, 80),
       dispatch_id: cleanText(paramsSource.dispatchId, 180),
       option_id: cleanText(paramsSource.optionId, 48),
