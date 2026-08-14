@@ -261,6 +261,7 @@ export function createCompanyOperatorController({
     const priority = {
       issueId: dispatch.issueId,
       evidenceFingerprint: dispatch.evidenceFingerprint,
+      missionId: dispatch.missionId || '',
       project: dispatch.project,
       title: dispatch.result.headline,
       userDirection: ''
@@ -630,6 +631,8 @@ export function createCompanyOperatorController({
   function companyOverviewCard() {
     const summary = snapshot.companySummary;
     if (!summary?.headline && !summary?.detail) return null;
+    const answerQueued =
+      summary.state === 'needs_you' && companySummaryAnswerPending(summary);
     const labels = {
       needs_you: 'You need to do this',
       ready: 'Ready for you',
@@ -640,24 +643,36 @@ export function createCompanyOperatorController({
     };
     const section = element(
       'section',
-      `company-primary-card company-overview ${summary.state || 'clear'}`
+      `company-primary-card company-overview ${answerQueued ? 'waiting' : summary.state || 'clear'}`
     );
     section.appendChild(
       element(
         'p',
         'company-eyebrow',
-        labels[summary.state] || 'Current company status'
+        answerQueued
+          ? 'Answer queued'
+          : labels[summary.state] || 'Current company status'
       )
     );
-    if (summary.headline) {
+    if (answerQueued) {
+      section.appendChild(element('h3', '', 'Your answer is queued'));
+    } else if (summary.headline) {
       section.appendChild(element('h3', '', summary.headline));
     }
-    if (summary.detail) {
+    if (answerQueued) {
+      section.appendChild(
+        element(
+          'p',
+          'company-priority-title',
+          'Company Operator will continue after the next local sync.'
+        )
+      );
+    } else if (summary.detail) {
       section.appendChild(
         element('p', 'company-priority-title', summary.detail)
       );
     }
-    if (summary.destination) {
+    if (summary.destination && !answerQueued) {
       section.appendChild(compactResultDestination(summary.destination));
     }
     return section;
@@ -782,7 +797,12 @@ export function createCompanyOperatorController({
       ['active', 'queued', 'waiting_for_source'].includes(mission.status)
     );
     const waitingRows = active.filter(
-      (mission) => mission.status === 'waiting_for_decision'
+      (mission) =>
+        mission.status === 'waiting_for_decision' &&
+        !pendingCompanyAnswerExists(
+          mission.issueId,
+          mission.evidenceFingerprint
+        )
     );
     const sections = { working: null, completed: null, needsYou: null };
 
@@ -838,24 +858,23 @@ export function createCompanyOperatorController({
           )
         );
       }
-      section.appendChild(missionCard(completedToday.at(-1), 'completed'));
-      if (completedToday.length > 1) {
-        const more = element('details', 'company-result-backlog');
-        more.appendChild(
-          element(
-            'summary',
-            '',
-            `${completedToday.length - 1} earlier completion${completedToday.length === 2 ? '' : 's'}`
-          )
+      const completed = element(
+        'details',
+        'company-result-backlog company-completed-results'
+      );
+      completed.appendChild(
+        element(
+          'summary',
+          '',
+          `${completedToday.length} completion${completedToday.length === 1 ? '' : 's'} · View details`
+        )
+      );
+      [...completedToday]
+        .reverse()
+        .forEach((mission) =>
+          completed.appendChild(missionCard(mission, 'completed compact'))
         );
-        completedToday
-          .slice(0, -1)
-          .reverse()
-          .forEach((mission) =>
-            more.appendChild(missionCard(mission, 'completed compact'))
-          );
-        section.appendChild(more);
-      }
+      section.appendChild(completed);
       sections.completed = section;
     }
 
@@ -987,10 +1006,45 @@ export function createCompanyOperatorController({
     );
   }
 
+  function pendingCompanyAnswerExists(
+    issueId = '',
+    evidenceFingerprint = '',
+    missionId = ''
+  ) {
+    const pendingAnswers = loadPending().filter(
+      (item) => item.action === 'add_direction' && Boolean(item.dispatchId)
+    );
+    return pendingAnswers.some(
+      (item) =>
+        (!issueId || item.issueId === issueId) &&
+        (!missionId || item.missionId === missionId) &&
+        (!evidenceFingerprint ||
+          !item.evidenceFingerprint ||
+          item.evidenceFingerprint === evidenceFingerprint)
+    );
+  }
+
+  function companySummaryAnswerPending(summary) {
+    if (summary.missionId) {
+      return pendingCompanyAnswerExists('', '', summary.missionId);
+    }
+    const questions = (snapshot?.dispatches?.recent || []).filter((dispatch) =>
+      ['needs_decision', 'needs_you'].includes(dispatch.result.status)
+    );
+    if (questions.length !== 1 || Number(summary.counts?.needsYou || 0) > 1) {
+      return false;
+    }
+    return pendingCompanyAnswerExists(
+      questions[0].issueId,
+      questions[0].evidenceFingerprint
+    );
+  }
+
   async function answerMission(mission, choice = null) {
     await answerDispatch(
       {
         dispatchId: mission.userRequest?.dispatchId || '',
+        missionId: mission.missionId,
         issueId: mission.issueId,
         evidenceFingerprint: mission.evidenceFingerprint,
         project: mission.project,
@@ -1116,12 +1170,17 @@ export function createCompanyOperatorController({
     const pending = loadPending().filter((item) =>
       ['add_direction', 'work_next'].includes(item.action)
     );
-    const pendingIssues = new Set(
-      pending.map((item) => item.issueId).filter(Boolean)
-    );
     const recent = Array.isArray(snapshot?.dispatches?.recent)
       ? snapshot.dispatches.recent
-          .filter((dispatch) => !pendingIssues.has(dispatch.issueId))
+          .filter(
+            (dispatch) =>
+              !pending.some(
+                (item) =>
+                  item.issueId === dispatch.issueId &&
+                  (!item.evidenceFingerprint ||
+                    item.evidenceFingerprint === dispatch.evidenceFingerprint)
+              )
+          )
           .slice(0, 5)
       : [];
     const sections = {
@@ -1151,23 +1210,23 @@ export function createCompanyOperatorController({
     );
     if (done.length) {
       const section = sectionBlock('Recent completed work');
-      section.appendChild(compactDispatchCard(done[0], 'done'));
-      if (done.length > 1) {
-        const earlier = element('details', 'company-result-backlog');
-        earlier.appendChild(
-          element(
-            'summary',
-            '',
-            `${done.length - 1} earlier result${done.length === 2 ? '' : 's'}`
-          )
-        );
-        done.slice(1).forEach((dispatch) => {
-          const card = compactDispatchCard(dispatch, 'done');
-          card.classList.add('compact');
-          earlier.appendChild(card);
-        });
-        section.appendChild(earlier);
-      }
+      const completed = element(
+        'details',
+        'company-result-backlog company-completed-results'
+      );
+      completed.appendChild(
+        element(
+          'summary',
+          '',
+          `${done.length} recent result${done.length === 1 ? '' : 's'} · View details`
+        )
+      );
+      done.forEach((dispatch) => {
+        const card = compactDispatchCard(dispatch, 'done');
+        card.classList.add('compact');
+        completed.appendChild(card);
+      });
+      section.appendChild(completed);
       sections.done = section;
     }
     if (needsYou.length) {
@@ -1347,8 +1406,17 @@ export function createCompanyOperatorController({
 
   function commandStatus() {
     const pending = loadPending();
-    const codexPending = pending.filter((item) =>
-      CODEX_ACTIONS.has(item.action)
+    const answerPending = pending.filter(
+      (item) => item.action === 'add_direction' && item.dispatchId
+    );
+    const requestPending = pending.filter(
+      (item) => item.action === 'request_work'
+    );
+    const codexPending = pending.filter(
+      (item) =>
+        CODEX_ACTIONS.has(item.action) &&
+        !answerPending.includes(item) &&
+        !requestPending.includes(item)
     );
     const syncingPending = pending.filter(
       (item) => !CODEX_ACTIONS.has(item.action)
@@ -1361,6 +1429,24 @@ export function createCompanyOperatorController({
       return null;
     }
     const section = element('section', 'company-command-status');
+    if (answerPending.length) {
+      section.appendChild(
+        element(
+          'p',
+          'company-queued',
+          `${answerPending.length === 1 ? 'Answer' : `${answerPending.length} answers`} queued for Company Operator`
+        )
+      );
+    }
+    if (requestPending.length) {
+      section.appendChild(
+        element(
+          'p',
+          'company-queued',
+          `${requestPending.length} Company request${requestPending.length === 1 ? '' : 's'} queued`
+        )
+      );
+    }
     if (codexPending.length) {
       section.appendChild(
         element(

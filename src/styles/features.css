@@ -1217,6 +1217,19 @@ tr:nth-child(even) td {
   font-weight: 750;
 }
 
+.company-completed-results {
+  margin-top: 0.35rem;
+}
+
+.company-completed-results > summary {
+  padding: 0.15rem 0;
+  color: #166534;
+}
+
+.company-completed-results[open] > summary {
+  margin-bottom: 0.5rem;
+}
+
 .company-list-card,
 .company-receipt-card,
 .company-dispatch-card,
