@@ -490,6 +490,8 @@ export function createCompanyOperatorController({
 
     const freshness = companySnapshotFreshness(snapshot);
     root.appendChild(statusBanner(freshness));
+    const overview = companyOverviewCard();
+    if (overview) root.appendChild(overview);
     const dispatches = compactDispatchSections();
     const missions = missionSections();
     if (missions.working) root.appendChild(missions.working);
@@ -568,6 +570,42 @@ export function createCompanyOperatorController({
     return items.slice(0, 2).join(' · ') || 'Some information needs refreshing';
   }
 
+  function companyOverviewCard() {
+    const summary = snapshot.companySummary;
+    if (!summary?.headline && !summary?.detail) return null;
+    const labels = {
+      needs_you: 'You need to do this',
+      ready: 'Ready for you',
+      working: 'Codex is working',
+      up_next: 'Up next',
+      waiting: 'Waiting',
+      clear: 'Nothing needs you'
+    };
+    const section = element(
+      'section',
+      `company-primary-card company-overview ${summary.state || 'clear'}`
+    );
+    section.appendChild(
+      element(
+        'p',
+        'company-eyebrow',
+        labels[summary.state] || 'Current company status'
+      )
+    );
+    if (summary.headline) {
+      section.appendChild(element('h3', '', summary.headline));
+    }
+    if (summary.detail) {
+      section.appendChild(
+        element('p', 'company-priority-title', summary.detail)
+      );
+    }
+    if (summary.destination) {
+      section.appendChild(compactResultDestination(summary.destination));
+    }
+    return section;
+  }
+
   function formatSourceAge(value) {
     const timestamp = new Date(value || '');
     if (Number.isNaN(timestamp.getTime())) return '';
@@ -613,9 +651,11 @@ export function createCompanyOperatorController({
             `${ordered.length - 1} other active mission${ordered.length === 2 ? '' : 's'}`
           )
         );
-        ordered.slice(1).forEach((mission) =>
-          more.appendChild(missionCard(mission, 'working compact'))
-        );
+        ordered
+          .slice(1)
+          .forEach((mission) =>
+            more.appendChild(missionCard(mission, 'working compact'))
+          );
         section.appendChild(more);
       }
       sections.working = section;
@@ -624,7 +664,10 @@ export function createCompanyOperatorController({
     if (completedToday.length) {
       const section = sectionBlock('Completed for you');
       const scorecard = source.scorecard;
-      if (scorecard.missionsCompletedToday || scorecard.estimatedMinutesSavedToday) {
+      if (
+        scorecard.missionsCompletedToday ||
+        scorecard.estimatedMinutesSavedToday
+      ) {
         section.appendChild(
           element(
             'p',
@@ -675,9 +718,11 @@ export function createCompanyOperatorController({
             `${waitingRows.length - 1} more question${waitingRows.length === 2 ? '' : 's'}`
           )
         );
-        waitingRows.slice(1).forEach((mission) =>
-          more.appendChild(missionCard(mission, 'needs-you compact'))
-        );
+        waitingRows
+          .slice(1)
+          .forEach((mission) =>
+            more.appendChild(missionCard(mission, 'needs-you compact'))
+          );
         section.appendChild(more);
       }
       sections.needsYou = section;
@@ -703,9 +748,7 @@ export function createCompanyOperatorController({
       const actions = element('div', 'company-action-grid');
       (request.choices || []).forEach((choice) => {
         actions.appendChild(
-          button(choice.label, 'primary', () =>
-            answerMission(mission, choice)
-          )
+          button(choice.label, 'primary', () => answerMission(mission, choice))
         );
       });
       actions.appendChild(
@@ -720,9 +763,7 @@ export function createCompanyOperatorController({
         row.appendChild(compactResultDestination(destination))
       );
     } else {
-      row.appendChild(
-        element('span', '', missionProgressLabel(mission))
-      );
+      row.appendChild(element('span', '', missionProgressLabel(mission)));
       if (mission.latestUpdate) {
         row.appendChild(element('small', '', mission.latestUpdate));
       }
@@ -754,7 +795,8 @@ export function createCompanyOperatorController({
     }
     const details = element('details', 'company-run-details');
     details.appendChild(element('summary', '', 'Finish line and progress'));
-    if (mission.doneWhen) details.appendChild(element('p', '', mission.doneWhen));
+    if (mission.doneWhen)
+      details.appendChild(element('p', '', mission.doneWhen));
     details.appendChild(
       element(
         'small',
@@ -779,7 +821,7 @@ export function createCompanyOperatorController({
     if (mission.status === 'queued') {
       return 'Ready for the next Codex step.';
     }
-    return 'Codex will continue this mission within today\'s work budget.';
+    return "Codex will continue this mission within today's work budget.";
   }
 
   function missionCommandPending(mission) {
@@ -955,7 +997,7 @@ export function createCompanyOperatorController({
       (dispatch) => !needsYou.includes(dispatch) && !done.includes(dispatch)
     );
     if (done.length) {
-      const section = sectionBlock('Done for you');
+      const section = sectionBlock('Recent completed work');
       section.appendChild(compactDispatchCard(done[0], 'done'));
       if (done.length > 1) {
         const earlier = element('details', 'company-result-backlog');
@@ -1038,6 +1080,13 @@ export function createCompanyOperatorController({
       row.appendChild(actions);
     }
     if (tone === 'done') {
+      row.appendChild(
+        element(
+          'small',
+          'company-completion-age',
+          formatCompletionAge(dispatch.finishedAt)
+        )
+      );
       dispatch.result.destinations.forEach((destination) => {
         row.appendChild(compactResultDestination(destination));
       });
@@ -1067,7 +1116,9 @@ export function createCompanyOperatorController({
       dispatch.executionBranch ? `Branch ${dispatch.executionBranch}` : '',
       dispatch.executionBranchPendingCommitCount
         ? `${dispatch.executionBranchPendingCommitCount} pending Company Operator ${
-            dispatch.executionBranchPendingCommitCount === 1 ? 'commit' : 'commits'
+            dispatch.executionBranchPendingCommitCount === 1
+              ? 'commit'
+              : 'commits'
           }`
         : '',
       formatDispatchDuration(dispatch.durationSeconds),
@@ -1087,6 +1138,27 @@ export function createCompanyOperatorController({
       row.appendChild(runDetails);
     }
     return row;
+  }
+
+  function formatCompletionAge(value) {
+    const completed = new Date(value || '');
+    if (Number.isNaN(completed.getTime())) {
+      return 'Completion time not available';
+    }
+    const todayKey = new Date(Date.now()).toISOString().slice(0, 10);
+    const completedKey = completed.toISOString().slice(0, 10);
+    const elapsedDays = Math.max(
+      0,
+      Math.round(
+        (Date.parse(`${todayKey}T00:00:00.000Z`) -
+          Date.parse(`${completedKey}T00:00:00.000Z`)) /
+          86400000
+      )
+    );
+    if (elapsedDays === 0) return 'Completed today';
+    if (elapsedDays === 1) return 'Completed yesterday';
+    if (elapsedDays < 14) return `Completed ${elapsedDays} days ago`;
+    return `Completed on ${completedKey}`;
   }
 
   function compactResultDestination(destination) {

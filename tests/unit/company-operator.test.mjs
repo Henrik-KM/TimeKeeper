@@ -84,6 +84,19 @@ test('normalizes a bounded mobile Company snapshot', () => {
       next_action: 'Prepare the tiered commercial response.',
       done_when: 'Every tier and approval is explicit.'
     },
+    company_summary: {
+      state: 'needs_you',
+      headline: 'Confirm the AstraZeneca launch decision',
+      detail: 'Choose the supported launch path before work continues.',
+      generated_at: '2026-08-03T11:59:00.000Z',
+      counts: {
+        needs_you: 1,
+        ready: 2,
+        working: 3,
+        up_next: 4,
+        waiting: 5
+      }
+    },
     priorities: [
       {
         issue_id: 'priority:avantor',
@@ -192,6 +205,22 @@ test('normalizes a bounded mobile Company snapshot', () => {
   });
 
   assert.equal(snapshot.today.project, 'Avantor');
+  assert.deepEqual(snapshot.companySummary, {
+    state: 'needs_you',
+    headline: 'Confirm the AstraZeneca launch decision',
+    detail: 'Choose the supported launch path before work continues.',
+    deepLink: '#company',
+    missionId: '',
+    destination: null,
+    generatedAt: '2026-08-03T11:59:00.000Z',
+    counts: {
+      needsYou: 1,
+      ready: 2,
+      working: 3,
+      upNext: 4,
+      waiting: 5
+    }
+  });
   assert.equal(
     snapshot.dispatches.recent[0].executionBranch,
     'codex/company-operator'
@@ -345,7 +374,10 @@ test('normalizes persistent missions, questions, progress, and verified outputs'
     snapshot.missions.active[1].userRequest.choices[0].label,
     'Direct'
   );
-  assert.equal(snapshot.missions.completedToday[0].destinations[0].type, 'local_commit');
+  assert.equal(
+    snapshot.missions.completedToday[0].destinations[0].type,
+    'local_commit'
+  );
   assert.equal(snapshot.missions.budget.stepsRemaining, 3);
 });
 
