@@ -33,7 +33,13 @@ const state = {
     model: { key: 'usagePerWallHour', direction: 'desc' },
     modelEffort: { key: 'effectiveHours', direction: 'desc' },
     project: { key: 'effectiveHoursPerUsagePoint', direction: 'desc' },
-    daily: { key: 'date', direction: 'desc' }
+    daily: { key: 'date', direction: 'desc' },
+    modelTrend: { key: 'date', direction: 'desc' }
+  },
+  trend: {
+    fastMode: 'all',
+    metric: 'effectiveHours',
+    minimumSessions: 2
   }
 };
 
@@ -281,6 +287,34 @@ function isUnknownRow(row) {
   return [row?.key, row?.label, row?.model, row?.effort]
     .filter(Boolean)
     .some((value) => String(value).toLowerCase().includes('unknown'));
+}
+
+function isUnknownTrendRow(row) {
+  return [row?.model, row?.effort]
+    .filter(Boolean)
+    .some((value) => String(value).toLowerCase().includes('unknown'));
+}
+
+function applyTrendFilters(analytics) {
+  const rows = Array.isArray(analytics?.modelTrends)
+    ? analytics.modelTrends
+    : [];
+  return rows.filter((row) => {
+    if (state.filters.hideUnknown && isUnknownTrendRow(row)) return false;
+    if (state.filters.model !== 'all' && row.model !== state.filters.model) {
+      return false;
+    }
+    if (state.filters.effort !== 'all' && row.effort !== state.filters.effort) {
+      return false;
+    }
+    if (
+      state.trend.fastMode !== 'all' &&
+      row.fastMode !== state.trend.fastMode
+    ) {
+      return false;
+    }
+    return true;
+  });
 }
 
 function applyFilters(rows, tableKey) {
@@ -558,6 +592,78 @@ function renderTables(analytics) {
     'Daily measurements will appear once usage history accumulates.',
     'daily'
   );
+  const trendRows = applyTrendFilters(analytics);
+  renderTable(
+    'modelTrendTable',
+    trendRows,
+    [
+      { key: 'date', label: 'Date' },
+      { key: 'model', label: 'Model' },
+      { key: 'effort', label: 'Reasoning' },
+      {
+        key: 'fastMode',
+        label: 'Fast mode',
+        format: (value) => titleCase(value)
+      },
+      {
+        key: 'effectiveHours',
+        label: 'Effective',
+        numeric: true,
+        format: (value) => formatHours(value)
+      },
+      {
+        key: 'measuredEffectiveHours',
+        label: 'Measured effective',
+        title: 'Effective time overlapping quota-history coverage',
+        numeric: true,
+        format: (value) => formatHours(value)
+      },
+      {
+        key: 'usagePoints',
+        label: 'Quota used',
+        title: 'Percentage points consumed in the selected quota window',
+        numeric: true,
+        format: (value) =>
+          Number.isFinite(value) ? `${value.toFixed(2)} pts` : '-'
+      },
+      {
+        key: 'effectiveHoursPerUsagePoint',
+        label: 'Effective h / quota',
+        title: 'Measured effective hours per observed quota percentage point',
+        numeric: true,
+        format: (value) =>
+          Number.isFinite(value) ? `${value.toFixed(2)} h/pt` : '-'
+      },
+      {
+        key: 'sessions',
+        label: 'Sessions',
+        numeric: true,
+        format: (value) => String(value)
+      },
+      {
+        key: 'sampleWarning',
+        label: 'Sample',
+        title:
+          'Rows below the selected minimum-sample threshold are directional',
+        render: (value, row) => {
+          const warning =
+            value ||
+            (row.sessions < state.trend.minimumSessions
+              ? `Low sample: fewer than ${state.trend.minimumSessions} sessions`
+              : 'Sample threshold met');
+          const badge = makeElement(
+            'span',
+            warning.startsWith('Low sample') ? 'trend-warning' : 'trend-ok',
+            warning
+          );
+          badge.title = warning;
+          return badge;
+        }
+      }
+    ],
+    'No model trend data exists in this range.',
+    'modelTrend'
+  );
 }
 
 function renderDataQuality(analytics) {
@@ -741,6 +847,58 @@ function renderFilterControls(analytics) {
   const visible = applyFilters(analytics.byModel, 'model').length;
   byId('filterSummary').textContent =
     `${visible} of ${analytics.byModel.length} model rows shown. Filters affect tables and charts, not the overall totals above.`;
+}
+
+function renderTrendControls(analytics) {
+  const fastMode = /** @type {HTMLSelectElement} */ (byId('trendFastMode'));
+  const metric = /** @type {HTMLSelectElement} */ (byId('trendMetric'));
+  const minimumSessions = /** @type {HTMLInputElement} */ (
+    byId('trendMinimumSessions')
+  );
+  const modes = new Set(
+    (analytics.modelTrends || []).map((row) => row.fastMode).filter(Boolean)
+  );
+  fastMode.replaceChildren();
+  [
+    ['all', 'All Fast modes'],
+    ['on', 'Fast on'],
+    ['off', 'Fast off'],
+    ['unknown', 'Fast unknown']
+  ].forEach(([value, label]) => {
+    if (value !== 'all' && !modes.has(value)) return;
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    fastMode.appendChild(option);
+  });
+  if (
+    ![...fastMode.options].some(
+      (option) => option.value === state.trend.fastMode
+    )
+  ) {
+    state.trend.fastMode = 'all';
+  }
+  fastMode.value = state.trend.fastMode;
+  fastMode.onchange = () => {
+    state.trend.fastMode = fastMode.value;
+    render();
+  };
+  metric.value = state.trend.metric;
+  metric.onchange = () => {
+    state.trend.metric = metric.value;
+    render();
+  };
+  minimumSessions.value = String(state.trend.minimumSessions);
+  minimumSessions.onchange = () => {
+    state.trend.minimumSessions = Math.max(
+      1,
+      Math.floor(Number(minimumSessions.value) || 1)
+    );
+    render();
+  };
+  const visibleRows = applyTrendFilters(analytics);
+  byId('trendSummary').textContent =
+    `${visibleRows.length} trend rows. Rows below ${state.trend.minimumSessions} sessions are marked low sample.`;
 }
 
 function prepareCanvas(canvas) {
@@ -1010,12 +1168,107 @@ function drawQuotaTrajectoryChart(analytics) {
   );
 }
 
+function drawModelTrendChart(analytics) {
+  const rows = applyTrendFilters(analytics).filter((row) =>
+    Number.isFinite(row[state.trend.metric])
+  );
+  if (!rows.length) {
+    drawEmptyChart(
+      byId('modelTrendChart'),
+      state.trend.metric === 'effectiveHoursPerUsagePoint'
+        ? 'Quota efficiency trend is still collecting measured history.'
+        : 'No model trend activity exists in this range.'
+    );
+    return;
+  }
+  const dates = [...new Set(rows.map((row) => row.date))].sort();
+  const groups = new Map();
+  rows.forEach((row) => {
+    const key = `${row.model}::${row.effort}::${row.fastMode}`;
+    const group = groups.get(key) || {
+      label: `${titleCase(row.model)} · ${titleCase(row.effort)} · ${titleCase(row.fastMode)}`,
+      rows: new Map(),
+      total: 0
+    };
+    group.rows.set(row.date, row);
+    group.total += row[state.trend.metric];
+    groups.set(key, group);
+  });
+  const visibleGroups = [...groups.values()]
+    .sort((left, right) => right.total - left.total)
+    .slice(0, 8);
+  const { context, width, height } = prepareCanvas(byId('modelTrendChart'));
+  const left = 54;
+  const top = 18;
+  const right = 18;
+  const bottom = 36;
+  const plotWidth = width - left - right;
+  const plotHeight = height - top - bottom;
+  const maxValue = Math.max(
+    1,
+    ...visibleGroups.flatMap((group) =>
+      [...group.rows.values()].map((row) => row[state.trend.metric])
+    )
+  );
+  drawGrid(
+    context,
+    left,
+    top,
+    plotWidth,
+    plotHeight,
+    maxValue,
+    state.trend.metric === 'effectiveHoursPerUsagePoint' ? ' h/pt' : ' h'
+  );
+  context.textAlign = 'left';
+  visibleGroups.forEach((group, groupIndex) => {
+    context.strokeStyle = CHART_COLORS[groupIndex % CHART_COLORS.length];
+    context.fillStyle = context.strokeStyle;
+    context.lineWidth = 2;
+    let started = false;
+    dates.forEach((date, dateIndex) => {
+      const row = group.rows.get(date);
+      const value = row?.[state.trend.metric];
+      if (!Number.isFinite(value)) {
+        started = false;
+        return;
+      }
+      const x =
+        dates.length === 1
+          ? left + plotWidth / 2
+          : left + (dateIndex / (dates.length - 1)) * plotWidth;
+      const y = top + plotHeight - (value / maxValue) * plotHeight;
+      if (!started) {
+        context.beginPath();
+        context.moveTo(x, y);
+        started = true;
+      } else {
+        context.lineTo(x, y);
+      }
+      context.stroke();
+      context.beginPath();
+      context.arc(x, y, 3, 0, Math.PI * 2);
+      context.fill();
+    });
+    context.fillText(
+      truncateLabel(group.label, 28),
+      left + 6,
+      top + 12 + groupIndex * 13
+    );
+  });
+  context.fillStyle = '#64748b';
+  context.textAlign = 'left';
+  context.fillText(dates[0], left, height - 8);
+  context.textAlign = 'right';
+  context.fillText(dates.at(-1), width - right, height - 8);
+}
+
 function drawCharts(analytics) {
   drawQuotaBurnChart(analytics);
   drawModelYieldChart(analytics);
   drawModelEffortChart(analytics);
   drawProjectEfficiencyChart(analytics);
   drawQuotaTrajectoryChart(analytics);
+  drawModelTrendChart(analytics);
 }
 
 export function buildCsv(analytics, rows = analytics?.byModel || []) {
@@ -1056,6 +1309,44 @@ export function buildCsv(analytics, rows = analytics?.byModel || []) {
     .join('\n');
 }
 
+export function buildTrendCsv(analytics, rows = analytics?.modelTrends || []) {
+  const headers = [
+    'window_key',
+    'date',
+    'model',
+    'reasoning_effort',
+    'fast_mode',
+    'effective_hours',
+    'measured_effective_hours',
+    'quota_points',
+    'effective_hours_per_quota_point',
+    'sessions',
+    'confidence',
+    'sample_warning'
+  ];
+  const values = rows.map((row) => [
+    analytics?.windowKey || 'primary',
+    row.date,
+    row.model,
+    row.effort,
+    row.fastMode,
+    row.effectiveHours,
+    row.measuredEffectiveHours,
+    row.usagePoints,
+    row.effectiveHoursPerUsagePoint ?? '',
+    row.sessions,
+    row.confidence,
+    row.sampleWarning || ''
+  ]);
+  return [headers, ...values]
+    .map((row) =>
+      row
+        .map((value) => `"${String(value ?? '').replaceAll('"', '""')}"`)
+        .join(',')
+    )
+    .join('\n');
+}
+
 function exportCsv() {
   if (!state.analytics) return;
   const rows = applyFilters(state.analytics.byModel, 'model');
@@ -1066,6 +1357,22 @@ function exportCsv() {
   const anchor = document.createElement('a');
   anchor.href = url;
   anchor.download = `timekeeper-codex-analysis-${state.windowKey}-${state.rangeDays}d.csv`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
+}
+
+function exportTrendCsv() {
+  if (!state.analytics) return;
+  const rows = applyTrendFilters(state.analytics);
+  const blob = new Blob([buildTrendCsv(state.analytics, rows)], {
+    type: 'text/csv'
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `timekeeper-codex-model-trend-${state.windowKey}-${state.rangeDays}d.csv`;
   document.body.appendChild(anchor);
   anchor.click();
   anchor.remove();
@@ -1089,6 +1396,7 @@ function render() {
   byId('updatedAt').textContent =
     `Calculated ${formatDateTime(analytics.generatedAt)}`;
   renderFilterControls(analytics);
+  renderTrendControls(analytics);
   renderMeasurementBanner(analytics);
   renderMetricCards(analytics);
   renderInsights(analytics);
@@ -1100,6 +1408,7 @@ function render() {
 async function initialize() {
   updateRangeControls();
   byId('exportCsv').addEventListener('click', exportCsv);
+  byId('exportTrendCsv').addEventListener('click', exportTrendCsv);
   byId('refreshAnalysis').addEventListener('click', () =>
     window.location.reload()
   );

@@ -288,6 +288,43 @@ export function getGitHubProjectPathInfo(cwd = '') {
   return { projectFolder, repoName };
 }
 
+function normalizeCodexPathForMatch(value = '') {
+  return String(value || '')
+    .trim()
+    .replace(/[\\/]+/g, '/')
+    .replace(/\/+$/g, '')
+    .toLowerCase();
+}
+
+function getCodexDisplayPath(cwd = '') {
+  const normalized = String(cwd || '').trim();
+  if (!normalized) return 'Unknown path';
+  const parts = normalized
+    .replace(/[\\/]+$/g, '')
+    .split(/[\\/]+/)
+    .filter(Boolean);
+  const lowerParts = parts.map((part) => part.toLowerCase());
+  const githubIndex = lowerParts.lastIndexOf('github');
+  if (githubIndex >= 0 && parts.length > githubIndex + 1) {
+    return `GitHub/${parts.slice(githubIndex + 1).join('/')}`;
+  }
+  const documentsIndex = lowerParts.lastIndexOf('documents');
+  if (documentsIndex >= 0 && parts.length > documentsIndex + 1) {
+    return `Documents/${parts.slice(documentsIndex + 1).join('/')}`;
+  }
+  if (lowerParts.lastIndexOf('users') >= 0) {
+    return `.../${parts.at(-1) || 'Unknown path'}`;
+  }
+  if (parts.length >= 2) return `.../${parts.slice(-2).join('/')}`;
+  return parts.at(-1) || 'Unknown path';
+}
+
+function getCodexDisplayMatch(match, matchType) {
+  const value = String(match || '').trim();
+  if (!value || matchType !== 'pathIncludes') return value;
+  return getCodexDisplayPath(value);
+}
+
 export function normalizeTrackedProjects(projects = []) {
   if (!Array.isArray(projects)) return [];
   return projects
@@ -329,9 +366,9 @@ export function findCodexMappingForCwd(cwd = '', mappings = []) {
   const normalizedMappings = normalizeCodexMappings(mappings);
   const repoName = getRepoNameFromCwd(cwd);
   const lowerRepoName = repoName.toLowerCase();
-  const lowerCwd = String(cwd || '').toLowerCase();
+  const lowerCwd = normalizeCodexPathForMatch(cwd);
   const mapping = normalizedMappings.find((candidate) => {
-    const lowerMatch = candidate.match.toLowerCase();
+    const lowerMatch = normalizeCodexPathForMatch(candidate.match);
     if (candidate.matchType === 'pathIncludes') {
       return lowerCwd.includes(lowerMatch);
     }
@@ -361,6 +398,13 @@ export function findTrackedProjectForCwd(
         repoName: pathInfo.repoName
       };
     }
+    const mapping = findCodexMappingForCwd(cwd, fallbackMappings);
+    if (mapping) {
+      return {
+        ...mapping,
+        projectName: ''
+      };
+    }
     if (normalizedProjects.length) return null;
   }
   const mapping = findCodexMappingForCwd(cwd, fallbackMappings);
@@ -369,6 +413,115 @@ export function findTrackedProjectForCwd(
     ...mapping,
     projectName: ''
   };
+}
+
+/**
+ * Build a privacy-preserving inventory of repository paths seen in Codex
+ * session metadata. The full cwd is deliberately kept out of the published
+ * inbox; the relative display path is enough to repair a mapping.
+ */
+export function buildCodexMappingAudit({
+  sessions = [],
+  trackedProjects = [],
+  mappings = []
+} = {}) {
+  const normalizedProjects = normalizeTrackedProjects(trackedProjects);
+  const byPath = new Map();
+  sessions.forEach((session) => {
+    const cwd = String(session?.meta?.cwd || '').trim();
+    const pathInfo = getGitHubProjectPathInfo(cwd);
+    const repoName = pathInfo?.repoName || getRepoNameFromCwd(cwd);
+    const projectFolder = pathInfo?.projectFolder || '';
+    const displayPath = getCodexDisplayPath(cwd);
+    const pathKey = displayPath.toLowerCase();
+    const explicitMapping = findCodexMappingForCwd(cwd, mappings);
+    const projectMatch = findTrackedProjectForCwd(
+      cwd,
+      normalizedProjects,
+      mappings
+    );
+    const matchedProject = normalizedProjects.find(
+      (project) =>
+        project.projectId ===
+        String(projectMatch?.projectId || explicitMapping?.projectId || '')
+    );
+    const projectId = String(
+      projectMatch?.projectId || explicitMapping?.projectId || ''
+    ).trim();
+    const isAutomatic = projectMatch?.matchType === 'githubParentFolder';
+    const matchType = isAutomatic
+      ? 'githubParentFolder'
+      : explicitMapping?.matchType || projectMatch?.matchType || null;
+    const match = isAutomatic
+      ? projectMatch?.match || projectFolder
+      : getCodexDisplayMatch(
+          explicitMapping?.match || projectMatch?.match || '',
+          matchType
+        );
+    const status = projectId
+      ? matchedProject
+        ? isAutomatic
+          ? 'automatic'
+          : 'mapped'
+        : 'stale'
+      : 'unmapped';
+    const sessionId = String(
+      session?.meta?.sessionId || session?.meta?.id || session?.sourceFile || ''
+    ).trim();
+    const activityTimes = (
+      Array.isArray(session?.activity) ? session.activity : []
+    )
+      .map((point) => parseTimestamp(point?.timestamp)?.getTime() || 0)
+      .filter(Boolean);
+    const seenAtMs = Math.max(
+      ...activityTimes,
+      parseTimestamp(session?.meta?.timestamp)?.getTime() || 0
+    );
+    const current = byPath.get(pathKey) || {
+      key: pathKey,
+      displayPath,
+      projectFolder,
+      repoName,
+      status,
+      projectId: projectId || null,
+      projectName: matchedProject?.name || projectMatch?.projectName || '',
+      matchType,
+      match,
+      sessionCount: 0,
+      assistantSessionCount: 0,
+      lastSeenAt: null,
+      _sessionIds: new Set(),
+      _assistantSessionIds: new Set()
+    };
+    if (sessionId && !current._sessionIds.has(sessionId)) {
+      current._sessionIds.add(sessionId);
+      current.sessionCount += 1;
+      if (session?.hasAssistantActivity === true) {
+        current._assistantSessionIds.add(sessionId);
+        current.assistantSessionCount += 1;
+      }
+    }
+    if (seenAtMs > 0) {
+      const seenAt = new Date(seenAtMs).toISOString();
+      if (
+        !current.lastSeenAt ||
+        Date.parse(seenAt) > Date.parse(current.lastSeenAt)
+      ) {
+        current.lastSeenAt = seenAt;
+      }
+    }
+    byPath.set(pathKey, current);
+  });
+  const statusOrder = { unmapped: 0, stale: 1, mapped: 2, automatic: 3 };
+  return [...byPath.values()]
+    .map(({ _sessionIds, _assistantSessionIds, ...row }) => row)
+    .sort(
+      (left, right) =>
+        (statusOrder[left.status] ?? 9) - (statusOrder[right.status] ?? 9) ||
+        (Date.parse(right.lastSeenAt || '') || 0) -
+          (Date.parse(left.lastSeenAt || '') || 0) ||
+        left.displayPath.localeCompare(right.displayPath)
+    );
 }
 
 export function parseCodexJsonl(text = '') {

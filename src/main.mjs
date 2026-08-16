@@ -1492,6 +1492,86 @@ import {
       .filter(Boolean);
   }
 
+  function normalizeCodexMappingAudit(value = []) {
+    if (!Array.isArray(value)) return [];
+    const rows = new Map();
+    value.forEach((item) => {
+      const source = item && typeof item === 'object' ? item : {};
+      const displayPath = String(
+        source.displayPath || source.path || source.repoName || ''
+      ).trim();
+      if (!displayPath) return;
+      const key = String(source.key || displayPath)
+        .trim()
+        .toLowerCase();
+      const sessionCount = Math.max(
+        0,
+        Math.floor(Number(source.sessionCount) || 0)
+      );
+      const assistantSessionCount = Math.max(
+        0,
+        Math.floor(Number(source.assistantSessionCount) || 0)
+      );
+      const lastSeenAt = source.lastSeenAt || null;
+      const existing = rows.get(key);
+      if (!existing) {
+        rows.set(key, {
+          key,
+          displayPath,
+          projectFolder: String(source.projectFolder || '').trim(),
+          repoName: String(source.repoName || '').trim(),
+          status: ['automatic', 'mapped', 'stale', 'unmapped'].includes(
+            source.status
+          )
+            ? source.status
+            : 'unmapped',
+          projectId: source.projectId ? String(source.projectId) : null,
+          projectName: String(source.projectName || '').trim(),
+          matchType:
+            source.matchType === 'pathIncludes'
+              ? 'pathIncludes'
+              : source.matchType === 'repoName' ||
+                  source.matchType === 'githubParentFolder'
+                ? source.matchType
+                : null,
+          match: String(source.match || '').trim(),
+          sessionCount,
+          assistantSessionCount,
+          lastSeenAt
+        });
+        return;
+      }
+      existing.sessionCount += sessionCount;
+      existing.assistantSessionCount += assistantSessionCount;
+      if (
+        lastSeenAt &&
+        (!existing.lastSeenAt ||
+          Date.parse(lastSeenAt) > Date.parse(existing.lastSeenAt))
+      ) {
+        existing.lastSeenAt = lastSeenAt;
+      }
+      if (
+        existing.status === 'unmapped' ||
+        (existing.status === 'stale' && source.status === 'mapped') ||
+        (existing.status === 'mapped' && source.status === 'automatic')
+      ) {
+        existing.status = source.status;
+        existing.projectId = source.projectId ? String(source.projectId) : null;
+        existing.projectName = String(source.projectName || '').trim();
+        existing.matchType = source.matchType || null;
+        existing.match = String(source.match || '').trim();
+      }
+    });
+    const statusOrder = { unmapped: 0, stale: 1, mapped: 2, automatic: 3 };
+    return [...rows.values()].sort(
+      (left, right) =>
+        (statusOrder[left.status] ?? 9) - (statusOrder[right.status] ?? 9) ||
+        (Date.parse(right.lastSeenAt || '') || 0) -
+          (Date.parse(left.lastSeenAt || '') || 0) ||
+        left.displayPath.localeCompare(right.displayPath)
+    );
+  }
+
   function makeDefaultCodexIntegration() {
     return {
       enabled: false,
@@ -1504,6 +1584,7 @@ import {
       contextBranch: CODEX_CONTEXT_DEFAULT_BRANCH,
       contextPath: CODEX_CONTEXT_DEFAULT_PATH,
       mappings: [],
+      mappingAudit: [],
       importedCodexRecordIds: [],
       lastImportAt: null,
       lastImportSummary: null,
@@ -1574,6 +1655,7 @@ import {
         defaults.contextBranch,
       contextPath: normalizeCodexPath(config.contextPath, defaults.contextPath),
       mappings: normalizeCodexMappings(config.mappings),
+      mappingAudit: normalizeCodexMappingAudit(config.mappingAudit),
       importedCodexRecordIds: [...new Set(importedIds)].slice(-1000),
       lastImportAt: config.lastImportAt || null,
       lastImportSummary:
@@ -3391,6 +3473,22 @@ import {
     return mappings;
   }
 
+  function getCodexPublishedMappings(projects = getCodexTrackedProjects()) {
+    const config = getCodexIntegrationConfig();
+    const mappings = [];
+    const seen = new Set();
+    [
+      ...normalizeCodexMappings(config.mappings),
+      ...getCodexLegacyPathMappings(projects)
+    ].forEach((mapping) => {
+      const key = `${mapping.matchType}::${mapping.match.toLowerCase()}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+      mappings.push(mapping);
+    });
+    return mappings;
+  }
+
   function findCodexProjectByName(name) {
     const value = String(name || '')
       .trim()
@@ -3441,7 +3539,7 @@ import {
       focusFactor: CODEX_FOCUS_FACTOR,
       focusPolicy: CODEX_FOCUS_POLICY,
       trackedProjects,
-      mappings: getCodexLegacyPathMappings(trackedProjects)
+      mappings: getCodexPublishedMappings(trackedProjects)
     };
   }
 
@@ -3496,7 +3594,7 @@ import {
     return apiUrl;
   }
 
-  async function publishCodexIntegrationConfig() {
+  async function publishCodexIntegrationConfig({ quiet = false } = {}) {
     const config = getCodexIntegrationConfig();
     if (!config.enabled) {
       showToast('Enable Codex import before publishing config.');
@@ -3519,7 +3617,7 @@ import {
         error: ''
       };
       updateCodexIntegrationPanel();
-      showToast('Codex config published.');
+      if (!quiet) showToast('Codex config published.');
       return apiUrl;
     } catch (error) {
       codexImportRuntimeStatus = {
@@ -3528,9 +3626,11 @@ import {
         error: error && error.message ? error.message : String(error)
       };
       updateCodexIntegrationPanel();
-      showToast(
-        `Codex config publish failed: ${codexImportRuntimeStatus.error}`
-      );
+      if (!quiet) {
+        showToast(
+          `Codex config publish failed: ${codexImportRuntimeStatus.error}`
+        );
+      }
       return null;
     }
   }
@@ -3703,6 +3803,12 @@ import {
     let reconciled = 0;
     let updated = 0;
     const nowIso = new Date().toISOString();
+    const mappingAuditRows = payloads.flatMap((payload) =>
+      Array.isArray(payload?.mappingAudit) ? payload.mappingAudit : []
+    );
+    if (mappingAuditRows.length) {
+      config.mappingAudit = normalizeCodexMappingAudit(mappingAuditRows);
+    }
     config.usageLimits =
       payloads
         .map((payload) => normalizeCodexUsageLimits(payload?.usageLimits))
@@ -10082,18 +10188,19 @@ import {
       return;
     }
 
-    const getModelEffortKey = (model, effort) => {
+    const getModelEffortFastKey = (model, effort, fastMode) => {
       const modelKey = String(model || '')
         .trim()
         .toLowerCase();
       const effortKey = String(effort || '')
         .trim()
         .toLowerCase();
-      return `${modelKey === 'unknown model' ? 'unknown' : modelKey || 'unknown'}::${effortKey || 'unknown'}`;
+      const fastModeKey = normalizeCodexFastModeLabel(fastMode);
+      return `${modelKey === 'unknown model' ? 'unknown' : modelKey || 'unknown'}::${effortKey || 'unknown'}::${fastModeKey}`;
     };
-    const usageByModelEffort = new Map(
-      (analytics?.byModelEffort || []).map((row) => [
-        getModelEffortKey(row.model, row.effort),
+    const usageByModelEffortFast = new Map(
+      (analytics?.byModelEffortFast || []).map((row) => [
+        getModelEffortFastKey(row.model, row.effort, row.fastMode),
         row
       ])
     );
@@ -10102,6 +10209,7 @@ import {
     [
       'Model',
       'Reasoning level',
+      'Fast mode',
       'Effective',
       'Measured effective',
       'Usage / effective hour',
@@ -10118,8 +10226,8 @@ import {
       row.className = 'codex-model-row';
       const focus =
         model.wallSeconds > 0 ? model.effectiveSeconds / model.wallSeconds : 0;
-      const usage = usageByModelEffort.get(
-        getModelEffortKey(model.model, model.effort)
+      const usage = usageByModelEffortFast.get(
+        getModelEffortFastKey(model.model, model.effort, model.fastMode)
       );
       const hasMeasurement =
         analytics && analytics.measurementState !== 'collecting';
@@ -10130,6 +10238,16 @@ import {
       const cells = [
         ['Model', model.model, 'strong', ''],
         ['Reasoning level', model.effort || 'Unavailable', 'span', ''],
+        [
+          'Fast mode',
+          model.fastMode === 'on'
+            ? 'On'
+            : model.fastMode === 'off'
+              ? 'Off'
+              : 'Unknown',
+          'span',
+          ''
+        ],
         [
           'Effective',
           formatDuration(model.effectiveSeconds),
@@ -10346,6 +10464,19 @@ import {
     return getEntryElapsedSeconds(entry);
   }
 
+  function normalizeCodexFastModeLabel(value) {
+    if (value === true || String(value || '').toLowerCase() === 'on') {
+      return 'on';
+    }
+    if (
+      value === false ||
+      ['off', 'false'].includes(String(value || '').toLowerCase())
+    ) {
+      return 'off';
+    }
+    return 'unknown';
+  }
+
   function getCodexPageData() {
     const now = new Date();
     const todayStart = startOfLocalDay(now);
@@ -10412,6 +10543,7 @@ import {
             {
               model: 'Unknown model',
               effort: '',
+              fastMode: 'unknown',
               effectiveSeconds: Number(entry.duration) || 0,
               wallSeconds: getCodexEntryWallSeconds(entry)
             }
@@ -10419,10 +10551,14 @@ import {
       rows.forEach((row) => {
         const model = String(row?.model || 'Unknown model').trim();
         const effort = String(row?.effort || '').trim();
-        const key = `${model}::${effort}`;
+        const fastMode = normalizeCodexFastModeLabel(
+          row?.fastMode ?? row?.fast_mode ?? row?.mode
+        );
+        const key = `${model}::${effort}::${fastMode}`;
         const current = models.get(key) || {
           model,
           effort,
+          fastMode,
           effectiveSeconds: 0,
           wallSeconds: 0
         };
@@ -10475,6 +10611,144 @@ import {
     }
     container.appendChild(metric);
     return metric;
+  }
+
+  function getCodexMappingStatusLabel(status) {
+    if (status === 'automatic') return 'Automatic project match';
+    if (status === 'mapped') return 'Custom mapping';
+    if (status === 'stale') return 'Mapped project unavailable';
+    return 'Needs mapping';
+  }
+
+  async function editCodexMapping(row) {
+    const config = getCodexIntegrationConfig();
+    const projects = getCodexTrackedProjects();
+    if (!projects.length) {
+      showToast('Add an active TimeKeeper project before mapping a path.');
+      return;
+    }
+    const defaultMatchType =
+      row.matchType === 'pathIncludes' ? 'pathIncludes' : 'repoName';
+    const defaultMatch =
+      row.match && row.matchType !== 'githubParentFolder'
+        ? row.match
+        : row.repoName || row.displayPath;
+    const values = await openFormDialog({
+      title: `Map ${row.displayPath}`,
+      fields: [
+        {
+          name: 'projectId',
+          label: 'TimeKeeper project',
+          type: 'select',
+          value: row.projectId || projects[0].projectId,
+          options: projects.map((project) => ({
+            value: project.projectId,
+            label: project.name
+          }))
+        },
+        {
+          name: 'matchType',
+          label: 'Match by',
+          type: 'select',
+          value: defaultMatchType,
+          options: [
+            { value: 'repoName', label: 'Repository name' },
+            { value: 'pathIncludes', label: 'Path contains' }
+          ]
+        },
+        {
+          name: 'match',
+          label: 'Repository or path match',
+          value: defaultMatch,
+          required: true
+        }
+      ],
+      submitLabel: 'Save Mapping'
+    });
+    if (!values) return;
+    const match = String(values.match || '').trim();
+    const projectId = String(values.projectId || '').trim();
+    if (!match || !projectId) {
+      showToast('Choose a project and enter a match value.');
+      return;
+    }
+    const matchType =
+      values.matchType === 'pathIncludes' ? 'pathIncludes' : 'repoName';
+    const nextMappings = normalizeCodexMappings(config.mappings).filter(
+      (mapping) =>
+        !(
+          mapping.matchType === matchType &&
+          mapping.match.toLowerCase() === match.toLowerCase()
+        )
+    );
+    nextMappings.push({ matchType, match, projectId });
+    data.codexIntegration = normalizeCodexIntegration({
+      ...config,
+      mappings: nextMappings
+    });
+    saveData();
+    updateCodexPage();
+    if (config.enabled) {
+      const published = await publishCodexIntegrationConfig({ quiet: true });
+      showToast(
+        published
+          ? 'Mapping saved and published to the Codex bridge.'
+          : 'Mapping saved locally. Publish Config when the bridge is connected.'
+      );
+    } else {
+      showToast('Mapping saved locally. Enable Codex import to publish it.');
+    }
+  }
+
+  function renderCodexMappingAudit(section) {
+    section.id = 'codexMappingAudit';
+    const note = document.createElement('small');
+    note.className = 'codex-summary-note';
+    note.textContent =
+      'Every path comes from the desktop bridge. Unknown paths are privacy-preserving relative paths; mapping a row publishes the rule for future imports.';
+    section.appendChild(note);
+    const rows = getCodexIntegrationConfig().mappingAudit || [];
+    const list = document.createElement('div');
+    list.className = 'codex-mapping-audit-list';
+    if (!rows.length) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent =
+        'No repository paths have been reported yet. Refresh Codex after the desktop bridge runs.';
+      list.appendChild(empty);
+    }
+    rows.forEach((audit) => {
+      const row = document.createElement('div');
+      row.className = 'codex-mapping-audit-row';
+      const copy = document.createElement('div');
+      copy.className = 'codex-mapping-audit-copy';
+      const path = document.createElement('strong');
+      path.textContent = audit.displayPath;
+      const details = document.createElement('span');
+      const projectLabel = audit.projectName
+        ? `Project: ${audit.projectName}`
+        : 'No TimeKeeper project';
+      const lastSeen = audit.lastSeenAt
+        ? `Last seen ${formatRelativeTime(audit.lastSeenAt)}`
+        : 'Last seen unavailable';
+      details.textContent = `${audit.repoName || 'Repository unavailable'} - ${audit.sessionCount} session${audit.sessionCount === 1 ? '' : 's'} - ${projectLabel} - ${lastSeen}`;
+      copy.append(path, details);
+      const status = document.createElement('span');
+      status.className =
+        audit.status === 'unmapped' || audit.status === 'stale'
+          ? 'health-pill warn'
+          : 'health-pill';
+      status.textContent = getCodexMappingStatusLabel(audit.status);
+      const action = document.createElement('button');
+      action.type = 'button';
+      action.className = 'btn secondary';
+      action.textContent = audit.status === 'automatic' ? 'Add rule' : 'Map';
+      action.title = `Map ${audit.displayPath} to a TimeKeeper project`;
+      action.addEventListener('click', () => editCodexMapping(audit));
+      row.append(copy, status, action);
+      list.appendChild(row);
+    });
+    section.appendChild(list);
   }
 
   function updateCodexPage() {
@@ -10551,6 +10825,12 @@ import {
     modelList.className = 'codex-model-list';
     renderCodexModelList(modelList, report.models);
     models.appendChild(modelList);
+
+    const mappingAudit = appendCodexPageSection(
+      content,
+      'Repository Mapping Audit'
+    );
+    renderCodexMappingAudit(mappingAudit);
 
     const activity = appendCodexPageSection(content, 'Activity');
     const activityGrid = document.createElement('div');
@@ -17025,6 +17305,7 @@ import {
   );
   const codexImportNowBtn = document.getElementById('codexImportNowBtn');
   const codexPageRefreshBtn = document.getElementById('codexPageRefreshBtn');
+  const codexMappingAuditBtn = document.getElementById('codexMappingAuditBtn');
   const connectCodexContextBtn = document.getElementById(
     'connectCodexContextBtn'
   );
@@ -17052,6 +17333,13 @@ import {
   if (codexPageRefreshBtn) {
     codexPageRefreshBtn.addEventListener('click', () => {
       importCodexUsage();
+    });
+  }
+  if (codexMappingAuditBtn) {
+    codexMappingAuditBtn.addEventListener('click', () => {
+      document
+        .getElementById('codexMappingAudit')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     });
   }
   if (connectCodexContextBtn) {
@@ -17106,7 +17394,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=28')
+      .register('./service-worker.js?v=29')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

@@ -35,6 +35,16 @@ function normalizeDisplayLabel(value, fallback = 'Unknown') {
   return text || fallback;
 }
 
+function normalizeFastMode(value) {
+  if (value === true || String(value || '').toLowerCase() === 'on') {
+    return 'on';
+  }
+  if (value === false || String(value || '').toLowerCase() === 'off') {
+    return 'off';
+  }
+  return 'unknown';
+}
+
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
 }
@@ -330,6 +340,9 @@ function normalizeModelBreakdown(entry, session) {
       return {
         model: normalizeLabel(row?.model),
         effort: normalizeLabel(row?.effort),
+        fastMode: normalizeFastMode(
+          row?.fastMode ?? row?.fast_mode ?? row?.mode
+        ),
         role: normalizeLabel(row?.role, 'parent'),
         wallSeconds,
         effectiveSeconds,
@@ -342,6 +355,9 @@ function normalizeModelBreakdown(entry, session) {
     {
       model: normalizeLabel(entry.codexModel ?? entry.model),
       effort: normalizeLabel(entry.codexEffort ?? entry.effort),
+      fastMode: normalizeFastMode(
+        entry.codexFastMode ?? entry.fastMode ?? entry.fast_mode
+      ),
       role: normalizeLabel(entry.codexRole ?? entry.role, 'parent'),
       wallSeconds: session.wallSeconds,
       effectiveSeconds: session.effectiveSeconds,
@@ -628,6 +644,17 @@ function finalizeAggregate(aggregate, totalAttributedUsagePoints) {
   };
 }
 
+function getAggregateSampleWarning(aggregate) {
+  if (aggregate.sessions.size < 2) return 'Low sample: fewer than 2 sessions';
+  if (aggregate.measuredWallSeconds < 30 * 60) {
+    return 'Low sample: less than 0.5 measured active hours';
+  }
+  if (aggregate.usagePoints > 0 && aggregate.allocatedIntervals.size < 2) {
+    return 'Low sample: fewer than 2 quota intervals';
+  }
+  return null;
+}
+
 function median(values) {
   const sorted = values
     .filter(Number.isFinite)
@@ -641,6 +668,16 @@ function median(values) {
 
 function dateKey(timestampMs) {
   return new Date(timestampMs).toISOString().slice(0, 10);
+}
+
+function modelEffortFastKey(model, effort, fastMode) {
+  return `${model}::${effort}::${fastMode}`;
+}
+
+function fastModeLabel(fastMode) {
+  if (fastMode === 'on') return 'Fast on';
+  if (fastMode === 'off') return 'Fast off';
+  return 'Fast unknown';
 }
 
 function rankRows(rows, selector, direction = 'desc') {
@@ -778,9 +815,11 @@ export function buildCodexAnalytics({
   const maps = {
     model: new Map(),
     modelEffort: new Map(),
+    modelEffortFast: new Map(),
     effort: new Map(),
     project: new Map(),
-    role: new Map()
+    role: new Map(),
+    trend: new Map()
   };
   let unknownModelEffectiveSeconds = 0;
   let totalEffectiveSeconds = 0;
@@ -811,9 +850,11 @@ export function buildCodexAnalytics({
         .map((segment) => segment.model)
     );
     if (distinctModels.size > 1) mixedModelSessions += 1;
+    const trendDate = dateKey(Math.max(session.startMs, requestedStartMs));
     session.modelBreakdown.forEach((segment) => {
       const model = segment.model;
       const effort = segment.effort;
+      const fastMode = segment.fastMode || 'unknown';
       const role = segment.role;
       const modelAggregate = ensureAggregate(maps.model, model, model);
       const modelEffortKey = `${model}::${effort}`;
@@ -823,6 +864,17 @@ export function buildCodexAnalytics({
         `${model} · ${effort}`,
         { model, effort }
       );
+      const modelEffortFastAggregateKey = modelEffortFastKey(
+        model,
+        effort,
+        fastMode
+      );
+      const modelEffortFastAggregate = ensureAggregate(
+        maps.modelEffortFast,
+        modelEffortFastAggregateKey,
+        `${model} · ${effort} · ${fastModeLabel(fastMode)}`,
+        { model, effort, fastMode }
+      );
       const effortAggregate = ensureAggregate(maps.effort, effort, effort);
       const projectAggregate = ensureAggregate(
         maps.project,
@@ -830,12 +882,21 @@ export function buildCodexAnalytics({
         session.projectName
       );
       const roleAggregate = ensureAggregate(maps.role, role, role);
+      const trendKey = `${trendDate}::${modelEffortFastAggregateKey}`;
+      const trendAggregate = ensureAggregate(
+        maps.trend,
+        trendKey,
+        `${model} · ${effort} · ${fastModeLabel(fastMode)}`,
+        { date: trendDate, model, effort, fastMode }
+      );
       [
         modelAggregate,
         modelEffortAggregate,
+        modelEffortFastAggregate,
         effortAggregate,
         projectAggregate,
-        roleAggregate
+        roleAggregate,
+        trendAggregate
       ].forEach((aggregate) =>
         addTimeToAggregate(
           aggregate,
@@ -887,6 +948,7 @@ export function buildCodexAnalytics({
     attributedUsagePoints += interval.usagePoints;
     candidates.forEach(({ session, segment, weight }) => {
       const allocated = interval.usagePoints * (weight / totalWeight);
+      const fastMode = segment.fastMode || 'unknown';
       const modelAggregate = ensureAggregate(
         maps.model,
         segment.model,
@@ -898,6 +960,21 @@ export function buildCodexAnalytics({
         modelEffortKey,
         `${segment.model} · ${segment.effort}`,
         { model: segment.model, effort: segment.effort }
+      );
+      const modelEffortFastAggregateKey = modelEffortFastKey(
+        segment.model,
+        segment.effort,
+        fastMode
+      );
+      const modelEffortFastAggregate = ensureAggregate(
+        maps.modelEffortFast,
+        modelEffortFastAggregateKey,
+        `${segment.model} · ${segment.effort} · ${fastModeLabel(fastMode)}`,
+        {
+          model: segment.model,
+          effort: segment.effort,
+          fastMode
+        }
       );
       const effortAggregate = ensureAggregate(
         maps.effort,
@@ -914,12 +991,26 @@ export function buildCodexAnalytics({
         segment.role,
         segment.role
       );
+      const trendDate = dateKey(interval.endMs);
+      const trendAggregate = ensureAggregate(
+        maps.trend,
+        `${trendDate}::${modelEffortFastAggregateKey}`,
+        `${segment.model} · ${segment.effort} · ${fastModeLabel(fastMode)}`,
+        {
+          date: trendDate,
+          model: segment.model,
+          effort: segment.effort,
+          fastMode
+        }
+      );
       [
         modelAggregate,
         modelEffortAggregate,
+        modelEffortFastAggregate,
         effortAggregate,
         projectAggregate,
-        roleAggregate
+        roleAggregate,
+        trendAggregate
       ].forEach((aggregate) =>
         addUsageToAggregate(aggregate, allocated, intervalIndex)
       );
@@ -932,9 +1023,21 @@ export function buildCodexAnalytics({
       .sort((left, right) => right.effectiveHours - left.effectiveHours);
   const byModel = finalizeMap(maps.model);
   const byModelEffort = finalizeMap(maps.modelEffort);
+  const byModelEffortFast = finalizeMap(maps.modelEffortFast);
   const byEffort = finalizeMap(maps.effort);
   const byProject = finalizeMap(maps.project);
   const byRole = finalizeMap(maps.role);
+  const modelTrends = [...maps.trend.values()]
+    .map((aggregate) => ({
+      ...finalizeAggregate(aggregate, attributedUsagePoints),
+      sampleWarning: getAggregateSampleWarning(aggregate)
+    }))
+    .sort(
+      (left, right) =>
+        left.date.localeCompare(right.date) ||
+        right.effectiveHours - left.effectiveHours ||
+        left.label.localeCompare(right.label)
+    );
 
   const totalUsagePoints = clippedIntervals.reduce(
     (total, interval) => total + interval.usagePoints,
@@ -1097,9 +1200,11 @@ export function buildCodexAnalytics({
     },
     byModel,
     byModelEffort,
+    byModelEffortFast,
     byEffort,
     byProject,
     byRole,
+    modelTrends,
     daily,
     quotaTimeline: clippedIntervals.map((interval) => ({
       startAt: interval.startAt,

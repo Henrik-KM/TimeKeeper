@@ -923,7 +923,8 @@ tr:nth-child(even) td {
 
 .codex-breakdown-list,
 .codex-model-list,
-.codex-session-list {
+.codex-session-list,
+.codex-mapping-audit-list {
   display: grid;
   gap: 0;
   border-top: 1px solid #e2e8f0;
@@ -931,10 +932,34 @@ tr:nth-child(even) td {
 
 .codex-breakdown-row,
 .codex-model-row,
-.codex-session-row {
+.codex-session-row,
+.codex-mapping-audit-row {
   min-width: 0;
   padding: 0.7rem 0;
   border-bottom: 1px solid #e2e8f0;
+}
+
+.codex-mapping-audit-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.codex-mapping-audit-copy {
+  display: grid;
+  min-width: 0;
+  gap: 0.15rem;
+}
+
+.codex-mapping-audit-copy strong,
+.codex-mapping-audit-copy span {
+  overflow-wrap: anywhere;
+}
+
+.codex-mapping-audit-copy span {
+  color: #64748b;
+  font-size: 0.78rem;
 }
 
 .codex-breakdown-row {
@@ -976,6 +1001,7 @@ tr:nth-child(even) td {
   grid-template-columns:
     minmax(0, 1.35fr)
     minmax(7rem, 0.95fr)
+    minmax(5rem, 0.7fr)
     repeat(4, minmax(4.5rem, 0.7fr));
   align-items: center;
   gap: 0.75rem;
@@ -2010,6 +2036,15 @@ tr:nth-child(even) td {
   .codex-breakdown-row {
     grid-template-columns: 1fr;
     gap: 0.5rem;
+  }
+
+  .codex-mapping-audit-row {
+    grid-template-columns: 1fr auto;
+    gap: 0.5rem;
+  }
+
+  .codex-mapping-audit-row .codex-mapping-audit-copy {
+    grid-column: 1 / -1;
   }
 
   .codex-model-row {

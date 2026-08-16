@@ -8,7 +8,10 @@ import {
   computeCodexUsageIntervals,
   normalizeCodexSessions
 } from '../../src/features/codex/analytics.mjs';
-import { buildCsv } from '../../src/features/codex/analysis-page.mjs';
+import {
+  buildCsv,
+  buildTrendCsv
+} from '../../src/features/codex/analysis-page.mjs';
 
 const RESET_ONE = '2026-08-20T00:00:00.000Z';
 const RESET_TWO = '2026-08-27T00:00:00.000Z';
@@ -135,7 +138,8 @@ function codexEntry({
   effort = 'high',
   wallSeconds = 3600,
   effectiveSeconds = 1800,
-  projectId = 'project-1'
+  projectId = 'project-1',
+  fastMode = false
 }) {
   return {
     id,
@@ -152,6 +156,7 @@ function codexEntry({
         role: 'parent',
         model,
         effort,
+        fastMode,
         wallSeconds,
         effectiveSeconds
       }
@@ -203,6 +208,59 @@ test('normalizes imported TimeKeeper Codex entries and their model breakdown', (
   assert.equal(sessions[0].projectName, 'IFLAI');
   assert.equal(sessions[0].modelBreakdown[0].model, 'gpt-5.6-luna');
   assert.equal(sessions[0].modelBreakdown[0].effectiveSeconds, 2700);
+  assert.equal(sessions[0].modelBreakdown[0].fastMode, 'off');
+});
+
+test('tracks model, reasoning, and Fast mode trends with sample warnings', () => {
+  const entries = [
+    codexEntry({
+      id: 'codex-fast-off',
+      startTime: '2026-08-13T08:00:00.000Z',
+      endTime: '2026-08-13T09:00:00.000Z',
+      model: 'gpt-5.6-sol',
+      effort: 'high',
+      wallSeconds: 3600,
+      effectiveSeconds: 1800,
+      fastMode: false
+    }),
+    codexEntry({
+      id: 'codex-fast-on',
+      startTime: '2026-08-13T09:00:00.000Z',
+      endTime: '2026-08-13T10:00:00.000Z',
+      model: 'gpt-5.6-sol',
+      effort: 'high',
+      wallSeconds: 3600,
+      effectiveSeconds: 2160,
+      fastMode: true
+    })
+  ];
+  const analytics = buildCodexAnalytics({
+    entries,
+    projects: [{ id: 'project-1', name: 'IFLAI' }],
+    usageHistory: [
+      sample('2026-08-13T08:00:00.000Z', 10),
+      sample('2026-08-13T09:00:00.000Z', 12),
+      sample('2026-08-13T10:00:00.000Z', 15)
+    ],
+    rangeDays: 1,
+    now: new Date('2026-08-13T10:00:00.000Z')
+  });
+  const trendRows = analytics.modelTrends.filter(
+    (row) => row.model === 'gpt-5.6-sol'
+  );
+
+  assert.deepEqual(trendRows.map((row) => row.fastMode).sort(), ['off', 'on']);
+  assert.equal(
+    trendRows.reduce((total, row) => total + row.usagePoints, 0),
+    analytics.overall.attributedUsagePoints
+  );
+  assert.equal(
+    trendRows.reduce((total, row) => total + row.effectiveHours, 0),
+    analytics.overall.totalEffectiveHours
+  );
+  assert.ok(trendRows.every((row) => row.sampleWarning));
+  assert.match(buildTrendCsv(analytics, trendRows), /fast_mode/);
+  assert.match(buildTrendCsv(analytics, trendRows), /gpt-5\.6-sol/);
 });
 
 test('ranks quota burn and effective-time yield by model', () => {
@@ -465,6 +523,7 @@ test('ignores zero-duration placeholder model rows', () => {
     role: 'parent',
     model: 'unknown',
     effort: 'unknown',
+    fastMode: false,
     factor: 0.4,
     wallSeconds: 0,
     effectiveSeconds: 0

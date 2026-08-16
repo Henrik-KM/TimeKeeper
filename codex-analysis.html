@@ -196,6 +196,21 @@
         display: block;
         color: var(--ink);
       }
+      .trend-toolbar {
+        display: flex;
+        align-items: end;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 12px;
+      }
+      .trend-toolbar .filter-field {
+        min-width: 150px;
+      }
+      .trend-summary {
+        align-self: center;
+        color: var(--muted);
+        font-size: 0.82rem;
+      }
       .measurement-banner {
         display: flex;
         flex-direction: column;
@@ -400,6 +415,24 @@
         color: #475569;
         background: #e2e8f0;
       }
+      .trend-warning,
+      .trend-ok {
+        display: inline-flex;
+        max-width: 220px;
+        border-radius: 999px;
+        padding: 3px 8px;
+        font-size: 0.72rem;
+        font-weight: 700;
+        white-space: normal;
+      }
+      .trend-warning {
+        color: #92400e;
+        background: #fef3c7;
+      }
+      .trend-ok {
+        color: #065f46;
+        background: #d1fae5;
+      }
       .two-column {
         min-width: 0;
         display: grid;
@@ -524,6 +557,9 @@
           </button>
           <button id="exportCsv" class="button primary" type="button">
             Export model CSV
+          </button>
+          <button id="exportTrendCsv" class="button" type="button">
+            Export trend CSV
           </button>
         </div>
       </header>
@@ -718,6 +754,55 @@
 
         <section class="section-card">
           <div class="section-header">
+            <h2>Model trend</h2>
+            <p>
+              Effective hours and measured quota efficiency by model, reasoning
+              level, and Fast mode.
+            </p>
+          </div>
+          <div class="trend-toolbar">
+            <label class="filter-field">
+              <span>Fast mode</span>
+              <select id="trendFastMode" class="select-control"></select>
+            </label>
+            <label class="filter-field">
+              <span>Trend metric</span>
+              <select id="trendMetric" class="select-control">
+                <option value="effectiveHours">Effective hours</option>
+                <option value="effectiveHoursPerUsagePoint">
+                  Effective hours per quota point
+                </option>
+              </select>
+            </label>
+            <label class="filter-field">
+              <span>Minimum sessions</span>
+              <input
+                id="trendMinimumSessions"
+                class="number-control"
+                type="number"
+                min="1"
+                step="1"
+                inputmode="numeric"
+              />
+            </label>
+            <span id="trendSummary" class="trend-summary"></span>
+          </div>
+          <canvas
+            id="modelTrendChart"
+            class="chart-canvas"
+            role="img"
+            aria-label="Model effective-time and quota-efficiency trend"
+          ></canvas>
+          <p class="chart-caption">
+            The chart shows the selected metric by session-start day. Efficiency
+            is shown only where quota history overlaps activity; small rows stay
+            visible but are marked directional.
+          </p>
+          <div id="modelTrendTable"></div>
+        </section>
+
+        <section class="section-card">
+          <div class="section-header">
             <h2>Project efficiency</h2>
             <p>Shows where quota is converted into the most credited work.</p>
           </div>
@@ -754,7 +839,7 @@
     </main>
     <script
       type="module"
-      src="src/features/codex/analysis-page.mjs?v=1"
+      src="src/features/codex/analysis-page.mjs?v=2"
     ></script>
   </body>
 </html>

@@ -8,6 +8,7 @@ import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 
 import {
+  buildCodexMappingAudit,
   buildCodexUsageRecordsFromSessionGroup,
   DEFAULT_CODEX_LOOKBACK_DAYS,
   getDefaultMachineId,
@@ -741,10 +742,17 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     group.push(summary);
     sessionGroups.set(groupId, group);
   });
+  const trackedProjects = config.trackedProjects || config.projects || [];
+  const mappings = config.mappings || [];
+  const mappingAudit = buildCodexMappingAudit({
+    sessions: summaries,
+    trackedProjects,
+    mappings
+  });
   const { records, retractedExternalIds } = buildCodexSessionGroupPartitions({
     sessionGroups: Array.from(sessionGroups.values()),
-    trackedProjects: config.trackedProjects || config.projects || [],
-    mappings: config.mappings || [],
+    trackedProjects,
+    mappings,
     threadNamesById,
     now,
     focusFactor: config.focusFactor,
@@ -776,7 +784,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     null;
   const usageLimits = (await liveUsageLimitsPromise) || sessionUsageLimits;
   return {
-    version: 2,
+    version: 3,
     source: 'timekeeper-codex-bridge',
     machineId: options.machineId,
     updatedAt: now.toISOString(),
@@ -787,6 +795,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     policyBackfillRepositories: [...backfillRepositories],
     usageLimits,
     retractedExternalIds,
+    mappingAudit,
     records: uniqueRecords
   };
 }
@@ -800,6 +809,9 @@ export function makeCodexPayloadKey(payload = {}) {
         usageLimits: payload.usageLimits || null,
         retractedExternalIds: Array.isArray(payload.retractedExternalIds)
           ? payload.retractedExternalIds
+          : [],
+        mappingAudit: Array.isArray(payload.mappingAudit)
+          ? payload.mappingAudit
           : [],
         records: Array.isArray(payload.records) ? payload.records : []
       })

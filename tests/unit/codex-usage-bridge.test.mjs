@@ -16,6 +16,7 @@ import {
   buildCodexUsageRecordsFromSessionData,
   buildCodexUsageRecordsFromSessionGroup,
   buildCodexUsageRecordsFromSessionText,
+  buildCodexMappingAudit,
   findTrackedProjectForCwd,
   getGitHubProjectPathInfo,
   getLocalLookbackStart,
@@ -113,6 +114,49 @@ test('ignores GitHub parent folders that are not TimeKeeper projects', () => {
   });
 
   assert.deepEqual(records, []);
+});
+
+test('builds a sanitized mapping audit and supports explicit unknown-folder rules', () => {
+  const audit = buildCodexMappingAudit({
+    sessions: [
+      {
+        meta: {
+          id: 'iflai-thread',
+          cwd: 'C:\\Users\\ccx55\\Documents\\GitHub\\IFLAI\\VWR-AutoInv',
+          timestamp: new Date('2026-06-13T09:00:00.000Z')
+        },
+        activity: [{ timestamp: new Date('2026-06-13T09:05:00.000Z') }],
+        hasAssistantActivity: true
+      },
+      {
+        meta: {
+          id: 'risknav-thread',
+          cwd: 'C:\\Users\\ccx55\\Documents\\RiskNav',
+          timestamp: new Date('2026-06-13T10:00:00.000Z')
+        },
+        activity: [{ timestamp: new Date('2026-06-13T10:05:00.000Z') }],
+        hasAssistantActivity: true
+      }
+    ],
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+    mappings: [{ matchType: 'repoName', match: 'RiskNav', projectId: 'iflai' }]
+  });
+
+  assert.deepEqual(
+    audit.map((row) => [row.displayPath, row.status, row.projectName]),
+    [
+      ['Documents/RiskNav', 'mapped', 'IFLAI'],
+      ['GitHub/IFLAI/VWR-AutoInv', 'automatic', 'IFLAI']
+    ]
+  );
+  assert.equal(audit[0].sessionCount, 1);
+  assert.equal(JSON.stringify(audit).includes('C:\\Users'), false);
+  const explicitGitHubMapping = findTrackedProjectForCwd(
+    'C:\\Users\\ccx55\\Documents\\GitHub\\RiskNav\\prototype',
+    [{ name: 'IFLAI', projectId: 'iflai' }],
+    [{ matchType: 'pathIncludes', match: 'GitHub/RiskNav', projectId: 'iflai' }]
+  );
+  assert.equal(explicitGitHubMapping.projectId, 'iflai');
 });
 
 test('keeps legacy repo mappings as a fallback when no project list exists', () => {

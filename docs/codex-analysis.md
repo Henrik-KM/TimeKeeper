@@ -38,8 +38,17 @@ without contributing to measured efficiency.
 The page supports 24-hour, 7-day, 30-day, and 90-day ranges. Where the data
 exists, the quota-window selector supports both primary and secondary windows.
 Model, effort, and project filters, minimum measured-time and quota-point
-thresholds, unknown-row visibility, sortable tables, charts, and CSV export
-all operate on the displayed breakdowns without changing the overall totals.
+thresholds, unknown-row visibility, sortable tables, charts, model-trend
+filters, and CSV export all operate on the displayed breakdowns without
+changing the overall totals.
+
+The model trend view groups activity by model, reasoning effort, and Fast mode.
+It reports full-range effective hours and measured quota efficiency by
+session-start day. Fast mode is `on`, `off`, or `unknown`; older entries that do
+not carry the bridge's Fast-mode field remain explicitly unknown. Trend rows
+with fewer than two sessions, less than 0.5 measured active hours, or fewer
+than two quota intervals are marked as low sample rather than treated as model
+rankings.
 
 ## Attribution
 
@@ -55,14 +64,29 @@ The analytics engine:
    longer than three hours;
 4. finds imported Codex sessions overlapping each positive quota delta;
 5. allocates the delta in proportion to overlapping model active time;
-6. aggregates the result by model, model and effort, effort, project, and
-   parent/subagent role.
+6. aggregates the result by model, model and effort, model/effort/Fast mode,
+   effort, project, parent/subagent role, and daily model trend.
 
 Allocation is conserved: the model breakdown sums to the attributed quota
 points. Quota with no overlapping activity remains explicitly unattributed.
 Mixed-model sessions contain aggregate model durations without exact per-model
 timestamps, so their allocation is proportional and receives a lower
 confidence qualification.
+
+## Repository mapping audit
+
+The main Codex page includes a repository mapping audit populated by the
+desktop bridge. It lists every detected session path in the bridge lookback,
+the resolved TimeKeeper project, session count, last-seen time, and whether the
+match was automatic, custom, stale, or missing. Published audit paths are
+sanitized to relative forms such as `GitHub/IFLAI/repository` or
+`Documents/RiskNav`; the full Windows cwd is not included in the inbox.
+
+An unknown row can be mapped by repository name or by a normalized path
+substring. Saving a rule keeps it in the browser configuration and publishes it
+through the existing Codex config publisher, so the desktop bridge uses the
+same rule on its next run. Explicit rules also resolve unfamiliar GitHub parent
+folders when the normal TimeKeeper project-folder match is unavailable.
 
 ## Historical backfill
 

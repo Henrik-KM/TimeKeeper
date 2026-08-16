@@ -1729,20 +1729,20 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v28';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=23'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v29';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=24'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '25')"
+    "url.searchParams.set('timekeeper-update', '26')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
-    "'./src/features/codex/analysis-page.mjs?v=1'"
+    "'./src/features/codex/analysis-page.mjs?v=2'"
   );
   expect(serviceWorker).toContain(
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=28')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=29')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1861,6 +1861,8 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   ).toBeVisible();
   await expect(page.locator('#windowSelect')).toHaveValue('primary');
   await expect(page.locator('#modelTable tbody tr')).toHaveCount(2);
+  await expect(page.locator('#modelTrendTable tbody tr')).toHaveCount(2);
+  await expect(page.locator('#trendFastMode')).toContainText('Fast unknown');
 
   const canvasState = await page.evaluate(() =>
     /** @type {HTMLCanvasElement[]} */ ([
@@ -1880,7 +1882,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
       };
     })
   );
-  expect(canvasState).toHaveLength(5);
+  expect(canvasState).toHaveLength(6);
   expect(
     canvasState.every(
       (canvas) => canvas.width > 0 && canvas.height > 0 && canvas.hasInk
@@ -1959,6 +1961,61 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
     )
   ).toBe(true);
+});
+
+test('Codex mapping audit exposes unknown paths and saves a repository rule', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-13T12:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'iflai-project',
+        name: 'IFLAI',
+        deadline: '2026-12-31'
+      })
+    ],
+    entries: [],
+    codexIntegration: {
+      enabled: false,
+      mappingAudit: [
+        {
+          key: 'documents/risknav',
+          displayPath: 'Documents/RiskNav',
+          repoName: 'RiskNav',
+          status: 'unmapped',
+          sessionCount: 3,
+          lastSeenAt: '2026-08-13T11:00:00.000Z'
+        }
+      ]
+    }
+  });
+  await page.goto('/');
+  await gotoSection(page, 'codex', 'Codex');
+  await expect(page.locator('#codexMappingAudit')).toContainText(
+    'Documents/RiskNav'
+  );
+  await expect(page.locator('#codexMappingAudit')).toContainText(
+    'Needs mapping'
+  );
+  await page.getByRole('button', { name: 'Mapping audit' }).click();
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Map Documents/RiskNav' })
+  ).toBeVisible();
+  await page.locator('#match').fill('RiskNav');
+  await page.getByRole('button', { name: 'Save Mapping' }).click();
+  const mappings = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem('timekeeperDataPro') || '{}')
+        .codexIntegration?.mappings
+  );
+  expect(mappings).toContainEqual({
+    matchType: 'repoName',
+    match: 'RiskNav',
+    projectId: 'iflai-project'
+  });
 });
 
 test('mobile Company request panel queues one bounded operator request', async ({
