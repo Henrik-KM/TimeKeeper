@@ -16,7 +16,7 @@ $TaskCommand = "wscript.exe //B //Nologo `"$ResolvedHiddenLauncherPath`""
   /Create `
   /TN $TaskName `
   /SC MINUTE `
-  /MO 5 `
+  /MO 15 `
   /TR $TaskCommand `
   /F | Out-Null
 if ($LASTEXITCODE -ne 0) {
@@ -32,7 +32,7 @@ if (-not $NoStart) {
 
 Write-Output "Installed scheduled task: $TaskName"
 if ($NoStart) {
-  Write-Output 'The task will repeat every 5 minutes.'
+  Write-Output 'The task will repeat every 15 minutes.'
 } else {
-  Write-Output 'The task was started and will repeat every 5 minutes.'
+  Write-Output 'The task was started and will repeat every 15 minutes.'
 }
