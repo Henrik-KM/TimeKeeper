@@ -4801,6 +4801,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   });
   await page.addInitScript((inboxContent) => {
     localStorage.setItem('timekeeperCodexIntegrationToken', 'ghp_codex_test');
+    window['__codexInboxFileFetches'] = 0;
     window.fetch = (url) => {
       const value = String(url);
       if (
@@ -4814,6 +4815,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
               {
                 type: 'file',
                 name: 'desktop-a.json',
+                sha: 'sha-desktop-a',
                 url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json'
               }
             ]),
@@ -4825,6 +4827,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         );
       }
       if (value.includes('timekeeper-codex-inbox/desktop-a.json')) {
+        window['__codexInboxFileFetches'] += 1;
         return Promise.resolve(
           new Response(JSON.stringify({ content: inboxContent }), {
             status: 200,
@@ -4954,6 +4957,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       )
     )
     .toMatchObject({ imported: 0, updated: 0 });
+  expect(
+    await page.evaluate(() => window['__codexInboxFileFetches'])
+  ).toBe(1);
   data = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );

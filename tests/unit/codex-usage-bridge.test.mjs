@@ -258,6 +258,34 @@ test('Codex payload fingerprint changes when usage limits change', () => {
   );
 });
 
+test('Codex payload fingerprint ignores usage-limit observation timestamps', () => {
+  const payload = {
+    rangeStart: '2026-06-07T00:00:00.000Z',
+    records: [],
+    usageLimits: {
+      observedAt: '2026-06-13T09:00:00.000Z',
+      primary: {
+        usedPercent: 90,
+        remainingPercent: 10,
+        windowMinutes: 10080,
+        resetsAt: '2026-06-16T17:00:00.000Z'
+      },
+      secondary: null
+    }
+  };
+
+  assert.equal(
+    makeCodexPayloadKey(payload),
+    makeCodexPayloadKey({
+      ...payload,
+      usageLimits: {
+        ...payload.usageLimits,
+        observedAt: '2026-06-13T09:05:00.000Z'
+      }
+    })
+  );
+});
+
 test('sanitizes the canonical live Codex rate-limit bucket', () => {
   const usageLimits = sanitizeAppServerUsageLimits(
     {

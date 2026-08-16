@@ -1430,7 +1430,7 @@ import {
   const CODEX_CONTEXT_PUBLISH_DEBOUNCE_MS = 5000;
   const CODEX_CONTEXT_RETRY_MS = 60 * 1000;
   const CODEX_CONTEXT_RUNNING_REFRESH_MS = 5 * 60 * 1000;
-  const CODEX_IMPORT_INTERVAL_MS = 60 * 1000;
+  const CODEX_IMPORT_INTERVAL_MS = 5 * 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
   const CODEX_FOCUS_FACTOR = 0.4;
@@ -3005,6 +3005,8 @@ import {
     skipped: 0,
     updated: 0
   };
+  let codexInboxFileCache = new Map();
+  let codexInboxCacheScope = '';
 
   function normalizeGitHubPath(value) {
     const path = String(value || 'assets/timekeeper-focus-state.json')
@@ -3864,6 +3866,15 @@ import {
 
   async function fetchCodexInboxPayloads() {
     const config = getCodexIntegrationConfig();
+    const cacheScope = [
+      normalizeGitHubRepository(config.repository),
+      config.branch || CODEX_DEFAULT_BRANCH,
+      config.inboxPath
+    ].join('|');
+    if (cacheScope !== codexInboxCacheScope) {
+      codexInboxFileCache = new Map();
+      codexInboxCacheScope = cacheScope;
+    }
     const directoryUrl = getCodexGitHubPathApiUrl(config.inboxPath, config);
     if (!directoryUrl)
       throw new Error('Enter a GitHub repository as owner/repo.');
@@ -3877,21 +3888,32 @@ import {
     const jsonItems = items.filter(
       (item) =>
         item &&
-        item.type === 'file' &&
-        String(item.name || '')
-          .toLowerCase()
-          .endsWith('.json')
+          item.type === 'file' &&
+          String(item.name || '')
+            .toLowerCase()
+            .endsWith('.json')
     );
-    const payloads = [];
+    const nextFileCache = new Map();
     await Promise.all(
       jsonItems.map(async (item) => {
+        const cacheKey = String(item.path || item.name || item.url || '');
+        const sha = String(item.sha || '');
+        const cached = cacheKey ? codexInboxFileCache.get(cacheKey) : null;
+        if (sha && cached?.sha === sha) {
+          nextFileCache.set(cacheKey, cached);
+          return;
+        }
         const itemPayload = await githubJson(item.url, {
           headers: getCodexAuthHeaders()
         });
-        payloads.push(JSON.parse(decodeUtf8Base64(itemPayload.content)));
+        nextFileCache.set(cacheKey, {
+          sha,
+          payload: JSON.parse(decodeUtf8Base64(itemPayload.content))
+        });
       })
     );
-    return payloads;
+    codexInboxFileCache = nextFileCache;
+    return [...nextFileCache.values()].map((item) => item.payload);
   }
 
   async function importCodexUsage({ quiet = false } = {}) {

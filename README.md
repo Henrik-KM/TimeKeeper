@@ -174,7 +174,7 @@ Setup:
 npm run codex:bridge:install
 ```
 
-The task runs at logon and every 5 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. To run it manually:
+The task runs at logon and every 15 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. The browser checks the inbox every five minutes and reuses unchanged files. To run it manually:
 
 ```bash
 npm run codex:bridge
@@ -211,6 +211,8 @@ Before writing, TimeKeeper checks the selected folder's latest backup revision a
 ## Strava feed publishing
 
 This repo includes a GitHub Actions workflow that publishes a lightweight Strava JSON feed to `assets/strava.json`, which is rendered in the Workouts section of the app.
+
+The workflow runs once daily at 03:17 UTC and can also be started manually with **Run workflow** when a fresher feed is needed.
 
 ### Setup
 

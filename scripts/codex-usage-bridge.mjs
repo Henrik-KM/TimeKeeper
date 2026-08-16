@@ -792,12 +792,18 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
 }
 
 export function makeCodexPayloadKey(payload = {}) {
+  const usageLimits = payload.usageLimits || null;
   return crypto
     .createHash('sha256')
     .update(
       JSON.stringify({
         rangeStart: payload.rangeStart,
-        usageLimits: payload.usageLimits || null,
+        usageLimits: usageLimits
+          ? {
+              primary: usageLimits.primary || null,
+              secondary: usageLimits.secondary || null
+            }
+          : null,
         retractedExternalIds: Array.isArray(payload.retractedExternalIds)
           ? payload.retractedExternalIds
           : [],
