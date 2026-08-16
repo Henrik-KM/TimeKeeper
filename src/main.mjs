@@ -10010,6 +10010,23 @@ import {
       : 'Collecting';
   }
 
+  function formatCodexSourceAveragePeriod(label, period) {
+    return `${label} avg/day: You ${Number(period?.meAverageHoursPerDay || 0).toFixed(1)}h - Codex ${Number(period?.codexAverageHoursPerDay || 0).toFixed(1)}h`;
+  }
+
+  function getCodexSourceAverageSummary() {
+    const averages = buildCodexSourceAverages(data.entries, new Date());
+    if (!averages) return null;
+    const weekLabel = formatCodexSourceAveragePeriod('Week', averages.week);
+    const monthLabel = formatCodexSourceAveragePeriod('Month', averages.month);
+    return {
+      averages,
+      weekLabel,
+      monthLabel,
+      compactLabel: `${weekLabel} | ${monthLabel}`
+    };
+  }
+
   function renderCodexKeyTakeaways(section, report, analytics = null) {
     section.replaceChildren();
     const title = document.createElement('h3');
@@ -10242,12 +10259,15 @@ import {
   function getCodexUsageCard() {
     const usage = getCodexUsageSummary();
     if (!usage) return null;
+    const sourceAverageLabel =
+      getCodexSourceAverageSummary()?.compactLabel || '';
     if (!Number.isFinite(usage.remainingPercent)) {
       return {
         title: 'Codex Usage',
         value: usage.value,
         icon: 'AI',
-        changeLabel: usage.todayValue
+        changeLabel: usage.todayValue,
+        sourceAverageLabel
       };
     }
     const quotaProgress = usage.isStale
@@ -10280,7 +10300,8 @@ import {
         progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(quotaProgress.expectedUsedPercent)}% expected by now`,
         scheduleLabel: pacingLabel,
         scheduleTone: pacingTone,
-        metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`
+        metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`,
+        sourceAverageLabel
       };
     }
     return {
@@ -10290,7 +10311,8 @@ import {
       icon: 'AI',
       progressLabel: `${formatCodexUsagePercent(usedPercent)}% used - weekly pacing unavailable`,
       scheduleLabel: usage.statusLabel,
-      metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel}${usage.secondaryLabel ? ` - ${usage.secondaryLabel}` : ''}`
+      metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel}${usage.secondaryLabel ? ` - ${usage.secondaryLabel}` : ''}`,
+      sourceAverageLabel
     };
   }
 
@@ -10924,6 +10946,12 @@ import {
           changeDiv.classList.add(change >= 0 ? 'positive' : 'negative');
         }
         div.appendChild(changeDiv);
+      }
+      if (card.sourceAverageLabel) {
+        const average = document.createElement('div');
+        average.className = 'stat-change codex-source-average-dashboard';
+        average.textContent = card.sourceAverageLabel;
+        div.appendChild(average);
       }
       // Append revenue information if provided on the card
       if (card.revenue !== undefined) {
@@ -14831,6 +14859,7 @@ import {
     const runningProject = running ? getEntryProject(running) : null;
     const workoutSummary = getWorkoutMobileSummary();
     const codexUsage = getCodexUsageSummary();
+    const codexSourceAverages = getCodexSourceAverageSummary();
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -14907,7 +14936,7 @@ import {
       () => openMobileWorkoutSheet(getFavoriteWorkoutPreset())
     );
     if (codexUsage) {
-      appendTodayCard(
+      const codexCard = appendTodayCard(
         'Codex',
         codexUsage.remainingLabel || codexUsage.value,
         `codex ${codexUsage.tone}`.trim(),
@@ -14916,6 +14945,18 @@ import {
           ? `Remaining - ${codexUsage.todayDetail}`
           : codexUsage.todayValue
       );
+      if (codexSourceAverages) {
+        const averageBlock = document.createElement('span');
+        averageBlock.className = 'codex-source-average-today';
+        [codexSourceAverages.weekLabel, codexSourceAverages.monthLabel].forEach(
+          (label) => {
+            const line = document.createElement('small');
+            line.textContent = label;
+            averageBlock.appendChild(line);
+          }
+        );
+        codexCard.appendChild(averageBlock);
+      }
     }
     panel.appendChild(primary);
 
@@ -17055,7 +17096,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=25')
+      .register('./service-worker.js?v=27')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

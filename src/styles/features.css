@@ -994,6 +994,14 @@ tr:nth-child(even) td {
   font-size: 0.78rem;
 }
 
+.codex-source-average-dashboard {
+  display: block;
+  color: #64748b;
+  font-size: 0.7rem;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
 .codex-source-average-list {
   display: grid;
   gap: 0;
@@ -2261,6 +2269,22 @@ tr:nth-child(even) td {
     font-size: 0.78rem;
     font-weight: 650;
     line-height: 1.25;
+  }
+
+  .mobile-today-card .codex-source-average-today {
+    display: grid;
+    gap: 0.08rem;
+    color: #64748b;
+    font-size: 0.7rem;
+    font-weight: 600;
+    line-height: 1.25;
+    text-transform: none;
+  }
+
+  .mobile-today-card .codex-source-average-today small {
+    color: inherit;
+    font-size: inherit;
+    font-weight: inherit;
   }
 
   .mobile-today-actions {

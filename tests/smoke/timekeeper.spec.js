@@ -1729,10 +1729,10 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v26';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=21'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v27';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=22'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '23')"
+    "url.searchParams.set('timekeeper-update', '24')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1742,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=25')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=27')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1907,6 +1907,16 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   ).toBe(true);
 
   await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const todayCodexCard = page.locator(
+    '#todayCommandPanel .mobile-today-card.codex'
+  );
+  await expect(todayCodexCard).toContainText(
+    'Week avg/day: You 0.0h - Codex 0.3h'
+  );
+  await expect(todayCodexCard).toContainText(
+    'Month avg/day: You 0.0h - Codex 0.1h'
+  );
   await gotoSection(page, 'codex', 'Codex');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
