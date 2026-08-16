@@ -10010,23 +10010,6 @@ import {
       : 'Collecting';
   }
 
-  function formatCodexSourceAveragePeriod(label, period) {
-    return `${label} avg/day: You ${Number(period?.meAverageHoursPerDay || 0).toFixed(1)}h - Codex ${Number(period?.codexAverageHoursPerDay || 0).toFixed(1)}h`;
-  }
-
-  function getCodexSourceAverageSummary() {
-    const averages = buildCodexSourceAverages(data.entries, new Date());
-    if (!averages) return null;
-    const weekLabel = formatCodexSourceAveragePeriod('Week', averages.week);
-    const monthLabel = formatCodexSourceAveragePeriod('Month', averages.month);
-    return {
-      averages,
-      weekLabel,
-      monthLabel,
-      compactLabel: `${weekLabel} | ${monthLabel}`
-    };
-  }
-
   function renderCodexKeyTakeaways(section, report, analytics = null) {
     section.replaceChildren();
     const title = document.createElement('h3');
@@ -10259,26 +10242,19 @@ import {
   function getCodexUsageCard() {
     const usage = getCodexUsageSummary();
     if (!usage) return null;
-    const sourceAverageLabel =
-      getCodexSourceAverageSummary()?.compactLabel || '';
     if (!Number.isFinite(usage.remainingPercent)) {
       return {
         title: 'Codex Usage',
         value: usage.value,
         icon: 'AI',
-        changeLabel: usage.todayValue,
-        sourceAverageLabel
+        changeLabel: usage.todayValue
       };
     }
-    const quotaProgress = usage.isStale
-      ? null
-      : computeCodexQuotaProgress(usage.primaryWindow, new Date());
-    const usedPercent = quotaProgress
-      ? quotaProgress.usedPercent
-      : Math.min(100, Math.max(0, 100 - usage.remainingPercent));
-    if (quotaProgress) {
-      const pacingDifference =
-        quotaProgress.usedPercent - quotaProgress.expectedUsedPercent;
+    const usagePacing = getCodexUsagePacing(usage);
+    const usedPercent = usagePacing.usedPercent;
+    const expectedUsedPercent = usagePacing.expectedUsedPercent;
+    if (Number.isFinite(expectedUsedPercent)) {
+      const pacingDifference = usedPercent - expectedUsedPercent;
       const pacingLabel =
         Math.abs(pacingDifference) <= 5
           ? 'On expected pace'
@@ -10295,13 +10271,12 @@ import {
         title: 'Codex Usage',
         value: usage.value,
         progress: usedPercent,
-        timeProgress: quotaProgress.expectedUsedPercent,
+        timeProgress: expectedUsedPercent,
         icon: 'AI',
-        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(quotaProgress.expectedUsedPercent)}% expected by now`,
+        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(expectedUsedPercent)}% expected by now`,
         scheduleLabel: pacingLabel,
         scheduleTone: pacingTone,
-        metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`,
-        sourceAverageLabel
+        metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`
       };
     }
     return {
@@ -10311,9 +10286,60 @@ import {
       icon: 'AI',
       progressLabel: `${formatCodexUsagePercent(usedPercent)}% used - weekly pacing unavailable`,
       scheduleLabel: usage.statusLabel,
-      metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel}${usage.secondaryLabel ? ` - ${usage.secondaryLabel}` : ''}`,
-      sourceAverageLabel
+      metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel}${usage.secondaryLabel ? ` - ${usage.secondaryLabel}` : ''}`
     };
+  }
+
+  function getCodexUsagePacing(usage) {
+    if (!usage || !Number.isFinite(usage.remainingPercent)) return null;
+    const fallbackUsedPercent = Math.min(
+      100,
+      Math.max(0, 100 - usage.remainingPercent)
+    );
+    const quotaProgress =
+      usage.isStale || !usage.primaryWindow
+        ? null
+        : computeCodexQuotaProgress(usage.primaryWindow, new Date());
+    return {
+      usedPercent: quotaProgress?.usedPercent ?? fallbackUsedPercent,
+      expectedUsedPercent: quotaProgress?.expectedUsedPercent ?? null
+    };
+  }
+
+  function appendCodexUsageProgress(container, usage, className = '') {
+    const pacing = getCodexUsagePacing(usage);
+    if (!pacing) return;
+    const hasExpectedProgress = Number.isFinite(pacing.expectedUsedPercent);
+    const usedLabel = formatCodexUsagePercent(pacing.usedPercent);
+    const expectedLabel = hasExpectedProgress
+      ? formatCodexUsagePercent(pacing.expectedUsedPercent)
+      : '';
+    const labelText = hasExpectedProgress
+      ? `${usedLabel}% used / ${expectedLabel}% expected this week`
+      : `${usedLabel}% used - weekly pacing unavailable`;
+    const progress = document.createElement('span');
+    progress.className = `codex-usage-progress${className ? ` ${className}` : ''}`;
+    progress.setAttribute('role', 'img');
+    progress.setAttribute('aria-label', labelText);
+    const appendBar = (width, barClass = '') => {
+      const bar = document.createElement('span');
+      bar.className = `progress-bar${barClass ? ` ${barClass}` : ''}`;
+      bar.setAttribute('aria-hidden', 'true');
+      const fill = document.createElement('span');
+      fill.className = 'fill';
+      fill.style.width = `${Math.min(100, Math.max(0, width)).toFixed(1)}%`;
+      bar.appendChild(fill);
+      progress.appendChild(bar);
+    };
+    appendBar(pacing.usedPercent);
+    if (hasExpectedProgress) {
+      appendBar(pacing.expectedUsedPercent, 'codex-usage-expected');
+    }
+    const label = document.createElement('small');
+    label.className = 'codex-usage-progress-label';
+    label.textContent = labelText;
+    progress.appendChild(label);
+    container.appendChild(progress);
   }
 
   function getCodexEntryWallSeconds(entry) {
@@ -10946,12 +10972,6 @@ import {
           changeDiv.classList.add(change >= 0 ? 'positive' : 'negative');
         }
         div.appendChild(changeDiv);
-      }
-      if (card.sourceAverageLabel) {
-        const average = document.createElement('div');
-        average.className = 'stat-change codex-source-average-dashboard';
-        average.textContent = card.sourceAverageLabel;
-        div.appendChild(average);
       }
       // Append revenue information if provided on the card
       if (card.revenue !== undefined) {
@@ -14859,7 +14879,6 @@ import {
     const runningProject = running ? getEntryProject(running) : null;
     const workoutSummary = getWorkoutMobileSummary();
     const codexUsage = getCodexUsageSummary();
-    const codexSourceAverages = getCodexSourceAverageSummary();
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -14945,18 +14964,7 @@ import {
           ? `Remaining - ${codexUsage.todayDetail}`
           : codexUsage.todayValue
       );
-      if (codexSourceAverages) {
-        const averageBlock = document.createElement('span');
-        averageBlock.className = 'codex-source-average-today';
-        [codexSourceAverages.weekLabel, codexSourceAverages.monthLabel].forEach(
-          (label) => {
-            const line = document.createElement('small');
-            line.textContent = label;
-            averageBlock.appendChild(line);
-          }
-        );
-        codexCard.appendChild(averageBlock);
-      }
+      appendCodexUsageProgress(codexCard, codexUsage);
     }
     panel.appendChild(primary);
 
@@ -15047,6 +15055,7 @@ import {
       item.appendChild(itemLabel);
       item.appendChild(itemValue);
       grid.appendChild(item);
+      return item;
     };
     addItem(
       'Timers',
@@ -15073,13 +15082,14 @@ import {
     );
     const codexUsage = getCodexUsageSummary();
     if (codexUsage) {
-      addItem(
+      const codexItem = addItem(
         'Codex',
         [codexUsage.todayValue, codexUsage.todayDetail]
           .filter(Boolean)
           .join(' - '),
         codexUsage.tone
       );
+      appendCodexUsageProgress(codexItem, codexUsage);
     }
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
@@ -17096,7 +17106,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=27')
+      .register('./service-worker.js?v=28')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
