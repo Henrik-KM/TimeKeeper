@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-17T11:46:02.035Z",
+  "updatedAt": "2026-08-17T13:31:03.802Z",
   "dayStart": "2026-08-16T22:00:00.000Z",
   "rangeStart": "2026-05-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-17T11:46:03.635Z",
+    "observedAt": "2026-08-17T13:31:14.031Z",
     "primary": {
       "usedPercent": 83,
       "remainingPercent": 17,
       "windowMinutes": 10080,
-      "resetsAt": "2026-08-20T03:48:07.000Z"
+      "resetsAt": "2026-08-20T03:48:08.000Z"
     },
     "secondary": null
   },
@@ -19876,6 +19876,32 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 2736,
           "effectiveSeconds": 1368
+        }
+      ],
+      "description": "Codex: Summarize AZ meeting notes"
+    },
+    {
+      "id": "codex-53c78e564ca8f237435d1e70",
+      "threadId": "01a00f05-92ad-7ad1-8957-5fff7305e09b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-17T10:29:59.260Z",
+      "endTime": "2026-08-17T11:53:00.175Z",
+      "wallSeconds": 4980,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2490,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 4980,
+          "effectiveSeconds": 2490
         }
       ],
       "description": "Codex: Summarize AZ meeting notes"
