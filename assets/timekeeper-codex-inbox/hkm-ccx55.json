@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-18T13:19:46.633Z",
+  "updatedAt": "2026-08-18T14:01:02.536Z",
   "dayStart": "2026-08-17T22:00:00.000Z",
   "rangeStart": "2026-05-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-18T13:19:50.528Z",
+    "observedAt": "2026-08-18T14:01:03.980Z",
     "primary": {
       "usedPercent": 93,
       "remainingPercent": 7,
@@ -21583,6 +21583,41 @@
         }
       ],
       "description": "Codex: Update July timesheet"
+    },
+    {
+      "id": "codex-98d0915c6cd13d75368c63c4",
+      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T12:58:55.569Z",
+      "endTime": "2026-08-18T13:39:56.439Z",
+      "wallSeconds": 2460,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 984,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2460,
+          "effectiveSeconds": 984
+        }
+      ],
+      "description": "Codex: Fill August Fortnox timesheet"
     }
   ]
 }
