@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-18T08:46:02.550Z",
+  "updatedAt": "2026-08-18T09:16:02.459Z",
   "dayStart": "2026-08-17T22:00:00.000Z",
   "rangeStart": "2026-05-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-18T08:46:03.919Z",
+    "observedAt": "2026-08-18T09:16:03.606Z",
     "primary": {
-      "usedPercent": 87,
-      "remainingPercent": 13,
+      "usedPercent": 88,
+      "remainingPercent": 12,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-20T03:48:07.000Z"
     },
@@ -19917,6 +19917,32 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-0baa630b2e77d6f3320eb2b0",
+      "threadId": "019ffa85-ec4c-72f2-bb7e-3cedbc7d4d90",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-18T08:25:00.208Z",
+      "endTime": "2026-08-18T08:52:50.303Z",
+      "wallSeconds": 1670,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 668,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1670,
+          "effectiveSeconds": 668
+        }
+      ],
+      "description": "Codex: Create editable vector PDFs"
     },
     {
       "id": "codex-c5fa0fa2b065d9ec0db60dd8",
