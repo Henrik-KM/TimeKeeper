@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-18T12:01:02.594Z",
+  "updatedAt": "2026-08-18T13:19:46.633Z",
   "dayStart": "2026-08-17T22:00:00.000Z",
   "rangeStart": "2026-05-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-18T12:01:08.134Z",
+    "observedAt": "2026-08-18T13:19:50.528Z",
     "primary": {
       "usedPercent": 93,
       "remainingPercent": 7,
@@ -21332,6 +21332,32 @@
       "description": "Codex: Create editable vector PDFs"
     },
     {
+      "id": "codex-de4494cef366615f68ee92b9",
+      "threadId": "01a013e8-3d0d-7760-983d-2d961ebb1d6f",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T10:28:40.956Z",
+      "endTime": "2026-08-18T11:58:51.421Z",
+      "wallSeconds": 5410,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2705,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 5410,
+          "effectiveSeconds": 2705
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
       "id": "codex-55c47719838141ade8769866",
       "threadId": "01a00efe-5dc7-7cc2-a753-0a17078fca22",
       "projectKey": "Albany",
@@ -21426,6 +21452,137 @@
         }
       ],
       "description": "Codex: Draft SEM NDA context reply"
+    },
+    {
+      "id": "codex-6cad3077730ab2e21e3eeb68",
+      "threadId": "01a0148c-5bb2-7140-9db0-6b89d9ef1dc7",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T12:20:26.355Z",
+      "endTime": "2026-08-18T12:22:39.758Z",
+      "wallSeconds": 133,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 66,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 133,
+          "effectiveSeconds": 66
+        }
+      ],
+      "description": "Codex: Draft SEM NDA context reply"
+    },
+    {
+      "id": "codex-ccb5f721806ba2d1ba4c9995",
+      "threadId": "01a014d4-95c2-7fe2-9212-84a9230ba249",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T12:24:58.090Z",
+      "endTime": "2026-08-18T12:48:25.214Z",
+      "wallSeconds": 1407,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 562,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1406,
+          "effectiveSeconds": 562
+        }
+      ],
+      "description": "Codex: Create Aventix-based repo"
+    },
+    {
+      "id": "codex-1c45a3b4d154c61e74584cc2",
+      "threadId": "01a014d5-201e-7921-8a65-c52d50b97021",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T12:25:27.288Z",
+      "endTime": "2026-08-18T12:49:48.949Z",
+      "wallSeconds": 1461,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 584,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1461,
+          "effectiveSeconds": 584
+        }
+      ],
+      "description": "Codex: Clarify email-helper structure"
+    },
+    {
+      "id": "codex-88e7c5be84bcbc70fdcd9954",
+      "threadId": "019f36c9-b110-7ad0-8de7-326497a5b84c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T12:51:50.853Z",
+      "endTime": "2026-08-18T12:52:56.590Z",
+      "wallSeconds": 65,
+      "focusFactor": 0.4109,
+      "effectiveSeconds": 27,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 7,
+          "effectiveSeconds": 3
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 58,
+          "effectiveSeconds": 23
+        }
+      ],
+      "description": "Codex: Update July timesheet"
     }
   ]
 }
