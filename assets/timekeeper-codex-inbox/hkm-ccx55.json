@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-18T15:46:02.568Z",
+  "updatedAt": "2026-08-18T16:01:02.575Z",
   "dayStart": "2026-08-17T22:00:00.000Z",
   "rangeStart": "2026-05-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-18T15:46:03.682Z",
+    "observedAt": "2026-08-18T16:01:04.002Z",
     "primary": {
       "usedPercent": 94,
       "remainingPercent": 6,
@@ -21618,6 +21618,41 @@
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-67064d521d49f0ef3d0a1b77",
+      "threadId": "01a01551-9da4-7252-91a2-d5b3c9500633",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-18T14:42:18.772Z",
+      "endTime": "2026-08-18T15:31:12.344Z",
+      "wallSeconds": 2933,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 1173,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2933,
+          "effectiveSeconds": 1173
+        }
+      ],
+      "description": "Codex: Rewrite Pixlbio outreach email"
     },
     {
       "id": "codex-72dfe21bf46f64b27ad9fbc5",
