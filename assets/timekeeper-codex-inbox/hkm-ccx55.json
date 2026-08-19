@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-19T19:46:02.304Z",
+  "updatedAt": "2026-08-19T20:01:02.310Z",
   "dayStart": "2026-08-18T22:00:00.000Z",
   "rangeStart": "2026-05-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-19T19:46:03.500Z",
+    "observedAt": "2026-08-19T20:01:03.588Z",
     "primary": {
       "usedPercent": 99,
       "remainingPercent": 1,
@@ -22069,6 +22069,41 @@
         }
       ],
       "description": "Codex: Create editable vector PDFs"
+    },
+    {
+      "id": "codex-abed97f4d660db2d687e6573",
+      "threadId": "01a01b73-96de-7511-b50b-713e58bc7458",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-19T19:15:55.809Z",
+      "endTime": "2026-08-19T19:33:54.020Z",
+      "wallSeconds": 1078,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 538,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1076,
+          "effectiveSeconds": 538
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
