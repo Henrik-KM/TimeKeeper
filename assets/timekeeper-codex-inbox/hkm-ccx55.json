@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-20T13:31:01.790Z",
+  "updatedAt": "2026-08-20T15:03:26.076Z",
   "dayStart": "2026-08-19T22:00:00.000Z",
   "rangeStart": "2026-05-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-20T13:31:02.992Z",
+    "observedAt": "2026-08-20T15:03:27.719Z",
     "primary": {
-      "usedPercent": 13,
-      "remainingPercent": 87,
+      "usedPercent": 14,
+      "remainingPercent": 86,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-27T05:35:47.000Z"
     },
@@ -22188,6 +22188,41 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-73c2f733df94a4f22feee729",
+      "threadId": "01a01f6c-f3d0-7610-953d-ac57470ce5b0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-20T13:47:44.171Z",
+      "endTime": "2026-08-20T13:53:28.643Z",
+      "wallSeconds": 344,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 137,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 343,
+          "effectiveSeconds": 137
+        }
+      ],
+      "description": "Codex: Draft LabVIEW startup discount email"
     }
   ]
 }
