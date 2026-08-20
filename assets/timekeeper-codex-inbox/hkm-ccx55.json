@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-20T08:01:01.753Z",
+  "updatedAt": "2026-08-20T08:16:01.671Z",
   "dayStart": "2026-08-19T22:00:00.000Z",
   "rangeStart": "2026-05-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-20T08:01:07.251Z",
+    "observedAt": "2026-08-20T08:16:03.020Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
@@ -21864,6 +21864,41 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b454a90490e584520eefc465",
+      "threadId": "01a01e1a-09ea-7863-9a54-49603bf53bda",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-20T07:37:29.572Z",
+      "endTime": "2026-08-20T07:45:56.948Z",
+      "wallSeconds": 507,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 202,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 506,
+          "effectiveSeconds": 202
+        }
+      ],
+      "description": "Codex: Review Aventix Slack updates"
     }
   ]
 }
