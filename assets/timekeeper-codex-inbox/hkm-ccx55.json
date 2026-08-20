@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-20T19:01:01.992Z",
+  "updatedAt": "2026-08-20T19:46:01.977Z",
   "dayStart": "2026-08-19T22:00:00.000Z",
   "rangeStart": "2026-05-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-20T19:01:03.053Z",
+    "observedAt": "2026-08-20T19:46:03.717Z",
     "primary": {
       "usedPercent": 17,
       "remainingPercent": 83,
       "windowMinutes": 10080,
-      "resetsAt": "2026-08-27T05:35:47.000Z"
+      "resetsAt": "2026-08-27T05:35:48.000Z"
     },
     "secondary": null
   },
@@ -23082,6 +23082,32 @@
         }
       ],
       "description": "Codex: Draft CHROMA-1 outreach emails"
+    },
+    {
+      "id": "codex-4330d8f14ef7ee83274fc9e3",
+      "threadId": "01a02026-f27e-74c0-9eee-a1e0c8f4a003",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-20T19:07:53.489Z",
+      "endTime": "2026-08-20T19:15:08.333Z",
+      "wallSeconds": 434,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 173,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 434,
+          "effectiveSeconds": 173
+        }
+      ],
+      "description": "Codex: Add LinkedIn contact invites"
     }
   ]
 }
