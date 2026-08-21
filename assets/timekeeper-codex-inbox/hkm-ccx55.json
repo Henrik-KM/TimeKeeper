@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-21T15:01:01.784Z",
+  "updatedAt": "2026-08-21T15:31:01.835Z",
   "dayStart": "2026-08-20T22:00:00.000Z",
   "rangeStart": "2026-05-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-21T15:01:03.143Z",
+    "observedAt": "2026-08-21T15:31:03.191Z",
     "primary": {
-      "usedPercent": 30,
-      "remainingPercent": 70,
+      "usedPercent": 31,
+      "remainingPercent": 69,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-27T05:35:47.000Z"
     },
@@ -25384,6 +25384,32 @@
         }
       ],
       "description": "Codex: Fix IFLAI skipped email filtering"
+    },
+    {
+      "id": "codex-8a7a7480a4206ebf728e0eef",
+      "threadId": "01a02026-f27e-74c0-9eee-a1e0c8f4a003",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-21T15:00:13.577Z",
+      "endTime": "2026-08-21T15:02:22.312Z",
+      "wallSeconds": 128,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 51,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 128,
+          "effectiveSeconds": 51
+        }
+      ],
+      "description": "Codex: Add LinkedIn contact invites"
     }
   ]
 }
