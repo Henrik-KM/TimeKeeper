@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-21T16:16:01.860Z",
+  "updatedAt": "2026-08-21T16:31:01.880Z",
   "dayStart": "2026-08-20T22:00:00.000Z",
   "rangeStart": "2026-05-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-21T16:16:03.363Z",
+    "observedAt": "2026-08-21T16:31:02.993Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
       "windowMinutes": 10080,
-      "resetsAt": "2026-08-27T05:35:48.000Z"
+      "resetsAt": "2026-08-27T05:35:47.000Z"
     },
     "secondary": null
   },
@@ -25433,6 +25433,32 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 24,
           "effectiveSeconds": 9
+        }
+      ],
+      "description": "Codex: Fix IFLAI skipped email filtering"
+    },
+    {
+      "id": "codex-4b854eebe61aeaf252622557",
+      "threadId": "01a0248a-3a27-7062-90fd-6634ffa915e9",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-21T15:59:15.010Z",
+      "endTime": "2026-08-21T16:09:08.999Z",
+      "wallSeconds": 593,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 237,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 593,
+          "effectiveSeconds": 237
         }
       ],
       "description": "Codex: Fix IFLAI skipped email filtering"
