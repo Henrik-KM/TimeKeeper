@@ -1,4 +1,12 @@
-import { buildCodexAnalytics } from './analytics.mjs';
+import {
+  buildCodexAnalytics,
+  selectTopCodexModelPerformance
+} from './analytics.mjs';
+import {
+  getCodexAnalyticsDataSignature,
+  readCodexTopPerformanceCache,
+  writeCodexTopPerformanceCache
+} from './top-performance-cache.mjs';
 
 const TIMEKEEPER_DATA_KEY = 'timekeeperDataPro';
 const USAGE_HISTORY_URL = new URL(
@@ -1390,6 +1398,15 @@ function render() {
     now: new Date()
   });
   state.analytics = analytics;
+  if (state.rangeDays === 7 || state.rangeDays === 30) {
+    const signature = getCodexAnalyticsDataSignature(state.data);
+    const stored = readCodexTopPerformanceCache();
+    const rows = stored?.signature === signature ? stored.rows : {};
+    rows[String(state.rangeDays)] = selectTopCodexModelPerformance(
+      analytics.byModelEffort
+    );
+    writeCodexTopPerformanceCache({ signature, rows });
+  }
   updateRangeControls();
   renderWindowControls();
   byId('rangeLabel').textContent = rangeLabel(state.rangeDays);

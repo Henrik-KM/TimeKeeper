@@ -1728,13 +1728,16 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v35';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=30'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v36';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=31'");
+  expect(serviceWorker).toContain(
+    "'./src/features/codex/top-performance-cache.mjs'"
+  );
   expect(serviceWorker).toContain(
     "'./src/features/codex/performance-worker.mjs'"
   );
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '32')"
+    "url.searchParams.set('timekeeper-update', '33')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1744,7 +1747,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=35')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=36')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1984,6 +1987,10 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
     )
   ).toBe(true);
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(
+    page.locator('#todayCommandPanel .mobile-today-card.codex-performance')
+  ).toContainText('model-a · high');
 });
 
 test('Codex mapping audit exposes unknown paths and saves a repository rule', async ({

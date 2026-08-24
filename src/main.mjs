@@ -56,6 +56,11 @@ import {
   selectTopCodexModelPerformance
 } from './features/codex/analytics.mjs';
 import {
+  getCodexAnalyticsDataSignature,
+  readCodexTopPerformanceCache,
+  writeCodexTopPerformanceCache
+} from './features/codex/top-performance-cache.mjs';
+import {
   computeUnionSeconds,
   getEntryElapsedSeconds,
   getEntrySource,
@@ -10098,21 +10103,7 @@ import {
   }
 
   function getCodexAnalyticsSignature() {
-    const integration = data?.codexIntegration || {};
-    const usageLimits =
-      integration.usageLimits ||
-      integration.lastUsageLimits ||
-      data?.codexUsageLimits ||
-      {};
-    const primary = usageLimits.primary || {};
-    return [
-      data?.updatedAt || '',
-      data?.entries?.length || 0,
-      primary.usedPercent ?? '',
-      primary.remainingPercent ?? '',
-      primary.windowMinutes ?? '',
-      primary.resetsAt || ''
-    ].join('|');
+    return getCodexAnalyticsDataSignature(data);
   }
 
   function getCodexEntriesForPerformance(rangeDays, now) {
@@ -10230,12 +10221,25 @@ import {
     if (codexAnalyticsCache.signature === signature) {
       return codexAnalyticsCache;
     }
+    const previous = codexAnalyticsCache;
+    const stored = readCodexTopPerformanceCache();
+    const previousRow =
+      previous.status !== 'idle' && previous.status !== 'error'
+        ? previous.row || previous.ranges['30']?.row || null
+        : null;
+    const cachedRow = previousRow || stored?.rows?.['30'] || null;
+    const cachedRanges = previousRow
+      ? previous.ranges
+      : {
+          7: { row: stored?.rows?.['7'] || null },
+          30: { row: stored?.rows?.['30'] || null }
+        };
     codexAnalyticsCache = {
       signature,
-      status: 'loading',
-      row: null,
+      status: cachedRow ? 'refreshing' : 'loading',
+      row: cachedRow,
       promise: null,
-      ranges: {}
+      ranges: cachedRanges
     };
     const cache = codexAnalyticsCache;
     const rangeDays = [7, 30];
@@ -10274,6 +10278,13 @@ import {
           cache.status = 'ready';
           cache.ranges = result.ranges || {};
           cache.row = cache.ranges['30']?.row || null;
+          writeCodexTopPerformanceCache({
+            signature,
+            rows: {
+              7: cache.ranges['7']?.row || null,
+              30: cache.ranges['30']?.row || null
+            }
+          });
           refreshCodexAnalyticsSurfaces();
         }
         return cache;
@@ -10345,7 +10356,8 @@ import {
       return 'Measuring the last 30 days';
     }
     const confidence = row.confidence === 'low' ? ' - directional sample' : '';
-    return `${row.usagePerEffectiveHour.toFixed(2)} pts/effective h - ${row.measuredEffectiveHours.toFixed(1)}h measured${confidence}`;
+    const refreshLabel = state?.status === 'refreshing' ? ' - updating' : '';
+    return `${row.usagePerEffectiveHour.toFixed(2)} pts/effective h - ${row.measuredEffectiveHours.toFixed(1)}h measured${confidence}${refreshLabel}`;
   }
 
   function hasCodexEntries() {
@@ -17765,7 +17777,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=35')
+      .register('./service-worker.js?v=36')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
