@@ -10108,7 +10108,6 @@ import {
     return [
       data?.updatedAt || '',
       data?.entries?.length || 0,
-      integration.lastImportAt || '',
       usageLimits.observedAt || integration.lastUsageAt || '',
       primary.usedPercent ?? '',
       primary.remainingPercent ?? ''
@@ -17765,7 +17764,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=33')
+      .register('./service-worker.js?v=34')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
