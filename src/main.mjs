@@ -10161,6 +10161,13 @@ import {
           finish(reject, new Error(result.error));
           return;
         }
+        if (!result.ranges?.['7'] || !result.ranges?.['30']) {
+          finish(
+            reject,
+            new Error('Codex analytics worker returned incomplete ranges')
+          );
+          return;
+        }
         finish(resolve, result);
       };
       worker.onerror = (error) => {
@@ -10256,8 +10263,7 @@ import {
           cache.status = 'ready';
           cache.ranges = result.ranges || {};
           cache.row = cache.ranges['30']?.row || null;
-          if (activeSectionId === 'dashboard') renderTodayCommandPanel();
-          if (activeSectionId === 'codex') updateCodexPage();
+          refreshCodexAnalyticsSurfaces();
         }
         return cache;
       })
@@ -10266,8 +10272,7 @@ import {
           cache.status = 'error';
           cache.row = null;
           cache.ranges = {};
-          if (activeSectionId === 'dashboard') renderTodayCommandPanel();
-          if (activeSectionId === 'codex') updateCodexPage();
+          refreshCodexAnalyticsSurfaces();
         }
         return cache;
       });
@@ -10279,6 +10284,14 @@ import {
     return (cache.promise || Promise.resolve(cache)).then(
       (resolvedCache) => resolvedCache.ranges
     );
+  }
+
+  function refreshCodexAnalyticsSurfaces() {
+    const dashboard = document.getElementById('dashboard');
+    if (dashboard && dashboard.style.display !== 'none') {
+      renderTodayCommandPanel();
+    }
+    if (activeSectionId === 'codex') updateCodexPage();
   }
 
   function getCodexTopPerformanceState() {

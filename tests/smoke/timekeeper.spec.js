@@ -1931,6 +1931,11 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   );
   await expect(topCodexCard).toContainText('model-a · high');
   await expect(topCodexCard).toContainText('pts/effective h');
+  await page.reload();
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(
+    page.locator('#todayCommandPanel .mobile-today-card.codex-performance')
+  ).toContainText('model-a · high');
   await gotoSection(page, 'codex', 'Codex');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
