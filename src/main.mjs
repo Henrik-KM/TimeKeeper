@@ -3075,7 +3075,9 @@ import {
     signature: '',
     status: 'idle',
     row: null,
-    promise: null
+    promise: null,
+    measurementState: 'collecting',
+    coverage: null
   };
   let codexImportRuntimeStatus = {
     pending: false,
@@ -10112,6 +10114,93 @@ import {
     ].join('|');
   }
 
+  function getCodexEntriesForPerformance(rangeDays, now) {
+    const nowMs = now.getTime();
+    const rangeStartMs = nowMs - rangeDays * 24 * 60 * 60 * 1000;
+    return data.entries.filter((entry) => {
+      if (!isCodexTimeEntry(entry)) return false;
+      const startMs = Date.parse(
+        entry.startTime || entry.timestamp || entry.createdAt || ''
+      );
+      if (!Number.isFinite(startMs) || startMs >= nowMs) return false;
+      const endMs = Date.parse(entry.endTime || '');
+      return Number.isFinite(endMs)
+        ? endMs > rangeStartMs
+        : startMs >= rangeStartMs;
+    });
+  }
+
+  function runCodexTopPerformanceWorker({
+    entries,
+    projects,
+    usageHistory,
+    rangeDays,
+    now,
+    windowKey
+  }) {
+    const requestId = `${Date.now()}-${Math.random()}`;
+    return new Promise((resolve, reject) => {
+      let worker;
+      try {
+        worker = new Worker(
+          new URL('./features/codex/performance-worker.mjs', import.meta.url),
+          { type: 'module' }
+        );
+      } catch (error) {
+        reject(error);
+        return;
+      }
+      const finish = (callback, value) => {
+        worker.terminate();
+        callback(value);
+      };
+      worker.onmessage = (event) => {
+        const result = event.data || {};
+        if (result.requestId !== requestId) return;
+        if (result.error) {
+          finish(reject, new Error(result.error));
+          return;
+        }
+        finish(resolve, result);
+      };
+      worker.onerror = (error) => {
+        finish(reject, error.error || error.message || error);
+      };
+      worker.postMessage({
+        requestId,
+        entries,
+        projects,
+        usageHistory,
+        rangeDays,
+        now: now.toISOString(),
+        windowKey
+      });
+    });
+  }
+
+  function runCodexTopPerformanceOnMainThread({
+    entries,
+    projects,
+    usageHistory,
+    rangeDays,
+    now,
+    windowKey
+  }) {
+    const analytics = buildCodexAnalytics({
+      entries,
+      projects,
+      usageHistory,
+      rangeDays,
+      now,
+      windowKey
+    });
+    return {
+      row: selectTopCodexModelPerformance(analytics.byModelEffort),
+      measurementState: analytics.measurementState,
+      coverage: analytics.coverage
+    };
+  }
+
   function getCodexTopPerformanceState() {
     const signature = getCodexTopPerformanceSignature();
     if (codexTopPerformanceState.signature === signature) {
@@ -10121,25 +10210,50 @@ import {
       signature,
       status: 'loading',
       row: null,
-      promise: null
+      promise: null,
+      measurementState: 'collecting',
+      coverage: null
     };
     const state = codexTopPerformanceState;
-    state.promise = loadCodexUsageHistory()
-      .then((usageHistory) =>
-        buildCodexAnalytics({
-          entries: data.entries,
-          projects: data.projects,
-          usageHistory,
-          rangeDays: 30,
-          now: new Date(),
-          windowKey: 'primary'
-        })
-      )
-      .then((analytics) => {
-        const row = selectTopCodexModelPerformance(analytics.byModelEffort);
+    const rangeDays = 30;
+    const now = new Date();
+    const workerInput = {
+      entries: getCodexEntriesForPerformance(rangeDays, now),
+      projects: data.projects,
+      rangeDays,
+      now,
+      windowKey: 'primary'
+    };
+    state.promise = new Promise((resolve, reject) => {
+      const start = () => {
+        loadCodexUsageHistory()
+          .then((usageHistory) =>
+            runCodexTopPerformanceWorker({
+              ...workerInput,
+              usageHistory
+            }).catch(() =>
+              runCodexTopPerformanceOnMainThread({
+                ...workerInput,
+                usageHistory
+              })
+            )
+          )
+          .then(resolve, reject);
+      };
+      if (typeof window.requestIdleCallback === 'function') {
+        window.requestIdleCallback(start, { timeout: 1500 });
+      } else {
+        window.setTimeout(start, 0);
+      }
+    })
+      .then((result) => {
+        const row = result.row || null;
         if (codexTopPerformanceState.signature === signature) {
           codexTopPerformanceState.status = 'ready';
           codexTopPerformanceState.row = row;
+          codexTopPerformanceState.measurementState =
+            result.measurementState || 'collecting';
+          codexTopPerformanceState.coverage = result.coverage || null;
           if (activeSectionId === 'dashboard') renderTodayCommandPanel();
         }
         return row;
@@ -10148,6 +10262,8 @@ import {
         if (codexTopPerformanceState.signature === signature) {
           codexTopPerformanceState.status = 'error';
           codexTopPerformanceState.row = null;
+          codexTopPerformanceState.measurementState = 'error';
+          codexTopPerformanceState.coverage = null;
           if (activeSectionId === 'dashboard') renderTodayCommandPanel();
         }
         return null;
@@ -10155,13 +10271,30 @@ import {
     return state;
   }
 
-  function formatCodexTopPerformanceLabel(row) {
-    if (!row) return 'Collecting';
-    return `${row.model} · ${row.effort}`;
+  function formatCodexTopPerformanceLabel(row, state = null) {
+    if (row) return `${row.model} · ${row.effort}`;
+    if (state?.status === 'ready') return 'No qualifying sample';
+    if (state?.status === 'error') return 'Unavailable';
+    return 'Collecting';
   }
 
-  function formatCodexTopPerformanceDetail(row) {
-    if (!row) return 'Needs 30 min measured effective time';
+  function formatCodexTopPerformanceDetail(row, state = null) {
+    if (!row) {
+      if (state?.status === 'error') {
+        return 'Quota history could not be read';
+      }
+      if (state?.status === 'ready') {
+        const coverage = state.coverage || {};
+        if (Number(coverage.sampleCount) < 2) {
+          return 'Waiting for a second quota snapshot';
+        }
+        if (Number(coverage.intervalCount) <= 0) {
+          return 'No overlapping quota interval in the last 30 days';
+        }
+        return 'No model + reasoning pair has 30 min measured effective time';
+      }
+      return 'Measuring the last 30 days';
+    }
     const confidence = row.confidence === 'low' ? ' - directional sample' : '';
     return `${row.usagePerEffectiveHour.toFixed(2)} pts/effective h - ${row.measuredEffectiveHours.toFixed(1)}h measured${confidence}`;
   }
@@ -15336,10 +15469,10 @@ import {
       const topRow = codexTopPerformance.row;
       appendTodayCard(
         'Top Codex (30d)',
-        formatCodexTopPerformanceLabel(topRow),
+        formatCodexTopPerformanceLabel(topRow, codexTopPerformance),
         `codex-performance${topRow ? '' : ' muted'}`,
         () => activateSection('codex'),
-        formatCodexTopPerformanceDetail(topRow)
+        formatCodexTopPerformanceDetail(topRow, codexTopPerformance)
       );
     }
     panel.appendChild(primary);
@@ -15473,13 +15606,17 @@ import {
     if (codexTopPerformance) {
       const topItem = addItem(
         'Top Codex (30d)',
-        formatCodexTopPerformanceLabel(codexTopPerformance.row),
+        formatCodexTopPerformanceLabel(
+          codexTopPerformance.row,
+          codexTopPerformance
+        ),
         `codex-performance${codexTopPerformance.row ? '' : ' muted'}`
       );
       const detail = document.createElement('small');
       detail.className = 'today-command-codex-performance-detail';
       detail.textContent = formatCodexTopPerformanceDetail(
-        codexTopPerformance.row
+        codexTopPerformance.row,
+        codexTopPerformance
       );
       topItem.appendChild(detail);
     }
@@ -17471,12 +17608,14 @@ import {
   }
 
   // Initial render
+  const initialLaunchSectionId =
+    getSectionFromHash(window.location.hash) || defaultSectionId;
   updateCodexContextStatus();
   primeStravaCacheFromBrowserStorage();
   updateProjectSelects();
   updateEntriesTable();
   updateProjectsPage();
-  updateDashboard();
+  if (initialLaunchSectionId !== 'dashboard') updateDashboard();
   updateTimerSection();
   updateCodexIntegrationPanel();
   updateCodexPage();
@@ -17506,7 +17645,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=30')
+      .register('./service-worker.js?v=31')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
