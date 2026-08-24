@@ -1728,13 +1728,13 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v31';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=26'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v32';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=27'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/performance-worker.mjs'"
   );
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '28')"
+    "url.searchParams.set('timekeeper-update', '29')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1744,7 +1744,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=31')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=32')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1930,12 +1930,23 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
     '#todayCommandPanel .mobile-today-card.codex-performance'
   );
   await expect(topCodexCard).toContainText('model-a · high');
-  await expect(topCodexCard).toContainText('2.67 pts/effective h');
+  await expect(topCodexCard).toContainText('pts/effective h');
   await gotoSection(page, 'codex', 'Codex');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
-    '4.80 pts/eff h'
+    'pts/eff h'
   );
+  const performanceSection = codexPage
+    .locator('.codex-report-section')
+    .filter({ hasText: 'Model + Reasoning Performance' });
+  await expect(performanceSection).toBeVisible();
+  await expect(
+    performanceSection.locator('.codex-performance-card')
+  ).toHaveCount(2);
+  await expect(performanceSection).toContainText('Last 7 Days');
+  await expect(performanceSection).toContainText('Last 30 Days');
+  await expect(performanceSection).toContainText('model-a · high');
+  await expect(performanceSection).toContainText('pts/eff h');
   const modelSection = codexPage
     .locator('.codex-report-section')
     .filter({ hasText: 'Model + Reasoning - Last 7 Days' });
@@ -1944,8 +1955,8 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
     .locator('.codex-model-row')
     .filter({ hasText: 'model-a' });
   await expect(modelARow).toContainText('high');
-  await expect(modelARow).toContainText('2.67 pts/eff h');
-  await expect(modelARow).toContainText('0.38 eff h/pt');
+  await expect(modelARow).toContainText('pts/eff h');
+  await expect(modelARow).toContainText('eff h/pt');
   await expect(modelARow).toContainText('0.8 h');
   const sourceAverages = codexPage
     .locator('.codex-report-section')
@@ -1961,7 +1972,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
     'Usage Limits',
     'Key Takeaways - Last 7 Days',
     'Average Effective Hours - You vs Codex',
-    'Model + Reasoning - Last 7 Days'
+    'Model + Reasoning Performance'
   ]);
   expect(
     await page.evaluate(

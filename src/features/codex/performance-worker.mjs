@@ -6,19 +6,27 @@ import {
 self.addEventListener('message', (event) => {
   const payload = event.data || {};
   try {
-    const analytics = buildCodexAnalytics({
-      entries: payload.entries,
-      projects: payload.projects,
-      usageHistory: payload.usageHistory,
-      rangeDays: payload.rangeDays,
-      now: payload.now,
-      windowKey: payload.windowKey
+    const rangeDays = Array.isArray(payload.rangeDays)
+      ? payload.rangeDays
+      : [payload.rangeDays];
+    const ranges = {};
+    rangeDays.forEach((range) => {
+      const analytics = buildCodexAnalytics({
+        entries: payload.entries,
+        projects: payload.projects,
+        usageHistory: payload.usageHistory,
+        rangeDays: range,
+        now: payload.now,
+        windowKey: payload.windowKey
+      });
+      ranges[String(range)] = {
+        analytics,
+        row: selectTopCodexModelPerformance(analytics.byModelEffort)
+      };
     });
     self.postMessage({
       requestId: payload.requestId,
-      row: selectTopCodexModelPerformance(analytics.byModelEffort),
-      measurementState: analytics.measurementState,
-      coverage: analytics.coverage
+      ranges
     });
   } catch (error) {
     self.postMessage({

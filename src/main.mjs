@@ -52,6 +52,7 @@ import {
   buildCodexAnalytics,
   buildCodexSourceAverages,
   computeCodexQuotaProgress,
+  rankCodexModelPerformance,
   selectTopCodexModelPerformance
 } from './features/codex/analytics.mjs';
 import {
@@ -3071,13 +3072,12 @@ import {
   let codexImportTimer = null;
   let codexUsageHistoryAssetPromise = null;
   let codexPageRenderToken = 0;
-  let codexTopPerformanceState = {
+  let codexAnalyticsCache = {
     signature: '',
     status: 'idle',
     row: null,
     promise: null,
-    measurementState: 'collecting',
-    coverage: null
+    ranges: {}
   };
   let codexImportRuntimeStatus = {
     pending: false,
@@ -10096,7 +10096,7 @@ import {
     });
   }
 
-  function getCodexTopPerformanceSignature() {
+  function getCodexAnalyticsSignature() {
     const integration = data?.codexIntegration || {};
     const usageLimits =
       integration.usageLimits ||
@@ -10130,7 +10130,7 @@ import {
     });
   }
 
-  function runCodexTopPerformanceWorker({
+  function runCodexAnalyticsWorker({
     entries,
     projects,
     usageHistory,
@@ -10171,14 +10171,14 @@ import {
         entries,
         projects,
         usageHistory,
-        rangeDays,
+        rangeDays: Array.isArray(rangeDays) ? rangeDays : [rangeDays],
         now: now.toISOString(),
         windowKey
       });
     });
   }
 
-  function runCodexTopPerformanceOnMainThread({
+  function runCodexAnalyticsOnMainThread({
     entries,
     projects,
     usageHistory,
@@ -10186,53 +10186,58 @@ import {
     now,
     windowKey
   }) {
-    const analytics = buildCodexAnalytics({
-      entries,
-      projects,
-      usageHistory,
-      rangeDays,
-      now,
-      windowKey
+    const ranges = {};
+    const requestedRanges = Array.isArray(rangeDays) ? rangeDays : [rangeDays];
+    requestedRanges.forEach((range) => {
+      const analytics = buildCodexAnalytics({
+        entries,
+        projects,
+        usageHistory,
+        rangeDays: range,
+        now,
+        windowKey
+      });
+      ranges[String(range)] = {
+        analytics,
+        row: selectTopCodexModelPerformance(analytics.byModelEffort)
+      };
     });
     return {
-      row: selectTopCodexModelPerformance(analytics.byModelEffort),
-      measurementState: analytics.measurementState,
-      coverage: analytics.coverage
+      ranges
     };
   }
 
-  function getCodexTopPerformanceState() {
-    const signature = getCodexTopPerformanceSignature();
-    if (codexTopPerformanceState.signature === signature) {
-      return codexTopPerformanceState;
+  function getCodexAnalyticsCache() {
+    const signature = getCodexAnalyticsSignature();
+    if (codexAnalyticsCache.signature === signature) {
+      return codexAnalyticsCache;
     }
-    codexTopPerformanceState = {
+    codexAnalyticsCache = {
       signature,
       status: 'loading',
       row: null,
       promise: null,
-      measurementState: 'collecting',
-      coverage: null
+      ranges: {}
     };
-    const state = codexTopPerformanceState;
-    const rangeDays = 30;
+    const cache = codexAnalyticsCache;
+    const rangeDays = [7, 30];
     const now = new Date();
     const workerInput = {
-      entries: getCodexEntriesForPerformance(rangeDays, now),
+      entries: getCodexEntriesForPerformance(30, now),
       projects: data.projects,
       rangeDays,
       now,
       windowKey: 'primary'
     };
-    state.promise = new Promise((resolve, reject) => {
+    cache.promise = new Promise((resolve, reject) => {
       const start = () => {
         loadCodexUsageHistory()
           .then((usageHistory) =>
-            runCodexTopPerformanceWorker({
+            runCodexAnalyticsWorker({
               ...workerInput,
               usageHistory
             }).catch(() =>
-              runCodexTopPerformanceOnMainThread({
+              runCodexAnalyticsOnMainThread({
                 ...workerInput,
                 usageHistory
               })
@@ -10247,28 +10252,48 @@ import {
       }
     })
       .then((result) => {
-        const row = result.row || null;
-        if (codexTopPerformanceState.signature === signature) {
-          codexTopPerformanceState.status = 'ready';
-          codexTopPerformanceState.row = row;
-          codexTopPerformanceState.measurementState =
-            result.measurementState || 'collecting';
-          codexTopPerformanceState.coverage = result.coverage || null;
+        if (codexAnalyticsCache.signature === signature) {
+          cache.status = 'ready';
+          cache.ranges = result.ranges || {};
+          cache.row = cache.ranges['30']?.row || null;
           if (activeSectionId === 'dashboard') renderTodayCommandPanel();
+          if (activeSectionId === 'codex') updateCodexPage();
         }
-        return row;
+        return cache;
       })
       .catch(() => {
-        if (codexTopPerformanceState.signature === signature) {
-          codexTopPerformanceState.status = 'error';
-          codexTopPerformanceState.row = null;
-          codexTopPerformanceState.measurementState = 'error';
-          codexTopPerformanceState.coverage = null;
+        if (codexAnalyticsCache.signature === signature) {
+          cache.status = 'error';
+          cache.row = null;
+          cache.ranges = {};
           if (activeSectionId === 'dashboard') renderTodayCommandPanel();
+          if (activeSectionId === 'codex') updateCodexPage();
         }
-        return null;
+        return cache;
       });
-    return state;
+    return cache;
+  }
+
+  function loadCodexAnalyticsRanges() {
+    const cache = getCodexAnalyticsCache();
+    return (cache.promise || Promise.resolve(cache)).then(
+      (resolvedCache) => resolvedCache.ranges
+    );
+  }
+
+  function getCodexTopPerformanceState() {
+    const cache = getCodexAnalyticsCache();
+    const thirtyDay = cache.ranges['30'];
+    return {
+      signature: cache.signature,
+      status: cache.status,
+      row: thirtyDay?.row || null,
+      promise: cache.promise,
+      measurementState:
+        thirtyDay?.analytics?.measurementState ||
+        (cache.status === 'error' ? 'error' : 'collecting'),
+      coverage: thirtyDay?.analytics?.coverage || null
+    };
   }
 
   function formatCodexTopPerformanceLabel(row, state = null) {
@@ -10301,19 +10326,6 @@ import {
 
   function hasCodexEntries() {
     return data.entries.some((entry) => isCodexTimeEntry(entry));
-  }
-
-  function loadCodexPageAnalytics() {
-    return loadCodexUsageHistory().then((usageHistory) =>
-      buildCodexAnalytics({
-        entries: data.entries,
-        projects: data.projects,
-        usageHistory,
-        rangeDays: 7,
-        now: new Date(),
-        windowKey: 'primary'
-      })
-    );
   }
 
   function formatCodexAnalyticsHours(value) {
@@ -10570,6 +10582,82 @@ import {
     note.className = 'codex-summary-note';
     note.textContent =
       'Average is effective hours per elapsed calendar day in the current period; totals include completed entries only.';
+    section.appendChild(note);
+  }
+
+  function renderCodexPerformanceRankings(section, ranges = null) {
+    section.replaceChildren();
+    const title = document.createElement('h3');
+    title.textContent = 'Model + Reasoning Performance';
+    section.appendChild(title);
+    const grid = document.createElement('div');
+    grid.className = 'codex-performance-grid';
+    [7, 30].forEach((rangeDays) => {
+      const card = document.createElement('div');
+      card.className = 'codex-performance-card';
+      const title = document.createElement('h4');
+      title.textContent = `Last ${rangeDays} Days`;
+      card.appendChild(title);
+
+      const result = ranges?.[String(rangeDays)];
+      if (!result?.analytics) {
+        const loading = document.createElement('p');
+        loading.className = 'status-muted';
+        loading.textContent = 'Collecting measured quota history';
+        card.appendChild(loading);
+        grid.appendChild(card);
+        return;
+      }
+
+      const ranked = rankCodexModelPerformance(result.analytics.byModelEffort);
+      if (!ranked.length) {
+        const empty = document.createElement('p');
+        empty.className = 'status-muted';
+        empty.textContent =
+          'No model + reasoning pair has 30 min measured effective time.';
+        card.appendChild(empty);
+        grid.appendChild(card);
+        return;
+      }
+
+      const list = document.createElement('div');
+      list.className = 'codex-performance-list';
+      ranked.slice(0, 5).forEach((row, index) => {
+        const item = document.createElement('div');
+        item.className = 'codex-performance-row';
+        const rank = document.createElement('strong');
+        rank.className = 'codex-performance-rank';
+        rank.textContent = `#${index + 1}`;
+        const name = document.createElement('div');
+        name.className = 'codex-performance-name';
+        const label = document.createElement('strong');
+        label.textContent = `${row.model} · ${row.effort}`;
+        const detail = document.createElement('small');
+        detail.textContent = `${row.measuredEffectiveHours.toFixed(1)}h measured · ${row.confidence} confidence`;
+        name.append(label, detail);
+        const efficiency = document.createElement('div');
+        efficiency.className = 'codex-performance-efficiency';
+        const usage = document.createElement('strong');
+        usage.textContent = `${row.usagePerEffectiveHour.toFixed(2)} pts/eff h`;
+        const yieldValue = document.createElement('small');
+        yieldValue.textContent = Number.isFinite(
+          row.effectiveHoursPerUsagePoint
+        )
+          ? `${row.effectiveHoursPerUsagePoint.toFixed(2)} eff h/pt`
+          : 'Yield unavailable';
+        efficiency.append(usage, yieldValue);
+        item.append(rank, name, efficiency);
+        list.appendChild(item);
+      });
+      card.appendChild(list);
+      grid.appendChild(card);
+    });
+    section.appendChild(grid);
+
+    const note = document.createElement('small');
+    note.className = 'codex-summary-note';
+    note.textContent =
+      'Ranked by lowest measured quota points per effective hour. Only pairs with at least 30 minutes of measured effective time are included.';
     section.appendChild(note);
   }
 
@@ -11033,6 +11121,12 @@ import {
       buildCodexSourceAverages(data.entries, new Date())
     );
 
+    const performance = appendCodexPageSection(
+      content,
+      'Model + Reasoning Performance'
+    );
+    renderCodexPerformanceRankings(performance);
+
     const models = appendCodexPageSection(
       content,
       'Model + Reasoning - Last 7 Days'
@@ -11191,9 +11285,11 @@ import {
     );
     bridge.appendChild(bridgeGrid);
 
-    loadCodexPageAnalytics()
-      .then((analytics) => {
+    loadCodexAnalyticsRanges()
+      .then((ranges) => {
         if (renderToken !== codexPageRenderToken) return;
+        const analytics = ranges['7']?.analytics || null;
+        renderCodexPerformanceRankings(performance, ranges);
         renderCodexKeyTakeaways(takeaways, report, analytics);
         renderCodexModelList(modelList, report.models, analytics);
       })
@@ -17645,7 +17741,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=31')
+      .register('./service-worker.js?v=32')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

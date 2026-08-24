@@ -7,6 +7,7 @@ import {
   computeCodexQuotaProgress,
   computeCodexUsageIntervals,
   normalizeCodexSessions,
+  rankCodexModelPerformance,
   selectTopCodexModelPerformance
 } from '../../src/features/codex/analytics.mjs';
 import {
@@ -353,6 +354,10 @@ test('selects the lowest measured model and reasoning usage rate after the cutof
       minimumMeasuredEffectiveHours: 0.6
     }),
     rows[2]
+  );
+  assert.deepEqual(
+    rankCodexModelPerformance(rows).map((row) => row.label),
+    ['model-best · medium', 'model-worse · high']
   );
 });
 

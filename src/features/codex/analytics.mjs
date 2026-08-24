@@ -656,7 +656,7 @@ function getAggregateSampleWarning(aggregate) {
   return null;
 }
 
-export function selectTopCodexModelPerformance(
+export function rankCodexModelPerformance(
   rows = [],
   {
     minimumMeasuredEffectiveHours = DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS
@@ -666,28 +666,30 @@ export function selectTopCodexModelPerformance(
     0,
     finiteNumber(minimumMeasuredEffectiveHours, 0.5)
   );
-  return (
-    rows
-      .filter(
-        (row) =>
-          row &&
-          row.model &&
-          row.model !== 'unknown' &&
-          row.effort &&
-          row.effort !== 'unknown' &&
-          Number(row.usagePoints) > 0 &&
-          Number(row.measuredEffectiveHours) >= minimumHours &&
-          Number.isFinite(row.usagePerEffectiveHour)
-      )
-      .slice()
-      .sort(
-        (left, right) =>
-          left.usagePerEffectiveHour - right.usagePerEffectiveHour ||
-          right.measuredEffectiveHours - left.measuredEffectiveHours ||
-          right.effectiveHours - left.effectiveHours ||
-          String(left.label || '').localeCompare(String(right.label || ''))
-      )[0] || null
-  );
+  return rows
+    .filter(
+      (row) =>
+        row &&
+        row.model &&
+        row.model !== 'unknown' &&
+        row.effort &&
+        row.effort !== 'unknown' &&
+        Number(row.usagePoints) > 0 &&
+        Number(row.measuredEffectiveHours) >= minimumHours &&
+        Number.isFinite(row.usagePerEffectiveHour)
+    )
+    .slice()
+    .sort(
+      (left, right) =>
+        left.usagePerEffectiveHour - right.usagePerEffectiveHour ||
+        right.measuredEffectiveHours - left.measuredEffectiveHours ||
+        right.effectiveHours - left.effectiveHours ||
+        String(left.label || '').localeCompare(String(right.label || ''))
+    );
+}
+
+export function selectTopCodexModelPerformance(rows = [], options = {}) {
+  return rankCodexModelPerformance(rows, options)[0] || null;
 }
 
 function median(values) {
