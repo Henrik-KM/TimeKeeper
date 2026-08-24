@@ -163,7 +163,7 @@ test('boots with saved data and navigation still works', async ({ page }) => {
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Timer', exact: true })
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
   ).toBeVisible();
 
   await gotoSection(page, 'dashboard', 'Dashboard');
@@ -535,6 +535,7 @@ test('timer descriptions pause resume and edit controls are usable', async ({
     entries: []
   });
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
 
   await page.locator('#timerDescriptionPro').fill('Planning work');
   await page.locator('#startFactorPro').selectOption('0.5');
@@ -1262,10 +1263,8 @@ test('QoL quick log saved billing views and reminder controls work', async ({
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Timer', exact: true })
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
   ).toBeVisible();
-  await expect(page.locator('#todayCommandPanel')).toBeHidden();
-  await gotoSection(page, 'dashboard', 'Dashboard');
   await expect(page.locator('#todayCommandPanel')).toBeVisible();
   await expect(page.locator('#todayCommandPanel')).toContainText('Today');
   await expect(page.locator('#todayCommandPanel')).toContainText(
@@ -1712,7 +1711,7 @@ test('storage failure during legacy token writes cannot stop app startup', async
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Timer', exact: true })
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
   ).toBeVisible();
   const savedProject = await page.evaluate(
     () =>
@@ -1729,10 +1728,10 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v29';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=24'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v30';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=25'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '26')"
+    "url.searchParams.set('timekeeper-update', '27')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1742,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=29')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=30')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1924,6 +1923,11 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
     .evaluateAll((fills) => fills.map((fill) => fill.style.width));
   expect(parseFloat(todayCodexProgressWidths[0])).toBe(16);
   expect(parseFloat(todayCodexProgressWidths[1])).toBeGreaterThan(0);
+  const topCodexCard = page.locator(
+    '#todayCommandPanel .mobile-today-card.codex-performance'
+  );
+  await expect(topCodexCard).toContainText('model-a · high');
+  await expect(topCodexCard).toContainText('2.67 pts/effective h');
   await gotoSection(page, 'codex', 'Codex');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
@@ -3018,7 +3022,7 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
   });
 
   const manifest = JSON.parse(await readFile('manifest.webmanifest', 'utf8'));
-  expect(manifest.start_url).toBe('./index.html#timer');
+  expect(manifest.start_url).toBe('./index.html#today');
   expect(manifest.shortcuts.map((shortcut) => shortcut.name)).toEqual(
     expect.arrayContaining([
       'Open Today',
@@ -3037,14 +3041,12 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await page.goto('/');
   await expect(
-    page.getByRole('heading', { name: 'Timer', exact: true })
+    page.getByRole('heading', { name: 'Dashboard', exact: true })
   ).toBeVisible();
   const syncStatus = page.locator('#mobileSyncStatus');
   await expect(syncStatus).toBeHidden();
 
   const nowBar = page.locator('#mobileNowBar');
-  await expect(nowBar).toBeHidden();
-  await gotoSection(page, 'dashboard', 'Dashboard');
   await expect(nowBar).toBeVisible();
   await expect(nowBar).toContainText('Mobile Timer');
   await expect(nowBar).toContainText('150%');
@@ -4214,6 +4216,7 @@ test('time left today counts initial elapsed time correctly at 50 percent focus'
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await page.locator('#timerProjectPro').selectOption('today-project');
   await page.locator('#timerInitialPro').fill('1');
   await page.locator('#startFactorPro').selectOption('0.5');
@@ -4247,6 +4250,7 @@ test('new timers use explicit 100 percent focus by default without auto rebalanc
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await expect(page.locator('#startFactorPro')).toHaveValue('1');
   await expect(page.locator('#startFactorPro')).not.toContainText('Auto');
   await expect(page.locator('#startFactorPro')).not.toContainText('75%');
@@ -4335,6 +4339,7 @@ test('recent timer chips preserve focus and start immediately', async ({
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await expect(page.locator('#startFactorPro')).toContainText('150%');
   await expect(page.locator('#startFactorPro')).toContainText('200%');
   const recentTimers = page.locator('#recentTimersPro');
@@ -4385,6 +4390,7 @@ test('timer presets can be pinned started and unpinned', async ({ page }) => {
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await page.locator('#timerProjectPro').selectOption('preset-project');
   await page.locator('#timerDescriptionPro').fill('Pinned focus pass');
   await page.locator('#startFactorPro').selectOption('1.5');
@@ -4937,7 +4943,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(page.locator('#todayCommandPanel')).toContainText('Resets in');
   const todayCodexUsage = page
     .locator('#todayCommandPanel .today-command-item')
-    .filter({ hasText: 'Codex' });
+    .filter({ has: page.locator('.codex-usage-progress') });
   await expect(todayCodexUsage).toContainText('% expected this week');
   await expect(
     todayCodexUsage.locator('.codex-usage-progress .progress-bar')

@@ -3,6 +3,7 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 const DEFAULT_MAX_USAGE_GAP_HOURS = 3;
 const DEFAULT_MAX_USAGE_DELTA = 40;
 const DEFAULT_RESET_TIME_TOLERANCE_MINUTES = 5;
+export const DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS = 0.5;
 
 function finiteNumber(value, fallback = 0) {
   if (value === null || value === undefined || value === '') return fallback;
@@ -653,6 +654,40 @@ function getAggregateSampleWarning(aggregate) {
     return 'Low sample: fewer than 2 quota intervals';
   }
   return null;
+}
+
+export function selectTopCodexModelPerformance(
+  rows = [],
+  {
+    minimumMeasuredEffectiveHours = DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS
+  } = {}
+) {
+  const minimumHours = Math.max(
+    0,
+    finiteNumber(minimumMeasuredEffectiveHours, 0.5)
+  );
+  return (
+    rows
+      .filter(
+        (row) =>
+          row &&
+          row.model &&
+          row.model !== 'unknown' &&
+          row.effort &&
+          row.effort !== 'unknown' &&
+          Number(row.usagePoints) > 0 &&
+          Number(row.measuredEffectiveHours) >= minimumHours &&
+          Number.isFinite(row.usagePerEffectiveHour)
+      )
+      .slice()
+      .sort(
+        (left, right) =>
+          left.usagePerEffectiveHour - right.usagePerEffectiveHour ||
+          right.measuredEffectiveHours - left.measuredEffectiveHours ||
+          right.effectiveHours - left.effectiveHours ||
+          String(left.label || '').localeCompare(String(right.label || ''))
+      )[0] || null
+  );
 }
 
 function median(values) {

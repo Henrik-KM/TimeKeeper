@@ -51,7 +51,8 @@ import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13'
 import {
   buildCodexAnalytics,
   buildCodexSourceAverages,
-  computeCodexQuotaProgress
+  computeCodexQuotaProgress,
+  selectTopCodexModelPerformance
 } from './features/codex/analytics.mjs';
 import {
   computeUnionSeconds,
@@ -3070,6 +3071,12 @@ import {
   let codexImportTimer = null;
   let codexUsageHistoryAssetPromise = null;
   let codexPageRenderToken = 0;
+  let codexTopPerformanceState = {
+    signature: '',
+    status: 'idle',
+    row: null,
+    promise: null
+  };
   let codexImportRuntimeStatus = {
     pending: false,
     checkedAt: null,
@@ -7774,7 +7781,7 @@ import {
     connectButton: document.getElementById('companyPageConnectBtn'),
     refreshButton: document.getElementById('companyPageRefreshBtn')
   });
-  const defaultSectionId = 'timer';
+  const defaultSectionId = 'dashboard';
   const sectionIds = new Set(
     Array.from(document.querySelectorAll('.section')).map(
       (section) => section.id
@@ -10085,6 +10092,82 @@ import {
       const current = getCodexCurrentUsageSample();
       return current ? [...samples, current] : samples;
     });
+  }
+
+  function getCodexTopPerformanceSignature() {
+    const integration = data?.codexIntegration || {};
+    const usageLimits =
+      integration.usageLimits ||
+      integration.lastUsageLimits ||
+      data?.codexUsageLimits ||
+      {};
+    const primary = usageLimits.primary || {};
+    return [
+      data?.updatedAt || '',
+      data?.entries?.length || 0,
+      integration.lastImportAt || '',
+      usageLimits.observedAt || integration.lastUsageAt || '',
+      primary.usedPercent ?? '',
+      primary.remainingPercent ?? ''
+    ].join('|');
+  }
+
+  function getCodexTopPerformanceState() {
+    const signature = getCodexTopPerformanceSignature();
+    if (codexTopPerformanceState.signature === signature) {
+      return codexTopPerformanceState;
+    }
+    codexTopPerformanceState = {
+      signature,
+      status: 'loading',
+      row: null,
+      promise: null
+    };
+    const state = codexTopPerformanceState;
+    state.promise = loadCodexUsageHistory()
+      .then((usageHistory) =>
+        buildCodexAnalytics({
+          entries: data.entries,
+          projects: data.projects,
+          usageHistory,
+          rangeDays: 30,
+          now: new Date(),
+          windowKey: 'primary'
+        })
+      )
+      .then((analytics) => {
+        const row = selectTopCodexModelPerformance(analytics.byModelEffort);
+        if (codexTopPerformanceState.signature === signature) {
+          codexTopPerformanceState.status = 'ready';
+          codexTopPerformanceState.row = row;
+          if (activeSectionId === 'dashboard') renderTodayCommandPanel();
+        }
+        return row;
+      })
+      .catch(() => {
+        if (codexTopPerformanceState.signature === signature) {
+          codexTopPerformanceState.status = 'error';
+          codexTopPerformanceState.row = null;
+          if (activeSectionId === 'dashboard') renderTodayCommandPanel();
+        }
+        return null;
+      });
+    return state;
+  }
+
+  function formatCodexTopPerformanceLabel(row) {
+    if (!row) return 'Collecting';
+    return `${row.model} · ${row.effort}`;
+  }
+
+  function formatCodexTopPerformanceDetail(row) {
+    if (!row) return 'Needs 30 min measured effective time';
+    const confidence = row.confidence === 'low' ? ' - directional sample' : '';
+    return `${row.usagePerEffectiveHour.toFixed(2)} pts/effective h - ${row.measuredEffectiveHours.toFixed(1)}h measured${confidence}`;
+  }
+
+  function hasCodexEntries() {
+    return data.entries.some((entry) => isCodexTimeEntry(entry));
   }
 
   function loadCodexPageAnalytics() {
@@ -15159,6 +15242,9 @@ import {
     const runningProject = running ? getEntryProject(running) : null;
     const workoutSummary = getWorkoutMobileSummary();
     const codexUsage = getCodexUsageSummary();
+    const codexTopPerformance = hasCodexEntries()
+      ? getCodexTopPerformanceState()
+      : null;
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -15246,6 +15332,16 @@ import {
       );
       appendCodexUsageProgress(codexCard, codexUsage);
     }
+    if (codexTopPerformance) {
+      const topRow = codexTopPerformance.row;
+      appendTodayCard(
+        'Top Codex (30d)',
+        formatCodexTopPerformanceLabel(topRow),
+        `codex-performance${topRow ? '' : ' muted'}`,
+        () => activateSection('codex'),
+        formatCodexTopPerformanceDetail(topRow)
+      );
+    }
     panel.appendChild(primary);
 
     const runningProjectIds = new Set(
@@ -15298,6 +15394,9 @@ import {
     const recommendation = getRecommendedProjectForToday();
     const audit = getLocalDataAudit();
     const settings = ensureReminderSettings();
+    const codexTopPerformance = hasCodexEntries()
+      ? getCodexTopPerformanceState()
+      : null;
     if (
       renderMobileTodayCommandPanel({
         panel,
@@ -15370,6 +15469,19 @@ import {
         codexUsage.tone
       );
       appendCodexUsageProgress(codexItem, codexUsage);
+    }
+    if (codexTopPerformance) {
+      const topItem = addItem(
+        'Top Codex (30d)',
+        formatCodexTopPerformanceLabel(codexTopPerformance.row),
+        `codex-performance${codexTopPerformance.row ? '' : ' muted'}`
+      );
+      const detail = document.createElement('small');
+      detail.className = 'today-command-codex-performance-detail';
+      detail.textContent = formatCodexTopPerformanceDetail(
+        codexTopPerformance.row
+      );
+      topItem.appendChild(detail);
     }
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
@@ -17394,7 +17506,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=29')
+      .register('./service-worker.js?v=30')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

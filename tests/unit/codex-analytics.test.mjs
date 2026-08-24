@@ -6,7 +6,8 @@ import {
   buildCodexSourceAverages,
   computeCodexQuotaProgress,
   computeCodexUsageIntervals,
-  normalizeCodexSessions
+  normalizeCodexSessions,
+  selectTopCodexModelPerformance
 } from '../../src/features/codex/analytics.mjs';
 import {
   buildCsv,
@@ -310,6 +311,49 @@ test('ranks quota burn and effective-time yield by model', () => {
   assert.equal(analytics.overall.attributionRate, 1);
   assert.equal(analytics.overall.usagePerEffectiveHour, 2.6667);
   assert.equal(analytics.measurementState, 'partial');
+});
+
+test('selects the lowest measured model and reasoning usage rate after the cutoff', () => {
+  const rows = [
+    {
+      model: 'model-small',
+      effort: 'high',
+      usagePoints: 0.5,
+      measuredEffectiveHours: 0.4,
+      usagePerEffectiveHour: 0.1,
+      effectiveHours: 0.4,
+      label: 'model-small · high'
+    },
+    {
+      model: 'model-best',
+      effort: 'medium',
+      usagePoints: 1,
+      measuredEffectiveHours: 0.5,
+      usagePerEffectiveHour: 2,
+      effectiveHours: 0.5,
+      label: 'model-best · medium'
+    },
+    {
+      model: 'model-worse',
+      effort: 'high',
+      usagePoints: 4,
+      measuredEffectiveHours: 1,
+      usagePerEffectiveHour: 4,
+      effectiveHours: 1,
+      label: 'model-worse · high'
+    }
+  ];
+
+  assert.equal(
+    selectTopCodexModelPerformance(rows)?.label,
+    'model-best · medium'
+  );
+  assert.equal(
+    selectTopCodexModelPerformance(rows, {
+      minimumMeasuredEffectiveHours: 0.6
+    }),
+    rows[2]
+  );
 });
 
 test('allocates a mixed-session quota delta by model active time', () => {

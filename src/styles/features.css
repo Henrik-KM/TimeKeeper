@@ -775,6 +775,23 @@ tr:nth-child(even) td {
   background: #f1f5f9;
 }
 
+.today-command-item.codex-performance {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.today-command-item.codex-performance.muted {
+  border-color: #dbe3ef;
+  background: #f1f5f9;
+}
+
+.today-command-codex-performance-detail {
+  color: #475569;
+  font-size: 0.7rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
 .today-command-item .codex-usage-progress {
   display: grid;
   gap: 0.18rem;
@@ -2308,6 +2325,23 @@ tr:nth-child(even) td {
   .mobile-today-card.codex {
     grid-column: 1 / -1;
     min-height: 3.8rem;
+  }
+
+  .mobile-today-card.codex-performance {
+    grid-column: 1 / -1;
+    min-height: 3.8rem;
+    border-color: #bbf7d0;
+    background: #f0fdf4;
+  }
+
+  .mobile-today-card.codex-performance.muted {
+    border-color: #dbe3ef;
+    background: #f8fafc;
+  }
+
+  .mobile-today-card.codex-performance strong {
+    overflow-wrap: anywhere;
+    white-space: normal;
   }
 
   .mobile-today-card.codex strong {
