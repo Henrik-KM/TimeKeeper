@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-24T12:16:01.702Z",
+  "updatedAt": "2026-08-24T13:35:51.611Z",
   "dayStart": "2026-08-23T22:00:00.000Z",
   "rangeStart": "2026-05-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-24T12:16:03.048Z",
+    "observedAt": "2026-08-24T13:35:53.695Z",
     "primary": {
-      "usedPercent": 14,
-      "remainingPercent": 86,
+      "usedPercent": 15,
+      "remainingPercent": 85,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-31T04:37:18.000Z"
     },
@@ -25187,6 +25187,67 @@
         }
       ],
       "description": "Codex: Review JCTC manuscript status"
+    },
+    {
+      "id": "codex-88b8c94bfa5a7b5b93b4a1e5",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T13:05:17.924Z",
+      "endTime": "2026-08-24T13:08:01.654Z",
+      "wallSeconds": 163,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 81,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 163,
+          "effectiveSeconds": 81
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-8f5cdf5d190836a867139f76",
+      "threadId": "01a033e0-6a88-7cf2-81d9-5ac85f2c31e4",
+      "projectKey": "Website",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T13:09:50.310Z",
+      "endTime": "2026-08-24T13:11:37.007Z",
+      "wallSeconds": 106,
+      "focusFactor": 0.4995,
+      "effectiveSeconds": 53,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 106,
+          "effectiveSeconds": 53
+        }
+      ],
+      "description": "Codex: Suggest new blog topics"
     }
   ]
 }
