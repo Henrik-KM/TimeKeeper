@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-24T14:46:02.213Z",
+  "updatedAt": "2026-08-24T15:16:01.861Z",
   "dayStart": "2026-08-23T22:00:00.000Z",
   "rangeStart": "2026-05-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-24T14:46:03.824Z",
+    "observedAt": "2026-08-24T15:16:02.967Z",
     "primary": {
-      "usedPercent": 20,
-      "remainingPercent": 80,
+      "usedPercent": 21,
+      "remainingPercent": 79,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-31T04:37:18.000Z"
     },
@@ -25335,6 +25335,41 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-2d39ea03a49ba09ccfc7270b",
+      "threadId": "01a03418-079f-76b1-a94a-b70e00e5a637",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T14:06:35.054Z",
+      "endTime": "2026-08-24T14:46:30.946Z",
+      "wallSeconds": 2395,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1197,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2395,
+          "effectiveSeconds": 1197
+        }
+      ],
+      "description": "Codex: Find duplicate Charles River drafts"
     }
   ]
 }
