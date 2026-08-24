@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-24T10:46:02.702Z",
+  "updatedAt": "2026-08-24T11:31:01.674Z",
   "dayStart": "2026-08-23T22:00:00.000Z",
   "rangeStart": "2026-05-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-24T10:46:03.934Z",
+    "observedAt": "2026-08-24T11:31:02.767Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
@@ -25131,6 +25131,34 @@
         }
       ],
       "description": "Codex: Begin Fulbright workflow"
+    },
+    {
+      "id": "codex-9af1a1927b2835941d9febd7",
+      "threadId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-24T10:41:44.693Z",
+      "endTime": "2026-08-24T11:10:59.285Z",
+      "wallSeconds": 1754,
+      "focusFactor": 0.2,
+      "effectiveSeconds": 350,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1754,
+          "effectiveSeconds": 350,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "description": "Codex: Review JCTC manuscript status"
     }
   ]
 }
