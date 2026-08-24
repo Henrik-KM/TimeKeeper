@@ -1,6 +1,6 @@
 import {
   buildCodexAnalytics,
-  selectTopCodexModelPerformance
+  rankCodexModelPerformance
 } from './analytics.mjs';
 
 self.addEventListener('message', (event) => {
@@ -19,9 +19,14 @@ self.addEventListener('message', (event) => {
         now: payload.now,
         windowKey: payload.windowKey
       });
+      const topRows = rankCodexModelPerformance(analytics.byModelEffort).slice(
+        0,
+        3
+      );
       ranges[String(range)] = {
         analytics,
-        row: selectTopCodexModelPerformance(analytics.byModelEffort)
+        row: topRows[0] || null,
+        topRows
       };
     });
     self.postMessage({

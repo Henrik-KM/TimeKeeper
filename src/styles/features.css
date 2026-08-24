@@ -792,6 +792,41 @@ tr:nth-child(even) td {
   line-height: 1.25;
 }
 
+.today-codex-top-list {
+  display: grid;
+  gap: 0.16rem;
+  margin-top: 0.12rem;
+}
+
+.today-codex-top-row {
+  display: grid;
+  grid-template-columns: 1.15rem minmax(0, 1fr) auto;
+  gap: 0.28rem;
+  align-items: baseline;
+  min-width: 0;
+  color: #334155;
+  font-size: 0.69rem;
+  font-weight: 650;
+  line-height: 1.2;
+}
+
+.today-codex-top-rank {
+  color: #64748b;
+  font-variant-numeric: tabular-nums;
+}
+
+.today-codex-top-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.today-codex-top-rate {
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+
 .today-command-item .codex-usage-progress {
   display: grid;
   gap: 0.18rem;
@@ -2428,6 +2463,15 @@ tr:nth-child(even) td {
     font-size: 0.78rem;
     font-weight: 650;
     line-height: 1.25;
+  }
+
+  .mobile-today-card .today-codex-top-list {
+    gap: 0.2rem;
+    margin-top: 0.1rem;
+  }
+
+  .mobile-today-card .today-codex-top-row {
+    font-size: 0.72rem;
   }
 
   .mobile-today-card .codex-usage-progress {

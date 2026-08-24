@@ -44,28 +44,59 @@ test('analytics signature ignores timestamp-only quota polls', () => {
   );
 });
 
-test('top performance cache round trips both range winners', () => {
+test('top performance cache round trips the top three rows for both ranges', () => {
   const storage = makeStorage();
-  const rows = {
-    7: { model: 'gpt-5.6-sol', effort: 'high' },
-    30: { model: 'gpt-5.6-luna', effort: 'max' }
+  const topRows = {
+    7: [
+      { model: 'gpt-5.6-sol', effort: 'high' },
+      { model: 'gpt-5.6-luna', effort: 'max' }
+    ],
+    30: [
+      { model: 'gpt-5.6-luna', effort: 'max' },
+      { model: 'gpt-5.6-sol', effort: 'medium' },
+      { model: 'gpt-5.6-sol', effort: 'high' }
+    ]
   };
   assert.equal(
     writeCodexTopPerformanceCache(
       {
         signature: 'signature-1',
         computedAt: '2026-08-24T18:00:00.000Z',
-        rows
+        topRows
       },
       storage
     ),
     true
   );
   assert.deepEqual(readCodexTopPerformanceCache(storage), {
-    version: 1,
+    version: 2,
     signature: 'signature-1',
     computedAt: '2026-08-24T18:00:00.000Z',
-    rows
+    topRows,
+    rows: {
+      7: topRows[7][0],
+      30: topRows[30][0]
+    }
+  });
+});
+
+test('top performance cache migrates a legacy single-row cache', () => {
+  const storage = makeStorage();
+  storage.setItem(
+    'timekeeperCodexTopPerformanceCacheV1',
+    JSON.stringify({
+      version: 1,
+      signature: 'legacy',
+      computedAt: '2026-08-24T18:00:00.000Z',
+      rows: {
+        7: { model: 'gpt-5.6-sol', effort: 'high' },
+        30: { model: 'gpt-5.6-luna', effort: 'max' }
+      }
+    })
+  );
+  assert.deepEqual(readCodexTopPerformanceCache(storage)?.topRows, {
+    7: [{ model: 'gpt-5.6-sol', effort: 'high' }],
+    30: [{ model: 'gpt-5.6-luna', effort: 'max' }]
   });
 });
 

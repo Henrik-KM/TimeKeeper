@@ -1,6 +1,6 @@
 import {
   buildCodexAnalytics,
-  selectTopCodexModelPerformance
+  rankCodexModelPerformance
 } from './analytics.mjs';
 import {
   getCodexAnalyticsDataSignature,
@@ -1401,11 +1401,11 @@ function render() {
   if (state.rangeDays === 7 || state.rangeDays === 30) {
     const signature = getCodexAnalyticsDataSignature(state.data);
     const stored = readCodexTopPerformanceCache();
-    const rows = stored?.signature === signature ? stored.rows : {};
-    rows[String(state.rangeDays)] = selectTopCodexModelPerformance(
+    const topRows = stored?.signature === signature ? stored.topRows || {} : {};
+    topRows[String(state.rangeDays)] = rankCodexModelPerformance(
       analytics.byModelEffort
-    );
-    writeCodexTopPerformanceCache({ signature, rows });
+    ).slice(0, 3);
+    writeCodexTopPerformanceCache({ signature, topRows });
   }
   updateRangeControls();
   renderWindowControls();

@@ -52,8 +52,7 @@ import {
   buildCodexAnalytics,
   buildCodexSourceAverages,
   computeCodexQuotaProgress,
-  rankCodexModelPerformance,
-  selectTopCodexModelPerformance
+  rankCodexModelPerformance
 } from './features/codex/analytics.mjs';
 import {
   getCodexAnalyticsDataSignature,
@@ -3082,6 +3081,7 @@ import {
     signature: '',
     status: 'idle',
     row: null,
+    topRows: { 7: [], 30: [] },
     promise: null,
     ranges: {}
   };
@@ -10206,9 +10206,14 @@ import {
         now,
         windowKey
       });
+      const topRows = rankCodexModelPerformance(analytics.byModelEffort).slice(
+        0,
+        3
+      );
       ranges[String(range)] = {
         analytics,
-        row: selectTopCodexModelPerformance(analytics.byModelEffort)
+        row: topRows[0] || null,
+        topRows
       };
     });
     return {
@@ -10223,21 +10228,42 @@ import {
     }
     const previous = codexAnalyticsCache;
     const stored = readCodexTopPerformanceCache();
-    const previousRow =
+    const previousTopRows =
       previous.status !== 'idle' && previous.status !== 'error'
-        ? previous.row || previous.ranges['30']?.row || null
+        ? {
+            7:
+              previous.topRows?.['7'] ||
+              previous.ranges['7']?.topRows ||
+              (previous.ranges['7']?.row ? [previous.ranges['7'].row] : []),
+            30:
+              previous.topRows?.['30'] ||
+              previous.ranges['30']?.topRows ||
+              (previous.ranges['30']?.row ? [previous.ranges['30'].row] : [])
+          }
         : null;
-    const cachedRow = previousRow || stored?.rows?.['30'] || null;
-    const cachedRanges = previousRow
+    const storedTopRows = stored?.topRows || {
+      7: stored?.rows?.['7'] ? [stored.rows['7']] : [],
+      30: stored?.rows?.['30'] ? [stored.rows['30']] : []
+    };
+    const cachedTopRows = previousTopRows || storedTopRows;
+    const cachedRow = cachedTopRows['30']?.[0] || null;
+    const cachedRanges = previousTopRows
       ? previous.ranges
       : {
-          7: { row: stored?.rows?.['7'] || null },
-          30: { row: stored?.rows?.['30'] || null }
+          7: {
+            row: cachedTopRows['7']?.[0] || null,
+            topRows: cachedTopRows['7'] || []
+          },
+          30: {
+            row: cachedTopRows['30']?.[0] || null,
+            topRows: cachedTopRows['30'] || []
+          }
         };
     codexAnalyticsCache = {
       signature,
       status: cachedRow ? 'refreshing' : 'loading',
       row: cachedRow,
+      topRows: cachedTopRows,
       promise: null,
       ranges: cachedRanges
     };
@@ -10277,13 +10303,18 @@ import {
         if (codexAnalyticsCache.signature === signature) {
           cache.status = 'ready';
           cache.ranges = result.ranges || {};
-          cache.row = cache.ranges['30']?.row || null;
+          cache.topRows = {
+            7:
+              cache.ranges['7']?.topRows ||
+              (cache.ranges['7']?.row ? [cache.ranges['7'].row] : []),
+            30:
+              cache.ranges['30']?.topRows ||
+              (cache.ranges['30']?.row ? [cache.ranges['30'].row] : [])
+          };
+          cache.row = cache.topRows['30'][0] || null;
           writeCodexTopPerformanceCache({
             signature,
-            rows: {
-              7: cache.ranges['7']?.row || null,
-              30: cache.ranges['30']?.row || null
-            }
+            topRows: cache.topRows
           });
           refreshCodexAnalyticsSurfaces();
         }
@@ -10293,6 +10324,7 @@ import {
         if (codexAnalyticsCache.signature === signature) {
           cache.status = 'error';
           cache.row = null;
+          cache.topRows = { 7: [], 30: [] };
           cache.ranges = {};
           refreshCodexAnalyticsSurfaces();
         }
@@ -10319,10 +10351,16 @@ import {
   function getCodexTopPerformanceState() {
     const cache = getCodexAnalyticsCache();
     const thirtyDay = cache.ranges['30'];
+    const rows = Array.isArray(thirtyDay?.topRows)
+      ? thirtyDay.topRows.slice(0, 3)
+      : thirtyDay?.row
+        ? [thirtyDay.row]
+        : [];
     return {
       signature: cache.signature,
       status: cache.status,
-      row: thirtyDay?.row || null,
+      row: rows[0] || null,
+      rows,
       promise: cache.promise,
       measurementState:
         thirtyDay?.analytics?.measurementState ||
@@ -10332,7 +10370,7 @@ import {
   }
 
   function formatCodexTopPerformanceLabel(row, state = null) {
-    if (row) return `${row.model} · ${row.effort}`;
+    if (row) return `#1 ${row.model} · ${row.effort}`;
     if (state?.status === 'ready') return 'No qualifying sample';
     if (state?.status === 'error') return 'Unavailable';
     return 'Collecting';
@@ -10358,6 +10396,39 @@ import {
     const confidence = row.confidence === 'low' ? ' - directional sample' : '';
     const refreshLabel = state?.status === 'refreshing' ? ' - updating' : '';
     return `${row.usagePerEffectiveHour.toFixed(2)} pts/effective h - ${row.measuredEffectiveHours.toFixed(1)}h measured${confidence}${refreshLabel}`;
+  }
+
+  function formatCodexTopPerformanceRate(row) {
+    return Number.isFinite(row?.usagePerEffectiveHour)
+      ? `${row.usagePerEffectiveHour.toFixed(2)} pts/eff h`
+      : 'No rate';
+  }
+
+  function appendCodexTopPerformanceRows(container, state) {
+    const rows = Array.isArray(state?.rows)
+      ? state.rows.slice(0, 3)
+      : state?.row
+        ? [state.row]
+        : [];
+    if (rows.length <= 1) return;
+    const list = document.createElement('div');
+    list.className = 'today-codex-top-list';
+    rows.slice(1).forEach((row, index) => {
+      const item = document.createElement('div');
+      item.className = 'today-codex-top-row';
+      const rank = document.createElement('span');
+      rank.className = 'today-codex-top-rank';
+      rank.textContent = `#${index + 2}`;
+      const name = document.createElement('span');
+      name.className = 'today-codex-top-name';
+      name.textContent = `${row.model} · ${row.effort}`;
+      const rate = document.createElement('span');
+      rate.className = 'today-codex-top-rate';
+      rate.textContent = formatCodexTopPerformanceRate(row);
+      item.append(rank, name, rate);
+      list.appendChild(item);
+    });
+    container.appendChild(list);
   }
 
   function hasCodexEntries() {
@@ -15599,13 +15670,14 @@ import {
     }
     if (codexTopPerformance) {
       const topRow = codexTopPerformance.row;
-      appendTodayCard(
+      const topCard = appendTodayCard(
         'Top Codex (30d)',
         formatCodexTopPerformanceLabel(topRow, codexTopPerformance),
         `codex-performance${topRow ? '' : ' muted'}`,
         () => activateSection('codex'),
         formatCodexTopPerformanceDetail(topRow, codexTopPerformance)
       );
+      appendCodexTopPerformanceRows(topCard, codexTopPerformance);
     }
     panel.appendChild(primary);
 
@@ -15751,6 +15823,7 @@ import {
         codexTopPerformance
       );
       topItem.appendChild(detail);
+      appendCodexTopPerformanceRows(topItem, codexTopPerformance);
     }
     if (audit.staleRunningEntries > 0) {
       addItem('Review', `${audit.staleRunningEntries} old timer`, 'risk');
@@ -17777,7 +17850,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=36')
+      .register('./service-worker.js?v=37')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
