@@ -1428,6 +1428,7 @@ import {
   const CODEX_IMPORT_INTERVAL_MS = 60 * 1000;
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
+  const CODEX_ANALYTICS_WORKER_TIMEOUT_MS = 8000;
   const CODEX_FOCUS_FACTOR = 0.4;
   const CODEX_FOCUS_POLICY = {
     version: 5,
@@ -10150,7 +10151,9 @@ import {
         reject(error);
         return;
       }
+      let timeoutId = null;
       const finish = (callback, value) => {
+        if (timeoutId !== null) window.clearTimeout(timeoutId);
         worker.terminate();
         callback(value);
       };
@@ -10173,6 +10176,14 @@ import {
       worker.onerror = (error) => {
         finish(reject, error.error || error.message || error);
       };
+      timeoutId = window.setTimeout(() => {
+        finish(
+          reject,
+          new Error(
+            'Codex analytics worker timed out; using main-thread fallback'
+          )
+        );
+      }, CODEX_ANALYTICS_WORKER_TIMEOUT_MS);
       worker.postMessage({
         requestId,
         entries,
