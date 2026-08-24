@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-24T16:01:01.833Z",
+  "updatedAt": "2026-08-24T16:31:01.892Z",
   "dayStart": "2026-08-23T22:00:00.000Z",
   "rangeStart": "2026-05-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-24T16:01:02.943Z",
+    "observedAt": "2026-08-24T16:31:03.107Z",
     "primary": {
-      "usedPercent": 24,
-      "remainingPercent": 76,
+      "usedPercent": 25,
+      "remainingPercent": 75,
       "windowMinutes": 10080,
       "resetsAt": "2026-08-31T04:37:18.000Z"
     },
@@ -25393,6 +25393,34 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 4352,
           "effectiveSeconds": 870,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "description": "Codex: Review JCTC manuscript status"
+    },
+    {
+      "id": "codex-3c91246666e282032556fa41",
+      "threadId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-24T15:42:02.585Z",
+      "endTime": "2026-08-24T16:04:11.939Z",
+      "wallSeconds": 1329,
+      "focusFactor": 0.2,
+      "effectiveSeconds": 265,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1329,
+          "effectiveSeconds": 265,
           "baseFactor": 0.4,
           "repositoryMultiplier": 0.5
         }
