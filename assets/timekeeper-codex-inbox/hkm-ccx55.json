@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-24T07:01:02.579Z",
+  "updatedAt": "2026-08-24T07:16:02.599Z",
   "dayStart": "2026-08-23T22:00:00.000Z",
   "rangeStart": "2026-05-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-24T07:01:04.151Z",
+    "observedAt": "2026-08-24T07:16:04.236Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
@@ -24794,6 +24794,41 @@
         }
       ],
       "description": "Codex: Add LinkedIn contact invites"
+    },
+    {
+      "id": "codex-3e1aa168289a5ac8bbc80bc6",
+      "threadId": "01a03275-fb52-7193-8d50-c9a2de9c460b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T06:30:19.112Z",
+      "endTime": "2026-08-24T06:45:51.476Z",
+      "wallSeconds": 932,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 372,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 931,
+          "effectiveSeconds": 372
+        }
+      ],
+      "description": "Codex: Review LinkedIn messages"
     }
   ]
 }
