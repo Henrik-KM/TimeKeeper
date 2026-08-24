@@ -10108,9 +10108,10 @@ import {
     return [
       data?.updatedAt || '',
       data?.entries?.length || 0,
-      usageLimits.observedAt || integration.lastUsageAt || '',
       primary.usedPercent ?? '',
-      primary.remainingPercent ?? ''
+      primary.remainingPercent ?? '',
+      primary.windowMinutes ?? '',
+      primary.resetsAt || ''
     ].join('|');
   }
 
@@ -17764,7 +17765,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=34')
+      .register('./service-worker.js?v=35')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
