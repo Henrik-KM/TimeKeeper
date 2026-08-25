@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-25T12:12:02.693Z",
+  "updatedAt": "2026-08-25T15:17:04.547Z",
   "dayStart": "2026-08-24T22:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 7,
@@ -165,7 +165,7 @@
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-f13ef2803a148e54d947b489",
+      "id": "codex-3d192d8d0752806e2a6c6b8d",
       "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -176,21 +176,32 @@
       "focusFactor": 0.4999,
       "effectiveSeconds": 513,
       "focusPolicyVersion": 5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
+          "role": "parent",
           "model": "unknown",
           "effort": "unknown",
           "factor": 0.4,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
           "wallSeconds": 0,
           "effectiveSeconds": 0
         },
         {
+          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
           "wallSeconds": 1025,
           "effectiveSeconds": 512
         }
+      ],
+      "supersedesExternalIds": [
+        "codex-f13ef2803a148e54d947b489"
       ],
       "description": "Codex: Check Stage 1 status"
     }
