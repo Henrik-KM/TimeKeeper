@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-25T12:31:02.543Z",
+  "updatedAt": "2026-08-25T12:46:02.488Z",
   "dayStart": "2026-08-24T22:00:00.000Z",
   "rangeStart": "2026-05-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-25T12:31:03.937Z",
+    "observedAt": "2026-08-25T12:46:03.871Z",
     "primary": {
       "usedPercent": 43,
       "remainingPercent": 57,
@@ -24398,6 +24398,58 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 569,
           "effectiveSeconds": 284
+        }
+      ],
+      "description": "Codex: Find scheduled blog posts"
+    },
+    {
+      "id": "codex-80baaa9a06e185b80fb3ef21",
+      "threadId": "01a034ab-5427-7c52-a20a-f259fa709a9f",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-25T12:02:53.127Z",
+      "endTime": "2026-08-25T12:26:31.490Z",
+      "wallSeconds": 1418,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 709,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1418,
+          "effectiveSeconds": 709
+        }
+      ],
+      "description": "Codex: Advance Stanford research visit"
+    },
+    {
+      "id": "codex-56af7e1417f4e87f4ad1b15c",
+      "threadId": "01a033e6-c592-78b1-bb89-d6cee3d6c8b6",
+      "projectKey": "Website",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-25T12:06:56.073Z",
+      "endTime": "2026-08-25T12:26:31.939Z",
+      "wallSeconds": 1175,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 587,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1175,
+          "effectiveSeconds": 587
         }
       ],
       "description": "Codex: Find scheduled blog posts"
