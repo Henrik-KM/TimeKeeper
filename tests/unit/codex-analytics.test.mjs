@@ -8,6 +8,7 @@ import {
   computeCodexUsageIntervals,
   normalizeCodexSessions,
   rankCodexModelPerformance,
+  rankCodexRepositoryPerformance,
   selectTopCodexModelPerformance
 } from '../../src/features/codex/analytics.mjs';
 import {
@@ -141,13 +142,15 @@ function codexEntry({
   wallSeconds = 3600,
   effectiveSeconds = 1800,
   projectId = 'project-1',
-  fastMode = false
+  fastMode = false,
+  repoName = 'repo-a'
 }) {
   return {
     id,
     externalId: id,
     source: 'Codex',
     projectId,
+    repoName,
     startTime,
     endTime,
     elapsedSeconds: wallSeconds,
@@ -312,6 +315,58 @@ test('ranks quota burn and effective-time yield by model', () => {
   assert.equal(analytics.overall.attributionRate, 1);
   assert.equal(analytics.overall.usagePerEffectiveHour, 2.6667);
   assert.equal(analytics.measurementState, 'partial');
+});
+
+test('aggregates and ranks repository quota efficiency separately from projects', () => {
+  const entries = [
+    codexEntry({
+      id: 'codex-repo-a',
+      startTime: '2026-08-13T08:00:00.000Z',
+      endTime: '2026-08-13T09:00:00.000Z',
+      model: 'model-a',
+      effectiveSeconds: 1800,
+      repoName: 'Repository A'
+    }),
+    codexEntry({
+      id: 'codex-repo-b',
+      startTime: '2026-08-13T09:00:00.000Z',
+      endTime: '2026-08-13T10:00:00.000Z',
+      model: 'model-b',
+      effectiveSeconds: 3600,
+      repoName: 'Repository B'
+    })
+  ];
+  const analytics = buildCodexAnalytics({
+    entries,
+    projects: [{ id: 'project-1', name: 'IFLAI' }],
+    usageHistory: [
+      sample('2026-08-13T08:00:00.000Z', 10),
+      sample('2026-08-13T09:00:00.000Z', 13),
+      sample('2026-08-13T10:00:00.000Z', 14)
+    ],
+    rangeDays: 1,
+    now: new Date('2026-08-13T10:00:00.000Z')
+  });
+
+  const repositoryA = analytics.byRepository.find(
+    (row) => row.key === 'Repository A'
+  );
+  const repositoryB = analytics.byRepository.find(
+    (row) => row.key === 'Repository B'
+  );
+  assert.equal(analytics.byProject.length, 1);
+  assert.equal(repositoryA.usagePerEffectiveHour, 6);
+  assert.equal(repositoryB.usagePerEffectiveHour, 1);
+  assert.deepEqual(
+    rankCodexRepositoryPerformance(analytics.byRepository).map(
+      (row) => row.label
+    ),
+    ['Repository B', 'Repository A']
+  );
+  assert.equal(
+    analytics.byRepository.reduce((total, row) => total + row.usagePoints, 0),
+    analytics.overall.attributedUsagePoints
+  );
 });
 
 test('selects the lowest measured model and reasoning usage rate after the cutoff', () => {

@@ -656,24 +656,12 @@ function getAggregateSampleWarning(aggregate) {
   return null;
 }
 
-export function rankCodexModelPerformance(
-  rows = [],
-  {
-    minimumMeasuredEffectiveHours = DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS
-  } = {}
-) {
-  const minimumHours = Math.max(
-    0,
-    finiteNumber(minimumMeasuredEffectiveHours, 0.5)
-  );
+function rankCodexEfficiencyRows(rows, minimumHours, predicate) {
   return rows
     .filter(
       (row) =>
         row &&
-        row.model &&
-        row.model !== 'unknown' &&
-        row.effort &&
-        row.effort !== 'unknown' &&
+        predicate(row) &&
         Number(row.usagePoints) > 0 &&
         Number(row.measuredEffectiveHours) >= minimumHours &&
         Number.isFinite(row.usagePerEffectiveHour)
@@ -686,6 +674,48 @@ export function rankCodexModelPerformance(
         right.effectiveHours - left.effectiveHours ||
         String(left.label || '').localeCompare(String(right.label || ''))
     );
+}
+
+export function rankCodexModelPerformance(
+  rows = [],
+  {
+    minimumMeasuredEffectiveHours = DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS
+  } = {}
+) {
+  const minimumHours = Math.max(
+    0,
+    finiteNumber(minimumMeasuredEffectiveHours, 0.5)
+  );
+  return rankCodexEfficiencyRows(
+    rows,
+    minimumHours,
+    (row) =>
+      row.model &&
+      row.model !== 'unknown' &&
+      row.effort &&
+      row.effort !== 'unknown'
+  );
+}
+
+export function rankCodexRepositoryPerformance(
+  rows = [],
+  {
+    minimumMeasuredEffectiveHours = DEFAULT_CODEX_TOP_PERFORMANCE_MIN_EFFECTIVE_HOURS
+  } = {}
+) {
+  const minimumHours = Math.max(
+    0,
+    finiteNumber(minimumMeasuredEffectiveHours, 0.5)
+  );
+  return rankCodexEfficiencyRows(rows, minimumHours, (row) => {
+    const label = String(row.key || row.label || '')
+      .trim()
+      .toLowerCase();
+    return (
+      Boolean(label) &&
+      !['unknown', 'unknown project', 'unknown repository'].includes(label)
+    );
+  });
 }
 
 export function selectTopCodexModelPerformance(rows = [], options = {}) {
@@ -855,6 +885,7 @@ export function buildCodexAnalytics({
     modelEffortFast: new Map(),
     effort: new Map(),
     project: new Map(),
+    repository: new Map(),
     role: new Map(),
     trend: new Map()
   };
@@ -918,6 +949,12 @@ export function buildCodexAnalytics({
         session.projectName,
         session.projectName
       );
+      const repositoryAggregate = ensureAggregate(
+        maps.repository,
+        session.repoName,
+        session.repoName,
+        { repository: session.repoName }
+      );
       const roleAggregate = ensureAggregate(maps.role, role, role);
       const trendKey = `${trendDate}::${modelEffortFastAggregateKey}`;
       const trendAggregate = ensureAggregate(
@@ -932,6 +969,7 @@ export function buildCodexAnalytics({
         modelEffortFastAggregate,
         effortAggregate,
         projectAggregate,
+        repositoryAggregate,
         roleAggregate,
         trendAggregate
       ].forEach((aggregate) =>
@@ -1023,6 +1061,12 @@ export function buildCodexAnalytics({
         session.projectName,
         session.projectName
       );
+      const repositoryAggregate = ensureAggregate(
+        maps.repository,
+        session.repoName,
+        session.repoName,
+        { repository: session.repoName }
+      );
       const roleAggregate = ensureAggregate(
         maps.role,
         segment.role,
@@ -1046,6 +1090,7 @@ export function buildCodexAnalytics({
         modelEffortFastAggregate,
         effortAggregate,
         projectAggregate,
+        repositoryAggregate,
         roleAggregate,
         trendAggregate
       ].forEach((aggregate) =>
@@ -1063,6 +1108,7 @@ export function buildCodexAnalytics({
   const byModelEffortFast = finalizeMap(maps.modelEffortFast);
   const byEffort = finalizeMap(maps.effort);
   const byProject = finalizeMap(maps.project);
+  const byRepository = finalizeMap(maps.repository);
   const byRole = finalizeMap(maps.role);
   const modelTrends = [...maps.trend.values()]
     .map((aggregate) => ({
@@ -1240,6 +1286,7 @@ export function buildCodexAnalytics({
     byModelEffortFast,
     byEffort,
     byProject,
+    byRepository,
     byRole,
     modelTrends,
     daily,

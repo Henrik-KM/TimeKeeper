@@ -52,7 +52,8 @@ import {
   buildCodexAnalytics,
   buildCodexSourceAverages,
   computeCodexQuotaProgress,
-  rankCodexModelPerformance
+  rankCodexModelPerformance,
+  rankCodexRepositoryPerformance
 } from './features/codex/analytics.mjs';
 import {
   getCodexAnalyticsDataSignature,
@@ -10692,10 +10693,14 @@ import {
     section.appendChild(note);
   }
 
-  function renderCodexPerformanceRankings(section, ranges = null) {
+  function renderCodexEfficiencyRankings(
+    section,
+    ranges,
+    { titleText, emptyText, getRows, getLabel, noteText }
+  ) {
     section.replaceChildren();
     const title = document.createElement('h3');
-    title.textContent = 'Model + Reasoning Performance';
+    title.textContent = titleText;
     section.appendChild(title);
     const grid = document.createElement('div');
     grid.className = 'codex-performance-grid';
@@ -10716,12 +10721,11 @@ import {
         return;
       }
 
-      const ranked = rankCodexModelPerformance(result.analytics.byModelEffort);
+      const ranked = getRows(result.analytics);
       if (!ranked.length) {
         const empty = document.createElement('p');
         empty.className = 'status-muted';
-        empty.textContent =
-          'No model + reasoning pair has 30 min measured effective time.';
+        empty.textContent = emptyText;
         card.appendChild(empty);
         grid.appendChild(card);
         return;
@@ -10738,7 +10742,7 @@ import {
         const name = document.createElement('div');
         name.className = 'codex-performance-name';
         const label = document.createElement('strong');
-        label.textContent = `${row.model} · ${row.effort}`;
+        label.textContent = getLabel(row);
         const detail = document.createElement('small');
         detail.textContent = `${row.measuredEffectiveHours.toFixed(1)}h measured · ${row.confidence} confidence`;
         name.append(label, detail);
@@ -10763,9 +10767,33 @@ import {
 
     const note = document.createElement('small');
     note.className = 'codex-summary-note';
-    note.textContent =
-      'Ranked by lowest measured quota points per effective hour. Only pairs with at least 30 minutes of measured effective time are included.';
+    note.textContent = noteText;
     section.appendChild(note);
+  }
+
+  function renderCodexPerformanceRankings(section, ranges = null) {
+    renderCodexEfficiencyRankings(section, ranges, {
+      titleText: 'Model + Reasoning Performance',
+      emptyText:
+        'No model + reasoning pair has 30 min measured effective time.',
+      getRows: (analytics) =>
+        rankCodexModelPerformance(analytics.byModelEffort),
+      getLabel: (row) => `${row.model} · ${row.effort}`,
+      noteText:
+        'Ranked by lowest measured quota points per effective hour. Only pairs with at least 30 minutes of measured effective time are included.'
+    });
+  }
+
+  function renderCodexRepositoryPerformanceRankings(section, ranges = null) {
+    renderCodexEfficiencyRankings(section, ranges, {
+      titleText: 'Repository Performance',
+      emptyText: 'No repository has 30 min measured effective time.',
+      getRows: (analytics) =>
+        rankCodexRepositoryPerformance(analytics.byRepository),
+      getLabel: (row) => row.label,
+      noteText:
+        'Ranked by lowest measured quota points per effective hour. Repositories need at least 30 minutes of measured effective time to appear.'
+    });
   }
 
   function getCodexUsageCard() {
@@ -11234,6 +11262,12 @@ import {
     );
     renderCodexPerformanceRankings(performance);
 
+    const repositories = appendCodexPageSection(
+      content,
+      'Repository Performance'
+    );
+    renderCodexRepositoryPerformanceRankings(repositories);
+
     const models = appendCodexPageSection(
       content,
       'Model + Reasoning - Last 7 Days'
@@ -11397,6 +11431,7 @@ import {
         if (renderToken !== codexPageRenderToken) return;
         const analytics = ranges['7']?.analytics || null;
         renderCodexPerformanceRankings(performance, ranges);
+        renderCodexRepositoryPerformanceRankings(repositories, ranges);
         renderCodexKeyTakeaways(takeaways, report, analytics);
         renderCodexModelList(modelList, report.models, analytics);
       })
@@ -17850,7 +17885,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=37')
+      .register('./service-worker.js?v=38')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

@@ -1728,8 +1728,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v37';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=32'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v38';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=33'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1737,7 +1737,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./src/features/codex/performance-worker.mjs'"
   );
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '34')"
+    "url.searchParams.set('timekeeper-update', '35')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1747,7 +1747,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=37')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=38')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1958,6 +1958,15 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   await expect(performanceSection).toContainText('Last 30 Days');
   await expect(performanceSection).toContainText('model-a · high');
   await expect(performanceSection).toContainText('pts/eff h');
+  const repositoryPerformanceSection = codexPage
+    .locator('.codex-report-section')
+    .filter({ hasText: 'Repository Performance' });
+  await expect(repositoryPerformanceSection).toBeVisible();
+  await expect(
+    repositoryPerformanceSection.locator('.codex-performance-card')
+  ).toHaveCount(2);
+  await expect(repositoryPerformanceSection).toContainText('Analysis Project');
+  await expect(repositoryPerformanceSection).toContainText('pts/eff h');
   const modelSection = codexPage
     .locator('.codex-report-section')
     .filter({ hasText: 'Model + Reasoning - Last 7 Days' });
