@@ -3890,6 +3890,9 @@ import {
         reconciled += reconcileCodexSupersededEntries(supersededIds);
         supersededIds.forEach((id) => importedIds.add(id));
         const focusPolicyVersion = Number(record?.focusPolicyVersion) || null;
+        const codexRepoName = String(
+          record?.repoName || record?.codexRepoName || record?.projectKey || ''
+        ).trim();
         const codexMetadata = {
           duration: effectiveSeconds,
           elapsedSeconds:
@@ -3908,11 +3911,15 @@ import {
             Number(record?.delegationCredit) >= 0
               ? Number(record.delegationCredit)
               : null,
-          codexSupersedesExternalIds: supersededIds
+          codexSupersedesExternalIds: supersededIds,
+          ...(codexRepoName ? { codexRepoName } : {})
         };
         if (alreadyImported) {
           const existingPolicyVersion =
             Number(existingEntry?.codexFocusPolicyVersion) || 0;
+          const repositoryMetadataChanged =
+            Boolean(codexRepoName) &&
+            String(existingEntry?.codexRepoName || '') !== codexRepoName;
           const codexMetadataChanged =
             existingEntry &&
             Object.entries(codexMetadata).some(
@@ -3922,8 +3929,9 @@ import {
             );
           if (
             existingEntry &&
-            focusPolicyVersion &&
-            focusPolicyVersion >= existingPolicyVersion &&
+            ((focusPolicyVersion &&
+              focusPolicyVersion >= existingPolicyVersion) ||
+              repositoryMetadataChanged) &&
             codexMetadataChanged
           ) {
             Object.assign(existingEntry, codexMetadata);
@@ -17885,7 +17893,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=38')
+      .register('./service-worker.js?v=39')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
