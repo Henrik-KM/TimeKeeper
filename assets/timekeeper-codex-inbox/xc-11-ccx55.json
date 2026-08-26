@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-26T12:07:02.400Z",
+  "updatedAt": "2026-08-26T12:37:02.453Z",
   "dayStart": "2026-08-25T22:00:00.000Z",
   "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 7,
@@ -412,6 +412,29 @@
           "factor": 0.5,
           "wallSeconds": 2408,
           "effectiveSeconds": 1204
+        }
+      ],
+      "description": "Codex: Assess stage 3 readiness"
+    },
+    {
+      "id": "codex-1bb584b4441dd5d9cd3eae5b",
+      "threadId": "01a03d6c-5666-72d0-a626-e613451fc9c8",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-26T12:16:54.935Z",
+      "endTime": "2026-08-26T12:18:45.213Z",
+      "wallSeconds": 110,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 55,
+      "focusPolicyVersion": 5,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 110,
+          "effectiveSeconds": 55
         }
       ],
       "description": "Codex: Assess stage 3 readiness"
