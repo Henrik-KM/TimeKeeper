@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-27T17:01:02.106Z",
+  "updatedAt": "2026-08-27T17:16:02.045Z",
   "dayStart": "2026-08-26T22:00:00.000Z",
   "rangeStart": "2026-05-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-27T17:01:03.801Z",
+    "observedAt": "2026-08-27T17:16:03.505Z",
     "primary": {
-      "usedPercent": 0,
-      "remainingPercent": 100,
+      "usedPercent": 1,
+      "remainingPercent": 99,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-03T16:25:44.000Z"
+      "resetsAt": "2026-09-03T16:25:43.000Z"
     },
     "secondary": null
   },
@@ -23847,6 +23847,32 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-a8561400b959a38d24afe2e6",
+      "threadId": "01a03de6-d234-7491-b9fb-47ba8f029a9c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-27T16:41:20.319Z",
+      "endTime": "2026-08-27T16:54:37.293Z",
+      "wallSeconds": 796,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 398,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 796,
+          "effectiveSeconds": 398
+        }
+      ],
+      "description": "Codex: Draft AZ project introduction reply"
     }
   ]
 }
