@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-27T08:17:02.255Z",
+  "updatedAt": "2026-08-27T13:32:02.751Z",
   "dayStart": "2026-08-26T22:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 7,
@@ -491,6 +491,29 @@
         }
       ],
       "description": "Codex: Check Vera HPC access"
+    },
+    {
+      "id": "codex-61ff53d205aace80a0f66a6c",
+      "threadId": "01a03d6c-5666-72d0-a626-e613451fc9c8",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-27T12:10:54.338Z",
+      "endTime": "2026-08-27T13:11:45.550Z",
+      "wallSeconds": 3651,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1825,
+      "focusPolicyVersion": 5,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 3651,
+          "effectiveSeconds": 1825
+        }
+      ],
+      "description": "Codex: Assess stage 3 readiness"
     }
   ]
 }
