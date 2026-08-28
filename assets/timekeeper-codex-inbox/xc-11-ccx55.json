@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-27T22:02:02.622Z",
+  "updatedAt": "2026-08-28T06:27:02.808Z",
   "dayStart": "2026-08-27T22:00:00.000Z",
   "rangeStart": "2026-08-21T22:00:00.000Z",
   "lookbackDays": 7,
@@ -580,6 +580,29 @@
           "factor": 0.5,
           "wallSeconds": 10023,
           "effectiveSeconds": 5011
+        }
+      ],
+      "description": "Codex: Check Vera HPC access"
+    },
+    {
+      "id": "codex-83ed6a1eede5c0fe5cc1e8d6",
+      "threadId": "01a041e4-8977-7761-ad3a-82b1e0da14aa",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-28T05:34:25.280Z",
+      "endTime": "2026-08-28T06:07:29.837Z",
+      "wallSeconds": 1984,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 992,
+      "focusPolicyVersion": 5,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "wallSeconds": 1984,
+          "effectiveSeconds": 992
         }
       ],
       "description": "Codex: Check Vera HPC access"
