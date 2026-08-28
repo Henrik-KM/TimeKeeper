@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-28T15:16:02.649Z",
+  "updatedAt": "2026-08-28T15:31:02.446Z",
   "dayStart": "2026-08-27T22:00:00.000Z",
   "rangeStart": "2026-05-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-28T15:16:04.052Z",
+    "observedAt": "2026-08-28T15:31:03.886Z",
     "primary": {
       "usedPercent": 54,
       "remainingPercent": 46,
@@ -21072,6 +21072,41 @@
         }
       ],
       "description": "Codex: Follow up with Saab"
+    },
+    {
+      "id": "codex-49e7233ba5ae02d88d078470",
+      "threadId": "019f3b9f-7d07-7943-9bb8-fd36d7c1e00e",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-08-28T13:35:50.524Z",
+      "endTime": "2026-08-28T15:05:14.316Z",
+      "wallSeconds": 5363,
+      "focusFactor": 0.52,
+      "effectiveSeconds": 2789,
+      "focusPolicyVersion": 5,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 4290,
+          "effectiveSeconds": 2145
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "max",
+          "factor": 0.6,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1073,
+          "effectiveSeconds": 643
+        }
+      ],
+      "description": "Codex: Apply Henrik style guide"
     },
     {
       "id": "codex-0e585f1ab892bc0270ce9392",
