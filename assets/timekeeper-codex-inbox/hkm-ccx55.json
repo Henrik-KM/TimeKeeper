@@ -2,16 +2,16 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-08-29T21:31:01.931Z",
-  "dayStart": "2026-08-28T22:00:00.000Z",
-  "rangeStart": "2026-05-31T22:00:00.000Z",
+  "updatedAt": "2026-08-29T22:01:02.046Z",
+  "dayStart": "2026-08-29T22:00:00.000Z",
+  "rangeStart": "2026-06-01T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-08-29T21:31:03.379Z",
+    "observedAt": "2026-08-29T22:01:03.259Z",
     "primary": {
       "usedPercent": 0,
       "remainingPercent": 100,
@@ -17078,67 +17078,6 @@
         }
       ],
       "description": "Codex: Prepare Research OS handoff"
-    },
-    {
-      "id": "codex-0ec7d7ad4531e7aa861f9372",
-      "threadId": "01a02026-f27e-74c0-9eee-a1e0c8f4a003",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-23T07:01:24.137Z",
-      "endTime": "2026-08-23T07:02:10.991Z",
-      "wallSeconds": 46,
-      "focusFactor": 0.4,
-      "effectiveSeconds": 18,
-      "focusPolicyVersion": 5,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "wallSeconds": 46,
-          "effectiveSeconds": 18
-        }
-      ],
-      "description": "Codex: Add LinkedIn contact invites"
-    },
-    {
-      "id": "codex-00deebf8040d3913cbb2a5b4",
-      "threadId": "01a02ffc-4a0a-7f41-a9f1-463df11d061e",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-08-23T18:57:51.536Z",
-      "endTime": "2026-08-23T18:58:45.334Z",
-      "wallSeconds": 53,
-      "focusFactor": 0.3515,
-      "effectiveSeconds": 18,
-      "focusPolicyVersion": 5,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "model": "gpt-5.6-terra",
-          "effort": "medium",
-          "factor": 0.35,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "wallSeconds": 52,
-          "effectiveSeconds": 18
-        }
-      ],
-      "description": "Codex: email-helper"
     },
     {
       "id": "codex-f7d8cfb5fe8b6c58253518a2",
