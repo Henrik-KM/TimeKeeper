@@ -61,6 +61,11 @@ import {
   writeCodexTopPerformanceCache
 } from './features/codex/top-performance-cache.mjs';
 import {
+  DEFAULT_CODEX_FOCUS_FACTOR,
+  DEFAULT_CODEX_FOCUS_POLICY
+} from './features/codex/policy.mjs';
+import { migrateCodexEntries } from './features/codex/revaluation.mjs';
+import {
   computeUnionSeconds,
   getEntryElapsedSeconds,
   getEntrySource,
@@ -1434,33 +1439,13 @@ import {
   const CODEX_IMPORT_LOOKBACK_DAYS = 7;
   const CODEX_USAGE_STALE_MS = 2 * 60 * 60 * 1000;
   const CODEX_ANALYTICS_WORKER_TIMEOUT_MS = 8000;
-  const CODEX_FOCUS_FACTOR = 0.4;
+  const CODEX_FOCUS_FACTOR = DEFAULT_CODEX_FOCUS_FACTOR;
   const CODEX_FOCUS_POLICY = {
-    version: 5,
-    defaultFactor: CODEX_FOCUS_FACTOR,
-    minimumFactor: 0.2,
-    maximumFactor: 0.8,
-    fastModeMultiplier: 1.2,
-    delegationCredit: 0.35,
-    modelBaseFactors: {
-      luna: 0.25,
-      terra: 0.35,
-      sol: 0.45
-    },
-    modelOverrides: {},
+    ...DEFAULT_CODEX_FOCUS_POLICY,
     repositoryMultipliers: {
       research: 0.5
     },
-    repositoryBackfillDays: 90,
-    repositoryMultiplierPolicyVersion: 4,
-    effortAdjustments: {
-      low: -0.05,
-      medium: 0,
-      high: 0.05,
-      xhigh: 0.1,
-      max: 0.15,
-      ultra: 0.15
-    }
+    repositoryBackfillDays: 90
   };
 
   function normalizeGitHubRepository(value = '') {
@@ -1596,6 +1581,7 @@ import {
       importedCodexRecordIds: [],
       lastImportAt: null,
       lastImportSummary: null,
+      codexPolicyMigration: null,
       usageLimits: null
     };
   }
@@ -1631,6 +1617,25 @@ import {
       observedAt: observedAt.toISOString(),
       primary,
       secondary: normalizeCodexUsageWindow(source.secondary)
+    };
+  }
+
+  function normalizeCodexPolicyMigration(value) {
+    if (!value || typeof value !== 'object') return null;
+    const number = (candidate) =>
+      Number.isFinite(Number(candidate))
+        ? Math.max(0, Math.floor(Number(candidate)))
+        : 0;
+    return {
+      version: number(value.version),
+      scanned: number(value.scanned),
+      updated: number(value.updated),
+      unable: number(value.unable),
+      unchanged: number(value.unchanged),
+      lastRunAt:
+        typeof value.lastRunAt === 'string' && value.lastRunAt
+          ? value.lastRunAt
+          : null
     };
   }
 
@@ -1670,6 +1675,9 @@ import {
         config.lastImportSummary && typeof config.lastImportSummary === 'object'
           ? config.lastImportSummary
           : null,
+      codexPolicyMigration: normalizeCodexPolicyMigration(
+        config.codexPolicyMigration
+      ),
       usageLimits: normalizeCodexUsageLimits(config.usageLimits)
     };
   }
@@ -2047,6 +2055,28 @@ import {
     scheduleBackupSoon();
     scheduleCodexRemoteContextPublish();
     renderMobileSyncStatus();
+  }
+
+  function runCodexPolicyMigration({ persist = true } = {}) {
+    const result = migrateCodexEntries(data.entries, CODEX_FOCUS_POLICY);
+    const previous = data.codexIntegration.codexPolicyMigration;
+    if (result.report.updated > 0) {
+      data.entries = result.entries;
+    }
+    const shouldRecordReport =
+      result.report.scanned > 0 &&
+      (!previous ||
+        result.report.updated > 0 ||
+        result.report.unable !== previous.unable);
+    if (shouldRecordReport) {
+      data.codexIntegration.codexPolicyMigration = {
+        ...result.report,
+        lastRunAt: new Date().toISOString()
+      };
+    }
+    if (persist && (result.report.updated > 0 || shouldRecordReport))
+      saveData();
+    return result.report;
   }
 
   function cloneData(value = data) {
@@ -2704,6 +2734,7 @@ import {
   ensureWorkoutData();
   ensureMonthlyRecurringPayments();
   ensureWealthData();
+  runCodexPolicyMigration();
   // Flag to track whether to show all entries or only recent ones. If false,
   // entries older than approximately one month are hidden by default to keep
   // the list manageable. This can be toggled via a button in the Entries section.
@@ -3547,7 +3578,7 @@ import {
     const config = getCodexIntegrationConfig();
     const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 5,
+      version: 6,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
@@ -3863,14 +3894,14 @@ import {
           record?.wallSeconds === null || record?.wallSeconds === undefined
             ? NaN
             : Math.floor(Number(record.wallSeconds));
-        const alreadyImported = importedIds.has(recordId);
-        const existingEntry = alreadyImported
-          ? data.entries.find(
-              (entry) =>
-                isCodexTimeEntry(entry) &&
-                String(entry?.externalId || '') === recordId
-            )
-          : null;
+        const existingEntry = data.entries.find(
+          (entry) =>
+            isCodexTimeEntry(entry) &&
+            String(entry?.externalId || '') === recordId
+        );
+        const alreadyImported =
+          importedIds.has(recordId) || Boolean(existingEntry);
+        if (existingEntry) importedIds.add(recordId);
         if (
           !recordId ||
           (!existingEntry &&
@@ -3960,6 +3991,7 @@ import {
     config.importedCodexRecordIds = [...importedIds].slice(-1000);
     config.lastImportAt = nowIso;
     config.lastImportSummary = { imported, skipped, reconciled, updated };
+    if (imported > 0) runCodexPolicyMigration({ persist: false });
     codexImportRuntimeStatus = {
       pending: false,
       checkedAt: nowIso,
@@ -4129,6 +4161,13 @@ import {
       const pill = document.createElement('span');
       pill.className = 'health-pill';
       pill.textContent = `Last import: ${config.lastImportSummary.imported || 0} new, ${config.lastImportSummary.updated || 0} recalibrated, ${config.lastImportSummary.skipped || 0} skipped`;
+      summary.appendChild(pill);
+    }
+    if (config.codexPolicyMigration) {
+      const migration = config.codexPolicyMigration;
+      const pill = document.createElement('span');
+      pill.className = `health-pill${migration.unable > 0 ? ' warn' : ''}`;
+      pill.textContent = `Policy v${migration.version || 6}: ${migration.updated || 0} historical entries updated, ${migration.unable || 0} unable to revalue`;
       summary.appendChild(pill);
     }
   }
@@ -11430,7 +11469,7 @@ import {
       bridgeGrid,
       'Focus Policy',
       focusPolicyVersion > 0 ? `v${focusPolicyVersion}` : 'Unavailable',
-      'Model and effort weighted'
+      'Model-family weighted; effort retained for analysis'
     );
     bridge.appendChild(bridgeGrid);
 
@@ -17893,7 +17932,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=39')
+      .register('./service-worker.js?v=40')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

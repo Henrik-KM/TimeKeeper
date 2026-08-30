@@ -1,21 +1,21 @@
 {
-  "version": 5,
+  "version": 6,
   "source": "timekeeper",
   "enabled": true,
   "updatedAt": "2026-07-31T18:49:22.843Z",
   "matchMode": "github-parent-folder",
   "focusFactor": 0.4,
   "focusPolicy": {
-    "version": 5,
+    "version": 6,
     "defaultFactor": 0.4,
     "minimumFactor": 0.2,
     "maximumFactor": 0.8,
     "fastModeMultiplier": 1.2,
     "delegationCredit": 0.35,
     "modelBaseFactors": {
-      "luna": 0.25,
-      "terra": 0.35,
-      "sol": 0.45
+      "luna": 0.3,
+      "terra": 0.4,
+      "sol": 0.5
     },
     "modelOverrides": {},
     "repositoryMultipliers": {
@@ -24,12 +24,12 @@
     "repositoryBackfillDays": 90,
     "repositoryMultiplierPolicyVersion": 4,
     "effortAdjustments": {
-      "low": -0.05,
+      "low": 0,
       "medium": 0,
-      "high": 0.05,
-      "xhigh": 0.1,
-      "max": 0.15,
-      "ultra": 0.15
+      "high": 0,
+      "xhigh": 0,
+      "max": 0,
+      "ultra": 0
     }
   },
   "trackedProjects": [

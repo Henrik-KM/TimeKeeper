@@ -784,7 +784,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     null;
   const usageLimits = (await liveUsageLimitsPromise) || sessionUsageLimits;
   return {
-    version: 3,
+    version: 4,
     source: 'timekeeper-codex-bridge',
     machineId: options.machineId,
     updatedAt: now.toISOString(),

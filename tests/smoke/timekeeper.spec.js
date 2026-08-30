@@ -708,7 +708,7 @@ test('entries preserve active elapsed time and group Codex records by project-da
   const group = page.locator('.entry-group-row');
   await expect(group).toContainText('Codex activity');
   await expect(group).toContainText('2 records');
-  await expect(group).toContainText('2h 15m 0s effective');
+  await expect(group).toContainText('36m 0s effective');
   await expect(group).toContainText('1h 30m 0s active');
   await expect(
     page
@@ -720,13 +720,13 @@ test('entries preserve active elapsed time and group Codex records by project-da
   const firstRow = page
     .locator('#entriesTableBodyPro tr')
     .filter({ hasText: 'First Codex record' });
-  await expect(firstRow).toContainText('1h 30m 0s eff / 1h 0m 0s active');
+  await expect(firstRow).toContainText('24m 0s eff / 1h 0m 0s active');
 
   const saved = await page.evaluate(() => {
     const stored = JSON.parse(localStorage.getItem('timekeeperDataPro'));
     return stored.entries.find((entry) => entry.id === 'codex-one');
   });
-  expect(saved.duration).toBe(5400);
+  expect(saved.duration).toBe(1440);
   expect(saved.elapsedSeconds).toBe(3600);
 });
 
@@ -1728,16 +1728,18 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v39';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=34'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v40';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=35'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
   expect(serviceWorker).toContain(
     "'./src/features/codex/performance-worker.mjs'"
   );
+  expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
+  expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '36')"
+    "url.searchParams.set('timekeeper-update', '37')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1747,7 +1749,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=39')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=40')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1770,6 +1772,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
         elapsedSeconds: 3600,
         duration: 2700,
         focusFactor: 0.75,
+        codexFocusPolicyVersion: 6,
         codexModelBreakdown: [
           {
             role: 'parent',
@@ -1790,6 +1793,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
         elapsedSeconds: 3600,
         duration: 1800,
         focusFactor: 0.5,
+        codexFocusPolicyVersion: 6,
         codexModelBreakdown: [
           {
             role: 'parent',
@@ -4082,10 +4086,10 @@ test('timer recommendation uses remaining project hours over workdays left', asy
   await page.goto('/');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
-    /IFLAI.*Recommended.*~12\.6h today/
+    /IFLAI.*Recommended.*~14\.6h today/
   );
   await expect(page.locator('#timerRecommendationPro')).toContainText(
-    'Recommended: IFLAI - 12.6h today'
+    'Recommended: IFLAI - 14.6h today'
   );
 });
 
@@ -4687,9 +4691,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         startTime: '2026-06-13T08:00:00.000Z',
         endTime: '2026-06-13T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 1.44,
-        effectiveSeconds: 2592,
-        focusPolicyVersion: 3,
+        focusFactor: 0.5,
+        effectiveSeconds: 900,
+        focusPolicyVersion: 6,
         delegationCredit: 0.35,
         delegatedSessionCount: 4,
         supersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
@@ -4698,10 +4702,10 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
             role: 'parent',
             model: 'gpt-5.6-sol',
             effort: 'ultra',
-            factor: 0.6,
+            factor: 0.5,
             creditMultiplier: 1,
             wallSeconds: 1800,
-            effectiveSeconds: 1080
+            effectiveSeconds: 900
           }
         ],
         description: 'Codex: VWR automation'
@@ -4726,9 +4730,20 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         startTime: '2026-06-06T08:00:00.000Z',
         endTime: '2026-06-06T08:30:00.000Z',
         wallSeconds: 1800,
-        focusFactor: 0.25,
-        effectiveSeconds: 450,
-        focusPolicyVersion: 4,
+        focusFactor: 0.5,
+        effectiveSeconds: 900,
+        focusPolicyVersion: 6,
+        modelBreakdown: [
+          {
+            model: 'gpt-5.6-sol',
+            effort: 'ultra',
+            fastMode: false,
+            factor: 0.5,
+            creditMultiplier: 1,
+            wallSeconds: 1800,
+            effectiveSeconds: 900
+          }
+        ],
         description: 'Codex: corrected historical work'
       },
       {
@@ -4807,9 +4822,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         }),
         source: 'codex',
         externalId: 'codex-today',
-        focusFactor: 1.68,
-        manualFactor: 1.68,
-        codexFocusPolicyVersion: 3,
+        focusFactor: 1.44,
+        manualFactor: 1.44,
+        codexFocusPolicyVersion: 5,
         codexModelBreakdown: [],
         codexDelegatedSessionCount: 4,
         codexDelegationCredit: 0.35
@@ -4827,7 +4842,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         externalId: 'codex-too-old',
         focusFactor: 0.5,
         manualFactor: 0.5,
-        codexFocusPolicyVersion: 3
+        codexFocusPolicyVersion: 5
       }
     ],
     codexIntegration: {
@@ -4900,13 +4915,13 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       id: 'existing-aggregate-entry',
       projectId: 'iflai',
       description: 'Codex: VWR automation',
-      duration: 2592,
-      focusFactor: 1.44,
-      manualFactor: 1.44,
+      duration: 900,
+      focusFactor: 0.5,
+      manualFactor: 0.5,
       source: 'codex',
       externalId: 'codex-today',
       codexRepoName: 'VWR-AutoInv',
-      codexFocusPolicyVersion: 3,
+      codexFocusPolicyVersion: 6,
       codexDelegatedSessionCount: 4,
       codexDelegationCredit: 0.35,
       codexSupersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
@@ -4915,7 +4930,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
           role: 'parent',
           model: 'gpt-5.6-sol',
           effort: 'ultra',
-          factor: 0.6
+          factor: 0.5
         })
       ]
     })
@@ -4923,13 +4938,20 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   expect(data.entries).toContainEqual(
     expect.objectContaining({
       id: 'existing-too-old-entry',
-      duration: 450,
-      focusFactor: 0.25,
-      manualFactor: 0.25,
+      duration: 900,
+      focusFactor: 0.5,
+      manualFactor: 0.5,
       source: 'codex',
       externalId: 'codex-too-old',
       codexRepoName: 'VWR-AutoInv',
-      codexFocusPolicyVersion: 4
+      codexFocusPolicyVersion: 6,
+      codexModelBreakdown: [
+        expect.objectContaining({
+          model: 'gpt-5.6-sol',
+          factor: 0.5,
+          effectiveSeconds: 900
+        })
+      ]
     })
   );
   expect(data.entries.map((entry) => entry.externalId)).not.toContain(
@@ -4939,10 +4961,19 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
     expect.objectContaining({
       projectId: 'iflai',
       description: 'Codex: recent work',
-      duration: 900,
+      duration: 720,
+      focusFactor: 0.4,
       source: 'codex',
       externalId: 'codex-yesterday',
-      codexRepoName: 'VWR-AutoInv'
+      codexRepoName: 'VWR-AutoInv',
+      codexFocusPolicyVersion: 6,
+      codexModelBreakdown: [
+        expect.objectContaining({
+          model: 'unknown',
+          factor: 0.4,
+          effectiveSeconds: 720
+        })
+      ]
     })
   );
   expect(JSON.stringify(data)).not.toContain('ghp_codex_test');
@@ -5066,6 +5097,107 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(page.locator('.mobile-more-nav-item')).toHaveClass(/active/);
 });
 
+test('migrates persisted Codex entries under policy v6 on app startup', async ({
+  page
+}) => {
+  await page.route('**/assets/strava.json', (route) => route.abort());
+  await freezeTime(page, '2026-06-13T12:00:00');
+  const manual = {
+    ...entryFixture({
+      id: 'manual-stable',
+      projectId: 'anders',
+      description: 'Manual work',
+      hours: 1
+    }),
+    source: 'manual',
+    focusFactor: 1,
+    manualFactor: 1,
+    customMetadata: { keep: true }
+  };
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'anders', name: 'Anders' })],
+    entries: [
+      {
+        ...entryFixture({
+          id: 'historical-sol',
+          projectId: 'anders',
+          description: 'Codex: historical Sol run',
+          startTime: '2026-05-01T08:00:00.000Z',
+          endTime: '2026-05-01T09:00:00.000Z',
+          hours: 0.6
+        }),
+        source: 'codex',
+        externalId: 'codex-historical-sol',
+        elapsedSeconds: 3600,
+        focusFactor: 0.6,
+        manualFactor: 0.6,
+        codexFocusPolicyVersion: 5,
+        codexModelBreakdown: [
+          {
+            model: 'gpt-5.6-sol',
+            effort: 'ultra',
+            fastMode: false,
+            wallSeconds: 3600,
+            factor: 0.6,
+            effectiveSeconds: 2160
+          }
+        ]
+      },
+      manual
+    ],
+    codexIntegration: { enabled: false }
+  });
+
+  await page.goto('/');
+  await expect
+    .poll(() =>
+      page.evaluate(() => JSON.parse(localStorage.getItem('timekeeperDataPro')))
+    )
+    .toMatchObject({
+      codexIntegration: {
+        codexPolicyMigration: expect.objectContaining({
+          version: 6,
+          updated: 1,
+          unable: 0
+        })
+      }
+    });
+  const data = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  const migrated = data.entries.find(
+    (entry) => entry.externalId === 'codex-historical-sol'
+  );
+  expect(migrated).toMatchObject({
+    id: 'historical-sol',
+    externalId: 'codex-historical-sol',
+    duration: 1800,
+    focusFactor: 0.5,
+    manualFactor: 0.5,
+    codexFocusPolicyVersion: 6,
+    elapsedSeconds: 3600,
+    codexModelBreakdown: [
+      expect.objectContaining({
+        model: 'gpt-5.6-sol',
+        effort: 'ultra',
+        factor: 0.5,
+        effectiveSeconds: 1800
+      })
+    ]
+  });
+  expect(
+    data.entries.find((entry) => entry.id === 'manual-stable')
+  ).toMatchObject({
+    id: 'manual-stable',
+    source: 'manual',
+    duration: 3600,
+    customMetadata: { keep: true }
+  });
+  await expect(page.locator('#codexIntegrationSummary')).toContainText(
+    'Policy v6: 1 historical entries updated'
+  );
+});
+
 test('Codex config publish retries after a stale GitHub sha', async ({
   page
 }) => {
@@ -5181,18 +5313,26 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     Buffer.from(bodies[1].content, 'base64').toString('utf8')
   );
   expect(publishedConfig).toMatchObject({
-    version: 5,
+    version: 6,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 5,
+      version: 6,
       defaultFactor: 0.4,
       minimumFactor: 0.2,
       fastModeMultiplier: 1.2,
       delegationCredit: 0.35,
       modelBaseFactors: {
-        luna: 0.25,
-        terra: 0.35,
-        sol: 0.45
+        luna: 0.3,
+        terra: 0.4,
+        sol: 0.5
+      },
+      effortAdjustments: {
+        low: 0,
+        medium: 0,
+        high: 0,
+        xhigh: 0,
+        max: 0,
+        ultra: 0
       },
       repositoryMultipliers: { research: 0.5 },
       repositoryBackfillDays: 90,

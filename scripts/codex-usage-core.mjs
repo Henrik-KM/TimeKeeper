@@ -2,153 +2,27 @@ import crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
 
-export const DEFAULT_CODEX_FOCUS_FACTOR = 0.4;
+import {
+  DEFAULT_CODEX_FOCUS_FACTOR,
+  DEFAULT_CODEX_FOCUS_POLICY,
+  normalizeCodexFocusPolicy,
+  resolveCodexFocusFactor
+} from '../src/features/codex/policy.mjs';
+
+export {
+  DEFAULT_CODEX_FOCUS_FACTOR,
+  DEFAULT_CODEX_FOCUS_POLICY,
+  normalizeCodexFocusPolicy,
+  resolveCodexFocusFactor
+};
+
 export const DEFAULT_IDLE_GAP_MS = 15 * 60 * 1000;
 export const DEFAULT_MATURE_MS = 17 * 60 * 1000;
 export const DEFAULT_CODEX_LOOKBACK_DAYS = 7;
-export const DEFAULT_CODEX_FOCUS_POLICY = {
-  version: 5,
-  defaultFactor: DEFAULT_CODEX_FOCUS_FACTOR,
-  minimumFactor: 0.2,
-  maximumFactor: 0.8,
-  fastModeMultiplier: 1.2,
-  delegationCredit: 0.35,
-  modelBaseFactors: {
-    luna: 0.25,
-    terra: 0.35,
-    sol: 0.45
-  },
-  modelOverrides: {},
-  repositoryMultipliers: {},
-  repositoryMultiplierPolicyVersion: 4,
-  effortAdjustments: {
-    low: -0.05,
-    medium: 0,
-    high: 0.05,
-    xhigh: 0.1,
-    max: 0.15,
-    ultra: 0.15
-  }
-};
 
 function getFiniteNumber(value, fallback) {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? parsed : fallback;
-}
-
-function normalizeNumberMap(value, fallback, { positiveOnly = false } = {}) {
-  const source = value && typeof value === 'object' ? value : {};
-  const normalized = { ...fallback };
-  Object.entries(source).forEach(([key, rawValue]) => {
-    const name = String(key || '')
-      .trim()
-      .toLowerCase();
-    const number = Number(rawValue);
-    if (!name || !Number.isFinite(number) || (positiveOnly && number <= 0)) {
-      return;
-    }
-    normalized[name] = number;
-  });
-  return normalized;
-}
-
-export function normalizeCodexFocusPolicy(
-  value = {},
-  fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
-) {
-  const source = /** @type {Record<string, any>} */ (
-    value && typeof value === 'object' ? value : {}
-  );
-  const minimumFactor = Math.max(
-    0.01,
-    getFiniteNumber(
-      source.minimumFactor,
-      DEFAULT_CODEX_FOCUS_POLICY.minimumFactor
-    )
-  );
-  const maximumFactor = Math.max(
-    minimumFactor,
-    getFiniteNumber(
-      source.maximumFactor,
-      DEFAULT_CODEX_FOCUS_POLICY.maximumFactor
-    )
-  );
-  const requestedDefault = getFiniteNumber(
-    source.defaultFactor,
-    getFiniteNumber(fallbackFactor, DEFAULT_CODEX_FOCUS_FACTOR)
-  );
-  return {
-    version: Math.max(
-      1,
-      Math.floor(
-        getFiniteNumber(source.version, DEFAULT_CODEX_FOCUS_POLICY.version)
-      )
-    ),
-    defaultFactor: Math.min(
-      maximumFactor,
-      Math.max(minimumFactor, requestedDefault)
-    ),
-    minimumFactor,
-    maximumFactor,
-    fastModeMultiplier: Math.max(
-      0.01,
-      getFiniteNumber(
-        source.fastModeMultiplier,
-        DEFAULT_CODEX_FOCUS_POLICY.fastModeMultiplier
-      )
-    ),
-    delegationCredit: Math.max(
-      0,
-      getFiniteNumber(
-        source.delegationCredit,
-        DEFAULT_CODEX_FOCUS_POLICY.delegationCredit
-      )
-    ),
-    modelBaseFactors: normalizeNumberMap(
-      source.modelBaseFactors,
-      DEFAULT_CODEX_FOCUS_POLICY.modelBaseFactors,
-      { positiveOnly: true }
-    ),
-    modelOverrides: normalizeNumberMap(
-      source.modelOverrides,
-      {},
-      {
-        positiveOnly: true
-      }
-    ),
-    repositoryMultipliers: normalizeNumberMap(
-      source.repositoryMultipliers,
-      {},
-      {
-        positiveOnly: true
-      }
-    ),
-    repositoryMultiplierPolicyVersion: Math.max(
-      1,
-      Math.floor(
-        getFiniteNumber(
-          source.repositoryMultiplierPolicyVersion,
-          DEFAULT_CODEX_FOCUS_POLICY.repositoryMultiplierPolicyVersion
-        )
-      )
-    ),
-    effortAdjustments: normalizeNumberMap(
-      source.effortAdjustments,
-      DEFAULT_CODEX_FOCUS_POLICY.effortAdjustments
-    )
-  };
-}
-
-export function normalizeCodexEffort(value = '') {
-  const normalized = String(value || '')
-    .trim()
-    .toLowerCase()
-    .replace(/[\s_]+/g, '-');
-  if (normalized === 'light') return 'low';
-  if (normalized === 'extra-high' || normalized === 'extra-high-reasoning') {
-    return 'xhigh';
-  }
-  return normalized;
 }
 
 export function isCodexFastModeActive(payload = {}) {
@@ -159,74 +33,17 @@ export function isCodexFastModeActive(payload = {}) {
   );
 }
 
-/**
- * @param {{
- *   model?: string,
- *   effort?: string,
- *   fastMode?: boolean,
- *   policy: ReturnType<typeof normalizeCodexFocusPolicy>
- * }} options
- */
 function resolveNormalizedCodexFocusFactor({
   model = '',
   effort = '',
   fastMode = false,
   policy
 }) {
-  const normalizedModel = String(model || '')
-    .trim()
-    .toLowerCase();
-  const normalizedEffort = normalizeCodexEffort(effort);
-  let modelFamily = '';
-  let baseFactor = policy.modelOverrides[normalizedModel];
-  let hasModelRule = Number.isFinite(baseFactor);
-  if (!Number.isFinite(baseFactor)) {
-    const modelParts = normalizedModel.split(/[-_.]+/).filter(Boolean);
-    modelFamily = Object.keys(policy.modelBaseFactors).find((family) =>
-      modelParts.includes(family)
-    );
-    baseFactor = modelFamily
-      ? policy.modelBaseFactors[modelFamily]
-      : policy.defaultFactor;
-    hasModelRule = !!modelFamily;
-  }
-  const adjustment = hasModelRule
-    ? getFiniteNumber(policy.effortAdjustments[normalizedEffort], 0)
-    : 0;
-  const appliedFastModeMultiplier = fastMode ? policy.fastModeMultiplier : 1;
-  const factor = Number(
-    Math.min(
-      policy.maximumFactor,
-      Math.max(
-        policy.minimumFactor,
-        (baseFactor + adjustment) * appliedFastModeMultiplier
-      )
-    ).toFixed(4)
-  );
-  return {
-    factor,
-    model: normalizedModel,
-    modelFamily,
-    effort: normalizedEffort,
-    fastMode: fastMode === true,
-    fastModeMultiplier: appliedFastModeMultiplier,
-    policyVersion: policy.version,
-    source: hasModelRule ? 'model-effort' : 'default'
-  };
-}
-
-export function resolveCodexFocusFactor({
-  model = '',
-  effort = '',
-  fastMode = false,
-  focusPolicy = {},
-  fallbackFactor = DEFAULT_CODEX_FOCUS_FACTOR
-} = {}) {
-  return resolveNormalizedCodexFocusFactor({
+  return resolveCodexFocusFactor({
     model,
     effort,
     fastMode,
-    policy: normalizeCodexFocusPolicy(focusPolicy, fallbackFactor)
+    focusPolicy: policy
   });
 }
 
@@ -693,11 +510,16 @@ export function buildModelWeightedActiveSpans(
   const closeSpan = () => {
     if (activeMs <= 0) return;
     const modelBreakdown = Array.from(breakdown.values()).map((item) => ({
+      role: 'parent',
       model: item.model || 'unknown',
       effort: item.effort || 'unknown',
+      baseFactor: item.factor,
       factor: item.factor,
       fastMode: item.fastMode,
       fastModeMultiplier: item.fastModeMultiplier,
+      creditMultiplier: 1,
+      creditedFactor: item.factor,
+      repositoryMultiplier: 1,
       wallSeconds: Math.floor(item.wallMs / 1000),
       effectiveSeconds: Math.floor(item.effectiveMs / 1000)
     }));
@@ -767,8 +589,11 @@ function getRepositoryFocusMultiplier(repoName, policy) {
   return getFiniteNumber(policy.repositoryMultipliers[normalizedRepoName], 1);
 }
 
+function roundCodexFactor(value) {
+  return Number(Number(value).toFixed(4));
+}
+
 function applyRepositoryFocusMultiplier(span, multiplier, policy) {
-  if (multiplier === 1) return span;
   return {
     ...span,
     effectiveMs: span.effectiveMs * multiplier,
@@ -777,20 +602,26 @@ function applyRepositoryFocusMultiplier(span, multiplier, policy) {
       span.focusPolicyVersion || policy.version,
       policy.repositoryMultiplierPolicyVersion
     ),
-    modelBreakdown: span.modelBreakdown.map((item) => ({
-      ...item,
-      baseFactor: item.factor,
-      factor: Number((item.factor * multiplier).toFixed(4)),
-      ...(Number.isFinite(item.creditedFactor)
-        ? {
-            creditedFactor: Number(
-              (item.creditedFactor * multiplier).toFixed(4)
+    modelBreakdown: Array.isArray(span.modelBreakdown)
+      ? span.modelBreakdown.map((item) => {
+          const baseFactor = getFiniteNumber(item.baseFactor, item.factor);
+          const factor = roundCodexFactor(baseFactor * multiplier);
+          const creditMultiplier = getFiniteNumber(item.creditMultiplier, 1);
+          const creditedFactor = roundCodexFactor(factor * creditMultiplier);
+          return {
+            ...item,
+            role: item.role || 'parent',
+            baseFactor,
+            factor,
+            creditMultiplier,
+            creditedFactor,
+            repositoryMultiplier: multiplier,
+            effectiveSeconds: Math.floor(
+              Math.max(0, Number(item.wallSeconds) || 0) * creditedFactor
             )
-          }
-        : {}),
-      repositoryMultiplier: multiplier,
-      effectiveSeconds: Math.floor(item.effectiveSeconds * multiplier)
-    }))
+          };
+        })
+      : []
   };
 }
 
@@ -872,7 +703,9 @@ export function buildCodexUsageRecordsFromSessionData({
       const wallSeconds = Math.floor(span.activeMs / 1000);
       const effectiveSeconds = Math.floor(span.effectiveMs / 1000);
       if (wallSeconds <= 0 || effectiveSeconds <= 0) return null;
-      const recordFocusFactor = Number(span.focusFactor.toFixed(4));
+      const recordFocusFactor = Number(
+        (effectiveSeconds / wallSeconds).toFixed(4)
+      );
       const startIso = span.start.toISOString();
       const endIso = span.end.toISOString();
       return {
@@ -1240,7 +1073,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
         startTime: startIso,
         endTime: endIso,
         wallSeconds,
-        focusFactor: Number(span.focusFactor.toFixed(4)),
+        focusFactor: Number((effectiveSeconds / wallSeconds).toFixed(4)),
         effectiveSeconds,
         focusPolicyVersion: span.focusPolicyVersion || normalizedPolicy.version,
         repositoryFocusMultiplier,

@@ -10,8 +10,8 @@ entry store.
 The page keeps three quantities separate:
 
 1. **Active time**: wall-clock seconds attributed to Codex model activity.
-2. **Effective time**: TimeKeeper credited time after model, effort,
-   repository, and delegation policy weights.
+2. **Effective time**: TimeKeeper credited time after the model-family work-rate
+   factor, Fast mode, repository, and delegation policy weights.
 3. **Quota usage**: positive percentage-point changes in an observed Codex
    limit window.
 
@@ -23,6 +23,14 @@ The selected range's full active and effective totals are independent from
 quota-history coverage. Efficiency denominators use only activity overlapping
 actual quota snapshots. A session can therefore contribute to full-range time
 without contributing to measured efficiency.
+
+The Codex focus policy is v6. Its normal model-family factors are Luna `0.30`,
+Terra `0.40`, Sol `0.50`, and unknown models `0.40`. Reasoning effort is kept on
+each record for model-by-effort analysis, but it does not change credited time;
+the compatibility `effortAdjustments` field is retained with zero values. Fast
+mode remains a separate `1.2` multiplier, Research remains `0.5`, and delegated
+subagent work remains credited at `0.35` of the post-model and repository
+factor. The existing minimum and maximum factor bounds remain `0.2` and `0.8`.
 
 ## Metrics and controls
 
@@ -72,6 +80,15 @@ points. Quota with no overlapping activity remains explicitly unattributed.
 Mixed-model sessions contain aggregate model durations without exact per-model
 timestamps, so their allocation is proportional and receives a lower
 confidence qualification.
+
+Historical `source: "codex"` entries are revalued locally when the app loads
+under a newer policy. The migration updates calculated duration and breakdown
+fields in place, preserves entry and external IDs, keeps repository and
+delegation modifiers separate, and records updated versus unable-to-revalue
+counts in the Codex integration state. Entries without model metadata use the
+explicit unknown-model fallback; entries without enough wall-time information
+are preserved and reported as unable to revalue. Re-running the migration is
+idempotent.
 
 ## Repository mapping audit
 

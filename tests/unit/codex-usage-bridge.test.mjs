@@ -17,6 +17,7 @@ import {
   buildCodexUsageRecordsFromSessionGroup,
   buildCodexUsageRecordsFromSessionText,
   buildCodexMappingAudit,
+  DEFAULT_CODEX_FOCUS_POLICY,
   findTrackedProjectForCwd,
   getGitHubProjectPathInfo,
   getLocalLookbackStart,
@@ -192,52 +193,69 @@ test('builds Codex records from streamed session summary data', () => {
   assert.equal(records[0].focusFactor, 0.4);
 });
 
-test('resolves model and effort focus factors with a safe unknown fallback', () => {
-  assert.equal(
-    resolveCodexFocusFactor({ model: 'gpt-5.6-luna', effort: 'light' }).factor,
-    0.2
-  );
-  assert.equal(
-    resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'high' }).factor,
-    0.5
-  );
-  assert.equal(
-    resolveCodexFocusFactor({ model: 'gpt-5.6-sol', effort: 'ultra' }).factor,
-    0.6
-  );
-  assert.equal(
-    resolveCodexFocusFactor({ model: 'gpt-future', effort: 'ultra' }).factor,
-    0.4
-  );
-  const fastSolHigh = resolveCodexFocusFactor({
-    model: 'gpt-5.6-sol',
-    effort: 'high',
-    fastMode: true
-  });
-  assert.equal(fastSolHigh.factor, 0.6);
-  assert.equal(fastSolHigh.fastMode, true);
-  assert.equal(fastSolHigh.fastModeMultiplier, 1.2);
-});
+test('resolves flat v6 model-family factors for every reasoning level', () => {
+  const efforts = ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
+  const expected = { luna: 0.3, terra: 0.4, sol: 0.5 };
 
-test('keeps the lowered Codex model scale evenly spaced', () => {
-  const expected = {
-    luna: { low: 0.2, medium: 0.25, high: 0.3, xhigh: 0.35, ultra: 0.4 },
-    terra: { low: 0.3, medium: 0.35, high: 0.4, xhigh: 0.45, ultra: 0.5 },
-    sol: { low: 0.4, medium: 0.45, high: 0.5, xhigh: 0.55, ultra: 0.6 }
-  };
-
-  Object.entries(expected).forEach(([model, efforts]) => {
-    Object.entries(efforts).forEach(([effort, factor]) => {
-      assert.equal(
-        resolveCodexFocusFactor({
-          model: `gpt-5.6-${model}`,
-          effort
-        }).factor,
-        factor,
-        `${model} ${effort}`
-      );
+  Object.entries(expected).forEach(([model, factor]) => {
+    efforts.forEach((effort) => {
+      const resolved = resolveCodexFocusFactor({
+        model: `gpt-5.6-${model}`,
+        effort
+      });
+      assert.equal(resolved.factor, factor, `${model} ${effort}`);
+      assert.equal(resolved.effort, effort);
+      assert.equal(resolved.policyVersion, 6);
     });
   });
+  assert.deepEqual(resolveCodexFocusFactor().factor, 0.4);
+});
+
+test('ignores legacy effort adjustments under the v6 policy', () => {
+  const legacyShapedPolicy = {
+    ...DEFAULT_CODEX_FOCUS_POLICY,
+    effortAdjustments: {
+      low: -0.2,
+      medium: -0.1,
+      high: 0.1,
+      xhigh: 0.2,
+      max: 0.3,
+      ultra: 0.3
+    }
+  };
+  ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'].forEach((effort) => {
+    assert.equal(
+      resolveCodexFocusFactor({
+        model: 'gpt-5.6-sol',
+        effort,
+        focusPolicy: legacyShapedPolicy
+      }).factor,
+      0.5,
+      effort
+    );
+  });
+});
+
+test('keeps Fast mode separate from reasoning and applies the unknown fallback', () => {
+  const efforts = ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
+  efforts.forEach((effort) => {
+    assert.equal(
+      resolveCodexFocusFactor({
+        model: 'gpt-5.6-sol',
+        effort,
+        fastMode: true
+      }).factor,
+      0.6,
+      `Sol Fast ${effort}`
+    );
+  });
+  const unknownFast = resolveCodexFocusFactor({
+    model: 'gpt-future',
+    effort: 'ultra',
+    fastMode: true
+  });
+  assert.equal(unknownFast.factor, 0.48);
+  assert.equal(unknownFast.fastModeMultiplier, 1.2);
 });
 
 test('Codex payload fingerprint changes when model weighting changes', () => {
@@ -681,25 +699,35 @@ test('weights one Codex span across model changes without splitting it', () => {
   assert.equal(records[0].wallSeconds, 1200);
   assert.equal(records[0].effectiveSeconds, 480);
   assert.equal(records[0].focusFactor, 0.4);
-  assert.equal(records[0].focusPolicyVersion, 5);
+  assert.equal(records[0].focusPolicyVersion, 6);
   assert.deepEqual(records[0].modelBreakdown, [
     {
+      role: 'parent',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.6,
+      baseFactor: 0.5,
+      factor: 0.5,
       fastMode: false,
       fastModeMultiplier: 1,
+      creditMultiplier: 1,
+      creditedFactor: 0.5,
+      repositoryMultiplier: 1,
       wallSeconds: 600,
-      effectiveSeconds: 360
+      effectiveSeconds: 300
     },
     {
+      role: 'parent',
       model: 'gpt-5.6-luna',
       effort: 'low',
-      factor: 0.2,
+      baseFactor: 0.3,
+      factor: 0.3,
       fastMode: false,
       fastModeMultiplier: 1,
+      creditMultiplier: 1,
+      creditedFactor: 0.3,
+      repositoryMultiplier: 1,
       wallSeconds: 600,
-      effectiveSeconds: 120
+      effectiveSeconds: 180
     }
   ]);
 });
@@ -725,7 +753,7 @@ test('halves model-weighted focus for an autonomous research repository', () => 
     trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
     now: new Date('2026-06-13T10:00:00.000Z'),
     focusPolicy: {
-      version: 3,
+      version: 6,
       repositoryMultipliers: { Research: 0.5 }
     }
   });
@@ -734,7 +762,7 @@ test('halves model-weighted focus for an autonomous research repository', () => 
   assert.equal(records[0].wallSeconds, 600);
   assert.equal(records[0].effectiveSeconds, 150);
   assert.equal(records[0].focusFactor, 0.25);
-  assert.equal(records[0].focusPolicyVersion, 4);
+  assert.equal(records[0].focusPolicyVersion, 6);
   assert.equal(records[0].repositoryFocusMultiplier, 0.5);
   assert.deepEqual(records[0].modelBreakdown, [
     {
@@ -744,6 +772,9 @@ test('halves model-weighted focus for an autonomous research repository', () => 
       factor: 0.25,
       fastMode: false,
       fastModeMultiplier: 1,
+      role: 'parent',
+      creditMultiplier: 1,
+      creditedFactor: 0.25,
       repositoryMultiplier: 0.5,
       wallSeconds: 600,
       effectiveSeconds: 150
@@ -774,7 +805,7 @@ test('applies the Research multiplier after Fast mode weighting', () => {
     trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
     now: new Date('2026-06-13T10:00:00.000Z'),
     focusPolicy: {
-      version: 5,
+      version: 6,
       fastModeMultiplier: 1.2,
       repositoryMultipliers: { research: 0.5 }
     }
@@ -789,6 +820,9 @@ test('applies the Research multiplier after Fast mode weighting', () => {
     factor: 0.3,
     fastMode: true,
     fastModeMultiplier: 1.2,
+    role: 'parent',
+    creditMultiplier: 1,
+    creditedFactor: 0.3,
     repositoryMultiplier: 0.5,
     wallSeconds: 600,
     effectiveSeconds: 180
@@ -835,8 +869,8 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
 
   assert.equal(records.length, 1);
   assert.equal(records[0].wallSeconds, 600);
-  assert.equal(records[0].effectiveSeconds, 864);
-  assert.equal(records[0].focusFactor, 1.44);
+  assert.equal(records[0].effectiveSeconds, 720);
+  assert.equal(records[0].focusFactor, 1.2);
   assert.equal(records[0].delegationCredit, 0.35);
   assert.equal(records[0].delegatedSessionCount, 4);
   assert.equal(records[0].supersedesExternalIds.length, 1);
@@ -849,25 +883,29 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
       role: 'parent',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.6,
+      baseFactor: 0.5,
+      factor: 0.5,
       fastMode: false,
       fastModeMultiplier: 1,
       creditMultiplier: 1,
-      creditedFactor: 0.6,
+      creditedFactor: 0.5,
+      repositoryMultiplier: 1,
       wallSeconds: 600,
-      effectiveSeconds: 360
+      effectiveSeconds: 300
     },
     {
       role: 'subagent',
       model: 'gpt-5.6-sol',
       effort: 'ultra',
-      factor: 0.6,
+      baseFactor: 0.5,
+      factor: 0.5,
       fastMode: false,
       fastModeMultiplier: 1,
       creditMultiplier: 0.35,
-      creditedFactor: 0.21,
+      creditedFactor: 0.175,
+      repositoryMultiplier: 1,
       wallSeconds: 2400,
-      effectiveSeconds: 504
+      effectiveSeconds: 420
     }
   ]);
 
@@ -876,14 +914,14 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
     trackedProjects: [{ name: 'Anders', projectId: 'anders' }],
     now: new Date('2026-06-13T10:00:00.000Z'),
     focusPolicy: {
-      version: 3,
+      version: 6,
       repositoryMultipliers: { research: 0.5 }
     }
   });
 
-  assert.equal(autonomousRecords[0].effectiveSeconds, 432);
-  assert.equal(autonomousRecords[0].focusFactor, 0.72);
-  assert.equal(autonomousRecords[0].focusPolicyVersion, 4);
+  assert.equal(autonomousRecords[0].effectiveSeconds, 360);
+  assert.equal(autonomousRecords[0].focusFactor, 0.6);
+  assert.equal(autonomousRecords[0].focusPolicyVersion, 6);
   assert.equal(autonomousRecords[0].repositoryFocusMultiplier, 0.5);
   assert.deepEqual(
     autonomousRecords[0].modelBreakdown.map((item) => ({
@@ -897,19 +935,19 @@ test('consolidates delegated sessions with uncapped discounted subagent credit',
     [
       {
         role: 'parent',
-        baseFactor: 0.6,
-        factor: 0.3,
-        creditedFactor: 0.3,
+        baseFactor: 0.5,
+        factor: 0.25,
+        creditedFactor: 0.25,
         repositoryMultiplier: 0.5,
-        effectiveSeconds: 180
+        effectiveSeconds: 150
       },
       {
         role: 'subagent',
-        baseFactor: 0.6,
-        factor: 0.3,
-        creditedFactor: 0.105,
+        baseFactor: 0.5,
+        factor: 0.25,
+        creditedFactor: 0.0875,
         repositoryMultiplier: 0.5,
-        effectiveSeconds: 252
+        effectiveSeconds: 210
       }
     ]
   );
