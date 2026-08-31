@@ -30,11 +30,24 @@ import { uuid } from './shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
-  computeWealthRegression,
+  calculateHistoricalRegression,
+  calculateWealthFreshness,
+  calculateWealthGoalPlan,
+  calculateWealthPeriodChange,
+  findWealthSnapshotByDate,
+  getLatestWealthSnapshot,
+  getWealthAccountReferences,
+  getWealthComposition,
+  getWealthHistoryRange,
+  normalizeWealthAccount,
+  normalizeWealthData,
   makeDefaultWealthGoal,
-  normalizeWealthEntry,
+  parseWealthDate,
   parseOptionalWealthAmount,
-  parseWealthAmount,
+  previewWealthCsvImport,
+  applyWealthCsvImport,
+  resolveWealthSnapshotConflict,
+  rollUpWealthBreakdown,
   validateWealthGoal
 } from './features/wealth/core.mjs';
 import {
@@ -113,7 +126,6 @@ import {
   normalizeWeekKey,
   parseCustomIntensity,
   parseDateTimeInput,
-  parseISODateOnly,
   sanitizeCustomPoints,
   weekKeyToDate
 } from './features/workouts/runtime.mjs';
@@ -212,28 +224,31 @@ import {
     return data.monthlyRecurringPayments;
   }
   function ensureWealthData() {
-    let changed = false;
-    const originalHistory = Array.isArray(data.wealthHistory)
-      ? data.wealthHistory
-      : [];
-    const normalized = originalHistory.map(normalizeWealthEntry);
-    if (JSON.stringify(normalized) !== JSON.stringify(originalHistory)) {
-      changed = true;
+    const before = JSON.stringify({
+      wealthSchemaVersion: data.wealthSchemaVersion,
+      wealthAccounts: data.wealthAccounts,
+      wealthHistory: data.wealthHistory,
+      wealthGoal: data.wealthGoal,
+      wealthSettings: data.wealthSettings
+    });
+    const normalized = normalizeWealthData(data, { now: new Date() });
+    data.wealthSchemaVersion = normalized.wealthSchemaVersion;
+    data.wealthAccounts = normalized.wealthAccounts;
+    data.wealthHistory = normalized.wealthHistory;
+    data.wealthGoal = normalized.wealthGoal;
+    data.wealthSettings = normalized.wealthSettings;
+    if (
+      before !==
+      JSON.stringify({
+        wealthSchemaVersion: data.wealthSchemaVersion,
+        wealthAccounts: data.wealthAccounts,
+        wealthHistory: data.wealthHistory,
+        wealthGoal: data.wealthGoal,
+        wealthSettings: data.wealthSettings
+      })
+    ) {
+      saveData();
     }
-    data.wealthHistory = changed ? normalized : originalHistory;
-    if (!data.wealthGoal || typeof data.wealthGoal !== 'object') {
-      data.wealthGoal = makeDefaultWealthGoal();
-      changed = true;
-    } else {
-      const amount = parseWealthAmount(data.wealthGoal.amount);
-      const date =
-        typeof data.wealthGoal.date === 'string' ? data.wealthGoal.date : '';
-      if (amount !== data.wealthGoal.amount || date !== data.wealthGoal.date) {
-        data.wealthGoal = { ...data.wealthGoal, amount, date };
-        changed = true;
-      }
-    }
-    if (changed) saveData();
     return data.wealthHistory;
   }
   const scheduleRender =
@@ -244,7 +259,7 @@ import {
   let groceryRenderQueued = false;
   let financeControlsBound = false;
   let financeActiveView = 'overview';
-  let financeWealthRange = 'all';
+  let financeWealthRange = 'one-year';
   let financeHistoryPeriod = 'all';
   let financeHistoryBucket = 'all';
   function ensureWorkoutPreset(name, intensity) {
@@ -681,35 +696,162 @@ import {
   }
 
   let wealthChartInstance = null;
+  let pendingWealthCsvPreview = null;
+  let editingWealthAccountId = null;
+  let wealthHistoryExpanded = !isMobileViewport();
+
   function createChartIfAvailable(context, config) {
-    if (typeof Chart === 'undefined') return null;
+    if (typeof Chart === 'undefined' || !context) return null;
     return new Chart(context, config);
   }
-  function addWealthHistoryEntry(dateStr, amountRaw, noteRaw = '') {
-    const parsedDate = parseISODateOnly(dateStr);
-    if (!parsedDate) return { ok: false, reason: 'date' };
-    const amount = parseOptionalWealthAmount(amountRaw);
-    if (amount === null || amount < 0) return { ok: false, reason: 'amount' };
-    const entry = {
-      id: uuid(),
-      date: formatDateKey(parsedDate),
-      amount,
-      note: typeof noteRaw === 'string' ? noteRaw.trim() : ''
+
+  function setWealthText(id, value) {
+    const element = document.getElementById(id);
+    if (element) element.textContent = value;
+    return element;
+  }
+
+  function formatWealthDateLabel(value) {
+    const date = parseWealthDate(value);
+    return date
+      ? date.toLocaleDateString(undefined, {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric'
+        })
+      : 'Unknown date';
+  }
+
+  function formatWealthRateLabel(rate) {
+    return Number.isFinite(Number(rate))
+      ? `${(Number(rate) * 100).toFixed(1)}%`
+      : 'Not configured';
+  }
+
+  function formatWealthPercentLabel(value) {
+    if (!Number.isFinite(Number(value))) return '—';
+    const amount = Number(value);
+    return `${amount >= 0 ? '+' : ''}${amount.toFixed(1)}%`;
+  }
+
+  function wealthSaveError(reason) {
+    const messages = {
+      date: 'Enter a valid snapshot date.',
+      amount: 'Enter a valid amount.',
+      breakdown: 'Enter a non-negative balance for every account.',
+      name: 'Enter an account name.',
+      category: 'Enter an account category.',
+      monthlyContribution: 'Enter a valid non-negative monthly contribution.',
+      rate: 'Enter valid annual assumptions between -100% and 100%.'
     };
-    const wealthHistory = ensureWealthData();
-    wealthHistory.push(entry);
-    wealthHistory.sort((a, b) => new Date(a.date) - new Date(b.date));
-    saveData();
-    return { ok: true, entry };
+    return messages[reason] || 'Check the highlighted values and try again.';
   }
-  function deleteWealthHistoryEntry(entryId) {
-    const wealthHistory = ensureWealthData();
-    const idx = wealthHistory.findIndex((e) => e.id === entryId);
-    if (idx >= 0) {
-      wealthHistory.splice(idx, 1);
-      saveData();
+
+  function getWealthAccountsForUpdate() {
+    const references = getWealthAccountReferences(data.wealthHistory);
+    return data.wealthAccounts
+      .filter(
+        (account) => !account.archived || references.has(String(account.id))
+      )
+      .slice()
+      .sort((left, right) => left.name.localeCompare(right.name));
+  }
+
+  function parseWealthBreakdownForSave(breakdown) {
+    if (!Array.isArray(breakdown) || !breakdown.length) {
+      return { ok: false, reason: 'breakdown' };
     }
+    const rows = breakdown.map((row) => {
+      const balance = parseOptionalWealthAmount(row?.balance);
+      return {
+        ...(row && typeof row === 'object' ? row : {}),
+        accountId: String(row?.accountId || '').trim(),
+        balance
+      };
+    });
+    if (
+      rows.some(
+        (row) => !row.accountId || row.balance === null || row.balance < 0
+      )
+    ) {
+      return { ok: false, reason: 'breakdown' };
+    }
+    const composition = rollUpWealthBreakdown(rows, data.wealthAccounts);
+    if (!composition.complete) return { ok: false, reason: 'breakdown' };
+    return { ok: true, rows, composition };
   }
+
+  async function saveWealthSnapshot({
+    id = null,
+    date,
+    amountRaw,
+    noteRaw = '',
+    breakdown = null,
+    confirmConflict = true
+  } = {}) {
+    const parsedDate = parseWealthDate(date);
+    if (!parsedDate) return { ok: false, reason: 'date' };
+    let amount = parseOptionalWealthAmount(amountRaw);
+    if (amount === null) {
+      return { ok: false, reason: 'amount' };
+    }
+    let normalizedBreakdown = null;
+    if (Array.isArray(breakdown)) {
+      const parsedBreakdown = parseWealthBreakdownForSave(breakdown);
+      if (!parsedBreakdown.ok) return parsedBreakdown;
+      normalizedBreakdown = parsedBreakdown.rows;
+      amount = parsedBreakdown.composition.netWorth;
+    }
+    const dateKey = formatDateKey(parsedDate);
+    const note = typeof noteRaw === 'string' ? noteRaw.trim() : '';
+    const history = ensureWealthData();
+    const resolution = resolveWealthSnapshotConflict(
+      history,
+      { id, date: dateKey, amount, breakdown: normalizedBreakdown, note },
+      { replace: false }
+    );
+    if (resolution.action === 'conflict' && confirmConflict) {
+      const replace = await requestConfirm({
+        title: 'Replace wealth snapshot?',
+        message: `A different snapshot already exists for ${dateKey}. Replace it?`,
+        confirmLabel: 'Replace snapshot',
+        danger: true
+      });
+      if (!replace) return { ok: false, reason: 'cancelled' };
+    }
+    const existing = resolution.existing;
+    if (existing) {
+      const index = history.findIndex(
+        (entry) => String(entry.id) === String(existing.id)
+      );
+      if (index < 0) return { ok: false, reason: 'missing' };
+      const next = {
+        ...existing,
+        date: dateKey,
+        amount,
+        note
+      };
+      if (normalizedBreakdown) next.breakdown = normalizedBreakdown;
+      else delete next.breakdown;
+      history[index] = next;
+    } else {
+      const next = { id: uuid(), date: dateKey, amount, note };
+      if (normalizedBreakdown) next.breakdown = normalizedBreakdown;
+      history.push(next);
+    }
+    history.sort((left, right) => {
+      const leftDate = parseWealthDate(left.date)?.getTime() || 0;
+      const rightDate = parseWealthDate(right.date)?.getTime() || 0;
+      return leftDate - rightDate;
+    });
+    saveData();
+    renderWealthHistoryTable();
+    renderWealthAccounts();
+    updateWealthDashboard();
+    renderTodayCommandPanel();
+    return { ok: true, entry: findWealthSnapshotByDate(history, dateKey) };
+  }
+
   async function editWealthHistoryEntry(entry) {
     const values = await openFormDialog({
       title: 'Edit wealth snapshot',
@@ -723,9 +865,8 @@ import {
         },
         {
           name: 'amount',
-          label: 'Amount (SEK)',
+          label: 'Net worth (SEK)',
           type: 'number',
-          min: 0,
           step: 0.01,
           value: entry.amount,
           required: true
@@ -735,37 +876,43 @@ import {
       submitLabel: 'Save snapshot'
     });
     if (!values) return;
-    const date = parseISODateOnly(values.date);
-    const amount = parseOptionalWealthAmount(values.amount);
-    if (!date || amount === null || amount < 0) {
-      showToast('Enter a valid snapshot date and amount.');
+    const snapshot = cloneData();
+    const result = await saveWealthSnapshot({
+      id: entry.id,
+      date: values.date,
+      amountRaw: values.amount,
+      noteRaw: values.note,
+      breakdown: entry.breakdown || null,
+      confirmConflict: true
+    });
+    if (!result.ok) {
+      if (result.reason !== 'cancelled')
+        showToast(wealthSaveError(result.reason));
       return;
     }
-    const snapshot = cloneData();
-    entry.date = formatDateKey(date);
-    entry.amount = amount;
-    entry.note = values.note.trim();
-    data.wealthHistory.sort(
-      (left, right) => new Date(left.date) - new Date(right.date)
-    );
-    saveData();
-    renderWealthHistoryTable();
-    updateWealthDashboard();
     offerUndo('Wealth snapshot updated.', snapshot);
+    if (isMobileViewport()) showToast('Wealth snapshot updated.');
   }
 
   async function deleteWealthHistoryEntryWithUndo(entry) {
     const ok = await requestConfirm({
       title: 'Delete wealth snapshot',
       message: 'Delete this wealth snapshot? It can be undone immediately.',
-      confirmLabel: 'Delete',
+      confirmLabel: 'Delete snapshot',
       danger: true
     });
     if (!ok) return;
     const snapshot = cloneData();
-    deleteWealthHistoryEntry(entry.id);
-    updateWealthDashboard();
+    const history = ensureWealthData();
+    const index = history.findIndex(
+      (candidate) => String(candidate.id) === String(entry.id)
+    );
+    if (index < 0) return;
+    history.splice(index, 1);
+    saveData();
     renderWealthHistoryTable();
+    updateWealthDashboard();
+    renderTodayCommandPanel();
     offerUndo('Wealth snapshot deleted.', snapshot);
   }
 
@@ -789,40 +936,51 @@ import {
     const body = document.getElementById('wealthHistoryBody');
     const mobileList = document.getElementById('wealthHistoryList');
     if (!body && !mobileList) return;
-    const wealthHistory = ensureWealthData()
+    const history = ensureWealthData()
       .slice()
-      .sort((a, b) => new Date(b.date) - new Date(a.date));
+      .sort((left, right) => {
+        const leftDate = parseWealthDate(left.date)?.getTime() || 0;
+        const rightDate = parseWealthDate(right.date)?.getTime() || 0;
+        return rightDate - leftDate;
+      });
     if (body) body.replaceChildren();
     if (mobileList) mobileList.replaceChildren();
-    if (!wealthHistory.length) {
+    if (!history.length) {
       if (body) {
         const row = document.createElement('tr');
         const cell = document.createElement('td');
-        cell.colSpan = 4;
-        cell.textContent = 'No snapshots yet.';
+        cell.colSpan = 5;
+        cell.textContent =
+          'No snapshots yet. Update wealth to start a trustworthy history.';
         row.appendChild(cell);
         body.appendChild(row);
       }
       if (mobileList) {
         const empty = document.createElement('p');
         empty.className = 'finance-empty-state';
-        empty.textContent = 'No snapshots yet.';
+        empty.textContent =
+          'No snapshots yet. Update wealth to start a trustworthy history.';
         mobileList.appendChild(empty);
       }
       return;
     }
-    wealthHistory.forEach((entry) => {
+    history.forEach((entry) => {
+      const typeLabel =
+        Array.isArray(entry.breakdown) && entry.breakdown.length
+          ? 'Detailed'
+          : 'Quick total';
       if (body) {
         const row = document.createElement('tr');
-        const dateCell = document.createElement('td');
-        dateCell.textContent = entry.date || '';
-        row.appendChild(dateCell);
-        const amountCell = document.createElement('td');
-        amountCell.textContent = formatFinanceAmount(entry.amount);
-        row.appendChild(amountCell);
-        const noteCell = document.createElement('td');
-        noteCell.textContent = entry.note || '';
-        row.appendChild(noteCell);
+        [
+          entry.date || 'Unknown date',
+          formatFinanceAmount(entry.amount),
+          typeLabel,
+          entry.note || '—'
+        ].forEach((value) => {
+          const cell = document.createElement('td');
+          cell.textContent = value;
+          row.appendChild(cell);
+        });
         const actionsCell = document.createElement('td');
         actionsCell.appendChild(createWealthHistoryActions(entry));
         row.appendChild(actionsCell);
@@ -836,7 +994,7 @@ import {
         const title = document.createElement('strong');
         title.textContent = entry.date || 'Snapshot';
         const detail = document.createElement('span');
-        detail.textContent = `${formatFinanceAmount(entry.amount)}${entry.note ? ` · ${entry.note}` : ''}`;
+        detail.textContent = `${formatFinanceAmount(entry.amount)} · ${typeLabel}${entry.note ? ` · ${entry.note}` : ''}`;
         copy.appendChild(title);
         copy.appendChild(detail);
         row.appendChild(copy);
@@ -845,336 +1003,89 @@ import {
       }
     });
   }
-  function updateWealthDashboard() {
+
+  function renderWealthChart(history) {
     const chartEl = document.getElementById('wealthChart');
-    const summaryEl = document.getElementById('wealthProjectionSummary');
-    const accessibleSummaryEl = document.getElementById(
-      'wealthAccessibleSummary'
+    if (!chartEl) return;
+    if (wealthChartInstance) {
+      wealthChartInstance.destroy();
+      wealthChartInstance = null;
+    }
+    const selectedHistory = getWealthHistoryRange(
+      history,
+      financeWealthRange,
+      new Date()
     );
-    const metricGridEl = document.getElementById('wealthMetricGrid');
-    const goalAmountInput = document.getElementById('wealthGoalAmount');
-    const goalDateInput = document.getElementById('wealthGoalDate');
-    const wealthEntryDateInput = document.getElementById('wealthEntryDate');
-    if (!chartEl || !summaryEl) return;
-    const msPerDay = 24 * 60 * 60 * 1000;
-    const allWealthHistory = ensureWealthData()
-      .map((entry) => ({ ...entry, time: new Date(entry.date).getTime() }))
-      .filter((entry) => Number.isFinite(entry.time))
-      .sort((a, b) => a.time - b.time);
-    const goal = data.wealthGoal || makeDefaultWealthGoal();
-    if (goalAmountInput && document.activeElement !== goalAmountInput) {
-      goalAmountInput.value = goal.amount || '';
-    }
-    if (goalDateInput && document.activeElement !== goalDateInput) {
-      goalDateInput.value = goal.date || '';
-    }
-    if (
-      wealthEntryDateInput &&
-      !wealthEntryDateInput.value &&
-      document.activeElement !== wealthEntryDateInput
-    ) {
-      wealthEntryDateInput.value = formatLocalDateString(new Date());
-    }
-    if (metricGridEl) {
-      metricGridEl.replaceChildren();
-      const latest = allWealthHistory[allWealthHistory.length - 1];
-      const previous = allWealthHistory[allWealthHistory.length - 2];
-      const currentAmount = latest ? latest.amount : 0;
-      const recentChange =
-        latest && previous ? latest.amount - previous.amount : 0;
-      const goalGap =
-        Number(goal.amount) > 0 ? Number(goal.amount) - currentAmount : null;
-      metricGridEl.appendChild(
-        createFinanceMetric(
-          'Current wealth',
-          formatFinanceAmount(currentAmount),
-          latest ? `Recorded ${latest.date}` : 'Add the first snapshot'
-        )
+    const latest = getLatestWealthSnapshot(history);
+    const rangeLabel =
+      financeWealthRange === 'one-year'
+        ? 'the last year'
+        : financeWealthRange === 'three-year'
+          ? 'the last three years'
+          : 'all recorded time';
+    if (!selectedHistory.length) {
+      const latestDetail = latest
+        ? ` The latest recorded total is ${formatFinanceAmount(latest.amount)} as of ${latest.date}.`
+        : '';
+      setWealthText(
+        'wealthAccessibleSummary',
+        `No recorded snapshots fall within ${rangeLabel}.${latestDetail}`
       );
-      metricGridEl.appendChild(
-        createFinanceMetric(
-          'Recent change',
-          formatFinanceSignedAmount(recentChange),
-          previous ? 'Since the previous snapshot' : 'Needs two snapshots'
-        )
+      setWealthText(
+        'wealthHistoryTableSummary',
+        `No snapshots in ${rangeLabel}.`
       );
-      metricGridEl.appendChild(
-        createFinanceMetric(
-          'Goal gap',
-          goalGap === null ? 'No goal' : formatFinanceSignedAmount(goalGap),
-          goalGap !== null && goalGap <= 0
-            ? 'Goal reached'
-            : 'Goal minus current wealth'
-        )
-      );
-      metricGridEl.appendChild(
-        createFinanceMetric(
-          'Projected pace',
-          allWealthHistory.length >= 2
-            ? 'Calculating…'
-            : 'Add another snapshot',
-          'Based on recorded trend'
-        )
-      );
-    }
-    if (!allWealthHistory.length) {
-      if (wealthChartInstance) {
-        wealthChartInstance.destroy();
-        wealthChartInstance = null;
-      }
-      summaryEl.textContent =
-        'No wealth history yet. Add a snapshot to see current wealth, change, goals, and projected pace.';
-      if (accessibleSummaryEl) {
-        accessibleSummaryEl.textContent =
-          'No wealth snapshots recorded. The chart will become available after you add a snapshot.';
-      }
       return;
     }
-    const latestTime = allWealthHistory[allWealthHistory.length - 1].time;
-    const wealthHistory =
-      financeWealthRange === 'one-year'
-        ? allWealthHistory.filter(
-            (entry) => entry.time >= latestTime - 365 * msPerDay
-          )
-        : allWealthHistory;
-    if (!wealthHistory.length) return;
-    const projectionWindowMs = 540 * msPerDay; // 18 months window for a more realistic trend
-    const windowStart =
-      wealthHistory[wealthHistory.length - 1].time - projectionWindowMs;
-    const regressionSource = wealthHistory.filter(
-      (entry) => entry.time >= windowStart
-    );
-    const regressionBaseTime = regressionSource.length
-      ? regressionSource[0].time
-      : wealthHistory[0].time;
-    const regressionInput = (
-      regressionSource.length >= 2 ? regressionSource : wealthHistory
-    ).map((entry) => ({
-      x: (entry.time - regressionBaseTime) / msPerDay,
+    const points = selectedHistory.map((entry) => ({
+      x: parseWealthDate(entry.date).getTime(),
       y: entry.amount
     }));
-    const chartPoints = wealthHistory.map((entry) => ({
-      x: entry.time,
-      y: entry.amount
-    }));
-    const regression = computeWealthRegression(regressionInput);
-    const lastEntry = wealthHistory[wealthHistory.length - 1];
-    const estimateAmountAtTime = (targetTime) => {
-      if (!wealthHistory.length) return 0;
-      if (targetTime <= wealthHistory[0].time) return wealthHistory[0].amount;
-      if (targetTime >= lastEntry.time) return lastEntry.amount;
-      for (let i = 0; i < wealthHistory.length - 1; i++) {
-        const left = wealthHistory[i];
-        const right = wealthHistory[i + 1];
-        if (targetTime >= left.time && targetTime <= right.time) {
-          const span = right.time - left.time;
-          if (span <= 0) return right.amount;
-          const ratio = (targetTime - left.time) / span;
-          return left.amount + (right.amount - left.amount) * ratio;
-        }
-      }
-      return lastEntry.amount;
-    };
-    const makeWindowPace = (months) => {
-      const windowMs = months * 30 * msPerDay;
-      const startTime = lastEntry.time - windowMs;
-      const startAmount = estimateAmountAtTime(startTime);
-      const elapsedDays = (lastEntry.time - startTime) / msPerDay;
-      if (elapsedDays <= 0) return null;
-      return {
-        months,
-        startTime,
-        startAmount,
-        slopePerDay: (lastEntry.amount - startAmount) / elapsedDays
-      };
-    };
-    const getWindowProjectionFromLatest = (windowModel, targetDate) => {
-      if (!windowModel) return lastEntry.amount;
-      const daysFromLatest = (targetDate.getTime() - lastEntry.time) / msPerDay;
-      return lastEntry.amount + windowModel.slopePerDay * daysFromLatest;
-    };
-    const regression6m = makeWindowPace(6);
-    const regression12m = makeWindowPace(12);
-    const lastDate = new Date(lastEntry.time);
-    const formatWealth = (num, decimals = -1) => {
-      const formatted = formatCurrency(num, decimals);
-      return formatted ? formatted.replace(' kr', ' SEK') : '0 SEK';
-    };
-    const formatCompactWealth = (num) => {
-      if (!isFinite(num)) return '';
-      return new Intl.NumberFormat('sv-SE', {
-        notation: 'compact',
-        maximumFractionDigits: 1
-      }).format(num);
-    };
-    const projectionHorizonDate = (() => {
-      const goalDateParsed = parseLocalDateString(goal.date);
-      if (goalDateParsed && goalDateParsed > lastDate) return goalDateParsed;
-      const twelveMonths = new Date(lastDate);
-      twelveMonths.setMonth(twelveMonths.getMonth() + 12);
-      return twelveMonths;
-    })();
-    const projectionData = [];
-    const upperBand = [];
-    const lowerBand = [];
-    const getPrediction = (targetDate) => {
-      const x = (targetDate.getTime() - regressionBaseTime) / msPerDay;
-      if (!regression) return { value: lastEntry.amount, band: 0 };
-      const predicted = regression.intercept + regression.slope * x;
-      const spread =
-        regression.residualStd *
-        Math.sqrt(
-          1 +
-            (regression.sumSqX > 0
-              ? Math.pow(x - regression.meanX, 2) / regression.sumSqX
-              : 0)
-        );
-      return { value: predicted, band: spread * 1.25 };
-    };
-    let cursor = new Date(lastDate);
-    const stepDays = Math.max(
-      14,
-      Math.round(
-        (projectionHorizonDate.getTime() - lastDate.getTime()) / msPerDay / 18
-      )
-    );
-    const stepMs = stepDays * msPerDay;
-    while (cursor.getTime() <= projectionHorizonDate.getTime()) {
-      const { value, band } = getPrediction(cursor);
-      const ts = cursor.getTime();
-      projectionData.push({ x: ts, y: value });
-      upperBand.push({ x: ts, y: value + band });
-      lowerBand.push({ x: ts, y: Math.max(0, value - band) });
-      cursor = new Date(cursor.getTime() + stepMs);
-    }
-    if (
-      projectionData[projectionData.length - 1].x !==
-      projectionHorizonDate.getTime()
-    ) {
-      const { value, band } = getPrediction(projectionHorizonDate);
-      projectionData.push({ x: projectionHorizonDate.getTime(), y: value });
-      upperBand.push({ x: projectionHorizonDate.getTime(), y: value + band });
-      lowerBand.push({
-        x: projectionHorizonDate.getTime(),
-        y: Math.max(0, value - band)
-      });
-    }
-    const datasets = [
-      {
-        label: 'Recorded wealth',
-        data: chartPoints,
-        borderColor: '#2563eb',
-        backgroundColor: '#2563eb',
-        tension: 0.2,
-        pointRadius: 4,
-        fill: false
-      }
-    ];
-    if (projectionData.length) {
-      const projection6mData = regression6m
-        ? projectionData.map((p) => ({
-            x: p.x,
-            y: getWindowProjectionFromLatest(regression6m, new Date(p.x))
-          }))
-        : [];
-      const projection12mData = regression12m
-        ? projectionData.map((p) => ({
-            x: p.x,
-            y: getWindowProjectionFromLatest(regression12m, new Date(p.x))
-          }))
-        : [];
-      datasets.push(
-        {
-          label: 'Projection band (+/- ~1 sigma)',
-          data: lowerBand,
-          borderColor: 'rgba(59,130,246,0.1)',
-          backgroundColor: 'rgba(59,130,246,0.12)',
-          pointRadius: 0,
-          fill: '+1',
-          tension: 0.2,
-          borderWidth: 0
-        },
-        {
-          label: 'Projection upper bound',
-          data: upperBand,
-          borderColor: 'rgba(59,130,246,0.1)',
-          backgroundColor: 'rgba(59,130,246,0.12)',
-          pointRadius: 0,
-          fill: false,
-          tension: 0.2,
-          borderWidth: 0
-        },
-        {
-          label: 'Projection (18m trend)',
-          data: projectionData,
-          borderColor: '#0ea5e9',
-          backgroundColor: '#0ea5e9',
-          borderDash: [6, 4],
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.2
-        }
-      );
-      if (projection6mData.length) {
-        datasets.push({
-          label: 'Projection (6m pace)',
-          data: projection6mData,
-          borderColor: '#f97316',
-          backgroundColor: '#f97316',
-          borderDash: [2, 5],
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.15
-        });
-      }
-      if (projection12mData.length) {
-        datasets.push({
-          label: 'Projection (12m pace)',
-          data: projection12mData,
-          borderColor: '#a855f7',
-          backgroundColor: '#a855f7',
-          borderDash: [10, 4],
-          borderWidth: 2,
-          pointRadius: 0,
-          tension: 0.15
-        });
-      }
-    }
-    const goalDateParsed = parseLocalDateString(goal.date);
-    const hasGoalAmount =
-      Number.isFinite(Number(goal.amount)) && goal.amount > 0;
-    const hasGoal =
-      hasGoalAmount && goalDateParsed instanceof Date && !isNaN(goalDateParsed);
-    if (hasGoal) {
-      datasets.push({
-        label: 'Goal',
-        data: [{ x: goalDateParsed.getTime(), y: goal.amount }],
-        borderColor: '#16a34a',
-        backgroundColor: '#16a34a',
-        pointRadius: 6,
-        pointStyle: 'triangle',
-        showLine: false
-      });
-    }
-    if (wealthChartInstance) wealthChartInstance.destroy();
+    const first = selectedHistory[0];
+    const last = selectedHistory[selectedHistory.length - 1];
+    const summary = `Recorded history for ${rangeLabel}: ${selectedHistory.length} snapshot${selectedHistory.length === 1 ? '' : 's'}, from ${formatFinanceAmount(first.amount)} on ${first.date} to ${formatFinanceAmount(last.amount)} on ${last.date}.`;
+    setWealthText('wealthAccessibleSummary', summary);
+    setWealthText('wealthHistoryTableSummary', summary);
+    chartEl.setAttribute('aria-label', summary);
+    const compact = (value) =>
+      Number.isFinite(Number(value))
+        ? new Intl.NumberFormat('sv-SE', {
+            notation: 'compact',
+            maximumFractionDigits: 1
+          }).format(Number(value))
+        : '';
     wealthChartInstance = createChartIfAvailable(chartEl.getContext('2d'), {
       type: 'line',
-      data: { datasets },
+      data: {
+        datasets: [
+          {
+            label: 'Recorded net worth',
+            data: points,
+            borderColor: '#2563eb',
+            backgroundColor: 'rgba(37,99,235,0.12)',
+            pointBackgroundColor: '#2563eb',
+            pointRadius: selectedHistory.length > 36 ? 2 : 4,
+            pointHoverRadius: 6,
+            tension: 0.18,
+            fill: true
+          }
+        ]
+      },
       options: {
         responsive: true,
         maintainAspectRatio: false,
-        interaction: { mode: 'index', intersect: false },
-        layout: { padding: { top: 8, right: 12, bottom: 0, left: 4 } },
+        interaction: { mode: 'nearest', intersect: false },
+        layout: { padding: { top: 8, right: 10, bottom: 2, left: 2 } },
         scales: {
           x: {
             type: 'linear',
             title: { display: true, text: 'Date' },
             ticks: {
               maxRotation: 0,
-              autoSkipPadding: 14,
+              autoSkip: true,
               callback: (value) => {
                 const date = new Date(value);
-                return isNaN(date)
+                return Number.isNaN(date.getTime())
                   ? ''
                   : date.toLocaleDateString(undefined, {
                       month: 'short',
@@ -1184,135 +1095,473 @@ import {
             }
           },
           y: {
-            title: { display: true, text: 'Total wealth (SEK)' },
-            grace: '12%',
-            ticks: {
-              callback: (val) => formatCompactWealth(val),
-              padding: 8,
-              maxTicksLimit: 7
-            }
+            title: { display: true, text: 'Net worth (SEK)' },
+            grace: '10%',
+            ticks: { callback: (value) => compact(value), maxTicksLimit: 6 }
           }
         },
         plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              boxWidth: 22,
-              usePointStyle: true,
-              filter: (item) => item.text !== 'Projection upper bound'
-            }
-          },
+          legend: { position: 'bottom', labels: { usePointStyle: true } },
           tooltip: {
-            padding: 10,
             callbacks: {
               title: (items) => {
-                const raw = items[0]?.parsed?.x;
-                const date = new Date(raw);
-                return isNaN(date) ? '' : date.toLocaleDateString();
+                const date = new Date(items[0]?.parsed?.x);
+                return Number.isNaN(date.getTime())
+                  ? ''
+                  : date.toLocaleDateString();
               },
-              label: (ctx) =>
-                `${ctx.dataset.label}: ${formatWealth(ctx.parsed.y, -1)}`
+              label: (context) =>
+                `${context.dataset.label}: ${formatFinanceAmount(context.parsed.y)}`
             }
           }
         }
       }
     });
-    const summaryParts = [];
-    const monthlySlope = regression ? regression.slope * 30 : 0;
-    const monthlySlope6m = regression6m ? regression6m.slopePerDay * 30 : null;
-    const monthlySlope12m = regression12m
-      ? regression12m.slopePerDay * 30
-      : null;
-    const horizonPoint = projectionData.length
-      ? projectionData[projectionData.length - 1]
-      : lastEntry;
-    const horizonDate = new Date(horizonPoint.x || lastDate.getTime());
-    const projection6mAtHorizon = regression6m
-      ? getWindowProjectionFromLatest(regression6m, horizonDate)
-      : null;
-    const projection12mAtHorizon = regression12m
-      ? getWindowProjectionFromLatest(regression12m, horizonDate)
-      : null;
-    summaryParts.push(
-      `<strong>Last recorded:</strong> ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}.`
-    );
-    summaryParts.push(
-      `<strong>Projected outlook through ${projectionHorizonDate.toLocaleDateString()}:</strong> ${formatWealth(horizonPoint.y)} (${formatSignedCurrency(monthlySlope, -1)} per month trend).`
-    );
-    summaryParts.push(
-      `<strong>Savings pace comparison:</strong> 6m ${formatSignedCurrency(monthlySlope6m || 0, -1)}/month, 12m ${formatSignedCurrency(monthlySlope12m || 0, -1)}/month, baseline 18m ${formatSignedCurrency(monthlySlope, -1)}/month.`
-    );
-    if (projection6mAtHorizon !== null && projection12mAtHorizon !== null) {
-      summaryParts.push(
-        `<strong>Projection comparison by ${projectionHorizonDate.toLocaleDateString()}:</strong> 6m pace ${formatWealth(projection6mAtHorizon)}, 12m pace ${formatWealth(projection12mAtHorizon)}, baseline ${formatWealth(horizonPoint.y)}.`
-      );
-    }
-    summaryParts.push(
-      '<span class="muted">Trend lines use rolling windows (6m, 12m, and 18m baseline) so you can compare recent acceleration vs longer-term pace.</span>'
-    );
-    if (hasGoal) {
-      const daysToGoal = Math.round(
-        (goalDateParsed.getTime() - lastDate.getTime()) / msPerDay
-      );
-      const goalProjection = getPrediction(goalDateParsed).value;
-      const monthsToGoal = daysToGoal / 30;
-      const requiredMonthlyTotal =
-        monthsToGoal > 0
-          ? (goal.amount - lastEntry.amount) / monthsToGoal
-          : null;
-      const monthlyDeltaNeeded =
-        requiredMonthlyTotal !== null
-          ? requiredMonthlyTotal - monthlySlope
-          : null;
-      if (daysToGoal <= 0) {
-        summaryParts.push(
-          `<strong>Goal:</strong> ${formatWealth(goal.amount)} on ${goalDateParsed.toLocaleDateString()} (date has passed).`
-        );
-      } else {
-        const gap = goal.amount - goalProjection;
-        if (daysToGoal < 7) {
-          summaryParts.push(
-            `<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`
-          );
-          summaryParts.push(
-            `<span class="muted">Goal date is too close for monthly adjustment calculations.</span>`
-          );
-        } else {
-          summaryParts.push(
-            `<strong>Goal:</strong> ${formatWealth(goal.amount)} by ${goalDateParsed.toLocaleDateString()}. Expected trajectory hits ${formatWealth(goalProjection)} (${formatSignedCurrency(gap, -1)} gap).`
-          );
-          summaryParts.push(
-            `<span class="muted">To stay on track, aim for about ${formatWealth(requiredMonthlyTotal, -1)} per month in total. Current trend is ${formatSignedCurrency(monthlySlope, -1)} per month, so adjust by ${formatSignedCurrency(monthlyDeltaNeeded, -1)} each month.</span>`
-          );
-        }
+  }
+
+  function renderWealthGoalPlan(plan) {
+    const summaryEl = document.getElementById('wealthGoalPlanSummary');
+    const legacySummaryEl = document.getElementById('wealthProjectionSummary');
+    const listEl = document.getElementById('wealthGoalScenarioList');
+    if (summaryEl) summaryEl.replaceChildren();
+    if (listEl) listEl.replaceChildren();
+    const message = document.createElement('p');
+    message.className = 'wealth-plan-message';
+    if (!plan.available) {
+      message.textContent =
+        plan.reason === 'missing-goal-date'
+          ? 'Add a goal date to calculate an assumption-driven plan.'
+          : plan.reason === 'insufficient-history'
+            ? 'Add a wealth update before calculating the plan.'
+            : 'Check the goal date and assumptions to calculate the plan.';
+      summaryEl?.appendChild(message);
+      if (legacySummaryEl) {
+        legacySummaryEl.textContent =
+          'Goal plan is assumption-driven. No historical forecast is presented as fact.';
       }
-    } else if (hasGoalAmount) {
-      summaryParts.push(
-        '<strong>Goal amount:</strong> Add a valid goal date to compare the required pace.'
+      return;
+    }
+    const goal = plan.goal;
+    message.textContent = `Goal ${formatFinanceAmount(goal.amount)} by ${goal.date}. Monthly contribution: ${formatFinanceAmount(goal.monthlyContribution)}. Projections use monthly compounding and your configured assumptions.`;
+    summaryEl?.appendChild(message);
+    plan.scenarios.forEach((scenario) => {
+      const row = document.createElement('div');
+      row.className = `wealth-scenario-row wealth-scenario-${scenario.key}`;
+      const copy = document.createElement('div');
+      const title = document.createElement('strong');
+      title.textContent = scenario.label;
+      const detail = document.createElement('span');
+      detail.textContent = `Annual net-growth assumption: ${formatWealthRateLabel(scenario.annualRate)}`;
+      copy.appendChild(title);
+      copy.appendChild(detail);
+      const values = document.createElement('div');
+      values.className = 'wealth-scenario-values';
+      const projected = document.createElement('span');
+      projected.textContent = `Projected: ${formatFinanceAmount(scenario.projectedAmount)}`;
+      const required = document.createElement('span');
+      required.textContent = `Required monthly: ${formatFinanceAmount(scenario.requiredMonthlyContribution)}`;
+      const status = document.createElement('span');
+      status.textContent = scenario.onTrack
+        ? 'On track'
+        : 'Needs more contribution';
+      values.appendChild(projected);
+      values.appendChild(required);
+      values.appendChild(status);
+      row.appendChild(copy);
+      row.appendChild(values);
+      listEl?.appendChild(row);
+    });
+    if (legacySummaryEl) {
+      legacySummaryEl.textContent =
+        'Goal plan is assumption-driven. Historical change remains a diagnostic, not a savings forecast.';
+    }
+  }
+
+  function renderWealthComposition(latest) {
+    const card = document.getElementById('wealthCompositionCard');
+    const rowsEl = document.getElementById('wealthCompositionRows');
+    if (!card || !rowsEl) return;
+    const detailed =
+      latest && Array.isArray(latest.breakdown) && latest.breakdown.length > 0;
+    card.hidden = !detailed;
+    rowsEl.replaceChildren();
+    if (!detailed) return;
+    const composition = getWealthComposition(latest, data.wealthAccounts);
+    const summary = document.createElement('p');
+    summary.className = 'wealth-composition-summary';
+    summary.textContent = composition.complete
+      ? `Assets ${formatFinanceAmount(composition.assets)} · Debt ${formatFinanceAmount(composition.liabilities)} · Recorded net worth ${formatFinanceAmount(latest.amount)} as of ${latest.date}.`
+      : 'Some account references are unavailable. The stored total remains unchanged until the accounts are restored.';
+    rowsEl.appendChild(summary);
+    const accountMap = new Map(
+      data.wealthAccounts.map((account) => [String(account.id), account])
+    );
+    composition.rows.forEach((row) => {
+      const account = accountMap.get(String(row.accountId));
+      const line = document.createElement('div');
+      line.className = 'wealth-composition-row';
+      const label = document.createElement('span');
+      label.textContent = account
+        ? `${account.name} · ${account.kind === 'liability' ? 'Liability' : 'Asset'}`
+        : `Unavailable account · ${row.accountId || 'unknown'}`;
+      const value = document.createElement('strong');
+      value.textContent = formatFinanceAmount(row.balance);
+      line.appendChild(label);
+      line.appendChild(value);
+      rowsEl.appendChild(line);
+    });
+  }
+
+  function renderWealthAccounts() {
+    const list = document.getElementById('wealthAccountsList');
+    if (!list) return;
+    list.replaceChildren();
+    const references = getWealthAccountReferences(data.wealthHistory);
+    if (!data.wealthAccounts.length) {
+      const empty = document.createElement('p');
+      empty.className = 'finance-empty-state';
+      empty.textContent =
+        'No accounts configured. Quick total updates remain available.';
+      list.appendChild(empty);
+      return;
+    }
+    data.wealthAccounts.forEach((account) => {
+      const row = document.createElement('div');
+      row.className = 'wealth-account-row';
+      const copy = document.createElement('div');
+      copy.className = 'finance-row-copy';
+      const title = document.createElement('strong');
+      title.textContent = account.name;
+      const detail = document.createElement('span');
+      detail.textContent = `${account.kind === 'liability' ? 'Liability' : 'Asset'} · ${account.category}${account.archived ? ' · Archived' : ''}${references.has(String(account.id)) ? ' · Used in history' : ''}`;
+      copy.appendChild(title);
+      copy.appendChild(detail);
+      const actions = document.createElement('div');
+      actions.className = 'finance-row-actions';
+      actions.appendChild(
+        createFinanceActionButton('Edit', 'secondary', () =>
+          isMobileViewport()
+            ? openMobileWealthAccountSheet(account)
+            : editWealthAccount(account)
+        )
       );
+      actions.appendChild(
+        createFinanceActionButton(
+          account.archived ? 'Restore' : 'Archive',
+          'secondary',
+          () => toggleWealthAccountArchive(account)
+        )
+      );
+      row.appendChild(copy);
+      row.appendChild(actions);
+      list.appendChild(row);
+    });
+  }
+
+  async function editWealthAccount(account) {
+    const values = await openFormDialog({
+      title: 'Edit wealth account',
+      fields: [
+        {
+          name: 'name',
+          label: 'Account name',
+          value: account.name,
+          required: true
+        },
+        {
+          name: 'kind',
+          label: 'Kind',
+          type: 'select',
+          value: account.kind,
+          options: [
+            { value: 'asset', label: 'Asset' },
+            { value: 'liability', label: 'Liability' }
+          ]
+        },
+        {
+          name: 'category',
+          label: 'Category',
+          value: account.category,
+          required: true
+        }
+      ],
+      submitLabel: 'Save account'
+    });
+    if (!values) return;
+    const result = saveWealthAccountValues(values, account.id);
+    if (!result.ok) showToast(wealthSaveError(result.reason));
+  }
+
+  function saveWealthAccountValues(values, id = null) {
+    const name = String(values?.name || '').trim();
+    const category = String(values?.category || '').trim();
+    const kind = values?.kind === 'liability' ? 'liability' : 'asset';
+    if (!name) return { ok: false, reason: 'name' };
+    if (!category) return { ok: false, reason: 'category' };
+    ensureWealthData();
+    const before = cloneData();
+    const existing = id
+      ? data.wealthAccounts.find((account) => String(account.id) === String(id))
+      : null;
+    const next = normalizeWealthAccount({
+      ...(existing || {}),
+      id: existing?.id || uuid(),
+      name,
+      kind,
+      category,
+      archived: existing?.archived || false
+    });
+    if (existing) {
+      Object.assign(existing, next);
     } else {
-      summaryParts.push(
-        '<span class="muted">Set a goal amount and date to see what pace you need to stay on track.</span>'
+      data.wealthAccounts.push(next);
+    }
+    saveData();
+    renderWealthAccounts();
+    updateWealthDashboard();
+    offerUndo(
+      existing ? 'Wealth account updated.' : 'Wealth account added.',
+      before
+    );
+    if (isMobileViewport()) {
+      showToast(existing ? 'Wealth account updated.' : 'Wealth account added.');
+    }
+    return { ok: true, account: next };
+  }
+
+  function toggleWealthAccountArchive(account) {
+    const current =
+      data.wealthAccounts.find(
+        (candidate) => String(candidate.id) === String(account.id)
+      ) || account;
+    const before = cloneData();
+    current.archived = !current.archived;
+    saveData();
+    renderWealthAccounts();
+    updateWealthDashboard();
+    offerUndo(
+      current.archived
+        ? 'Wealth account archived.'
+        : 'Wealth account restored.',
+      before
+    );
+    if (isMobileViewport()) {
+      showToast(
+        current.archived
+          ? 'Wealth account archived.'
+          : 'Wealth account restored.'
       );
     }
-    if (metricGridEl) {
-      const paceValue = metricGridEl.querySelectorAll(
-        '.finance-metric-value'
-      )[3];
-      if (paceValue)
-        paceValue.textContent =
-          formatFinanceSignedAmount(monthlySlope) + ' / month';
+  }
+
+  function renderWealthCsvPreview(preview) {
+    const target = document.getElementById('wealthCsvPreview');
+    const applyButton = document.getElementById('wealthCsvApplyButton');
+    if (!target) return;
+    target.replaceChildren();
+    if (!preview) {
+      target.textContent = 'Choose a CSV to preview before importing.';
+      if (applyButton) applyButton.disabled = true;
+      return;
     }
-    if (accessibleSummaryEl) {
-      const rangeLabel =
-        financeWealthRange === 'one-year'
-          ? 'the last year'
-          : 'all recorded time';
-      accessibleSummaryEl.textContent = `Accessible summary for ${rangeLabel}: ${wealthHistory.length} snapshots, latest ${formatWealth(lastEntry.amount)} on ${lastDate.toLocaleDateString()}, projected pace ${formatSignedCurrency(monthlySlope, -1)} per month.${hasGoal ? ` Goal ${formatWealth(goal.amount)} by ${goalDateParsed ? goalDateParsed.toLocaleDateString() : 'the selected date'}.` : hasGoalAmount ? ' Goal amount is set; no valid goal date is set.' : ' No valid goal is set.'}`;
+    const summary = document.createElement('p');
+    summary.textContent = `${preview.validRows} valid row${preview.validRows === 1 ? '' : 's'} · ${preview.newAccounts.length} new account${preview.newAccounts.length === 1 ? '' : 's'} · ${preview.conflictDates.length} existing date${preview.conflictDates.length === 1 ? '' : 's'}.`;
+    target.appendChild(summary);
+    [...preview.errors, ...preview.warnings].forEach((item) => {
+      const line = document.createElement('p');
+      line.className =
+        item.code && item.code.startsWith('existing')
+          ? 'wealth-import-warning'
+          : 'wealth-import-error';
+      line.textContent = `${item.row ? `Row ${item.row}: ` : ''}${item.message}`;
+      target.appendChild(line);
+    });
+    if (applyButton) applyButton.disabled = !preview.ok;
+  }
+
+  function renderWealthTrendDiagnostic(history) {
+    const target = document.getElementById('wealthTrendDiagnostic');
+    if (!target) return;
+    const diagnostic = calculateHistoricalRegression(history, {
+      now: new Date(),
+      settings: data.wealthSettings,
+      range: 'all'
+    });
+    if (!diagnostic.available) {
+      target.textContent = diagnostic.label;
+      return;
     }
-    summaryEl.innerHTML = summaryParts
-      .map((part) => `<div style="margin-bottom:0.35rem;">${part}</div>`)
-      .join('');
+    target.textContent = diagnostic.canProject
+      ? `Historical trend diagnostic: observed change of ${formatFinanceSignedAmount(diagnostic.monthlyChange)} per month across the recorded points. This is not a savings pace or a promise.`
+      : diagnostic.label;
+  }
+
+  function updateWealthDashboard() {
+    ensureWealthData();
+    const history = data.wealthHistory;
+    const latest = getLatestWealthSnapshot(history);
+    const freshness = calculateWealthFreshness(
+      history,
+      new Date(),
+      data.wealthSettings
+    );
+    const change = calculateWealthPeriodChange(history, latest);
+    const composition = getWealthComposition(latest, data.wealthAccounts);
+    const goal = data.wealthGoal || makeDefaultWealthGoal();
+    const goalGap = latest ? Number(goal.amount) - Number(latest.amount) : null;
+    const goalPlan = calculateWealthGoalPlan(goal, latest, { now: new Date() });
+    const baseGoalScenario = goalPlan.scenarios?.find(
+      (scenario) => scenario.key === 'base' && scenario.available
+    );
+
+    setWealthText(
+      'wealthCurrentValue',
+      latest ? formatFinanceAmount(latest.amount) : 'No snapshot yet'
+    );
+    setWealthText(
+      'wealthCurrentAsOf',
+      latest
+        ? `As of ${latest.date} · ${formatWealthDateLabel(latest.date)}`
+        : 'Update wealth to establish a dated total.'
+    );
+    const freshnessEl = setWealthText('wealthFreshness', freshness.label);
+    if (freshnessEl) {
+      freshnessEl.className = `wealth-freshness-label ${freshness.status}`;
+    }
+    setWealthText('wealthFreshnessDetail', freshness.detail);
+    const statusEl = setWealthText(
+      'wealthStatus',
+      !latest
+        ? 'Needs first update'
+        : freshness.status === 'stale'
+          ? 'Update recommended'
+          : 'Current total is fresh'
+    );
+    if (statusEl) {
+      statusEl.className = `wealth-status wealth-status-${freshness.status}`;
+    }
+    setWealthText(
+      'wealthChangeValue',
+      change.available ? formatFinanceSignedAmount(change.amount) : '—'
+    );
+    setWealthText(
+      'wealthChangeDetail',
+      change.available
+        ? `${formatWealthPercentLabel(change.percentage)} over ${change.elapsedDays} day${change.elapsedDays === 1 ? '' : 's'} since ${change.previous.date}.`
+        : 'A second dated snapshot will show change.'
+    );
+    setWealthText(
+      'wealthCompositionValue',
+      composition.detailed && composition.complete
+        ? `Assets ${formatFinanceAmount(composition.assets)} · Debt ${formatFinanceAmount(composition.liabilities)}`
+        : 'Available after a detailed account update.'
+    );
+    setWealthText(
+      'wealthGoalStatus',
+      !latest
+        ? 'Goal status starts after the first update.'
+        : goalGap <= 0
+          ? `Goal reached · ${formatFinanceAmount(goal.amount)}`
+          : `Gap ${formatFinanceAmount(goalGap)} · target ${formatFinanceAmount(goal.amount)}`
+    );
+
+    const metricGrid = document.getElementById('wealthMetricGrid');
+    if (metricGrid) {
+      metricGrid.replaceChildren(
+        createFinanceMetric(
+          'Current net worth',
+          latest ? formatFinanceAmount(latest.amount) : '—',
+          latest ? `As of ${latest.date}` : 'No dated update'
+        ),
+        createFinanceMetric(
+          'Change since prior',
+          change.available ? formatFinanceSignedAmount(change.amount) : '—',
+          change.available
+            ? `${formatWealthPercentLabel(change.percentage)} over ${change.elapsedDays} days`
+            : 'Needs two snapshots'
+        ),
+        createFinanceMetric(
+          'Freshness',
+          freshness.status === 'empty' ? 'Needs update' : freshness.label,
+          `Stale after ${freshness.staleAfterDays} days`
+        ),
+        createFinanceMetric(
+          'Goal gap',
+          goalGap === null
+            ? '—'
+            : goalGap <= 0
+              ? 'Reached'
+              : formatFinanceAmount(goalGap),
+          goalGap !== null && goalGap > 0
+            ? 'Target minus current total'
+            : 'Set a dated goal plan'
+        ),
+        createFinanceMetric(
+          'Projected pace',
+          baseGoalScenario
+            ? formatFinanceAmount(baseGoalScenario.requiredMonthlyContribution)
+            : '—',
+          baseGoalScenario
+            ? 'Required monthly under base assumptions'
+            : 'Set a dated goal plan'
+        )
+      );
+    }
+
+    const goalInputs = {
+      amount: document.getElementById('wealthGoalAmount'),
+      date: document.getElementById('wealthGoalDate'),
+      monthlyContribution: document.getElementById(
+        'wealthGoalMonthlyContribution'
+      ),
+      conservative: document.getElementById('wealthGoalRateConservative'),
+      base: document.getElementById('wealthGoalRateBase'),
+      optimistic: document.getElementById('wealthGoalRateOptimistic')
+    };
+    if (goalInputs.amount && document.activeElement !== goalInputs.amount) {
+      goalInputs.amount.value = goal.amount || '';
+    }
+    if (goalInputs.date && document.activeElement !== goalInputs.date) {
+      goalInputs.date.value = goal.date || '';
+    }
+    if (
+      goalInputs.monthlyContribution &&
+      document.activeElement !== goalInputs.monthlyContribution
+    ) {
+      goalInputs.monthlyContribution.value = goal.monthlyContribution ?? 0;
+    }
+    for (const key of ['conservative', 'base', 'optimistic']) {
+      const input = goalInputs[key];
+      if (input && document.activeElement !== input) {
+        const rate = goal.scenarioAnnualRates?.[key];
+        input.value =
+          rate === null || rate === undefined ? '' : String(rate * 100);
+      }
+    }
+    document.querySelectorAll('[data-wealth-range]').forEach((button) => {
+      button.classList.toggle(
+        'active',
+        (button.dataset.wealthRange || 'all') === financeWealthRange
+      );
+      button.setAttribute(
+        'aria-pressed',
+        (button.dataset.wealthRange || 'all') === financeWealthRange
+          ? 'true'
+          : 'false'
+      );
+    });
+    renderWealthChart(history);
+    renderWealthGoalPlan(goalPlan);
+    renderWealthComposition(latest);
+    renderWealthTrendDiagnostic(history);
+    const entryDateInput = document.getElementById('wealthEntryDate');
+    if (
+      entryDateInput &&
+      !entryDateInput.value &&
+      document.activeElement !== entryDateInput
+    ) {
+      entryDateInput.value = formatLocalDateString(new Date());
+    }
   }
   function finalizeFitnessWeek(lastMonday, thisMonday) {
     const fitness = ensureFitnessDefaults();
@@ -1504,16 +1753,6 @@ import {
   function _formatPercent(value, decimals = 1) {
     if (!isFinite(value)) return '0%';
     return (value * 100).toFixed(decimals) + '%';
-  }
-  function formatSignedCurrency(value, decimals = -1) {
-    if (!isFinite(value) || value === 0) {
-      return '0 SEK';
-    }
-    const formatted = formatCurrency(Math.abs(value), decimals).replace(
-      ' kr',
-      ''
-    );
-    return (value >= 0 ? '+' : '-') + formatted + ' SEK';
   }
   // Load and save data
 
@@ -1989,8 +2228,11 @@ import {
           codexIntegration: makeDefaultCodexIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
+          wealthSchemaVersion: 2,
+          wealthAccounts: [],
           wealthHistory: [],
-          wealthGoal: makeDefaultWealthGoal()
+          wealthGoal: makeDefaultWealthGoal(),
+          wealthSettings: { staleAfterDays: 45, remindersEnabled: true }
         },
         { now: new Date() }
       );
@@ -2059,20 +2301,11 @@ import {
             DEFAULT_FOCUS_BLOCKED_WEBSITES
           ),
           fitness: applyFitnessDefaults(parsed.fitness),
-          wealthHistory: Array.isArray(parsed.wealthHistory)
-            ? parsed.wealthHistory.map(normalizeWealthEntry)
-            : [],
-          wealthGoal:
-            parsed.wealthGoal && typeof parsed.wealthGoal === 'object'
-              ? {
-                  ...parsed.wealthGoal,
-                  amount: parseWealthAmount(parsed.wealthGoal.amount || 0) || 0,
-                  date:
-                    typeof parsed.wealthGoal.date === 'string'
-                      ? parsed.wealthGoal.date
-                      : ''
-                }
-              : makeDefaultWealthGoal()
+          wealthSchemaVersion: parsed.wealthSchemaVersion,
+          wealthAccounts: parsed.wealthAccounts,
+          wealthHistory: parsed.wealthHistory,
+          wealthGoal: parsed.wealthGoal,
+          wealthSettings: parsed.wealthSettings
         },
         { now: new Date() }
       );
@@ -2109,8 +2342,11 @@ import {
           codexIntegration: makeDefaultCodexIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
+          wealthSchemaVersion: 2,
+          wealthAccounts: [],
           wealthHistory: [],
-          wealthGoal: makeDefaultWealthGoal()
+          wealthGoal: makeDefaultWealthGoal(),
+          wealthSettings: { staleAfterDays: 45, remindersEnabled: true }
         },
         { now: new Date() }
       );
@@ -7632,6 +7868,120 @@ import {
     document
       .getElementById('wealthSnapshotMobileButton')
       ?.addEventListener('click', openMobileWealthSnapshotSheet);
+    document
+      .getElementById('wealthUpdateButton')
+      ?.addEventListener('click', openMobileWealthUpdateSheet);
+    document
+      .getElementById('wealthGoalOpenButton')
+      ?.addEventListener('click', openMobileWealthGoalSheet);
+    document
+      .getElementById('wealthGoalEditButton')
+      ?.addEventListener('click', openMobileWealthGoalSheet);
+    document
+      .getElementById('wealthAccountMobileButton')
+      ?.addEventListener('click', openMobileWealthAccountSheet);
+    document
+      .getElementById('wealthHistoryToggle')
+      ?.addEventListener('click', (event) => {
+        wealthHistoryExpanded = !wealthHistoryExpanded;
+        const button = event.currentTarget;
+        const region = document.getElementById('wealthHistoryRegion');
+        button.setAttribute(
+          'aria-expanded',
+          wealthHistoryExpanded ? 'true' : 'false'
+        );
+        button.textContent = wealthHistoryExpanded
+          ? 'Hide history chart'
+          : 'Show history chart';
+        if (region) region.hidden = !wealthHistoryExpanded;
+        if (wealthHistoryExpanded && wealthChartInstance) {
+          window.requestAnimationFrame(() => wealthChartInstance?.resize());
+        }
+      });
+    const wealthHistoryToggle = document.getElementById('wealthHistoryToggle');
+    const wealthHistoryRegion = document.getElementById('wealthHistoryRegion');
+    if (wealthHistoryToggle && wealthHistoryRegion) {
+      wealthHistoryRegion.hidden = isMobileViewport();
+      wealthHistoryToggle.setAttribute(
+        'aria-expanded',
+        isMobileViewport() ? 'false' : 'true'
+      );
+      wealthHistoryToggle.textContent = isMobileViewport()
+        ? 'Show history chart'
+        : 'Hide history chart';
+    }
+    const wealthAccountForm = document.getElementById('wealthAccountForm');
+    wealthAccountForm?.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const result = saveWealthAccountValues(
+        {
+          name: document.getElementById('wealthAccountName')?.value,
+          kind: document.getElementById('wealthAccountKind')?.value,
+          category: document.getElementById('wealthAccountCategory')?.value
+        },
+        editingWealthAccountId
+      );
+      if (!result.ok) {
+        showToast(wealthSaveError(result.reason));
+        return;
+      }
+      editingWealthAccountId = null;
+      wealthAccountForm.reset();
+      const categoryInput = document.getElementById('wealthAccountCategory');
+      if (categoryInput) categoryInput.value = 'other';
+      const submit = wealthAccountForm.querySelector('button[type="submit"]');
+      if (submit) submit.textContent = 'Add account';
+    });
+    const wealthCsvFile = document.getElementById('wealthCsvFile');
+    document
+      .getElementById('wealthCsvPreviewButton')
+      ?.addEventListener('click', async () => {
+        const file = wealthCsvFile?.files?.[0];
+        if (!file) {
+          showToast('Choose a CSV file first.');
+          return;
+        }
+        try {
+          const text = await file.text();
+          pendingWealthCsvPreview = previewWealthCsvImport(text, {
+            accounts: data.wealthAccounts,
+            history: data.wealthHistory
+          });
+          renderWealthCsvPreview(pendingWealthCsvPreview);
+        } catch (error) {
+          pendingWealthCsvPreview = null;
+          renderWealthCsvPreview(null);
+          showToast('Could not read that CSV file.');
+        }
+      });
+    document
+      .getElementById('wealthCsvApplyButton')
+      ?.addEventListener('click', async () => {
+        if (!pendingWealthCsvPreview?.ok) {
+          showToast('Preview a valid CSV before importing.');
+          return;
+        }
+        const before = cloneData();
+        const result = applyWealthCsvImport(data, pendingWealthCsvPreview, {
+          replaceExistingDates:
+            document.getElementById('wealthCsvReplace')?.checked === true
+        });
+        if (!result.ok) {
+          showToast('The CSV preview is no longer valid. Preview it again.');
+          return;
+        }
+        data = result.state;
+        saveData();
+        pendingWealthCsvPreview = null;
+        renderWealthCsvPreview(null);
+        if (wealthCsvFile) wealthCsvFile.value = '';
+        refreshAllViews();
+        offerUndo(
+          `Imported ${result.importedDates.length} wealth date${result.importedDates.length === 1 ? '' : 's'}.`,
+          before
+        );
+        if (isMobileViewport()) showToast('Wealth CSV imported.');
+      });
   }
 
   function updateGrocerySection(force = false) {
@@ -7660,7 +8010,9 @@ import {
     renderFinanceHistory();
     renderFinanceSettings(snapshot);
     renderWealthHistoryTable();
+    renderWealthAccounts();
     updateWealthDashboard();
+    renderWealthCsvPreview(pendingWealthCsvPreview);
   }
 
   // Render reports section including monthly heatmap and per-project burndown charts. This
@@ -9428,6 +9780,10 @@ import {
     titleText,
     { className = '', description = '' } = {}
   ) {
+    const previousFocus =
+      document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null;
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop mobile-flow-backdrop';
     const panel = document.createElement('div');
@@ -9459,7 +9815,49 @@ import {
     }
     const actions = document.createElement('div');
     actions.className = 'modal-actions mobile-flow-actions';
-    const close = () => backdrop.remove();
+    let closed = false;
+    const getFocusable = () =>
+      Array.from(
+        panel.querySelectorAll(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        )
+      ).filter((element) => {
+        if (!(element instanceof HTMLElement) || element.hidden) return false;
+        const style = window.getComputedStyle(element);
+        return style.display !== 'none' && style.visibility !== 'hidden';
+      });
+    const close = () => {
+      if (closed) return;
+      closed = true;
+      document.removeEventListener('keydown', onKeyDown);
+      backdrop.remove();
+      if (previousFocus && document.contains(previousFocus)) {
+        previousFocus.focus();
+      }
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') {
+        event.preventDefault();
+        close();
+        return;
+      }
+      if (event.key !== 'Tab') return;
+      const focusable = getFocusable();
+      if (!focusable.length) {
+        event.preventDefault();
+        panel.focus();
+        return;
+      }
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
     closeBtn.addEventListener('click', close);
     backdrop.addEventListener('click', (event) => {
       if (event.target === backdrop) close();
@@ -9469,6 +9867,7 @@ import {
     panel.appendChild(actions);
     backdrop.appendChild(panel);
     document.body.appendChild(backdrop);
+    document.addEventListener('keydown', onKeyDown);
     const addAction = (label, variant = 'secondary', onClick = close) => {
       const button = document.createElement('button');
       button.type = 'button';
@@ -9483,6 +9882,11 @@ import {
     );
     if (firstFocus instanceof HTMLElement) firstFocus.focus();
     else panel.focus();
+    setTimeout(() => {
+      if (closed) return;
+      const firstAvailable = getFocusable()[0];
+      if (firstAvailable) firstAvailable.focus();
+    }, 0);
     return { backdrop, panel, body, actions, close, addAction };
   }
 
@@ -9692,46 +10096,305 @@ import {
     sheet.addAction('Close', 'secondary', sheet.close);
   }
 
-  function openMobileWealthSnapshotSheet() {
-    const sheet = createMobileSheet('Wealth snapshot', {
-      className: 'mobile-wealth-sheet',
-      description: 'Add a quick wealth data point.'
+  function persistWealthGoal(values = null) {
+    ensureWealthData();
+    const source = values || {
+      amount: document.getElementById('wealthGoalAmount')?.value || '',
+      date: document.getElementById('wealthGoalDate')?.value || '',
+      monthlyContribution:
+        document.getElementById('wealthGoalMonthlyContribution')?.value || '',
+      scenarioAnnualRates: {
+        conservative:
+          document.getElementById('wealthGoalRateConservative')?.value || '',
+        base: document.getElementById('wealthGoalRateBase')?.value || '',
+        optimistic:
+          document.getElementById('wealthGoalRateOptimistic')?.value || ''
+      }
+    };
+    const validation = validateWealthGoal({
+      amount: source.amount,
+      date: source.date || '',
+      monthlyContribution: source.monthlyContribution ?? '',
+      scenarioAnnualRates: source.scenarioAnnualRates || {}
     });
-    const dateInput = document.createElement('input');
-    dateInput.type = 'date';
-    dateInput.value = formatDateInputValue(new Date());
-    const amountInput = document.createElement('input');
-    amountInput.type = 'number';
-    amountInput.min = '0';
-    amountInput.step = '0.01';
-    amountInput.placeholder = 'Amount (SEK)';
-    const noteInput = document.createElement('input');
-    noteInput.placeholder = 'Note';
-    sheet.body.appendChild(createMobileField('Snapshot date', dateInput));
-    sheet.body.appendChild(createMobileField('Amount (SEK)', amountInput));
-    sheet.body.appendChild(createMobileField('Note (optional)', noteInput));
-    sheet.addAction('Add point', 'primary', () => {
-      const snapshot = cloneData();
-      const result = addWealthHistoryEntry(
-        dateInput.value,
-        amountInput.value,
-        noteInput.value
+    if (!validation.ok) {
+      showToast(
+        validation.reason === 'amount'
+          ? 'Enter a goal amount greater than zero.'
+          : wealthSaveError(validation.reason)
       );
+      return false;
+    }
+    const before = cloneData();
+    const existing = data.wealthGoal || {};
+    data.wealthGoal = {
+      ...existing,
+      ...validation.goal,
+      scenarioAnnualRates: {
+        ...(existing.scenarioAnnualRates || {}),
+        ...validation.goal.scenarioAnnualRates
+      }
+    };
+    saveData();
+    updateWealthDashboard();
+    renderTodayCommandPanel();
+    offerUndo('Wealth goal saved.', before);
+    if (isMobileViewport()) showToast('Wealth goal saved.');
+    return true;
+  }
+
+  function openMobileWealthUpdateSheet() {
+    ensureWealthData();
+    const latest = getLatestWealthSnapshot(data.wealthHistory);
+    const freshness = calculateWealthFreshness(
+      data.wealthHistory,
+      new Date(),
+      data.wealthSettings
+    );
+    const sheet = createMobileSheet('Update wealth', {
+      className: 'mobile-wealth-update-sheet mobile-wealth-sheet',
+      description: latest
+        ? `${freshness.label}. Latest total ${formatFinanceAmount(latest.amount)} as of ${latest.date}. Choose a quick total or a complete account breakdown.`
+        : 'No snapshot yet. Record today’s total, or add a complete account breakdown.'
+    });
+    const modeGroup = document.createElement('div');
+    modeGroup.className = 'wealth-mobile-mode-group';
+    modeGroup.setAttribute('role', 'group');
+    modeGroup.setAttribute('aria-label', 'Wealth update method');
+    const quickMode = document.createElement('button');
+    quickMode.type = 'button';
+    quickMode.className = 'btn secondary active';
+    quickMode.textContent = 'Quick total';
+    quickMode.setAttribute('aria-pressed', 'true');
+    const accountMode = document.createElement('button');
+    accountMode.type = 'button';
+    accountMode.className = 'btn secondary';
+    accountMode.textContent = 'By account';
+    accountMode.setAttribute('aria-pressed', 'false');
+    modeGroup.appendChild(quickMode);
+    modeGroup.appendChild(accountMode);
+    sheet.body.appendChild(modeGroup);
+
+    const quickSection = document.createElement('div');
+    quickSection.className = 'wealth-mobile-update-section';
+    const quickDate = document.createElement('input');
+    quickDate.type = 'date';
+    quickDate.value = formatLocalDateString(new Date());
+    const quickAmount = document.createElement('input');
+    quickAmount.type = 'number';
+    quickAmount.step = '0.01';
+    quickAmount.inputMode = 'decimal';
+    quickAmount.value = latest ? String(latest.amount) : '';
+    quickAmount.placeholder = 'Amount (SEK)';
+    const quickNote = document.createElement('input');
+    quickNote.type = 'text';
+    quickNote.placeholder = 'Note (optional)';
+    quickSection.appendChild(createMobileField('Snapshot date', quickDate));
+    quickSection.appendChild(createMobileField('Net worth (SEK)', quickAmount));
+    quickSection.appendChild(createMobileField('Note (optional)', quickNote));
+
+    const detailSection = document.createElement('div');
+    detailSection.className = 'wealth-mobile-update-section';
+    detailSection.hidden = true;
+    const detailIntro = document.createElement('p');
+    detailIntro.className = 'mobile-flow-description';
+    detailIntro.textContent =
+      'Enter liabilities as positive balances. The net worth total subtracts them automatically.';
+    detailSection.appendChild(detailIntro);
+    const accountInputs = new Map();
+    const previousBreakdown = new Map(
+      (Array.isArray(latest?.breakdown) ? latest.breakdown : []).map((row) => [
+        String(row.accountId),
+        row.balance
+      ])
+    );
+    const updateAccounts = getWealthAccountsForUpdate();
+    if (!updateAccounts.length) {
+      const empty = document.createElement('p');
+      empty.className = 'finance-empty-state';
+      empty.textContent =
+        'Add an account first to use the detailed update route.';
+      detailSection.appendChild(empty);
+    } else {
+      updateAccounts.forEach((account) => {
+        const input = document.createElement('input');
+        input.type = 'number';
+        input.min = '0';
+        input.step = '0.01';
+        input.inputMode = 'decimal';
+        input.placeholder = 'Balance (SEK)';
+        if (previousBreakdown.has(String(account.id))) {
+          input.value = String(previousBreakdown.get(String(account.id)));
+        }
+        const label = `${account.name} · ${account.kind === 'liability' ? 'liability' : 'asset'} (${account.category})`;
+        detailSection.appendChild(createMobileField(label, input));
+        accountInputs.set(account.id, input);
+      });
+    }
+    sheet.body.appendChild(quickSection);
+    sheet.body.appendChild(detailSection);
+
+    let mode = 'quick';
+    const renderMode = () => {
+      const quick = mode === 'quick';
+      quickSection.hidden = !quick;
+      detailSection.hidden = quick;
+      quickMode.classList.toggle('active', quick);
+      accountMode.classList.toggle('active', !quick);
+      quickMode.setAttribute('aria-pressed', quick ? 'true' : 'false');
+      accountMode.setAttribute('aria-pressed', quick ? 'false' : 'true');
+    };
+    quickMode.addEventListener('click', () => {
+      mode = 'quick';
+      renderMode();
+    });
+    accountMode.addEventListener('click', () => {
+      mode = 'account';
+      renderMode();
+    });
+    renderMode();
+
+    sheet.addAction('Update wealth', 'primary', async () => {
+      const before = cloneData();
+      const result =
+        mode === 'quick'
+          ? await saveWealthSnapshot({
+              date: quickDate.value,
+              amountRaw: quickAmount.value,
+              noteRaw: quickNote.value
+            })
+          : await saveWealthSnapshot({
+              date: quickDate.value,
+              amountRaw: '0',
+              noteRaw: quickNote.value,
+              breakdown: Array.from(accountInputs, ([accountId, input]) => ({
+                accountId,
+                balance: input.value
+              }))
+            });
       if (!result.ok) {
-        showToast(
-          result.reason === 'date'
-            ? 'Enter a valid date.'
-            : 'Enter a valid amount.'
-        );
+        if (result.reason !== 'cancelled')
+          showToast(wealthSaveError(result.reason));
         return;
       }
-      renderWealthHistoryTable();
-      updateWealthDashboard();
-      renderTodayCommandPanel();
-      offerUndo('Wealth point added.', snapshot);
+      offerUndo('Wealth updated.', before);
+      if (isMobileViewport()) showToast('Wealth updated.');
       sheet.close();
     });
     sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileWealthGoalSheet() {
+    ensureWealthData();
+    const goal = data.wealthGoal;
+    const sheet = createMobileSheet('Edit goal plan', {
+      className: 'mobile-wealth-goal-sheet',
+      description: 'Set a target and your own monthly net-growth assumptions.'
+    });
+    const amount = document.createElement('input');
+    amount.type = 'number';
+    amount.min = '0.01';
+    amount.step = '0.01';
+    amount.value = goal.amount || '';
+    const date = document.createElement('input');
+    date.type = 'date';
+    date.value = goal.date || '';
+    const contribution = document.createElement('input');
+    contribution.type = 'number';
+    contribution.min = '0';
+    contribution.step = '0.01';
+    contribution.value = goal.monthlyContribution ?? 0;
+    const conservative = document.createElement('input');
+    conservative.type = 'number';
+    conservative.step = '0.1';
+    conservative.placeholder = 'Optional %';
+    conservative.value =
+      goal.scenarioAnnualRates?.conservative === null
+        ? ''
+        : String((goal.scenarioAnnualRates?.conservative || 0) * 100);
+    const base = document.createElement('input');
+    base.type = 'number';
+    base.step = '0.1';
+    base.value = String((goal.scenarioAnnualRates?.base || 0) * 100);
+    const optimistic = document.createElement('input');
+    optimistic.type = 'number';
+    optimistic.step = '0.1';
+    optimistic.placeholder = 'Optional %';
+    optimistic.value =
+      goal.scenarioAnnualRates?.optimistic === null
+        ? ''
+        : String((goal.scenarioAnnualRates?.optimistic || 0) * 100);
+    sheet.body.appendChild(createMobileField('Goal amount (SEK)', amount));
+    sheet.body.appendChild(createMobileField('Goal date', date));
+    sheet.body.appendChild(
+      createMobileField('Planned monthly contribution (SEK)', contribution)
+    );
+    sheet.body.appendChild(
+      createMobileField('Downside annual rate (%)', conservative)
+    );
+    sheet.body.appendChild(createMobileField('Base annual rate (%)', base));
+    sheet.body.appendChild(
+      createMobileField('Upside annual rate (%)', optimistic)
+    );
+    sheet.addAction('Save goal plan', 'primary', () => {
+      const saved = persistWealthGoal({
+        amount: amount.value,
+        date: date.value,
+        monthlyContribution: contribution.value,
+        scenarioAnnualRates: {
+          conservative: conservative.value,
+          base: base.value,
+          optimistic: optimistic.value
+        }
+      });
+      if (saved) sheet.close();
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileWealthAccountSheet(account = null) {
+    const editing = Boolean(account);
+    const sheet = createMobileSheet(
+      editing ? 'Edit wealth account' : 'Add wealth account',
+      {
+        className: 'mobile-wealth-account-sheet',
+        description:
+          'Accounts are optional. Archived accounts remain in referenced history.'
+      }
+    );
+    const name = document.createElement('input');
+    name.type = 'text';
+    name.value = account?.name || '';
+    const kind = createMobileSelect(
+      [
+        { value: 'asset', label: 'Asset' },
+        { value: 'liability', label: 'Liability' }
+      ],
+      account?.kind || 'asset'
+    );
+    const category = document.createElement('input');
+    category.type = 'text';
+    category.value = account?.category || 'other';
+    sheet.body.appendChild(createMobileField('Account name', name));
+    sheet.body.appendChild(createMobileField('Kind', kind));
+    sheet.body.appendChild(createMobileField('Category', category));
+    sheet.addAction(editing ? 'Save account' : 'Add account', 'primary', () => {
+      const result = saveWealthAccountValues(
+        {
+          name: name.value,
+          kind: kind.value,
+          category: category.value
+        },
+        account?.id || null
+      );
+      if (result.ok) sheet.close();
+      else showToast(wealthSaveError(result.reason));
+    });
+    sheet.addAction('Close', 'secondary', sheet.close);
+  }
+
+  function openMobileWealthSnapshotSheet() {
+    openMobileWealthUpdateSheet();
   }
 
   function _openMobileRecurringPaymentSheet() {
@@ -14320,62 +14983,43 @@ import {
     updateDashboard();
   });
 
+  const wealthGoalForm = document.getElementById('wealthGoalForm');
   const wealthGoalApplyBtn = document.getElementById('wealthGoalApply');
-  const wealthGoalAmountInput = document.getElementById('wealthGoalAmount');
-  const wealthGoalDateInput = document.getElementById('wealthGoalDate');
   const wealthEntryForm = document.getElementById('wealthEntryForm');
   const wealthEntryDateInput = document.getElementById('wealthEntryDate');
   const wealthEntryAmountInput = document.getElementById('wealthEntryAmount');
   const wealthEntryNoteInput = document.getElementById('wealthEntryNote');
-  function persistWealthGoal() {
-    const amountValue = wealthGoalAmountInput
-      ? wealthGoalAmountInput.value
-      : '';
-    const date =
-      wealthGoalDateInput && wealthGoalDateInput.value
-        ? wealthGoalDateInput.value
-        : '';
-    const validation = validateWealthGoal(amountValue, date);
-    if (!validation.ok) {
-      showToast(
-        validation.reason === 'date'
-          ? 'Enter a valid goal date.'
-          : 'Enter a goal amount greater than zero.'
-      );
-      return false;
-    }
-    data.wealthGoal = validation.goal;
-    saveData();
-    updateWealthDashboard();
-    showToast('Wealth goal saved.');
-    return true;
-  }
-  if (wealthGoalApplyBtn) {
-    wealthGoalApplyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
+  if (wealthGoalForm) {
+    wealthGoalForm.addEventListener('submit', (event) => {
+      event.preventDefault();
+      persistWealthGoal();
+    });
+  } else if (wealthGoalApplyBtn) {
+    wealthGoalApplyBtn.addEventListener('click', (event) => {
+      event.preventDefault();
       persistWealthGoal();
     });
   }
   if (wealthEntryForm) {
-    wealthEntryForm.addEventListener('submit', (e) => {
-      e.preventDefault();
-      const dateVal = wealthEntryDateInput ? wealthEntryDateInput.value : '';
-      const amountVal = wealthEntryAmountInput
-        ? wealthEntryAmountInput.value
-        : '';
-      const noteVal = wealthEntryNoteInput ? wealthEntryNoteInput.value : '';
-      const result = addWealthHistoryEntry(dateVal, amountVal, noteVal);
+    wealthEntryForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const before = cloneData();
+      const result = await saveWealthSnapshot({
+        date: wealthEntryDateInput?.value || '',
+        amountRaw: wealthEntryAmountInput?.value || '',
+        noteRaw: wealthEntryNoteInput?.value || ''
+      });
       if (!result.ok) {
-        showToast(
-          result.reason === 'date'
-            ? 'Enter a valid date.'
-            : 'Enter a valid amount.'
-        );
+        if (result.reason !== 'cancelled')
+          showToast(wealthSaveError(result.reason));
         return;
       }
+      offerUndo('Wealth updated.', before);
+      if (isMobileViewport()) showToast('Wealth updated.');
       wealthEntryForm.reset();
-      renderWealthHistoryTable();
-      updateWealthDashboard();
+      if (wealthEntryDateInput) {
+        wealthEntryDateInput.value = formatLocalDateString(new Date());
+      }
     });
   }
 
@@ -17110,6 +17754,12 @@ import {
     const codexTopPerformance = hasCodexEntries()
       ? getCodexTopPerformanceState()
       : null;
+    ensureWealthData();
+    const wealthFreshness = calculateWealthFreshness(
+      data.wealthHistory,
+      new Date(),
+      data.wealthSettings
+    );
     const header = document.createElement('div');
     header.className = 'mobile-today-header';
     const title = document.createElement('div');
@@ -17244,6 +17894,25 @@ import {
       actions.appendChild(button);
     });
     panel.appendChild(actions);
+
+    if (
+      wealthFreshness.status === 'stale' &&
+      data.wealthSettings?.remindersEnabled !== false
+    ) {
+      const reminder = document.createElement('button');
+      reminder.type = 'button';
+      reminder.className = 'btn secondary mobile-today-wealth-reminder';
+      reminder.textContent = 'Wealth total needs an update';
+      reminder.setAttribute(
+        'aria-label',
+        `Wealth total needs an update. Last recorded ${wealthFreshness.actualDate}.`
+      );
+      reminder.addEventListener('click', () => {
+        activateSection('grocery');
+        window.setTimeout(() => openMobileWealthUpdateSheet(), 0);
+      });
+      panel.appendChild(reminder);
+    }
 
     return true;
   }
@@ -18837,10 +19506,10 @@ import {
     const previousBackupDirName = data.backupDirName || null;
     const previousLastBackupAt = data.lastBackupAt || null;
     const previousLastBackupVerifiedAt = data.lastBackupVerifiedAt || null;
-    data = normalizeFinanceData(imported, { now: new Date() });
-    data.wealthHistory = Array.isArray(data.wealthHistory)
-      ? data.wealthHistory.map(normalizeWealthEntry)
-      : [];
+    data = normalizeWealthData(
+      normalizeFinanceData(imported, { now: new Date() }),
+      { now: new Date() }
+    );
     if (!data.backupDirName && previousBackupDirName) {
       data.backupDirName = previousBackupDirName;
     }
@@ -19433,6 +20102,11 @@ import {
       timer: 'timer',
       entries: 'entries',
       'quick-log': 'entries',
+      workouts: 'todo',
+      todo: 'todo',
+      finances: 'grocery',
+      grocery: 'grocery',
+      'grocery/wealth-update': 'grocery',
       reports: 'analytics',
       analytics: 'analytics',
       company: 'company',
@@ -19448,6 +20122,9 @@ import {
     showSection(sectionId, null, { resetScroll: false });
     if (launchHash === '#quick-log') {
       window.setTimeout(() => openMobileQuickLogSheet(), 0);
+    }
+    if (launchHash === '#grocery/wealth-update') {
+      window.setTimeout(() => openMobileWealthUpdateSheet(), 0);
     }
   }
 

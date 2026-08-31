@@ -3642,6 +3642,11 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
   await gotoSection(page, 'grocery', 'Finances');
   await page.locator('#financeTabWealth').click();
 
+  await expect(page.locator('#wealthHistoryToggle')).toHaveAttribute(
+    'aria-expanded',
+    'false'
+  );
+  await page.locator('#wealthHistoryToggle').click();
   await expect(page.locator('#wealthChart')).toBeVisible();
   const metrics = await page
     .locator('#wealthDashboardCard')
@@ -4006,7 +4011,7 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   await page.locator('#financeTabWealth').click();
 
   await expect(page.locator('#wealthMetricGrid .finance-metric')).toHaveCount(
-    4
+    5
   );
   await expect(page.locator('#wealthAccessibleSummary')).toContainText(
     '2 snapshots'
@@ -4033,7 +4038,16 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
-  expect(saved.wealthGoal).toEqual({ amount: 250000, date: '2027-08-31' });
+  expect(saved.wealthGoal).toMatchObject({
+    amount: 250000,
+    date: '2027-08-31',
+    monthlyContribution: 0,
+    scenarioAnnualRates: {
+      conservative: null,
+      base: 0,
+      optimistic: null
+    }
+  });
 
   await page.locator('#wealthEntryDate').fill('2026-08-31');
   await page.locator('#wealthEntryAmount').fill('120000');
@@ -4074,6 +4088,180 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   await expect(page.locator('#wealthHistoryBody')).toContainText(
     'Edited point'
   );
+});
+
+test('wealth supports dated conflicts, account archiving, goal scenarios, and CSV preview', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [],
+    entries: [],
+    groceries: [],
+    monthlyRecurringPayments: [],
+    wealthHistory: [
+      { id: 'dated', date: '2026-08-30', amount: 100000, note: 'Previous' }
+    ],
+    wealthGoal: { amount: 200000, date: '' }
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+  await page.locator('#financeTabWealth').click();
+
+  await expect(page.locator('#wealthCurrentValue')).toContainText('100');
+  await expect(page.locator('#wealthCurrentAsOf')).toContainText('2026-08-30');
+  await expect(page.locator('#wealthChart')).toBeVisible();
+
+  await page.locator('#wealthAccountName').fill('Savings');
+  await page.locator('#wealthAccountKind').selectOption('asset');
+  await page.locator('#wealthAccountCategory').fill('cash');
+  await page.locator('#wealthAccountForm button[type="submit"]').click();
+  await expect(page.locator('#wealthAccountsList')).toContainText('Savings');
+  const savingsRow = page
+    .locator('#wealthAccountsList .wealth-account-row')
+    .filter({ hasText: 'Savings' });
+  await savingsRow.getByRole('button', { name: 'Archive' }).click();
+  await expect(savingsRow).toContainText('Archived');
+
+  await page.locator('#wealthGoalAmount').fill('250000');
+  await page.locator('#wealthGoalDate').fill('2027-08-31');
+  await page.locator('#wealthGoalMonthlyContribution').fill('1000');
+  await page.locator('#wealthGoalRateBase').fill('5');
+  await page.locator('#wealthGoalApply').click();
+  await expect(page.locator('#wealthGoalScenarioList')).toContainText(
+    'Base case'
+  );
+  await expect(page.locator('#wealthGoalScenarioList')).toContainText(
+    'Annual net-growth assumption: 5.0%'
+  );
+
+  await page.locator('#wealthEntryDate').fill('2026-08-30');
+  await page.locator('#wealthEntryAmount').fill('110000');
+  await page.locator('#wealthEntryNote').fill('Replacement');
+  await page.locator('#wealthEntryForm button[type="submit"]').click();
+  const replaceDialog = page.getByRole('dialog', {
+    name: 'Replace wealth snapshot?'
+  });
+  await expect(replaceDialog).toBeVisible();
+  await replaceDialog.getByRole('button', { name: 'Replace snapshot' }).click();
+  await expect(page.locator('#wealthHistoryBody')).toContainText('Replacement');
+
+  await page.locator('#wealthCsvFile').setInputFiles({
+    name: 'wealth.csv',
+    mimeType: 'text/csv',
+    buffer: Buffer.from(
+      'date,account,kind,category,balance,note\n2026-08-31,Wallet,asset,cash,12000,Imported wallet\n2026-08-31,Card,liability,debt,2000,Imported card'
+    )
+  });
+  await page.locator('#wealthCsvPreviewButton').click();
+  await expect(page.locator('#wealthCsvPreview')).toContainText(
+    '2 new accounts'
+  );
+  await page.locator('#wealthCsvApplyButton').click();
+  await expect(page.locator('#wealthAccountsList')).toContainText('Wallet');
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(saved.wealthHistory).toHaveLength(2);
+  expect(
+    saved.wealthHistory.find((row) => row.date === '2026-08-31').amount
+  ).toBe(10000);
+  expect(saved.wealthGoal.scenarioAnnualRates.base).toBe(0.05);
+});
+
+test('mobile wealth leads with freshness, supports detailed updates, and avoids overflow', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [],
+    entries: [],
+    groceries: [],
+    monthlyRecurringPayments: [],
+    wealthAccounts: [
+      { id: 'cash', name: 'Cash', kind: 'asset', category: 'cash' },
+      { id: 'loan', name: 'Loan', kind: 'liability', category: 'debt' }
+    ],
+    wealthHistory: [
+      {
+        id: 'detail',
+        date: '2026-08-30',
+        amount: 90000,
+        breakdown: [
+          { accountId: 'cash', balance: 100000 },
+          { accountId: 'loan', balance: 10000 }
+        ]
+      }
+    ]
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+  await page.locator('#financeTabWealth').click();
+  await expect(page.locator('#wealthUpdateButton')).toBeVisible();
+  await expect(page.locator('#wealthFreshness')).toContainText(
+    'Updated 1 day ago'
+  );
+  await expect(page.locator('#wealthHistoryRegion')).toBeHidden();
+
+  await page.locator('#wealthUpdateButton').click();
+  const sheet = page.getByRole('dialog', { name: 'Update wealth' });
+  await expect(sheet).toBeVisible();
+  await expect(sheet.getByLabel('Net worth (SEK)')).toHaveValue('90000');
+  await sheet.getByRole('button', { name: 'By account' }).click();
+  await sheet.getByLabel(/Cash.*asset/).fill('110000');
+  await sheet.getByLabel(/Loan.*liability/).fill('12000');
+  await sheet.getByRole('button', { name: 'Update wealth' }).click();
+  await expect(sheet).toBeHidden();
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(saved.wealthHistory).toHaveLength(2);
+  expect(saved.wealthHistory.at(-1)).toMatchObject({
+    date: '2026-08-31',
+    amount: 98000
+  });
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Math.max(
+          document.documentElement.scrollWidth,
+          document.body.scrollWidth
+        )
+      )
+    )
+    .toBeLessThanOrEqual(392);
+});
+
+test('stale wealth adds a low-priority Today update reminder without rendering finance there', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [],
+    entries: [],
+    groceries: [],
+    monthlyRecurringPayments: [],
+    wealthHistory: [{ id: 'old', date: '2026-06-01', amount: 100000 }]
+  });
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(page.locator('#todayCommandPanel')).toContainText(
+    'Wealth total needs an update'
+  );
+  await expect(page.locator('#todayCommandPanel')).not.toContainText(
+    'Recorded net worth'
+  );
+  await page
+    .locator('#todayCommandPanel')
+    .getByRole('button', {
+      name: /Wealth total needs an update/
+    })
+    .click();
+  await expect(
+    page.getByRole('dialog', { name: 'Update wealth' })
+  ).toBeVisible();
 });
 
 test('weekly workouts include Strava activities from the feed', async ({

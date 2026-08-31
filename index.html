@@ -563,35 +563,147 @@
         </div>
 
         <div id="financeViewWealth" class="finance-view" role="tabpanel" aria-labelledby="financeTabWealth" data-finance-view-panel="wealth" hidden>
+          <div id="wealthFreshnessBanner" class="wealth-command-header">
+            <div class="wealth-current-summary">
+              <p class="eyebrow">Net worth</p>
+              <h3 id="wealthCurrentValue" class="wealth-current-value">No snapshot yet</h3>
+              <p id="wealthCurrentAsOf" class="card-subtitle">Update wealth to establish a dated total.</p>
+            </div>
+            <div class="wealth-freshness-panel">
+              <span id="wealthFreshness" class="wealth-freshness-label empty">No snapshot yet</span>
+              <p id="wealthFreshnessDetail" class="wealth-freshness-detail">Your latest total will appear here with its actual date.</p>
+              <span id="wealthStatus" class="wealth-status wealth-status-empty">Needs first update</span>
+            </div>
+            <div class="wealth-summary-actions">
+              <button id="wealthUpdateButton" type="button" class="btn primary wealth-mobile-only">Update wealth</button>
+              <button id="wealthGoalOpenButton" type="button" class="btn secondary wealth-mobile-only">Edit goal plan</button>
+            </div>
+          </div>
+
           <div id="wealthMetricGrid" class="wealth-metric-grid"></div>
-          <div class="wealth-grid">
-            <div class="card" id="wealthDashboardCard">
+
+          <div class="wealth-layout">
+            <div class="card wealth-history-card" id="wealthDashboardCard">
               <div class="wealth-dashboard-header">
-                <div><p class="eyebrow">Longer view</p><h3 class="card-title">Wealth pace</h3><p class="card-subtitle">A responsive view of recorded snapshots and trend.</p></div>
-                <div class="wealth-range-controls" role="group" aria-label="Wealth chart range">
-                  <button id="wealthRangeOneYear" type="button" class="btn secondary" data-wealth-range="one-year">One year</button>
-                  <button id="wealthRangeAll" type="button" class="btn secondary active" data-wealth-range="all">All time</button>
+                <div>
+                  <p class="eyebrow">History</p>
+                  <h3 class="card-title">Recorded net worth</h3>
+                  <p class="card-subtitle">Only recorded totals appear here. Plans and diagnostics stay separate.</p>
+                </div>
+                <div class="wealth-range-controls" role="group" aria-label="Wealth history range">
+                  <button id="wealthRangeOneYear" type="button" class="btn secondary" data-wealth-range="one-year" aria-pressed="true">One year</button>
+                  <button id="wealthRangeThreeYear" type="button" class="btn secondary" data-wealth-range="three-year" aria-pressed="false">Three years</button>
+                  <button id="wealthRangeAll" type="button" class="btn secondary" data-wealth-range="all" aria-pressed="false">All time</button>
                 </div>
               </div>
-              <div class="wealth-goal-row">
-                <div class="finance-field"><label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" class="wealth-input" placeholder="2,000,000" /></div>
-                <div class="finance-field"><label for="wealthGoalDate" class="wealth-label">Goal date (optional)</label><input id="wealthGoalDate" type="date" class="wealth-input" /></div>
-                <button id="wealthGoalApply" type="button" class="btn primary">Save goal</button>
+              <button id="wealthHistoryToggle" type="button" class="btn secondary wealth-history-toggle" aria-expanded="false">Show history chart</button>
+              <div id="wealthHistoryRegion" class="wealth-history-region">
+                <div class="wealth-chart-wrapper"><canvas id="wealthChart" aria-label="Recorded net worth history chart" role="img"></canvas></div>
+                <div id="wealthAccessibleSummary" class="wealth-accessible-summary" role="status" aria-live="polite"></div>
+                <div id="wealthHistoryTableSummary" class="wealth-history-table-summary"></div>
+                <div id="wealthTrendDiagnostic" class="wealth-trend-diagnostic"></div>
               </div>
-              <div class="wealth-chart-wrapper"><canvas id="wealthChart" aria-label="Wealth history chart" role="img"></canvas></div>
-              <div id="wealthAccessibleSummary" class="wealth-accessible-summary" role="status" aria-live="polite"></div>
               <div id="wealthProjectionSummary" class="wealth-summary"></div>
             </div>
-            <div class="card wealth-add-card">
-              <div class="wealth-add-header"><div><p class="eyebrow">Snapshots</p><h3 class="card-title">Add wealth snapshot</h3></div><button id="wealthSnapshotMobileButton" type="button" class="btn secondary finance-mobile-only">Open snapshot sheet</button></div>
-              <form id="wealthEntryForm" class="wealth-entry-form">
-                <div class="finance-field"><label for="wealthEntryDate">Snapshot date</label><input id="wealthEntryDate" type="date" required class="wealth-entry-input" /></div>
-                <div class="finance-field"><label for="wealthEntryAmount">Amount (SEK)</label><input id="wealthEntryAmount" type="number" step="0.01" min="0" required placeholder="Amount" class="wealth-entry-input" /></div>
+
+            <div class="card wealth-update-card wealth-add-card">
+              <div class="wealth-add-header">
+                <div>
+                  <p class="eyebrow">Update</p>
+                  <h3 class="card-title">Update wealth</h3>
+                  <p class="card-subtitle">Use a quick total or the detailed account route on mobile.</p>
+                </div>
+                <button id="wealthSnapshotMobileButton" type="button" class="btn secondary finance-mobile-only">Open update sheet</button>
+              </div>
+              <form id="wealthEntryForm" class="wealth-entry-form wealth-desktop-form">
+                <div class="finance-field"><label for="wealthEntryDate">Snapshot date</label><input id="wealthEntryDate" type="date" required class="wealth-entry-input" aria-describedby="wealthEntryDateHelp" /></div>
+                <div class="finance-field"><label for="wealthEntryAmount">Net worth (SEK)</label><input id="wealthEntryAmount" type="number" step="0.01" required placeholder="Amount" class="wealth-entry-input" aria-describedby="wealthEntryAmountHelp" /><span id="wealthEntryAmountHelp" class="field-help">Enter your total as of the selected date. A negative total is valid when debts exceed assets.</span></div>
                 <div class="finance-field"><label for="wealthEntryNote">Note (optional)</label><input id="wealthEntryNote" type="text" placeholder="Note" class="wealth-entry-input" /></div>
-                <button type="submit" class="btn primary wealth-entry-submit">Add snapshot</button>
+                <button type="submit" class="btn primary wealth-entry-submit">Update wealth</button>
               </form>
-              <div class="wealth-history-wrapper"><div class="wealth-history-scroll"><table class="wealth-history-table"><thead><tr><th scope="col">Date</th><th scope="col">Amount</th><th scope="col">Note</th><th scope="col">Actions</th></tr></thead><tbody id="wealthHistoryBody"></tbody></table><div id="wealthHistoryList" class="wealth-history-list"></div></div></div>
+              <p id="wealthChangeDetail" class="wealth-update-detail">A second dated snapshot will show change.</p>
+              <p id="wealthCompositionValue" class="wealth-update-detail">Available after a detailed account update.</p>
+              <p id="wealthGoalStatus" class="wealth-update-detail">Goal status starts after the first update.</p>
             </div>
+          </div>
+
+          <div class="card wealth-goal-card" id="wealthGoalCard">
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">Goal plan</p>
+                <h3 class="card-title">Assumption-driven plan</h3>
+                <p class="card-subtitle">Your assumptions shape the scenarios; no forecast is presented as fact.</p>
+              </div>
+              <button id="wealthGoalEditButton" type="button" class="btn secondary finance-mobile-only">Edit goal plan</button>
+            </div>
+            <form id="wealthGoalForm" class="wealth-goal-form wealth-desktop-form" novalidate>
+              <div class="finance-field"><label for="wealthGoalAmount">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" required class="wealth-input" placeholder="2,000,000" /></div>
+              <div class="finance-field"><label for="wealthGoalDate">Goal date</label><input id="wealthGoalDate" type="date" class="wealth-input" aria-describedby="wealthGoalDateHelp" /><span id="wealthGoalDateHelp" class="field-help">Required for a monthly plan.</span></div>
+              <div class="finance-field"><label for="wealthGoalMonthlyContribution">Planned monthly contribution (SEK)</label><input id="wealthGoalMonthlyContribution" type="number" min="0" step="0.01" class="wealth-input" value="0" /></div>
+              <div class="finance-field"><label for="wealthGoalRateConservative">Downside annual rate (%)</label><input id="wealthGoalRateConservative" type="number" step="0.1" class="wealth-input" placeholder="Optional" /></div>
+              <div class="finance-field"><label for="wealthGoalRateBase">Base annual rate (%)</label><input id="wealthGoalRateBase" type="number" step="0.1" class="wealth-input" value="0" required /></div>
+              <div class="finance-field"><label for="wealthGoalRateOptimistic">Upside annual rate (%)</label><input id="wealthGoalRateOptimistic" type="number" step="0.1" class="wealth-input" placeholder="Optional" /></div>
+              <button id="wealthGoalApply" type="submit" class="btn primary">Save goal plan</button>
+            </form>
+            <div id="wealthGoalPlanSummary" class="wealth-summary"></div>
+            <div id="wealthGoalScenarioList" class="wealth-scenario-list"></div>
+          </div>
+
+          <div class="card wealth-composition-card" id="wealthCompositionCard" hidden>
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">Composition</p>
+                <h3 class="card-title">Assets and debt</h3>
+                <p class="card-subtitle">Shown only when the latest snapshot includes account balances.</p>
+              </div>
+            </div>
+            <div id="wealthCompositionRows" class="wealth-composition-rows"></div>
+          </div>
+
+          <div class="card wealth-account-card" id="wealthAccountsCard">
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">Accounts</p>
+                <h3 class="card-title">Optional account tracking</h3>
+                <p class="card-subtitle">Liabilities are entered as positive balances and subtracted from assets.</p>
+              </div>
+              <button id="wealthAccountMobileButton" type="button" class="btn secondary finance-mobile-only">Add account</button>
+            </div>
+            <form id="wealthAccountForm" class="wealth-account-form wealth-desktop-form">
+              <div class="finance-field"><label for="wealthAccountName">Account name</label><input id="wealthAccountName" type="text" required placeholder="e.g. Savings" /></div>
+              <div class="finance-field"><label for="wealthAccountKind">Kind</label><select id="wealthAccountKind"><option value="asset">Asset</option><option value="liability">Liability</option></select></div>
+              <div class="finance-field"><label for="wealthAccountCategory">Category</label><input id="wealthAccountCategory" type="text" required value="other" placeholder="e.g. cash" /></div>
+              <button type="submit" class="btn primary">Add account</button>
+            </form>
+            <div id="wealthAccountsList" class="wealth-accounts-list"></div>
+          </div>
+
+          <div class="card wealth-import-card" id="wealthImportCard">
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">Import</p>
+                <h3 class="card-title">CSV account history</h3>
+                <p class="card-subtitle">Preview and validate <code>date, account, kind, category, balance, note</code> before anything is saved.</p>
+              </div>
+            </div>
+            <div class="wealth-import-controls">
+              <div class="finance-field"><label for="wealthCsvFile">CSV file</label><input id="wealthCsvFile" type="file" accept=".csv,text/csv" /></div>
+              <button id="wealthCsvPreviewButton" type="button" class="btn secondary">Preview CSV</button>
+              <label class="wealth-import-replace"><input id="wealthCsvReplace" type="checkbox" /> Replace existing dates</label>
+              <button id="wealthCsvApplyButton" type="button" class="btn primary" disabled>Apply import</button>
+            </div>
+            <div id="wealthCsvPreview" class="wealth-csv-preview" role="status" aria-live="polite">Choose a CSV to preview before importing.</div>
+          </div>
+
+          <div class="card wealth-history-list-card">
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">History actions</p>
+                <h3 class="card-title">Snapshot history</h3>
+                <p class="card-subtitle">Edit dates or totals, or delete with confirmation and undo.</p>
+              </div>
+            </div>
+            <div class="wealth-history-wrapper"><div class="wealth-history-scroll"><table class="wealth-history-table"><thead><tr><th scope="col">Date</th><th scope="col">Net worth</th><th scope="col">Type</th><th scope="col">Note</th><th scope="col">Actions</th></tr></thead><tbody id="wealthHistoryBody"></tbody></table><div id="wealthHistoryList" class="wealth-history-list"></div></div></div>
           </div>
         </div>
       </section>
