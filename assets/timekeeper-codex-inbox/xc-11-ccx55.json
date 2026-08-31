@@ -2,198 +2,31 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-08-31T14:22:02.351Z",
-  "dayStart": "2026-08-30T22:00:00.000Z",
-  "rangeStart": "2026-08-24T22:00:00.000Z",
+  "updatedAt": "2026-08-31T22:02:01.874Z",
+  "dayStart": "2026-08-31T22:00:00.000Z",
+  "rangeStart": "2026-08-25T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
     {
-      "id": "codex-ed3e3fcf78f42d50dd2cf407",
-      "threadId": "01a0344a-d750-7402-8be1-6ff697eb907f",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-08-25T06:56:47.930Z",
-      "endTime": "2026-08-25T07:31:22.446Z",
-      "wallSeconds": 2074,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1037,
-      "focusPolicyVersion": 6,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "wallSeconds": 2074,
-          "effectiveSeconds": 1037
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-3d192d8d0752806e2a6c6b8d",
+      "id": "codex-e18dd5273ebcb18c7880f2e1",
       "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
-      "startTime": "2026-08-25T11:37:42.438Z",
-      "endTime": "2026-08-25T11:54:48.875Z",
-      "wallSeconds": 1026,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 513,
-      "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 1025,
-          "effectiveSeconds": 512
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-f13ef2803a148e54d947b489"
-      ],
-      "description": "Codex: Check Stage 1 status"
-    },
-    {
-      "id": "codex-b5a6ece84db568aba62d705d",
-      "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-08-25T15:12:30.920Z",
-      "endTime": "2026-08-25T15:50:53.439Z",
-      "wallSeconds": 2302,
-      "focusFactor": 0.5201,
-      "effectiveSeconds": 1197,
-      "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 2302,
-          "effectiveSeconds": 1151
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 4,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 434,
-          "effectiveSeconds": 45
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-fb49ef338a153c59faba3626",
-        "codex-a9117847be040d0db990737f",
-        "codex-b59bff595c70b36a395e7838"
-      ],
-      "description": "Codex: Check Stage 1 status"
-    },
-    {
-      "id": "codex-b8229ae66af62838aa712ed5",
-      "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-08-25T17:10:28.879Z",
+      "startTime": "2026-08-25T22:00:00.367Z",
       "endTime": "2026-08-25T23:27:42.318Z",
-      "wallSeconds": 22633,
-      "focusFactor": 0.5028,
-      "effectiveSeconds": 11379,
+      "wallSeconds": 5261,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2630,
       "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
       "modelBreakdown": [
         {
-          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 22633,
-          "effectiveSeconds": 11316
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 3,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 591,
-          "effectiveSeconds": 62
+          "wallSeconds": 5261,
+          "effectiveSeconds": 2630
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-62a012a38815ba2134713a62",
-        "codex-a7050b302b0f3ee823edc3dd",
-        "codex-9303633e03682d464700c638"
       ],
       "description": "Codex: Check Stage 1 status"
     },
@@ -228,7 +61,7 @@
       "description": "Codex: Assess stage 3 readiness"
     },
     {
-      "id": "codex-6496e636f9f6a314e667d451",
+      "id": "codex-e98a24bc599fbce9f69024a7",
       "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -239,27 +72,19 @@
       "focusFactor": 0.5,
       "effectiveSeconds": 62,
       "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
-          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
           "wallSeconds": 125,
           "effectiveSeconds": 62
         }
       ],
-      "supersedesExternalIds": [
-        "codex-e98a24bc599fbce9f69024a7"
-      ],
       "description": "Codex: Check Stage 1 status"
     },
     {
-      "id": "codex-c01a662f1d37404857cc9cb5",
+      "id": "codex-d673cfe066002b4c74bbb1ce",
       "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -270,22 +95,14 @@
       "focusFactor": 0.5,
       "effectiveSeconds": 55,
       "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
-          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
           "wallSeconds": 111,
           "effectiveSeconds": 55
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-d673cfe066002b4c74bbb1ce"
       ],
       "description": "Codex: Check Stage 1 status"
     },
@@ -504,7 +321,7 @@
       "description": "Codex: Check Vera HPC access"
     },
     {
-      "id": "codex-6e5d4cc96862a93c70b16ba7",
+      "id": "codex-ed06090e344f5b1ebce39c20",
       "threadId": "01a038b6-2866-7630-9f93-2251f17d846b",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -515,22 +332,14 @@
       "focusFactor": 0.5,
       "effectiveSeconds": 215,
       "focusPolicyVersion": 6,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
-          "role": "parent",
           "model": "gpt-5.6-sol",
           "effort": "high",
           "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
           "wallSeconds": 431,
           "effectiveSeconds": 215
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-ed06090e344f5b1ebce39c20"
       ],
       "description": "Codex: Check Stage 1 status"
     },
