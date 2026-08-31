@@ -2,32 +2,9 @@ import { uuid } from '../../shared/id.mjs';
 
 /**
  * @typedef {{ x: number, y: number }} RegressionPoint
- * @typedef {{ id?: string, date?: string, amount?: number | string, note?: string }} WealthEntryInput
+ * @typedef {{ [key: string]: unknown, id?: string, date?: string, amount?: number | string, note?: string }} WealthEntryInput
  * @typedef {{ id: string, date: string, amount: number, note: string }} WealthEntry
  */
-
-const DEFAULT_WEALTH_POINTS = [
-  { date: '2020-01-01', amount: 1150000 },
-  { date: '2022-01-01', amount: 1280000 },
-  { date: '2023-04-25', amount: 1350000 },
-  { date: '2024-01-01', amount: 1415000 },
-  { date: '2024-01-25', amount: 1488400 },
-  { date: '2024-02-26', amount: 1518000 },
-  { date: '2024-03-25', amount: 1515000, note: '1,565,000 without taxes' },
-  { date: '2024-04-25', amount: 1507000 },
-  { date: '2024-05-24', amount: 1567000 },
-  { date: '2024-06-25', amount: 1600000 },
-  { date: '2024-07-25', amount: 1661000 },
-  { date: '2024-08-25', amount: 1629000 },
-  { date: '2024-09-25', amount: 1630000 },
-  { date: '2024-10-25', amount: 1715000 },
-  { date: '2024-11-25', amount: 1773000 },
-  { date: '2024-12-23', amount: 1755200 },
-  { date: '2025-01-24', amount: 1830000 },
-  { date: '2025-09-24', amount: 1931600 },
-  { date: '2025-10-24', amount: 1962000 },
-  { date: '2025-11-05', amount: 2010000 }
-];
 
 export function parseWealthAmount(raw) {
   const cleaned = String(raw ?? '')
@@ -37,6 +14,18 @@ export function parseWealthAmount(raw) {
   return Number.isFinite(value) ? value : 0;
 }
 
+export function parseOptionalWealthAmount(raw) {
+  if (raw === null || raw === undefined || String(raw).trim() === '') {
+    return null;
+  }
+  const cleaned = String(raw).trim().replace(/\s/g, '');
+  if (!/^-?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(cleaned)) {
+    return null;
+  }
+  const value = Number.parseFloat(cleaned.replace(',', '.'));
+  return Number.isFinite(value) ? value : null;
+}
+
 /**
  * @param {WealthEntryInput | null | undefined} entry
  * @returns {WealthEntry}
@@ -44,6 +33,7 @@ export function parseWealthAmount(raw) {
 export function normalizeWealthEntry(entry) {
   const obj = entry && typeof entry === 'object' ? { ...entry } : {};
   return {
+    ...obj,
     id: obj.id || uuid(),
     date: typeof obj.date === 'string' ? obj.date.trim() : '',
     amount: parseWealthAmount(obj.amount),
@@ -55,11 +45,35 @@ export function normalizeWealthEntry(entry) {
  * @returns {WealthEntry[]}
  */
 export function getDefaultWealthHistory() {
-  return DEFAULT_WEALTH_POINTS.map((point) => normalizeWealthEntry(point));
+  return [];
 }
 
 export function makeDefaultWealthGoal() {
   return { amount: 2000000, date: '' };
+}
+
+export function validateWealthGoal(amountRaw, dateRaw = '') {
+  const amount = parseOptionalWealthAmount(amountRaw);
+  if (amount === null || amount <= 0) {
+    return { ok: false, reason: 'amount' };
+  }
+  const date = String(dateRaw || '').trim();
+  if (date) {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return { ok: false, reason: 'date' };
+    }
+    const [year, month, day] = date.split('-').map(Number);
+    const parsed = new Date(year, month - 1, day);
+    if (
+      Number.isNaN(parsed.getTime()) ||
+      parsed.getFullYear() !== year ||
+      parsed.getMonth() !== month - 1 ||
+      parsed.getDate() !== day
+    ) {
+      return { ok: false, reason: 'date' };
+    }
+  }
+  return { ok: true, goal: { amount, date } };
 }
 
 /**

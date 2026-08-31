@@ -382,101 +382,217 @@
 
       <!-- Grocery/Finances Section -->
       <section id="grocery" class="section" style="display:none;">
-        <h2 class="mb-4" style="font-size:1.25rem; font-weight:600;">Finances</h2>
+        <div class="finance-page-header">
+          <div>
+            <h2>Finances</h2>
+            <p>Daily spending, planning, and wealth in one local-first workspace.</p>
+          </div>
+        </div>
+        <nav id="financeViewNav" class="finance-view-tabs" aria-label="Finance views" role="tablist">
+          <button id="financeTabOverview" class="finance-view-tab active" type="button" role="tab" aria-selected="true" aria-controls="financeViewOverview" data-finance-view="overview">Overview</button>
+          <button id="financeTabSpending" class="finance-view-tab" type="button" role="tab" aria-selected="false" aria-controls="financeViewSpending" data-finance-view="spending">Spending</button>
+          <button id="financeTabWealth" class="finance-view-tab" type="button" role="tab" aria-selected="false" aria-controls="financeViewWealth" data-finance-view="wealth">Wealth</button>
+        </nav>
 
-        <!-- Form to add a new grocery item -->
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Shopping List</h3>
-          <form id="groceryForm" style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
-            <input id="groceryName" type="text" required placeholder="Item name" style="flex:2; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <select id="groceryGroup" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;">
-              <option value="soon">Soon</option>
-              <option value="later">Later</option>
-              <option value="recurring">Recurring</option>
-              <option value="someday">Someday</option>
-            </select>
-            <input id="groceryEstimate" type="number" min="0" step="1" placeholder="Estimate" style="width:8rem; padding:0.5rem; border:1px solid #cbd5e1; border-radius:0.375rem;" />
-            <button type="submit" class="btn primary">Add</button>
-          </form>
-        </div>
-        <!-- Weekly grocery items -->
-        <div class="card" style="margin-bottom:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Soon</h3>
-          <ul id="weeklyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-        <!-- Monthly grocery items -->
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Later</h3>
-          <ul id="monthlyGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
+        <div id="financeViewOverview" class="finance-view" role="tabpanel" aria-labelledby="financeTabOverview" data-finance-view-panel="overview">
+          <div id="financeOverviewStatus" class="finance-status-banner" role="status" aria-live="polite"></div>
+          <div id="financeEnvelopeGrid" class="finance-envelope-grid"></div>
 
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Recurring</h3>
-          <ul id="recurringGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-
-        <!-- Biannual grocery items -->
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Someday</h3>
-          <ul id="biannualGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
-        </div>
-
-        <div class="wealth-grid">
-          <div class="card" id="wealthDashboardCard">
-            <div class="wealth-dashboard-header">
+          <div class="card finance-quick-card">
+            <div class="finance-card-heading">
               <div>
-                <h3 class="card-title">Wealth Dashboard</h3>
-                <p class="card-subtitle">Track total wealth over time, view projections with uncertainty, and plan for goals.</p>
+                <p class="eyebrow">Log it now</p>
+                <h3>Quick purchase</h3>
+                <p>Record a direct expense against its budget envelope.</p>
+              </div>
+              <button id="financeQuickPurchaseMobileButton" class="btn secondary finance-mobile-only" type="button">Open purchase sheet</button>
+            </div>
+            <form id="financeQuickPurchaseForm" class="finance-form finance-quick-form">
+              <div class="finance-field">
+                <label for="financeQuickPurchaseName">Purchase name</label>
+                <input id="financeQuickPurchaseName" name="name" type="text" required autocomplete="off" placeholder="Coffee, train ticket…" />
+              </div>
+              <div class="finance-field">
+                <label for="financeQuickPurchaseCost">Cost (SEK)</label>
+                <input id="financeQuickPurchaseCost" name="cost" type="number" min="0" step="0.01" required inputmode="decimal" placeholder="0.00" />
+              </div>
+              <div class="finance-field">
+                <label for="financeQuickPurchaseBucket">Budget envelope</label>
+                <select id="financeQuickPurchaseBucket" name="budgetBucket">
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="biannual">Six-month</option>
+                </select>
+              </div>
+              <div class="finance-field">
+                <label for="financeQuickPurchaseDate">Purchase date</label>
+                <input id="financeQuickPurchaseDate" name="purchasedDate" type="date" required />
+              </div>
+              <button id="financeQuickPurchaseSubmit" type="submit" class="btn primary">Log purchase</button>
+            </form>
+          </div>
+
+          <div class="card finance-overview-planning-card">
+            <div class="finance-card-heading">
+              <div>
+                <p class="eyebrow">Plan ahead</p>
+                <h3>Shopping List</h3>
+                <p>Keep a short planning list separate from accounting.</p>
+              </div>
+              <button class="btn secondary" type="button" data-finance-action="spending">Open Spending</button>
+            </div>
+            <form id="groceryForm" class="finance-form finance-planning-form">
+              <div class="finance-field">
+                <label for="groceryName">Item name</label>
+                <input id="groceryName" name="name" type="text" required placeholder="Planned purchase" />
+              </div>
+              <div class="finance-field">
+                <label for="groceryGroup">Planning horizon</label>
+                <select id="groceryGroup" name="planningGroup">
+                  <option value="soon">Soon</option>
+                  <option value="later">Later</option>
+                  <option value="recurring">Recurring review</option>
+                  <option value="someday">Someday</option>
+                </select>
+              </div>
+              <div class="finance-field">
+                <label for="groceryBudgetBucket">Budget envelope</label>
+                <select id="groceryBudgetBucket" name="budgetBucket">
+                  <option value="weekly">Weekly</option>
+                  <option value="monthly">Monthly</option>
+                  <option value="biannual">Six-month</option>
+                </select>
+              </div>
+              <div class="finance-field">
+                <label for="groceryEstimate">Estimate (SEK)</label>
+                <input id="groceryEstimate" name="estimate" type="number" min="0" step="0.01" inputmode="decimal" placeholder="Optional" />
+              </div>
+              <button type="submit" class="btn secondary">Add to plan</button>
+            </form>
+            <div id="financeOverviewPlans" class="finance-overview-plans"></div>
+          </div>
+
+          <div class="card finance-recurring-overview-card">
+            <div class="finance-card-heading">
+              <div>
+                <p class="eyebrow">Fixed costs</p>
+                <h3>Recurring payments</h3>
+                <p>Active monthly commitments are reserved in the monthly envelope.</p>
+              </div>
+              <button class="btn secondary" type="button" data-finance-action="recurring">Manage fixed costs</button>
+            </div>
+            <div id="financeOverviewRecurring" class="finance-recurring-summary"></div>
+          </div>
+
+          <div class="finance-link-grid" aria-label="Finance shortcuts">
+            <button type="button" class="btn secondary" data-finance-action="budget-settings">Budget settings</button>
+            <button type="button" class="btn secondary" data-finance-action="spending">Purchase planning</button>
+            <button type="button" class="btn secondary" data-finance-action="history">Purchase history</button>
+            <button type="button" class="btn secondary" data-finance-action="wealth">Wealth</button>
+          </div>
+        </div>
+
+        <div id="financeViewSpending" class="finance-view" role="tabpanel" aria-labelledby="financeTabSpending" data-finance-view-panel="spending" hidden>
+          <div class="finance-spending-layout">
+            <div class="card" id="financePlanningCard">
+              <div class="finance-card-heading">
+                <div>
+                  <p class="eyebrow">Planning horizons</p>
+                  <h3>Purchase planning</h3>
+                  <p>Soon, Later, and Someday are planning groups; the envelope is always independent.</p>
+                </div>
+              </div>
+              <div id="financePlanningGroups" class="finance-planning-groups">
+                <section class="finance-planning-group" data-planning-group="soon"><h4>Soon</h4><ul id="weeklyGroceryList"></ul></section>
+                <section class="finance-planning-group" data-planning-group="later"><h4>Later</h4><ul id="monthlyGroceryList"></ul></section>
+                <section class="finance-planning-group" data-planning-group="someday"><h4>Someday</h4><ul id="biannualGroceryList"></ul></section>
+                <section class="finance-planning-group" data-planning-group="recurring"><h4>Recurring review</h4><ul id="recurringGroceryList"></ul></section>
+              </div>
+              <div id="financeMigrationReview" class="finance-migration-review" hidden></div>
+            </div>
+
+            <div class="card" id="financeRecurringCard">
+              <div class="finance-card-heading">
+                <div>
+                  <p class="eyebrow">Fixed-cost manager</p>
+                  <h3>Recurring payments</h3>
+                  <p>Pause or end commitments without deleting their history.</p>
+                </div>
+                <button id="financeRecurringMobileButton" class="btn secondary finance-mobile-only" type="button">Add fixed cost</button>
+              </div>
+              <form id="financeRecurringForm" class="finance-form finance-recurring-form">
+                <div class="finance-field"><label for="financeRecurringName">Payment name</label><input id="financeRecurringName" name="name" type="text" required placeholder="Rent, subscription…" /></div>
+                <div class="finance-field"><label for="financeRecurringAmount">Amount (SEK)</label><input id="financeRecurringAmount" name="amount" type="number" min="0" step="0.01" required inputmode="decimal" /></div>
+                <div class="finance-field"><label for="financeRecurringDueDay">Due day (optional)</label><input id="financeRecurringDueDay" name="dueDay" type="number" min="1" max="31" step="1" placeholder="1–31" /></div>
+                <div class="finance-field"><label for="financeRecurringEffectiveDate">Effective date</label><input id="financeRecurringEffectiveDate" name="effectiveDate" type="date" required /></div>
+                <div class="finance-field"><label for="financeRecurringEndDate">End date (optional)</label><input id="financeRecurringEndDate" name="endDate" type="date" /></div>
+                <label class="finance-check-field" for="financeRecurringActive"><input id="financeRecurringActive" name="active" type="checkbox" checked /> Active</label>
+                <button type="submit" class="btn primary">Add payment</button>
+              </form>
+              <div id="financeRecurringList" class="finance-recurring-list"></div>
+            </div>
+          </div>
+
+          <div class="card finance-history-card" id="financeHistoryCard">
+            <div class="finance-card-heading">
+              <div><p class="eyebrow">Accounting</p><h3>Purchase history</h3><p>Edit dates and envelopes without losing the original record.</p></div>
+            </div>
+            <div class="finance-filter-grid" aria-label="Purchase history filters">
+              <div class="finance-field"><label for="financeHistoryPeriod">Period</label><select id="financeHistoryPeriod"><option value="all">All dates</option><option value="current-week">Current week</option><option value="current-month">Current month</option><option value="current-six-month">Current six-month period</option></select></div>
+              <div class="finance-field"><label for="financeHistoryBucket">Envelope</label><select id="financeHistoryBucket"><option value="all">All envelopes</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="biannual">Six-month</option></select></div>
+              <button id="financeHistoryClear" type="button" class="btn secondary">Clear filters</button>
+            </div>
+            <div id="financeHistoryTotals" class="finance-history-totals" role="status" aria-live="polite"></div>
+            <div id="financeHistoryList" class="finance-history-list"></div>
+            <ul id="archivedGroceryList" class="finance-history-legacy-list" aria-label="Purchase history"></ul>
+          </div>
+
+          <details id="financeBudgetSettings" class="finance-settings-card">
+            <summary>Budget settings and carry adjustments</summary>
+            <div class="finance-settings-body">
+              <p class="finance-help">Budgets use calendar periods: Monday–Sunday, calendar months, and January–June / July–December. Carry-over is signed and rolls forward at closure.</p>
+              <button id="financeBudgetMobileButton" type="button" class="btn secondary finance-mobile-only">Open adjustment sheet</button>
+              <form id="financeBudgetSettingsForm" class="finance-form finance-budget-form">
+                <div class="finance-budget-column"><h4>Weekly</h4><div class="finance-field"><label for="financeBudgetWeekly">Base budget (SEK)</label><input id="financeBudgetWeekly" type="number" min="0" step="0.01" required /></div><div class="finance-field"><label for="financeCarryWeekly">Opening carry (SEK)</label><input id="financeCarryWeekly" type="number" step="0.01" required /></div></div>
+                <div class="finance-budget-column"><h4>Monthly</h4><div class="finance-field"><label for="financeBudgetMonthly">Base budget (SEK)</label><input id="financeBudgetMonthly" type="number" min="0" step="0.01" required /></div><div class="finance-field"><label for="financeCarryMonthly">Opening carry (SEK)</label><input id="financeCarryMonthly" type="number" step="0.01" required /></div></div>
+                <div class="finance-budget-column"><h4>Six-month</h4><div class="finance-field"><label for="financeBudgetBiannual">Base budget (SEK)</label><input id="financeBudgetBiannual" type="number" min="0" step="0.01" required /></div><div class="finance-field"><label for="financeCarryBiannual">Opening carry (SEK)</label><input id="financeCarryBiannual" type="number" step="0.01" required /></div></div>
+                <button id="financeBudgetSettingsSave" type="submit" class="btn primary">Save budget settings</button>
+              </form>
+            </div>
+          </details>
+        </div>
+
+        <div id="financeViewWealth" class="finance-view" role="tabpanel" aria-labelledby="financeTabWealth" data-finance-view-panel="wealth" hidden>
+          <div id="wealthMetricGrid" class="wealth-metric-grid"></div>
+          <div class="wealth-grid">
+            <div class="card" id="wealthDashboardCard">
+              <div class="wealth-dashboard-header">
+                <div><p class="eyebrow">Longer view</p><h3 class="card-title">Wealth pace</h3><p class="card-subtitle">A responsive view of recorded snapshots and trend.</p></div>
+                <div class="wealth-range-controls" role="group" aria-label="Wealth chart range">
+                  <button id="wealthRangeOneYear" type="button" class="btn secondary" data-wealth-range="one-year">One year</button>
+                  <button id="wealthRangeAll" type="button" class="btn secondary active" data-wealth-range="all">All time</button>
+                </div>
               </div>
               <div class="wealth-goal-row">
-                <label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label>
-                <input id="wealthGoalAmount" type="number" min="0" step="1000" class="wealth-input" placeholder="2,000,000" />
-                <label for="wealthGoalDate" class="wealth-label">Goal date</label>
-                <input id="wealthGoalDate" type="date" class="wealth-input" />
-                <button id="wealthGoalApply" class="btn secondary">Save goal</button>
+                <div class="finance-field"><label for="wealthGoalAmount" class="wealth-label">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" class="wealth-input" placeholder="2,000,000" /></div>
+                <div class="finance-field"><label for="wealthGoalDate" class="wealth-label">Goal date (optional)</label><input id="wealthGoalDate" type="date" class="wealth-input" /></div>
+                <button id="wealthGoalApply" type="button" class="btn primary">Save goal</button>
               </div>
+              <div class="wealth-chart-wrapper"><canvas id="wealthChart" aria-label="Wealth history chart" role="img"></canvas></div>
+              <div id="wealthAccessibleSummary" class="wealth-accessible-summary" role="status" aria-live="polite"></div>
+              <div id="wealthProjectionSummary" class="wealth-summary"></div>
             </div>
-            <div class="wealth-chart-wrapper">
-              <canvas id="wealthChart" height="320"></canvas>
-            </div>
-            <div id="wealthProjectionSummary" class="wealth-summary"></div>
-          </div>
-          <div class="card wealth-add-card">
-            <div class="wealth-add-header">
-              <div>
-                <p class="eyebrow">Entries</p>
-                <h3 class="card-title">Wealth data points</h3>
-              </div>
-              <p class="card-subtitle">Log quick snapshots without crowding the dashboard.</p>
-            </div>
-            <form id="wealthEntryForm" class="wealth-entry-form">
-              <input id="wealthEntryDate" type="date" required class="wealth-entry-input" />
-              <input id="wealthEntryAmount" type="number" step="1" min="0" required placeholder="Amount (SEK)" class="wealth-entry-input" />
-              <input id="wealthEntryNote" type="text" placeholder="Note (optional)" class="wealth-entry-input" />
-              <button type="submit" class="btn primary wealth-entry-submit">Add point</button>
-            </form>
-            <div class="wealth-history-wrapper">
-              <div class="wealth-history-scroll">
-                <table class="wealth-history-table">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Amount</th>
-                      <th>Note</th>
-                      <th>Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody id="wealthHistoryBody"></tbody>
-                </table>
-              </div>
+            <div class="card wealth-add-card">
+              <div class="wealth-add-header"><div><p class="eyebrow">Snapshots</p><h3 class="card-title">Add wealth snapshot</h3></div><button id="wealthSnapshotMobileButton" type="button" class="btn secondary finance-mobile-only">Open snapshot sheet</button></div>
+              <form id="wealthEntryForm" class="wealth-entry-form">
+                <div class="finance-field"><label for="wealthEntryDate">Snapshot date</label><input id="wealthEntryDate" type="date" required class="wealth-entry-input" /></div>
+                <div class="finance-field"><label for="wealthEntryAmount">Amount (SEK)</label><input id="wealthEntryAmount" type="number" step="0.01" min="0" required placeholder="Amount" class="wealth-entry-input" /></div>
+                <div class="finance-field"><label for="wealthEntryNote">Note (optional)</label><input id="wealthEntryNote" type="text" placeholder="Note" class="wealth-entry-input" /></div>
+                <button type="submit" class="btn primary wealth-entry-submit">Add snapshot</button>
+              </form>
+              <div class="wealth-history-wrapper"><div class="wealth-history-scroll"><table class="wealth-history-table"><thead><tr><th scope="col">Date</th><th scope="col">Amount</th><th scope="col">Note</th><th scope="col">Actions</th></tr></thead><tbody id="wealthHistoryBody"></tbody></table><div id="wealthHistoryList" class="wealth-history-list"></div></div></div>
             </div>
           </div>
-        </div>
-
-        <!-- Archived grocery items (purchased items with cost) -->
-        <div class="card">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Purchase History</h3>
-          <ul id="archivedGroceryList" style="list-style:none; padding:0; margin:0;"></ul>
         </div>
       </section>
 

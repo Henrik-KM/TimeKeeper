@@ -1,6 +1,8 @@
 const { expect, test } = require('@playwright/test');
 const { readFile } = require('node:fs/promises');
 
+/** @typedef {Window & { __timekeeperFinanceXssFired?: boolean }} FinanceSmokeWindow */
+
 function seedLocalStorage(page, payload = null) {
   return page.addInitScript((initialPayload) => {
     localStorage.clear();
@@ -3602,21 +3604,33 @@ test('workout, finances, wealth, and Strava fallback paths still render', async 
 
   await gotoSection(page, 'grocery', 'Finances');
   await expect(
-    page.getByRole('heading', { name: 'Shopping List' })
+    page.getByRole('heading', { name: 'Finances', exact: true })
   ).toBeVisible();
+  await expect(page.locator('#financeTabOverview')).toHaveAttribute(
+    'aria-selected',
+    'true'
+  );
 
   await page.locator('#groceryName').fill('Protein');
   await page.locator('#groceryGroup').selectOption('soon');
   await page.locator('#groceryEstimate').fill('250');
   await page.locator('#groceryForm button[type="submit"]').click();
-  await expect(page.getByText('Protein')).toBeVisible();
-  await expect(page.getByText(/est\. 250 SEK/)).toBeVisible();
+  await expect(
+    page.locator('#financeViewOverview').getByText('Protein')
+  ).toBeVisible();
+  await expect(
+    page.locator('#financeViewOverview').getByText(/Est\. 250 SEK/)
+  ).toBeVisible();
 
+  await page.locator('#financeTabWealth').click();
+  await expect(page.locator('#financeViewWealth')).toBeVisible();
   await page.locator('#wealthEntryDate').fill('2026-04-01');
   await page.locator('#wealthEntryAmount').fill('100000');
   await page.locator('#wealthEntryNote').fill('Deposit');
   await page.locator('#wealthEntryForm button[type="submit"]').click();
-  await expect(page.getByText('Deposit')).toBeVisible();
+  await expect(
+    page.locator('#wealthHistoryBody').getByText('Deposit')
+  ).toBeVisible();
 });
 
 test('finance wealth chart stays readable on a mobile viewport', async ({
@@ -3626,6 +3640,7 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
   await seedLocalStorage(page);
   await page.goto('/');
   await gotoSection(page, 'grocery', 'Finances');
+  await page.locator('#financeTabWealth').click();
 
   await expect(page.locator('#wealthChart')).toBeVisible();
   const metrics = await page
@@ -3646,9 +3661,419 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
   expect(
     Math.max(metrics.documentScrollWidth, metrics.bodyScrollWidth)
   ).toBeLessThanOrEqual(metrics.viewportWidth + 2);
-  expect(metrics.cardScrollWidth).toBeGreaterThan(metrics.cardClientWidth);
-  expect(metrics.canvasWidth).toBeGreaterThan(600);
-  expect(metrics.canvasHeight).toBeGreaterThan(450);
+  expect(metrics.cardScrollWidth).toBeLessThanOrEqual(
+    metrics.cardClientWidth + 2
+  );
+  expect(metrics.canvasWidth).toBeLessThanOrEqual(metrics.cardClientWidth + 2);
+  expect(metrics.canvasHeight).toBeGreaterThan(200);
+  expect(metrics.canvasHeight).toBeLessThan(400);
+});
+
+test('finance overview keeps direct purchases, planning, and history totals separate', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await seedLocalStorage(page, {
+    groceries: [],
+    monthlyRecurringPayments: [],
+    groceryBudgetWeekly: 500,
+    groceryBudgetMonthly: 2000,
+    groceryBudgetBiYearly: 12000,
+    groceryBudgetWeeklyCarry: 0,
+    groceryBudgetMonthlyCarry: 0,
+    groceryBudgetBiYearlyCarry: 0,
+    wealthHistory: []
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+
+  await expect(
+    page.locator('#financeEnvelopeGrid .finance-envelope-card')
+  ).toHaveCount(3);
+  await expect(page.locator('#financeOverviewStatus')).toContainText(
+    'Safe to spend'
+  );
+
+  await page.locator('#financeQuickPurchaseName').fill('Coffee');
+  await page.locator('#financeQuickPurchaseCost').fill('45');
+  await page.locator('#financeQuickPurchaseBucket').selectOption('weekly');
+  await page.locator('#financeQuickPurchaseDate').fill('2026-08-31');
+  await page
+    .locator('#financeQuickPurchaseForm')
+    .getByRole('button', { name: 'Log purchase' })
+    .click();
+
+  await page.locator('#groceryName').fill('Desk lamp');
+  await page.locator('#groceryGroup').selectOption('later');
+  await page.locator('#groceryBudgetBucket').selectOption('biannual');
+  await page.locator('#groceryEstimate').fill('1200');
+  await page
+    .locator('#groceryForm')
+    .getByRole('button', { name: 'Add to plan' })
+    .click();
+  await expect(page.locator('#financeViewOverview')).toContainText('Desk lamp');
+
+  await page.locator('#financeTabSpending').click();
+  await expect(page.locator('#financeViewSpending')).toBeVisible();
+  await expect(page.locator('#monthlyGroceryList')).toContainText('Desk lamp');
+  await expect(page.locator('#financeHistoryList')).toContainText('Coffee');
+  await expect(page.locator('#financeHistoryTotals')).toContainText('45 SEK');
+
+  await page.locator('#financeHistoryBucket').selectOption('biannual');
+  await expect(page.locator('#financeHistoryList')).toContainText(
+    'No purchases match these filters.'
+  );
+  await page.locator('#financeHistoryClear').click();
+  await expect(page.locator('#financeHistoryList')).toContainText('Coffee');
+
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  const direct = saved.groceries.find((item) => item.name === 'Coffee');
+  const planned = saved.groceries.find((item) => item.name === 'Desk lamp');
+  expect(direct).toMatchObject({
+    archived: true,
+    budgetBucket: 'weekly',
+    cost: 45
+  });
+  expect(planned).toMatchObject({
+    archived: false,
+    budgetBucket: 'biannual',
+    planningGroup: 'later'
+  });
+});
+
+test('finance spending confirms destructive actions, supports undo, fixed costs, and budget edits', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await seedLocalStorage(page, {
+    groceries: [
+      {
+        id: 'delete-plan',
+        name: 'Delete me',
+        planningGroup: 'soon',
+        shoppingGroup: 'soon',
+        budgetBucket: 'weekly',
+        estimate: 25,
+        archived: false
+      }
+    ],
+    monthlyRecurringPayments: [],
+    groceryBudgetWeekly: 500,
+    groceryBudgetMonthly: 2000,
+    groceryBudgetBiYearly: 12000,
+    groceryBudgetWeeklyCarry: 0,
+    groceryBudgetMonthlyCarry: 0,
+    groceryBudgetBiYearlyCarry: 0,
+    wealthHistory: []
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+  await page.locator('#financeTabSpending').click();
+
+  const plannedRow = page
+    .locator('#weeklyGroceryList .finance-planned-row')
+    .filter({ hasText: 'Delete me' });
+  await plannedRow.getByRole('button', { name: 'Delete', exact: true }).click();
+  const cancelDialog = page.getByRole('dialog', {
+    name: 'Delete planned purchase'
+  });
+  await expect(cancelDialog).toBeVisible();
+  await cancelDialog.getByRole('button', { name: 'Cancel' }).click();
+  await expect(plannedRow).toBeVisible();
+
+  await plannedRow.getByRole('button', { name: 'Delete', exact: true }).click();
+  const deleteDialog = page.getByRole('dialog', {
+    name: 'Delete planned purchase'
+  });
+  await deleteDialog.getByRole('button', { name: 'Delete' }).click();
+  await expect(page.locator('#weeklyGroceryList')).not.toContainText(
+    'Delete me'
+  );
+  await page
+    .locator('.app-toast')
+    .filter({ hasText: 'Planned purchase deleted.' })
+    .getByRole('button', { name: 'Undo' })
+    .click();
+  await expect(page.locator('#weeklyGroceryList')).toContainText('Delete me');
+
+  await page.locator('#financeRecurringName').fill('Gym');
+  await page.locator('#financeRecurringAmount').fill('60');
+  await page.locator('#financeRecurringDueDay').fill('31');
+  await page.locator('#financeRecurringEffectiveDate').fill('2026-08-01');
+  await page
+    .locator('#financeRecurringForm')
+    .getByRole('button', { name: 'Add payment' })
+    .click();
+  const recurringRow = page
+    .locator('#financeRecurringList .finance-recurring-row')
+    .filter({ hasText: 'Gym' });
+  await expect(recurringRow).toContainText('60 SEK');
+  await recurringRow.getByRole('button', { name: 'Pause' }).click();
+  await expect(recurringRow).toContainText('Paused');
+  await expect(
+    recurringRow.getByRole('button', { name: 'Resume' })
+  ).toBeVisible();
+
+  await page.locator('#financeBudgetSettings summary').click();
+  await page.locator('#financeBudgetWeekly').fill('777');
+  await page.locator('#financeCarryWeekly').fill('-25');
+  await page
+    .locator('#financeBudgetSettingsForm')
+    .getByRole('button', { name: 'Save budget settings' })
+    .click();
+  await expect(
+    page.locator('.app-toast').filter({ hasText: 'Budget settings saved.' })
+  ).toBeVisible();
+
+  const saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(saved.finance.budgets.weekly).toMatchObject({
+    baseBudget: 777,
+    openingCarry: -25
+  });
+  expect(saved.groceryBudgetWeekly).toBe(777);
+  expect(saved.monthlyRecurringPayments[0]).toMatchObject({
+    name: 'Gym',
+    amount: 60,
+    active: false
+  });
+});
+
+test('finance mobile sheets cover quick purchases, recurring costs, and budget adjustments', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await seedLocalStorage(page, {
+    groceries: [],
+    monthlyRecurringPayments: [],
+    groceryBudgetWeekly: 500,
+    groceryBudgetMonthly: 2000,
+    groceryBudgetBiYearly: 12000,
+    groceryBudgetWeeklyCarry: 0,
+    groceryBudgetMonthlyCarry: 0,
+    groceryBudgetBiYearlyCarry: 0,
+    wealthHistory: []
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+
+  await expect(page.locator('#financeViewOverview')).toBeVisible();
+  await expect(
+    page.locator('#financeViewOverview .finance-planning-group')
+  ).toHaveCount(0);
+  await page.locator('#financeQuickPurchaseMobileButton').click();
+  const purchaseSheet = page.locator('.mobile-finance-quick-sheet');
+  await expect(purchaseSheet).toBeVisible();
+  await purchaseSheet.getByPlaceholder('Purchase name').fill('Bus ticket');
+  await purchaseSheet.getByPlaceholder('Cost (SEK)').fill('38');
+  await purchaseSheet.locator('select').selectOption('weekly');
+  await purchaseSheet.getByRole('button', { name: 'Log purchase' }).click();
+  await expect(purchaseSheet).toBeHidden();
+
+  await page.locator('#financeTabSpending').click();
+  await page.locator('#financeRecurringMobileButton').click();
+  const recurringSheet = page.locator('.mobile-recurring-sheet');
+  await expect(recurringSheet).toBeVisible();
+  await recurringSheet.getByPlaceholder('Name').fill('Cloud storage');
+  await recurringSheet.getByPlaceholder('Amount (SEK)').fill('12');
+  await recurringSheet.getByPlaceholder('1–31 (optional)').fill('31');
+  await recurringSheet.getByRole('button', { name: 'Add payment' }).click();
+  await expect(recurringSheet).toBeHidden();
+  await expect(page.locator('#financeRecurringList')).toContainText(
+    'Cloud storage'
+  );
+
+  await page.locator('#financeBudgetSettings summary').click();
+  await page.locator('#financeBudgetMobileButton').click();
+  const budgetSheet = page.locator('.mobile-finance-budget-sheet');
+  await expect(budgetSheet).toBeVisible();
+  const budgetInputs = budgetSheet.locator('input');
+  await budgetInputs.nth(0).fill('550');
+  await budgetInputs.nth(1).fill('-10');
+  await budgetSheet.getByRole('button', { name: 'Save adjustments' }).click();
+  await expect(budgetSheet).toBeHidden();
+
+  const metrics = await page.evaluate(() => ({
+    documentScrollWidth: document.documentElement.scrollWidth,
+    bodyScrollWidth: document.body.scrollWidth,
+    viewportWidth: window.innerWidth,
+    stored: JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  }));
+  expect(
+    Math.max(metrics.documentScrollWidth, metrics.bodyScrollWidth)
+  ).toBeLessThanOrEqual(metrics.viewportWidth + 2);
+  expect(metrics.stored.groceries[0]).toMatchObject({
+    name: 'Bus ticket',
+    archived: true,
+    cost: 38
+  });
+  expect(metrics.stored.monthlyRecurringPayments[0]).toMatchObject({
+    name: 'Cloud storage',
+    amount: 12,
+    dueDay: 31
+  });
+  expect(metrics.stored.finance.budgets.weekly).toMatchObject({
+    baseBudget: 550,
+    openingCarry: -10
+  });
+});
+
+test('finance saved names, notes, and imported content remain inert text', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await page.addInitScript(() => {
+    /** @type {FinanceSmokeWindow} */
+    const testWindow = window;
+    testWindow.__timekeeperFinanceXssFired = false;
+  });
+  await seedLocalStorage(page, {
+    groceries: [
+      {
+        id: 'unsafe-planned',
+        name: '<img src=x onerror="window.__timekeeperFinanceXssFired=true">Purchase',
+        planningGroup: 'soon',
+        budgetBucket: 'weekly',
+        estimate: 10,
+        archived: false
+      },
+      {
+        id: 'unsafe-history',
+        name: '<svg onload="window.__timekeeperFinanceXssFired=true"></svg>History',
+        planningGroup: 'later',
+        budgetBucket: 'monthly',
+        cost: 20,
+        purchasedDate: '2026-08-20T12:00:00.000Z',
+        archived: true
+      }
+    ],
+    monthlyRecurringPayments: [
+      {
+        id: 'unsafe-recurring',
+        name: '<img src=x onerror="window.__timekeeperFinanceXssFired=true">Recurring',
+        amount: 15,
+        active: true,
+        effectiveDate: '2026-08-01'
+      }
+    ],
+    wealthHistory: [
+      {
+        id: 'unsafe-wealth',
+        date: '2026-08-01',
+        amount: 100,
+        note: '<svg onload="window.__timekeeperFinanceXssFired=true"></svg>Note'
+      }
+    ]
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+  await expect(page.locator('#financeViewOverview')).toContainText('Purchase');
+  await expect(page.locator('#financeViewOverview')).toContainText('Recurring');
+  await page.locator('#financeTabSpending').click();
+  await expect(page.locator('#financeHistoryList')).toContainText('History');
+  await page.locator('#financeTabWealth').click();
+  await expect(page.locator('#wealthHistoryBody')).toContainText('Note');
+  await expect
+    .poll(() =>
+      page.evaluate(() => {
+        /** @type {FinanceSmokeWindow} */
+        const testWindow = window;
+        return testWindow.__timekeeperFinanceXssFired;
+      })
+    )
+    .toBe(false);
+});
+
+test('wealth leads with metrics, validates goals, and supports snapshot edit and undo', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-08-31T12:00:00');
+  await seedLocalStorage(page, {
+    groceries: [],
+    monthlyRecurringPayments: [],
+    wealthHistory: [
+      { id: 'wealth-one', date: '2026-07-01', amount: 100000, note: 'Start' },
+      { id: 'wealth-two', date: '2026-08-01', amount: 110000, note: 'Growth' }
+    ],
+    wealthGoal: { amount: 200000, date: '' }
+  });
+  await page.goto('/');
+  await gotoSection(page, 'grocery', 'Finances');
+  await page.locator('#financeTabWealth').click();
+
+  await expect(page.locator('#wealthMetricGrid .finance-metric')).toHaveCount(
+    4
+  );
+  await expect(page.locator('#wealthAccessibleSummary')).toContainText(
+    '2 snapshots'
+  );
+  await page.locator('#wealthRangeOneYear').click();
+  await expect(page.locator('#wealthRangeOneYear')).toHaveClass(/active/);
+
+  await page.locator('#wealthGoalAmount').fill('0');
+  await page.locator('#wealthGoalApply').click();
+  await expect(
+    page.locator('.app-toast').filter({ hasText: 'greater than zero' })
+  ).toBeVisible();
+  let saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(saved.wealthGoal).toMatchObject({ amount: 200000, date: '' });
+
+  await page.locator('#wealthGoalAmount').fill('250000');
+  await page.locator('#wealthGoalDate').fill('2027-08-31');
+  await page.locator('#wealthGoalApply').click();
+  await expect(
+    page.locator('.app-toast').filter({ hasText: 'Wealth goal saved.' })
+  ).toBeVisible();
+  saved = await page.evaluate(() =>
+    JSON.parse(localStorage.getItem('timekeeperDataPro'))
+  );
+  expect(saved.wealthGoal).toEqual({ amount: 250000, date: '2027-08-31' });
+
+  await page.locator('#wealthEntryDate').fill('2026-08-31');
+  await page.locator('#wealthEntryAmount').fill('120000');
+  await page.locator('#wealthEntryNote').fill('New point');
+  await page.locator('#wealthEntryForm button[type="submit"]').click();
+  const newRow = page
+    .locator('#wealthHistoryBody tr')
+    .filter({ hasText: 'New point' });
+  await expect(newRow).toBeVisible();
+
+  await newRow.getByRole('button', { name: 'Edit' }).click();
+  const editDialog = page.getByRole('dialog', { name: 'Edit wealth snapshot' });
+  await editDialog.locator('#date').fill('2026-08-30');
+  await editDialog.locator('#amount').fill('121000');
+  await editDialog.locator('#note').fill('Edited point');
+  await editDialog.getByRole('button', { name: 'Save snapshot' }).click();
+  await expect(page.locator('#wealthHistoryBody')).toContainText(
+    'Edited point'
+  );
+  await expect(page.locator('#wealthHistoryBody')).toContainText('2026-08-30');
+
+  const editedRow = page
+    .locator('#wealthHistoryBody tr')
+    .filter({ hasText: 'Edited point' });
+  await editedRow.getByRole('button', { name: 'Delete' }).click();
+  const deleteDialog = page.getByRole('dialog', {
+    name: 'Delete wealth snapshot'
+  });
+  await deleteDialog.getByRole('button', { name: 'Delete' }).click();
+  await expect(page.locator('#wealthHistoryBody')).not.toContainText(
+    'Edited point'
+  );
+  await page
+    .locator('.app-toast')
+    .filter({ hasText: 'Wealth snapshot deleted.' })
+    .getByRole('button', { name: 'Undo' })
+    .click();
+  await expect(page.locator('#wealthHistoryBody')).toContainText(
+    'Edited point'
+  );
 });
 
 test('weekly workouts include Strava activities from the feed', async ({
