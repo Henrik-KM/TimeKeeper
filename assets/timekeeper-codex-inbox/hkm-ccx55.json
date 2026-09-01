@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-01T15:46:02.018Z",
+  "updatedAt": "2026-09-01T16:01:01.802Z",
   "dayStart": "2026-08-31T22:00:00.000Z",
   "rangeStart": "2026-06-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-01T15:46:03.327Z",
+    "observedAt": "2026-09-01T16:01:03.237Z",
     "primary": {
       "usedPercent": 39,
       "remainingPercent": 61,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-07T02:29:19.000Z"
+      "resetsAt": "2026-09-07T02:29:20.000Z"
     },
     "secondary": null
   },
@@ -21093,6 +21093,32 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 98,
           "effectiveSeconds": 29
+        }
+      ],
+      "description": "Codex: Review latest Albany updates"
+    },
+    {
+      "id": "codex-c4ae490f5d17fd64980d4341",
+      "threadId": "01a00efe-5dc7-7cc2-a753-0a17078fca22",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T14:19:34.964Z",
+      "endTime": "2026-09-01T15:31:57.161Z",
+      "wallSeconds": 4342,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 1302,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 4342,
+          "effectiveSeconds": 1302
         }
       ],
       "description": "Codex: Review latest Albany updates"
