@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-01T13:31:01.724Z",
+  "updatedAt": "2026-09-01T13:46:01.708Z",
   "dayStart": "2026-08-31T22:00:00.000Z",
   "rangeStart": "2026-06-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-01T13:31:03.185Z",
+    "observedAt": "2026-09-01T13:46:02.952Z",
     "primary": {
       "usedPercent": 38,
       "remainingPercent": 62,
@@ -21070,6 +21070,32 @@
         }
       ],
       "description": "Codex: Audit email helper usefulness"
+    },
+    {
+      "id": "codex-0e3dfefa921f5d54a2425ce8",
+      "threadId": "01a00efe-5dc7-7cc2-a753-0a17078fca22",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T13:26:23.476Z",
+      "endTime": "2026-09-01T13:28:02.340Z",
+      "wallSeconds": 98,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 29,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 98,
+          "effectiveSeconds": 29
+        }
+      ],
+      "description": "Codex: Review latest Albany updates"
     }
   ]
 }
