@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-01T10:16:02.635Z",
+  "updatedAt": "2026-09-01T10:46:03.964Z",
   "dayStart": "2026-08-31T22:00:00.000Z",
   "rangeStart": "2026-06-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-01T10:16:03.997Z",
+    "observedAt": "2026-09-01T10:46:08.706Z",
     "primary": {
       "usedPercent": 36,
       "remainingPercent": 64,
@@ -21018,6 +21018,32 @@
         }
       ],
       "description": "Codex: Fix Chrome automation confirmations"
+    },
+    {
+      "id": "codex-1e355d73a6f230987db92766",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T10:02:03.653Z",
+      "endTime": "2026-09-01T10:17:04.322Z",
+      "wallSeconds": 900,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 450,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 900,
+          "effectiveSeconds": 450
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
