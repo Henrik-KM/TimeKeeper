@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-01T07:31:02.548Z",
+  "updatedAt": "2026-09-01T08:01:02.585Z",
   "dayStart": "2026-08-31T22:00:00.000Z",
   "rangeStart": "2026-06-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-01T07:31:04.270Z",
+    "observedAt": "2026-09-01T08:01:04.613Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-07T02:29:19.000Z"
+      "resetsAt": "2026-09-07T02:29:20.000Z"
     },
     "secondary": null
   },
@@ -20948,6 +20948,76 @@
         }
       ],
       "description": "Codex: Add LinkedIn contact invites"
+    },
+    {
+      "id": "codex-05d4d6e93256cc68fb1577d6",
+      "threadId": "01a02026-f27e-74c0-9eee-a1e0c8f4a003",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T07:24:46.014Z",
+      "endTime": "2026-09-01T07:33:58.932Z",
+      "wallSeconds": 552,
+      "focusFactor": 0.3276,
+      "effectiveSeconds": 181,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 76,
+          "effectiveSeconds": 38
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "medium",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 476,
+          "effectiveSeconds": 142
+        }
+      ],
+      "description": "Codex: Add LinkedIn contact invites"
+    },
+    {
+      "id": "codex-b007a0aff9d9f10137ea58b3",
+      "threadId": "01a05be4-410b-77c1-abb7-d6c075d07aa6",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T07:35:04.058Z",
+      "endTime": "2026-09-01T07:43:20.161Z",
+      "wallSeconds": 496,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 247,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 495,
+          "effectiveSeconds": 247
+        }
+      ],
+      "description": "Codex: Fix Chrome automation confirmations"
     }
   ]
 }
