@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-02T06:46:02.242Z",
+  "updatedAt": "2026-09-02T07:01:02.330Z",
   "dayStart": "2026-09-01T22:00:00.000Z",
   "rangeStart": "2026-06-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-02T06:46:03.895Z",
+    "observedAt": "2026-09-02T07:01:03.901Z",
     "primary": {
       "usedPercent": 44,
       "remainingPercent": 56,
@@ -20556,6 +20556,67 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-fb4e0a4801d561d457c9ccb8",
+      "threadId": "01a060cd-45ac-7093-9e26-2ff23b754912",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-02T06:28:14.638Z",
+      "endTime": "2026-09-02T06:36:56.530Z",
+      "wallSeconds": 521,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 260,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 521,
+          "effectiveSeconds": 260
+        }
+      ],
+      "description": "Codex: Audit competitor SoW"
+    },
+    {
+      "id": "codex-f882cd48680e39ef3fc6fda4",
+      "threadId": "01a00efe-5dc7-7cc2-a753-0a17078fca22",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-02T06:32:54.455Z",
+      "endTime": "2026-09-02T06:35:06.756Z",
+      "wallSeconds": 132,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 39,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 132,
+          "effectiveSeconds": 39
+        }
+      ],
+      "description": "Codex: Review latest Albany updates"
     }
   ]
 }
