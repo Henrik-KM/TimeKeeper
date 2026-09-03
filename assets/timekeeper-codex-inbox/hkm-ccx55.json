@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-03T10:31:02.180Z",
+  "updatedAt": "2026-09-03T11:01:02.254Z",
   "dayStart": "2026-09-02T22:00:00.000Z",
   "rangeStart": "2026-06-05T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-03T10:31:04.391Z",
+    "observedAt": "2026-09-03T11:01:04.334Z",
     "primary": {
       "usedPercent": 68,
       "remainingPercent": 32,
@@ -21701,6 +21701,58 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-4db1b36b5fe850e7c44aa1f7",
+      "threadId": "01a066d3-c088-74e2-9ee2-3fe5a2979141",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-03T10:32:27.680Z",
+      "endTime": "2026-09-03T10:33:16.275Z",
+      "wallSeconds": 48,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 24,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 48,
+          "effectiveSeconds": 24
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-435c0dce771424c32cb6a1c2",
+      "threadId": "01a066d4-8156-77f0-b460-fe638fcc73bb",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-03T10:33:17.468Z",
+      "endTime": "2026-09-03T10:33:40.116Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 22,
+          "effectiveSeconds": 11
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
