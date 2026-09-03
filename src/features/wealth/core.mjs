@@ -2,19 +2,15 @@
 
 import { uuid } from '../../shared/id.mjs';
 
-export const WEALTH_SCHEMA_VERSION = 2;
+export const WEALTH_SCHEMA_VERSION = 3;
 export const WEALTH_ACCOUNT_KINDS = ['asset', 'liability'];
-export const WEALTH_SCENARIOS = ['conservative', 'base', 'optimistic'];
 export const WEALTH_DEFAULT_STALE_AFTER_DAYS = 45;
-export const WEALTH_DEFAULT_GOAL_AMOUNT = 2000000;
+export const WEALTH_DAYS_PER_YEAR = 365.2425;
+export const WEALTH_TRAILING_MONTHS = 18;
+export const WEALTH_MIN_PACE_SNAPSHOTS = 3;
+export const WEALTH_MIN_PACE_SPAN_DAYS = 90;
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTHS_PER_YEAR = 12;
-
-const DEFAULT_SCENARIO_RATES = {
-  conservative: null,
-  base: 0,
-  optimistic: null
-};
 
 function isObject(value) {
   return !!value && typeof value === 'object' && !Array.isArray(value);
@@ -53,38 +49,6 @@ export function parseOptionalWealthAmount(raw) {
   }
   const value = Number.parseFloat(cleaned.replace(',', '.'));
   return Number.isFinite(value) ? value : null;
-}
-
-/** Parse a user-entered annual rate expressed as a percentage. */
-export function parseWealthAnnualRate(raw) {
-  if (raw === null || raw === undefined || String(raw).trim() === '') {
-    return null;
-  }
-  const text = String(raw).trim().replace(/\s/g, '');
-  const hasPercent = text.endsWith('%');
-  const numericText = hasPercent ? text.slice(0, -1) : text;
-  if (!/^-?(?:\d+(?:[.,]\d+)?|[.,]\d+)$/.test(numericText)) {
-    return null;
-  }
-  const value = Number.parseFloat(numericText.replace(',', '.'));
-  if (!Number.isFinite(value)) return null;
-  const rate = value / 100;
-  return rate > -1 ? rate : null;
-}
-
-function normalizeStoredAnnualRate(raw, fallback = null) {
-  if (raw === null || raw === undefined || String(raw).trim() === '') {
-    return fallback;
-  }
-  if (typeof raw === 'number') {
-    return Number.isFinite(raw) && raw > -1 ? raw : fallback;
-  }
-  const text = String(raw).trim();
-  if (text.endsWith('%')) return parseWealthAnnualRate(text) ?? fallback;
-  const value = Number.parseFloat(text.replace(',', '.'));
-  if (!Number.isFinite(value)) return fallback;
-  const rate = Math.abs(value) > 1 ? value / 100 : value;
-  return rate > -1 ? rate : fallback;
 }
 
 export function parseWealthDate(raw) {
@@ -183,48 +147,22 @@ export function normalizeWealthSettings(settings) {
 }
 
 export function makeDefaultWealthGoal() {
-  return {
-    amount: WEALTH_DEFAULT_GOAL_AMOUNT,
-    date: '',
-    monthlyContribution: 0,
-    scenarioAnnualRates: { ...DEFAULT_SCENARIO_RATES }
-  };
+  return { amount: null, date: '' };
 }
 
 export function normalizeWealthGoal(goal) {
   const obj = isObject(goal) ? { ...goal } : {};
-  const rates = isObject(obj.scenarioAnnualRates)
-    ? { ...obj.scenarioAnnualRates }
-    : {};
-  const hasMonthlyContribution = hasOwn(obj, 'monthlyContribution');
-  const monthlyContribution = hasMonthlyContribution
-    ? parseOptionalWealthAmount(obj.monthlyContribution)
-    : 0;
-  return {
+  const normalized = {
     ...obj,
     amount: hasOwn(obj, 'amount')
-      ? parseWealthAmount(obj.amount)
-      : WEALTH_DEFAULT_GOAL_AMOUNT,
-    date: normalizeText(obj.date),
-    monthlyContribution:
-      monthlyContribution !== null && monthlyContribution >= 0
-        ? monthlyContribution
-        : hasMonthlyContribution
-          ? null
-          : 0,
-    scenarioAnnualRates: {
-      ...rates,
-      conservative: normalizeStoredAnnualRate(
-        rates.conservative,
-        DEFAULT_SCENARIO_RATES.conservative
-      ),
-      base: normalizeStoredAnnualRate(rates.base, DEFAULT_SCENARIO_RATES.base),
-      optimistic: normalizeStoredAnnualRate(
-        rates.optimistic,
-        DEFAULT_SCENARIO_RATES.optimistic
-      )
-    }
+      ? parseOptionalWealthAmount(obj.amount)
+      : null,
+    date: normalizeText(obj.date)
   };
+  if (normalized.amount !== null && normalized.amount < 0) {
+    normalized.amount = null;
+  }
+  return normalized;
 }
 
 export function getDefaultWealthHistory() {
@@ -241,8 +179,7 @@ export function normalizeWealthData(data, { now = new Date() } = {}) {
   const source = isObject(data) ? data : {};
   const sourceSchemaVersion = Number(source.wealthSchemaVersion);
   const migrateDetailedTotals =
-    !Number.isFinite(sourceSchemaVersion) ||
-    sourceSchemaVersion < WEALTH_SCHEMA_VERSION;
+    !Number.isFinite(sourceSchemaVersion) || sourceSchemaVersion < 2;
   const accounts = Array.isArray(source.wealthAccounts)
     ? source.wealthAccounts.map(normalizeWealthAccount)
     : [];
@@ -296,50 +233,16 @@ export function validateWealthGoal(amountRaw, dateRaw = '', options = null) {
     return { ok: false, reason: 'amount' };
   }
   const date = normalizeText(dateValue);
-  if (date && !parseWealthDate(date)) {
+  const now =
+    isObject(goalOptions) && goalOptions.now ? goalOptions.now : new Date();
+  const parsedDate = date ? parseWealthDate(date) : null;
+  if (!date || !parsedDate) {
     return { ok: false, reason: 'date' };
   }
-  const goal = { amount, date };
-  if (isObject(goalOptions)) {
-    const contributionRaw = hasOwn(goalOptions, 'monthlyContribution')
-      ? goalOptions.monthlyContribution
-      : 0;
-    const monthlyContribution =
-      contributionRaw === null ||
-      contributionRaw === undefined ||
-      String(contributionRaw).trim() === ''
-        ? 0
-        : parseOptionalWealthAmount(contributionRaw);
-    if (monthlyContribution === null || monthlyContribution < 0) {
-      return { ok: false, reason: 'monthlyContribution' };
-    }
-    const rateValues = isObject(goalOptions.scenarioAnnualRates)
-      ? goalOptions.scenarioAnnualRates
-      : {};
-    const scenarioAnnualRates = {};
-    for (const scenario of WEALTH_SCENARIOS) {
-      const raw = rateValues[scenario];
-      if (
-        scenario === 'base' &&
-        raw !== undefined &&
-        raw !== '' &&
-        raw !== null
-      ) {
-        const parsed = parseWealthAnnualRate(raw);
-        if (parsed === null) return { ok: false, reason: 'rate' };
-        scenarioAnnualRates[scenario] = parsed;
-      } else if (scenario !== 'base' && String(raw ?? '').trim() !== '') {
-        const parsed = parseWealthAnnualRate(raw);
-        if (parsed === null) return { ok: false, reason: 'rate' };
-        scenarioAnnualRates[scenario] = parsed;
-      } else {
-        scenarioAnnualRates[scenario] = scenario === 'base' ? 0 : null;
-      }
-    }
-    goal.monthlyContribution = monthlyContribution;
-    goal.scenarioAnnualRates = scenarioAnnualRates;
+  if (parsedDate && startOfDay(toValidDate(now)) >= parsedDate) {
+    return { ok: false, reason: 'date-past' };
   }
-  return { ok: true, goal };
+  return { ok: true, goal: { amount, date } };
 }
 
 export function getValidWealthHistory(history) {
@@ -367,13 +270,22 @@ export function getValidWealthHistory(history) {
     }));
 }
 
-export function getLatestWealthSnapshot(history) {
-  const valid = getValidWealthHistory(history);
+export function getLatestWealthSnapshot(
+  history,
+  { now = new Date(), includeFuture = false } = {}
+) {
+  const valid = includeFuture
+    ? getValidWealthHistory(history)
+    : getPastWealthSnapshots(history, now).snapshots;
   return valid.length ? valid[valid.length - 1] : null;
 }
 
-export function getPreviousWealthSnapshot(history, latest = null) {
-  const valid = getValidWealthHistory(history);
+export function getPreviousWealthSnapshot(
+  history,
+  latest = null,
+  { now = new Date() } = {}
+) {
+  const valid = getPastWealthSnapshots(history, now).snapshots;
   if (valid.length < 2) return null;
   const latestId = latest?.id;
   const latestIndex = latestId
@@ -481,12 +393,26 @@ function startOfDay(date) {
   return result;
 }
 
+function calendarDayNumber(value) {
+  const date = value instanceof Date ? value : parseWealthDate(value);
+  if (!date || Number.isNaN(date.getTime())) return null;
+  return Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / DAY_MS;
+}
+
+function calendarDaysBetween(later, earlier) {
+  const laterDay = calendarDayNumber(later);
+  const earlierDay = calendarDayNumber(earlier);
+  return laterDay === null || earlierDay === null
+    ? null
+    : laterDay - earlierDay;
+}
+
 export function calculateWealthFreshness(
   history,
   now = new Date(),
   settings = {}
 ) {
-  const latest = getLatestWealthSnapshot(history);
+  const latest = getLatestWealthSnapshot(history, { now });
   const staleAfterDays = normalizeWealthSettings(settings).staleAfterDays;
   if (!latest) {
     return {
@@ -500,10 +426,7 @@ export function calculateWealthFreshness(
     };
   }
   const latestDate = parseWealthDate(latest.date);
-  const ageDays = Math.max(
-    0,
-    Math.floor((startOfDay(now).getTime() - latestDate.getTime()) / DAY_MS)
-  );
+  const ageDays = Math.max(0, calendarDaysBetween(now, latestDate) || 0);
   const stale = ageDays > staleAfterDays;
   const label =
     ageDays === 0
@@ -548,7 +471,7 @@ export function calculateWealthPeriodChange(history, latest = null) {
     percentage,
     elapsedDays: Math.max(
       0,
-      Math.round((currentDate.getTime() - previousDate.getTime()) / DAY_MS)
+      calendarDaysBetween(currentDate, previousDate) || 0
     ),
     current,
     previous
@@ -574,7 +497,7 @@ export function getWealthHistoryRange(
   range = 'all',
   now = new Date()
 ) {
-  const valid = getValidWealthHistory(history);
+  const valid = getPastWealthSnapshots(history, now).snapshots;
   if (range === 'one-year') {
     const boundary = subtractYears(startOfDay(now), 1).getTime();
     return valid.filter(
@@ -598,20 +521,25 @@ export function calculateHistoricalRegression(
   history,
   { now = new Date(), settings = {}, range = 'all' } = {}
 ) {
-  const valid = getWealthHistoryRange(history, range, now);
+  const pace = calculateObservedWealthPace(history, {
+    now,
+    range,
+    settings
+  });
   const freshness = calculateWealthFreshness(history, now, settings);
-  if (valid.length < 3) {
+  if (!pace.available) {
     return {
       available: false,
       canProject: false,
       reason: 'insufficient-history',
-      label: 'Historical trend diagnostic needs at least three snapshots.',
-      freshness
+      label:
+        'Historical trend diagnostic needs three snapshots spanning 90 days.',
+      freshness,
+      pace
     };
   }
-  const firstDate = parseWealthDate(valid[0].date).getTime();
-  const points = valid.map((entry) => ({
-    x: (parseWealthDate(entry.date).getTime() - firstDate) / DAY_MS,
+  const points = pace.snapshots.map((entry) => ({
+    x: calendarDaysBetween(entry.date, pace.snapshots[0].date),
     y: entry.amount
   }));
   const regression = computeWealthRegression(points);
@@ -623,9 +551,12 @@ export function calculateHistoricalRegression(
       freshness.status === 'stale'
         ? 'Historical trend diagnostic is available, but forward extrapolation is paused while the total is stale.'
         : 'Historical trend diagnostic',
-    monthlyChange: regression ? regression.slope * 30 : null,
+    monthlyChange: regression
+      ? regression.slope * (WEALTH_DAYS_PER_YEAR / 12)
+      : null,
     regression,
-    freshness
+    freshness,
+    pace
   };
 }
 
@@ -652,7 +583,15 @@ export function computeWealthRegression(points) {
   return { slope, intercept, meanX, meanY, residualStd, sumSqX, count };
 }
 
-function addClampedMonths(date, months) {
+function toValidDate(value, fallback = new Date()) {
+  if (value instanceof Date && Number.isFinite(value.getTime())) {
+    return new Date(value);
+  }
+  const parsed = parseWealthDate(value);
+  return parsed || new Date(fallback);
+}
+
+function subtractClampedMonths(date, months) {
   const result = new Date(date);
   const day = result.getDate();
   result.setDate(1);
@@ -663,156 +602,466 @@ function addClampedMonths(date, months) {
     0
   ).getDate();
   result.setDate(Math.min(day, lastDay));
+  result.setHours(0, 0, 0, 0);
   return result;
 }
 
-function monthsBetween(startDate, endDate) {
-  const start = parseWealthDate(startDate);
-  const end = parseWealthDate(endDate);
-  if (!start || !end) return null;
-  const calendarMonths =
-    (end.getFullYear() - start.getFullYear()) * 12 +
-    end.getMonth() -
-    start.getMonth();
-  let wholeMonths = calendarMonths;
-  let anniversary = addClampedMonths(start, wholeMonths);
-  if (anniversary > end) {
-    wholeMonths -= 1;
-    anniversary = addClampedMonths(start, wholeMonths);
-  }
-  const nextAnniversary = addClampedMonths(start, wholeMonths + 1);
-  const remainingDays = Math.max(0, end.getTime() - anniversary.getTime());
-  const periodDays = Math.max(
-    1,
-    nextAnniversary.getTime() - anniversary.getTime()
-  );
-  return wholeMonths + remainingDays / periodDays;
+function percentile(values, fraction) {
+  if (!values.length) return null;
+  const sorted = values.slice().sort((left, right) => left - right);
+  if (sorted.length === 1) return sorted[0];
+  const position = (sorted.length - 1) * fraction;
+  const lower = Math.floor(position);
+  const upper = Math.ceil(position);
+  if (lower === upper) return sorted[lower];
+  return sorted[lower] + (sorted[upper] - sorted[lower]) * (position - lower);
 }
 
-function monthlyRateFromAnnual(annualRate) {
-  if (!Number.isFinite(annualRate) || annualRate <= -1) return null;
-  return Math.pow(1 + annualRate, 1 / MONTHS_PER_YEAR) - 1;
+function getPastWealthSnapshots(history, now = new Date()) {
+  const today = startOfDay(toValidDate(now));
+  const todayTime = today.getTime();
+  const byDate = new Map();
+  const duplicateDates = new Set();
+  const futureSnapshots = [];
+  getValidWealthHistory(history).forEach((entry) => {
+    const date = parseWealthDate(entry.date);
+    if (!date) return;
+    if (date.getTime() > todayTime) {
+      futureSnapshots.push(entry);
+      return;
+    }
+    if (byDate.has(entry.date)) duplicateDates.add(entry.date);
+    byDate.set(entry.date, entry);
+  });
+  return {
+    snapshots: Array.from(byDate.values()).sort(
+      (left, right) =>
+        parseWealthDate(left.date).getTime() -
+        parseWealthDate(right.date).getTime()
+    ),
+    futureSnapshots,
+    duplicateDates: Array.from(duplicateDates)
+  };
+}
+
+export function getFutureWealthSnapshots(history, now = new Date()) {
+  return getPastWealthSnapshots(history, now).futureSnapshots;
+}
+
+function hasPaceCoverage(snapshots, minSnapshots, minSpanDays) {
+  if (snapshots.length < minSnapshots) return false;
+  const first = parseWealthDate(snapshots[0].date);
+  const last = parseWealthDate(snapshots[snapshots.length - 1].date);
+  const spanDays = calendarDaysBetween(last, first);
+  return !!first && !!last && spanDays >= minSpanDays;
+}
+
+function buildPairwiseSlopes(snapshots) {
+  const pairs = [];
+  for (let left = 0; left < snapshots.length; left += 1) {
+    const leftDate = parseWealthDate(snapshots[left].date);
+    for (let right = left + 1; right < snapshots.length; right += 1) {
+      const rightDate = parseWealthDate(snapshots[right].date);
+      const days = calendarDaysBetween(rightDate, leftDate);
+      if (days <= 0) continue;
+      pairs.push({
+        fromDate: snapshots[left].date,
+        toDate: snapshots[right].date,
+        days,
+        slopePerDay: (snapshots[right].amount - snapshots[left].amount) / days
+      });
+    }
+  }
+  return pairs;
 }
 
 /**
- * @param {{ currentAmount?: number | string, goalAmount?: number | string, startDate?: string, goalDate?: string, monthlyContribution?: number | string, annualRate?: number | string }} [options]
+ * Estimate net-worth pace from robust pairwise slopes. Contributions,
+ * investment movement, property, cash, and debt are intentionally treated as
+ * one recorded net-worth trajectory.
  */
-export function calculateGoalScenario({
-  currentAmount,
-  goalAmount,
-  startDate,
-  goalDate,
-  monthlyContribution = 0,
-  annualRate = 0
-} = {}) {
-  const current = Number(currentAmount);
-  const goal = Number(goalAmount);
-  const contribution = Number(monthlyContribution || 0);
-  const months = monthsBetween(startDate, goalDate);
-  const monthlyRate = monthlyRateFromAnnual(Number(annualRate));
-  if (
-    !Number.isFinite(current) ||
-    !Number.isFinite(goal) ||
-    goal <= 0 ||
-    !Number.isFinite(contribution) ||
-    contribution < 0 ||
-    months === null ||
-    months <= 0 ||
-    monthlyRate === null
-  ) {
-    return {
-      available: false,
-      reason: months === null || months <= 0 ? 'date' : 'invalid-assumptions',
-      months,
-      currentAmount: current,
-      goalAmount: goal,
-      annualRate,
-      monthlyRate
-    };
-  }
-  const factor = Math.pow(1 + monthlyRate, months);
-  const annuity =
-    Math.abs(monthlyRate) < 1e-12 ? months : (factor - 1) / monthlyRate;
-  const projectedAmount = current * factor + contribution * annuity;
-  const requiredMonthlyContribution = Math.max(
-    0,
-    (goal - current * factor) / annuity
+export function calculateObservedWealthPace(
+  history,
+  {
+    now = new Date(),
+    trailingMonths = WEALTH_TRAILING_MONTHS,
+    minSnapshots = WEALTH_MIN_PACE_SNAPSHOTS,
+    minSpanDays = WEALTH_MIN_PACE_SPAN_DAYS
+  } = {}
+) {
+  const today = startOfDay(toValidDate(now));
+  const {
+    snapshots: allSnapshots,
+    futureSnapshots,
+    duplicateDates
+  } = getPastWealthSnapshots(history, today);
+  const latestSnapshot = allSnapshots.at(-1) || null;
+  const trailingBoundary = subtractClampedMonths(today, -trailingMonths);
+  const trailingSnapshots = allSnapshots.filter(
+    (entry) =>
+      parseWealthDate(entry.date).getTime() >= trailingBoundary.getTime()
   );
+  const trailingHasCoverage = hasPaceCoverage(
+    trailingSnapshots,
+    minSnapshots,
+    minSpanDays
+  );
+  const allHasCoverage = hasPaceCoverage(
+    allSnapshots,
+    minSnapshots,
+    minSpanDays
+  );
+  const snapshots = trailingHasCoverage
+    ? trailingSnapshots
+    : allHasCoverage
+      ? allSnapshots
+      : trailingSnapshots.length
+        ? trailingSnapshots
+        : allSnapshots;
+  const source = trailingHasCoverage
+    ? 'trailing-18-months'
+    : allHasCoverage
+      ? 'all-history-fallback'
+      : 'insufficient-history';
+  const pairwiseSlopes = buildPairwiseSlopes(snapshots);
+  const slopeValues = pairwiseSlopes.map((pair) => pair.slopePerDay);
+  const available = trailingHasCoverage || allHasCoverage;
+  const slopePerDay = available ? percentile(slopeValues, 0.5) : null;
+  const lowerSlopePerDay = available ? percentile(slopeValues, 0.25) : null;
+  const upperSlopePerDay = available ? percentile(slopeValues, 0.75) : null;
+  const latestRecordedAmount = latestSnapshot?.amount ?? null;
+  const daysSinceLatest = latestSnapshot
+    ? Math.max(0, calendarDaysBetween(today, latestSnapshot.date) || 0)
+    : null;
+  const annualGrowthSek = available ? slopePerDay * WEALTH_DAYS_PER_YEAR : null;
+  const annualGrowthPercent =
+    available && latestRecordedAmount !== 0
+      ? annualGrowthSek / latestRecordedAmount
+      : null;
+  const observedMonthlyGrowth = available
+    ? annualGrowthSek / MONTHS_PER_YEAR
+    : null;
+  const estimatedToday = latestSnapshot
+    ? latestRecordedAmount + (available ? slopePerDay * daysSinceLatest : 0)
+    : null;
   return {
-    available: true,
-    months,
-    annualRate,
-    monthlyRate,
-    currentAmount: current,
-    goalAmount: goal,
-    monthlyContribution: contribution,
-    projectedAmount,
-    requiredMonthlyContribution,
-    gap: goal - projectedAmount,
-    onTrack: projectedAmount >= goal
+    available,
+    reason: available ? null : 'insufficient-history',
+    source,
+    snapshots,
+    allSnapshots,
+    trailingSnapshots,
+    futureSnapshots,
+    duplicateDates,
+    latestSnapshot,
+    latestRecordedAmount,
+    latestRecordedDate: latestSnapshot?.date || '',
+    daysSinceLatest,
+    spanDays:
+      snapshots.length >= 2
+        ? calendarDaysBetween(snapshots.at(-1).date, snapshots[0].date)
+        : 0,
+    snapshotCount: snapshots.length,
+    pairwiseSlopes,
+    slopes: slopeValues,
+    slopePerDay,
+    lowerSlopePerDay,
+    upperSlopePerDay,
+    annualGrowthSek,
+    annualGrowthPercent,
+    observedMonthlyGrowth,
+    lowerMonthlyGrowth: available
+      ? (lowerSlopePerDay * WEALTH_DAYS_PER_YEAR) / MONTHS_PER_YEAR
+      : null,
+    upperMonthlyGrowth: available
+      ? (upperSlopePerDay * WEALTH_DAYS_PER_YEAR) / MONTHS_PER_YEAR
+      : null,
+    estimatedToday,
+    minSnapshots,
+    minSpanDays,
+    trailingMonths
   };
 }
 
-export function calculateWealthGoalPlan(
+function addDays(date, days) {
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
+}
+
+function formatRoundedDate(date) {
+  return formatWealthDate(startOfDay(date));
+}
+
+function calculateEstimatedGoalDate(today, amount, goalAmount, slopePerDay) {
+  if (!Number.isFinite(amount) || !Number.isFinite(goalAmount)) return null;
+  if (amount >= goalAmount) return formatRoundedDate(today);
+  if (!Number.isFinite(slopePerDay) || slopePerDay <= 0) return null;
+  const days = (goalAmount - amount) / slopePerDay;
+  if (!Number.isFinite(days) || days < 0 || days > 3652425) return null;
+  return formatRoundedDate(addDays(today, days));
+}
+
+export function calculateWealthGoalTrajectory(
+  history,
   goal,
-  latestSnapshot,
-  { now = new Date() } = {}
+  { now = new Date(), pace: suppliedPace = null } = {}
 ) {
   const normalizedGoal = normalizeWealthGoal(goal);
-  const current = latestSnapshot || null;
-  if (!current || !parseWealthDate(current.date)) {
-    return {
-      available: false,
-      reason: 'insufficient-history',
-      scenarios: [],
-      goal: normalizedGoal
-    };
-  }
+  const today = startOfDay(toValidDate(now));
+  const pace =
+    suppliedPace || calculateObservedWealthPace(history, { now: today });
+  const latest = pace.latestSnapshot;
+  const goalAmount = normalizedGoal.amount;
   const goalDate = parseWealthDate(normalizedGoal.date);
-  if (!goalDate || goalDate <= parseWealthDate(current.date)) {
-    return {
-      available: false,
-      reason: normalizedGoal.date ? 'date' : 'missing-goal-date',
-      scenarios: [],
-      goal: normalizedGoal,
-      current
-    };
-  }
-  const scenarios = WEALTH_SCENARIOS.filter(
-    (scenario) =>
-      scenario === 'base' ||
-      normalizedGoal.scenarioAnnualRates[scenario] !== null
-  ).map((scenario) => {
-    const annualRate = normalizedGoal.scenarioAnnualRates[scenario];
-    const calculation = calculateGoalScenario({
-      currentAmount: current.amount,
-      goalAmount: normalizedGoal.amount,
-      startDate: current.date,
-      goalDate: normalizedGoal.date,
-      monthlyContribution: normalizedGoal.monthlyContribution,
-      annualRate
-    });
-    return {
-      key: scenario,
-      label:
-        scenario === 'conservative'
-          ? 'Downside'
-          : scenario === 'optimistic'
-            ? 'Upside'
-            : 'Base case',
-      annualRate,
-      ...calculation
-    };
-  });
-  void now;
-  return {
-    available: scenarios.every((scenario) => scenario.available),
-    reason: null,
+  const base = {
+    available: false,
     goal: normalizedGoal,
-    current,
-    scenarios
+    goalAmount,
+    goalDate: normalizedGoal.date,
+    today: formatWealthDate(today),
+    latestSnapshot: latest,
+    latestRecordedAmount: pace.latestRecordedAmount,
+    futureSnapshots: pace.futureSnapshots,
+    observedPace: pace,
+    paceAvailable: pace.available,
+    status: 'no-goal',
+    reason: null,
+    estimatedToday: pace.estimatedToday,
+    annualGrowthSek: pace.annualGrowthSek,
+    annualGrowthPercent: pace.annualGrowthPercent,
+    projectedAtGoal: null,
+    projectedShortfallOrSurplus: null,
+    requiredAnnualGrowth: null,
+    requiredMonthlyGrowth: null,
+    additionalMonthlyPace: null,
+    estimatedGoalDateAtCurrentPace: null,
+    yearsRemaining: null,
+    monthsRemaining: null,
+    daysToGoal: null,
+    historicalPaceRange: pace.available
+      ? {
+          lowerMonthlyGrowth: pace.lowerMonthlyGrowth,
+          upperMonthlyGrowth: pace.upperMonthlyGrowth,
+          lowerSlopePerDay: pace.lowerSlopePerDay,
+          upperSlopePerDay: pace.upperSlopePerDay
+        }
+      : null,
+    uncertaintyAtGoal: null
+  };
+  if (goalAmount === null || !Number.isFinite(goalAmount) || goalAmount <= 0) {
+    base.reason = 'missing-goal-amount';
+    return base;
+  }
+  if (!normalizedGoal.date) {
+    base.reason = 'missing-goal-date';
+    return base;
+  }
+  if (!goalDate) {
+    base.reason = 'invalid-goal-date';
+    return base;
+  }
+  if (goalDate.getTime() <= today.getTime()) {
+    base.reason = 'expired-goal';
+    base.status = 'expired';
+    return base;
+  }
+  if (!latest) {
+    base.reason = 'insufficient-history';
+    base.status = 'insufficient-history';
+    return base;
+  }
+  const estimatedToday =
+    pace.estimatedToday === null ? latest.amount : pace.estimatedToday;
+  const daysToGoal = calendarDaysBetween(goalDate, today);
+  const yearsRemaining = daysToGoal / WEALTH_DAYS_PER_YEAR;
+  const monthsRemaining = yearsRemaining * MONTHS_PER_YEAR;
+  const requiredAnnualGrowth = (goalAmount - estimatedToday) / yearsRemaining;
+  const requiredMonthlyGrowth = requiredAnnualGrowth / MONTHS_PER_YEAR;
+  const projectedAtGoal = pace.available
+    ? pace.latestRecordedAmount +
+      pace.slopePerDay * calendarDaysBetween(goalDate, latest.date)
+    : null;
+  const projectedShortfallOrSurplus =
+    projectedAtGoal === null ? null : projectedAtGoal - goalAmount;
+  const estimatedGoalDateAtCurrentPace = calculateEstimatedGoalDate(
+    today,
+    estimatedToday,
+    goalAmount,
+    pace.slopePerDay
+  );
+  const additionalMonthlyPace = pace.available
+    ? requiredMonthlyGrowth - pace.observedMonthlyGrowth
+    : null;
+  const uncertaintyAtGoal = pace.available
+    ? {
+        lower:
+          pace.latestRecordedAmount +
+          pace.lowerSlopePerDay * calendarDaysBetween(goalDate, latest.date),
+        upper:
+          pace.latestRecordedAmount +
+          pace.upperSlopePerDay * calendarDaysBetween(goalDate, latest.date)
+      }
+    : null;
+  const status =
+    estimatedToday >= goalAmount
+      ? 'achieved'
+      : !pace.available
+        ? 'insufficient-history'
+        : projectedAtGoal >= goalAmount
+          ? 'on-track'
+          : 'shortfall';
+  return {
+    ...base,
+    available: true,
+    reason: null,
+    status,
+    goalDate: formatWealthDate(goalDate),
+    estimatedToday,
+    projectedAtGoal,
+    projectedShortfallOrSurplus,
+    requiredAnnualGrowth,
+    requiredMonthlyGrowth,
+    additionalMonthlyPace,
+    estimatedGoalDateAtCurrentPace,
+    yearsRemaining,
+    monthsRemaining,
+    daysToGoal,
+    uncertaintyAtGoal
   };
 }
+
+/** Build every Wealth graph series and its domain from the same trajectory values used by the cards. */
+export function buildWealthGoalChartSeries(
+  history,
+  goal,
+  { now = new Date(), range = 'one-year', pace = null } = {}
+) {
+  const today = startOfDay(toValidDate(now));
+  const trajectory = calculateWealthGoalTrajectory(history, goal, {
+    now: today,
+    pace
+  });
+  const selectedHistory = getWealthHistoryRange(history, range, today);
+  const latest = trajectory.latestSnapshot;
+  const recorded = selectedHistory.slice();
+  const recordedData = recorded.map((entry) => ({
+    x: parseWealthDate(entry.date).getTime(),
+    y: entry.amount
+  }));
+  const latestDate = latest ? parseWealthDate(latest.date) : null;
+  const goalDate = parseWealthDate(trajectory.goalDate);
+  const goalIsUsable = !!goalDate && trajectory.reason !== 'expired-goal';
+  const goalPoint = goalIsUsable
+    ? [{ x: goalDate.getTime(), y: trajectory.goalAmount }]
+    : goalDate && trajectory.goalAmount !== null
+      ? [{ x: goalDate.getTime(), y: trajectory.goalAmount }]
+      : [];
+  const observedData =
+    trajectory.paceAvailable && latestDate && goalIsUsable
+      ? [
+          { x: latestDate.getTime(), y: trajectory.latestRecordedAmount },
+          { x: goalDate.getTime(), y: trajectory.projectedAtGoal }
+        ]
+      : latestDate
+        ? [{ x: latestDate.getTime(), y: trajectory.latestRecordedAmount }]
+        : [];
+  const requiredData =
+    trajectory.available && goalIsUsable
+      ? [
+          { x: today.getTime(), y: trajectory.estimatedToday },
+          { x: goalDate.getTime(), y: trajectory.goalAmount }
+        ]
+      : goalIsUsable && trajectory.goalAmount !== null
+        ? [{ x: goalDate.getTime(), y: trajectory.goalAmount }]
+        : [];
+  const lowerData =
+    trajectory.uncertaintyAtGoal && latestDate && goalIsUsable
+      ? [
+          { x: latestDate.getTime(), y: trajectory.latestRecordedAmount },
+          { x: goalDate.getTime(), y: trajectory.uncertaintyAtGoal.lower }
+        ]
+      : [];
+  const upperData =
+    trajectory.uncertaintyAtGoal && latestDate && goalIsUsable
+      ? [
+          { x: latestDate.getTime(), y: trajectory.latestRecordedAmount },
+          { x: goalDate.getTime(), y: trajectory.uncertaintyAtGoal.upper }
+        ]
+      : [];
+  const allPoints = [
+    ...recordedData,
+    ...observedData,
+    ...requiredData,
+    ...goalPoint,
+    ...lowerData,
+    ...upperData
+  ];
+  const xValues = allPoints.map((point) => point.x).filter(Number.isFinite);
+  const xMin = xValues.length
+    ? Math.min(...xValues, today.getTime())
+    : today.getTime();
+  const xMax = goalIsUsable
+    ? Math.max(goalDate.getTime(), today.getTime())
+    : xValues.length
+      ? Math.max(...xValues)
+      : today.getTime();
+  const rangeLabel =
+    range === 'one-year'
+      ? 'the last year'
+      : range === 'three-year'
+        ? 'the last three years'
+        : 'all recorded time';
+  return {
+    range,
+    rangeLabel,
+    trajectory,
+    selectedHistory,
+    recorded,
+    xMin,
+    xMax,
+    datasets: [
+      {
+        key: 'recorded',
+        label: 'Recorded wealth',
+        data: recordedData,
+        style: 'solid'
+      },
+      {
+        key: 'projected',
+        label: 'Current data-derived trajectory',
+        data: observedData,
+        style: 'dashed'
+      },
+      {
+        key: 'required',
+        label: 'Required trajectory',
+        data: requiredData,
+        style: 'dashed'
+      },
+      {
+        key: 'goal',
+        label: 'Goal',
+        data: goalPoint,
+        style: 'marker'
+      },
+      {
+        key: 'pace-lower',
+        label: 'Historical pace range (lower)',
+        data: lowerData,
+        style: 'band-lower'
+      },
+      {
+        key: 'pace-upper',
+        label: 'Historical pace range (upper)',
+        data: upperData,
+        style: 'band-upper'
+      }
+    ]
+  };
+}
+
+export const buildWealthChartSeries = buildWealthGoalChartSeries;
 
 export function getWealthAccountReferences(history) {
   const references = new Map();

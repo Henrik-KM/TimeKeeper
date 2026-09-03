@@ -3,13 +3,18 @@ import test from 'node:test';
 
 import {
   applyWealthCsvImport,
-  calculateGoalScenario,
+  buildWealthGoalChartSeries,
   calculateHistoricalRegression,
+  calculateObservedWealthPace,
   calculateWealthFreshness,
+  calculateWealthGoalTrajectory,
   calculateWealthPeriodChange,
   findWealthSnapshotByDate,
   getDefaultWealthHistory,
+  getFutureWealthSnapshots,
+  getLatestWealthSnapshot,
   getWealthComposition,
+  getWealthHistoryRange,
   normalizeWealthData,
   normalizeWealthEntry,
   parseOptionalWealthAmount,
@@ -19,8 +24,14 @@ import {
   validateWealthGoal
 } from '../../src/features/wealth/core.mjs';
 
-test('new wealth installations start with an empty history', () => {
+const NOW = new Date(2026, 8, 1, 12);
+
+test('new wealth installations start with an empty history and no invented goal', () => {
   assert.deepEqual(getDefaultWealthHistory(), []);
+  assert.deepEqual(normalizeWealthData({}).wealthGoal, {
+    amount: null,
+    date: ''
+  });
 });
 
 test('wealth normalization preserves imported fields and rejects invalid optional amounts', () => {
@@ -46,25 +57,34 @@ test('wealth normalization preserves imported fields and rejects invalid optiona
   assert.equal(parseOptionalWealthAmount('-1'), -1);
 });
 
-test('wealth goals require a positive amount and validate an optional ISO date', () => {
-  assert.deepEqual(validateWealthGoal('0', ''), {
-    ok: false,
-    reason: 'amount'
-  });
-  assert.deepEqual(validateWealthGoal('250000', '2027-08-31'), {
-    ok: true,
-    goal: {
-      amount: 250000,
-      date: '2027-08-31'
-    }
-  });
-  assert.deepEqual(validateWealthGoal('250000', '2027-02-30'), {
-    ok: false,
-    reason: 'date'
-  });
+test('new goals require only a positive amount and a date after today', () => {
+  assert.deepEqual(
+    validateWealthGoal({
+      amount: '0',
+      date: '2027-08-31',
+      now: NOW
+    }),
+    { ok: false, reason: 'amount' }
+  );
+  assert.deepEqual(
+    validateWealthGoal({ amount: '250000', date: '', now: NOW }),
+    { ok: false, reason: 'date' }
+  );
+  assert.deepEqual(
+    validateWealthGoal({ amount: '250000', date: '2027-08-31', now: NOW }),
+    { ok: true, goal: { amount: 250000, date: '2027-08-31' } }
+  );
+  assert.deepEqual(
+    validateWealthGoal({ amount: '250000', date: '2026-09-01', now: NOW }),
+    { ok: false, reason: 'date-past' }
+  );
+  assert.deepEqual(
+    validateWealthGoal({ amount: '250000', date: '2027-02-30', now: NOW }),
+    { ok: false, reason: 'date' }
+  );
 });
 
-test('wealth migration is additive and preserves detailed fields and unknown data', () => {
+test('wealth migration is additive, preserves unknown fields, and does not rewrite v2 totals', () => {
   const source = {
     unrelated: { keep: true },
     wealthHistory: [
@@ -95,22 +115,23 @@ test('wealth migration is additive and preserves detailed fields and unknown dat
 
   const migrated = normalizeWealthData(source);
   assert.equal(migrated.unrelated.keep, true);
-  assert.equal(migrated.wealthSchemaVersion, 2);
+  assert.equal(migrated.wealthSchemaVersion, 3);
   assert.equal(migrated.wealthHistory[0].amount, 100000);
   assert.equal(migrated.wealthHistory[0].importedField, 'keep');
   assert.equal(migrated.wealthHistory[0].breakdown[0].sourceField, 'keep');
-  assert.equal(migrated.wealthGoal.monthlyContribution, 1000);
-  assert.equal(migrated.wealthGoal.scenarioAnnualRates.base, 0.05);
+  assert.equal(migrated.wealthGoal.monthlyContribution, '1000');
+  assert.equal(migrated.wealthGoal.scenarioAnnualRates.base, '5');
   assert.equal(migrated.wealthGoal.scenarioAnnualRates.customRate, 0.2);
   assert.equal(migrated.wealthGoal.goalUnknown, 'keep');
+
   const stable = normalizeWealthData(migrated);
   assert.equal(stable.wealthHistory[0].amount, 100000);
-  const current = normalizeWealthData({
+  const v2 = normalizeWealthData({
     wealthSchemaVersion: 2,
     wealthAccounts: source.wealthAccounts,
     wealthHistory: [source.wealthHistory[0]]
   });
-  assert.equal(current.wealthHistory[0].amount, 1);
+  assert.equal(v2.wealthHistory[0].amount, 1);
 });
 
 test('liability balances subtract from assets and archived referenced accounts remain usable', () => {
@@ -187,11 +208,11 @@ test('same-date snapshots distinguish idempotent updates from conflicting replac
 });
 
 test('freshness becomes stale only after the configured threshold', () => {
-  const history = [{ date: '2026-07-17', amount: 100 }];
-  const day45 = calculateWealthFreshness(history, new Date(2026, 7, 31, 12), {
+  const history = [{ date: '2026-07-18', amount: 100 }];
+  const day45 = calculateWealthFreshness(history, new Date(2026, 8, 1, 12), {
     staleAfterDays: 45
   });
-  const day46 = calculateWealthFreshness(history, new Date(2026, 8, 1, 12), {
+  const day46 = calculateWealthFreshness(history, new Date(2026, 8, 2, 12), {
     staleAfterDays: 45
   });
   assert.equal(day45.status, 'fresh');
@@ -211,44 +232,262 @@ test('period change reports signed amount, percentage, and elapsed irregular day
   assert.equal(change.elapsedDays, 43);
 });
 
-test('goal scenarios use monthly compounding and solve the required contribution', () => {
-  const noGrowth = calculateGoalScenario({
-    currentAmount: 1000,
-    goalAmount: 2200,
-    startDate: '2026-01-01',
-    goalDate: '2027-01-01',
-    monthlyContribution: 100,
-    annualRate: 0
-  });
-  assert.equal(noGrowth.available, true);
-  assert.equal(noGrowth.months, 12);
-  assert.equal(noGrowth.projectedAmount, 2200);
-  assert.equal(noGrowth.requiredMonthlyContribution, 100);
-
-  const compounded = calculateGoalScenario({
-    currentAmount: 1000,
-    goalAmount: 2000,
-    startDate: '2026-01-01',
-    goalDate: '2027-01-01',
-    monthlyContribution: 0,
-    annualRate: 0.12
-  });
-  assert.equal(compounded.available, true);
-  assert.ok(compounded.projectedAmount > 1100);
-  assert.ok(compounded.projectedAmount < 1150);
-
-  const monthEnd = calculateGoalScenario({
-    currentAmount: 1000,
-    goalAmount: 1100,
-    startDate: '2026-01-31',
-    goalDate: '2026-02-28',
-    monthlyContribution: 100,
-    annualRate: 0
-  });
-  assert.equal(monthEnd.months, 1);
+test('observed pace uses the robust median of pairwise slopes and calendar-day intervals', () => {
+  const pace = calculateObservedWealthPace(
+    [
+      { date: '2025-01-01', amount: 1000 },
+      { date: '2025-04-11', amount: 2000 },
+      { date: '2025-07-20', amount: 100000 },
+      { date: '2025-10-28', amount: 4000 },
+      { date: '2026-02-05', amount: 5000 },
+      { date: '2026-05-16', amount: 6000 }
+    ],
+    { now: new Date(2026, 5, 1, 12) }
+  );
+  assert.equal(pace.available, true);
+  assert.equal(pace.source, 'trailing-18-months');
+  assert.equal(pace.snapshotCount, 6);
+  assert.equal(pace.spanDays, 500);
+  assert.equal(pace.slopePerDay, 10);
+  assert.equal(pace.annualGrowthSek, 3652.425);
+  assert.ok(Math.abs(pace.observedMonthlyGrowth - 304.36875) < 1e-9);
+  assert.equal(pace.estimatedToday, 6160);
+  assert.equal(pace.annualGrowthPercent, 3652.425 / 6000);
+  assert.equal(pace.lowerSlopePerDay, 10);
+  assert.equal(pace.upperSlopePerDay, 10);
 });
 
-test('historical trend diagnostics require enough history and pause projection when stale', () => {
+test('observed pace handles irregular intervals and falls back to all history', () => {
+  const irregular = calculateObservedWealthPace(
+    [
+      { date: '2025-01-01', amount: 0 },
+      { date: '2025-02-15', amount: 450 },
+      { date: '2025-04-01', amount: 900 }
+    ],
+    { now: new Date(2025, 3, 1, 12) }
+  );
+  assert.equal(irregular.available, true);
+  assert.equal(irregular.spanDays, 90);
+  assert.equal(irregular.slopePerDay, 10);
+
+  const fallback = calculateObservedWealthPace(
+    [
+      { date: '2024-01-01', amount: 100 },
+      { date: '2024-06-01', amount: 200 },
+      { date: '2024-10-01', amount: 300 },
+      { date: '2026-04-01', amount: 400 },
+      { date: '2026-05-01', amount: 450 }
+    ],
+    { now: new Date(2026, 4, 15, 12) }
+  );
+  assert.equal(fallback.available, true);
+  assert.equal(fallback.source, 'all-history-fallback');
+  assert.equal(fallback.snapshotCount, 5);
+});
+
+test('future snapshots are excluded, same-date records are deduplicated, and ranges stay historical', () => {
+  const history = [
+    { id: 'old', date: '2024-01-01', amount: 50 },
+    { id: 'first', date: '2026-01-01', amount: 100 },
+    { id: 'duplicate', date: '2026-08-01', amount: 250 },
+    { id: 'last', date: '2026-08-01', amount: 300 },
+    { id: 'future', date: '2026-09-02', amount: 999 }
+  ];
+  const pace = calculateObservedWealthPace(history, { now: NOW });
+  assert.equal(pace.latestSnapshot.id, 'last');
+  assert.equal(pace.futureSnapshots.length, 1);
+  assert.deepEqual(
+    getFutureWealthSnapshots(history, NOW).map((row) => row.id),
+    ['future']
+  );
+  assert.deepEqual(pace.duplicateDates, ['2026-08-01']);
+  assert.equal(getLatestWealthSnapshot(history, { now: NOW }).id, 'last');
+  assert.equal(getWealthHistoryRange(history, 'all', NOW).length, 3);
+  assert.equal(getWealthHistoryRange(history, 'one-year', NOW).length, 2);
+});
+
+test('insufficient history still calculates the exact required pace without inventing a trajectory', () => {
+  const history = [
+    { date: '2026-07-01', amount: 100000 },
+    { date: '2026-07-31', amount: 101000 },
+    { date: '2026-08-30', amount: 102000 }
+  ];
+  const plan = calculateWealthGoalTrajectory(
+    history,
+    { amount: 200000, date: '2027-08-31' },
+    { now: NOW }
+  );
+  assert.equal(plan.available, true);
+  assert.equal(plan.status, 'insufficient-history');
+  assert.equal(plan.paceAvailable, false);
+  assert.equal(plan.projectedAtGoal, null);
+  assert.equal(plan.additionalMonthlyPace, null);
+  assert.ok(Number.isFinite(plan.requiredMonthlyGrowth));
+  const series = buildWealthGoalChartSeries(
+    history,
+    { amount: 200000, date: '2027-08-31' },
+    { now: NOW, range: 'one-year' }
+  );
+  assert.equal(
+    series.datasets.find((dataset) => dataset.key === 'required').data.length,
+    2
+  );
+  assert.equal(
+    series.datasets.find((dataset) => dataset.key === 'goal').data[0].y,
+    200000
+  );
+  assert.equal(series.xMax, new Date(2027, 7, 31).getTime());
+});
+
+test('goal trajectory derives yearly and monthly net-worth pace and shares chart endpoints', () => {
+  const history = [
+    { date: '2025-01-01', amount: 100000 },
+    { date: '2025-05-01', amount: 104000 },
+    { date: '2025-09-01', amount: 108000 },
+    { date: '2026-01-01', amount: 112000 },
+    { date: '2026-05-01', amount: 116000 }
+  ];
+  const goal = { amount: 150000, date: '2027-01-01' };
+  const plan = calculateWealthGoalTrajectory(history, goal, { now: NOW });
+  assert.equal(plan.status, 'shortfall');
+  assert.equal(plan.goalDate, '2027-01-01');
+  assert.equal(plan.annualGrowthSek, plan.observedPace.slopePerDay * 365.2425);
+  assert.equal(plan.annualGrowthPercent, plan.annualGrowthSek / 116000);
+  assert.equal(plan.observedPace.estimatedToday, plan.estimatedToday);
+  assert.equal(
+    plan.requiredAnnualGrowth,
+    (150000 - plan.estimatedToday) / plan.yearsRemaining
+  );
+  assert.equal(plan.requiredMonthlyGrowth, plan.requiredAnnualGrowth / 12);
+  assert.equal(
+    plan.additionalMonthlyPace,
+    plan.requiredMonthlyGrowth - plan.observedPace.observedMonthlyGrowth
+  );
+
+  const series = buildWealthGoalChartSeries(history, goal, {
+    now: NOW,
+    range: 'one-year'
+  });
+  assert.deepEqual(
+    series.datasets.map((dataset) => dataset.key),
+    ['recorded', 'projected', 'required', 'goal', 'pace-lower', 'pace-upper']
+  );
+  assert.equal(series.xMax, new Date(2027, 0, 1).getTime());
+  assert.equal(
+    series.datasets.find((dataset) => dataset.key === 'projected').data.at(-1)
+      .y,
+    plan.projectedAtGoal
+  );
+  assert.equal(
+    series.datasets.find((dataset) => dataset.key === 'required').data.at(-1).y,
+    plan.goalAmount
+  );
+  assert.equal(
+    buildWealthGoalChartSeries(history, goal, {
+      now: NOW,
+      range: 'all'
+    }).datasets.find((dataset) => dataset.key === 'goal').data[0].y,
+    150000
+  );
+});
+
+test('legacy scenario fields cannot change the data-derived projection', () => {
+  const history = [
+    { date: '2025-01-01', amount: 1000 },
+    { date: '2025-05-01', amount: 1200 },
+    { date: '2025-09-01', amount: 1400 }
+  ];
+  const base = calculateWealthGoalTrajectory(
+    history,
+    { amount: 3000, date: '2027-01-01' },
+    { now: NOW }
+  );
+  const legacy = calculateWealthGoalTrajectory(
+    history,
+    {
+      amount: 3000,
+      date: '2027-01-01',
+      monthlyContribution: 999999,
+      scenarioAnnualRates: {
+        conservative: -0.5,
+        base: 1.5,
+        optimistic: 4
+      }
+    },
+    { now: NOW }
+  );
+  for (const key of [
+    'estimatedToday',
+    'annualGrowthSek',
+    'projectedAtGoal',
+    'requiredAnnualGrowth',
+    'requiredMonthlyGrowth',
+    'additionalMonthlyPace',
+    'estimatedGoalDateAtCurrentPace'
+  ]) {
+    assert.equal(legacy[key], base[key], key);
+  }
+  assert.equal(legacy.goal.monthlyContribution, 999999);
+  assert.equal(legacy.goal.scenarioAnnualRates.base, 1.5);
+});
+
+test('achieved, declining, negative, zero-denominator, and expired goals are explicit', () => {
+  const achieved = calculateWealthGoalTrajectory(
+    [
+      { date: '2025-01-01', amount: 100 },
+      { date: '2025-05-01', amount: 125 },
+      { date: '2025-09-01', amount: 150 }
+    ],
+    { amount: 120, date: '2026-01-01' },
+    { now: new Date(2025, 8, 15, 12) }
+  );
+  assert.equal(achieved.status, 'achieved');
+  assert.equal(achieved.estimatedGoalDateAtCurrentPace, '2025-09-15');
+
+  const declining = calculateWealthGoalTrajectory(
+    [
+      { date: '2025-01-01', amount: 1000 },
+      { date: '2025-05-01', amount: 900 },
+      { date: '2025-09-01', amount: 800 }
+    ],
+    { amount: 1200, date: '2026-01-01' },
+    { now: new Date(2025, 8, 15, 12) }
+  );
+  assert.equal(declining.status, 'shortfall');
+  assert.ok(declining.annualGrowthSek < 0);
+  assert.equal(declining.estimatedGoalDateAtCurrentPace, null);
+
+  const negative = calculateObservedWealthPace(
+    [
+      { date: '2025-01-01', amount: -300 },
+      { date: '2025-05-01', amount: -200 },
+      { date: '2025-09-01', amount: -100 }
+    ],
+    { now: new Date(2025, 8, 15, 12) }
+  );
+  assert.ok(Number.isFinite(negative.annualGrowthPercent));
+  const zero = calculateObservedWealthPace(
+    [
+      { date: '2025-01-01', amount: 0 },
+      { date: '2025-05-01', amount: 0 },
+      { date: '2025-09-01', amount: 0 }
+    ],
+    { now: new Date(2025, 8, 15, 12) }
+  );
+  assert.equal(zero.annualGrowthPercent, null);
+
+  const expired = calculateWealthGoalTrajectory(
+    [{ date: '2025-08-01', amount: 100 }],
+    { amount: 200, date: '2025-08-31' },
+    { now: new Date(2025, 8, 1, 12) }
+  );
+  assert.equal(expired.status, 'expired');
+  assert.equal(expired.reason, 'expired-goal');
+  assert.equal(expired.goalAmount, 200);
+  assert.equal(expired.projectedAtGoal, null);
+});
+
+test('historical diagnostics remain separate from the goal planner and pause only stale extrapolation', () => {
   const insufficient = calculateHistoricalRegression(
     [
       { date: '2026-08-01', amount: 100 },
@@ -261,9 +500,9 @@ test('historical trend diagnostics require enough history and pause projection w
 
   const stale = calculateHistoricalRegression(
     [
-      { date: '2026-05-01', amount: 100 },
-      { date: '2026-05-15', amount: 110 },
-      { date: '2026-06-01', amount: 120 }
+      { date: '2026-03-01', amount: 100 },
+      { date: '2026-04-15', amount: 110 },
+      { date: '2026-05-30', amount: 120 }
     ],
     { now: new Date(2026, 7, 31) }
   );

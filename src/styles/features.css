@@ -494,6 +494,25 @@
   line-height: 1.45;
 }
 
+.wealth-chart-fallback {
+  margin: 0.5rem 0;
+  color: #475569;
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
+.wealth-goal-card {
+  margin-bottom: 1rem;
+}
+
+.wealth-goal-card > .wealth-status {
+  margin: 0.25rem 0 0.75rem;
+}
+
+.wealth-goal-metric-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
 .wealth-history-list {
   display: none;
 }
@@ -1155,6 +1174,20 @@ tr:nth-child(even) td {
   line-height: 1.4;
 }
 
+.wealth-header-stat-label {
+  margin-top: 0.35rem;
+  color: #64748b;
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+
+.wealth-header-stat-value {
+  color: #0f172a;
+  font-size: 1.02rem;
+}
+
 .wealth-summary-actions {
   display: flex;
   gap: 0.45rem;
@@ -1237,6 +1270,31 @@ tr:nth-child(even) td {
   gap: 0.7rem;
   align-items: end;
   margin-top: 0.85rem;
+}
+
+.wealth-goal-form {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) auto;
+}
+
+.wealth-goal-form > .btn {
+  white-space: nowrap;
+}
+
+.wealth-status-achieved,
+.wealth-status-on-track {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.wealth-status-shortfall,
+.wealth-status-expired {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.wealth-status-insufficient-history {
+  background: #e0f2fe;
+  color: #075985;
 }
 
 .wealth-goal-form > .btn,
@@ -1411,6 +1469,19 @@ tr:nth-child(even) td {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .wealth-goal-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .wealth-goal-form > .btn {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+
+  .wealth-goal-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .wealth-import-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1453,8 +1524,18 @@ tr:nth-child(even) td {
   }
 
   .wealth-layout {
+    display: flex;
+    flex-direction: column;
     grid-template-columns: 1fr;
     gap: 0.75rem;
+  }
+
+  .wealth-update-card {
+    order: 1;
+  }
+
+  .wealth-history-card {
+    order: 2;
   }
 
   .wealth-history-card,
@@ -1570,6 +1651,10 @@ tr:nth-child(even) td {
   .wealth-history-mobile-row .finance-row-actions .btn {
     flex: 1 1 7rem;
     min-height: 2.65rem;
+  }
+
+  .wealth-goal-metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   #wealthProjectionSummary {

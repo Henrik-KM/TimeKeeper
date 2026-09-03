@@ -30,15 +30,15 @@ import { uuid } from './shared/id.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
+  buildWealthGoalChartSeries,
   calculateHistoricalRegression,
   calculateWealthFreshness,
-  calculateWealthGoalPlan,
+  calculateWealthGoalTrajectory,
   calculateWealthPeriodChange,
   findWealthSnapshotByDate,
   getLatestWealthSnapshot,
   getWealthAccountReferences,
   getWealthComposition,
-  getWealthHistoryRange,
   normalizeWealthAccount,
   normalizeWealthData,
   makeDefaultWealthGoal,
@@ -722,27 +722,25 @@ import {
       : 'Unknown date';
   }
 
-  function formatWealthRateLabel(rate) {
-    return Number.isFinite(Number(rate))
-      ? `${(Number(rate) * 100).toFixed(1)}%`
-      : 'Not configured';
-  }
-
   function formatWealthPercentLabel(value) {
-    if (!Number.isFinite(Number(value))) return '—';
+    if (
+      value === null ||
+      value === undefined ||
+      !Number.isFinite(Number(value))
+    )
+      return '—';
     const amount = Number(value);
     return `${amount >= 0 ? '+' : ''}${amount.toFixed(1)}%`;
   }
 
   function wealthSaveError(reason) {
     const messages = {
-      date: 'Enter a valid snapshot date.',
+      date: 'Enter a valid date.',
       amount: 'Enter a valid amount.',
       breakdown: 'Enter a non-negative balance for every account.',
       name: 'Enter an account name.',
       category: 'Enter an account category.',
-      monthlyContribution: 'Enter a valid non-negative monthly contribution.',
-      rate: 'Enter valid annual assumptions between -100% and 100%.'
+      'date-past': 'Choose a date after today.'
     };
     return messages[reason] || 'Check the highlighted values and try again.';
   }
@@ -965,16 +963,20 @@ import {
       return;
     }
     history.forEach((entry) => {
+      const isFuture =
+        parseWealthDate(entry.date)?.getTime() >
+        startOfLocalDay(new Date()).getTime();
       const typeLabel =
         Array.isArray(entry.breakdown) && entry.breakdown.length
           ? 'Detailed'
           : 'Quick total';
+      const displayType = isFuture ? typeLabel + ' · Future date' : typeLabel;
       if (body) {
         const row = document.createElement('tr');
         [
           entry.date || 'Unknown date',
           formatFinanceAmount(entry.amount),
-          typeLabel,
+          displayType,
           entry.note || '—'
         ].forEach((value) => {
           const cell = document.createElement('td');
@@ -994,7 +996,7 @@ import {
         const title = document.createElement('strong');
         title.textContent = entry.date || 'Snapshot';
         const detail = document.createElement('span');
-        detail.textContent = `${formatFinanceAmount(entry.amount)} · ${typeLabel}${entry.note ? ` · ${entry.note}` : ''}`;
+        detail.textContent = `${formatFinanceAmount(entry.amount)} · ${displayType}${entry.note ? ` · ${entry.note}` : ''}`;
         copy.appendChild(title);
         copy.appendChild(detail);
         row.appendChild(copy);
@@ -1011,42 +1013,124 @@ import {
       wealthChartInstance.destroy();
       wealthChartInstance = null;
     }
-    const selectedHistory = getWealthHistoryRange(
+    const series = buildWealthGoalChartSeries(history, data.wealthGoal, {
+      now: new Date(),
+      range: financeWealthRange
+    });
+    const trajectory = series.trajectory;
+    const first = series.recorded[0];
+    const last = series.recorded.at(-1);
+    const recordedSummary = first
+      ? 'Recorded history for ' +
+        series.rangeLabel +
+        ': ' +
+        series.recorded.length +
+        ' snapshot' +
+        (series.recorded.length === 1 ? '' : 's') +
+        ', from ' +
+        formatFinanceAmount(first.amount) +
+        ' on ' +
+        first.date +
+        ' to ' +
+        formatFinanceAmount(last.amount) +
+        ' on ' +
+        last.date +
+        '.'
+      : 'No recorded snapshots fall within ' + series.rangeLabel + '.';
+    const projectionSummary =
+      trajectory.available &&
+      trajectory.goalDate &&
+      trajectory.projectedAtGoal !== null
+        ? 'Estimated wealth today ' +
+          formatFinanceAmount(trajectory.estimatedToday) +
+          '. Current data-derived trajectory reaches ' +
+          formatFinanceAmount(trajectory.projectedAtGoal) +
+          ' on ' +
+          trajectory.goalDate +
+          '; required trajectory reaches ' +
+          formatFinanceAmount(trajectory.goalAmount) +
+          '.'
+        : trajectory.goalAmount !== null && trajectory.goalDate
+          ? 'Current trajectory cannot yet be estimated. Required trajectory reaches ' +
+            formatFinanceAmount(trajectory.goalAmount) +
+            ' on ' +
+            trajectory.goalDate +
+            '.'
+          : 'Set a goal amount and date to draw the required trajectory.';
+    const freshness = calculateWealthFreshness(
       history,
-      financeWealthRange,
-      new Date()
+      new Date(),
+      data.wealthSettings
     );
-    const latest = getLatestWealthSnapshot(history);
-    const rangeLabel =
-      financeWealthRange === 'one-year'
-        ? 'the last year'
-        : financeWealthRange === 'three-year'
-          ? 'the last three years'
-          : 'all recorded time';
-    if (!selectedHistory.length) {
-      const latestDetail = latest
-        ? ` The latest recorded total is ${formatFinanceAmount(latest.amount)} as of ${latest.date}.`
+    const hasMetricValue = (value) =>
+      value !== null && value !== undefined && Number.isFinite(Number(value));
+    const metricSummary = [];
+    if (hasMetricValue(trajectory.annualGrowthSek)) {
+      const annualPercent = hasMetricValue(trajectory.annualGrowthPercent)
+        ? ` (${(trajectory.annualGrowthPercent * 100).toFixed(1)}%)`
         : '';
-      setWealthText(
-        'wealthAccessibleSummary',
-        `No recorded snapshots fall within ${rangeLabel}.${latestDetail}`
+      metricSummary.push(
+        `Observed net-worth growth is ${formatFinanceSignedAmount(trajectory.annualGrowthSek)} per year${annualPercent}.`
       );
-      setWealthText(
-        'wealthHistoryTableSummary',
-        `No snapshots in ${rangeLabel}.`
-      );
-      return;
     }
-    const points = selectedHistory.map((entry) => ({
-      x: parseWealthDate(entry.date).getTime(),
-      y: entry.amount
-    }));
-    const first = selectedHistory[0];
-    const last = selectedHistory[selectedHistory.length - 1];
-    const summary = `Recorded history for ${rangeLabel}: ${selectedHistory.length} snapshot${selectedHistory.length === 1 ? '' : 's'}, from ${formatFinanceAmount(first.amount)} on ${first.date} to ${formatFinanceAmount(last.amount)} on ${last.date}.`;
+    if (hasMetricValue(trajectory.requiredMonthlyGrowth)) {
+      metricSummary.push(
+        `Required net-worth increase is ${formatFinanceSignedAmount(trajectory.requiredMonthlyGrowth)} per month and ${formatFinanceSignedAmount(trajectory.requiredAnnualGrowth)} per year.`
+      );
+    }
+    if (hasMetricValue(trajectory.projectedShortfallOrSurplus)) {
+      metricSummary.push(
+        `Projected outcome is ${formatFinanceSignedAmount(trajectory.projectedShortfallOrSurplus)} versus the goal.`
+      );
+    }
+    if (hasMetricValue(trajectory.additionalMonthlyPace)) {
+      metricSummary.push(
+        `Additional monthly pace needed is ${formatFinanceSignedAmount(trajectory.additionalMonthlyPace)}.`
+      );
+    }
+    if (trajectory.estimatedGoalDateAtCurrentPace) {
+      metricSummary.push(
+        `At the current pace, the goal is estimated for ${trajectory.estimatedGoalDateAtCurrentPace}.`
+      );
+    }
+    const recordedEnd = trajectory.latestSnapshot
+      ? ' Recorded data ends on ' + trajectory.latestSnapshot.date + '.'
+      : '';
+    const futureWarning = trajectory.futureSnapshots.length
+      ? ' ' +
+        trajectory.futureSnapshots.length +
+        ' future-dated snapshot' +
+        (trajectory.futureSnapshots.length === 1 ? '' : 's') +
+        ' excluded; correct the date' +
+        (trajectory.futureSnapshots.length === 1 ? '' : 's') +
+        ' in history.'
+      : '';
+    const duplicateDates = trajectory.observedPace?.duplicateDates || [];
+    const duplicateWarning = duplicateDates.length
+      ? ` Same-date snapshots were found for ${duplicateDates.join(', ')}; calculations use the latest record for each date.`
+      : '';
+    const summary =
+      recordedSummary +
+      ' ' +
+      projectionSummary +
+      (metricSummary.length ? ' ' + metricSummary.join(' ') : '') +
+      recordedEnd +
+      (freshness.status === 'stale'
+        ? ' The latest recorded total is stale (' + freshness.label + ').'
+        : '') +
+      futureWarning +
+      duplicateWarning;
     setWealthText('wealthAccessibleSummary', summary);
-    setWealthText('wealthHistoryTableSummary', summary);
+    setWealthText(
+      'wealthHistoryTableSummary',
+      summary +
+        ' Chart series: Recorded wealth, Current data-derived trajectory, Required trajectory, Goal, and historical pace range.'
+    );
     chartEl.setAttribute('aria-label', summary);
+    chartEl.dataset.seriesKeys = series.datasets
+      .map((item) => item.key)
+      .join(',');
+    setWealthText('wealthChartFallback', summary);
     const compact = (value) =>
       Number.isFinite(Number(value))
         ? new Intl.NumberFormat('sv-SE', {
@@ -1057,19 +1141,46 @@ import {
     wealthChartInstance = createChartIfAvailable(chartEl.getContext('2d'), {
       type: 'line',
       data: {
-        datasets: [
-          {
-            label: 'Recorded net worth',
-            data: points,
-            borderColor: '#2563eb',
-            backgroundColor: 'rgba(37,99,235,0.12)',
-            pointBackgroundColor: '#2563eb',
-            pointRadius: selectedHistory.length > 36 ? 2 : 4,
-            pointHoverRadius: 6,
-            tension: 0.18,
-            fill: true
-          }
-        ]
+        datasets: series.datasets.map((dataset) => ({
+          label: dataset.label,
+          data: dataset.data,
+          borderColor:
+            dataset.key === 'recorded'
+              ? '#2563eb'
+              : dataset.key === 'projected'
+                ? '#0f766e'
+                : dataset.key === 'required'
+                  ? '#c2410c'
+                  : dataset.key === 'goal'
+                    ? '#b45309'
+                    : 'rgba(15, 118, 110, 0.22)',
+          backgroundColor:
+            dataset.key === 'pace-upper'
+              ? 'rgba(15, 118, 110, 0.10)'
+              : 'transparent',
+          pointBackgroundColor: dataset.key === 'goal' ? '#b45309' : undefined,
+          borderWidth: dataset.key === 'goal' ? 3 : 2,
+          borderDash:
+            dataset.key === 'projected'
+              ? [7, 5]
+              : dataset.key === 'required'
+                ? [3, 4]
+                : undefined,
+          pointRadius:
+            dataset.key === 'goal'
+              ? 8
+              : dataset.key === 'recorded'
+                ? series.recorded.length > 36
+                  ? 2
+                  : 4
+                : 0,
+          pointHoverRadius: dataset.key === 'goal' ? 10 : 6,
+          tension: dataset.key === 'recorded' ? 0.18 : 0,
+          fill: dataset.key === 'pace-upper' ? '-1' : false,
+          spanGaps: false,
+          showLine: dataset.key !== 'goal',
+          hidden: dataset.key.startsWith('pace-') && !dataset.data.length
+        }))
       },
       options: {
         responsive: true,
@@ -1079,6 +1190,8 @@ import {
         scales: {
           x: {
             type: 'linear',
+            min: series.xMin,
+            max: series.xMax,
             title: { display: true, text: 'Date' },
             ticks: {
               maxRotation: 0,
@@ -1117,64 +1230,153 @@ import {
         }
       }
     });
+    const fallbackEl = document.getElementById('wealthChartFallback');
+    if (fallbackEl) fallbackEl.hidden = !!wealthChartInstance;
   }
 
   function renderWealthGoalPlan(plan) {
     const summaryEl = document.getElementById('wealthGoalPlanSummary');
-    const legacySummaryEl = document.getElementById('wealthProjectionSummary');
-    const listEl = document.getElementById('wealthGoalScenarioList');
+    const metricGrid = document.getElementById('wealthMetricGrid');
+    const statusEl = document.getElementById('wealthGoalStatus');
+    const detailEl = document.getElementById('wealthGoalStatusDetail');
     if (summaryEl) summaryEl.replaceChildren();
-    if (listEl) listEl.replaceChildren();
+    if (metricGrid) metricGrid.replaceChildren();
+
+    const hasMetricValue = (value) =>
+      value !== null && value !== undefined && Number.isFinite(Number(value));
+    const formatMetric = (value) =>
+      hasMetricValue(value) ? formatFinanceAmount(Number(value)) : '—';
+    const formatSignedMetric = (value) =>
+      hasMetricValue(value) ? formatFinanceSignedAmount(Number(value)) : '—';
+    const formatAnnualGrowth = (value) =>
+      hasMetricValue(value)
+        ? formatFinanceSignedAmount(Number(value)) +
+          ' / ' +
+          (hasMetricValue(plan.annualGrowthPercent)
+            ? Number(plan.annualGrowthPercent * 100).toFixed(1) + '%'
+            : '—')
+        : '—';
+    const statusLabels = {
+      'no-goal': 'Set a goal amount and date',
+      expired: 'Goal date needs revision',
+      'insufficient-history': 'Current trajectory cannot yet be estimated',
+      achieved: 'Goal reached in the estimated total',
+      'on-track': 'Current pace reaches the goal',
+      shortfall: 'Current pace leaves a projected shortfall'
+    };
+    const status = statusLabels[plan.status] || statusLabels['no-goal'];
+    if (statusEl) {
+      statusEl.textContent = status;
+      statusEl.className =
+        'wealth-status wealth-status-' + (plan.status || 'empty');
+    }
+
+    let detail = '';
+    if (plan.reason === 'missing-goal-amount') {
+      detail = 'Enter the two goal fields and save to draw the goal plan.';
+    } else if (plan.reason === 'missing-goal-date') {
+      detail = 'Enter a future goal date to calculate the required pace.';
+    } else if (plan.reason === 'invalid-goal-date') {
+      detail = 'The saved goal date is invalid and needs revision.';
+    } else if (plan.reason === 'expired-goal') {
+      detail =
+        'This goal was set for ' +
+        plan.goalDate +
+        '. Existing data is preserved; choose a date after today.';
+    } else if (plan.status === 'insufficient-history') {
+      detail =
+        'Need at least three valid snapshots spanning 90 days before a current trajectory can be estimated.';
+    } else if (plan.available) {
+      detail =
+        'Linear net-worth estimate from recorded totals; this is not investment advice or a guarantee.';
+    } else {
+      detail = 'Add a dated wealth update to calculate the plan.';
+    }
+    if (detailEl) detailEl.textContent = detail;
+
+    if (plan.available) {
+      const metrics = [
+        [
+          'Estimated wealth today',
+          formatMetric(plan.estimatedToday),
+          'Based on the latest recorded total' +
+            (plan.latestSnapshot ? ' from ' + plan.latestSnapshot.date : '')
+        ],
+        [
+          'Net-worth growth / year',
+          formatAnnualGrowth(plan.annualGrowthSek),
+          'SEK and percent derived from recorded pace'
+        ],
+        [
+          'Projected wealth on goal date',
+          formatMetric(plan.projectedAtGoal),
+          'Current data-derived trajectory at ' + plan.goalDate
+        ],
+        [
+          'Projected shortfall / surplus',
+          formatSignedMetric(plan.projectedShortfallOrSurplus),
+          'Projected wealth minus goal amount'
+        ],
+        [
+          'Required monthly net-worth increase',
+          formatSignedMetric(plan.requiredMonthlyGrowth),
+          'Required from estimated wealth today'
+        ],
+        [
+          'Required yearly net-worth increase',
+          formatSignedMetric(plan.requiredAnnualGrowth),
+          'Required from estimated wealth today'
+        ],
+        [
+          'Additional monthly pace needed',
+          formatSignedMetric(plan.additionalMonthlyPace),
+          plan.paceAvailable
+            ? 'Beyond the observed net-worth pace'
+            : 'Observed pace is not yet available'
+        ],
+        [
+          'Estimated goal date at current pace',
+          plan.estimatedGoalDateAtCurrentPace || 'Not reached at current pace',
+          plan.estimatedGoalDateAtCurrentPace
+            ? 'Estimate from today'
+            : 'Flat or falling pace cannot reach the goal'
+        ]
+      ];
+      metrics.forEach(([label, value, metricDetail]) => {
+        metricGrid?.appendChild(
+          createFinanceMetric(label, value, metricDetail)
+        );
+      });
+    }
+
     const message = document.createElement('p');
     message.className = 'wealth-plan-message';
-    if (!plan.available) {
+    if (plan.available) {
       message.textContent =
-        plan.reason === 'missing-goal-date'
-          ? 'Add a goal date to calculate an assumption-driven plan.'
-          : plan.reason === 'insufficient-history'
-            ? 'Add a wealth update before calculating the plan.'
-            : 'Check the goal date and assumptions to calculate the plan.';
-      summaryEl?.appendChild(message);
-      if (legacySummaryEl) {
-        legacySummaryEl.textContent =
-          'Goal plan is assumption-driven. No historical forecast is presented as fact.';
+        'Goal ' +
+        formatFinanceAmount(plan.goalAmount) +
+        ' by ' +
+        plan.goalDate +
+        '. Required pace: ' +
+        formatSignedMetric(plan.requiredMonthlyGrowth) +
+        ' per month / ' +
+        formatSignedMetric(plan.requiredAnnualGrowth) +
+        ' per year.';
+      if (plan.observedPace?.available) {
+        message.textContent +=
+          ' Historical pace range: ' +
+          formatSignedMetric(plan.historicalPaceRange?.lowerMonthlyGrowth) +
+          ' to ' +
+          formatSignedMetric(plan.historicalPaceRange?.upperMonthlyGrowth) +
+          ' per month; this is a range of observed history, not a probability or guarantee.';
+      } else {
+        message.textContent +=
+          ' The current trajectory cannot yet be estimated from the available history.';
       }
-      return;
+    } else {
+      message.textContent = detail;
     }
-    const goal = plan.goal;
-    message.textContent = `Goal ${formatFinanceAmount(goal.amount)} by ${goal.date}. Monthly contribution: ${formatFinanceAmount(goal.monthlyContribution)}. Projections use monthly compounding and your configured assumptions.`;
     summaryEl?.appendChild(message);
-    plan.scenarios.forEach((scenario) => {
-      const row = document.createElement('div');
-      row.className = `wealth-scenario-row wealth-scenario-${scenario.key}`;
-      const copy = document.createElement('div');
-      const title = document.createElement('strong');
-      title.textContent = scenario.label;
-      const detail = document.createElement('span');
-      detail.textContent = `Annual net-growth assumption: ${formatWealthRateLabel(scenario.annualRate)}`;
-      copy.appendChild(title);
-      copy.appendChild(detail);
-      const values = document.createElement('div');
-      values.className = 'wealth-scenario-values';
-      const projected = document.createElement('span');
-      projected.textContent = `Projected: ${formatFinanceAmount(scenario.projectedAmount)}`;
-      const required = document.createElement('span');
-      required.textContent = `Required monthly: ${formatFinanceAmount(scenario.requiredMonthlyContribution)}`;
-      const status = document.createElement('span');
-      status.textContent = scenario.onTrack
-        ? 'On track'
-        : 'Needs more contribution';
-      values.appendChild(projected);
-      values.appendChild(required);
-      values.appendChild(status);
-      row.appendChild(copy);
-      row.appendChild(values);
-      listEl?.appendChild(row);
-    });
-    if (legacySummaryEl) {
-      legacySummaryEl.textContent =
-        'Goal plan is assumption-driven. Historical change remains a diagnostic, not a savings forecast.';
-    }
   }
 
   function renderWealthComposition(latest) {
@@ -1392,7 +1594,7 @@ import {
       return;
     }
     target.textContent = diagnostic.canProject
-      ? `Historical trend diagnostic: observed change of ${formatFinanceSignedAmount(diagnostic.monthlyChange)} per month across the recorded points. This is not a savings pace or a promise.`
+      ? `Historical net-worth pace diagnostic: observed change of ${formatFinanceSignedAmount(diagnostic.monthlyChange)} per month across the recorded points. This is not a return, savings pace, or promise.`
       : diagnostic.label;
   }
 
@@ -1408,11 +1610,9 @@ import {
     const change = calculateWealthPeriodChange(history, latest);
     const composition = getWealthComposition(latest, data.wealthAccounts);
     const goal = data.wealthGoal || makeDefaultWealthGoal();
-    const goalGap = latest ? Number(goal.amount) - Number(latest.amount) : null;
-    const goalPlan = calculateWealthGoalPlan(goal, latest, { now: new Date() });
-    const baseGoalScenario = goalPlan.scenarios?.find(
-      (scenario) => scenario.key === 'base' && scenario.available
-    );
+    const goalPlan = calculateWealthGoalTrajectory(history, goal, {
+      now: new Date()
+    });
 
     setWealthText(
       'wealthCurrentValue',
@@ -1456,87 +1656,15 @@ import {
         ? `Assets ${formatFinanceAmount(composition.assets)} · Debt ${formatFinanceAmount(composition.liabilities)}`
         : 'Available after a detailed account update.'
     );
-    setWealthText(
-      'wealthGoalStatus',
-      !latest
-        ? 'Goal status starts after the first update.'
-        : goalGap <= 0
-          ? `Goal reached · ${formatFinanceAmount(goal.amount)}`
-          : `Gap ${formatFinanceAmount(goalGap)} · target ${formatFinanceAmount(goal.amount)}`
-    );
-
-    const metricGrid = document.getElementById('wealthMetricGrid');
-    if (metricGrid) {
-      metricGrid.replaceChildren(
-        createFinanceMetric(
-          'Current net worth',
-          latest ? formatFinanceAmount(latest.amount) : '—',
-          latest ? `As of ${latest.date}` : 'No dated update'
-        ),
-        createFinanceMetric(
-          'Change since prior',
-          change.available ? formatFinanceSignedAmount(change.amount) : '—',
-          change.available
-            ? `${formatWealthPercentLabel(change.percentage)} over ${change.elapsedDays} days`
-            : 'Needs two snapshots'
-        ),
-        createFinanceMetric(
-          'Freshness',
-          freshness.status === 'empty' ? 'Needs update' : freshness.label,
-          `Stale after ${freshness.staleAfterDays} days`
-        ),
-        createFinanceMetric(
-          'Goal gap',
-          goalGap === null
-            ? '—'
-            : goalGap <= 0
-              ? 'Reached'
-              : formatFinanceAmount(goalGap),
-          goalGap !== null && goalGap > 0
-            ? 'Target minus current total'
-            : 'Set a dated goal plan'
-        ),
-        createFinanceMetric(
-          'Projected pace',
-          baseGoalScenario
-            ? formatFinanceAmount(baseGoalScenario.requiredMonthlyContribution)
-            : '—',
-          baseGoalScenario
-            ? 'Required monthly under base assumptions'
-            : 'Set a dated goal plan'
-        )
-      );
-    }
-
     const goalInputs = {
       amount: document.getElementById('wealthGoalAmount'),
-      date: document.getElementById('wealthGoalDate'),
-      monthlyContribution: document.getElementById(
-        'wealthGoalMonthlyContribution'
-      ),
-      conservative: document.getElementById('wealthGoalRateConservative'),
-      base: document.getElementById('wealthGoalRateBase'),
-      optimistic: document.getElementById('wealthGoalRateOptimistic')
+      date: document.getElementById('wealthGoalDate')
     };
     if (goalInputs.amount && document.activeElement !== goalInputs.amount) {
-      goalInputs.amount.value = goal.amount || '';
+      goalInputs.amount.value = goal.amount ?? '';
     }
     if (goalInputs.date && document.activeElement !== goalInputs.date) {
       goalInputs.date.value = goal.date || '';
-    }
-    if (
-      goalInputs.monthlyContribution &&
-      document.activeElement !== goalInputs.monthlyContribution
-    ) {
-      goalInputs.monthlyContribution.value = goal.monthlyContribution ?? 0;
-    }
-    for (const key of ['conservative', 'base', 'optimistic']) {
-      const input = goalInputs[key];
-      if (input && document.activeElement !== input) {
-        const rate = goal.scenarioAnnualRates?.[key];
-        input.value =
-          rate === null || rate === undefined ? '' : String(rate * 100);
-      }
     }
     document.querySelectorAll('[data-wealth-range]').forEach((button) => {
       button.classList.toggle(
@@ -2228,7 +2356,7 @@ import {
           codexIntegration: makeDefaultCodexIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
-          wealthSchemaVersion: 2,
+          wealthSchemaVersion: 3,
           wealthAccounts: [],
           wealthHistory: [],
           wealthGoal: makeDefaultWealthGoal(),
@@ -2342,7 +2470,7 @@ import {
           codexIntegration: makeDefaultCodexIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
-          wealthSchemaVersion: 2,
+          wealthSchemaVersion: 3,
           wealthAccounts: [],
           wealthHistory: [],
           wealthGoal: makeDefaultWealthGoal(),
@@ -10100,28 +10228,20 @@ import {
     ensureWealthData();
     const source = values || {
       amount: document.getElementById('wealthGoalAmount')?.value || '',
-      date: document.getElementById('wealthGoalDate')?.value || '',
-      monthlyContribution:
-        document.getElementById('wealthGoalMonthlyContribution')?.value || '',
-      scenarioAnnualRates: {
-        conservative:
-          document.getElementById('wealthGoalRateConservative')?.value || '',
-        base: document.getElementById('wealthGoalRateBase')?.value || '',
-        optimistic:
-          document.getElementById('wealthGoalRateOptimistic')?.value || ''
-      }
+      date: document.getElementById('wealthGoalDate')?.value || ''
     };
     const validation = validateWealthGoal({
       amount: source.amount,
       date: source.date || '',
-      monthlyContribution: source.monthlyContribution ?? '',
-      scenarioAnnualRates: source.scenarioAnnualRates || {}
+      now: new Date()
     });
     if (!validation.ok) {
       showToast(
         validation.reason === 'amount'
           ? 'Enter a goal amount greater than zero.'
-          : wealthSaveError(validation.reason)
+          : validation.reason === 'date-past'
+            ? 'Choose a goal date after today.'
+            : wealthSaveError(validation.reason)
       );
       return false;
     }
@@ -10129,11 +10249,7 @@ import {
     const existing = data.wealthGoal || {};
     data.wealthGoal = {
       ...existing,
-      ...validation.goal,
-      scenarioAnnualRates: {
-        ...(existing.scenarioAnnualRates || {}),
-        ...validation.goal.scenarioAnnualRates
-      }
+      ...validation.goal
     };
     saveData();
     updateWealthDashboard();
@@ -10289,63 +10405,23 @@ import {
     const goal = data.wealthGoal;
     const sheet = createMobileSheet('Edit goal plan', {
       className: 'mobile-wealth-goal-sheet',
-      description: 'Set a target and your own monthly net-growth assumptions.'
+      description: 'Set the amount and date used for the goal trajectory.'
     });
     const amount = document.createElement('input');
     amount.type = 'number';
     amount.min = '0.01';
     amount.step = '0.01';
-    amount.value = goal.amount || '';
+    amount.inputMode = 'decimal';
+    amount.value = goal.amount ?? '';
     const date = document.createElement('input');
     date.type = 'date';
     date.value = goal.date || '';
-    const contribution = document.createElement('input');
-    contribution.type = 'number';
-    contribution.min = '0';
-    contribution.step = '0.01';
-    contribution.value = goal.monthlyContribution ?? 0;
-    const conservative = document.createElement('input');
-    conservative.type = 'number';
-    conservative.step = '0.1';
-    conservative.placeholder = 'Optional %';
-    conservative.value =
-      goal.scenarioAnnualRates?.conservative === null
-        ? ''
-        : String((goal.scenarioAnnualRates?.conservative || 0) * 100);
-    const base = document.createElement('input');
-    base.type = 'number';
-    base.step = '0.1';
-    base.value = String((goal.scenarioAnnualRates?.base || 0) * 100);
-    const optimistic = document.createElement('input');
-    optimistic.type = 'number';
-    optimistic.step = '0.1';
-    optimistic.placeholder = 'Optional %';
-    optimistic.value =
-      goal.scenarioAnnualRates?.optimistic === null
-        ? ''
-        : String((goal.scenarioAnnualRates?.optimistic || 0) * 100);
     sheet.body.appendChild(createMobileField('Goal amount (SEK)', amount));
     sheet.body.appendChild(createMobileField('Goal date', date));
-    sheet.body.appendChild(
-      createMobileField('Planned monthly contribution (SEK)', contribution)
-    );
-    sheet.body.appendChild(
-      createMobileField('Downside annual rate (%)', conservative)
-    );
-    sheet.body.appendChild(createMobileField('Base annual rate (%)', base));
-    sheet.body.appendChild(
-      createMobileField('Upside annual rate (%)', optimistic)
-    );
-    sheet.addAction('Save goal plan', 'primary', () => {
+    sheet.addAction('Save goal', 'primary', () => {
       const saved = persistWealthGoal({
         amount: amount.value,
-        date: date.value,
-        monthlyContribution: contribution.value,
-        scenarioAnnualRates: {
-          conservative: conservative.value,
-          base: base.value,
-          optimistic: optimistic.value
-        }
+        date: date.value
       });
       if (saved) sheet.close();
     });

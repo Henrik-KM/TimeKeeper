@@ -573,14 +573,36 @@
               <span id="wealthFreshness" class="wealth-freshness-label empty">No snapshot yet</span>
               <p id="wealthFreshnessDetail" class="wealth-freshness-detail">Your latest total will appear here with its actual date.</p>
               <span id="wealthStatus" class="wealth-status wealth-status-empty">Needs first update</span>
+              <span class="wealth-header-stat-label">Change since prior snapshot</span>
+              <strong id="wealthChangeValue" class="wealth-header-stat-value">—</strong>
+              <p id="wealthChangeDetail" class="wealth-freshness-detail">A second dated snapshot will show change.</p>
+              <span class="wealth-header-stat-label">Composition</span>
+              <p id="wealthCompositionValue" class="wealth-freshness-detail">Available after a detailed account update.</p>
             </div>
             <div class="wealth-summary-actions">
               <button id="wealthUpdateButton" type="button" class="btn primary wealth-mobile-only">Update wealth</button>
-              <button id="wealthGoalOpenButton" type="button" class="btn secondary wealth-mobile-only">Edit goal plan</button>
+              <button id="wealthGoalOpenButton" type="button" class="btn secondary wealth-mobile-only">Edit goal</button>
             </div>
           </div>
 
-          <div id="wealthMetricGrid" class="wealth-metric-grid"></div>
+          <div class="card wealth-goal-card" id="wealthGoalCard">
+            <div class="wealth-card-heading">
+              <div>
+                <p class="eyebrow">Goal status</p>
+                <h3 class="card-title">What the recorded trajectory suggests</h3>
+                <p id="wealthGoalStatusDetail" class="card-subtitle">Set a goal amount and date to see the required pace.</p>
+              </div>
+              <button id="wealthGoalEditButton" type="button" class="btn secondary finance-mobile-only">Edit goal</button>
+            </div>
+            <span id="wealthGoalStatus" class="wealth-status wealth-status-empty">Set a goal amount and date</span>
+            <div id="wealthMetricGrid" class="wealth-metric-grid wealth-goal-metric-grid"></div>
+            <form id="wealthGoalForm" class="wealth-goal-form wealth-desktop-form" novalidate>
+              <div class="finance-field"><label for="wealthGoalAmount">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" required class="wealth-input" placeholder="Enter a target" /></div>
+              <div class="finance-field"><label for="wealthGoalDate">Goal date</label><input id="wealthGoalDate" type="date" required class="wealth-input" aria-describedby="wealthGoalDateHelp" /><span id="wealthGoalDateHelp" class="field-help">Choose a date after today.</span></div>
+              <button id="wealthGoalApply" type="submit" class="btn primary">Save goal</button>
+            </form>
+            <div id="wealthGoalPlanSummary" class="wealth-summary" role="status" aria-live="polite"></div>
+          </div>
 
           <div class="wealth-layout">
             <div class="card wealth-history-card" id="wealthDashboardCard">
@@ -598,12 +620,12 @@
               </div>
               <button id="wealthHistoryToggle" type="button" class="btn secondary wealth-history-toggle" aria-expanded="false">Show history chart</button>
               <div id="wealthHistoryRegion" class="wealth-history-region">
-                <div class="wealth-chart-wrapper"><canvas id="wealthChart" aria-label="Recorded net worth history chart" role="img"></canvas></div>
+                <div class="wealth-chart-wrapper"><canvas id="wealthChart" aria-label="Recorded wealth and goal trajectory chart" role="img"></canvas></div>
                 <div id="wealthAccessibleSummary" class="wealth-accessible-summary" role="status" aria-live="polite"></div>
+                <p id="wealthChartFallback" class="wealth-chart-fallback">The text summary below is the accessible alternative to the chart.</p>
                 <div id="wealthHistoryTableSummary" class="wealth-history-table-summary"></div>
                 <div id="wealthTrendDiagnostic" class="wealth-trend-diagnostic"></div>
               </div>
-              <div id="wealthProjectionSummary" class="wealth-summary"></div>
             </div>
 
             <div class="card wealth-update-card wealth-add-card">
@@ -621,32 +643,7 @@
                 <div class="finance-field"><label for="wealthEntryNote">Note (optional)</label><input id="wealthEntryNote" type="text" placeholder="Note" class="wealth-entry-input" /></div>
                 <button type="submit" class="btn primary wealth-entry-submit">Update wealth</button>
               </form>
-              <p id="wealthChangeDetail" class="wealth-update-detail">A second dated snapshot will show change.</p>
-              <p id="wealthCompositionValue" class="wealth-update-detail">Available after a detailed account update.</p>
-              <p id="wealthGoalStatus" class="wealth-update-detail">Goal status starts after the first update.</p>
             </div>
-          </div>
-
-          <div class="card wealth-goal-card" id="wealthGoalCard">
-            <div class="wealth-card-heading">
-              <div>
-                <p class="eyebrow">Goal plan</p>
-                <h3 class="card-title">Assumption-driven plan</h3>
-                <p class="card-subtitle">Your assumptions shape the scenarios; no forecast is presented as fact.</p>
-              </div>
-              <button id="wealthGoalEditButton" type="button" class="btn secondary finance-mobile-only">Edit goal plan</button>
-            </div>
-            <form id="wealthGoalForm" class="wealth-goal-form wealth-desktop-form" novalidate>
-              <div class="finance-field"><label for="wealthGoalAmount">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" required class="wealth-input" placeholder="2,000,000" /></div>
-              <div class="finance-field"><label for="wealthGoalDate">Goal date</label><input id="wealthGoalDate" type="date" class="wealth-input" aria-describedby="wealthGoalDateHelp" /><span id="wealthGoalDateHelp" class="field-help">Required for a monthly plan.</span></div>
-              <div class="finance-field"><label for="wealthGoalMonthlyContribution">Planned monthly contribution (SEK)</label><input id="wealthGoalMonthlyContribution" type="number" min="0" step="0.01" class="wealth-input" value="0" /></div>
-              <div class="finance-field"><label for="wealthGoalRateConservative">Downside annual rate (%)</label><input id="wealthGoalRateConservative" type="number" step="0.1" class="wealth-input" placeholder="Optional" /></div>
-              <div class="finance-field"><label for="wealthGoalRateBase">Base annual rate (%)</label><input id="wealthGoalRateBase" type="number" step="0.1" class="wealth-input" value="0" required /></div>
-              <div class="finance-field"><label for="wealthGoalRateOptimistic">Upside annual rate (%)</label><input id="wealthGoalRateOptimistic" type="number" step="0.1" class="wealth-input" placeholder="Optional" /></div>
-              <button id="wealthGoalApply" type="submit" class="btn primary">Save goal plan</button>
-            </form>
-            <div id="wealthGoalPlanSummary" class="wealth-summary"></div>
-            <div id="wealthGoalScenarioList" class="wealth-scenario-list"></div>
           </div>
 
           <div class="card wealth-composition-card" id="wealthCompositionCard" hidden>

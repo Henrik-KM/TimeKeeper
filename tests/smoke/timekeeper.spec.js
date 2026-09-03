@@ -3648,6 +3648,10 @@ test('finance wealth chart stays readable on a mobile viewport', async ({
   );
   await page.locator('#wealthHistoryToggle').click();
   await expect(page.locator('#wealthChart')).toBeVisible();
+  await expect(page.locator('#wealthChart')).toHaveAttribute(
+    'data-series-keys',
+    'recorded,projected,required,goal,pace-lower,pace-upper'
+  );
   const metrics = await page
     .locator('#wealthDashboardCard')
     .evaluate((card) => {
@@ -3993,7 +3997,7 @@ test('finance saved names, notes, and imported content remain inert text', async
     .toBe(false);
 });
 
-test('wealth leads with metrics, validates goals, and supports snapshot edit and undo', async ({
+test('wealth leads with goal status, validates the two goal inputs, and supports snapshot edit and undo', async ({
   page
 }) => {
   await freezeTime(page, '2026-08-31T12:00:00');
@@ -4001,8 +4005,9 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
     groceries: [],
     monthlyRecurringPayments: [],
     wealthHistory: [
-      { id: 'wealth-one', date: '2026-07-01', amount: 100000, note: 'Start' },
-      { id: 'wealth-two', date: '2026-08-01', amount: 110000, note: 'Growth' }
+      { id: 'wealth-one', date: '2025-12-01', amount: 100000, note: 'Start' },
+      { id: 'wealth-two', date: '2026-04-01', amount: 110000, note: 'Growth' },
+      { id: 'wealth-three', date: '2026-08-01', amount: 120000, note: 'Latest' }
     ],
     wealthGoal: { amount: 200000, date: '' }
   });
@@ -4010,24 +4015,16 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   await gotoSection(page, 'grocery', 'Finances');
   await page.locator('#financeTabWealth').click();
 
-  await expect(page.locator('#wealthMetricGrid .finance-metric')).toHaveCount(
-    5
-  );
+  await expect(page.locator('#wealthGoalCard')).toBeVisible();
+  await expect(page.locator('#wealthGoalCard')).toContainText('Goal status');
+  await expect(page.locator('#wealthGoalForm input')).toHaveCount(2);
+  await expect(page.locator('#wealthGoalMonthlyContribution')).toHaveCount(0);
+  await expect(page.locator('#wealthGoalRateBase')).toHaveCount(0);
   await expect(page.locator('#wealthAccessibleSummary')).toContainText(
-    '2 snapshots'
+    '3 snapshots'
   );
   await page.locator('#wealthRangeOneYear').click();
   await expect(page.locator('#wealthRangeOneYear')).toHaveClass(/active/);
-
-  await page.locator('#wealthGoalAmount').fill('0');
-  await page.locator('#wealthGoalApply').click();
-  await expect(
-    page.locator('.app-toast').filter({ hasText: 'greater than zero' })
-  ).toBeVisible();
-  let saved = await page.evaluate(() =>
-    JSON.parse(localStorage.getItem('timekeeperDataPro'))
-  );
-  expect(saved.wealthGoal).toMatchObject({ amount: 200000, date: '' });
 
   await page.locator('#wealthGoalAmount').fill('250000');
   await page.locator('#wealthGoalDate').fill('2027-08-31');
@@ -4035,19 +4032,31 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   await expect(
     page.locator('.app-toast').filter({ hasText: 'Wealth goal saved.' })
   ).toBeVisible();
-  saved = await page.evaluate(() =>
+  const saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );
   expect(saved.wealthGoal).toMatchObject({
     amount: 250000,
-    date: '2027-08-31',
-    monthlyContribution: 0,
-    scenarioAnnualRates: {
-      conservative: null,
-      base: 0,
-      optimistic: null
-    }
+    date: '2027-08-31'
   });
+  expect(saved.wealthGoal).not.toHaveProperty('monthlyContribution');
+  expect(saved.wealthGoal).not.toHaveProperty('scenarioAnnualRates');
+  await expect(page.locator('#wealthMetricGrid .finance-metric')).toHaveCount(
+    8
+  );
+  await expect(page.locator('#wealthGoalCard')).toContainText(
+    'Estimated wealth today'
+  );
+  await expect(page.locator('#wealthGoalCard')).toContainText(
+    'Required monthly net-worth increase'
+  );
+  await expect(page.locator('#wealthGoalCard')).toContainText(
+    'Estimated goal date at current pace'
+  );
+  await expect(page.locator('#wealthChart')).toHaveAttribute(
+    'data-series-keys',
+    /recorded,projected,required,goal/
+  );
 
   await page.locator('#wealthEntryDate').fill('2026-08-31');
   await page.locator('#wealthEntryAmount').fill('120000');
@@ -4090,7 +4099,7 @@ test('wealth leads with metrics, validates goals, and supports snapshot edit and
   );
 });
 
-test('wealth supports dated conflicts, account archiving, goal scenarios, and CSV preview', async ({
+test('wealth supports dated conflicts, account archiving, legacy goal compatibility, and CSV preview', async ({
   page
 }) => {
   await freezeTime(page, '2026-08-31T12:00:00');
@@ -4102,7 +4111,13 @@ test('wealth supports dated conflicts, account archiving, goal scenarios, and CS
     wealthHistory: [
       { id: 'dated', date: '2026-08-30', amount: 100000, note: 'Previous' }
     ],
-    wealthGoal: { amount: 200000, date: '' }
+    wealthGoal: {
+      amount: 200000,
+      date: '',
+      monthlyContribution: 1000,
+      scenarioAnnualRates: { base: 0.05 },
+      goalUnknown: 'keep'
+    }
   });
   await page.goto('/');
   await gotoSection(page, 'grocery', 'Finances');
@@ -4125,14 +4140,16 @@ test('wealth supports dated conflicts, account archiving, goal scenarios, and CS
 
   await page.locator('#wealthGoalAmount').fill('250000');
   await page.locator('#wealthGoalDate').fill('2027-08-31');
-  await page.locator('#wealthGoalMonthlyContribution').fill('1000');
-  await page.locator('#wealthGoalRateBase').fill('5');
   await page.locator('#wealthGoalApply').click();
-  await expect(page.locator('#wealthGoalScenarioList')).toContainText(
-    'Base case'
+  await expect(page.locator('#wealthMetricGrid .finance-metric')).toHaveCount(
+    8
   );
-  await expect(page.locator('#wealthGoalScenarioList')).toContainText(
-    'Annual net-growth assumption: 5.0%'
+  await expect(page.locator('#wealthGoalCard')).not.toContainText('Base case');
+  await expect(page.locator('#wealthGoalCard')).not.toContainText(
+    'monthly contribution'
+  );
+  await expect(page.locator('#wealthGoalCard')).not.toContainText(
+    'annual rate'
   );
 
   await page.locator('#wealthEntryDate').fill('2026-08-30');
@@ -4166,7 +4183,11 @@ test('wealth supports dated conflicts, account archiving, goal scenarios, and CS
   expect(
     saved.wealthHistory.find((row) => row.date === '2026-08-31').amount
   ).toBe(10000);
-  expect(saved.wealthGoal.scenarioAnnualRates.base).toBe(0.05);
+  expect(saved.wealthGoal).toMatchObject({
+    monthlyContribution: 1000,
+    scenarioAnnualRates: { base: 0.05 },
+    goalUnknown: 'keep'
+  });
 });
 
 test('mobile wealth leads with freshness, supports detailed updates, and avoids overflow', async ({
@@ -4202,7 +4223,28 @@ test('mobile wealth leads with freshness, supports detailed updates, and avoids 
   await expect(page.locator('#wealthFreshness')).toContainText(
     'Updated 1 day ago'
   );
+  await expect(page.locator('#wealthGoalForm input')).toHaveCount(2);
+  await expect(page.locator('#wealthGoalMonthlyContribution')).toHaveCount(0);
+  await expect(page.locator('#wealthGoalRateBase')).toHaveCount(0);
   await expect(page.locator('#wealthHistoryRegion')).toBeHidden();
+
+  const mobileOrder = await page.evaluate(() => {
+    const goal = document.getElementById('wealthGoalCard');
+    const update = document.querySelector('.wealth-update-card');
+    const history = document.getElementById('wealthDashboardCard');
+    return {
+      goalBeforeHistory:
+        Boolean(goal && history) &&
+        Boolean(
+          goal.compareDocumentPosition(history) &
+          Node.DOCUMENT_POSITION_FOLLOWING
+        ),
+      updateTop: update?.getBoundingClientRect().top ?? 0,
+      historyTop: history?.getBoundingClientRect().top ?? 0
+    };
+  });
+  expect(mobileOrder.goalBeforeHistory).toBe(true);
+  expect(mobileOrder.updateTop).toBeLessThan(mobileOrder.historyTop);
 
   await page.locator('#wealthUpdateButton').click();
   const sheet = page.getByRole('dialog', { name: 'Update wealth' });
@@ -4221,6 +4263,29 @@ test('mobile wealth leads with freshness, supports detailed updates, and avoids 
     date: '2026-08-31',
     amount: 98000
   });
+
+  await page.locator('#wealthGoalOpenButton').click();
+  const goalSheet = page.getByRole('dialog', { name: 'Edit goal plan' });
+  await expect(goalSheet.locator('input')).toHaveCount(2);
+  await expect(goalSheet.getByLabel('Goal amount (SEK)')).toHaveCount(1);
+  await expect(goalSheet.getByLabel('Goal date')).toHaveCount(1);
+  await goalSheet.getByLabel('Goal amount (SEK)').fill('150000');
+  await goalSheet.getByLabel('Goal date').fill('2027-08-31');
+  await goalSheet.getByRole('button', { name: 'Save goal' }).click();
+  await expect(goalSheet).toBeHidden();
+  await expect(page.locator('#wealthGoalCard')).toContainText(
+    'Required monthly net-worth increase'
+  );
+
+  await page.locator('#wealthHistoryToggle').click();
+  await expect(page.locator('#wealthChart')).toBeVisible();
+  await expect(page.locator('#wealthChart')).toHaveAttribute(
+    'data-series-keys',
+    /recorded,projected,required,goal/
+  );
+  await expect(page.locator('#wealthAccessibleSummary')).toContainText(
+    'Required trajectory'
+  );
   await expect
     .poll(() =>
       page.evaluate(() =>
