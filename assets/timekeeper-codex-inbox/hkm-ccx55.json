@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-05T09:16:02.178Z",
+  "updatedAt": "2026-09-05T09:31:02.229Z",
   "dayStart": "2026-09-04T22:00:00.000Z",
   "rangeStart": "2026-06-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-05T09:16:04.569Z",
+    "observedAt": "2026-09-05T09:31:04.369Z",
     "primary": {
       "usedPercent": 89,
       "remainingPercent": 11,
@@ -22930,6 +22930,32 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 18,
           "effectiveSeconds": 9
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-fcecaf8b6c0a50849d8ebb8a",
+      "threadId": "01a070d3-f07d-7f72-bfe8-0afe80d09e78",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-05T09:08:52.236Z",
+      "endTime": "2026-09-05T09:09:12.435Z",
+      "wallSeconds": 20,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 6,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 20,
+          "effectiveSeconds": 10
         }
       ],
       "description": "Codex: email-helper"
