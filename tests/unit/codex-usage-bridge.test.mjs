@@ -193,25 +193,30 @@ test('builds Codex records from streamed session summary data', () => {
   assert.equal(records[0].focusFactor, 0.4);
 });
 
-test('resolves flat v6 model-family factors for every reasoning level', () => {
+test('resolves flat v7 model-family factors for every reasoning level', () => {
   const efforts = ['low', 'medium', 'high', 'xhigh', 'max', 'ultra'];
-  const expected = { luna: 0.3, terra: 0.4, sol: 0.5 };
+  const expected = {
+    luna: { model: 'gpt-5.6-luna', factor: 0.3 },
+    terra: { model: 'gpt-5.6-terra', factor: 0.4 },
+    sol: { model: 'gpt-5.6-sol', factor: 0.5 },
+    astra: { model: 'gpt-6-astra', factor: 0.75 }
+  };
 
-  Object.entries(expected).forEach(([model, factor]) => {
+  Object.entries(expected).forEach(([model, expectedModel]) => {
     efforts.forEach((effort) => {
       const resolved = resolveCodexFocusFactor({
-        model: `gpt-5.6-${model}`,
+        model: expectedModel.model,
         effort
       });
-      assert.equal(resolved.factor, factor, `${model} ${effort}`);
+      assert.equal(resolved.factor, expectedModel.factor, `${model} ${effort}`);
       assert.equal(resolved.effort, effort);
-      assert.equal(resolved.policyVersion, 6);
+      assert.equal(resolved.policyVersion, 7);
     });
   });
   assert.deepEqual(resolveCodexFocusFactor().factor, 0.4);
 });
 
-test('ignores legacy effort adjustments under the v6 policy', () => {
+test('ignores legacy effort adjustments under the v7 policy', () => {
   const legacyShapedPolicy = {
     ...DEFAULT_CODEX_FOCUS_POLICY,
     effortAdjustments: {
@@ -256,6 +261,13 @@ test('keeps Fast mode separate from reasoning and applies the unknown fallback',
   });
   assert.equal(unknownFast.factor, 0.48);
   assert.equal(unknownFast.fastModeMultiplier, 1.2);
+  const astraFast = resolveCodexFocusFactor({
+    model: 'gpt-6-astra',
+    effort: 'low',
+    fastMode: true
+  });
+  assert.equal(astraFast.baseFactor, 0.75);
+  assert.equal(astraFast.factor, 0.8);
 });
 
 test('Codex payload fingerprint changes when model weighting changes', () => {
@@ -699,7 +711,7 @@ test('weights one Codex span across model changes without splitting it', () => {
   assert.equal(records[0].wallSeconds, 1200);
   assert.equal(records[0].effectiveSeconds, 480);
   assert.equal(records[0].focusFactor, 0.4);
-  assert.equal(records[0].focusPolicyVersion, 6);
+  assert.equal(records[0].focusPolicyVersion, 7);
   assert.deepEqual(records[0].modelBreakdown, [
     {
       role: 'parent',

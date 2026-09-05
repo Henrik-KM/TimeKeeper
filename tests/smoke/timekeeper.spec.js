@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v40';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=35'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v41';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=36'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '37')"
+    "url.searchParams.set('timekeeper-update', '38')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=40')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=41')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1774,7 +1774,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
         elapsedSeconds: 3600,
         duration: 2700,
         focusFactor: 0.75,
-        codexFocusPolicyVersion: 6,
+        codexFocusPolicyVersion: 7,
         codexModelBreakdown: [
           {
             role: 'parent',
@@ -1795,7 +1795,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
         elapsedSeconds: 3600,
         duration: 1800,
         focusFactor: 0.5,
-        codexFocusPolicyVersion: 6,
+        codexFocusPolicyVersion: 7,
         codexModelBreakdown: [
           {
             role: 'parent',
@@ -5599,7 +5599,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       source: 'codex',
       externalId: 'codex-today',
       codexRepoName: 'VWR-AutoInv',
-      codexFocusPolicyVersion: 6,
+      codexFocusPolicyVersion: 7,
       codexDelegatedSessionCount: 4,
       codexDelegationCredit: 0.35,
       codexSupersedesExternalIds: ['codex-parent-old', 'codex-subagent-old'],
@@ -5622,7 +5622,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       source: 'codex',
       externalId: 'codex-too-old',
       codexRepoName: 'VWR-AutoInv',
-      codexFocusPolicyVersion: 6,
+      codexFocusPolicyVersion: 7,
       codexModelBreakdown: [
         expect.objectContaining({
           model: 'gpt-5.6-sol',
@@ -5644,7 +5644,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       source: 'codex',
       externalId: 'codex-yesterday',
       codexRepoName: 'VWR-AutoInv',
-      codexFocusPolicyVersion: 6,
+      codexFocusPolicyVersion: 7,
       codexModelBreakdown: [
         expect.objectContaining({
           model: 'unknown',
@@ -5775,7 +5775,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(page.locator('.mobile-more-nav-item')).toHaveClass(/active/);
 });
 
-test('migrates persisted Codex entries under policy v6 on app startup', async ({
+test('migrates persisted Codex entries under policy v7 on app startup', async ({
   page
 }) => {
   await page.route('**/assets/strava.json', (route) => route.abort());
@@ -5834,7 +5834,7 @@ test('migrates persisted Codex entries under policy v6 on app startup', async ({
     .toMatchObject({
       codexIntegration: {
         codexPolicyMigration: expect.objectContaining({
-          version: 6,
+          version: 7,
           updated: 1,
           unable: 0
         })
@@ -5852,7 +5852,7 @@ test('migrates persisted Codex entries under policy v6 on app startup', async ({
     duration: 1800,
     focusFactor: 0.5,
     manualFactor: 0.5,
-    codexFocusPolicyVersion: 6,
+    codexFocusPolicyVersion: 7,
     elapsedSeconds: 3600,
     codexModelBreakdown: [
       expect.objectContaining({
@@ -5872,7 +5872,7 @@ test('migrates persisted Codex entries under policy v6 on app startup', async ({
     customMetadata: { keep: true }
   });
   await expect(page.locator('#codexIntegrationSummary')).toContainText(
-    'Policy v6: 1 historical entries updated'
+    'Policy v7: 1 historical entries updated'
   );
 });
 
@@ -5991,10 +5991,10 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     Buffer.from(bodies[1].content, 'base64').toString('utf8')
   );
   expect(publishedConfig).toMatchObject({
-    version: 6,
+    version: 7,
     matchMode: 'github-parent-folder',
     focusPolicy: {
-      version: 6,
+      version: 7,
       defaultFactor: 0.4,
       minimumFactor: 0.2,
       fastModeMultiplier: 1.2,
@@ -6002,7 +6002,8 @@ test('Codex config publish retries after a stale GitHub sha', async ({
       modelBaseFactors: {
         luna: 0.3,
         terra: 0.4,
-        sol: 0.5
+        sol: 0.5,
+        astra: 0.75
       },
       effortAdjustments: {
         low: 0,

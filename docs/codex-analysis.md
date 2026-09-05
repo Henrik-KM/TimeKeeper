@@ -24,13 +24,14 @@ quota-history coverage. Efficiency denominators use only activity overlapping
 actual quota snapshots. A session can therefore contribute to full-range time
 without contributing to measured efficiency.
 
-The Codex focus policy is v6. Its normal model-family factors are Luna `0.30`,
-Terra `0.40`, Sol `0.50`, and unknown models `0.40`. Reasoning effort is kept on
-each record for model-by-effort analysis, but it does not change credited time;
-the compatibility `effortAdjustments` field is retained with zero values. Fast
-mode remains a separate `1.2` multiplier, Research remains `0.5`, and delegated
-subagent work remains credited at `0.35` of the post-model and repository
-factor. The existing minimum and maximum factor bounds remain `0.2` and `0.8`.
+The Codex focus policy is v7. Its normal model-family factors are Luna `0.30`,
+Terra `0.40`, Sol `0.50`, Astra `0.75`, and unknown models `0.40`. Reasoning
+effort is kept on each record for model-by-effort analysis, but it does not
+change credited time; the compatibility `effortAdjustments` field is retained
+with zero values. Fast mode remains a separate `1.2` multiplier, Research
+remains `0.5`, and delegated subagent work remains credited at `0.35` of the
+post-model and repository factor. The existing minimum and maximum factor
+bounds remain `0.2` and `0.8`.
 
 ## Metrics and controls
 

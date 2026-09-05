@@ -1,7 +1,7 @@
 export const DEFAULT_CODEX_FOCUS_FACTOR = 0.4;
 
 export const DEFAULT_CODEX_FOCUS_POLICY = {
-  version: 6,
+  version: 7,
   defaultFactor: DEFAULT_CODEX_FOCUS_FACTOR,
   minimumFactor: 0.2,
   maximumFactor: 0.8,
@@ -10,7 +10,8 @@ export const DEFAULT_CODEX_FOCUS_POLICY = {
   modelBaseFactors: {
     luna: 0.3,
     terra: 0.4,
-    sol: 0.5
+    sol: 0.5,
+    astra: 0.75
   },
   modelOverrides: {},
   repositoryMultipliers: {},
@@ -124,7 +125,7 @@ export function normalizeCodexFocusPolicy(
         )
       )
     ),
-    // Keep this compatibility field for old readers. v6 deliberately ignores
+    // Keep this compatibility field for old readers. v7 deliberately ignores
     // its values when resolving a focus factor.
     effortAdjustments: { ...DEFAULT_CODEX_FOCUS_POLICY.effortAdjustments }
   };

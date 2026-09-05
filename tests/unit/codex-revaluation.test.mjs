@@ -41,7 +41,7 @@ function historicalEntry(overrides = {}) {
   };
 }
 
-test('revalues existing v5 model rows under policy v6', () => {
+test('revalues existing v5 model rows under policy v7', () => {
   const sol = historicalEntry();
   const luna = historicalEntry({
     id: 'luna-entry',
@@ -69,7 +69,7 @@ test('revalues existing v5 model rows under policy v6', () => {
   assert.equal(result.entries[0].duration, 1800);
   assert.equal(result.entries[0].focusFactor, 0.5);
   assert.equal(result.entries[0].manualFactor, 0.5);
-  assert.equal(result.entries[0].codexFocusPolicyVersion, 6);
+  assert.equal(result.entries[0].codexFocusPolicyVersion, 7);
   assert.equal(result.entries[0].codexModelBreakdown[0].effort, 'ultra');
   assert.equal(result.entries[0].codexModelBreakdown[0].baseFactor, 0.5);
   assert.equal(result.entries[0].codexModelBreakdown[0].factor, 0.5);
@@ -81,6 +81,37 @@ test('revalues existing v5 model rows under policy v6', () => {
   assert.equal(result.entries[1].codexModelBreakdown[0].effort, 'low');
   assert.equal(result.entries[1].codexModelBreakdown[0].factor, 0.3);
   assert.equal(result.entries[1].codexModelBreakdown[0].effectiveSeconds, 1080);
+});
+
+test('revalues historical Astra rows to the 0.75 base factor', () => {
+  const entry = historicalEntry({
+    id: 'astra-entry',
+    externalId: 'codex-astra-historical',
+    duration: 1440,
+    focusFactor: 0.4,
+    manualFactor: 0.4,
+    codexModelBreakdown: [
+      {
+        model: 'gpt-6-astra',
+        effort: 'ultra',
+        fastMode: false,
+        wallSeconds: 3600,
+        factor: 0.4,
+        effectiveSeconds: 1440
+      }
+    ]
+  });
+
+  const migrated = migrateCodexEntries([entry], POLICY).entries[0];
+  assert.equal(migrated.id, 'astra-entry');
+  assert.equal(migrated.externalId, 'codex-astra-historical');
+  assert.equal(migrated.duration, 2700);
+  assert.equal(migrated.focusFactor, 0.75);
+  assert.equal(migrated.manualFactor, 0.75);
+  assert.equal(migrated.codexFocusPolicyVersion, 7);
+  assert.equal(migrated.codexModelBreakdown[0].baseFactor, 0.75);
+  assert.equal(migrated.codexModelBreakdown[0].factor, 0.75);
+  assert.equal(migrated.codexModelBreakdown[0].effectiveSeconds, 2700);
 });
 
 test('keeps reasoning labels while ignoring them for credited time', () => {

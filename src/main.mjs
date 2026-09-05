@@ -4015,7 +4015,7 @@ import {
     const config = getCodexIntegrationConfig();
     const trackedProjects = getCodexTrackedProjects();
     return {
-      version: 6,
+      version: CODEX_FOCUS_POLICY.version,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
@@ -20123,7 +20123,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=40')
+      .register('./service-worker.js?v=41')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
