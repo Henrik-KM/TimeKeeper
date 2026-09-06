@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-06T08:16:01.959Z",
+  "updatedAt": "2026-09-06T09:01:01.948Z",
   "dayStart": "2026-09-05T22:00:00.000Z",
   "rangeStart": "2026-06-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-06T08:16:04.055Z",
+    "observedAt": "2026-09-06T09:01:04.079Z",
     "primary": {
       "usedPercent": 95,
       "remainingPercent": 5,
@@ -23216,6 +23216,32 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 554,
           "effectiveSeconds": 277
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
+    },
+    {
+      "id": "codex-7d86fb193140ddb8f635d7a7",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-06T08:03:25.748Z",
+      "endTime": "2026-09-06T08:36:18.135Z",
+      "wallSeconds": 1972,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 986,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1972,
+          "effectiveSeconds": 986
         }
       ],
       "description": "Codex: LinkedIn weekly stale invitation cleanup"
