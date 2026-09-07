@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-07T16:01:01.867Z",
+  "updatedAt": "2026-09-07T16:31:01.879Z",
   "dayStart": "2026-09-06T22:00:00.000Z",
   "rangeStart": "2026-06-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-07T16:01:03.838Z",
+    "observedAt": "2026-09-07T16:31:04.061Z",
     "primary": {
       "usedPercent": 23,
       "remainingPercent": 77,
@@ -23854,6 +23854,58 @@
           "fastMode": false,
           "fastModeMultiplier": 1,
           "wallSeconds": 21,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-bd40d3a0f92f5ab200ecb94d",
+      "threadId": "01a07c9c-3314-7322-bbed-95e44af6bcec",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-07T16:03:25.651Z",
+      "endTime": "2026-09-07T16:03:52.924Z",
+      "wallSeconds": 27,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 27,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-e557f704659383e509ae12fc",
+      "threadId": "01a07ca1-3792-7c80-b141-d7df7a6b3f65",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-07T16:08:55.189Z",
+      "endTime": "2026-09-07T16:09:16.110Z",
+      "wallSeconds": 20,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 20,
           "effectiveSeconds": 10
         }
       ],
