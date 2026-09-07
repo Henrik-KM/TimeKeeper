@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-07T12:17:01.909Z",
+  "updatedAt": "2026-09-07T12:32:01.998Z",
   "dayStart": "2026-09-06T22:00:00.000Z",
   "rangeStart": "2026-08-31T22:00:00.000Z",
   "lookbackDays": 7,
@@ -816,6 +816,37 @@
       ],
       "supersedesExternalIds": [
         "codex-132482244b7dfac23eb3672b"
+      ],
+      "description": "Codex: Continue Structured AL Stage 5"
+    },
+    {
+      "id": "codex-66a4936c6afaf827c0bd88cd",
+      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-07T12:12:35.845Z",
+      "endTime": "2026-09-07T12:12:52.345Z",
+      "wallSeconds": 16,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 12,
+      "focusPolicyVersion": 7,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "wallSeconds": 16,
+          "effectiveSeconds": 12
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-a1a84f223d53d5ae309d4b5c"
       ],
       "description": "Codex: Continue Structured AL Stage 5"
     }
