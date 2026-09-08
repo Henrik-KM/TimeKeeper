@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-08T12:31:02.018Z",
+  "updatedAt": "2026-09-08T12:46:02.105Z",
   "dayStart": "2026-09-07T22:00:00.000Z",
   "rangeStart": "2026-06-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-08T12:31:04.051Z",
+    "observedAt": "2026-09-08T12:46:04.312Z",
     "primary": {
-      "usedPercent": 75,
-      "remainingPercent": 25,
+      "usedPercent": 78,
+      "remainingPercent": 22,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-15T05:35:13.000Z"
     },
@@ -24313,6 +24313,58 @@
         }
       ],
       "description": "Codex: Integrate latest Slack and Outlook"
+    },
+    {
+      "id": "codex-6dbf0a3b8168693790d1310d",
+      "threadId": "01a080f8-1547-7202-80a3-b22cfcb84599",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-08T12:22:15.392Z",
+      "endTime": "2026-09-08T12:23:48.073Z",
+      "wallSeconds": 92,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 46,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 92,
+          "effectiveSeconds": 46
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-e158eaad7c411f7e6e0990a0",
+      "threadId": "01a080f9-7d23-78d2-928d-0a4e17956f62",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-08T12:23:49.075Z",
+      "endTime": "2026-09-08T12:24:35.097Z",
+      "wallSeconds": 46,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 23,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 46,
+          "effectiveSeconds": 23
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
