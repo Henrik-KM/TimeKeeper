@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-09T09:01:02.760Z",
+  "updatedAt": "2026-09-09T09:16:02.656Z",
   "dayStart": "2026-09-08T22:00:00.000Z",
   "rangeStart": "2026-06-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-09T09:01:05.764Z",
+    "observedAt": "2026-09-09T09:16:04.826Z",
     "primary": {
       "usedPercent": 99,
       "remainingPercent": 1,
@@ -22976,6 +22976,58 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-fe5e83910c052203c492b702",
+      "threadId": "01a0855f-d02c-7213-96c2-9aa5eaba8f6b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T08:54:03.082Z",
+      "endTime": "2026-09-09T08:54:30.196Z",
+      "wallSeconds": 27,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 27,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-fc4bbd03317032cfd032db05",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T08:54:57.834Z",
+      "endTime": "2026-09-09T08:56:25.708Z",
+      "wallSeconds": 87,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 65,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 87,
+          "effectiveSeconds": 65
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     }
   ]
 }
