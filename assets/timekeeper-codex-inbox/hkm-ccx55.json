@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-09T12:46:02.975Z",
+  "updatedAt": "2026-09-09T13:16:02.942Z",
   "dayStart": "2026-09-08T22:00:00.000Z",
   "rangeStart": "2026-06-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-09T12:46:05.132Z",
+    "observedAt": "2026-09-09T13:16:04.875Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
@@ -23436,6 +23436,93 @@
       "timekeeperProjectName": "IFLAI",
       "startTime": "2026-09-09T12:24:05.131Z",
       "endTime": "2026-09-09T12:24:28.671Z",
+      "wallSeconds": 23,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 23,
+          "effectiveSeconds": 11
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-3bf1ff8a754b7a5ebf2f22ca",
+      "threadId": "01a08634-d944-7e71-912f-253baf394b90",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T12:46:49.276Z",
+      "endTime": "2026-09-09T12:47:55.909Z",
+      "wallSeconds": 66,
+      "focusFactor": 0.7469,
+      "effectiveSeconds": 49,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 66,
+          "effectiveSeconds": 49
+        }
+      ],
+      "description": "Codex: Review Aventix BMS draft"
+    },
+    {
+      "id": "codex-f8104cc54200e73d5a3dbf86",
+      "threadId": "01a08635-9df9-7ad0-b457-dbbc7855b3fe",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T12:47:34.550Z",
+      "endTime": "2026-09-09T12:48:01.193Z",
+      "wallSeconds": 26,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 26,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-0e8456d71df8de54f07c6cab",
+      "threadId": "01a0863b-a3ba-7520-8f73-5bde740dddcb",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T12:54:10.025Z",
+      "endTime": "2026-09-09T12:54:33.855Z",
       "wallSeconds": 23,
       "focusFactor": 0.5,
       "effectiveSeconds": 11,
