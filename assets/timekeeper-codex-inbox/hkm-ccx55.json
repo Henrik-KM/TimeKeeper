@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-09T20:01:02.575Z",
+  "updatedAt": "2026-09-09T20:16:02.478Z",
   "dayStart": "2026-09-08T22:00:00.000Z",
   "rangeStart": "2026-06-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-09T20:01:04.663Z",
+    "observedAt": "2026-09-09T20:16:05.173Z",
     "primary": {
       "usedPercent": 23,
       "remainingPercent": 77,
@@ -23702,6 +23702,41 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 61,
           "effectiveSeconds": 45
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-f610079016aff098efcab916",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T18:30:12.049Z",
+      "endTime": "2026-09-09T19:54:06.810Z",
+      "wallSeconds": 5034,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 3776,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 5034,
+          "effectiveSeconds": 3775
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
