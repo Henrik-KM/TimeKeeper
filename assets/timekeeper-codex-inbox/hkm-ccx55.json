@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-09T14:31:03.060Z",
+  "updatedAt": "2026-09-09T15:31:02.461Z",
   "dayStart": "2026-09-08T22:00:00.000Z",
   "rangeStart": "2026-06-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-09T14:31:05.471Z",
+    "observedAt": "2026-09-09T15:31:04.677Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
@@ -23644,6 +23644,32 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-9187c0e193dc46bec9a8c3b4",
+      "threadId": "01a08634-d944-7e71-912f-253baf394b90",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T15:05:27.315Z",
+      "endTime": "2026-09-09T15:06:38.274Z",
+      "wallSeconds": 70,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 53,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 70,
+          "effectiveSeconds": 53
+        }
+      ],
+      "description": "Codex: Review Aventix BMS draft"
     }
   ]
 }
