@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-10T15:27:02.206Z",
+  "updatedAt": "2026-09-10T16:52:02.300Z",
   "dayStart": "2026-09-09T22:00:00.000Z",
   "rangeStart": "2026-09-03T22:00:00.000Z",
   "lookbackDays": 7,
@@ -3892,6 +3892,37 @@
         }
       ],
       "description": "Codex: Improve hybrid algorithm"
+    },
+    {
+      "id": "codex-b9f1ec32b0cfb20ba68c34cc",
+      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-10T16:32:22.430Z",
+      "endTime": "2026-09-10T16:32:47.721Z",
+      "wallSeconds": 25,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 18,
+      "focusPolicyVersion": 7,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "wallSeconds": 25,
+          "effectiveSeconds": 18
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-67c61ed5312a391837805e7b"
+      ],
+      "description": "Codex: Continue Structured AL Stage 5"
     }
   ]
 }
