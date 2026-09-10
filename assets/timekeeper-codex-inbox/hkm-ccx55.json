@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-10T13:31:02.154Z",
+  "updatedAt": "2026-09-10T13:46:02.375Z",
   "dayStart": "2026-09-09T22:00:00.000Z",
   "rangeStart": "2026-06-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-10T13:31:04.238Z",
+    "observedAt": "2026-09-10T13:46:04.220Z",
     "primary": {
-      "usedPercent": 34,
-      "remainingPercent": 66,
+      "usedPercent": 39,
+      "remainingPercent": 61,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-16T10:51:52.000Z"
     },
@@ -21917,6 +21917,41 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-4b2b5e4d1667a36a36cb2f58",
+      "threadId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T13:00:36.981Z",
+      "endTime": "2026-09-10T13:18:46.621Z",
+      "wallSeconds": 1089,
+      "focusFactor": 0.7498,
+      "effectiveSeconds": 817,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1089,
+          "effectiveSeconds": 816
+        }
+      ],
+      "description": "Codex: Review latest Slack and Outlook"
     }
   ]
 }
