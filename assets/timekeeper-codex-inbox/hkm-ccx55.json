@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-10T09:21:04.838Z",
+  "updatedAt": "2026-09-10T10:01:02.406Z",
   "dayStart": "2026-09-09T22:00:00.000Z",
   "rangeStart": "2026-06-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-10T09:21:07.585Z",
+    "observedAt": "2026-09-10T10:01:06.539Z",
     "primary": {
       "usedPercent": 24,
       "remainingPercent": 76,
@@ -21830,6 +21830,41 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-211a71bb34ace2bf3befe18d",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T09:22:42.513Z",
+      "endTime": "2026-09-10T09:30:27.663Z",
+      "wallSeconds": 465,
+      "focusFactor": 0.3001,
+      "effectiveSeconds": 139,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 464,
+          "effectiveSeconds": 139
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
