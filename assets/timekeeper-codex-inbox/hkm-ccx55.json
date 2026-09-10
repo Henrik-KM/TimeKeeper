@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-10T14:01:02.145Z",
+  "updatedAt": "2026-09-10T14:16:02.350Z",
   "dayStart": "2026-09-09T22:00:00.000Z",
   "rangeStart": "2026-06-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-10T14:01:05.332Z",
+    "observedAt": "2026-09-10T14:16:04.459Z",
     "primary": {
-      "usedPercent": 42,
-      "remainingPercent": 58,
+      "usedPercent": 46,
+      "remainingPercent": 54,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-16T10:51:52.000Z"
     },
@@ -21984,6 +21984,67 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 1089,
           "effectiveSeconds": 816
+        }
+      ],
+      "description": "Codex: Review latest Slack and Outlook"
+    },
+    {
+      "id": "codex-3837802532b8c7119af723e3",
+      "threadId": "01a0703f-ae6d-7fb0-8073-8780a5294e81",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T13:19:22.405Z",
+      "endTime": "2026-09-10T13:55:04.569Z",
+      "wallSeconds": 2142,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 1606,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "high",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 36,
+          "effectiveSeconds": 27
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2105,
+          "effectiveSeconds": 1579
+        }
+      ],
+      "description": "Codex: Improve operator and email helper"
+    },
+    {
+      "id": "codex-150ec29fc53955efc8e24456",
+      "threadId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T13:44:39.616Z",
+      "endTime": "2026-09-10T13:46:32.587Z",
+      "wallSeconds": 112,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 84,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "low",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 112,
+          "effectiveSeconds": 84
         }
       ],
       "description": "Codex: Review latest Slack and Outlook"
