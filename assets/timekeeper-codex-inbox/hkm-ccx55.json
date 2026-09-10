@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-10T10:46:02.051Z",
+  "updatedAt": "2026-09-10T11:16:02.098Z",
   "dayStart": "2026-09-09T22:00:00.000Z",
   "rangeStart": "2026-06-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,7 +11,7 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-10T10:46:06.792Z",
+    "observedAt": "2026-09-10T11:16:05.470Z",
     "primary": {
       "usedPercent": 25,
       "remainingPercent": 75,
@@ -21891,6 +21891,32 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-4edd9f12cef7c81c28e05d0b",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T10:46:18.116Z",
+      "endTime": "2026-09-10T10:47:58.104Z",
+      "wallSeconds": 99,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 29,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 99,
+          "effectiveSeconds": 29
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
