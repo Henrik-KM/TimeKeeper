@@ -60,6 +60,35 @@ function round(value, decimals = 4) {
   return Math.round(value * factor) / factor;
 }
 
+function getWeekdayMilliseconds(startMs, endMs) {
+  if (
+    !Number.isFinite(startMs) ||
+    !Number.isFinite(endMs) ||
+    endMs <= startMs
+  ) {
+    return 0;
+  }
+  let cursorMs = startMs;
+  let totalMs = 0;
+  while (cursorMs < endMs) {
+    const cursor = new Date(cursorMs);
+    const nextLocalDayMs = new Date(
+      cursor.getFullYear(),
+      cursor.getMonth(),
+      cursor.getDate() + 1
+    ).getTime();
+    const nextMs =
+      nextLocalDayMs > cursorMs ? nextLocalDayMs : cursorMs + DAY_MS;
+    const segmentEndMs = Math.min(endMs, nextMs);
+    const dayOfWeek = cursor.getDay();
+    if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+      totalMs += segmentEndMs - cursorMs;
+    }
+    cursorMs = segmentEndMs;
+  }
+  return totalMs;
+}
+
 function getUsageWindow(sample, windowKey) {
   if (!sample || typeof sample !== 'object') return null;
   if (sample[windowKey] && typeof sample[windowKey] === 'object') {
@@ -140,11 +169,15 @@ export function computeCodexQuotaProgress(quotaWindow, now = new Date()) {
       : Number.NaN;
   if (!Number.isFinite(usedPercent)) return null;
 
-  const expectedUsedPercent = clamp(
-    ((nowMs - windowStartMs) / (resetMs - windowStartMs)) * 100,
-    0,
-    100
+  const expectedWindowMs = getWeekdayMilliseconds(windowStartMs, resetMs);
+  const expectedElapsedMs = getWeekdayMilliseconds(
+    windowStartMs,
+    clamp(nowMs, windowStartMs, resetMs)
   );
+  const expectedUsedPercent =
+    expectedWindowMs > 0
+      ? clamp((expectedElapsedMs / expectedWindowMs) * 100, 0, 100)
+      : 0;
   const normalizedUsedPercent = clamp(usedPercent, 0, 100);
   return {
     usedPercent: round(normalizedUsedPercent, 1),

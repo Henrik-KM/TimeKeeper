@@ -13100,7 +13100,7 @@ import {
         progress: usedPercent,
         timeProgress: expectedUsedPercent,
         icon: 'AI',
-        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(expectedUsedPercent)}% expected by now`,
+        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(expectedUsedPercent)}% expected by now (weekdays)`,
         scheduleLabel: pacingLabel,
         scheduleTone: pacingTone,
         metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`
@@ -13142,7 +13142,7 @@ import {
       ? formatCodexUsagePercent(pacing.expectedUsedPercent)
       : '';
     const labelText = hasExpectedProgress
-      ? `${usedLabel}% used / ${expectedLabel}% expected this week`
+      ? `${usedLabel}% used / ${expectedLabel}% expected this week (weekdays)`
       : `${usedLabel}% used - weekly pacing unavailable`;
     const progress = document.createElement('span');
     progress.className = `codex-usage-progress${className ? ` ${className}` : ''}`;
@@ -20123,7 +20123,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=41')
+      .register('./service-worker.js?v=42')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

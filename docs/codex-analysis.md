@@ -24,6 +24,10 @@ quota-history coverage. Efficiency denominators use only activity overlapping
 actual quota snapshots. A session can therefore contribute to full-range time
 without contributing to measured efficiency.
 
+Expected progress for the weekly Codex usage card advances over local weekdays
+(Monday through Friday) only. Weekends do not increase the expected percentage;
+the expected pace resumes on Monday.
+
 The Codex focus policy is v7. Its normal model-family factors are Luna `0.30`,
 Terra `0.40`, Sol `0.50`, Astra `0.75`, and unknown models `0.40`. Reasoning
 effort is kept on each record for model-by-effort analysis, but it does not

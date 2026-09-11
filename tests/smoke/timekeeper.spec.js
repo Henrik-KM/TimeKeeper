@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v41';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=36'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v42';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=37'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '38')"
+    "url.searchParams.set('timekeeper-update', '39')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=41')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=42')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1926,7 +1926,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   );
   await expect(todayCodexCard).not.toContainText('avg/day');
   await expect(todayCodexCard).toContainText('% used /');
-  await expect(todayCodexCard).toContainText('% expected this week');
+  await expect(todayCodexCard).toContainText('% expected this week (weekdays)');
   await expect(
     todayCodexCard.locator('.codex-usage-progress .progress-bar')
   ).toHaveCount(2);
@@ -5681,7 +5681,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Codex Usage' });
   await expect(codexUsageCard).toContainText('% used /');
-  await expect(codexUsageCard).toContainText('% expected by now');
+  await expect(codexUsageCard).toContainText('% expected by now (weekdays)');
   await expect(codexUsageCard.locator('.progress-bar')).toHaveCount(2);
   const codexProgressWidths = await codexUsageCard
     .locator('.progress-bar .fill')
@@ -5694,7 +5694,9 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   const todayCodexUsage = page
     .locator('#todayCommandPanel .today-command-item')
     .filter({ has: page.locator('.codex-usage-progress') });
-  await expect(todayCodexUsage).toContainText('% expected this week');
+  await expect(todayCodexUsage).toContainText(
+    '% expected this week (weekdays)'
+  );
   await expect(
     todayCodexUsage.locator('.codex-usage-progress .progress-bar')
   ).toHaveCount(2);
