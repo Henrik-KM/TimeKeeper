@@ -11694,6 +11694,11 @@ import {
       rollingBounds.start,
       rollingBounds.endExclusive
     );
+    const rolling30CodexHours = sumEntryHours(
+      entries.filter((entry) => isCodexTimeEntry(entry)),
+      rollingBounds.start,
+      rollingBounds.endExclusive
+    );
     // Revenue
     const revenue = totalHours * project.hourlyRate;
     const weeklyRevenue = weeklyHours * project.hourlyRate;
@@ -11749,6 +11754,7 @@ import {
         monthlyHours,
         lastMonthHours,
         rolling30Hours,
+        rolling30CodexHours,
         rolling30TargetConst,
         revenue,
         weeklyRevenue,
@@ -11823,6 +11829,7 @@ import {
         monthlyHours,
         lastMonthHours,
         rolling30Hours: 0,
+        rolling30CodexHours: 0,
         rolling30TargetConst: 0,
         revenue,
         weeklyRevenue,
@@ -11861,6 +11868,7 @@ import {
       monthlyHours,
       lastMonthHours,
       rolling30Hours,
+      rolling30CodexHours,
       rolling30TargetConst,
       revenue,
       weeklyRevenue,
@@ -12107,6 +12115,7 @@ import {
     let monthlyRevenue = 0;
     let lastMonthRevenue = 0;
     let rollingRevenue = 0;
+    let rollingCodexSeconds = 0;
     // Revenue totals for today and this week (across all projects)
     let todayRevenue = 0;
     let yesterdayRevenue = 0;
@@ -12160,6 +12169,7 @@ import {
       }
       if (start >= rollingBounds.start && start < rollingBounds.endExclusive) {
         rollingSeconds += entry.duration;
+        if (isCodexTimeEntry(entry)) rollingCodexSeconds += entry.duration;
         rollingRevenue += hours * project.hourlyRate;
       }
       totalRevenue += hours * project.hourlyRate;
@@ -12229,6 +12239,7 @@ import {
       monthProgress,
       monthRevenue: monthlyRevenue,
       rollingHours,
+      rollingCodexHours: rollingCodexSeconds / 3600,
       rollingTarget,
       rollingProgress,
       rollingRevenue,
@@ -13722,6 +13733,18 @@ import {
   function updateDashboard() {
     const stats = computeGlobalStats();
     const nowTime = new Date();
+    const formatRollingCodexShare = (codexHours, totalHours) => {
+      const total = Number(totalHours);
+      const codex = Number(codexHours);
+      if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(codex)) {
+        return 0;
+      }
+      return Math.round(clampNumber((codex / total) * 100, 0, 100));
+    };
+    const rollingCodexShare = formatRollingCodexShare(
+      stats.rollingCodexHours,
+      stats.rollingHours
+    );
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, nowTime)
     );
@@ -13855,6 +13878,7 @@ import {
         icon: '30',
         progressLabel:
           (stats.rollingProgress || 0).toFixed(1) + '% of required 30-day pace',
+        metaLabel: `Codex ${rollingCodexShare}% total - You ${100 - rollingCodexShare}%`,
         revenue: stats.rollingRevenue || 0
       },
       {
@@ -14024,6 +14048,14 @@ import {
               item.stats.rolling30Hours >=
               item.stats.rolling30TargetConst - 0.01;
             row.style.color = onTrack ? '#15803d' : '#b91c1c';
+            const codexShare = formatRollingCodexShare(
+              item.stats.rolling30CodexHours,
+              item.stats.rolling30Hours
+            );
+            const sourceShare = document.createElement('span');
+            sourceShare.textContent = ` - Codex ${codexShare}%`;
+            sourceShare.style.color = '#64748b';
+            row.appendChild(sourceShare);
           }
           list.appendChild(row);
         });

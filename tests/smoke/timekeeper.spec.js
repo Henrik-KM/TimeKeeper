@@ -4569,6 +4569,73 @@ test('daily target catches up against the fixed weekly target', async ({
   );
 });
 
+test('rolling 30-day hours show the Codex share overall and per project', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-23T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'shared-project',
+        name: 'Shared Project',
+        budgetHours: 40,
+        startDate: '2026-04-01',
+        deadline: '2026-05-31'
+      }),
+      projectFixture({
+        id: 'codex-project',
+        name: 'Codex Project',
+        budgetHours: 40,
+        startDate: '2026-04-01',
+        deadline: '2026-05-31'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'shared-personal',
+        projectId: 'shared-project',
+        startTime: '2026-04-20T09:00:00.000',
+        endTime: '2026-04-22T11:00:00.000',
+        hours: 2
+      }),
+      {
+        ...entryFixture({
+          id: 'shared-codex',
+          projectId: 'shared-project',
+          startTime: '2026-04-21T09:00:00.000',
+          endTime: '2026-04-21T10:00:00.000',
+          hours: 1
+        }),
+        source: 'codex',
+        codexFocusPolicyVersion: 7
+      },
+      {
+        ...entryFixture({
+          id: 'codex-only',
+          projectId: 'codex-project',
+          startTime: '2026-04-22T09:00:00.000',
+          endTime: '2026-04-22T12:00:00.000',
+          hours: 3
+        }),
+        source: 'codex',
+        codexFocusPolicyVersion: 7
+      }
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const rollingCard = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Rolling 30 Days' });
+  await expect(rollingCard).toContainText('Codex 67% total - You 33%');
+  await expect(rollingCard).toContainText('Shared Project: 3.0 /');
+  await expect(rollingCard).toContainText('Codex 33%');
+  await expect(rollingCard).toContainText('Codex Project: 3.0 /');
+  await expect(rollingCard).toContainText('Codex 100%');
+});
+
 test('missed Monday hours are spread over the remaining week', async ({
   page
 }) => {
