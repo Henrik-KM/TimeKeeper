@@ -1,5 +1,30 @@
 const { test, expect } = require('@playwright/test');
 
+test('mobile release bypasses an older cached root stylesheet', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 412, height: 915 });
+  await page.route(/\/style\.css$/, (route) =>
+    route.fulfill({
+      contentType: 'text/css',
+      body: 'body { background: pink; }'
+    })
+  );
+  await page.goto('/#dashboard');
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        getComputedStyle(document.documentElement)
+          .getPropertyValue('--mobile-dock-height')
+          .trim()
+      )
+    )
+    .toBe('76px');
+  await expect(
+    page.locator('#navList [data-section="dashboard"]')
+  ).toBeVisible();
+});
+
 async function seedWorkspace(page) {
   await page.addInitScript(() => {
     const now = new Date();
