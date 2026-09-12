@@ -1,5 +1,8 @@
 /* Shared visual system. Historical section IDs and feature layouts stay intact. */
 :root {
+  /* Keep Android text autosizing consistent before and after rotation. */
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
   --ui-ink: #172940;
   --ui-muted: #586b82;
   --ui-blue: #2459db;

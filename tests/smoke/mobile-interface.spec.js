@@ -67,6 +67,56 @@ async function seedWorkspace(page) {
   });
 }
 
+test.describe('mobile portrait startup and rotation', () => {
+  test.use({ isMobile: true, hasTouch: true, deviceScaleFactor: 3 });
+
+  for (const width of [360, 412]) {
+    test(`Today keeps its initial text and card sizes after rotation at ${width}px`, async ({
+      page
+    }) => {
+      await page.setViewportSize({ width, height: 915 });
+      await seedWorkspace(page);
+      await page.goto('/#dashboard');
+      const panel = page.locator('#todayCommandPanel');
+      await expect(panel).toHaveClass(/mobile-today-panel/);
+      await expect(page.locator('.mobile-today-card')).toHaveCount(4);
+      const measureCards = () =>
+        page.locator('.mobile-today-card').evaluateAll((cards) =>
+          cards.map((card) => ({
+            width: card.getBoundingClientRect().width,
+            height: card.getBoundingClientRect().height,
+            fontSize: getComputedStyle(card.querySelector('strong')).fontSize
+          }))
+        );
+      const initial = await measureCards();
+      expect(
+        await page.evaluate(() =>
+          getComputedStyle(document.documentElement).getPropertyValue(
+            'text-size-adjust'
+          )
+        )
+      ).toBe('100%');
+      await expect(page.locator('meta[name="viewport"]')).not.toHaveAttribute(
+        'content',
+        /user-scalable\s*=\s*no|maximum-scale/
+      );
+
+      await page.setViewportSize({ width: 915, height: width });
+      await expect(panel).not.toHaveClass(/mobile-today-panel/);
+      await page.setViewportSize({ width, height: 915 });
+      await expect(panel).toHaveClass(/mobile-today-panel/);
+      await expect.poll(measureCards).toEqual(initial);
+      await page
+        .getByRole('button', {
+          name: 'Running now Research and development',
+          exact: true
+        })
+        .click();
+      await expect(page.locator('#timer')).toBeVisible();
+    });
+  }
+});
+
 for (const width of [360, 412, 480]) {
   test(`mobile interface fits every section at ${width}px`, async ({
     page

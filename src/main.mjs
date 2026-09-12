@@ -20188,7 +20188,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=44')
+      .register('./service-worker.js?v=45')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
@@ -20273,6 +20273,11 @@ import {
   }
 
   applyLaunchRoute();
+  window.matchMedia('(max-width: 640px)').addEventListener('change', () => {
+    renderTodayCommandPanel();
+    renderMobileNowBar();
+    applyMobileChartCollapses();
+  });
   window.addEventListener('hashchange', applyLaunchRoute);
 
   // Initialize auto sync toggle and status message
