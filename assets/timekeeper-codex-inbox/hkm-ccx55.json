@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T12:46:01.734Z",
+  "updatedAt": "2026-09-12T13:01:01.688Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T12:46:03.595Z",
+    "observedAt": "2026-09-12T13:01:04.055Z",
     "primary": {
-      "usedPercent": 12,
-      "remainingPercent": 88,
+      "usedPercent": 15,
+      "remainingPercent": 85,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-19T08:20:21.000Z"
     },
@@ -21322,6 +21322,41 @@
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-dfb948fc97bee1a81319dcb8",
+      "threadId": "01a0956b-390a-72e1-880d-c194f0f5ec0b",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T11:40:51.976Z",
+      "endTime": "2026-09-12T12:40:01.501Z",
+      "wallSeconds": 3549,
+      "focusFactor": 0.7499,
+      "effectiveSeconds": 2661,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 3548,
+          "effectiveSeconds": 2661
+        }
+      ],
+      "description": "Codex: Complete IFLAI Coupa registration"
     },
     {
       "id": "codex-26420e9f0814cd09120009be",
