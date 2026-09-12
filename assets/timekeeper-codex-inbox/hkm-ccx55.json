@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T13:31:01.843Z",
+  "updatedAt": "2026-09-12T13:46:02.191Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T13:31:03.956Z",
+    "observedAt": "2026-09-12T13:46:04.719Z",
     "primary": {
-      "usedPercent": 22,
-      "remainingPercent": 78,
+      "usedPercent": 25,
+      "remainingPercent": 75,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-19T08:20:22.000Z"
+      "resetsAt": "2026-09-19T08:20:21.000Z"
     },
     "secondary": null
   },
@@ -21383,6 +21383,32 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-cc9e5a145294e6c079995a7d",
+      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T12:54:45.082Z",
+      "endTime": "2026-09-12T13:16:47.801Z",
+      "wallSeconds": 1322,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 396,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1322,
+          "effectiveSeconds": 396
+        }
+      ],
+      "description": "Codex: Fill August Fortnox timesheet"
     }
   ]
 }
