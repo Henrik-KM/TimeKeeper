@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T07:16:02.704Z",
+  "updatedAt": "2026-09-12T07:31:02.548Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,10 +11,10 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T07:16:04.998Z",
+    "observedAt": "2026-09-12T07:31:04.541Z",
     "primary": {
-      "usedPercent": 79,
-      "remainingPercent": 21,
+      "usedPercent": 84,
+      "remainingPercent": 16,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-16T10:51:52.000Z"
     },
@@ -21148,6 +21148,41 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-3763327266272e81f5046322",
+      "threadId": "01a09460-97ce-7261-aeee-55ff7f9d770d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T06:49:37.467Z",
+      "endTime": "2026-09-12T07:08:20.708Z",
+      "wallSeconds": 1123,
+      "focusFactor": 0.7498,
+      "effectiveSeconds": 842,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "medium",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1122,
+          "effectiveSeconds": 841
+        }
+      ],
+      "description": "Codex: Review old Outlook follow-ups"
     }
   ]
 }
