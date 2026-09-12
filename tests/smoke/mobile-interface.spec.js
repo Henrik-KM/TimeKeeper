@@ -89,6 +89,13 @@ test.describe('mobile portrait startup and rotation', () => {
           }))
         );
       const initial = await measureCards();
+      const primaryBounds = await page
+        .locator('.mobile-today-primary')
+        .boundingBox();
+      expect(primaryBounds.height).toBeLessThanOrEqual(200);
+      for (const card of initial) {
+        expect(card.height).toBeGreaterThanOrEqual(48);
+      }
       expect(
         await page.evaluate(() =>
           getComputedStyle(document.documentElement).getPropertyValue(

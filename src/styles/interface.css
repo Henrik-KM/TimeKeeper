@@ -480,8 +480,8 @@ body:has(.modal-backdrop) {
     border: 0;
     padding: 0;
     box-shadow: none;
-    gap: 16px;
-    margin-bottom: 28px;
+    gap: 10px;
+    margin-bottom: 20px;
   }
   .today-command-title {
     font-size: 1.8rem;
@@ -494,15 +494,20 @@ body:has(.modal-backdrop) {
     font-weight: 500;
   }
   .mobile-today-primary {
-    gap: 10px;
+    gap: 8px;
   }
   .mobile-today-card {
-    min-height: 132px;
-    padding: 16px;
-    border-radius: 18px;
-    gap: 8px;
+    min-height: 80px;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 14px;
+    gap: 4px;
     box-shadow: var(--ui-shadow);
     align-content: start;
+  }
+  .mobile-today-card.codex,
+  .mobile-today-card.codex-performance {
+    min-height: 0;
   }
   .mobile-today-card > span {
     font-size: 0.65rem;
@@ -510,7 +515,7 @@ body:has(.modal-backdrop) {
     font-weight: 650;
   }
   .mobile-today-card > strong {
-    font-size: 1.15rem;
+    font-size: 1rem;
     line-height: 1.2;
     letter-spacing: -0.025em;
     overflow-wrap: anywhere;
