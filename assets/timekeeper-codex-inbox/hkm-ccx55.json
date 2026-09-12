@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T15:31:01.744Z",
+  "updatedAt": "2026-09-12T15:46:01.776Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T15:31:04.066Z",
+    "observedAt": "2026-09-12T15:46:03.892Z",
     "primary": {
-      "usedPercent": 40,
-      "remainingPercent": 60,
+      "usedPercent": 42,
+      "remainingPercent": 58,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-19T08:20:21.000Z"
+      "resetsAt": "2026-09-19T08:20:22.000Z"
     },
     "secondary": null
   },
@@ -21444,6 +21444,32 @@
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-22eb6717700c1cf0c1ebd31b",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T14:33:30.656Z",
+      "endTime": "2026-09-12T15:14:05.870Z",
+      "wallSeconds": 2435,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 1826,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2435,
+          "effectiveSeconds": 1826
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     }
   ]
 }
