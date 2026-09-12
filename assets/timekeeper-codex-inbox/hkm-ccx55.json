@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T10:16:02.898Z",
+  "updatedAt": "2026-09-12T10:31:02.718Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T10:16:05.035Z",
+    "observedAt": "2026-09-12T10:31:04.925Z",
     "primary": {
       "usedPercent": 0,
       "remainingPercent": 100,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-19T08:20:21.000Z"
+      "resetsAt": "2026-09-19T08:20:22.000Z"
     },
     "secondary": null
   },
@@ -21244,6 +21244,32 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-0c1c5938449d2fc4e491022b",
+      "threadId": "019f36c9-b110-7ad0-8de7-326497a5b84c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T09:47:24.631Z",
+      "endTime": "2026-09-12T10:13:04.093Z",
+      "wallSeconds": 1539,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 461,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1539,
+          "effectiveSeconds": 461
+        }
+      ],
+      "description": "Codex: Update July timesheet"
     }
   ]
 }
