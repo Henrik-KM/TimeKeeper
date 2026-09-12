@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v42';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=37'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v43';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=38'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '39')"
+    "url.searchParams.set('timekeeper-update', '40')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=42')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=43')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5274,6 +5274,7 @@ test('focus blocker sends blocked websites once paid focus exceeds 50 percent', 
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await page.locator('#timerProjectPro').selectOption('paid-project');
   await page.locator('#startFactorPro').selectOption('1.5');
   await page.locator('#startTimerBtnPro').click();
@@ -5368,6 +5369,7 @@ test('GitHub focus bridge publishes paid focus state without exporting the token
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await page.locator('#timerProjectPro').selectOption('bridge-project');
   await page.locator('#startFactorPro').selectOption('1.5');
   await page.locator('#startTimerBtnPro').click();
@@ -6162,6 +6164,7 @@ test('focus blocker can edit blocked websites and resend the active block', asyn
   });
 
   await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
   await page.locator('#timerProjectPro').selectOption('paid-project');
   await page.locator('#startFactorPro').selectOption('1.5');
   await page.locator('#startTimerBtnPro').click();

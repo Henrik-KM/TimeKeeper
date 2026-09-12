@@ -3,13 +3,13 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v42';
+const CACHE_NAME = 'timekeeper-app-v43';
 const APP_SHELL = [
   './',
   './index.html',
   './codex-analysis.html',
   './style.css',
-  './src/main.mjs?v=37',
+  './src/main.mjs?v=38',
   './src/features/codex/performance-worker.mjs',
   './src/features/codex/top-performance-cache.mjs',
   './src/features/codex/analysis-page.mjs?v=2',
@@ -34,6 +34,18 @@ const APP_SHELL = [
   './src/styles/components.css',
   './src/styles/features.css',
   './src/styles/layout.css',
+  './src/styles/interface.css',
+  './assets/icons/house.svg',
+  './assets/icons/timer.svg',
+  './assets/icons/briefcase-business.svg',
+  './assets/icons/list.svg',
+  './assets/icons/folder.svg',
+  './assets/icons/cloud-upload.svg',
+  './assets/icons/bot.svg',
+  './assets/icons/chart-no-axes-combined.svg',
+  './assets/icons/dumbbell.svg',
+  './assets/icons/wallet.svg',
+  './assets/icons/ellipsis.svg',
   './assets/strava.json',
   './assets/strava_overrides.json',
   './assets/timekeeper-codex-usage-history.json',
@@ -76,8 +88,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '39') return;
-          url.searchParams.set('timekeeper-update', '39');
+          if (url.searchParams.get('timekeeper-update') === '40') return;
+          url.searchParams.set('timekeeper-update', '40');
           client.navigate(url.href).catch(() => undefined);
         });
       })

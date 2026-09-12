@@ -9751,6 +9751,23 @@ import {
 
   // Navigation
   const navList = document.getElementById('navList');
+  const projectCreateToggle = document.getElementById('toggleProjectCreateBtn');
+  const projectCreateCard = document.getElementById('projectCreateCard');
+  if (projectCreateToggle && projectCreateCard) {
+    let expanded = getActiveProjects().length === 0;
+    const syncProjectCreate = () => {
+      projectCreateToggle.setAttribute('aria-expanded', String(expanded));
+      projectCreateToggle.textContent = expanded
+        ? 'Hide project form'
+        : 'New project';
+      projectCreateCard.classList.toggle('mobile-collapsed', !expanded);
+    };
+    projectCreateToggle.addEventListener('click', () => {
+      expanded = !expanded;
+      syncProjectCreate();
+    });
+    syncProjectCreate();
+  }
   const companyOperatorController = createCompanyOperatorController({
     root: document.getElementById('companyPageContent'),
     connectButton: document.getElementById('companyPageConnectBtn'),
@@ -9802,13 +9819,25 @@ import {
     const { updateHash = true, resetScroll = true } = options;
     activeSectionId = sectionId;
     companyOperatorController.setActive(sectionId === 'company');
-    navList
-      .querySelectorAll('li')
-      .forEach((item) => item.classList.remove('active'));
+    navList.querySelectorAll('li').forEach((item) => {
+      item.classList.remove('active');
+      item.removeAttribute('aria-current');
+    });
     const item =
       navItem || navList.querySelector(`li[data-section="${sectionId}"]`);
-    if (item) item.classList.add('active');
+    if (item) {
+      item.classList.add('active');
+      item.setAttribute('aria-current', 'page');
+    }
     updateMobileMoreActiveState(sectionId);
+    const appDate = document.getElementById('appDate');
+    if (appDate) {
+      appDate.textContent = new Date().toLocaleDateString(undefined, {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+      });
+    }
     document.querySelectorAll('.section').forEach((sec) => {
       sec.style.display = 'none';
     });
@@ -9847,6 +9876,14 @@ import {
   }
 
   navList.querySelectorAll('li[data-section]').forEach((li) => {
+    li.setAttribute('role', 'button');
+    li.setAttribute('tabindex', '0');
+    li.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        showSection(li.getAttribute('data-section'), li);
+      }
+    });
     li.addEventListener('click', () => {
       showSection(li.getAttribute('data-section'), li);
     });
@@ -9865,27 +9902,16 @@ import {
       ['todo', 'Workouts'],
       ['grocery', 'Finances']
     ];
-    const backdrop = document.createElement('div');
-    backdrop.className = 'modal-backdrop mobile-more-backdrop';
-    const panel = document.createElement('div');
-    panel.className = 'modal-panel mobile-more-panel';
-    panel.role = 'dialog';
-    panel.setAttribute('aria-modal', 'true');
-    const header = document.createElement('div');
-    header.className = 'modal-header';
-    const title = document.createElement('h3');
-    title.id = 'mobile-more-title';
-    title.className = 'modal-title';
-    title.textContent = 'More';
-    panel.setAttribute('aria-labelledby', title.id);
-    header.appendChild(title);
-    const body = document.createElement('div');
-    body.className = 'modal-body mobile-more-list';
-    const close = () => backdrop.remove();
+    const sheet = createMobileSheet('More', { className: 'mobile-more-panel' });
+    const { body, close } = sheet;
+    body.classList.add('mobile-more-list');
     options.forEach(([sectionId, label]) => {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'mobile-more-button';
+      button.dataset.section = sectionId;
+      if (sectionId === activeSectionId)
+        button.setAttribute('aria-current', 'page');
       button.textContent = label;
       button.addEventListener('click', () => {
         close();
@@ -9893,13 +9919,6 @@ import {
       });
       body.appendChild(button);
     });
-    backdrop.addEventListener('click', (event) => {
-      if (event.target === backdrop) close();
-    });
-    panel.appendChild(header);
-    panel.appendChild(body);
-    backdrop.appendChild(panel);
-    document.body.appendChild(backdrop);
     const first = body.querySelector('button');
     if (first) first.focus();
   }
@@ -10811,6 +10830,15 @@ import {
     const item = document.createElement('li');
     item.className = 'mobile-more-nav-item';
     item.textContent = 'More';
+    item.setAttribute('role', 'button');
+    item.setAttribute('tabindex', '0');
+    item.setAttribute('aria-haspopup', 'dialog');
+    item.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        openMobileMoreMenu();
+      }
+    });
     item.addEventListener('click', openMobileMoreMenu);
     navList.appendChild(item);
   }
@@ -15348,7 +15376,10 @@ import {
       const label = bar.querySelector('.mobile-now-label');
       if (label) label.textContent = labelText;
       const detail = bar.querySelector('.mobile-now-summary strong');
-      if (detail) detail.textContent = detailText;
+      if (detail) {
+        detail.textContent = `${formatDuration(Math.floor(effective))} - ${formatFocusPercent(focus)}${paused ? ' - paused' : ''}`;
+        detail.title = detailText;
+      }
       const select = bar.querySelector('.running-factor-select');
       if (select && document.activeElement !== select) {
         select.value = ensureCurrentCompactFocusOption(select, focus);
@@ -15399,6 +15430,8 @@ import {
   }
 
   function updateTimerSection() {
+    const emptyState = document.getElementById('timerEmptyState');
+    if (emptyState) emptyState.hidden = getActiveProjects().length > 0;
     const runningEntries = getRunningEntries();
     const runningDiv = document.getElementById('runningTimerPro');
     const startDiv = document.getElementById('startTimerPro');
@@ -15592,7 +15625,7 @@ import {
           stopSingleTimer(entry.id);
         });
         runningControls.appendChild(stopBtn);
-        row.appendChild(runningControls);
+        row.insertBefore(runningControls, nameP.nextSibling);
         runningDiv.appendChild(row);
       });
       // Start an interval that updates all running timers every second
@@ -20155,7 +20188,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=42')
+      .register('./service-worker.js?v=43')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
@@ -20208,6 +20241,9 @@ import {
       today: 'dashboard',
       dashboard: 'dashboard',
       timer: 'timer',
+      projects: 'projects',
+      codex: 'codex',
+      importexport: 'importExport',
       entries: 'entries',
       'quick-log': 'entries',
       workouts: 'todo',
