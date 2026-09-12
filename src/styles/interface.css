@@ -494,14 +494,15 @@ body:has(.modal-backdrop) {
     font-weight: 500;
   }
   .mobile-today-primary {
-    gap: 8px;
+    gap: 6px;
+    align-items: start;
   }
   .mobile-today-card {
-    min-height: 80px;
+    min-height: 0;
     min-width: 0;
-    padding: 10px 12px;
-    border-radius: 14px;
-    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 10px;
+    gap: 2px;
     box-shadow: var(--ui-shadow);
     align-content: start;
   }
@@ -568,14 +569,24 @@ body:has(.modal-backdrop) {
   }
 
   .stats-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 6px;
     margin-bottom: 20px;
   }
   .stat-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
     min-width: 0;
-    padding: 14px;
-    gap: 8px;
+    padding: 8px 10px;
+    gap: 3px 8px;
+    border-radius: 10px;
+  }
+  .stat-card > :not(.stat-title):not(.stat-value) {
+    grid-column: 1 / -1;
+  }
+  .stat-card .stat-icon {
+    display: none;
   }
   .stat-title {
     font-size: 0.78rem;

@@ -89,10 +89,31 @@ test.describe('mobile portrait startup and rotation', () => {
           }))
         );
       const initial = await measureCards();
-      const primaryBounds = await page
-        .locator('.mobile-today-primary')
-        .boundingBox();
-      expect(primaryBounds.height).toBeLessThanOrEqual(200);
+      await expect
+        .poll(
+          async () =>
+            (await page.locator('.mobile-today-primary').boundingBox())
+              ?.height ?? Infinity
+        )
+        .toBeLessThanOrEqual(160);
+      const unusedSpace = await page
+        .locator('.mobile-today-card')
+        .evaluateAll((cards) =>
+          cards.map(
+            (card) =>
+              card.getBoundingClientRect().bottom -
+              card.lastElementChild.getBoundingClientRect().bottom
+          )
+        );
+      for (const space of unusedSpace) expect(space).toBeLessThanOrEqual(8);
+      const statLayout = await page
+        .locator('.stat-card')
+        .first()
+        .evaluate((card) => ({
+          title: card.querySelector('.stat-title').getBoundingClientRect().top,
+          value: card.querySelector('.stat-value').getBoundingClientRect().top
+        }));
+      expect(Math.abs(statLayout.title - statLayout.value)).toBeLessThan(10);
       for (const card of initial) {
         expect(card.height).toBeGreaterThanOrEqual(48);
       }

@@ -20188,7 +20188,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=46')
+      .register('./service-worker.js?v=47')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
