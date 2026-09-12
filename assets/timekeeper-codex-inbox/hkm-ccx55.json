@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-12T12:01:01.831Z",
+  "updatedAt": "2026-09-12T12:16:01.730Z",
   "dayStart": "2026-09-11T22:00:00.000Z",
   "rangeStart": "2026-06-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-12T12:01:03.980Z",
+    "observedAt": "2026-09-12T12:16:03.835Z",
     "primary": {
-      "usedPercent": 5,
-      "remainingPercent": 95,
+      "usedPercent": 7,
+      "remainingPercent": 93,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-19T08:20:21.000Z"
+      "resetsAt": "2026-09-19T08:20:22.000Z"
     },
     "secondary": null
   },
@@ -21296,6 +21296,58 @@
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-0f938649b2ffce7fc789410d",
+      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T11:35:04.909Z",
+      "endTime": "2026-09-12T11:48:32.389Z",
+      "wallSeconds": 807,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 242,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 807,
+          "effectiveSeconds": 242
+        }
+      ],
+      "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-26420e9f0814cd09120009be",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-12T11:52:14.806Z",
+      "endTime": "2026-09-12T11:53:38.899Z",
+      "wallSeconds": 84,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 25,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 84,
+          "effectiveSeconds": 25
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
