@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-14T12:01:02.274Z",
+  "updatedAt": "2026-09-14T12:31:02.197Z",
   "dayStart": "2026-09-13T22:00:00.000Z",
   "rangeStart": "2026-06-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-14T12:01:06.013Z",
+    "observedAt": "2026-09-14T12:31:04.283Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-21T09:10:29.000Z"
+      "resetsAt": "2026-09-21T09:10:30.000Z"
     },
     "secondary": null
   },
@@ -19883,6 +19883,32 @@
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-8c12f300cc8942fee4505ac1",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-14T11:11:37.598Z",
+      "endTime": "2026-09-14T12:01:05.429Z",
+      "wallSeconds": 2967,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1483,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 2967,
+          "effectiveSeconds": 1483
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
