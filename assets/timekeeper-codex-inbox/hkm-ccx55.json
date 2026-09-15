@@ -2,7 +2,7 @@
   "version": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-15T12:16:02.062Z",
+  "updatedAt": "2026-09-15T12:31:02.115Z",
   "dayStart": "2026-09-14T22:00:00.000Z",
   "rangeStart": "2026-06-17T22:00:00.000Z",
   "lookbackDays": 90,
@@ -11,12 +11,12 @@
     "research"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-15T12:16:04.182Z",
+    "observedAt": "2026-09-15T12:31:04.249Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-21T09:10:30.000Z"
+      "resetsAt": "2026-09-21T09:10:29.000Z"
     },
     "secondary": null
   },
@@ -20587,6 +20587,32 @@
       "description": "Codex: email-helper"
     },
     {
+      "id": "codex-b442abcdca0b010f02ac20fb",
+      "threadId": "01a0703f-ae6d-7fb0-8073-8780a5294e81",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T11:33:26.020Z",
+      "endTime": "2026-09-15T12:05:39.289Z",
+      "wallSeconds": 1933,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 1449,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 1933,
+          "effectiveSeconds": 1449
+        }
+      ],
+      "description": "Codex: Improve operator and email helper"
+    },
+    {
       "id": "codex-d39c83630580a5d1ad3151b7",
       "threadId": "01a0a4e8-08bc-75b1-ad45-bb500cc166b0",
       "projectKey": "email-helper",
@@ -20738,6 +20764,136 @@
           "fastModeMultiplier": 1,
           "wallSeconds": 26,
           "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-ee06042aa4498e4cee6322b0",
+      "threadId": "01a0a4fa-37e4-7fd0-88db-51ba45fc156d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T12:11:07.610Z",
+      "endTime": "2026-09-15T12:11:44.411Z",
+      "wallSeconds": 36,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 18,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 36,
+          "effectiveSeconds": 18
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-9d1c3f38dc4189dc868b00e2",
+      "threadId": "01a0a4fa-2f69-76a2-9fa1-1a4327ea8edf",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T12:11:14.571Z",
+      "endTime": "2026-09-15T12:11:44.332Z",
+      "wallSeconds": 29,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 14,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 29,
+          "effectiveSeconds": 14
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-200dd9d9617cbb40d76fa9a8",
+      "threadId": "01a0a4f9-e35e-72e1-be03-aa1bfe0be9ad",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T12:11:22.227Z",
+      "endTime": "2026-09-15T12:11:44.177Z",
+      "wallSeconds": 21,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 21,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-3aa7c2ee5931fc872b05326d",
+      "threadId": "01a0a4f9-e56d-7d63-a717-6c58d1f37bab",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T12:11:24.724Z",
+      "endTime": "2026-09-15T12:11:44.257Z",
+      "wallSeconds": 19,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 9,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 19,
+          "effectiveSeconds": 9
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-fae9efdc4633b5d78b95d588",
+      "threadId": "01a0a4fa-a565-7530-87cb-bfd5fd791e23",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T12:11:25.127Z",
+      "endTime": "2026-09-15T12:11:44.491Z",
+      "wallSeconds": 19,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 9,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "wallSeconds": 19,
+          "effectiveSeconds": 9
         }
       ],
       "description": "Codex: email-helper"
