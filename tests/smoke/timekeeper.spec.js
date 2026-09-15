@@ -4023,6 +4023,7 @@ test('wealth leads with goal status, validates the two goal inputs, and supports
   await expect(page.locator('#wealthAccessibleSummary')).toContainText(
     '3 snapshots'
   );
+  await expect(page.locator('#wealthCurrentPace')).toContainText('/day');
   await page.locator('#wealthRangeOneYear').click();
   await expect(page.locator('#wealthRangeOneYear')).toHaveClass(/active/);
 
@@ -4066,6 +4067,9 @@ test('wealth leads with goal status, validates the two goal inputs, and supports
     .locator('#wealthHistoryBody tr')
     .filter({ hasText: 'New point' });
   await expect(newRow).toBeVisible();
+  await expect(page.locator('#wealthProjectionUpdate')).toContainText(
+    'Wealth point added'
+  );
 
   await newRow.getByRole('button', { name: 'Edit' }).click();
   const editDialog = page.getByRole('dialog', { name: 'Edit wealth snapshot' });
@@ -4255,6 +4259,9 @@ test('mobile wealth leads with freshness, supports detailed updates, and avoids 
   await sheet.getByLabel(/Loan.*liability/).fill('12000');
   await sheet.getByRole('button', { name: 'Update wealth' }).click();
   await expect(sheet).toBeHidden();
+  await expect(page.locator('#wealthProjectionUpdate')).toContainText(
+    'Wealth point added'
+  );
   const saved = await page.evaluate(() =>
     JSON.parse(localStorage.getItem('timekeeperDataPro'))
   );

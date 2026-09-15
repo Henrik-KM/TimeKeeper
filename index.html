@@ -585,6 +585,7 @@
               <p class="eyebrow">Net worth</p>
               <h3 id="wealthCurrentValue" class="wealth-current-value">No snapshot yet</h3>
               <p id="wealthCurrentAsOf" class="card-subtitle">Update wealth to establish a dated total.</p>
+              <p id="wealthCurrentPace" class="wealth-current-pace pending" role="status" aria-live="polite">Observed pace starts after 3 snapshots spanning 90 days.</p>
             </div>
             <div class="wealth-freshness-panel">
               <span id="wealthFreshness" class="wealth-freshness-label empty">No snapshot yet</span>
@@ -612,6 +613,7 @@
               <button id="wealthGoalEditButton" type="button" class="btn secondary finance-mobile-only">Edit goal</button>
             </div>
             <span id="wealthGoalStatus" class="wealth-status wealth-status-empty">Set a goal amount and date</span>
+            <p id="wealthProjectionUpdate" class="wealth-projection-update" role="status" aria-live="polite" hidden></p>
             <div id="wealthMetricGrid" class="wealth-metric-grid wealth-goal-metric-grid"></div>
             <form id="wealthGoalForm" class="wealth-goal-form wealth-desktop-form" novalidate>
               <div class="finance-field"><label for="wealthGoalAmount">Goal amount (SEK)</label><input id="wealthGoalAmount" type="number" min="0.01" step="0.01" required class="wealth-input" placeholder="Enter a target" /></div>

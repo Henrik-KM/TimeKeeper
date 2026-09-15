@@ -699,6 +699,9 @@ import {
   let pendingWealthCsvPreview = null;
   let editingWealthAccountId = null;
   let wealthHistoryExpanded = !isMobileViewport();
+  let wealthProjectionNotice = null;
+  let wealthProjectionNoticeRevision = 0;
+  let wealthProjectionNoticeAnimatedRevision = 0;
 
   function createChartIfAvailable(context, config) {
     if (typeof Chart === 'undefined' || !context) return null;
@@ -743,6 +746,84 @@ import {
       'date-past': 'Choose a date after today.'
     };
     return messages[reason] || 'Check the highlighted values and try again.';
+  }
+
+  function setWealthProjectionUpdateNotice({
+    previousPlan,
+    nextPlan,
+    date = '',
+    action = 'added',
+    count = 1
+  } = {}) {
+    const label = count === 1 ? 'Wealth point' : `${count} wealth points`;
+    const verb = action === 'updated' ? 'updated' : 'added';
+    const message = [`${label} ${verb}${date ? ` for ${date}` : ''}.`];
+    const previousProjection = Number(previousPlan?.projectedAtGoal);
+    const nextProjection = Number(nextPlan?.projectedAtGoal);
+    const hasPreviousProjection = Number.isFinite(previousProjection);
+    const hasNextProjection = Number.isFinite(nextProjection);
+
+    if (hasPreviousProjection && hasNextProjection && nextPlan?.goalDate) {
+      message.push(
+        `Goal-date projection moved ${formatFinanceSignedAmount(nextProjection - previousProjection)} to ${formatFinanceAmount(nextProjection)}.`
+      );
+    } else if (hasNextProjection && nextPlan?.goalDate) {
+      message.push(
+        `Goal-date projection is ${formatFinanceAmount(nextProjection)}.`
+      );
+    } else if (nextPlan?.goalAmount !== null && nextPlan?.goalDate) {
+      message.push('The goal trajectory was recalculated.');
+    } else {
+      message.push('Set a goal amount and date to see updated projections.');
+    }
+
+    const pace = nextPlan?.observedPace;
+    if (pace?.available && Number.isFinite(Number(pace.slopePerDay))) {
+      message.push(
+        `Observed net-worth pace is ${formatFinanceSignedAmount(pace.slopePerDay)}/day.`
+      );
+    } else {
+      message.push(
+        'Current trajectory needs at least three snapshots spanning 90 days.'
+      );
+    }
+
+    wealthProjectionNotice = {
+      text: message.join(' '),
+      revision: ++wealthProjectionNoticeRevision
+    };
+  }
+
+  function renderWealthProjectionUpdate() {
+    const notice = document.getElementById('wealthProjectionUpdate');
+    if (!notice) return;
+    if (!wealthProjectionNotice) {
+      notice.hidden = true;
+      notice.textContent = '';
+      return;
+    }
+
+    notice.textContent = wealthProjectionNotice.text;
+    notice.hidden = false;
+    if (
+      wealthProjectionNotice.revision === wealthProjectionNoticeAnimatedRevision
+    ) {
+      return;
+    }
+    wealthProjectionNoticeAnimatedRevision = wealthProjectionNotice.revision;
+    const pulseTargets = [
+      notice,
+      document.getElementById('wealthMetricGrid'),
+      document.querySelector('#wealthDashboardCard .wealth-chart-wrapper')
+    ].filter(Boolean);
+    pulseTargets.forEach((element) => {
+      element.classList.remove('wealth-projection-pulse');
+      void element.offsetWidth;
+      element.classList.add('wealth-projection-pulse');
+      window.setTimeout(() => {
+        element.classList.remove('wealth-projection-pulse');
+      }, 1100);
+    });
   }
 
   function getWealthAccountsForUpdate() {
@@ -803,6 +884,12 @@ import {
     const dateKey = formatDateKey(parsedDate);
     const note = typeof noteRaw === 'string' ? noteRaw.trim() : '';
     const history = ensureWealthData();
+    const projectionNow = new Date();
+    const previousPlan = calculateWealthGoalTrajectory(
+      history,
+      data.wealthGoal || makeDefaultWealthGoal(),
+      { now: projectionNow }
+    );
     const resolution = resolveWealthSnapshotConflict(
       history,
       { id, date: dateKey, amount, breakdown: normalizedBreakdown, note },
@@ -841,6 +928,17 @@ import {
       const leftDate = parseWealthDate(left.date)?.getTime() || 0;
       const rightDate = parseWealthDate(right.date)?.getTime() || 0;
       return leftDate - rightDate;
+    });
+    const nextPlan = calculateWealthGoalTrajectory(
+      history,
+      data.wealthGoal || makeDefaultWealthGoal(),
+      { now: projectionNow }
+    );
+    setWealthProjectionUpdateNotice({
+      previousPlan,
+      nextPlan,
+      date: dateKey,
+      action: existing ? 'updated' : 'added'
     });
     saveData();
     renderWealthHistoryTable();
@@ -907,6 +1005,7 @@ import {
     );
     if (index < 0) return;
     history.splice(index, 1);
+    wealthProjectionNotice = null;
     saveData();
     renderWealthHistoryTable();
     updateWealthDashboard();
@@ -1377,6 +1476,7 @@ import {
       message.textContent = detail;
     }
     summaryEl?.appendChild(message);
+    renderWealthProjectionUpdate();
   }
 
   function renderWealthComposition(latest) {
@@ -1624,6 +1724,21 @@ import {
         ? `As of ${latest.date} · ${formatWealthDateLabel(latest.date)}`
         : 'Update wealth to establish a dated total.'
     );
+    const paceEl = document.getElementById('wealthCurrentPace');
+    if (paceEl) {
+      const pace = goalPlan.observedPace;
+      if (pace?.available && Number.isFinite(Number(pace.slopePerDay))) {
+        paceEl.textContent = `${formatFinanceSignedAmount(pace.slopePerDay)}/day · observed net-worth pace`;
+        paceEl.className =
+          'wealth-current-pace ' +
+          (Number(pace.slopePerDay) >= 0 ? 'positive' : 'negative');
+      } else {
+        paceEl.textContent = latest
+          ? 'Observed pace pending · need 3 snapshots spanning 90 days'
+          : 'Observed pace starts after 3 snapshots spanning 90 days.';
+        paceEl.className = 'wealth-current-pace pending';
+      }
+    }
     const freshnessEl = setWealthText('wealthFreshness', freshness.label);
     if (freshnessEl) {
       freshnessEl.className = `wealth-freshness-label ${freshness.status}`;
@@ -2551,6 +2666,7 @@ import {
 
   function restoreDataSnapshot(snapshot) {
     data = cloneData(snapshot);
+    wealthProjectionNotice = null;
     persistDataToLocalStorage();
     needsBackup = true;
     scheduleBackupSoon();
@@ -8090,6 +8206,12 @@ import {
           return;
         }
         const before = cloneData();
+        const projectionNow = new Date();
+        const previousPlan = calculateWealthGoalTrajectory(
+          data.wealthHistory,
+          data.wealthGoal || makeDefaultWealthGoal(),
+          { now: projectionNow }
+        );
         const result = applyWealthCsvImport(data, pendingWealthCsvPreview, {
           replaceExistingDates:
             document.getElementById('wealthCsvReplace')?.checked === true
@@ -8099,6 +8221,24 @@ import {
           return;
         }
         data = result.state;
+        if (result.importedDates.length) {
+          const nextPlan = calculateWealthGoalTrajectory(
+            data.wealthHistory,
+            data.wealthGoal || makeDefaultWealthGoal(),
+            { now: projectionNow }
+          );
+          setWealthProjectionUpdateNotice({
+            previousPlan,
+            nextPlan,
+            date:
+              result.importedDates.length === 1 ? result.importedDates[0] : '',
+            action:
+              result.replacedDates.length === result.importedDates.length
+                ? 'updated'
+                : 'added',
+            count: result.importedDates.length
+          });
+        }
         saveData();
         pendingWealthCsvPreview = null;
         renderWealthCsvPreview(null);
