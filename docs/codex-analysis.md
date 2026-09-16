@@ -104,11 +104,26 @@ match was automatic, custom, stale, or missing. Published audit paths are
 sanitized to relative forms such as `GitHub/IFLAI/repository` or
 `Documents/RiskNav`; the full Windows cwd is not included in the inbox.
 
+The same audit also lists individual session mappings. These are keyed by the
+stable Codex session/thread ID and are required for projectless or automation
+sessions whose runtime cwd is a temporary folder such as
+`Documents/Codex/2026-09-01/...`. A session mapping can specify the
+TimeKeeper project, repository name, and a bounded historical backfill window.
+The bridge checks these mappings before cwd mappings, so a changing scratch
+folder does not break attribution. Records admitted through a session or
+repository backfill are marked for historical import and are allowed through
+the local import window without changing their stable external IDs.
+
 An unknown row can be mapped by repository name or by a normalized path
 substring. Saving a rule keeps it in the browser configuration and publishes it
 through the existing Codex config publisher, so the desktop bridge uses the
 same rule on its next run. Explicit rules also resolve unfamiliar GitHub parent
 folders when the normal TimeKeeper project-folder match is unavailable.
+
+The bridge does not infer a project from arbitrary command text or map every
+`Documents/Codex` scratch folder to one project. Broad projectless tasks may
+touch several repositories, so they remain visible as unmapped until their
+stable session ID is assigned deliberately.
 
 ## Historical backfill
 

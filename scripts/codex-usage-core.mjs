@@ -179,6 +179,55 @@ export function normalizeCodexMappings(mappings = []) {
     .filter(Boolean);
 }
 
+export function normalizeCodexSessionMappings(sessionMappings = []) {
+  if (!Array.isArray(sessionMappings)) return [];
+  return sessionMappings
+    .map((mapping) => {
+      const obj = mapping && typeof mapping === 'object' ? mapping : {};
+      const sessionId = String(
+        obj.sessionId || obj.threadId || obj.id || ''
+      ).trim();
+      if (!sessionId) return null;
+      const projectId =
+        obj.projectId === null
+          ? null
+          : String(obj.projectId || obj.timekeeperProjectId || '').trim();
+      const projectName = String(
+        obj.projectName || obj.timekeeperProjectName || ''
+      ).trim();
+      const repoName = String(
+        obj.repoName || obj.repository || obj.codexRepoName || ''
+      ).trim();
+      const backfillDays = Math.min(
+        365,
+        Math.max(
+          DEFAULT_CODEX_LOOKBACK_DAYS,
+          Math.floor(Number(obj.backfillDays) || DEFAULT_CODEX_LOOKBACK_DAYS)
+        )
+      );
+      return {
+        sessionId,
+        projectId: projectId || null,
+        projectName,
+        repoName,
+        backfillDays
+      };
+    })
+    .filter(Boolean);
+}
+
+export function findCodexSessionMapping(sessionId = '', sessionMappings = []) {
+  const normalizedId = String(sessionId || '')
+    .trim()
+    .toLowerCase();
+  if (!normalizedId) return null;
+  return (
+    normalizeCodexSessionMappings(sessionMappings).find(
+      (mapping) => mapping.sessionId.toLowerCase() === normalizedId
+    ) || null
+  );
+}
+
 export function findCodexMappingForCwd(cwd = '', mappings = []) {
   const normalizedMappings = normalizeCodexMappings(mappings);
   const repoName = getRepoNameFromCwd(cwd);
@@ -230,6 +279,140 @@ export function findTrackedProjectForCwd(
     ...mapping,
     projectName: ''
   };
+}
+
+export function findTrackedProjectForSession(
+  meta = {},
+  trackedProjects = [],
+  fallbackMappings = [],
+  sessionMappings = []
+) {
+  const sessionId = String(meta?.sessionId || meta?.id || '').trim();
+  const sessionMapping = findCodexSessionMapping(sessionId, sessionMappings);
+  if (sessionMapping) {
+    const normalizedProjects = normalizeTrackedProjects(trackedProjects);
+    const project = normalizedProjects.find(
+      (candidate) =>
+        (sessionMapping.projectId &&
+          candidate.projectId === sessionMapping.projectId) ||
+        (sessionMapping.projectName &&
+          candidate.name.toLowerCase() ===
+            sessionMapping.projectName.toLowerCase())
+    );
+    const projectId = project?.projectId || sessionMapping.projectId || null;
+    if (projectId) {
+      return {
+        ...sessionMapping,
+        matchType: 'sessionId',
+        match: sessionMapping.sessionId,
+        sessionMapping: true,
+        projectId,
+        projectName: project?.name || sessionMapping.projectName || '',
+        repoName: sessionMapping.repoName || getRepoNameFromCwd(meta?.cwd || '')
+      };
+    }
+  }
+  return findTrackedProjectForCwd(
+    meta?.cwd || '',
+    trackedProjects,
+    fallbackMappings
+  );
+}
+
+/**
+ * Build a session-level audit so scratch-backed Codex tasks can be mapped by
+ * stable session ID instead of by a dated temporary working directory.
+ */
+export function buildCodexSessionMappingAudit({
+  sessions = [],
+  trackedProjects = [],
+  mappings = [],
+  sessionMappings = [],
+  threadNamesById = new Map()
+} = {}) {
+  const normalizedProjects = normalizeTrackedProjects(trackedProjects);
+  const bySession = new Map();
+  sessions.forEach((session) => {
+    const meta = session?.meta || {};
+    const sessionId = String(meta.sessionId || meta.id || '').trim();
+    if (!sessionId) return;
+    const sessionMapping = findCodexSessionMapping(sessionId, sessionMappings);
+    const projectMatch = findTrackedProjectForSession(
+      meta,
+      normalizedProjects,
+      mappings,
+      sessionMappings
+    );
+    const matchedProject = normalizedProjects.find(
+      (project) =>
+        project.projectId === String(projectMatch?.projectId || '').trim()
+    );
+    const projectId = String(projectMatch?.projectId || '').trim();
+    const isSessionMapped = Boolean(sessionMapping);
+    const isAutomatic =
+      !isSessionMapped && projectMatch?.matchType === 'githubParentFolder';
+    const status = projectId
+      ? matchedProject
+        ? isSessionMapped || !isAutomatic
+          ? 'mapped'
+          : 'automatic'
+        : 'stale'
+      : 'unmapped';
+    const activityTimes = (
+      Array.isArray(session?.activity) ? session.activity : []
+    )
+      .map((point) => parseTimestamp(point?.timestamp)?.getTime() || 0)
+      .filter(Boolean);
+    const seenAtMs = Math.max(
+      ...activityTimes,
+      parseTimestamp(meta.timestamp)?.getTime() || 0
+    );
+    const key = sessionId.toLowerCase();
+    const current = bySession.get(key) || {
+      key,
+      sessionId,
+      title: threadNamesById.get(sessionId) || '',
+      threadSource: String(meta.threadSource || '').trim(),
+      displayPath: getCodexDisplayPath(meta.cwd),
+      repoName: projectMatch?.repoName || getRepoNameFromCwd(meta.cwd),
+      status,
+      mappingSource: isSessionMapped
+        ? 'sessionId'
+        : projectMatch?.matchType || null,
+      projectId: projectId || null,
+      projectName: matchedProject?.name || projectMatch?.projectName || '',
+      match: isSessionMapped
+        ? sessionMapping.sessionId
+        : projectMatch?.match || '',
+      backfillDays: sessionMapping?.backfillDays || DEFAULT_CODEX_LOOKBACK_DAYS,
+      activityCount: 0,
+      assistantActivity: false,
+      lastSeenAt: null
+    };
+    current.activityCount += Array.isArray(session?.activity)
+      ? session.activity.length
+      : 0;
+    current.assistantActivity ||= session?.hasAssistantActivity === true;
+    if (seenAtMs > 0) {
+      const seenAt = new Date(seenAtMs).toISOString();
+      if (
+        !current.lastSeenAt ||
+        Date.parse(seenAt) > Date.parse(current.lastSeenAt)
+      ) {
+        current.lastSeenAt = seenAt;
+      }
+    }
+    bySession.set(key, current);
+  });
+  const statusOrder = { unmapped: 0, stale: 1, mapped: 2, automatic: 3 };
+  return [...bySession.values()].sort(
+    (left, right) =>
+      (statusOrder[left.status] ?? 9) - (statusOrder[right.status] ?? 9) ||
+      (Date.parse(right.lastSeenAt || '') || 0) -
+        (Date.parse(left.lastSeenAt || '') || 0) ||
+      left.title.localeCompare(right.title) ||
+      left.sessionId.localeCompare(right.sessionId)
+  );
 }
 
 /**
@@ -641,6 +824,7 @@ export function makeCodexRecordId(parts = []) {
  *   activity?: Array<{ timestamp: Date, model?: string, effort?: string, fastMode?: boolean }>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
+ *   sessionMappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
  *   now?: Date,
  *   idleGapMs?: number,
@@ -656,6 +840,7 @@ export function buildCodexUsageRecordsFromSessionData({
   activity = [],
   trackedProjects,
   mappings,
+  sessionMappings,
   threadNamesById = new Map(),
   now = new Date(),
   idleGapMs = DEFAULT_IDLE_GAP_MS,
@@ -664,10 +849,11 @@ export function buildCodexUsageRecordsFromSessionData({
   focusPolicy = {},
   sourceFile = ''
 } = {}) {
-  const projectMatch = findTrackedProjectForCwd(
-    meta.cwd,
+  const projectMatch = findTrackedProjectForSession(
+    meta,
     trackedProjects,
-    mappings
+    mappings,
+    sessionMappings
   );
   if (!projectMatch || !projectMatch.projectId) return [];
   const normalizedPolicy = normalizeCodexFocusPolicy(focusPolicy, focusFactor);
@@ -942,6 +1128,7 @@ function aggregateCodexIntervals(intervals = []) {
  *   }>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
+ *   sessionMappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
  *   now?: Date,
  *   idleGapMs?: number,
@@ -955,6 +1142,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
   sessions = [],
   trackedProjects,
   mappings,
+  sessionMappings,
   threadNamesById = new Map(),
   now = new Date(),
   idleGapMs = DEFAULT_IDLE_GAP_MS,
@@ -975,6 +1163,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
         ...session,
         trackedProjects,
         mappings,
+        sessionMappings,
         threadNamesById,
         now,
         idleGapMs,
@@ -998,10 +1187,11 @@ export function buildCodexUsageRecordsFromSessionGroup({
     ...parent.meta,
     id: rootSessionId
   };
-  const projectMatch = findTrackedProjectForCwd(
-    parentMeta.cwd,
+  const projectMatch = findTrackedProjectForSession(
+    parentMeta,
     trackedProjects,
-    mappings
+    mappings,
+    sessionMappings
   );
   if (!projectMatch || !projectMatch.projectId) return [];
   const normalizedPolicy = normalizeCodexFocusPolicy(focusPolicy, focusFactor);
@@ -1026,6 +1216,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
       },
       trackedProjects,
       mappings,
+      sessionMappings,
       threadNamesById,
       now,
       idleGapMs,
@@ -1094,6 +1285,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
  *   text?: string,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
+ *   sessionMappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
  *   dayStart?: Date,
  *   now?: Date,
@@ -1108,6 +1300,7 @@ export function buildCodexUsageRecordsFromSessionText({
   text,
   trackedProjects,
   mappings,
+  sessionMappings,
   threadNamesById = new Map(),
   dayStart = getLocalDayStart(),
   now = new Date(),
@@ -1127,6 +1320,7 @@ export function buildCodexUsageRecordsFromSessionText({
     activity,
     trackedProjects,
     mappings,
+    sessionMappings,
     threadNamesById,
     now,
     idleGapMs,

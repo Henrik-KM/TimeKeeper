@@ -2068,6 +2068,14 @@ import {
     },
     repositoryBackfillDays: 90
   };
+  const CODEX_DEFAULT_SESSION_MAPPINGS = [
+    {
+      sessionId: '01a05bde-fee1-7303-89e3-8f54b5e16505',
+      projectName: 'IFLAI',
+      repoName: 'email-helper',
+      backfillDays: 90
+    }
+  ];
 
   function normalizeGitHubRepository(value = '') {
     const repository = String(value || '')
@@ -2101,6 +2109,38 @@ import {
             obj.matchType === 'pathIncludes' ? 'pathIncludes' : 'repoName',
           match,
           projectId: projectId || null
+        };
+      })
+      .filter(Boolean);
+  }
+
+  function normalizeCodexSessionMappings(value = []) {
+    if (!Array.isArray(value)) return [];
+    return value
+      .map((mapping) => {
+        const obj = mapping && typeof mapping === 'object' ? mapping : {};
+        const sessionId = String(
+          obj.sessionId || obj.threadId || obj.id || ''
+        ).trim();
+        if (!sessionId) return null;
+        const projectId =
+          obj.projectId === null ? null : String(obj.projectId || '').trim();
+        const projectName = String(
+          obj.projectName || obj.timekeeperProjectName || ''
+        ).trim();
+        const repoName = String(
+          obj.repoName || obj.repository || obj.codexRepoName || ''
+        ).trim();
+        const backfillDays = Math.min(
+          365,
+          Math.max(7, Math.floor(Number(obj.backfillDays) || 7))
+        );
+        return {
+          sessionId,
+          projectId: projectId || null,
+          projectName,
+          repoName,
+          backfillDays
         };
       })
       .filter(Boolean);
@@ -2186,6 +2226,80 @@ import {
     );
   }
 
+  function normalizeCodexSessionMappingAudit(value = []) {
+    if (!Array.isArray(value)) return [];
+    const rows = new Map();
+    value.forEach((item) => {
+      const source = item && typeof item === 'object' ? item : {};
+      const sessionId = String(
+        source.sessionId || source.threadId || source.id || ''
+      ).trim();
+      if (!sessionId) return;
+      const key = sessionId.toLowerCase();
+      const existing = rows.get(key);
+      const row = {
+        key,
+        sessionId,
+        title: String(source.title || '').trim(),
+        threadSource: String(source.threadSource || '').trim(),
+        displayPath: String(source.displayPath || '').trim(),
+        repoName: String(source.repoName || '').trim(),
+        status: ['automatic', 'mapped', 'stale', 'unmapped'].includes(
+          source.status
+        )
+          ? source.status
+          : 'unmapped',
+        mappingSource: String(source.mappingSource || '').trim(),
+        projectId: source.projectId ? String(source.projectId) : null,
+        projectName: String(source.projectName || '').trim(),
+        match: String(source.match || '').trim(),
+        backfillDays: Math.min(
+          365,
+          Math.max(7, Math.floor(Number(source.backfillDays) || 7))
+        ),
+        activityCount: Math.max(
+          0,
+          Math.floor(Number(source.activityCount) || 0)
+        ),
+        assistantActivity: source.assistantActivity === true,
+        lastSeenAt: source.lastSeenAt || null
+      };
+      if (!existing) {
+        rows.set(key, row);
+        return;
+      }
+      existing.activityCount += row.activityCount;
+      existing.assistantActivity ||= row.assistantActivity;
+      if (
+        row.lastSeenAt &&
+        (!existing.lastSeenAt ||
+          Date.parse(row.lastSeenAt) > Date.parse(existing.lastSeenAt))
+      ) {
+        existing.lastSeenAt = row.lastSeenAt;
+      }
+      if (!existing.title && row.title) existing.title = row.title;
+      if (!existing.projectName && row.projectName) {
+        existing.projectName = row.projectName;
+      }
+      if (!existing.repoName && row.repoName) existing.repoName = row.repoName;
+      if (existing.status === 'unmapped' && row.status !== 'unmapped') {
+        existing.status = row.status;
+        existing.mappingSource = row.mappingSource;
+        existing.projectId = row.projectId;
+        existing.match = row.match;
+      }
+    });
+    const statusOrder = { unmapped: 0, stale: 1, mapped: 2, automatic: 3 };
+    return [...rows.values()].sort(
+      (left, right) =>
+        (statusOrder[left.status] ?? 9) - (statusOrder[right.status] ?? 9) ||
+        (Date.parse(right.lastSeenAt || '') || 0) -
+          (Date.parse(left.lastSeenAt || '') || 0) ||
+        left.title.localeCompare(right.title) ||
+        left.sessionId.localeCompare(right.sessionId)
+    );
+  }
+
   function makeDefaultCodexIntegration() {
     return {
       enabled: false,
@@ -2198,7 +2312,9 @@ import {
       contextBranch: CODEX_CONTEXT_DEFAULT_BRANCH,
       contextPath: CODEX_CONTEXT_DEFAULT_PATH,
       mappings: [],
+      sessionMappings: CODEX_DEFAULT_SESSION_MAPPINGS,
       mappingAudit: [],
+      sessionMappingAudit: [],
       importedCodexRecordIds: [],
       lastImportAt: null,
       lastImportSummary: null,
@@ -2270,6 +2386,10 @@ import {
     const importedIds = Array.isArray(config.importedCodexRecordIds)
       ? config.importedCodexRecordIds.map((id) => String(id)).filter(Boolean)
       : [];
+    const hasSessionMappings = Object.prototype.hasOwnProperty.call(
+      config,
+      'sessionMappings'
+    );
     return {
       enabled: config.enabled === true,
       repository:
@@ -2289,7 +2409,15 @@ import {
         defaults.contextBranch,
       contextPath: normalizeCodexPath(config.contextPath, defaults.contextPath),
       mappings: normalizeCodexMappings(config.mappings),
+      sessionMappings: normalizeCodexSessionMappings(
+        hasSessionMappings
+          ? config.sessionMappings
+          : CODEX_DEFAULT_SESSION_MAPPINGS
+      ),
       mappingAudit: normalizeCodexMappingAudit(config.mappingAudit),
+      sessionMappingAudit: normalizeCodexSessionMappingAudit(
+        config.sessionMappingAudit
+      ),
       importedCodexRecordIds: [...new Set(importedIds)].slice(-1000),
       lastImportAt: config.lastImportAt || null,
       lastImportSummary:
@@ -4089,6 +4217,35 @@ import {
     return mappings;
   }
 
+  function getCodexPublishedSessionMappings(
+    projects = getCodexTrackedProjects()
+  ) {
+    const config = getCodexIntegrationConfig();
+    const mappings = normalizeCodexSessionMappings(config.sessionMappings);
+    const seen = new Set();
+    return mappings
+      .map((mapping) => {
+        const project = projects.find(
+          (candidate) =>
+            (mapping.projectId && candidate.projectId === mapping.projectId) ||
+            (mapping.projectName &&
+              candidate.name.toLowerCase() ===
+                mapping.projectName.toLowerCase())
+        );
+        return {
+          ...mapping,
+          projectId: mapping.projectId || project?.projectId || null,
+          projectName: mapping.projectName || project?.name || ''
+        };
+      })
+      .filter((mapping) => {
+        const key = mapping.sessionId.toLowerCase();
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return Boolean(mapping.projectId || mapping.projectName);
+      });
+  }
+
   function findCodexProjectByName(name) {
     const value = String(name || '')
       .trim()
@@ -4132,6 +4289,7 @@ import {
     const trackedProjects = getCodexTrackedProjects();
     return {
       version: CODEX_FOCUS_POLICY.version,
+      schemaVersion: 2,
       source: 'timekeeper',
       enabled: config.enabled,
       updatedAt: new Date().toISOString(),
@@ -4139,7 +4297,8 @@ import {
       focusFactor: CODEX_FOCUS_FACTOR,
       focusPolicy: CODEX_FOCUS_POLICY,
       trackedProjects,
-      mappings: getCodexPublishedMappings(trackedProjects)
+      mappings: getCodexPublishedMappings(trackedProjects),
+      sessionMappings: getCodexPublishedSessionMappings(trackedProjects)
     };
   }
 
@@ -4358,6 +4517,7 @@ import {
     record,
     windowStart = getCodexImportWindowStart()
   ) {
+    if (record?.codexBackfill === true) return true;
     const start = new Date(record?.startTime || '');
     return !Number.isNaN(start.getTime()) && start >= windowStart;
   }
@@ -4408,6 +4568,16 @@ import {
     );
     if (mappingAuditRows.length) {
       config.mappingAudit = normalizeCodexMappingAudit(mappingAuditRows);
+    }
+    const sessionMappingAuditRows = payloads.flatMap((payload) =>
+      Array.isArray(payload?.sessionMappingAudit)
+        ? payload.sessionMappingAudit
+        : []
+    );
+    if (sessionMappingAuditRows.length) {
+      config.sessionMappingAudit = normalizeCodexSessionMappingAudit(
+        sessionMappingAuditRows
+      );
     }
     config.usageLimits =
       payloads
@@ -13508,6 +13678,87 @@ import {
     return 'Needs mapping';
   }
 
+  async function editCodexSessionMapping(row) {
+    const config = getCodexIntegrationConfig();
+    const projects = getCodexTrackedProjects();
+    if (!projects.length) {
+      showToast('Add an active TimeKeeper project before mapping a session.');
+      return;
+    }
+    const values = await openFormDialog({
+      title: `Map ${row.title || row.sessionId}`,
+      fields: [
+        {
+          name: 'projectId',
+          label: 'TimeKeeper project',
+          type: 'select',
+          value: row.projectId || projects[0].projectId,
+          options: projects.map((project) => ({
+            value: project.projectId,
+            label: project.name
+          }))
+        },
+        {
+          name: 'repoName',
+          label: 'Repository name',
+          value: row.repoName || '',
+          required: true
+        },
+        {
+          name: 'backfillDays',
+          label: 'Historical days to include',
+          type: 'number',
+          value: row.backfillDays || 90,
+          min: 7,
+          max: 365,
+          step: 1
+        }
+      ],
+      submitLabel: 'Save Session Mapping'
+    });
+    if (!values) return;
+    const projectId = String(values.projectId || '').trim();
+    const repoName = String(values.repoName || '').trim();
+    const backfillDays = Math.min(
+      365,
+      Math.max(7, Math.floor(Number(values.backfillDays) || 7))
+    );
+    if (!projectId || !repoName) {
+      showToast('Choose a project and enter a repository name.');
+      return;
+    }
+    const nextMappings = normalizeCodexSessionMappings(
+      config.sessionMappings
+    ).filter(
+      (mapping) =>
+        mapping.sessionId.toLowerCase() !== String(row.sessionId).toLowerCase()
+    );
+    nextMappings.push({
+      sessionId: row.sessionId,
+      projectId,
+      repoName,
+      backfillDays
+    });
+    data.codexIntegration = normalizeCodexIntegration({
+      ...config,
+      sessionMappings: nextMappings
+    });
+    saveData();
+    updateCodexPage();
+    if (config.enabled) {
+      const published = await publishCodexIntegrationConfig({ quiet: true });
+      showToast(
+        published
+          ? 'Session mapping saved and published to the Codex bridge.'
+          : 'Session mapping saved locally. Publish Config when the bridge is connected.'
+      );
+    } else {
+      showToast(
+        'Session mapping saved locally. Enable Codex import to publish it.'
+      );
+    }
+  }
+
   async function editCodexMapping(row) {
     const config = getCodexIntegrationConfig();
     const projects = getCodexTrackedProjects();
@@ -13593,50 +13844,73 @@ import {
     const note = document.createElement('small');
     note.className = 'codex-summary-note';
     note.textContent =
-      'Every path comes from the desktop bridge. Unknown paths are privacy-preserving relative paths; mapping a row publishes the rule for future imports.';
+      'Path and session diagnostics come from the desktop bridge. Session rules keep scratch-backed tasks mapped even when their temporary folder changes.';
     section.appendChild(note);
-    const rows = getCodexIntegrationConfig().mappingAudit || [];
-    const list = document.createElement('div');
-    list.className = 'codex-mapping-audit-list';
-    if (!rows.length) {
-      const empty = document.createElement('p');
-      empty.className = 'status-muted';
-      empty.textContent =
-        'No repository paths have been reported yet. Refresh Codex after the desktop bridge runs.';
-      list.appendChild(empty);
-    }
-    rows.forEach((audit) => {
-      const row = document.createElement('div');
-      row.className = 'codex-mapping-audit-row';
-      const copy = document.createElement('div');
-      copy.className = 'codex-mapping-audit-copy';
-      const path = document.createElement('strong');
-      path.textContent = audit.displayPath;
-      const details = document.createElement('span');
-      const projectLabel = audit.projectName
-        ? `Project: ${audit.projectName}`
-        : 'No TimeKeeper project';
-      const lastSeen = audit.lastSeenAt
-        ? `Last seen ${formatRelativeTime(audit.lastSeenAt)}`
-        : 'Last seen unavailable';
-      details.textContent = `${audit.repoName || 'Repository unavailable'} - ${audit.sessionCount} session${audit.sessionCount === 1 ? '' : 's'} - ${projectLabel} - ${lastSeen}`;
-      copy.append(path, details);
-      const status = document.createElement('span');
-      status.className =
-        audit.status === 'unmapped' || audit.status === 'stale'
-          ? 'health-pill warn'
-          : 'health-pill';
-      status.textContent = getCodexMappingStatusLabel(audit.status);
-      const action = document.createElement('button');
-      action.type = 'button';
-      action.className = 'btn secondary';
-      action.textContent = audit.status === 'automatic' ? 'Add rule' : 'Map';
-      action.title = `Map ${audit.displayPath} to a TimeKeeper project`;
-      action.addEventListener('click', () => editCodexMapping(audit));
-      row.append(copy, status, action);
-      list.appendChild(row);
-    });
-    section.appendChild(list);
+    const config = getCodexIntegrationConfig();
+    const sessionRows = config.sessionMappingAudit || [];
+    const pathRows = config.mappingAudit || [];
+    const renderList = (rows, { session = false } = {}) => {
+      const list = document.createElement('div');
+      list.className = 'codex-mapping-audit-list';
+      if (!rows.length) {
+        const empty = document.createElement('p');
+        empty.className = 'status-muted';
+        empty.textContent = session
+          ? 'No session diagnostics have been reported yet.'
+          : 'No repository paths have been reported yet. Refresh Codex after the desktop bridge runs.';
+        list.appendChild(empty);
+      }
+      rows.forEach((audit) => {
+        const row = document.createElement('div');
+        row.className = 'codex-mapping-audit-row';
+        const copy = document.createElement('div');
+        copy.className = 'codex-mapping-audit-copy';
+        const path = document.createElement('strong');
+        path.textContent = session
+          ? audit.title || audit.sessionId
+          : audit.displayPath;
+        const details = document.createElement('span');
+        const projectLabel = audit.projectName
+          ? `Project: ${audit.projectName}`
+          : 'No TimeKeeper project';
+        const lastSeen = audit.lastSeenAt
+          ? `Last seen ${formatRelativeTime(audit.lastSeenAt)}`
+          : 'Last seen unavailable';
+        details.textContent = session
+          ? `${audit.displayPath || 'Scratch workspace'} - ${audit.activityCount} activity points - ${projectLabel} - ${lastSeen}`
+          : `${audit.repoName || 'Repository unavailable'} - ${audit.sessionCount} session${audit.sessionCount === 1 ? '' : 's'} - ${projectLabel} - ${lastSeen}`;
+        copy.append(path, details);
+        const status = document.createElement('span');
+        status.className =
+          audit.status === 'unmapped' || audit.status === 'stale'
+            ? 'health-pill warn'
+            : 'health-pill';
+        status.textContent = getCodexMappingStatusLabel(audit.status);
+        const action = document.createElement('button');
+        action.type = 'button';
+        action.className = 'btn secondary';
+        action.textContent = audit.status === 'automatic' ? 'Add rule' : 'Map';
+        action.title = session
+          ? `Map ${audit.title || audit.sessionId} to a TimeKeeper project`
+          : `Map ${audit.displayPath} to a TimeKeeper project`;
+        action.addEventListener('click', () =>
+          session ? editCodexSessionMapping(audit) : editCodexMapping(audit)
+        );
+        row.append(copy, status, action);
+        list.appendChild(row);
+      });
+      return list;
+    };
+    const sessionHeading = document.createElement('h4');
+    sessionHeading.className = 'codex-subsection-title';
+    sessionHeading.textContent = 'Session mappings';
+    section.appendChild(sessionHeading);
+    section.appendChild(renderList(sessionRows, { session: true }));
+    const pathHeading = document.createElement('h4');
+    pathHeading.className = 'codex-subsection-title';
+    pathHeading.textContent = 'Repository paths';
+    section.appendChild(pathHeading);
+    section.appendChild(renderList(pathRows));
   }
 
   function updateCodexPage() {
@@ -20328,7 +20602,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=47')
+      .register('./service-worker.js?v=48')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

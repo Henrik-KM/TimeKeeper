@@ -17,10 +17,13 @@ import {
   buildCodexUsageRecordsFromSessionGroup,
   buildCodexUsageRecordsFromSessionText,
   buildCodexMappingAudit,
+  buildCodexSessionMappingAudit,
   DEFAULT_CODEX_FOCUS_POLICY,
   findTrackedProjectForCwd,
+  findTrackedProjectForSession,
   getGitHubProjectPathInfo,
   getLocalLookbackStart,
+  normalizeCodexSessionMappings,
   resolveCodexFocusFactor
 } from '../../scripts/codex-usage-core.mjs';
 
@@ -169,6 +172,114 @@ test('keeps legacy repo mappings as a fallback when no project list exists', () 
 
   assert.equal(mapping.repoName, 'VWR-AutoInv');
   assert.equal(mapping.projectId, 'iflai');
+});
+
+test('maps scratch-backed sessions by stable session ID', () => {
+  const sessionId = 'automation-thread';
+  const mapping = findTrackedProjectForSession(
+    {
+      id: sessionId,
+      sessionId,
+      cwd: 'C:\\Users\\ccx55\\Documents\\Codex\\2026-09-01\\linkedin'
+    },
+    [{ name: 'IFLAI', projectId: 'iflai' }],
+    [],
+    [
+      {
+        sessionId,
+        projectName: 'IFLAI',
+        repoName: 'email-helper',
+        backfillDays: 90
+      }
+    ]
+  );
+
+  assert.deepEqual(mapping, {
+    sessionId,
+    projectId: 'iflai',
+    projectName: 'IFLAI',
+    repoName: 'email-helper',
+    backfillDays: 90,
+    matchType: 'sessionId',
+    match: sessionId,
+    sessionMapping: true
+  });
+  assert.deepEqual(
+    normalizeCodexSessionMappings([
+      { threadId: sessionId, projectId: 'iflai', repoName: 'email-helper' }
+    ]),
+    [
+      {
+        sessionId,
+        projectId: 'iflai',
+        projectName: '',
+        repoName: 'email-helper',
+        backfillDays: 7
+      }
+    ]
+  );
+});
+
+test('session mapping audit reports stable mappings and unmapped scratch tasks', () => {
+  const mappedId = 'mapped-session';
+  const unmappedId = 'unmapped-session';
+  const audit = buildCodexSessionMappingAudit({
+    sessions: [
+      {
+        meta: {
+          id: mappedId,
+          sessionId: mappedId,
+          cwd: 'C:\\Users\\ccx55\\Documents\\Codex\\2026-09-01\\linkedin',
+          threadSource: 'automation'
+        },
+        activity: [{ timestamp: new Date('2026-06-13T09:00:00.000Z') }],
+        hasAssistantActivity: true
+      },
+      {
+        meta: {
+          id: unmappedId,
+          sessionId: unmappedId,
+          cwd: 'C:\\Users\\ccx55\\Documents\\Codex\\2026-09-08\\disk',
+          threadSource: 'user'
+        },
+        activity: [{ timestamp: new Date('2026-06-13T10:00:00.000Z') }],
+        hasAssistantActivity: true
+      }
+    ],
+    trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }],
+    sessionMappings: [
+      {
+        sessionId: mappedId,
+        projectId: 'iflai',
+        repoName: 'email-helper',
+        backfillDays: 90
+      }
+    ],
+    threadNamesById: new Map([[mappedId, 'LinkedIn invitations']])
+  });
+
+  assert.equal(audit.length, 2);
+  const mapped = audit.find((row) => row.sessionId === mappedId);
+  const unmapped = audit.find((row) => row.sessionId === unmappedId);
+  assert.deepEqual(mapped, {
+    key: mappedId,
+    sessionId: mappedId,
+    title: 'LinkedIn invitations',
+    threadSource: 'automation',
+    displayPath: 'Documents/Codex/2026-09-01/linkedin',
+    repoName: 'email-helper',
+    status: 'mapped',
+    mappingSource: 'sessionId',
+    projectId: 'iflai',
+    projectName: 'IFLAI',
+    match: mappedId,
+    backfillDays: 90,
+    activityCount: 1,
+    assistantActivity: true,
+    lastSeenAt: '2026-06-13T09:00:00.000Z'
+  });
+  assert.equal(unmapped.status, 'unmapped');
+  assert.equal(unmapped.sessionId, unmappedId);
 });
 
 test('builds Codex records from streamed session summary data', () => {

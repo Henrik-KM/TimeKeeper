@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v47';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=42'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v48';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=43'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '47')"
+    "url.searchParams.set('timekeeper-update', '48')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=47')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=48')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -2063,6 +2063,62 @@ test('Codex mapping audit exposes unknown paths and saves a repository rule', as
     matchType: 'repoName',
     match: 'RiskNav',
     projectId: 'iflai-project'
+  });
+});
+
+test('Codex mapping audit saves a stable session rule', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await freezeTime(page, '2026-09-16T12:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'iflai-project',
+        name: 'IFLAI',
+        deadline: '2026-12-31'
+      })
+    ],
+    entries: [],
+    codexIntegration: {
+      enabled: false,
+      sessionMappingAudit: [
+        {
+          sessionId: 'scratch-thread',
+          title: 'LinkedIn invitations',
+          threadSource: 'automation',
+          displayPath: 'Documents/Codex/2026-09-01/linkedin',
+          repoName: 'email-helper',
+          status: 'unmapped',
+          activityCount: 42,
+          assistantActivity: true,
+          lastSeenAt: '2026-09-16T11:00:00.000Z'
+        }
+      ]
+    }
+  });
+  await page.goto('/');
+  await gotoSection(page, 'codex', 'Codex');
+  await page.getByRole('button', { name: 'Mapping audit' }).click();
+  await expect(page.locator('#codexMappingAudit')).toContainText(
+    'LinkedIn invitations'
+  );
+  await page.getByRole('button', { name: 'Map', exact: true }).click();
+  await expect(
+    page.getByRole('heading', { name: 'Map LinkedIn invitations' })
+  ).toBeVisible();
+  await page.locator('#repoName').fill('email-helper');
+  await page.locator('#backfillDays').fill('90');
+  await page.getByRole('button', { name: 'Save Session Mapping' }).click();
+  const mappings = await page.evaluate(
+    () =>
+      JSON.parse(localStorage.getItem('timekeeperDataPro') || '{}')
+        .codexIntegration?.sessionMappings
+  );
+  expect(mappings).toContainEqual({
+    sessionId: 'scratch-thread',
+    projectId: 'iflai-project',
+    projectName: '',
+    repoName: 'email-helper',
+    backfillDays: 90
   });
 });
 
@@ -6070,6 +6126,7 @@ test('Codex config publish retries after a stale GitHub sha', async ({
   );
   expect(publishedConfig).toMatchObject({
     version: 7,
+    schemaVersion: 2,
     matchMode: 'github-parent-folder',
     focusPolicy: {
       version: 7,
@@ -6097,6 +6154,16 @@ test('Codex config publish retries after a stale GitHub sha', async ({
     },
     trackedProjects: [{ name: 'IFLAI', projectId: 'iflai' }]
   });
+  expect(publishedConfig.sessionMappings).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({
+        sessionId: '01a05bde-fee1-7303-89e3-8f54b5e16505',
+        projectName: 'IFLAI',
+        repoName: 'email-helper',
+        backfillDays: 90
+      })
+    ])
+  );
   expect(publishedConfig.mappings).toEqual(
     expect.arrayContaining([
       expect.objectContaining({

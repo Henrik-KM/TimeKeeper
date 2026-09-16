@@ -9,12 +9,14 @@ import { fileURLToPath } from 'node:url';
 
 import {
   buildCodexMappingAudit,
+  buildCodexSessionMappingAudit,
   buildCodexUsageRecordsFromSessionGroup,
   DEFAULT_CODEX_LOOKBACK_DAYS,
   getDefaultMachineId,
   getLocalDayStart,
   getLocalLookbackStart,
   isCodexFastModeActive,
+  normalizeCodexSessionMappings,
   parseTimestamp,
   sanitizeMachineId
 } from './codex-usage-core.mjs';
@@ -589,6 +591,7 @@ export function hasCreditableCodexActivity(sessions = []) {
  *   sessionGroups?: Array<Array<Record<string, any>>>,
  *   trackedProjects?: Array<object>,
  *   mappings?: Array<object>,
+ *   sessionMappings?: Array<object>,
  *   threadNamesById?: Map<string, string>,
  *   now?: Date,
  *   focusFactor?: number,
@@ -599,6 +602,7 @@ export function buildCodexSessionGroupPartitions({
   sessionGroups = [],
   trackedProjects = [],
   mappings = [],
+  sessionMappings = [],
   threadNamesById = new Map(),
   now = new Date(),
   focusFactor,
@@ -611,6 +615,7 @@ export function buildCodexSessionGroupPartitions({
       sessions,
       trackedProjects,
       mappings,
+      sessionMappings,
       threadNamesById,
       now,
       focusFactor,
@@ -724,7 +729,18 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
       )
     )
   );
-  const rangeStart = getLocalLookbackStart(now, repositoryBackfillDays);
+  const sessionMappings = normalizeCodexSessionMappings(
+    config.sessionMappings || []
+  );
+  const sessionBackfillDays = sessionMappings.reduce(
+    (largest, mapping) => Math.max(largest, mapping.backfillDays),
+    DEFAULT_CODEX_LOOKBACK_DAYS
+  );
+  const historyLookbackDays = Math.max(
+    repositoryBackfillDays,
+    sessionBackfillDays
+  );
+  const rangeStart = getLocalLookbackStart(now, historyLookbackDays);
   const files = await listSessionFilesChangedSince(
     options.sessionsDir,
     rangeStart
@@ -749,10 +765,18 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     trackedProjects,
     mappings
   });
+  const sessionMappingAudit = buildCodexSessionMappingAudit({
+    sessions: summaries,
+    trackedProjects,
+    mappings,
+    sessionMappings,
+    threadNamesById
+  });
   const { records, retractedExternalIds } = buildCodexSessionGroupPartitions({
     sessionGroups: Array.from(sessionGroups.values()),
     trackedProjects,
     mappings,
+    sessionMappings,
     threadNamesById,
     now,
     focusFactor: config.focusFactor,
@@ -767,15 +791,36 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
       .map(([repoName]) => String(repoName).trim().toLowerCase())
       .filter(Boolean)
   );
-  const uniqueRecords = allUniqueRecords.filter((record) => {
-    const start = parseTimestamp(record.startTime);
-    if (start && start >= recentRangeStart) return true;
-    return backfillRepositories.has(
-      String(record.projectKey || '')
-        .trim()
-        .toLowerCase()
-    );
-  });
+  const sessionBackfillStarts = new Map(
+    sessionMappings.map((mapping) => [
+      mapping.sessionId.toLowerCase(),
+      getLocalLookbackStart(now, mapping.backfillDays)
+    ])
+  );
+  const uniqueRecords = allUniqueRecords
+    .filter((record) => {
+      const start = parseTimestamp(record.startTime);
+      if (start && start >= recentRangeStart) return true;
+      const sessionBackfillStart = sessionBackfillStarts.get(
+        String(record.threadId || '')
+          .trim()
+          .toLowerCase()
+      );
+      if (start && sessionBackfillStart && start >= sessionBackfillStart) {
+        return true;
+      }
+      return backfillRepositories.has(
+        String(record.projectKey || '')
+          .trim()
+          .toLowerCase()
+      );
+    })
+    .map((record) => {
+      const start = parseTimestamp(record.startTime);
+      return start && start < recentRangeStart
+        ? { ...record, codexBackfill: true }
+        : record;
+    });
   const sessionUsageLimits =
     summaries
       .map((summary) => summary.usageLimits)
@@ -784,18 +829,23 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     null;
   const usageLimits = (await liveUsageLimitsPromise) || sessionUsageLimits;
   return {
-    version: 4,
+    version: 5,
+    schemaVersion: 2,
     source: 'timekeeper-codex-bridge',
     machineId: options.machineId,
     updatedAt: now.toISOString(),
     dayStart: dayStart.toISOString(),
     rangeStart: rangeStart.toISOString(),
-    lookbackDays: repositoryBackfillDays,
+    lookbackDays: historyLookbackDays,
     recentLookbackDays: DEFAULT_CODEX_LOOKBACK_DAYS,
     policyBackfillRepositories: [...backfillRepositories],
+    policyBackfillSessions: sessionMappings
+      .filter((mapping) => mapping.backfillDays > DEFAULT_CODEX_LOOKBACK_DAYS)
+      .map((mapping) => mapping.sessionId),
     usageLimits,
     retractedExternalIds,
     mappingAudit,
+    sessionMappingAudit,
     records: uniqueRecords
   };
 }
@@ -812,6 +862,9 @@ export function makeCodexPayloadKey(payload = {}) {
           : [],
         mappingAudit: Array.isArray(payload.mappingAudit)
           ? payload.mappingAudit
+          : [],
+        sessionMappingAudit: Array.isArray(payload.sessionMappingAudit)
+          ? payload.sessionMappingAudit
           : [],
         records: Array.isArray(payload.records) ? payload.records : []
       })
