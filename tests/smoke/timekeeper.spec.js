@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v50';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=45'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v51';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=46'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '50')"
+    "url.searchParams.set('timekeeper-update', '51')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=50')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=51')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5572,9 +5572,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       }
     ]
   };
-  const encodedInbox = Buffer.from(JSON.stringify(inboxPayload)).toString(
-    'base64'
-  );
+  const rawInbox = JSON.stringify(inboxPayload);
   await seedLocalStorage(page, {
     projects: [
       projectFixture({
@@ -5665,42 +5663,50 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       importedCodexRecordIds: ['codex-yesterday']
     }
   });
-  await page.addInitScript((inboxContent) => {
-    localStorage.setItem('timekeeperCodexIntegrationToken', 'ghp_codex_test');
-    window.fetch = (url) => {
-      const value = String(url);
-      if (
-        value.includes(
-          'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox?ref=main'
-        )
-      ) {
-        return Promise.resolve(
-          new Response(
-            JSON.stringify([
+  await page.addInitScript(
+    ({ rawContent }) => {
+      localStorage.setItem('timekeeperCodexIntegrationToken', 'ghp_codex_test');
+      window.fetch = (url) => {
+        const value = String(url);
+        if (
+          value.includes(
+            'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox?ref=main'
+          )
+        ) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify([
+                {
+                  type: 'file',
+                  name: 'desktop-a.json',
+                  url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json',
+                  download_url:
+                    'https://raw.githubusercontent.com/Henrik-KM/TimeKeeper/main/assets/timekeeper-codex-inbox/desktop-a.json'
+                }
+              ]),
               {
-                type: 'file',
-                name: 'desktop-a.json',
-                url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json'
+                status: 200,
+                headers: { 'Content-Type': 'application/json' }
               }
-            ]),
-            {
+            )
+          );
+        }
+        if (value.includes('raw.githubusercontent.com')) {
+          return Promise.resolve(
+            new Response(rawContent, {
               status: 200,
               headers: { 'Content-Type': 'application/json' }
-            }
-          )
-        );
-      }
-      if (value.includes('timekeeper-codex-inbox/desktop-a.json')) {
-        return Promise.resolve(
-          new Response(JSON.stringify({ content: inboxContent }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' }
-          })
-        );
-      }
-      return Promise.resolve(new Response('{}', { status: 404 }));
-    };
-  }, encodedInbox);
+            })
+          );
+        }
+        if (value.includes('timekeeper-codex-inbox/desktop-a.json')) {
+          return Promise.resolve(new Response('{}', { status: 404 }));
+        }
+        return Promise.resolve(new Response('{}', { status: 404 }));
+      };
+    },
+    { rawContent: rawInbox }
+  );
 
   await page.goto('/');
   await gotoSection(page, 'importExport', 'Import / Export');

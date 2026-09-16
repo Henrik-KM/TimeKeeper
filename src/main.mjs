@@ -3802,6 +3802,7 @@ import {
     pending: false,
     checkedAt: null,
     error: '',
+    warning: '',
     imported: 0,
     skipped: 0,
     updated: 0
@@ -4734,6 +4735,7 @@ import {
       pending: false,
       checkedAt: nowIso,
       error: '',
+      warning: '',
       imported,
       skipped,
       reconciled,
@@ -4772,15 +4774,38 @@ import {
           .endsWith('.json')
     );
     const payloads = [];
+    const errors = [];
     await Promise.all(
       jsonItems.map(async (item) => {
-        const itemPayload = await githubJson(item.url, {
-          headers: getCodexAuthHeaders()
-        });
-        payloads.push(JSON.parse(decodeUtf8Base64(itemPayload.content)));
+        try {
+          const itemUrl = item.download_url || item.url;
+          const itemPayload = await githubJson(itemUrl, {
+            headers: getCodexAuthHeaders()
+          });
+          const payload = item.download_url
+            ? itemPayload
+            : JSON.parse(decodeUtf8Base64(itemPayload.content));
+          if (
+            !payload ||
+            typeof payload !== 'object' ||
+            Array.isArray(payload) ||
+            !Array.isArray(payload.records)
+          ) {
+            throw new Error('Inbox file did not contain a records array.');
+          }
+          payloads.push(payload);
+        } catch (error) {
+          const name = String(item.name || 'inbox file');
+          const message =
+            error && error.message ? error.message : String(error);
+          errors.push(`${name}: ${message}`);
+        }
       })
     );
-    return payloads;
+    if (!payloads.length && errors.length) {
+      throw new Error(errors[0]);
+    }
+    return { payloads, errors };
   }
 
   async function importCodexUsage({ quiet = false } = {}) {
@@ -4795,13 +4820,17 @@ import {
       ...codexImportRuntimeStatus,
       pending: true,
       checkedAt: new Date().toISOString(),
-      error: ''
+      error: '',
+      warning: ''
     };
     updateCodexIntegrationPanel();
     updateCodexPage();
     codexImportPromise = fetchCodexInboxPayloads()
-      .then((payloads) => {
+      .then(({ payloads, errors }) => {
         const result = importCodexInboxPayloads(payloads);
+        if (errors.length) {
+          codexImportRuntimeStatus.warning = `Skipped ${errors.length} inbox file${errors.length === 1 ? '' : 's'}: ${errors.join('; ')}`;
+        }
         if (
           !quiet &&
           (result.imported > 0 || result.reconciled > 0 || result.updated > 0)
@@ -4809,8 +4838,14 @@ import {
           showToast(
             `Codex import: ${result.imported} new, ${result.updated} recalibrated, ${result.reconciled} reconciled.`
           );
+          if (errors.length) {
+            showToast(codexImportRuntimeStatus.warning);
+          }
         } else if (!quiet) {
           showToast('No new Codex entries.');
+          if (errors.length) {
+            showToast(codexImportRuntimeStatus.warning);
+          }
         }
         return result;
       })
@@ -4867,6 +4902,8 @@ import {
         status.textContent = 'Codex import is checking GitHub...';
       } else if (codexImportRuntimeStatus.error) {
         status.textContent = `Codex import error: ${codexImportRuntimeStatus.error}`;
+      } else if (codexImportRuntimeStatus.warning) {
+        status.textContent = `Codex import warning: ${codexImportRuntimeStatus.warning}`;
       } else if (config.lastImportAt) {
         status.textContent = `Codex import ON - last checked ${formatRelativeTime(config.lastImportAt)}.`;
       } else {
@@ -20617,7 +20654,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=50')
+      .register('./service-worker.js?v=51')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
