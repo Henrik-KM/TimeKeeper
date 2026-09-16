@@ -4563,6 +4563,15 @@ import {
     let reconciled = 0;
     let updated = 0;
     const nowIso = new Date().toISOString();
+    const retractedExternalIds = new Set(
+      payloads.flatMap((payload) =>
+        Array.isArray(payload?.retractedExternalIds)
+          ? payload.retractedExternalIds
+              .map((id) => String(id || '').trim())
+              .filter(Boolean)
+          : []
+      )
+    );
     const mappingAuditRows = payloads.flatMap((payload) =>
       Array.isArray(payload?.mappingAudit) ? payload.mappingAudit : []
     );
@@ -4625,11 +4634,14 @@ import {
             isCodexTimeEntry(entry) &&
             String(entry?.externalId || '') === recordId
         );
-        const alreadyImported =
-          importedIds.has(recordId) || Boolean(existingEntry);
+        // The cached ID list is only a hint. A restored or partially imported
+        // dataset can retain an ID without retaining its actual entry, so the
+        // entry itself is the source of truth for reconciliation.
+        const alreadyImported = Boolean(existingEntry);
         if (existingEntry) importedIds.add(recordId);
         if (
           !recordId ||
+          retractedExternalIds.has(recordId) ||
           (!existingEntry &&
             !isCodexRecordInImportWindow(record, windowStart)) ||
           !projectId ||
@@ -20605,7 +20617,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=49')
+      .register('./service-worker.js?v=50')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
