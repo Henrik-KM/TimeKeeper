@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-16T13:01:02.689Z",
+  "updatedAt": "2026-09-16T13:16:02.861Z",
   "dayStart": "2026-09-15T22:00:00.000Z",
   "rangeStart": "2026-06-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-16T13:01:04.998Z",
+    "observedAt": "2026-09-16T13:16:04.599Z",
     "primary": {
-      "usedPercent": 45,
-      "remainingPercent": 55,
+      "usedPercent": 46,
+      "remainingPercent": 54,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-21T09:10:29.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-09-16T13:01:45.318Z"
+      "lastSeenAt": "2026-09-16T13:14:18.438Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2463,9 +2463,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 6627,
+      "activityCount": 6749,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-16T13:01:45.318Z"
+      "lastSeenAt": "2026-09-16T13:14:18.438Z"
     },
     {
       "key": "01a0aa43-5667-7e02-96df-b22fb8fa768e",
@@ -45497,6 +45497,68 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 25,
           "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-776582be0a8c9dae7dbf4506",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-16T12:46:54.274Z",
+      "endTime": "2026-09-16T12:48:07.454Z",
+      "wallSeconds": 73,
+      "focusFactor": 0.2877,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 73,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-c2cb341b2434714956211306",
+      "threadId": "01a0aa43-5667-7e02-96df-b22fb8fa768e",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-16T12:48:53.476Z",
+      "endTime": "2026-09-16T12:49:22.920Z",
+      "wallSeconds": 29,
+      "focusFactor": 0.4828,
+      "effectiveSeconds": 14,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 29,
+          "effectiveSeconds": 14
         }
       ],
       "description": "Codex: email-helper"
