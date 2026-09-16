@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v51';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=46'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v52';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=47'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '51')"
+    "url.searchParams.set('timekeeper-update', '52')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=51')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=52')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5679,9 +5679,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
                 {
                   type: 'file',
                   name: 'desktop-a.json',
-                  url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json',
-                  download_url:
-                    'https://raw.githubusercontent.com/Henrik-KM/TimeKeeper/main/assets/timekeeper-codex-inbox/desktop-a.json'
+                  url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json'
                 }
               ]),
               {
@@ -5691,7 +5689,11 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
             )
           );
         }
-        if (value.includes('raw.githubusercontent.com')) {
+        if (
+          value.includes(
+            'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-codex-inbox/desktop-a.json'
+          )
+        ) {
           return Promise.resolve(
             new Response(rawContent, {
               status: 200,

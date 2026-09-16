@@ -4778,13 +4778,18 @@ import {
     await Promise.all(
       jsonItems.map(async (item) => {
         try {
-          const itemUrl = item.download_url || item.url;
+          // Keep large inbox reads on the GitHub API host. Some mobile networks
+          // block raw.githubusercontent.com even though the API endpoint works.
+          const itemUrl = item.url || item.download_url;
           const itemPayload = await githubJson(itemUrl, {
-            headers: getCodexAuthHeaders()
+            headers: {
+              ...getCodexAuthHeaders(),
+              Accept: 'application/vnd.github.raw+json'
+            }
           });
-          const payload = item.download_url
+          const payload = Array.isArray(itemPayload?.records)
             ? itemPayload
-            : JSON.parse(decodeUtf8Base64(itemPayload.content));
+            : JSON.parse(decodeUtf8Base64(itemPayload?.content));
           if (
             !payload ||
             typeof payload !== 'object' ||
@@ -20654,7 +20659,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=51')
+      .register('./service-worker.js?v=52')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
