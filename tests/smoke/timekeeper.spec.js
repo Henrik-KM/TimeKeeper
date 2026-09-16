@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v48';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=43'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v49';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=44'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1741,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '48')"
+    "url.searchParams.set('timekeeper-update', '49')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1751,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=48')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=49')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5524,6 +5524,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
         id: 'codex-yesterday',
         threadId: 'thread-yesterday',
         projectKey: 'VWR-AutoInv',
+        timekeeperProjectId: 'stale-iflai-project-id',
         timekeeperProjectName: 'IFLAI',
         startTime: '2026-06-12T08:00:00.000Z',
         endTime: '2026-06-12T08:30:00.000Z',

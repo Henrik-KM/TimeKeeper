@@ -4602,10 +4602,13 @@ import {
       records.forEach((record) => {
         const recordId = String(record?.id || '').trim();
         let projectId = String(record?.timekeeperProjectId || '').trim();
-        const namedProject = projectId
-          ? null
-          : findCodexProjectByName(record?.timekeeperProjectName);
-        if (namedProject) projectId = String(namedProject.id);
+        const namedProject = findCodexProjectByName(
+          record?.timekeeperProjectName
+        );
+        if (projectId && !getActiveCodexProject(projectId)) {
+          projectId = '';
+        }
+        if (!projectId && namedProject) projectId = String(namedProject.id);
         const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
         const recordFocusFactor = normalizeFocusFactor(
           record?.focusFactor,
@@ -20602,7 +20605,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=48')
+      .register('./service-worker.js?v=49')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
