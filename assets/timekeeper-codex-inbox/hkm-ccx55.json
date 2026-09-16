@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-16T15:01:02.686Z",
+  "updatedAt": "2026-09-16T15:16:02.637Z",
   "dayStart": "2026-09-15T22:00:00.000Z",
   "rangeStart": "2026-06-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-16T15:01:04.687Z",
+    "observedAt": "2026-09-16T15:16:04.632Z",
     "primary": {
       "usedPercent": 49,
       "remainingPercent": 51,
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-09-16T15:01:26.082Z"
+      "lastSeenAt": "2026-09-16T15:16:24.667Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2463,9 +2463,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2333,
+      "activityCount": 2817,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-16T15:01:26.082Z"
+      "lastSeenAt": "2026-09-16T15:16:24.667Z"
     },
     {
       "key": "01a0aab2-1a69-7952-8854-1a0c6b05ebdb",
@@ -45912,6 +45912,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 27,
           "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-4e92df2de0dbc8db99b6acdb",
+      "threadId": "01a0aab2-1a69-7952-8854-1a0c6b05ebdb",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-16T14:49:52.946Z",
+      "endTime": "2026-09-16T14:50:23.796Z",
+      "wallSeconds": 30,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 15,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 30,
+          "effectiveSeconds": 15
         }
       ],
       "description": "Codex: email-helper"
