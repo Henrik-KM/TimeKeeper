@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-17T21:01:01.749Z",
+  "updatedAt": "2026-09-17T21:16:01.791Z",
   "dayStart": "2026-09-16T22:00:00.000Z",
   "rangeStart": "2026-06-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-17T21:01:05.136Z",
+    "observedAt": "2026-09-17T21:16:04.145Z",
     "primary": {
       "usedPercent": 69,
       "remainingPercent": 31,
@@ -246,9 +246,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 962,
-      "assistantSessionCount": 961,
-      "lastSeenAt": "2026-09-17T20:48:06.103Z"
+      "sessionCount": 964,
+      "assistantSessionCount": 963,
+      "lastSeenAt": "2026-09-17T21:03:40.440Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2533,6 +2533,40 @@
       "activityCount": 70,
       "assistantActivity": true,
       "lastSeenAt": "2026-06-19T22:02:51.044Z"
+    },
+    {
+      "key": "01a0b12e-2bcd-7e03-8210-8ec1a583f5c1",
+      "sessionId": "01a0b12e-2bcd-7e03-8210-8ec1a583f5c1",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-17T21:03:40.440Z"
+    },
+    {
+      "key": "01a0b12d-9deb-7bb2-9651-23a02ed3c643",
+      "sessionId": "01a0b12d-9deb-7bb2-9651-23a02ed3c643",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-17T21:03:06.990Z"
     },
     {
       "key": "01a0b11f-f30f-73a2-8869-66736bf395f5",
@@ -54078,6 +54112,68 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 24,
           "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-33b18cd52f17cf08fd5b5e72",
+      "threadId": "01a0b11f-f2a2-7213-87dc-23c0f19de31d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-17T20:47:34.993Z",
+      "endTime": "2026-09-17T20:48:06.024Z",
+      "wallSeconds": 31,
+      "focusFactor": 0.4839,
+      "effectiveSeconds": 15,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 31,
+          "effectiveSeconds": 15
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-c05cce72be8ebb69815b26af",
+      "threadId": "01a0b11f-f30f-73a2-8869-66736bf395f5",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-17T20:47:43.747Z",
+      "endTime": "2026-09-17T20:48:06.103Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 22,
+          "effectiveSeconds": 11
         }
       ],
       "description": "Codex: email-helper"
