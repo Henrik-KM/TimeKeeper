@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-18T00:46:01.901Z",
+  "updatedAt": "2026-09-18T01:01:01.902Z",
   "dayStart": "2026-09-17T22:00:00.000Z",
   "rangeStart": "2026-06-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-18T00:46:03.949Z",
+    "observedAt": "2026-09-18T01:01:03.855Z",
     "primary": {
       "usedPercent": 69,
       "remainingPercent": 31,
@@ -246,9 +246,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 979,
-      "assistantSessionCount": 978,
-      "lastSeenAt": "2026-09-18T00:33:36.415Z"
+      "sessionCount": 980,
+      "assistantSessionCount": 979,
+      "lastSeenAt": "2026-09-18T00:48:18.340Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2499,6 +2499,23 @@
       "activityCount": 1950,
       "assistantActivity": true,
       "lastSeenAt": "2026-06-21T17:49:13.960Z"
+    },
+    {
+      "key": "01a0b1fb-fab8-7503-bde6-421f773e47a9",
+      "sessionId": "01a0b1fb-fab8-7503-bde6-421f773e47a9",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-18T00:48:18.340Z"
     },
     {
       "key": "01a0b1ee-838c-7e62-bfe3-857ab08bc1b4",
@@ -54498,6 +54515,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 34,
           "effectiveSeconds": 17
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-17cb81d3fb1222c4c6086098",
+      "threadId": "01a0b1ee-838c-7e62-bfe3-857ab08bc1b4",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-18T00:33:12.455Z",
+      "endTime": "2026-09-18T00:33:36.415Z",
+      "wallSeconds": 23,
+      "focusFactor": 0.4783,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 23,
+          "effectiveSeconds": 11
         }
       ],
       "description": "Codex: email-helper"
