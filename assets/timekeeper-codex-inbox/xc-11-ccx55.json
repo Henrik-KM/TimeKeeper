@@ -2,194 +2,22 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-18T19:12:02.062Z",
-  "dayStart": "2026-09-17T22:00:00.000Z",
-  "rangeStart": "2026-09-11T22:00:00.000Z",
+  "updatedAt": "2026-09-18T22:02:02.334Z",
+  "dayStart": "2026-09-18T22:00:00.000Z",
+  "rangeStart": "2026-09-12T22:00:00.000Z",
   "lookbackDays": 7,
   "records": [
     {
-      "id": "codex-d441533cce6324282cd37177",
+      "id": "codex-60182823a03c2162dbedb242",
       "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-11T23:56:19.885Z",
-      "endTime": "2026-09-12T00:01:49.333Z",
-      "wallSeconds": 329,
-      "focusFactor": 0.8516,
-      "effectiveSeconds": 280,
-      "focusPolicyVersion": 7,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 329,
-          "effectiveSeconds": 247
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 318,
-          "effectiveSeconds": 33
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-11692965e1b0b46bc25db6b4",
-        "codex-c7f50b971f2447badb1aa8a9"
-      ],
-      "description": "Codex: Continue Structured AL Stage 5"
-    },
-    {
-      "id": "codex-0e254f222d03073e7ec57fae",
-      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T02:01:51.693Z",
-      "endTime": "2026-09-12T02:20:12.602Z",
-      "wallSeconds": 1100,
-      "focusFactor": 0.2314,
-      "effectiveSeconds": 254,
-      "focusPolicyVersion": 7,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 168,
-          "effectiveSeconds": 126
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 1222,
-          "effectiveSeconds": 128
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-a22593dbabf56e93f90d5dac",
-        "codex-0249ffb51cb2823c42e0c82a",
-        "codex-d708c9b148be44ae17af73dd"
-      ],
-      "description": "Codex: Continue Structured AL Stage 5"
-    },
-    {
-      "id": "codex-1b6f8b5e3d7ef69521224769",
-      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T04:20:23.664Z",
-      "endTime": "2026-09-12T04:30:58.338Z",
-      "wallSeconds": 634,
-      "focusFactor": 0.9007,
-      "effectiveSeconds": 571,
-      "focusPolicyVersion": 7,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 2,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 634,
-          "effectiveSeconds": 476
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 911,
-          "effectiveSeconds": 95
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-5263a21302b1f0bd9544868c",
-        "codex-fe9a97e90c003afd81993010",
-        "codex-6735af9a08c8e70fc276ee7d"
-      ],
-      "description": "Codex: Continue Structured AL Stage 5"
-    },
-    {
-      "id": "codex-f1df1726ab85e88e8113d78c",
-      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T06:31:25.535Z",
-      "endTime": "2026-09-12T06:43:56.022Z",
-      "wallSeconds": 750,
-      "focusFactor": 0.9497,
-      "effectiveSeconds": 712,
-      "focusPolicyVersion": 7,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 3,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 750,
-          "effectiveSeconds": 562
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 1427,
-          "effectiveSeconds": 149
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-16a1536763c0594d2d54a23b",
-        "codex-09a0a1037f8653e16ff50af0",
-        "codex-c3c6e255616b7fd8dd2aecbd",
-        "codex-4935fa14fb923b7ecd3d92b3"
-      ],
-      "description": "Codex: Continue Structured AL Stage 5"
-    },
-    {
-      "id": "codex-11f13f921fc5aa1db305fb32",
-      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T10:07:31.492Z",
-      "endTime": "2026-09-12T10:22:26.347Z",
-      "wallSeconds": 894,
+      "startTime": "2026-09-12T22:00:53.872Z",
+      "endTime": "2026-09-13T03:51:35.805Z",
+      "wallSeconds": 21041,
       "focusFactor": 0.75,
-      "effectiveSeconds": 671,
+      "effectiveSeconds": 15781,
       "focusPolicyVersion": 7,
       "delegationCredit": 0.35,
       "delegatedSessionCount": 0,
@@ -197,130 +25,16 @@
         {
           "role": "parent",
           "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 894,
-          "effectiveSeconds": 671
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-ad9bed1af6579badc8fbef3c"
-      ],
-      "description": "Codex: Continue Structured AL Stage 5"
-    },
-    {
-      "id": "codex-00381919749591c627783587",
-      "threadId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T11:49:17.266Z",
-      "endTime": "2026-09-12T11:51:58.100Z",
-      "wallSeconds": 160,
-      "focusFactor": 0.3,
-      "effectiveSeconds": 48,
-      "focusPolicyVersion": 7,
-      "modelBreakdown": [
-        {
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "factor": 0.3,
-          "wallSeconds": 160,
-          "effectiveSeconds": 48
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-84d90291b3a5196601e437db",
-      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-09-12T12:48:18.589Z",
-      "endTime": "2026-09-13T03:52:53.590Z",
-      "wallSeconds": 54275,
-      "focusFactor": 0.8871,
-      "effectiveSeconds": 48146,
-      "focusPolicyVersion": 7,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 5,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "low",
-          "factor": 0.75,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
           "effort": "xhigh",
           "factor": 0.75,
           "creditMultiplier": 1,
           "creditedFactor": 0.75,
-          "wallSeconds": 54196,
-          "effectiveSeconds": 40647
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 8,
-          "effectiveSeconds": 1
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-luna",
-          "effort": "xhigh",
-          "factor": 0.3,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.105,
-          "wallSeconds": 71400,
-          "effectiveSeconds": 7497
+          "wallSeconds": 21041,
+          "effectiveSeconds": 15781
         }
       ],
       "supersedesExternalIds": [
-        "codex-2274fa8a2e71e7e5c779c7fa",
-        "codex-c6ac17997fb44a778d58b432",
-        "codex-c2990d374f35a4bea45fd7cf",
-        "codex-f3e5fe1650cc8d05816a24df",
-        "codex-7eb4f085a7a41d3655712bb7",
-        "codex-bd4c96e38998f47cf3405486",
-        "codex-dff43efd8f340695ce1d636b",
-        "codex-8b3ce00dcd9b90727cc8a141",
-        "codex-7ed700aefb538a4eaed77c32",
-        "codex-cb51b29977ae6b0433afa7ee",
-        "codex-57fa546e4e7025d6cd4d2c51",
-        "codex-5723136a0409f4eb5b8d4001",
-        "codex-505d0a77cd1b5629e57209c1",
-        "codex-37f474eea569279e9319c4d2",
-        "codex-96daac1b1790a9d68d1b6ab1",
-        "codex-fd47045e79cdb959fff3e148",
-        "codex-4b93960403aecfd38cc11bf4",
-        "codex-b42da7673bd0f8784a83c84e",
-        "codex-5d0a23b34c5ebfd6b344db5f",
-        "codex-5207fcac39bf550fad482f74",
-        "codex-27ef145c96c1f811e6360471",
-        "codex-cc7ffaf7611c7f4dea00c7e2",
-        "codex-97ee3ad5eb080ebb4d96e6e8",
-        "codex-93b6c34b96a910db7705f5ed",
-        "codex-ecc6182d29d75c5d255e18c1",
-        "codex-345f40cb55c78baaa342ad98",
-        "codex-411a68361eaeb7905d0c59a9",
-        "codex-a646bd27e6529311480b2177",
-        "codex-68b162dfdabfed5eb5bf1e9d",
-        "codex-68b226d3dbec3788a7c69c3e",
-        "codex-8d4ca384000ad22df7210a54"
+        "codex-a2c66c1157baeb9805865457"
       ],
       "description": "Codex: Continue Structured AL Stage 5"
     },
