@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-18T08:31:02.239Z",
+  "updatedAt": "2026-09-18T08:46:03.339Z",
   "dayStart": "2026-09-17T22:00:00.000Z",
   "rangeStart": "2026-06-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-18T08:31:03.953Z",
+    "observedAt": "2026-09-18T08:46:07.481Z",
     "primary": {
-      "usedPercent": 76,
-      "remainingPercent": 24,
+      "usedPercent": 78,
+      "remainingPercent": 22,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-21T09:10:29.000Z"
+      "resetsAt": "2026-09-21T09:10:30.000Z"
     },
     "secondary": null
   },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-09-18T08:32:01.099Z"
+      "lastSeenAt": "2026-09-18T08:46:26.365Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -260,9 +260,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 1037,
-      "assistantSessionCount": 1036,
-      "lastSeenAt": "2026-09-18T07:51:02.543Z"
+      "sessionCount": 1038,
+      "assistantSessionCount": 1037,
+      "lastSeenAt": "2026-09-18T08:37:29.032Z"
     },
     {
       "key": "github/iflai/website",
@@ -2513,9 +2513,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 7526,
+      "activityCount": 7706,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-18T08:32:01.099Z"
+      "lastSeenAt": "2026-09-18T08:46:26.365Z"
+    },
+    {
+      "key": "01a0b3a9-604d-7a13-af61-c0ba22ed03fc",
+      "sessionId": "01a0b3a9-604d-7a13-af61-c0ba22ed03fc",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-18T08:37:29.032Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -57287,6 +57304,37 @@
       "description": "Codex: email-helper"
     },
     {
+      "id": "codex-52a4340c45332124e94e0834",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-18T07:25:56.709Z",
+      "endTime": "2026-09-18T08:14:54.981Z",
+      "wallSeconds": 2938,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 881,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2938,
+          "effectiveSeconds": 881
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
       "id": "codex-e44a58853ac8873704bdfe3c",
       "threadId": "01a0b37f-075d-7aa0-bdc4-8d8cca46105a",
       "projectKey": "email-helper",
@@ -57316,6 +57364,37 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b39bead96479ed5cd582132d",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-18T08:08:37.011Z",
+      "endTime": "2026-09-18T08:15:07.061Z",
+      "wallSeconds": 390,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 117,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 390,
+          "effectiveSeconds": 117
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
