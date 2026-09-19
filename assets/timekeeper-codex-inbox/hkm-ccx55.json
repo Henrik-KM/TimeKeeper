@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-19T21:46:02.176Z",
-  "dayStart": "2026-09-18T22:00:00.000Z",
-  "rangeStart": "2026-06-21T22:00:00.000Z",
+  "updatedAt": "2026-09-19T22:01:02.144Z",
+  "dayStart": "2026-09-19T22:00:00.000Z",
+  "rangeStart": "2026-06-22T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-19T21:46:03.638Z",
+    "observedAt": "2026-09-19T22:01:03.254Z",
     "primary": {
       "usedPercent": 100,
       "remainingPercent": 0,
@@ -221,20 +221,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-06-18T22:07:52.761Z"
-    },
-    {
-      "key": "documents/codex/2026-06-19/sales-company-research",
-      "displayPath": "Documents/Codex/2026-06-19/sales-company-research",
-      "projectFolder": "",
-      "repoName": "sales-company-research",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-06-18T22:07:41.864Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2465,23 +2451,6 @@
       "activityCount": 0,
       "assistantActivity": true,
       "lastSeenAt": "2026-06-18T22:07:52.761Z"
-    },
-    {
-      "key": "019edcc6-9328-7ff0-addd-3cd4247927b7",
-      "sessionId": "019edcc6-9328-7ff0-addd-3cd4247927b7",
-      "title": "Sales Company Research",
-      "threadSource": "subagent",
-      "displayPath": "Documents/Codex/2026-06-19/sales-company-research",
-      "repoName": "sales-company-research",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 0,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-06-18T22:07:41.864Z"
     },
     {
       "key": "01a05bde-fee1-7303-89e3-8f54b5e16505",
@@ -28285,7 +28254,7 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1737,
+      "activityCount": 1667,
       "assistantActivity": true,
       "lastSeenAt": "2026-06-29T16:48:30.041Z"
     },
@@ -45751,99 +45720,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-d1ceab07cd566040432bf034",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-12T22:52:26.674Z",
-      "endTime": "2026-09-12T23:12:59.727Z",
-      "wallSeconds": 1233,
-      "focusFactor": 0.7494,
-      "effectiveSeconds": 924,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "xhigh",
-          "baseFactor": 0.75,
-          "factor": 0.75,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1233,
-          "effectiveSeconds": 924
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-f17bea6c43afb54d4d463046",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-13T02:52:30.259Z",
-      "endTime": "2026-09-13T03:18:18.123Z",
-      "wallSeconds": 1547,
-      "focusFactor": 0.7498,
-      "effectiveSeconds": 1160,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "xhigh",
-          "baseFactor": 0.75,
-          "factor": 0.75,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1547,
-          "effectiveSeconds": 1160
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-009b26a3f7759ad75b407976",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-13T06:53:34.329Z",
-      "endTime": "2026-09-13T06:53:35.772Z",
-      "wallSeconds": 1,
-      "focusFactor": 1,
-      "effectiveSeconds": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "xhigh",
-          "baseFactor": 0.75,
-          "factor": 0.75,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
       "id": "codex-44a36fbf5545126d66dc3fd6",
       "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "projectKey": "email-helper",
@@ -45872,69 +45748,8 @@
           "effectiveSeconds": 0
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-f1019c9e0c5d64778b68744f",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-13T07:30:35.871Z",
-      "endTime": "2026-09-13T07:30:38.710Z",
-      "wallSeconds": 2,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2,
-          "effectiveSeconds": 1
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-4efde9178cfcc2e7ce5c907c",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-13T10:54:08.361Z",
-      "endTime": "2026-09-13T10:54:10.309Z",
-      "wallSeconds": 1,
-      "focusFactor": 1,
-      "effectiveSeconds": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-astra",
-          "effort": "xhigh",
-          "baseFactor": 0.75,
-          "factor": 0.75,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.75,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-cf65fe74029b963046256052",
@@ -71368,6 +71183,68 @@
       "timekeeperProjectName": "IFLAI",
       "startTime": "2026-09-19T21:05:17.926Z",
       "endTime": "2026-09-19T21:05:23.085Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-eb75265d3da28a2357244f31",
+      "threadId": "01a0bb98-60c1-7fb0-ae5c-48eb5d06c778",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-19T21:35:19.363Z",
+      "endTime": "2026-09-19T21:35:25.032Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-5c3fc2ca45d45ec16c30e575",
+      "threadId": "01a0bb98-6034-7870-b5e0-2ca8d40b1d27",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-19T21:35:19.533Z",
+      "endTime": "2026-09-19T21:35:25.096Z",
       "wallSeconds": 5,
       "focusFactor": 0.4,
       "effectiveSeconds": 2,
