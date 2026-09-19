@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-19T12:46:01.941Z",
+  "updatedAt": "2026-09-19T13:01:01.943Z",
   "dayStart": "2026-09-18T22:00:00.000Z",
   "rangeStart": "2026-06-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-19T12:46:03.910Z",
+    "observedAt": "2026-09-19T13:01:04.038Z",
     "primary": {
-      "usedPercent": 99,
-      "remainingPercent": 1,
+      "usedPercent": 100,
+      "remainingPercent": 0,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-21T09:10:29.000Z"
     },
@@ -246,9 +246,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 1283,
-      "assistantSessionCount": 1282,
-      "lastSeenAt": "2026-09-19T12:33:32.969Z"
+      "sessionCount": 1286,
+      "assistantSessionCount": 1285,
+      "lastSeenAt": "2026-09-19T12:48:44.099Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2499,6 +2499,57 @@
       "activityCount": 13929,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-19T07:31:45.931Z"
+    },
+    {
+      "key": "01a0b9b5-dac3-7e82-9d2d-647e397787cc",
+      "sessionId": "01a0b9b5-dac3-7e82-9d2d-647e397787cc",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-19T12:48:44.099Z"
+    },
+    {
+      "key": "01a0b9b5-2751-7810-821b-ba63ef15c76b",
+      "sessionId": "01a0b9b5-2751-7810-821b-ba63ef15c76b",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-19T12:48:16.855Z"
+    },
+    {
+      "key": "01a0b9b5-277b-7462-82d6-51ac407234d6",
+      "sessionId": "01a0b9b5-277b-7462-82d6-51ac407234d6",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-19T12:48:16.779Z"
     },
     {
       "key": "01a0b9a7-f8f3-7652-806f-80e27d0f6408",
@@ -69004,6 +69055,99 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 21,
           "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-f43c482cb854f5193c66c9bc",
+      "threadId": "01a0b9a7-5b18-7273-95a8-85bc50d861df",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-19T12:32:26.650Z",
+      "endTime": "2026-09-19T12:33:07.022Z",
+      "wallSeconds": 40,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 20,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 40,
+          "effectiveSeconds": 20
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-5307fc56824a88d737da4d73",
+      "threadId": "01a0b9a7-5aa4-7583-a954-4581f1c01ba3",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-19T12:32:44.609Z",
+      "endTime": "2026-09-19T12:33:06.926Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 22,
+          "effectiveSeconds": 11
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-37d3b4414350a66d4272bed2",
+      "threadId": "01a0b9a7-f8f3-7652-806f-80e27d0f6408",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-19T12:33:08.119Z",
+      "endTime": "2026-09-19T12:33:32.969Z",
+      "wallSeconds": 24,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 12,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 24,
+          "effectiveSeconds": 12
         }
       ],
       "description": "Codex: email-helper"
