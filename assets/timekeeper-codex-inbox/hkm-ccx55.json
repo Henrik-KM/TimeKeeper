@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-20T21:46:01.854Z",
-  "dayStart": "2026-09-19T22:00:00.000Z",
-  "rangeStart": "2026-06-22T22:00:00.000Z",
+  "updatedAt": "2026-09-20T22:01:01.842Z",
+  "dayStart": "2026-09-20T22:00:00.000Z",
+  "rangeStart": "2026-06-23T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-20T21:46:04.088Z",
+    "observedAt": "2026-09-20T22:01:04.140Z",
     "primary": {
       "usedPercent": 100,
       "remainingPercent": 0,
       "windowMinutes": 10080,
-      "resetsAt": "2026-09-21T09:10:30.000Z"
+      "resetsAt": "2026-09-21T09:10:29.000Z"
     },
     "secondary": null
   },
@@ -232,9 +232,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 1485,
-      "assistantSessionCount": 1484,
-      "lastSeenAt": "2026-09-20T21:32:56.611Z"
+      "sessionCount": 1488,
+      "assistantSessionCount": 1487,
+      "lastSeenAt": "2026-09-20T21:48:26.029Z"
     },
     {
       "key": "github/iflai/website",
@@ -2468,6 +2468,57 @@
       "activityCount": 13939,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-20T11:16:34.985Z"
+    },
+    {
+      "key": "01a0c0ca-afa5-7813-ae36-fbd9a18f1e59",
+      "sessionId": "01a0c0ca-afa5-7813-ae36-fbd9a18f1e59",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-20T21:48:26.029Z"
+    },
+    {
+      "key": "01a0c0ca-a200-72f1-bdc0-6b905def866d",
+      "sessionId": "01a0c0ca-a200-72f1-bdc0-6b905def866d",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-20T21:48:25.965Z"
+    },
+    {
+      "key": "01a0c0ca-a15a-7991-b888-fd1b85672d7f",
+      "sessionId": "01a0c0ca-a15a-7991-b888-fd1b85672d7f",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-20T21:48:25.874Z"
     },
     {
       "key": "01a0c0bc-80b3-7e42-88e3-c0e473f2065c",
@@ -30787,7 +30838,7 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 836,
+      "activityCount": 666,
       "assistantActivity": true,
       "lastSeenAt": "2026-07-14T09:12:20.265Z"
     },
@@ -48381,69 +48432,8 @@
           "effectiveSeconds": 1
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-a8d9fcb76090b12bc3b5bf6a",
-      "threadId": "01a07173-01c6-7233-a4e1-b572f90b008a",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T07:36:04.539Z",
-      "endTime": "2026-09-14T07:36:10.480Z",
-      "wallSeconds": 5,
-      "focusFactor": 0.4,
-      "effectiveSeconds": 2,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 5,
-          "effectiveSeconds": 2
-        }
-      ],
-      "description": "Codex: IFLAI"
-    },
-    {
-      "id": "codex-24f2385687ec07a1572fce3f",
-      "threadId": "01a033e6-c592-78b1-bb89-d6cee3d6c8b6",
-      "projectKey": "Website",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T09:04:58.038Z",
-      "endTime": "2026-09-14T09:20:44.597Z",
-      "wallSeconds": 946,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 473,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 946,
-          "effectiveSeconds": 473
-        }
-      ],
-      "description": "Codex: Find scheduled blog posts"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-47664664c2d44a43614e1d8f",
@@ -48474,100 +48464,8 @@
           "effectiveSeconds": 606
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-26e4b253d31f24edd29e8297",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T09:10:57.692Z",
-      "endTime": "2026-09-14T09:43:46.141Z",
-      "wallSeconds": 1968,
-      "focusFactor": 0.2998,
-      "effectiveSeconds": 590,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1968,
-          "effectiveSeconds": 590
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
-    },
-    {
-      "id": "codex-ef6ae1430d8edeeb64deb06c",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T09:11:44.480Z",
-      "endTime": "2026-09-14T09:43:46.400Z",
-      "wallSeconds": 1921,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 960,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1921,
-          "effectiveSeconds": 960
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-1735958700e77ecf97363a28",
-      "threadId": "01a07173-01c6-7233-a4e1-b572f90b008a",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T09:12:15.064Z",
-      "endTime": "2026-09-14T09:43:44.849Z",
-      "wallSeconds": 1889,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 944,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1889,
-          "effectiveSeconds": 944
-        }
-      ],
-      "description": "Codex: IFLAI"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-f261fd5aab8ecc9e6acb1c66",
@@ -48598,269 +48496,8 @@
           "effectiveSeconds": 536
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-aa75032d00c47a10b66e828d",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T10:14:13.223Z",
-      "endTime": "2026-09-14T10:52:02.031Z",
-      "wallSeconds": 2268,
-      "focusFactor": 0.2998,
-      "effectiveSeconds": 680,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2268,
-          "effectiveSeconds": 680
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
-    },
-    {
-      "id": "codex-754322485f837428256e2297",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T10:14:13.846Z",
-      "endTime": "2026-09-14T10:23:27.970Z",
-      "wallSeconds": 554,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 277,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 554,
-          "effectiveSeconds": 277
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-eb2939579a97b9688582130e",
-      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T10:14:23.543Z",
-      "endTime": "2026-09-14T10:39:48.776Z",
-      "wallSeconds": 1525,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 762,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1525,
-          "effectiveSeconds": 762
-        }
-      ],
-      "description": "Codex: Edit outreach drafts"
-    },
-    {
-      "id": "codex-ff3c3b77180c53001c95da01",
-      "threadId": "01a07173-01c6-7233-a4e1-b572f90b008a",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T10:15:51.994Z",
-      "endTime": "2026-09-14T10:28:26.767Z",
-      "wallSeconds": 754,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 377,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 754,
-          "effectiveSeconds": 377
-        }
-      ],
-      "description": "Codex: IFLAI"
-    },
-    {
-      "id": "codex-7c6e2f337a18cc3895077d02",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T11:10:46.994Z",
-      "endTime": "2026-09-14T11:15:58.228Z",
-      "wallSeconds": 311,
-      "focusFactor": 0.299,
-      "effectiveSeconds": 93,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 311,
-          "effectiveSeconds": 93
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
-    },
-    {
-      "id": "codex-8c12f300cc8942fee4505ac1",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T11:11:37.598Z",
-      "endTime": "2026-09-14T12:01:05.429Z",
-      "wallSeconds": 2967,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1483,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2967,
-          "effectiveSeconds": 1483
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-c18b8e027fedd44cb3b77c22",
-      "threadId": "01a0a0dc-ace0-7392-a8fa-0f1ad9516438",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T17:00:12.818Z",
-      "endTime": "2026-09-14T17:24:00.757Z",
-      "wallSeconds": 1427,
-      "focusFactor": 0.4996,
-      "effectiveSeconds": 713,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1425,
-          "effectiveSeconds": 712
-        }
-      ],
-      "description": "Codex: RD-doc-personal"
-    },
-    {
-      "id": "codex-ae3a0b10068743d1ab69caa0",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-14T17:37:04.096Z",
-      "endTime": "2026-09-14T17:46:01.008Z",
-      "wallSeconds": 536,
-      "focusFactor": 0.3004,
-      "effectiveSeconds": 161,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 536,
-          "effectiveSeconds": 160
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-21c20bd8146fb0247f7f827a",
@@ -78527,6 +78164,99 @@
       "timekeeperProjectName": "IFLAI",
       "startTime": "2026-09-20T21:18:00.455Z",
       "endTime": "2026-09-20T21:18:02.825Z",
+      "wallSeconds": 2,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2,
+          "effectiveSeconds": 1
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-9b37b780e5ed9cb89bced662",
+      "threadId": "01a0c0bc-708c-7ff0-8a7f-46bb9fea04d0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-20T21:32:50.780Z",
+      "endTime": "2026-09-20T21:32:56.455Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-daa5ecf194d4bd511c3d4ffe",
+      "threadId": "01a0c0bc-707d-7263-bfd6-24fb5f3e8a8c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-20T21:32:50.953Z",
+      "endTime": "2026-09-20T21:32:56.535Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-2057a8ad3e7f538fa6df95b1",
+      "threadId": "01a0c0bc-80b3-7e42-88e3-c0e473f2065c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-20T21:32:54.329Z",
+      "endTime": "2026-09-20T21:32:56.611Z",
       "wallSeconds": 2,
       "focusFactor": 0.5,
       "effectiveSeconds": 1,
