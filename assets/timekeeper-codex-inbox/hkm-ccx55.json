@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-20T06:46:02.383Z",
+  "updatedAt": "2026-09-20T07:01:02.433Z",
   "dayStart": "2026-09-19T22:00:00.000Z",
   "rangeStart": "2026-06-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-20T06:46:03.516Z",
+    "observedAt": "2026-09-20T07:01:03.853Z",
     "primary": {
       "usedPercent": 100,
       "remainingPercent": 0,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-09-19T07:31:45.931Z"
+      "lastSeenAt": "2026-09-20T07:01:19.385Z"
     },
     {
       "key": "documents/codex/2026-09-18/realtime-voice-chat",
@@ -232,9 +232,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 1376,
-      "assistantSessionCount": 1375,
-      "lastSeenAt": "2026-09-20T06:32:36.197Z"
+      "sessionCount": 1378,
+      "assistantSessionCount": 1377,
+      "lastSeenAt": "2026-09-20T06:48:45.861Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2465,9 +2465,43 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 13929,
+      "activityCount": 13938,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-19T07:31:45.931Z"
+      "lastSeenAt": "2026-09-20T07:01:19.385Z"
+    },
+    {
+      "key": "01a0bd92-f8af-7b00-bf49-ffbf8cc03d43",
+      "sessionId": "01a0bd92-f8af-7b00-bf49-ffbf8cc03d43",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-20T06:48:45.861Z"
+    },
+    {
+      "key": "01a0bd92-f860-74b3-bac5-0f1a0d287985",
+      "sessionId": "01a0bd92-f860-74b3-bac5-0f1a0d287985",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-20T06:48:45.805Z"
     },
     {
       "key": "01a0bd84-2f13-7f93-ad7d-faadd27968f7",
@@ -73295,6 +73329,68 @@
       "timekeeperProjectName": "IFLAI",
       "startTime": "2026-09-20T06:17:21.808Z",
       "endTime": "2026-09-20T06:17:27.180Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-914435eac8e7e60051698a76",
+      "threadId": "01a0bd84-2efe-7a90-a708-d7832887cfcd",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-20T06:32:30.122Z",
+      "endTime": "2026-09-20T06:32:36.119Z",
+      "wallSeconds": 5,
+      "focusFactor": 0.4,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-e013983df10bc37fc6ee65a3",
+      "threadId": "01a0bd84-2f13-7f93-ad7d-faadd27968f7",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-20T06:32:30.419Z",
+      "endTime": "2026-09-20T06:32:36.197Z",
       "wallSeconds": 5,
       "focusFactor": 0.4,
       "effectiveSeconds": 2,
