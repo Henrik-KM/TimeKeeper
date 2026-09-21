@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-21T10:01:02.288Z",
+  "updatedAt": "2026-09-21T10:16:02.276Z",
   "dayStart": "2026-09-20T22:00:00.000Z",
   "rangeStart": "2026-06-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-21T10:01:04.252Z",
+    "observedAt": "2026-09-21T10:16:04.043Z",
     "primary": {
-      "usedPercent": 2,
-      "remainingPercent": 98,
+      "usedPercent": 3,
+      "remainingPercent": 97,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-28T09:11:35.000Z"
     },
@@ -234,7 +234,7 @@
       "match": "IFLAI",
       "sessionCount": 1633,
       "assistantSessionCount": 1632,
-      "lastSeenAt": "2026-09-21T10:02:07.010Z"
+      "lastSeenAt": "2026-09-21T10:07:51.098Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2538,9 +2538,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 9796,
+      "activityCount": 10028,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-21T10:02:07.010Z"
+      "lastSeenAt": "2026-09-21T10:07:51.098Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -85239,6 +85239,68 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-bc5ee482c99690d91c0917d5",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:11:25.377Z",
+      "endTime": "2026-09-21T09:52:18.789Z",
+      "wallSeconds": 2453,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 736,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2453,
+          "effectiveSeconds": 735
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-2f0147b0df9d1efa38d748f3",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:11:29.723Z",
+      "endTime": "2026-09-21T09:50:37.455Z",
+      "wallSeconds": 2347,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1173,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2347,
+          "effectiveSeconds": 1173
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     },
     {
       "id": "codex-bddbe7ba82165003568b7c8f",
