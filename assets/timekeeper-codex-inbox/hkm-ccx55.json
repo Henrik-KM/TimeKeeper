@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-21T22:16:01.707Z",
+  "updatedAt": "2026-09-21T22:31:01.681Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-06-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-21T22:16:03.961Z",
+    "observedAt": "2026-09-21T22:31:05.846Z",
     "primary": {
       "usedPercent": 10,
       "remainingPercent": 90,
@@ -83704,6 +83704,68 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 38,
           "effectiveSeconds": 19
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b05b6df5969a9f92214b414c",
+      "threadId": "01a0c5fe-4172-7923-abee-fe53fb19ec3b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T22:02:48.202Z",
+      "endTime": "2026-09-21T22:04:18.993Z",
+      "wallSeconds": 90,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 45,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 90,
+          "effectiveSeconds": 45
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-f4c344cbbb64d9ed04f5300c",
+      "threadId": "01a0c5ff-a560-7a40-8d2e-22b0f1270083",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T22:04:20.135Z",
+      "endTime": "2026-09-21T22:05:07.001Z",
+      "wallSeconds": 46,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 23,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 46,
+          "effectiveSeconds": 23
         }
       ],
       "description": "Codex: email-helper"
