@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-21T09:46:02.355Z",
+  "updatedAt": "2026-09-21T10:01:02.288Z",
   "dayStart": "2026-09-20T22:00:00.000Z",
   "rangeStart": "2026-06-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-21T09:46:04.210Z",
+    "observedAt": "2026-09-21T10:01:04.252Z",
     "primary": {
       "usedPercent": 2,
       "remainingPercent": 98,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-09-21T09:46:49.855Z"
+      "lastSeenAt": "2026-09-21T09:52:18.789Z"
     },
     {
       "key": "documents/codex/2026-09-18/realtime-voice-chat",
@@ -234,7 +234,7 @@
       "match": "IFLAI",
       "sessionCount": 1633,
       "assistantSessionCount": 1632,
-      "lastSeenAt": "2026-09-21T09:46:42.576Z"
+      "lastSeenAt": "2026-09-21T10:02:07.010Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2521,9 +2521,26 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 14337,
+      "activityCount": 14400,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-21T09:46:49.855Z"
+      "lastSeenAt": "2026-09-21T09:52:18.789Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 9796,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-21T10:02:07.010Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -2538,9 +2555,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3298,
+      "activityCount": 3375,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-21T09:46:42.576Z"
+      "lastSeenAt": "2026-09-21T09:50:37.455Z"
     },
     {
       "key": "01a0c353-3e7d-7cc3-b855-65690c913cce",
@@ -6621,23 +6638,6 @@
       "activityCount": 2130,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-20T11:16:39.350Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 9788,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-20T11:16:36.834Z"
     },
     {
       "key": "01a0be7b-c81f-7a22-a8cb-39e491fb314a",
@@ -85236,6 +85236,223 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 2,
           "effectiveSeconds": 1
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-bddbe7ba82165003568b7c8f",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:14:43.036Z",
+      "endTime": "2026-09-21T09:35:11.670Z",
+      "wallSeconds": 1228,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 614,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1228,
+          "effectiveSeconds": 614
+        }
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-2e0e31ac6f80379b014da997",
+      "threadId": "01a0c351-b9e6-7261-b34d-e6e6396f4696",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:01.911Z",
+      "endTime": "2026-09-21T09:36:45.300Z",
+      "wallSeconds": 43,
+      "focusFactor": 0.4884,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 43,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-2ba111959326e7ab659cda02",
+      "threadId": "01a0c351-baa9-7ec2-8b42-91188a562e7e",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:01.927Z",
+      "endTime": "2026-09-21T09:36:45.414Z",
+      "wallSeconds": 43,
+      "focusFactor": 0.4884,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 43,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-523a04e22e86ad64575509e4",
+      "threadId": "01a0c352-c4de-7332-9413-d4b43fdd1062",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:17.004Z",
+      "endTime": "2026-09-21T09:36:45.720Z",
+      "wallSeconds": 28,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 14,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 28,
+          "effectiveSeconds": 14
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-57921a590cda3ad7ae5f869b",
+      "threadId": "01a0c352-5f4c-7190-9296-d6dcf56b1dab",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:18.083Z",
+      "endTime": "2026-09-21T09:36:45.623Z",
+      "wallSeconds": 27,
+      "focusFactor": 0.4815,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 27,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-1c94371926a2d969e10bb213",
+      "threadId": "01a0c352-5ea3-7902-bfb9-3c97011bee0a",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:19.625Z",
+      "endTime": "2026-09-21T09:36:45.513Z",
+      "wallSeconds": 25,
+      "focusFactor": 0.48,
+      "effectiveSeconds": 12,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 25,
+          "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-6972078fe4f8104119757548",
+      "threadId": "01a0c353-3e7d-7cc3-b855-65690c913cce",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T09:36:47.407Z",
+      "endTime": "2026-09-21T09:37:10.586Z",
+      "wallSeconds": 23,
+      "focusFactor": 0.4783,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 23,
+          "effectiveSeconds": 11
         }
       ],
       "description": "Codex: email-helper"
