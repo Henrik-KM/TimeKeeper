@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-22T07:17:01.815Z",
+  "updatedAt": "2026-09-22T07:52:01.919Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-09-15T22:00:00.000Z",
   "lookbackDays": 7,
@@ -297,6 +297,60 @@
         }
       ],
       "description": "Codex: Complete Stanford sensor data run"
+    },
+    {
+      "id": "codex-9ac67417776628ad4afb52ff",
+      "threadId": "01a07aa2-a39b-71b2-8653-654c57b83afd",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-22T05:36:56.095Z",
+      "endTime": "2026-09-22T07:33:14.860Z",
+      "wallSeconds": 6978,
+      "focusFactor": 0.9771,
+      "effectiveSeconds": 6819,
+      "focusPolicyVersion": 7,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 3,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "wallSeconds": 6978,
+          "effectiveSeconds": 5234
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 3,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-5.6-luna",
+          "effort": "xhigh",
+          "factor": 0.3,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.105,
+          "wallSeconds": 15092,
+          "effectiveSeconds": 1584
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-298af7b64c899cd56cfcd8dc",
+        "codex-b6eb62c7899ad3d94a913a07",
+        "codex-e0cab46e51b638486d5dcb56",
+        "codex-394c35c57ab8569e5ead39e2"
+      ],
+      "description": "Codex: Continue Structured AL Stage 5"
     },
     {
       "id": "codex-8481b7f73062e4e05607edbd",
