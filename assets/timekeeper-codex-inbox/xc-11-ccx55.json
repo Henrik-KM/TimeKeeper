@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-22T06:22:03.602Z",
+  "updatedAt": "2026-09-22T06:32:04.142Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-09-15T22:00:00.000Z",
   "lookbackDays": 7,
@@ -267,6 +267,36 @@
         }
       ],
       "description": "Codex: Improve hybrid algorithm"
+    },
+    {
+      "id": "codex-251d0727477544fdb9497e68",
+      "threadId": "01a0c79d-92a4-7901-ae2e-d4e9ac6dd005",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-22T05:36:31.511Z",
+      "endTime": "2026-09-22T06:11:25.798Z",
+      "wallSeconds": 2094,
+      "focusFactor": 0.7499,
+      "effectiveSeconds": 1570,
+      "focusPolicyVersion": 7,
+      "modelBreakdown": [
+        {
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "wallSeconds": 2093,
+          "effectiveSeconds": 1570
+        }
+      ],
+      "description": "Codex: Complete Stanford sensor data run"
     },
     {
       "id": "codex-8481b7f73062e4e05607edbd",
