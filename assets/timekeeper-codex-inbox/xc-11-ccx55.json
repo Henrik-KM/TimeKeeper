@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-22T06:32:04.142Z",
+  "updatedAt": "2026-09-22T07:17:01.815Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-09-15T22:00:00.000Z",
   "lookbackDays": 7,
@@ -320,6 +320,36 @@
         }
       ],
       "description": "Codex: Improve hybrid algorithm"
+    },
+    {
+      "id": "codex-c5404f286c3ffc38192d5954",
+      "threadId": "019e5f78-41b2-79d0-bebd-baa3944e24ed",
+      "projectKey": "particle_iden",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-22T06:03:08.983Z",
+      "endTime": "2026-09-22T06:59:29.229Z",
+      "wallSeconds": 3380,
+      "focusFactor": 0.7488,
+      "effectiveSeconds": 2531,
+      "focusPolicyVersion": 7,
+      "modelBreakdown": [
+        {
+          "model": "gpt-5.5",
+          "effort": "xhigh",
+          "factor": 0.4,
+          "wallSeconds": 11,
+          "effectiveSeconds": 4
+        },
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "wallSeconds": 3368,
+          "effectiveSeconds": 2526
+        }
+      ],
+      "description": "Codex: Recreate Figure 1 as vector"
     }
   ]
 }
