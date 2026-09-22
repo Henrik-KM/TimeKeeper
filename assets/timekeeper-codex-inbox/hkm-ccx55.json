@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-22T05:46:01.843Z",
+  "updatedAt": "2026-09-22T06:01:01.882Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-06-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-22T05:46:03.555Z",
+    "observedAt": "2026-09-22T06:01:03.695Z",
     "primary": {
-      "usedPercent": 15,
-      "remainingPercent": 85,
+      "usedPercent": 25,
+      "remainingPercent": 75,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-28T09:11:35.000Z"
     },
@@ -234,7 +234,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-09-22T05:46:56.385Z"
+      "lastSeenAt": "2026-09-22T06:01:52.664Z"
     },
     {
       "key": "github/iflai",
@@ -248,7 +248,21 @@
       "match": "IFLAI",
       "sessionCount": 11,
       "assistantSessionCount": 11,
-      "lastSeenAt": "2026-09-22T05:46:24.712Z"
+      "lastSeenAt": "2026-09-22T06:01:26.318Z"
+    },
+    {
+      "key": "github/anders/research",
+      "displayPath": "GitHub/Anders/Research",
+      "projectFolder": "Anders",
+      "repoName": "Research",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 9,
+      "assistantSessionCount": 9,
+      "lastSeenAt": "2026-09-22T06:00:25.821Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -260,9 +274,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 1756,
-      "assistantSessionCount": 1755,
-      "lastSeenAt": "2026-09-22T05:24:31.028Z"
+      "sessionCount": 1759,
+      "assistantSessionCount": 1758,
+      "lastSeenAt": "2026-09-22T06:00:20.902Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -697,20 +711,6 @@
       "sessionCount": 5,
       "assistantSessionCount": 4,
       "lastSeenAt": "2026-09-10T13:46:32.587Z"
-    },
-    {
-      "key": "github/anders/research",
-      "displayPath": "GitHub/Anders/Research",
-      "projectFolder": "Anders",
-      "repoName": "Research",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 8,
-      "assistantSessionCount": 8,
-      "lastSeenAt": "2026-09-08T10:58:16.195Z"
     },
     {
       "key": "github/iflai/email-helper/.local/operator-worktrees/context_workspace-16a3a384ab57",
@@ -2538,9 +2538,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 8293,
+      "activityCount": 8469,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-22T05:46:56.385Z"
+      "lastSeenAt": "2026-09-22T06:01:52.664Z"
     },
     {
       "key": "01a07173-01c6-7233-a4e1-b572f90b008a",
@@ -2555,9 +2555,111 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1746,
+      "activityCount": 2081,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-22T05:46:24.712Z"
+      "lastSeenAt": "2026-09-22T06:01:26.318Z"
+    },
+    {
+      "key": "01a0c7a9-2159-7082-8827-34aef197793b",
+      "sessionId": "01a0c7a9-2159-7082-8827-34aef197793b",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Research",
+      "repoName": "Research",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 199,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T06:00:25.821Z"
+    },
+    {
+      "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
+      "sessionId": "01a09460-97ce-7261-aeee-55ff7f9d770d",
+      "title": "Review old Outlook follow-ups",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 332,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T06:00:20.902Z"
+    },
+    {
+      "key": "01a0c7ac-3f55-7710-99f6-1e28d8ec32aa",
+      "sessionId": "01a0c7ac-3f55-7710-99f6-1e28d8ec32aa",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T05:53:11.816Z"
+    },
+    {
+      "key": "01a0c7aa-de13-7a41-aea4-6ea87a6bc2fd",
+      "sessionId": "01a0c7aa-de13-7a41-aea4-6ea87a6bc2fd",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T05:52:26.349Z"
+    },
+    {
+      "key": "01a0c7aa-dde9-7391-9ca9-1b5b301e2a4f",
+      "sessionId": "01a0c7aa-dde9-7391-9ca9-1b5b301e2a4f",
+      "title": "",
+      "threadSource": "iflai_email_authoring",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T05:52:26.278Z"
+    },
+    {
+      "key": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "sessionId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "title": "Review JCTC manuscript status",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Research",
+      "repoName": "Research",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 5256,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T05:48:03.369Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -23232,23 +23334,6 @@
       "lastSeenAt": "2026-09-12T10:13:04.093Z"
     },
     {
-      "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
-      "sessionId": "01a09460-97ce-7261-aeee-55ff7f9d770d",
-      "title": "Review old Outlook follow-ups",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 331,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-12T07:08:20.708Z"
-    },
-    {
       "key": "01a08f13-56be-7122-b1b9-0967190ac391",
       "sessionId": "01a08f13-56be-7122-b1b9-0967190ac391",
       "title": "",
@@ -29690,23 +29775,6 @@
       "activityCount": 20,
       "assistantActivity": true,
       "lastSeenAt": "2026-08-25T06:05:43.113Z"
-    },
-    {
-      "key": "01a03234-8a23-7ad3-b674-4baa7f690c23",
-      "sessionId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
-      "title": "Review JCTC manuscript status",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Research",
-      "repoName": "Research",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 5255,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-08-24T16:04:11.939Z"
     },
     {
       "key": "01a03418-079f-76b1-a94a-b70e00e5a637",
@@ -85497,6 +85565,37 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b9da5af4a719f46638a0bebe",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-22T05:31:52.836Z",
+      "endTime": "2026-09-22T05:33:21.690Z",
+      "wallSeconds": 88,
+      "focusFactor": 0.2955,
+      "effectiveSeconds": 26,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 88,
+          "effectiveSeconds": 26
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
