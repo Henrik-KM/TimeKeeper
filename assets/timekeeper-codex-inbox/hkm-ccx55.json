@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-22T08:46:01.988Z",
+  "updatedAt": "2026-09-22T12:11:37.588Z",
   "dayStart": "2026-09-21T22:00:00.000Z",
   "rangeStart": "2026-06-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-22T08:46:04.198Z",
+    "observedAt": "2026-09-22T12:11:41.878Z",
     "primary": {
-      "usedPercent": 81,
-      "remainingPercent": 19,
+      "usedPercent": 99,
+      "remainingPercent": 1,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-28T09:11:35.000Z"
     },
@@ -223,6 +223,20 @@
       "lastSeenAt": "2026-06-18T22:07:52.761Z"
     },
     {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1781,
+      "assistantSessionCount": 1780,
+      "lastSeenAt": "2026-09-22T10:39:57.650Z"
+    },
+    {
       "key": "github/anders/research",
       "displayPath": "GitHub/Anders/Research",
       "projectFolder": "Anders",
@@ -235,20 +249,6 @@
       "sessionCount": 9,
       "assistantSessionCount": 9,
       "lastSeenAt": "2026-09-22T07:26:02.200Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1781,
-      "assistantSessionCount": 1780,
-      "lastSeenAt": "2026-09-22T07:21:50.883Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2610,6 +2610,23 @@
       "lastSeenAt": "2026-09-22T08:39:57.379Z"
     },
     {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 10783,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-22T10:39:57.650Z"
+    },
+    {
       "key": "01a0c7a9-2159-7082-8827-34aef197793b",
       "sessionId": "01a0c7a9-2159-7082-8827-34aef197793b",
       "title": "",
@@ -4750,23 +4767,6 @@
       "activityCount": 2,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-21T15:16:34.652Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 10513,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-21T14:34:43.359Z"
     },
     {
       "key": "01a0c457-3eb5-7023-8bac-3f06994c1d00",
@@ -87339,6 +87339,68 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-68b26a36111e698ea6d74c24",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-22T08:10:40.627Z",
+      "endTime": "2026-09-22T08:39:57.379Z",
+      "wallSeconds": 1756,
+      "focusFactor": 0.3001,
+      "effectiveSeconds": 527,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1756,
+          "effectiveSeconds": 526
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-21f50958f01dbca08f959887",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-22T10:29:31.424Z",
+      "endTime": "2026-09-22T10:39:57.650Z",
+      "wallSeconds": 626,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 313,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 626,
+          "effectiveSeconds": 313
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
