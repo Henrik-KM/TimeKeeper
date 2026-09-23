@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper",
   "enabled": true,
-  "updatedAt": "2026-09-05T10:26:36.850Z",
+  "updatedAt": "2026-09-23T10:18:27.456Z",
   "matchMode": "github-parent-folder",
   "focusFactor": 0.4,
   "focusPolicy": {
@@ -152,5 +152,22 @@
       "repoName": "email-helper",
       "backfillDays": 90
     }
-  ]
+  ],
+  "claude": {
+    "enabled": true,
+    "inboxPath": "assets/timekeeper-claude-inbox",
+    "focusPolicy": {
+      "version": 1,
+      "idleGapMinutes": 15,
+      "matureMinutes": 17,
+      "delegationCredit": 0.35,
+      "modelFactors": {
+        "fable": 0.75,
+        "opus": 0.5,
+        "sonnet": 0.4,
+        "haiku": 0.3,
+        "unknown": 0.4
+      }
+    }
+  }
 }
