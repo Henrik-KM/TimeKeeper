@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-23T07:46:02.650Z",
+  "updatedAt": "2026-09-23T08:01:02.633Z",
   "dayStart": "2026-09-22T22:00:00.000Z",
   "rangeStart": "2026-06-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-23T07:46:04.375Z",
+    "observedAt": "2026-09-23T08:01:04.558Z",
     "primary": {
-      "usedPercent": 6,
-      "remainingPercent": 94,
+      "usedPercent": 8,
+      "remainingPercent": 92,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-30T06:04:04.000Z"
     },
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-09-23/please",
+      "displayPath": "Documents/Codex/2026-09-23/please",
+      "projectFolder": "",
+      "repoName": "please",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-09-23T08:00:50.713Z"
+    },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
       "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -223,6 +237,20 @@
       "lastSeenAt": "2026-06-18T22:07:52.761Z"
     },
     {
+      "key": "github/anders/research",
+      "displayPath": "GitHub/Anders/Research",
+      "projectFolder": "Anders",
+      "repoName": "Research",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 9,
+      "assistantSessionCount": 9,
+      "lastSeenAt": "2026-09-23T08:01:21.371Z"
+    },
+    {
       "key": "github/iflai/email-helper",
       "displayPath": "GitHub/IFLAI/email-helper",
       "projectFolder": "IFLAI",
@@ -263,20 +291,6 @@
       "sessionCount": 10,
       "assistantSessionCount": 10,
       "lastSeenAt": "2026-09-23T06:06:53.609Z"
-    },
-    {
-      "key": "github/anders/research",
-      "displayPath": "GitHub/Anders/Research",
-      "projectFolder": "Anders",
-      "repoName": "Research",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 9,
-      "assistantSessionCount": 9,
-      "lastSeenAt": "2026-09-22T07:26:02.200Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2185,6 +2199,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a0cd40-8968-74d0-9742-be77c5690f18",
+      "sessionId": "01a0cd40-8968-74d0-9742-be77c5690f18",
+      "title": "Install and launch Claude apps",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-09-23/please",
+      "repoName": "please",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 124,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-23T08:00:50.713Z"
+    },
+    {
       "key": "01a0b421-e391-7891-8321-d0cdc728079d",
       "sessionId": "01a0b421-e391-7891-8321-d0cdc728079d",
       "title": "Realtime Voice Chat",
@@ -2608,6 +2639,40 @@
       "activityCount": 15333,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-23T07:35:06.940Z"
+    },
+    {
+      "key": "01a0c7a9-2159-7082-8827-34aef197793b",
+      "sessionId": "01a0c7a9-2159-7082-8827-34aef197793b",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Research",
+      "repoName": "Research",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 1402,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-23T08:01:21.371Z"
+    },
+    {
+      "key": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "sessionId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "title": "Review JCTC manuscript status",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Research",
+      "repoName": "Research",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 5484,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-23T07:54:14.520Z"
     },
     {
       "key": "01a0cd32-4c95-7861-933c-464f61f27307",
@@ -3613,23 +3678,6 @@
       "lastSeenAt": "2026-09-22T12:51:48.186Z"
     },
     {
-      "key": "01a0c7a9-2159-7082-8827-34aef197793b",
-      "sessionId": "01a0c7a9-2159-7082-8827-34aef197793b",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Research",
-      "repoName": "Research",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 1224,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-22T07:26:02.200Z"
-    },
-    {
       "key": "01a0c7fd-8c1f-70e1-9c6a-432c38b05984",
       "sessionId": "01a0c7fd-8c1f-70e1-9c6a-432c38b05984",
       "title": "",
@@ -4189,23 +4237,6 @@
       "activityCount": 2,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-22T05:52:26.278Z"
-    },
-    {
-      "key": "01a03234-8a23-7ad3-b674-4baa7f690c23",
-      "sessionId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
-      "title": "Review JCTC manuscript status",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Research",
-      "repoName": "Research",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 5256,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-22T05:48:03.369Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -86389,6 +86420,37 @@
       "description": "Codex: email-helper"
     },
     {
+      "id": "codex-d21ac4f170dd34e4691a1002",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T07:00:15.317Z",
+      "endTime": "2026-09-23T07:35:06.940Z",
+      "wallSeconds": 2091,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 627,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2091,
+          "effectiveSeconds": 627
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
       "id": "codex-b584eba429e2e3e2150bdc07",
       "threadId": "01a0cd15-973f-7a80-89f5-5dc18a7fc477",
       "projectKey": "email-helper",
@@ -86570,6 +86632,130 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 40,
           "effectiveSeconds": 20
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b5eca93cf1b863fbb23065dd",
+      "threadId": "01a0cd30-e0d9-7922-8f6c-bb57bb483125",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T07:35:26.298Z",
+      "endTime": "2026-09-23T07:36:56.109Z",
+      "wallSeconds": 89,
+      "focusFactor": 0.4944,
+      "effectiveSeconds": 44,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 89,
+          "effectiveSeconds": 44
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-1452d1b9d36218e4f6de5a2b",
+      "threadId": "01a0cd30-e0d9-7a91-b16a-3136ab027701",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T07:35:37.350Z",
+      "endTime": "2026-09-23T07:36:56.205Z",
+      "wallSeconds": 78,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 39,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 78,
+          "effectiveSeconds": 39
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-9613d526f70f736e8d014c30",
+      "threadId": "01a0cd32-492c-73e0-a4fe-8c4ccf63e934",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T07:36:59.225Z",
+      "endTime": "2026-09-23T07:37:34.674Z",
+      "wallSeconds": 35,
+      "focusFactor": 0.4857,
+      "effectiveSeconds": 17,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 35,
+          "effectiveSeconds": 17
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-175ae20decac743b358731e3",
+      "threadId": "01a0cd32-4c95-7861-933c-464f61f27307",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T07:37:01.747Z",
+      "endTime": "2026-09-23T07:37:34.813Z",
+      "wallSeconds": 33,
+      "focusFactor": 0.4848,
+      "effectiveSeconds": 16,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 33,
+          "effectiveSeconds": 16
         }
       ],
       "description": "Codex: email-helper"
