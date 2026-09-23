@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-23T17:01:02.381Z",
+  "updatedAt": "2026-09-23T17:16:02.449Z",
   "dayStart": "2026-09-22T22:00:00.000Z",
   "rangeStart": "2026-06-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-23T17:01:04.205Z",
+    "observedAt": "2026-09-23T17:16:04.797Z",
     "primary": {
       "usedPercent": 18,
       "remainingPercent": 82,
@@ -90832,6 +90832,130 @@
           "creditedFactor": 0.5,
           "repositoryMultiplier": 1,
           "wallSeconds": 32,
+          "effectiveSeconds": 16
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-6b592ca76881483240eb8b6f",
+      "threadId": "01a0cf2c-7251-7c81-8ee5-5c05f19fa2ac",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T16:49:50.560Z",
+      "endTime": "2026-09-23T16:50:56.923Z",
+      "wallSeconds": 66,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 33,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 66,
+          "effectiveSeconds": 33
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-99c5b1486e7d31f878fd3553",
+      "threadId": "01a0cf2c-7267-7012-a356-8ff076c28483",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T16:49:56.594Z",
+      "endTime": "2026-09-23T16:50:56.811Z",
+      "wallSeconds": 60,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 30,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 60,
+          "effectiveSeconds": 30
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-7ad287bee5480eec9ac0dec5",
+      "threadId": "01a0cf2d-7aa0-7a80-9747-6c69c865f350",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T16:50:58.545Z",
+      "endTime": "2026-09-23T16:51:35.880Z",
+      "wallSeconds": 37,
+      "focusFactor": 0.4865,
+      "effectiveSeconds": 18,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 37,
+          "effectiveSeconds": 18
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-f01648f3fe19bc7bbc965d4a",
+      "threadId": "01a0cf2d-7ac9-7b70-b00f-7c7b356daff0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T16:51:02.264Z",
+      "endTime": "2026-09-23T16:51:36.026Z",
+      "wallSeconds": 33,
+      "focusFactor": 0.4848,
+      "effectiveSeconds": 16,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 33,
           "effectiveSeconds": 16
         }
       ],
