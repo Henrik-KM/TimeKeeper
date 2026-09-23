@@ -12033,6 +12033,18 @@ import {
     return description.startsWith('codex:');
   }
 
+  function isImportedAgentTimeEntry(entry) {
+    if (isCodexTimeEntry(entry)) return true;
+    const source = String(entry?.source || '')
+      .trim()
+      .toLowerCase();
+    if (source === 'claude') return true;
+    return String(entry?.externalId || '')
+      .trim()
+      .toLowerCase()
+      .startsWith('claude:');
+  }
+
   function getCompletedProjectEntries(projectId, options = {}) {
     const includeCodexEntries = options.includeCodexEntries !== false;
     return data.entries.filter(
@@ -17105,7 +17117,8 @@ import {
     const entry = data.entries
       .slice()
       .filter(
-        (candidate) => !candidate.isRunning && !isCodexTimeEntry(candidate)
+        (candidate) =>
+          !candidate.isRunning && !isImportedAgentTimeEntry(candidate)
       )
       .sort((a, b) => {
         const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
@@ -17136,7 +17149,7 @@ import {
     const shortcuts = [];
     data.entries
       .slice()
-      .filter((entry) => !entry.isRunning && !isCodexTimeEntry(entry))
+      .filter((entry) => !entry.isRunning && !isImportedAgentTimeEntry(entry))
       .sort((a, b) => {
         const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
         const bTime = new Date(b.endTime || b.createdAt || b.startTime || 0);
@@ -17181,7 +17194,7 @@ import {
       })
       .forEach((entry) => {
         if (shortcuts.length >= limit) return;
-        if (entry.isRunning || isCodexTimeEntry(entry)) return;
+        if (entry.isRunning || isImportedAgentTimeEntry(entry)) return;
         const project = getStartableTimerProject(
           entry.projectId,
           runningProjectIds
@@ -17209,7 +17222,7 @@ import {
   ) {
     const groups = new Map();
     data.entries.forEach((entry) => {
-      if (entry.isRunning || isCodexTimeEntry(entry)) return;
+      if (entry.isRunning || isImportedAgentTimeEntry(entry)) return;
       const project = getStartableTimerProject(
         entry.projectId,
         runningProjectIds
@@ -17377,7 +17390,7 @@ import {
     const descriptions = new Map();
     data.entries.forEach((entry) => {
       const description = String(entry.description || '').trim();
-      if (!description || isCodexTimeEntry(entry)) return;
+      if (!description || isImportedAgentTimeEntry(entry)) return;
       const key = description.toLowerCase();
       const time = new Date(
         entry.endTime || entry.createdAt || entry.startTime || 0
@@ -21028,7 +21041,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=54')
+      .register('./service-worker.js?v=55')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

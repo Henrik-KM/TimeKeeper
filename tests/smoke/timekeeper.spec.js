@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v54';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=49'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v55';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=50'");
   expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
@@ -1742,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '54')"
+    "url.searchParams.set('timekeeper-update', '55')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1752,7 +1752,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=54')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=55')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -3420,7 +3420,31 @@ test('mobile Today one-click timers use repeated manual history before recent on
         endTime: '2026-04-26T11:00:00.000',
         createdAt: '2026-04-26T11:00:00.000',
         hours: 1
-      })
+      }),
+      {
+        ...entryFixture({
+          id: 'claude-recent-1',
+          projectId: 'frequent',
+          description: 'Claude: imported work',
+          startTime: '2026-04-25T09:00:00.000',
+          endTime: '2026-04-25T11:00:00.000',
+          createdAt: '2026-04-25T11:00:00.000',
+          hours: 2
+        }),
+        source: 'claude'
+      },
+      {
+        ...entryFixture({
+          id: 'claude-recent-2',
+          projectId: 'frequent',
+          description: 'Claude: imported work',
+          startTime: '2026-04-26T08:00:00.000',
+          endTime: '2026-04-26T10:00:00.000',
+          createdAt: '2026-04-26T10:00:00.000',
+          hours: 2
+        }),
+        externalId: 'claude:legacy-record'
+      }
     ]
   });
 
@@ -3433,6 +3457,7 @@ test('mobile Today one-click timers use repeated manual history before recent on
   await expect(commandPanel).toContainText('50%');
   await expect(commandPanel).toContainText('2x');
   await expect(commandPanel).not.toContainText('Newest one-off');
+  await expect(commandPanel).not.toContainText('Claude: imported work');
 
   await commandPanel
     .locator('.mobile-quick-timer')
@@ -5334,6 +5359,19 @@ test('recent timer chips preserve focus and start immediately', async ({
       },
       {
         ...entryFixture({
+          id: 'agent-claude-latest',
+          projectId: 'agent-project',
+          description: 'Claude: recent imported work',
+          startTime: '2026-04-24T09:00:00.000',
+          endTime: '2026-04-24T09:30:00.000',
+          createdAt: '2026-04-24T09:30:00.000',
+          hours: 0.5
+        }),
+        source: 'claude',
+        externalId: 'claude:latest'
+      },
+      {
+        ...entryFixture({
           id: 'agent-codex-legacy',
           projectId: 'agent-project',
           description: 'Codex: legacy imported work',
@@ -5380,6 +5418,12 @@ test('recent timer chips preserve focus and start immediately', async ({
     'Codex: recent imported agent work'
   );
   await expect(recentTimers).not.toContainText('Codex: legacy imported work');
+  await expect(recentTimers).not.toContainText('Claude: recent imported work');
+  await expect(
+    page.locator(
+      '#recentDescriptionOptions option[value="Claude: recent imported work"]'
+    )
+  ).toHaveCount(0);
 
   await page
     .locator('#recentTimersPro')
