@@ -1,0 +1,73 @@
+{
+  "version": 1,
+  "source": "timekeeper-claude-bridge",
+  "machineId": "xc-11-ccx55",
+  "updatedAt": "2026-09-23T10:18:35.312Z",
+  "rangeStart": "2026-08-24T22:00:00.000Z",
+  "lookbackDays": 30,
+  "records": [
+    {
+      "id": "claude:e09d2624b2b9906b6ccc3f14dbfce576",
+      "sessionId": "e4334954-a407-4238-bfaa-efefd11dcc67",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "particle_iden",
+      "description": "Claude: particle_iden",
+      "startTime": "2026-09-23T07:23:39.645Z",
+      "endTime": "2026-09-23T08:34:12.907Z",
+      "wallSeconds": 4233,
+      "effectiveSeconds": 2116,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 4233,
+          "effectiveSeconds": 2116
+        }
+      ],
+      "focusFactor": 0.4999,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:998c6ee18f4687acac50f310e170750f",
+      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Structured AL",
+      "description": "Claude: Structured AL",
+      "startTime": "2026-09-23T07:34:30.141Z",
+      "endTime": "2026-09-23T08:43:30.846Z",
+      "wallSeconds": 4140,
+      "effectiveSeconds": 2902,
+      "delegatedSessionCount": 3,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 4140,
+          "effectiveSeconds": 2070
+        },
+        {
+          "role": "subagent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 4752,
+          "effectiveSeconds": 831
+        }
+      ],
+      "focusFactor": 0.701,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    }
+  ]
+}
