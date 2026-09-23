@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-23T10:16:02.774Z",
+  "updatedAt": "2026-09-23T10:31:02.749Z",
   "dayStart": "2026-09-22T22:00:00.000Z",
   "rangeStart": "2026-06-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-23T10:16:04.551Z",
+    "observedAt": "2026-09-23T10:31:04.698Z",
     "primary": {
       "usedPercent": 14,
       "remainingPercent": 86,
@@ -248,7 +248,7 @@
       "match": "Anders",
       "sessionCount": 9,
       "assistantSessionCount": 9,
-      "lastSeenAt": "2026-09-23T10:17:02.521Z"
+      "lastSeenAt": "2026-09-23T10:31:58.593Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2653,9 +2653,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 7036,
+      "activityCount": 7492,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-23T10:17:02.521Z"
+      "lastSeenAt": "2026-09-23T10:31:58.593Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -88052,6 +88052,37 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-07481b86ecbcc78b6d61ef63",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T10:00:17.672Z",
+      "endTime": "2026-09-23T10:09:54.398Z",
+      "wallSeconds": 576,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 288,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 576,
+          "effectiveSeconds": 288
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
