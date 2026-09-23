@@ -153,13 +153,13 @@ Remote focus states expire after 15 minutes in the app and are treated as stale 
 
 ## Codex Usage Bridge
 
-TimeKeeper can import Codex desktop work as 50% project time. The Android/GitHub Pages app cannot read Windows Codex logs directly, so each Windows desktop runs a small scheduled helper that scans local Codex session JSONL files, publishes sanitized usage records to a GitHub inbox, and exits.
+TimeKeeper imports Codex desktop work using its published model policy. The Android/GitHub Pages app cannot read Windows Codex logs directly, so each Windows desktop runs a small scheduled helper that scans local Codex session JSONL files, publishes sanitized usage records to a GitHub inbox, and exits.
 
 The helper never publishes prompts, tool output, or full local paths. It publishes repo/thread metadata, active timestamps, and effective seconds only. It scans the current day plus the previous six local calendar days. Stable record IDs prevent entries that were already imported from being added again.
 
 Setup:
 
-1. In TimeKeeper, open Import / Export -> Codex Integration.
+1. In TimeKeeper, open Backup / Sync -> AI Logging -> Configure Codex.
 2. Keep Codex work under `GitHub/<TimeKeeper project>` or `GitHub/<TimeKeeper project>/<repo>`, for example `GitHub/IFLAI`, `GitHub/IFLAI/VWR-AutoInv`, or `GitHub/Anders/particle_iden`.
 3. Add a fine-grained GitHub token with Contents read/write access and choose `Publish Config`. TimeKeeper publishes the active project names, and the helper only tracks folders whose GitHub project folder is one of those TimeKeeper projects. A folder such as `GitHub/Polish/...` is ignored unless `Polish` exists as an active TimeKeeper project.
 4. On each Windows desktop, set the same token for the helper:
@@ -185,6 +185,20 @@ To uninstall the scheduled task:
 ```powershell
 npm run codex:bridge:uninstall
 ```
+
+## Claude Usage Bridge
+
+Claude logging uses the same active TimeKeeper project list, GitHub connection, and `TIMEKEEPER_CODEX_TOKEN`. In Backup / Sync -> AI Logging, choose **Configure Claude**, switch import on, and publish the config. Existing profiles keep Claude off until enabled.
+
+On the Windows PC, install the separate five-minute task:
+
+```powershell
+npm.cmd run claude:bridge:install
+```
+
+The task scans parent and nested subagent transcripts in `%USERPROFILE%\.claude\projects` (or `CLAUDE_CONFIG_DIR\projects`) for today and the previous 29 local calendar days. It publishes only session IDs, active timestamps, model families, project names, and measured seconds to `assets/timekeeper-claude-inbox/`. Prompts, tool output, and full local paths stay on the PC. A span closes after a gap over 15 minutes and is published 17 minutes after its last event. Overlapping parent and subagent activity counts wall time once; delegated work receives 35% of its model factor. Claude uses Fable 0.75, Opus 0.50, Sonnet 0.40, Haiku 0.30, and unknown 0.40.
+
+To preview sanitized records without publishing, run `npm.cmd run claude:bridge -- --dry-run`. To publish immediately, run `npm.cmd run claude:bridge`. To remove only the Claude task, run `npm.cmd run claude:bridge:uninstall`.
 
 ## Backup And Sync
 

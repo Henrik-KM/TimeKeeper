@@ -98,7 +98,14 @@ import {
   DEFAULT_CODEX_FOCUS_POLICY
 } from './features/codex/policy.mjs';
 import { migrateCodexEntries } from './features/codex/revaluation.mjs';
+import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs';
 import {
+  CLAUDE_INBOX_PATH,
+  importClaudeInboxRecords,
+  normalizeClaudeIntegration
+} from './features/claude/inbox.mjs';
+import {
+  computeRollingSourceTotals,
   computeUnionSeconds,
   getEntryElapsedSeconds,
   getEntrySource,
@@ -2597,6 +2604,7 @@ import {
           usagePreferences: normalizeUsagePreferences(),
           reminderSettings: normalizeReminderSettings(),
           codexIntegration: makeDefaultCodexIntegration(),
+          claudeIntegration: normalizeClaudeIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
           wealthSchemaVersion: 3,
@@ -2667,6 +2675,9 @@ import {
           usagePreferences: normalizeUsagePreferences(parsed.usagePreferences),
           reminderSettings: normalizeReminderSettings(parsed.reminderSettings),
           codexIntegration: normalizeCodexIntegration(parsed.codexIntegration),
+          claudeIntegration: normalizeClaudeIntegration(
+            parsed.claudeIntegration
+          ),
           focusBlockerSites: normalizeFocusBlockedSites(
             parsed.focusBlockerSites,
             DEFAULT_FOCUS_BLOCKED_WEBSITES
@@ -2711,6 +2722,7 @@ import {
           usagePreferences: normalizeUsagePreferences(),
           reminderSettings: normalizeReminderSettings(),
           codexIntegration: makeDefaultCodexIntegration(),
+          claudeIntegration: normalizeClaudeIntegration(),
           focusBlockerSites: [...DEFAULT_FOCUS_BLOCKED_WEBSITES],
           fitness: makeDefaultFitness(),
           wealthSchemaVersion: 3,
@@ -2765,6 +2777,7 @@ import {
 
   function refreshAllViews() {
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
+    data.claudeIntegration = normalizeClaudeIntegration(data.claudeIntegration);
     ensureFitnessDefaults();
     ensureWorkoutData();
     ensureMonthlyRecurringPayments();
@@ -2799,6 +2812,7 @@ import {
     needsBackup = true;
     scheduleBackupSoon();
     refreshAllViews();
+    scheduleClaudeAutoImport();
   }
 
   const MOBILE_UNDO_TRAY_VISIBLE_MS = 3500;
@@ -3788,8 +3802,16 @@ import {
   };
   let codexImportPromise = null;
   let codexImportTimer = null;
+  let claudeImportPromise = null;
+  let claudeImportTimer = null;
+  let claudeImportRuntimeStatus = {
+    pending: false,
+    checkedAt: null,
+    error: ''
+  };
   let codexUsageHistoryAssetPromise = null;
   let codexPageRenderToken = 0;
+  let aiActivityFilter = 'all';
   let codexAnalyticsCache = {
     signature: '',
     status: 'idle',
@@ -4128,6 +4150,11 @@ import {
     return data.codexIntegration;
   }
 
+  function getClaudeIntegrationConfig() {
+    data.claudeIntegration = normalizeClaudeIntegration(data.claudeIntegration);
+    return data.claudeIntegration;
+  }
+
   function getCodexIntegrationToken() {
     return String(localStorage.getItem(CODEX_INTEGRATION_TOKEN_KEY) || '');
   }
@@ -4297,6 +4324,11 @@ import {
       matchMode: 'github-parent-folder',
       focusFactor: CODEX_FOCUS_FACTOR,
       focusPolicy: CODEX_FOCUS_POLICY,
+      claude: {
+        enabled: getClaudeIntegrationConfig().enabled,
+        inboxPath: CLAUDE_INBOX_PATH,
+        focusPolicy: DEFAULT_CLAUDE_POLICY
+      },
       trackedProjects,
       mappings: getCodexPublishedMappings(trackedProjects),
       sessionMappings: getCodexPublishedSessionMappings(trackedProjects)
@@ -4356,8 +4388,8 @@ import {
 
   async function publishCodexIntegrationConfig({ quiet = false } = {}) {
     const config = getCodexIntegrationConfig();
-    if (!config.enabled) {
-      showToast('Enable Codex import before publishing config.');
+    if (!config.enabled && !getClaudeIntegrationConfig().enabled) {
+      showToast('Enable Codex or Claude import before publishing config.');
       return null;
     }
     const payload = buildCodexPublishedConfig();
@@ -4377,7 +4409,7 @@ import {
         error: ''
       };
       updateCodexIntegrationPanel();
-      if (!quiet) showToast('Codex config published.');
+      if (!quiet) showToast('AI logging config published.');
       return apiUrl;
     } catch (error) {
       codexImportRuntimeStatus = {
@@ -4388,7 +4420,7 @@ import {
       updateCodexIntegrationPanel();
       if (!quiet) {
         showToast(
-          `Codex config publish failed: ${codexImportRuntimeStatus.error}`
+          `AI logging config publish failed: ${codexImportRuntimeStatus.error}`
         );
       }
       return null;
@@ -4496,6 +4528,40 @@ import {
     scheduleCodexRemoteContextPublish({ delay: 0, force: true });
     showToast(
       next.enabled ? 'Codex import enabled.' : 'Codex import disabled.'
+    );
+  }
+
+  async function editClaudeIntegrationSettings() {
+    const config = getClaudeIntegrationConfig();
+    const values = await openFormDialog({
+      title: 'Claude Integration',
+      fields: [
+        {
+          name: 'enabled',
+          label: 'Claude import',
+          type: 'select',
+          value: config.enabled ? 'on' : 'off',
+          options: [
+            { value: 'off', label: 'Off' },
+            { value: 'on', label: 'On' }
+          ]
+        }
+      ],
+      submitLabel: 'Save Claude'
+    });
+    if (!values) return;
+    data.claudeIntegration = normalizeClaudeIntegration({
+      ...config,
+      enabled: values.enabled === 'on'
+    });
+    saveData();
+    scheduleClaudeAutoImport();
+    updateClaudeIntegrationPanel();
+    updateCodexPage();
+    showToast(
+      data.claudeIntegration.enabled
+        ? 'Claude import enabled. Publish the AI logging config.'
+        : 'Claude import disabled.'
     );
   }
 
@@ -4753,9 +4819,11 @@ import {
     return { imported, skipped, reconciled, updated };
   }
 
-  async function fetchCodexInboxPayloads() {
+  async function fetchCodexInboxPayloads(
+    inboxPath = getCodexIntegrationConfig().inboxPath
+  ) {
     const config = getCodexIntegrationConfig();
-    const directoryUrl = getCodexGitHubPathApiUrl(config.inboxPath, config);
+    const directoryUrl = getCodexGitHubPathApiUrl(inboxPath, config);
     if (!directoryUrl)
       throw new Error('Enter a GitHub repository as owner/repo.');
     const directoryPayload = await githubJson(directoryUrl, {
@@ -4889,6 +4957,113 @@ import {
       importCodexUsage({ quiet: true });
     }, CODEX_IMPORT_INTERVAL_MS);
     updateCodexIntegrationPanel();
+    updateClaudeIntegrationPanel();
+  }
+
+  function importClaudeInboxPayloads(payloads = []) {
+    const now = new Date();
+    const config = getClaudeIntegrationConfig();
+    const activeProjectIds = new Set(
+      getCodexTrackedProjects().map((project) => project.projectId)
+    );
+    const result = importClaudeInboxRecords({
+      entries: data.entries,
+      payloads,
+      activeProjectIds,
+      windowStart: getRollingWindowBounds(now).start,
+      now,
+      createId: uuid
+    });
+    data.entries = result.entries;
+    config.lastImportAt = now.toISOString();
+    config.lastImportSummary = {
+      imported: result.imported,
+      updated: result.updated,
+      skipped: result.skipped
+    };
+    claudeImportRuntimeStatus = {
+      pending: false,
+      checkedAt: config.lastImportAt,
+      error: ''
+    };
+    if (result.imported || result.updated) {
+      saveData();
+      refreshAllViews();
+    } else {
+      persistDataToLocalStorage();
+      updateClaudeIntegrationPanel();
+      updateCodexPage();
+    }
+    return result;
+  }
+
+  async function importClaudeUsage({ quiet = false } = {}) {
+    const config = getClaudeIntegrationConfig();
+    if (!config.enabled) return { imported: 0, updated: 0, skipped: 0 };
+    if (claudeImportPromise) return claudeImportPromise;
+    claudeImportRuntimeStatus = {
+      pending: true,
+      checkedAt: new Date().toISOString(),
+      error: ''
+    };
+    updateClaudeIntegrationPanel();
+    claudeImportPromise = fetchCodexInboxPayloads(CLAUDE_INBOX_PATH)
+      .then(({ payloads, errors }) => {
+        const result = importClaudeInboxPayloads(payloads);
+        if (!quiet) {
+          showToast(
+            `Claude import: ${result.imported} new, ${result.updated} updated, ${result.skipped} skipped.`
+          );
+          if (errors.length)
+            showToast(`Skipped ${errors.length} Claude inbox file(s).`);
+        }
+        return result;
+      })
+      .catch((error) => {
+        claudeImportRuntimeStatus = {
+          pending: false,
+          checkedAt: new Date().toISOString(),
+          error: error?.message || String(error)
+        };
+        if (!quiet)
+          showToast(`Claude import failed: ${claudeImportRuntimeStatus.error}`);
+        return { imported: 0, updated: 0, skipped: 0 };
+      })
+      .finally(() => {
+        claudeImportPromise = null;
+        updateClaudeIntegrationPanel();
+        updateCodexPage();
+      });
+    return claudeImportPromise;
+  }
+
+  function scheduleClaudeAutoImport() {
+    if (claudeImportTimer) clearInterval(claudeImportTimer);
+    claudeImportTimer = null;
+    if (!getClaudeIntegrationConfig().enabled) return;
+    importClaudeUsage({ quiet: true });
+    claudeImportTimer = setInterval(
+      () => importClaudeUsage({ quiet: true }),
+      CODEX_IMPORT_INTERVAL_MS
+    );
+  }
+
+  function updateClaudeIntegrationPanel() {
+    const status = document.getElementById('claudeIntegrationStatus');
+    const importBtn = document.getElementById('claudeImportNowBtn');
+    const config = getClaudeIntegrationConfig();
+    if (importBtn)
+      importBtn.disabled = !config.enabled || claudeImportRuntimeStatus.pending;
+    if (!status) return;
+    status.textContent = !config.enabled
+      ? 'Claude import is OFF.'
+      : claudeImportRuntimeStatus.pending
+        ? 'Claude import is checking GitHub...'
+        : claudeImportRuntimeStatus.error
+          ? `Claude import error: ${claudeImportRuntimeStatus.error}`
+          : config.lastImportAt
+            ? `Claude import ON - last checked ${formatRelativeTime(config.lastImportAt)}.`
+            : 'Claude import ON - waiting for desktop inbox data.';
   }
 
   function updateCodexIntegrationPanel() {
@@ -4897,7 +5072,9 @@ import {
     const publishBtn = document.getElementById('codexPublishConfigBtn');
     const importBtn = document.getElementById('codexImportNowBtn');
     const config = getCodexIntegrationConfig();
-    if (publishBtn) publishBtn.disabled = !config.enabled;
+    if (publishBtn)
+      publishBtn.disabled =
+        !config.enabled && !getClaudeIntegrationConfig().enabled;
     if (importBtn)
       importBtn.disabled = !config.enabled || codexImportRuntimeStatus.pending;
     if (status) {
@@ -10263,7 +10440,7 @@ import {
   function openMobileMoreMenu() {
     const options = [
       ['projects', 'Projects'],
-      ['codex', 'Codex'],
+      ['codex', 'AI Activity'],
       ['analytics', 'Reports'],
       ['importExport', 'Backup / Sync'],
       ['todo', 'Workouts'],
@@ -11224,7 +11401,7 @@ import {
       ['grocery', 'Open Finances'],
       ['analytics', 'Open Reports'],
       ['company', 'Open Company'],
-      ['codex', 'Open Codex']
+      ['codex', 'Open AI Activity']
     ].map(([sectionId, label]) => ({
       label,
       meta: 'Navigate',
@@ -12089,11 +12266,13 @@ import {
       rollingBounds.start,
       rollingBounds.endExclusive
     );
-    const rolling30CodexHours = sumEntryHours(
-      entries.filter((entry) => isCodexTimeEntry(entry)),
-      rollingBounds.start,
-      rollingBounds.endExclusive
-    );
+    const rollingSources = computeRollingSourceTotals(entries, {
+      start: rollingBounds.start,
+      endExclusive: rollingBounds.endExclusive
+    });
+    const rolling30YouHours = rollingSources.you / 3600;
+    const rolling30CodexHours = rollingSources.codex / 3600;
+    const rolling30ClaudeHours = rollingSources.claude / 3600;
     // Revenue
     const revenue = totalHours * project.hourlyRate;
     const weeklyRevenue = weeklyHours * project.hourlyRate;
@@ -12149,7 +12328,9 @@ import {
         monthlyHours,
         lastMonthHours,
         rolling30Hours,
+        rolling30YouHours,
         rolling30CodexHours,
+        rolling30ClaudeHours,
         rolling30TargetConst,
         revenue,
         weeklyRevenue,
@@ -12224,7 +12405,9 @@ import {
         monthlyHours,
         lastMonthHours,
         rolling30Hours: 0,
+        rolling30YouHours: 0,
         rolling30CodexHours: 0,
+        rolling30ClaudeHours: 0,
         rolling30TargetConst: 0,
         revenue,
         weeklyRevenue,
@@ -12263,7 +12446,9 @@ import {
       monthlyHours,
       lastMonthHours,
       rolling30Hours,
+      rolling30YouHours,
       rolling30CodexHours,
+      rolling30ClaudeHours,
       rolling30TargetConst,
       revenue,
       weeklyRevenue,
@@ -12510,7 +12695,6 @@ import {
     let monthlyRevenue = 0;
     let lastMonthRevenue = 0;
     let rollingRevenue = 0;
-    let rollingCodexSeconds = 0;
     // Revenue totals for today and this week (across all projects)
     let todayRevenue = 0;
     let yesterdayRevenue = 0;
@@ -12564,7 +12748,6 @@ import {
       }
       if (start >= rollingBounds.start && start < rollingBounds.endExclusive) {
         rollingSeconds += entry.duration;
-        if (isCodexTimeEntry(entry)) rollingCodexSeconds += entry.duration;
         rollingRevenue += hours * project.hourlyRate;
       }
       totalRevenue += hours * project.hourlyRate;
@@ -12578,6 +12761,11 @@ import {
     const weekHours = weekSeconds / 3600;
     const monthHours = monthSeconds / 3600;
     const rollingHours = rollingSeconds / 3600;
+    const rollingSources = computeRollingSourceTotals(data.entries, {
+      start: rollingBounds.start,
+      endExclusive: rollingBounds.endExclusive,
+      projectIds: new Set(data.projects.map((project) => String(project.id)))
+    });
     const weeklyProgress =
       weeklyTarget > 0
         ? (weekHours / weeklyTarget) * 100
@@ -12634,7 +12822,9 @@ import {
       monthProgress,
       monthRevenue: monthlyRevenue,
       rollingHours,
-      rollingCodexHours: rollingCodexSeconds / 3600,
+      rollingYouHours: rollingSources.you / 3600,
+      rollingCodexHours: rollingSources.codex / 3600,
+      rollingClaudeHours: rollingSources.claude / 3600,
       rollingTarget,
       rollingProgress,
       rollingRevenue,
@@ -13979,7 +14169,135 @@ import {
     const usage = getCodexUsageSummary();
     const report = getCodexPageData();
 
-    const limits = appendCodexPageSection(content, 'Usage Limits');
+    const now = new Date();
+    const bounds = getRollingWindowBounds(now);
+    const sourceTotals = computeRollingSourceTotals(data.entries, {
+      start: bounds.start,
+      endExclusive: bounds.endExclusive,
+      projectIds: new Set(data.projects.map((project) => String(project.id)))
+    });
+    const overview = appendCodexPageSection(
+      content,
+      'Rolling 30 Days · Effective Hours'
+    );
+    const sourceGrid = document.createElement('div');
+    sourceGrid.className = 'codex-metric-grid';
+    appendCodexMetric(
+      sourceGrid,
+      'You',
+      formatDuration(sourceTotals.you),
+      'Timer and manual entries'
+    );
+    appendCodexMetric(
+      sourceGrid,
+      'Codex',
+      formatDuration(sourceTotals.codex),
+      'Imported Codex sessions'
+    );
+    appendCodexMetric(
+      sourceGrid,
+      'Claude',
+      formatDuration(sourceTotals.claude),
+      'Imported Claude sessions'
+    );
+    overview.appendChild(sourceGrid);
+
+    const recentActivity = appendCodexPageSection(content, 'Recent Activity');
+    const filterLabel = document.createElement('label');
+    filterLabel.className = 'ai-activity-filter';
+    filterLabel.textContent = 'Show';
+    const filter = document.createElement('select');
+    filter.setAttribute('aria-label', 'Activity source');
+    [
+      ['all', 'All'],
+      ['you', 'You'],
+      ['codex', 'Codex'],
+      ['claude', 'Claude']
+    ].forEach(([value, label]) => {
+      const option = document.createElement('option');
+      option.value = value;
+      option.textContent = label;
+      filter.appendChild(option);
+    });
+    filter.value = aiActivityFilter;
+    filter.addEventListener('change', () => {
+      aiActivityFilter = filter.value;
+      updateCodexPage();
+    });
+    filterLabel.appendChild(filter);
+    recentActivity.appendChild(filterLabel);
+    const activityList = document.createElement('div');
+    activityList.className = 'codex-session-list';
+    data.entries
+      .filter((entry) => {
+        const start = new Date(entry.startTime);
+        const source = getEntrySource(entry);
+        const bucket =
+          source === 'codex' || source === 'claude' ? source : 'you';
+        return (
+          !entry.isRunning &&
+          Number(entry.duration) > 0 &&
+          getEntryProject(entry) &&
+          start >= bounds.start &&
+          start < bounds.endExclusive &&
+          (aiActivityFilter === 'all' || aiActivityFilter === bucket)
+        );
+      })
+      .sort(
+        (left, right) => new Date(right.startTime) - new Date(left.startTime)
+      )
+      .slice(0, 15)
+      .forEach((entry) => {
+        const source = getEntrySource(entry);
+        const provider =
+          source === 'codex' ? 'Codex' : source === 'claude' ? 'Claude' : 'You';
+        const row = document.createElement('div');
+        row.className = 'codex-session-row';
+        const main = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = `${provider} · ${getEntryProject(entry)?.name || 'Unknown project'}`;
+        const detail = document.createElement('span');
+        const models =
+          source === 'claude'
+            ? [
+                ...new Set(
+                  (entry.claudeModelBreakdown || [])
+                    .map((item) => item.model)
+                    .filter(Boolean)
+                )
+              ].join(', ')
+            : '';
+        const delegates =
+          source === 'claude' && Number(entry.claudeDelegatedSessionCount) > 0
+            ? ` · ${entry.claudeDelegatedSessionCount} delegated`
+            : '';
+        detail.textContent = `${String(entry.description || provider)} · ${formatDateTime(entry.startTime)}${models ? ` · ${models}` : ''}${delegates}`;
+        main.append(name, detail);
+        const duration = document.createElement('div');
+        duration.className = 'codex-session-duration';
+        const effective = document.createElement('strong');
+        effective.textContent = formatDuration(Number(entry.duration) || 0);
+        const wall = document.createElement('span');
+        wall.textContent = `${formatDuration(getEntryElapsedSeconds(entry))} active`;
+        duration.append(effective, wall);
+        row.append(main, duration);
+        activityList.appendChild(row);
+      });
+    if (!activityList.childElementCount) {
+      const empty = document.createElement('p');
+      empty.className = 'status-muted';
+      empty.textContent = 'No activity for this source in the last 30 days.';
+      activityList.appendChild(empty);
+    }
+    recentActivity.appendChild(activityList);
+
+    const codexDetails = document.createElement('div');
+    codexDetails.className = 'codex-page-content';
+    codexDetails.hidden =
+      aiActivityFilter === 'you' || aiActivityFilter === 'claude';
+    content.appendChild(codexDetails);
+
+    const limits = appendCodexPageSection(codexDetails, 'Codex Usage Limits');
     const limitGrid = document.createElement('div');
     limitGrid.className = 'codex-limit-grid';
     if (usage && Number.isFinite(usage.remainingPercent)) {
@@ -14024,11 +14342,14 @@ import {
     }
     limits.appendChild(limitGrid);
 
-    const takeaways = appendCodexPageSection(content, 'Key Takeaways');
+    const takeaways = appendCodexPageSection(
+      codexDetails,
+      'Codex Key Takeaways'
+    );
     renderCodexKeyTakeaways(takeaways, report);
 
     const sourceAverages = appendCodexPageSection(
-      content,
+      codexDetails,
       'Average Effective Hours - You vs Codex'
     );
     renderCodexSourceAverages(
@@ -14037,19 +14358,19 @@ import {
     );
 
     const performance = appendCodexPageSection(
-      content,
+      codexDetails,
       'Model + Reasoning Performance'
     );
     renderCodexPerformanceRankings(performance);
 
     const repositories = appendCodexPageSection(
-      content,
+      codexDetails,
       'Repository Performance'
     );
     renderCodexRepositoryPerformanceRankings(repositories);
 
     const models = appendCodexPageSection(
-      content,
+      codexDetails,
       'Model + Reasoning - Last 7 Days'
     );
     const modelList = document.createElement('div');
@@ -14058,12 +14379,12 @@ import {
     models.appendChild(modelList);
 
     const mappingAudit = appendCodexPageSection(
-      content,
+      codexDetails,
       'Repository Mapping Audit'
     );
     renderCodexMappingAudit(mappingAudit);
 
-    const activity = appendCodexPageSection(content, 'Activity');
+    const activity = appendCodexPageSection(codexDetails, 'Codex Activity');
     const activityGrid = document.createElement('div');
     activityGrid.className = 'codex-metric-grid';
     appendCodexMetric(
@@ -14102,7 +14423,10 @@ import {
     );
     activity.appendChild(activityGrid);
 
-    const projects = appendCodexPageSection(content, 'Projects - Last 7 Days');
+    const projects = appendCodexPageSection(
+      codexDetails,
+      'Codex Projects - Last 7 Days'
+    );
     const projectList = document.createElement('div');
     projectList.className = 'codex-breakdown-list';
     if (!report.projects.length) {
@@ -14137,7 +14461,10 @@ import {
     });
     projects.appendChild(projectList);
 
-    const recent = appendCodexPageSection(content, 'Recent Sessions');
+    const recent = appendCodexPageSection(
+      codexDetails,
+      'Recent Codex Sessions'
+    );
     const recentList = document.createElement('div');
     recentList.className = 'codex-session-list';
     report.entries.slice(0, 10).forEach((entry) => {
@@ -14171,7 +14498,7 @@ import {
     }
     recent.appendChild(recentList);
 
-    const bridge = appendCodexPageSection(content, 'Bridge');
+    const bridge = appendCodexPageSection(codexDetails, 'Codex Bridge');
     const bridgeGrid = document.createElement('div');
     bridgeGrid.className = 'codex-bridge-grid';
     appendCodexMetric(
@@ -14222,28 +14549,19 @@ import {
     const refreshButton = document.getElementById('codexPageRefreshBtn');
     if (refreshButton) {
       refreshButton.disabled =
-        !config.enabled || codexImportRuntimeStatus.pending;
-      refreshButton.textContent = codexImportRuntimeStatus.pending
-        ? 'Refreshing...'
-        : 'Refresh';
+        (!config.enabled && !getClaudeIntegrationConfig().enabled) ||
+        codexImportRuntimeStatus.pending ||
+        claudeImportRuntimeStatus.pending;
+      refreshButton.textContent =
+        codexImportRuntimeStatus.pending || claudeImportRuntimeStatus.pending
+          ? 'Refreshing...'
+          : 'Refresh';
     }
   }
 
   function updateDashboard() {
     const stats = computeGlobalStats();
     const nowTime = new Date();
-    const formatRollingCodexShare = (codexHours, totalHours) => {
-      const total = Number(totalHours);
-      const codex = Number(codexHours);
-      if (!Number.isFinite(total) || total <= 0 || !Number.isFinite(codex)) {
-        return 0;
-      }
-      return Math.round(clampNumber((codex / total) * 100, 0, 100));
-    };
-    const rollingCodexShare = formatRollingCodexShare(
-      stats.rollingCodexHours,
-      stats.rollingHours
-    );
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, nowTime)
     );
@@ -14377,7 +14695,11 @@ import {
         icon: '30',
         progressLabel:
           (stats.rollingProgress || 0).toFixed(1) + '% of required 30-day pace',
-        metaLabel: `Codex ${rollingCodexShare}% total - You ${100 - rollingCodexShare}%`,
+        sourceBreakdown: {
+          you: stats.rollingYouHours,
+          codex: stats.rollingCodexHours,
+          claude: stats.rollingClaudeHours
+        },
         revenue: stats.rollingRevenue || 0
       },
       {
@@ -14484,6 +14806,28 @@ import {
           meta.style.color = '#475569';
           div.appendChild(meta);
         }
+        if (card.sourceBreakdown) {
+          const breakdown = document.createElement('div');
+          breakdown.className = 'rolling-source-breakdown';
+          const heading = document.createElement('small');
+          heading.className = 'rolling-source-heading';
+          heading.textContent = 'Effective hours by source';
+          breakdown.appendChild(heading);
+          [
+            ['You', card.sourceBreakdown.you],
+            ['Codex', card.sourceBreakdown.codex],
+            ['Claude', card.sourceBreakdown.claude]
+          ].forEach(([name, hours]) => {
+            const item = document.createElement('span');
+            const label = document.createElement('span');
+            label.textContent = name;
+            const value = document.createElement('strong');
+            value.textContent = `${hours.toFixed(1)}h`;
+            item.append(label, value);
+            breakdown.appendChild(item);
+          });
+          div.appendChild(breakdown);
+        }
       } else {
         // Change or change label for cards without progress
         const changeDiv = document.createElement('div');
@@ -14547,14 +14891,10 @@ import {
               item.stats.rolling30Hours >=
               item.stats.rolling30TargetConst - 0.01;
             row.style.color = onTrack ? '#15803d' : '#b91c1c';
-            const codexShare = formatRollingCodexShare(
-              item.stats.rolling30CodexHours,
-              item.stats.rolling30Hours
-            );
-            const sourceShare = document.createElement('span');
-            sourceShare.textContent = ` - Codex ${codexShare}%`;
-            sourceShare.style.color = '#64748b';
-            row.appendChild(sourceShare);
+            const sourceBreakdown = document.createElement('span');
+            sourceBreakdown.className = 'rolling-project-sources';
+            sourceBreakdown.textContent = `You ${item.stats.rolling30YouHours.toFixed(1)}h · Codex ${item.stats.rolling30CodexHours.toFixed(1)}h · Claude ${item.stats.rolling30ClaudeHours.toFixed(1)}h`;
+            row.appendChild(sourceBreakdown);
           }
           list.appendChild(row);
         });
@@ -19539,7 +19879,7 @@ import {
       `${formatDuration(totalEffectiveSeconds)} effective`,
       `${formatDuration(totalElapsedSeconds)} active`,
       `${formatDuration(unionSeconds)} unique`,
-      `${sourceCounts.timer || 0} timer / ${sourceCounts.codex || 0} Codex / ${sourceCounts.manual || 0} manual`,
+      `${sourceCounts.timer || 0} timer / ${sourceCounts.manual || 0} manual / ${sourceCounts.codex || 0} Codex / ${sourceCounts.claude || 0} Claude`,
       `${formatCurrency(totalEarned)} billable`,
       scopeText
     ].filter(Boolean);
@@ -19853,9 +20193,11 @@ import {
         const sourceLabel =
           group.source === 'codex'
             ? 'Codex activity'
-            : group.source === 'manual'
-              ? 'Manual entries'
-              : 'Timer episode';
+            : group.source === 'claude'
+              ? 'Claude activity'
+              : group.source === 'manual'
+                ? 'Manual entries'
+                : 'Timer episode';
         const label = document.createElement('strong');
         label.textContent = `${project?.name || 'Unknown project'} - ${sourceLabel}`;
         const detail = document.createElement('span');
@@ -19908,9 +20250,11 @@ import {
             String(entry.description || '').trim() ||
               (entrySource === 'codex'
                 ? 'Codex activity'
-                : entrySource === 'manual'
-                  ? 'Manual time'
-                  : 'Project time')
+                : entrySource === 'claude'
+                  ? 'Claude activity'
+                  : entrySource === 'manual'
+                    ? 'Manual time'
+                    : 'Project time')
           );
           appendEntryCell(tr, 'Start', formatDateTime(entry.startTime));
           appendEntryCell(
@@ -20140,6 +20484,7 @@ import {
     data.usagePreferences = normalizeUsagePreferences(data.usagePreferences);
     data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
+    data.claudeIntegration = normalizeClaudeIntegration(data.claudeIntegration);
     // Remove transient timer fields from imported entries.
     data.entries = data.entries.map((entry) => normalizeEntryTiming(entry));
     data.entries.forEach((entry) => {
@@ -20160,6 +20505,7 @@ import {
       persistDataToLocalStorage();
     }
     refreshAllViews();
+    scheduleClaudeAutoImport();
   }
 
   async function restoreLatestBackupFromDir() {
@@ -20563,6 +20909,8 @@ import {
     });
   }
   const codexConfigBtn = document.getElementById('codexConfigBtn');
+  const claudeConfigBtn = document.getElementById('claudeConfigBtn');
+  const claudeImportNowBtn = document.getElementById('claudeImportNowBtn');
   const codexPublishConfigBtn = document.getElementById(
     'codexPublishConfigBtn'
   );
@@ -20583,6 +20931,16 @@ import {
       editCodexIntegrationSettings();
     });
   }
+  if (claudeConfigBtn) {
+    claudeConfigBtn.addEventListener('click', () => {
+      editClaudeIntegrationSettings();
+    });
+  }
+  if (claudeImportNowBtn) {
+    claudeImportNowBtn.addEventListener('click', () => {
+      importClaudeUsage();
+    });
+  }
   if (codexPublishConfigBtn) {
     codexPublishConfigBtn.addEventListener('click', () => {
       publishCodexIntegrationConfig();
@@ -20596,6 +20954,7 @@ import {
   if (codexPageRefreshBtn) {
     codexPageRefreshBtn.addEventListener('click', () => {
       importCodexUsage();
+      importClaudeUsage();
     });
   }
   if (codexMappingAuditBtn) {
@@ -20632,8 +20991,10 @@ import {
   if (initialLaunchSectionId !== 'dashboard') updateDashboard();
   updateTimerSection();
   updateCodexIntegrationPanel();
+  updateClaudeIntegrationPanel();
   updateCodexPage();
   scheduleCodexAutoImport();
+  scheduleClaudeAutoImport();
   scheduleCodexRemoteContextPublish({ delay: 0, force: true });
   setInterval(() => {
     scheduleCodexRemoteContextPublish({ delay: 0 });
@@ -20659,7 +21020,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=52')
+      .register('./service-worker.js?v=53')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

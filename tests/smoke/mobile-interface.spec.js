@@ -162,7 +162,7 @@ for (const width of [360, 412, 480]) {
       ['todo', 'Workouts'],
       ['grocery', 'Finances'],
       ['analytics', 'Reports'],
-      ['codex', 'Codex'],
+      ['codex', 'AI Activity'],
       ['importExport', 'Backup / Sync']
     ];
     for (const [id, label] of sections) {

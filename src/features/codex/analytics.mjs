@@ -481,7 +481,12 @@ function sumSourceEffectiveSeconds(entries, startMs, endMs, source) {
       return total;
     }
     const isCodex = isCodexEntry(entry);
-    if ((source === 'codex') !== isCodex) return total;
+    if (
+      source === 'codex'
+        ? !isCodex
+        : isCodex || String(entry.source || '').toLowerCase() === 'claude'
+    )
+      return total;
     return total + positiveNumber(entry.duration, 0);
   }, 0);
 }

@@ -25,6 +25,7 @@ function focusFactor(entry) {
 export function getEntrySource(entry) {
   const savedSource = String(entry?.source || '').toLowerCase();
   if (savedSource === 'codex') return 'codex';
+  if (savedSource === 'claude') return 'claude';
   if (entry?.manual === true || savedSource === 'manual') {
     return 'manual';
   }
@@ -137,17 +138,17 @@ export function groupTimeEntries(
         validDate(right.startTime).getTime()
     );
   const groups = [];
-  const codexGroups = new Map();
+  const agentGroups = new Map();
   ordered.forEach((entry) => {
     const source = getEntrySource(entry);
     const dateKey = localDateKey(entry.startTime);
     const projectId = String(entry.projectId || '');
-    if (source === 'codex') {
-      const key = `codex:${dateKey}:${projectId}`;
-      let group = codexGroups.get(key);
+    if (source === 'codex' || source === 'claude') {
+      const key = `${source}:${dateKey}:${projectId}`;
+      let group = agentGroups.get(key);
       if (!group) {
         group = makeGroup(entry, 'day');
-        codexGroups.set(key, group);
+        agentGroups.set(key, group);
         groups.push(group);
       } else {
         group.entries.push(entry);
@@ -192,6 +193,37 @@ export function groupTimeEntries(
       (left, right) =>
         (right.start?.getTime() || 0) - (left.start?.getTime() || 0)
     );
+}
+
+/** @param {Array<any>} entries
+ *  @param {{ start?: Date, endExclusive?: Date, projectIds?: Set<string> | null }} options
+ */
+export function computeRollingSourceTotals(
+  entries,
+  { start, endExclusive, projectIds = null } = {}
+) {
+  const totals = { you: 0, codex: 0, claude: 0, total: 0 };
+  const from = validDate(start);
+  const to = validDate(endExclusive);
+  if (!from || !to) return totals;
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!entry || entry.isRunning) continue;
+    const date = validDate(entry.startTime);
+    const duration = finiteNonNegative(entry.duration);
+    if (
+      !date ||
+      date < from ||
+      date >= to ||
+      duration <= 0 ||
+      (projectIds && !projectIds.has(String(entry.projectId || '')))
+    )
+      continue;
+    const source = getEntrySource(entry);
+    const bucket = source === 'codex' || source === 'claude' ? source : 'you';
+    totals[bucket] += duration;
+    totals.total += duration;
+  }
+  return totals;
 }
 
 export function computeUnionSeconds(entries) {

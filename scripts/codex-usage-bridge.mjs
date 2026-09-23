@@ -73,7 +73,7 @@ function getDefaultStatePath() {
   return path.join(base, 'codex-usage-bridge-state.json');
 }
 
-function buildOptions(args = parseArgs()) {
+export function buildOptions(args = parseArgs()) {
   const machineId = sanitizeMachineId(
     args.machineId ||
       process.env.TIMEKEEPER_CODEX_MACHINE_ID ||
@@ -180,7 +180,7 @@ function decodeGitHubContent(payload) {
   ).toString('utf8');
 }
 
-async function fetchCodexConfig(options) {
+export async function fetchCodexConfig(options) {
   const url = getGitHubApiUrl(
     options.repository,
     options.configPath,
@@ -633,7 +633,7 @@ export function buildCodexSessionGroupPartitions({
   };
 }
 
-async function readJsonFile(filePath, fallback) {
+export async function readJsonFile(filePath, fallback) {
   try {
     return JSON.parse(await fs.readFile(filePath, 'utf8'));
   } catch (error) {
@@ -642,13 +642,18 @@ async function readJsonFile(filePath, fallback) {
   }
 }
 
-async function writeJsonFile(filePath, value) {
+export async function writeJsonFile(filePath, value) {
   await fs.mkdir(path.dirname(filePath), { recursive: true });
   await fs.writeFile(`${filePath}.tmp`, JSON.stringify(value, null, 2), 'utf8');
   await fs.rename(`${filePath}.tmp`, filePath);
 }
 
-async function putGitHubJsonFile({ options, pathValue, payload, message }) {
+export async function putGitHubJsonFile({
+  options,
+  pathValue,
+  payload,
+  message
+}) {
   if (!options.token) {
     throw new Error(
       'Set TIMEKEEPER_CODEX_TOKEN to a GitHub token with Contents read/write access.'

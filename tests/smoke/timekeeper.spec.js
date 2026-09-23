@@ -58,7 +58,7 @@ async function gotoSection(page, sectionId, headingText) {
   } else {
     const moreLabels = {
       projects: 'Projects',
-      codex: 'Codex',
+      codex: 'AI Activity',
       analytics: 'Reports',
       importExport: 'Backup / Sync',
       todo: 'Workouts',
@@ -1730,8 +1730,9 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v52';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=47'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v53';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=48'");
+  expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1741,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '52')"
+    "url.searchParams.set('timekeeper-update', '53')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1751,7 +1752,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=52')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=53')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -1948,7 +1949,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   await expect(
     page.locator('#todayCommandPanel .mobile-today-card.codex-performance')
   ).toContainText('model-a · high');
-  await gotoSection(page, 'codex', 'Codex');
+  await gotoSection(page, 'codex', 'AI Activity');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage.locator('.codex-takeaway-grid')).toContainText(
     'pts/eff h'
@@ -1994,12 +1995,16 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   const sectionTitles = await codexPage
     .locator(':scope > .codex-report-section > h3')
     .allTextContents();
-  expect(sectionTitles.slice(0, 4)).toEqual([
-    'Usage Limits',
-    'Key Takeaways - Last 7 Days',
-    'Average Effective Hours - You vs Codex',
-    'Model + Reasoning Performance'
+  expect(sectionTitles.slice(0, 2)).toEqual([
+    'Rolling 30 Days · Effective Hours',
+    'Recent Activity'
   ]);
+  expect(
+    await codexPage
+      .locator(':scope > .codex-page-content > .codex-report-section > h3')
+      .first()
+      .textContent()
+  ).toBe('Codex Usage Limits');
   expect(
     await page.evaluate(
       () => document.documentElement.scrollWidth <= window.innerWidth + 1
@@ -2040,14 +2045,14 @@ test('Codex mapping audit exposes unknown paths and saves a repository rule', as
     }
   });
   await page.goto('/');
-  await gotoSection(page, 'codex', 'Codex');
+  await gotoSection(page, 'codex', 'AI Activity');
   await expect(page.locator('#codexMappingAudit')).toContainText(
     'Documents/RiskNav'
   );
   await expect(page.locator('#codexMappingAudit')).toContainText(
     'Needs mapping'
   );
-  await page.getByRole('button', { name: 'Mapping audit' }).click();
+  await page.getByRole('button', { name: 'Codex mapping audit' }).click();
   await page.getByRole('button', { name: 'Map', exact: true }).click();
   await expect(
     page.getByRole('heading', { name: 'Map Documents/RiskNav' })
@@ -2096,8 +2101,8 @@ test('Codex mapping audit saves a stable session rule', async ({ page }) => {
     }
   });
   await page.goto('/');
-  await gotoSection(page, 'codex', 'Codex');
-  await page.getByRole('button', { name: 'Mapping audit' }).click();
+  await gotoSection(page, 'codex', 'AI Activity');
+  await page.getByRole('button', { name: 'Codex mapping audit' }).click();
   await expect(page.locator('#codexMappingAudit')).toContainText(
     'LinkedIn invitations'
   );
@@ -4632,7 +4637,7 @@ test('daily target catches up against the fixed weekly target', async ({
   );
 });
 
-test('rolling 30-day hours show the Codex share overall and per project', async ({
+test('rolling 30-day hours show You, Codex, and Claude totals overall and per project', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-23T12:00:00');
@@ -4682,6 +4687,16 @@ test('rolling 30-day hours show the Codex share overall and per project', async 
         }),
         source: 'codex',
         codexFocusPolicyVersion: 7
+      },
+      {
+        ...entryFixture({
+          id: 'shared-claude',
+          projectId: 'shared-project',
+          startTime: '2026-04-22T13:00:00.000',
+          endTime: '2026-04-22T14:00:00.000',
+          hours: 0.5
+        }),
+        source: 'claude'
       }
     ]
   });
@@ -4692,11 +4707,163 @@ test('rolling 30-day hours show the Codex share overall and per project', async 
   const rollingCard = page
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Rolling 30 Days' });
-  await expect(rollingCard).toContainText('Codex 67% total - You 33%');
-  await expect(rollingCard).toContainText('Shared Project: 3.0 /');
-  await expect(rollingCard).toContainText('Codex 33%');
+  await expect(rollingCard).toContainText('6.5 /');
+  await expect(rollingCard).toContainText('You2.0h');
+  await expect(rollingCard).toContainText('Codex4.0h');
+  await expect(rollingCard).toContainText('Claude0.5h');
+  await expect(rollingCard).toContainText('Shared Project: 3.5 /');
+  await expect(rollingCard).toContainText(
+    'You 2.0h · Codex 1.0h · Claude 0.5h'
+  );
   await expect(rollingCard).toContainText('Codex Project: 3.0 /');
-  await expect(rollingCard).toContainText('Codex 100%');
+  await expect(rollingCard).toContainText(
+    'You 0.0h · Codex 3.0h · Claude 0.0h'
+  );
+});
+
+test('Claude inbox imports into AI Activity once and remains readable on a phone', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-09-23T12:00:00.000Z');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'anders',
+        name: 'Anders',
+        startDate: '2026-09-01',
+        deadline: '2026-10-31'
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'personal',
+        projectId: 'anders',
+        startTime: '2026-09-23T06:00:00.000Z',
+        endTime: '2026-09-23T07:00:00.000Z',
+        hours: 1
+      })
+    ],
+    codexIntegration: { enabled: false },
+    claudeIntegration: { enabled: true }
+  });
+  const record = {
+    id: 'claude:11111111111111111111111111111111',
+    sessionId: '11111111-2222-4333-8444-555555555555',
+    timekeeperProjectId: 'anders',
+    timekeeperProjectName: 'Anders',
+    repoName: 'example',
+    startTime: '2026-09-23T07:00:00.000Z',
+    endTime: '2026-09-23T08:00:00.000Z',
+    wallSeconds: 3600,
+    effectiveSeconds: 1800,
+    delegatedSessionCount: 0,
+    focusPolicyVersion: 1,
+    modelBreakdown: [
+      {
+        role: 'parent',
+        model: 'opus',
+        factor: 0.5,
+        creditMultiplier: 1,
+        creditedFactor: 0.5,
+        wallSeconds: 3600,
+        effectiveSeconds: 1800
+      }
+    ]
+  };
+  await page.addInitScript(
+    ({ inbox }) => {
+      window.fetch = (url) => {
+        const value = String(url);
+        if (
+          value.includes(
+            'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-claude-inbox?ref=main'
+          )
+        ) {
+          return Promise.resolve(
+            new Response(
+              JSON.stringify([
+                {
+                  type: 'file',
+                  name: 'desktop.json',
+                  url: 'https://api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-claude-inbox/desktop.json'
+                }
+              ]),
+              { status: 200, headers: { 'Content-Type': 'application/json' } }
+            )
+          );
+        }
+        if (
+          value.includes(
+            'api.github.com/repos/Henrik-KM/TimeKeeper/contents/assets/timekeeper-claude-inbox/desktop.json'
+          )
+        ) {
+          return Promise.resolve(
+            new Response(JSON.stringify(inbox), {
+              status: 200,
+              headers: { 'Content-Type': 'application/json' }
+            })
+          );
+        }
+        return Promise.resolve(new Response('{}', { status: 404 }));
+      };
+    },
+    { inbox: { source: 'timekeeper-claude-bridge', records: [record] } }
+  );
+
+  await page.goto('/');
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('timekeeperDataPro')).entries.filter(
+            (entry) => entry.source === 'claude'
+          ).length
+      )
+    )
+    .toBe(1);
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  const rollingCard = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Rolling 30 Days' });
+  await expect(rollingCard).toContainText('1.5 /');
+  await expect(rollingCard).toContainText('You1.0h');
+  await expect(rollingCard).toContainText('Codex0.0h');
+  await expect(rollingCard).toContainText('Claude0.5h');
+  await gotoSection(page, 'codex', 'AI Activity');
+  await page
+    .getByRole('combobox', { name: 'Activity source' })
+    .selectOption('claude');
+  await expect(page.locator('#codexPageContent')).toContainText(
+    'Claude · Anders'
+  );
+  await expect(
+    page.locator('#codexPageContent > .codex-page-content')
+  ).toBeHidden();
+  await page.getByRole('button', { name: 'Refresh' }).click();
+  await expect
+    .poll(() =>
+      page.evaluate(
+        () =>
+          JSON.parse(localStorage.getItem('timekeeperDataPro')).entries.filter(
+            (entry) => entry.source === 'claude'
+          ).length
+      )
+    )
+    .toBe(1);
+  const saved = await page.evaluate(() =>
+    localStorage.getItem('timekeeperDataPro')
+  );
+  expect(saved).not.toContain('private prompt');
+  expect(saved).not.toContain('C:\\Users');
+
+  await page.setViewportSize({ width: 390, height: 844 });
+  await gotoSection(page, 'dashboard', 'Dashboard');
+  await expect(rollingCard.locator('.rolling-source-breakdown')).toBeVisible();
+  expect(
+    await rollingCard.evaluate(
+      (card) => card.scrollWidth <= card.clientWidth + 1
+    )
+  ).toBe(true);
 });
 
 test('missed Monday hours are spread over the remaining week', async ({
@@ -5855,8 +6022,10 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
       updated: 2
     });
 
-  await expect(page.getByRole('button', { name: 'Import Now' })).toBeEnabled();
-  await page.getByRole('button', { name: 'Import Now' }).click();
+  await expect(
+    page.getByRole('button', { name: 'Import Codex' })
+  ).toBeEnabled();
+  await page.getByRole('button', { name: 'Import Codex' }).click();
   await expect
     .poll(() =>
       page.evaluate(
@@ -5872,7 +6041,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   expect(data.entries).toHaveLength(3);
   expect(JSON.stringify(data)).not.toContain('codex-too-old-absent');
 
-  await gotoSection(page, 'codex', 'Codex');
+  await gotoSection(page, 'codex', 'AI Activity');
   const codexPage = page.locator('#codexPageContent');
   await expect(codexPage).toContainText('5%');
   await expect(codexPage).toContainText('Resets in');
@@ -5910,10 +6079,10 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
   await expect(mobileCodexUsage).toContainText('Remaining - Resets in');
   await mobileCodexUsage.click();
   await expect(
-    page.getByRole('heading', { name: 'Codex', exact: true })
+    page.getByRole('heading', { name: 'AI Activity', exact: true })
   ).toBeVisible();
   await gotoSection(page, 'dashboard', 'Dashboard');
-  await gotoSection(page, 'codex', 'Codex');
+  await gotoSection(page, 'codex', 'AI Activity');
   await expect(page.locator('#codex')).toBeVisible();
   await expect(page.locator('.mobile-more-nav-item')).toHaveClass(/active/);
 });

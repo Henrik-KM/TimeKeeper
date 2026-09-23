@@ -2018,9 +2018,41 @@ tr:nth-child(even) td {
   justify-content: flex-end;
 }
 
+@media (max-width: 640px) {
+  .codex-page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .codex-page-actions {
+    justify-content: flex-start;
+  }
+}
+
 .codex-page-content {
   display: grid;
   gap: 1.5rem;
+}
+
+.codex-page-content[hidden] {
+  display: none;
+}
+
+.claude-integration-controls {
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #e2e8f0;
+}
+
+.ai-activity-filter {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.ai-activity-filter select {
+  min-width: 9rem;
 }
 
 .codex-report-section {

@@ -10,7 +10,7 @@
     <title>TimeKeeper Pro - Offline</title>
     <!-- Chart.js for graphs -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="style.css?v=48">
+    <link rel="stylesheet" href="style.css?v=49">
   </head>
   <body>
     <div class="sidebar" role="navigation" aria-label="Main navigation">
@@ -23,7 +23,7 @@
         <li data-section="projects">Projects</li>
         <li data-section="entries">Entries</li>
         <li data-section="importExport">Import/Export</li>
-        <li data-section="codex">Codex</li>
+        <li data-section="codex">AI Activity</li>
         <li data-section="analytics">Reports</li>
         <li data-section="todo">Workouts</li>
         <li data-section="grocery">Finances</li>
@@ -276,13 +276,20 @@
           <input id="stravaImportInput" type="file" accept="application/json,.json,text/csv,.csv" />
         </div>
         <div class="card" style="margin-top:1rem;">
-          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">Codex Integration</h3>
+          <h3 style="margin:0 0 0.5rem 0; font-size:1.1rem; font-weight:600;">AI Logging</h3>
           <p id="codexIntegrationStatus" class="status-muted">Codex import is not configured.</p>
           <div id="codexIntegrationSummary" class="codex-integration-summary"></div>
           <div style="display:flex; flex-wrap:wrap; gap:0.5rem; margin-top:0.5rem;">
             <button id="codexConfigBtn" class="btn secondary" type="button">Configure Codex</button>
             <button id="codexPublishConfigBtn" class="btn secondary" type="button">Publish Config</button>
-            <button id="codexImportNowBtn" class="btn secondary" type="button">Import Now</button>
+            <button id="codexImportNowBtn" class="btn secondary" type="button">Import Codex</button>
+          </div>
+          <div class="claude-integration-controls">
+            <p id="claudeIntegrationStatus" class="status-muted">Claude import is OFF.</p>
+            <div style="display:flex; flex-wrap:wrap; gap:0.5rem;">
+              <button id="claudeConfigBtn" class="btn secondary" type="button">Configure Claude</button>
+              <button id="claudeImportNowBtn" class="btn secondary" type="button">Import Claude</button>
+            </div>
           </div>
           <div class="codex-context-controls">
             <p id="codexContextStatus" class="status-muted">Private Codex context sync is checking GitHub.</p>
@@ -739,13 +746,13 @@
         <div id="companyPageContent" class="company-page-content" aria-live="polite"></div>
       </section>
 
-      <!-- Codex Usage Section -->
+      <!-- AI Activity Section -->
       <section id="codex" class="section" style="display:none;">
         <div class="codex-page-header">
-          <h2>Codex</h2>
+          <h2>AI Activity</h2>
           <div class="codex-page-actions">
-            <button id="codexMappingAuditBtn" type="button" class="btn secondary">Mapping audit</button>
-            <a href="codex-analysis.html" class="btn secondary">Deep analysis</a>
+            <button id="codexMappingAuditBtn" type="button" class="btn secondary">Codex mapping audit</button>
+            <a href="codex-analysis.html" class="btn secondary">Codex analysis</a>
             <button id="codexPageRefreshBtn" type="button" class="btn secondary">Refresh</button>
           </div>
         </div>
@@ -773,6 +780,6 @@
       </section>
     </div>
     <div id="mobileNowBar" class="mobile-now-bar hidden" aria-live="polite"></div>
-    <script type="module" src="src/main.mjs?v=47"></script>
+    <script type="module" src="src/main.mjs?v=48"></script>
   </body>
 </html>
