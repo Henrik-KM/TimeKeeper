@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-22T22:02:02.261Z",
+  "updatedAt": "2026-09-23T07:17:02.077Z",
   "dayStart": "2026-09-22T22:00:00.000Z",
   "rangeStart": "2026-09-16T22:00:00.000Z",
   "lookbackDays": 7,
@@ -362,6 +362,29 @@
         "codex-0aebd758bb08a295e5628d35"
       ],
       "description": "Codex: Continue Structured AL Stage 5"
+    },
+    {
+      "id": "codex-84cd5840488bbf69aa81115b",
+      "threadId": "019e5f78-41b2-79d0-bebd-baa3944e24ed",
+      "projectKey": "particle_iden",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-23T06:10:51.642Z",
+      "endTime": "2026-09-23T06:57:13.937Z",
+      "wallSeconds": 2782,
+      "focusFactor": 0.75,
+      "effectiveSeconds": 2086,
+      "focusPolicyVersion": 7,
+      "modelBreakdown": [
+        {
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "factor": 0.75,
+          "wallSeconds": 2782,
+          "effectiveSeconds": 2086
+        }
+      ],
+      "description": "Codex: Recreate Figure 1 as vector"
     }
   ]
 }
