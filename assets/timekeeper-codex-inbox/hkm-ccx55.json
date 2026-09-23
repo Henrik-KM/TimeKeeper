@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-23T14:16:02.468Z",
+  "updatedAt": "2026-09-23T14:31:02.281Z",
   "dayStart": "2026-09-22T22:00:00.000Z",
   "rangeStart": "2026-06-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-23T14:16:04.314Z",
+    "observedAt": "2026-09-23T14:31:04.062Z",
     "primary": {
       "usedPercent": 17,
       "remainingPercent": 83,
@@ -88362,6 +88362,51 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-1033ce8c80e9108cca3ffb4f",
+      "threadId": "01a03234-8a23-7ad3-b674-4baa7f690c23",
+      "projectKey": "Research",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-09-23T09:14:20.774Z",
+      "endTime": "2026-09-23T14:04:40.367Z",
+      "wallSeconds": 17419,
+      "focusFactor": 0.15,
+      "effectiveSeconds": 2612,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 17419,
+          "effectiveSeconds": 2612
+        }
+      ],
+      "description": "Codex: Review JCTC manuscript status"
     },
     {
       "id": "codex-ed14c54c714d2bade2bbded7",
