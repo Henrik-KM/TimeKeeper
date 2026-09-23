@@ -125,6 +125,7 @@ export function importClaudeInboxRecords({
   const next = [...entries];
   let imported = 0;
   let updated = 0;
+  let unchanged = 0;
   let skipped = 0;
   for (const payload of payloads) {
     if (
@@ -160,7 +161,7 @@ export function importClaudeInboxRecords({
           Object.assign(existing, normalized);
           updated += 1;
         } else {
-          skipped += 1;
+          unchanged += 1;
         }
       } else {
         next.push({
@@ -174,5 +175,5 @@ export function importClaudeInboxRecords({
       }
     }
   }
-  return { entries: next, imported, updated, skipped };
+  return { entries: next, imported, updated, unchanged, skipped };
 }

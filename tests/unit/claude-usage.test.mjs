@@ -176,6 +176,8 @@ test('Claude inbox imports once, updates changed records, and rejects missing pr
   const second = importClaudeInboxRecords({ ...input, entries: first.entries });
   assert.equal(second.imported, 0);
   assert.equal(second.updated, 0);
+  assert.equal(second.unchanged, 1);
+  assert.equal(second.skipped, 0);
   const changed = { ...record, effectiveSeconds: record.effectiveSeconds + 1 };
   const third = importClaudeInboxRecords({
     ...input,
@@ -183,6 +185,7 @@ test('Claude inbox imports once, updates changed records, and rejects missing pr
     payloads: [{ source: 'timekeeper-claude-bridge', records: [changed] }]
   });
   assert.equal(third.updated, 1);
+  assert.equal(third.unchanged, 0);
   assert.equal(third.entries.length, 1);
   assert.equal(third.entries[0].duration, record.effectiveSeconds + 1);
   const archived = importClaudeInboxRecords({
@@ -191,6 +194,7 @@ test('Claude inbox imports once, updates changed records, and rejects missing pr
   });
   assert.equal(archived.imported, 0);
   assert.equal(archived.skipped, 1);
+  assert.equal(archived.unchanged, 0);
   const privatePayload = importClaudeInboxRecords({
     ...input,
     payloads: [

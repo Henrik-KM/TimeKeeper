@@ -4979,6 +4979,7 @@ import {
     config.lastImportSummary = {
       imported: result.imported,
       updated: result.updated,
+      unchanged: result.unchanged,
       skipped: result.skipped
     };
     claudeImportRuntimeStatus = {
@@ -4999,7 +5000,8 @@ import {
 
   async function importClaudeUsage({ quiet = false } = {}) {
     const config = getClaudeIntegrationConfig();
-    if (!config.enabled) return { imported: 0, updated: 0, skipped: 0 };
+    if (!config.enabled)
+      return { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
     if (claudeImportPromise) return claudeImportPromise;
     claudeImportRuntimeStatus = {
       pending: true,
@@ -5011,9 +5013,15 @@ import {
       .then(({ payloads, errors }) => {
         const result = importClaudeInboxPayloads(payloads);
         if (!quiet) {
-          showToast(
-            `Claude import: ${result.imported} new, ${result.updated} updated, ${result.skipped} skipped.`
-          );
+          const summary = [
+            result.imported && `${result.imported} new`,
+            result.updated && `${result.updated} updated`,
+            result.unchanged && `${result.unchanged} already imported`,
+            result.skipped && `${result.skipped} excluded`
+          ]
+            .filter(Boolean)
+            .join(', ');
+          showToast(`Claude import: ${summary || 'no records found'}.`);
           if (errors.length)
             showToast(`Skipped ${errors.length} Claude inbox file(s).`);
         }
@@ -5027,7 +5035,7 @@ import {
         };
         if (!quiet)
           showToast(`Claude import failed: ${claudeImportRuntimeStatus.error}`);
-        return { imported: 0, updated: 0, skipped: 0 };
+        return { imported: 0, updated: 0, unchanged: 0, skipped: 0 };
       })
       .finally(() => {
         claudeImportPromise = null;
@@ -21020,7 +21028,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=53')
+      .register('./service-worker.js?v=54')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
