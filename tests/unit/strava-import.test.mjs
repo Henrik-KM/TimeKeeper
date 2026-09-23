@@ -50,11 +50,13 @@ test('buildStravaPayloadFromCsv converts free Strava export rows', () => {
 
   assert.equal(payload.updated_utc, '2026-06-03T08:00:00.000Z');
   assert.equal(payload.source, 'strava-export:activities.csv');
+  assert.equal(payload.score_model_version, 2);
   assert.equal(payload.activities.length, 1);
   assert.deepEqual(payload.activities[0], {
     id: 998877,
     name: 'Browser CSV Ride',
     type: 'Ride',
+    sport_type: 'Ride',
     start_date: '2026-06-02T09:00:00.000Z',
     distance_km: 21.4,
     moving_time_min: 41.7,

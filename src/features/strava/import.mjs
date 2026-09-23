@@ -184,6 +184,11 @@ export function activityFromStravaCsvRow(row, existingActivities = []) {
       firstValue(row, 'Activity Type', 'Type', 'Sport') ||
       existingActivity.type ||
       'Activity',
+    sport_type:
+      firstValue(row, 'Sport Type', 'Activity Type', 'Type', 'Sport') ||
+      existingActivity.sport_type ||
+      existingActivity.type ||
+      'Activity',
     start_date: startDate,
     distance_km: distance !== null ? Math.round(distance * 100) / 100 : null,
     moving_time_min: moving,
@@ -244,6 +249,7 @@ export function buildStravaPayloadFromCsv(
   return {
     updated_utc: now.toISOString(),
     source: `strava-export:${sourceName}`,
+    score_model_version: 2,
     activities,
     error: null
   };

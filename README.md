@@ -11,11 +11,13 @@ Saved browser data stays compatible with the existing `localStorage` schema. No 
 
 The Dashboard includes an App Health panel that summarizes local data, backup/snapshot state, Strava feed freshness, desktop blocker status, and offline app cache status. It can also repair common local-data integrity problems such as duplicate IDs, orphaned entries, invalid focus values, and broken stopped-entry durations.
 
+On mobile, **Today** is the short whole-life overview: one card each for the current or next timer, today's work target, workout progress, and Company. At most one important exception appears above those cards, such as a stale timer, a company decision, a ready company result, a missed workout target, a budget overrun, or a backup conflict. The underlying detail remains in the existing Timer, Projects, Workouts, Company, Finances, and Backup screens.
+
 ## Mobile Company workspace
 
 The mobile bottom bar includes a **Company** tab. It shows the current evidence-backed company priority, the next concrete action, prepared internal work, decisions that genuinely need judgment, work already handled, and source freshness.
 
-Connect it once from **Company > Connect** with a fine-grained GitHub token that has Contents read/write access only to the private `Henrik-KM/timekeeper-private-context` repository. The token, cached Company view, pending instructions, and receipts are stored separately from `timekeeperDataPro`, so they are not included in normal TimeKeeper exports or backups.
+Connect it once from **Company > Connect** with a fine-grained GitHub token that has Contents read/write access only to the private `Henrik-KM/timekeeper-private-context` repository. Company and Codex private sync now share that one connection. Existing Company or Codex tokens and repository settings migrate automatically. The token, cached Company view, pending instructions, and receipts are stored separately from `timekeeperDataPro`, so they are not included in normal TimeKeeper exports or backups.
 
 Mobile controls can add direction, reprioritize, pause or mark an item handled, record a decision, or ask the desktop operator to work on the next safe item. They cannot send mail, post to Slack, change calendars, deploy, delete data, or make legal or financial commitments. The desktop operator validates freshness and evidence before applying each instruction and returns a receipt to the app.
 
@@ -172,7 +174,7 @@ Setup:
 npm run codex:bridge:install
 ```
 
-The task runs at logon and every 5 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. To run it manually:
+The task runs at logon and every 15 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. The browser checks the inbox every five minutes and reuses unchanged files. To run it manually:
 
 ```bash
 npm run codex:bridge
@@ -210,6 +212,8 @@ Before writing, TimeKeeper checks the selected folder's latest backup revision a
 
 This repo includes a GitHub Actions workflow that publishes a lightweight Strava JSON feed to `assets/strava.json`, which is rendered in the Workouts section of the app.
 
+The workflow runs once daily at 03:17 UTC and can also be started manually with **Run workflow** when a fresher feed is needed.
+
 ### Setup
 
 1. Create a Strava API app and note the Client ID and Client Secret.
@@ -225,7 +229,9 @@ This repo includes a GitHub Actions workflow that publishes a lightweight Strava
 }
 ```
 
-The workflow fetches all available activities by paging through the Strava API. If Strava rejects a refresh but `assets/strava.json` already contains activities, the script preserves the existing feed so the app does not go blank.
+The workflow fetches recent activities and merges them over the existing feed. New activities are enriched from Strava streams and reduced to compact active-time, cardio-zone, and strength-density features. Stream requests are cached per activity and limited by `STRAVA_STREAM_REQUEST_LIMIT` (default `30`) so older activities are backfilled incrementally. If Strava rejects a refresh but `assets/strava.json` already contains activities, the script preserves the existing feed so the app does not go blank.
+
+Workout points use scoring model v2: adjacent records are grouped into sessions, strength and cardio credits are calculated separately, the secondary component is bounded, and each session is capped at six points. Heart-rate recovery load remains a separate diagnostic. Existing v1 history is used once to calibrate the v2 point scale; reported exertion and local score overrides do not affect routine workout points.
 
 ### Free export import
 

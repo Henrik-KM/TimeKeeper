@@ -275,6 +275,14 @@ Also run a scoped Prettier check for changed source/test/docs files.
 - Start by checking `git status --short --branch`.
 - Do not revert or overwrite user changes you did not make.
 - Stage only the intended files.
+- Never create a clone or Git worktree beside `TimeKeeper` or elsewhere directly
+  under the repository's parent directory. Those directories surface as spammy
+  sister repositories in the user's GitHub workspace.
+- If an isolated checkout is genuinely necessary, create it under the system
+  temporary directory with a unique task-specific name. Remove it with
+  `git worktree remove` and verify it is absent from `git worktree list` before
+  handoff, including after failed or interrupted work. Keeping any extra
+  checkout requires the user's explicit approval for its exact path.
 - Scheduled or automated commits may advance `origin/main`; fetch/rebase before
   pushing if the remote moved.
 - Never force-push `main`.

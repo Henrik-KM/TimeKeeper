@@ -188,6 +188,7 @@ def activity_from_row(row: dict, existing: dict[str, dict]) -> dict | None:
         "id": activity_id,
         "name": name,
         "type": activity_type,
+        "sport_type": existing_activity.get("sport_type") or activity_type,
         "start_date": start_date,
         "distance_km": round(distance, 2) if distance is not None else None,
         "moving_time_min": moving,
@@ -244,6 +245,7 @@ def main() -> None:
     payload = {
         "updated_utc": datetime.now(timezone.utc).isoformat(),
         "source": f"strava-export:{csv_name}",
+        "score_model_version": 2,
         "activities": activities,
         "error": None,
     }
