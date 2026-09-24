@@ -105,6 +105,7 @@ import {
   normalizeClaudeIntegration
 } from './features/claude/inbox.mjs';
 import {
+  computeRollingPersonalHourlyRate,
   computeRollingSourceTotals,
   computeUnionSeconds,
   getEntryElapsedSeconds,
@@ -12786,6 +12787,14 @@ import {
       endExclusive: rollingBounds.endExclusive,
       projectIds: new Set(data.projects.map((project) => String(project.id)))
     });
+    const rollingPersonalRate = computeRollingPersonalHourlyRate(
+      data.entries,
+      data.projects,
+      {
+        start: rollingBounds.start,
+        endExclusive: rollingBounds.endExclusive
+      }
+    );
     const weeklyProgress =
       weeklyTarget > 0
         ? (weekHours / weeklyTarget) * 100
@@ -12845,6 +12854,7 @@ import {
       rollingYouHours: rollingSources.you / 3600,
       rollingCodexHours: rollingSources.codex / 3600,
       rollingClaudeHours: rollingSources.claude / 3600,
+      rollingPersonalRate: rollingPersonalRate.hourlyRate,
       rollingTarget,
       rollingProgress,
       rollingRevenue,
@@ -14720,6 +14730,7 @@ import {
           codex: stats.rollingCodexHours,
           claude: stats.rollingClaudeHours
         },
+        averagePaidRate: stats.rollingPersonalRate,
         revenue: stats.rollingRevenue || 0
       },
       {
@@ -14873,6 +14884,15 @@ import {
         revenueDiv.style.color = '#475569';
         div.appendChild(revenueDiv);
       }
+      if (card.averagePaidRate !== undefined) {
+        const rateDiv = document.createElement('div');
+        rateDiv.className = 'stat-change';
+        rateDiv.textContent = `Avg. paid rate: ${Number.isFinite(card.averagePaidRate) ? `${formatCurrency(card.averagePaidRate, -1)}/h` : '—'}`;
+        rateDiv.title =
+          'Weighted by your recorded hours on projects with a positive hourly rate; excludes Codex and Claude.';
+        rateDiv.style.color = '#475569';
+        div.appendChild(rateDiv);
+      }
       // Append per-project breakdowns underneath each card. For Today, display today's hours
       // against the recommended daily hours for each project. For Week and Month, display
       // actual versus target hours and colour code based on whether the project is ahead
@@ -14913,7 +14933,15 @@ import {
             row.style.color = onTrack ? '#15803d' : '#b91c1c';
             const sourceBreakdown = document.createElement('span');
             sourceBreakdown.className = 'rolling-project-sources';
-            sourceBreakdown.textContent = `You ${item.stats.rolling30YouHours.toFixed(1)}h · Codex ${item.stats.rolling30CodexHours.toFixed(1)}h · Claude ${item.stats.rolling30ClaudeHours.toFixed(1)}h`;
+            const sourceHours =
+              item.stats.rolling30YouHours +
+              item.stats.rolling30CodexHours +
+              item.stats.rolling30ClaudeHours;
+            const sourcePercent = (hours) =>
+              sourceHours > 0 ? Math.round((hours / sourceHours) * 100) : 0;
+            sourceBreakdown.textContent = `You: ${sourcePercent(item.stats.rolling30YouHours)}% · Codex: ${sourcePercent(item.stats.rolling30CodexHours)}% · Claude: ${sourcePercent(item.stats.rolling30ClaudeHours)}%`;
+            sourceBreakdown.title =
+              'Share of this project’s rolling 30-day hours.';
             row.appendChild(sourceBreakdown);
           }
           list.appendChild(row);
@@ -21041,7 +21069,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=55')
+      .register('./service-worker.js?v=56')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

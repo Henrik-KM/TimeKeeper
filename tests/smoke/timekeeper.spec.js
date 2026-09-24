@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v55';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=50'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v56';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=51'");
   expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
@@ -1742,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '55')"
+    "url.searchParams.set('timekeeper-update', '56')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1752,7 +1752,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=55')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=56')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -4738,12 +4738,81 @@ test('rolling 30-day hours show You, Codex, and Claude totals overall and per pr
   await expect(rollingCard).toContainText('Claude0.5h');
   await expect(rollingCard).toContainText('Shared Project: 3.5 /');
   await expect(rollingCard).toContainText(
-    'You 2.0h · Codex 1.0h · Claude 0.5h'
+    'You: 57% · Codex: 29% · Claude: 14%'
   );
   await expect(rollingCard).toContainText('Codex Project: 3.0 /');
-  await expect(rollingCard).toContainText(
-    'You 0.0h · Codex 3.0h · Claude 0.0h'
-  );
+  await expect(rollingCard).toContainText('You: 0% · Codex: 100% · Claude: 0%');
+});
+
+test('rolling card shows a weighted rate for personal hours on paid projects', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-23T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'low-rate', name: 'Paid Low', hourlyRate: 80 }),
+      projectFixture({ id: 'high-rate', name: 'Paid High', hourlyRate: 180 }),
+      projectFixture({ id: 'unpaid', name: 'Unpaid Project', hourlyRate: 0 })
+    ],
+    entries: [
+      entryFixture({
+        id: 'you-low-rate',
+        projectId: 'low-rate',
+        startTime: '2026-04-20T08:00:00.000',
+        endTime: '2026-04-20T09:00:00.000',
+        hours: 1
+      }),
+      entryFixture({
+        id: 'you-high-rate',
+        projectId: 'high-rate',
+        startTime: '2026-04-20T09:00:00.000',
+        endTime: '2026-04-20T11:00:00.000',
+        hours: 2
+      }),
+      entryFixture({
+        id: 'you-unpaid',
+        projectId: 'unpaid',
+        startTime: '2026-04-20T11:00:00.000',
+        endTime: '2026-04-20T15:00:00.000',
+        hours: 4
+      }),
+      {
+        ...entryFixture({
+          id: 'codex-high-rate',
+          projectId: 'high-rate',
+          startTime: '2026-04-21T08:00:00.000',
+          endTime: '2026-04-21T14:00:00.000',
+          hours: 6
+        }),
+        source: 'codex'
+      },
+      {
+        ...entryFixture({
+          id: 'claude-low-rate',
+          projectId: 'low-rate',
+          startTime: '2026-04-21T09:00:00.000',
+          endTime: '2026-04-21T12:00:00.000',
+          hours: 3
+        }),
+        source: 'claude'
+      },
+      entryFixture({
+        id: 'outside-window',
+        projectId: 'high-rate',
+        startTime: '2026-03-20T08:00:00.000',
+        endTime: '2026-03-20T10:00:00.000',
+        hours: 2
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const rollingCard = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Rolling 30 Days' });
+  await expect(rollingCard).toContainText('Avg. paid rate: 150 kr/h');
 });
 
 test('Claude inbox imports into AI Activity once and remains readable on a phone', async ({

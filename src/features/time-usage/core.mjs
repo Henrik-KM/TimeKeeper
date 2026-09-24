@@ -226,6 +226,60 @@ export function computeRollingSourceTotals(
   return totals;
 }
 
+/** @param {Array<any>} entries
+ *  @param {Array<any>} projects
+ *  @param {{ start?: Date, endExclusive?: Date }} options
+ */
+export function computeRollingPersonalHourlyRate(
+  entries,
+  projects,
+  { start, endExclusive } = {}
+) {
+  const from = validDate(start);
+  const to = validDate(endExclusive);
+  if (!from || !to) {
+    return { hours: 0, totalEarned: 0, hourlyRate: null };
+  }
+
+  const projectById = new Map();
+  for (const project of Array.isArray(projects) ? projects : []) {
+    const id = String(project?.id || '');
+    if (id && !projectById.has(id)) projectById.set(id, project);
+  }
+
+  let eligibleSeconds = 0;
+  let totalEarned = 0;
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!entry || entry.isRunning) continue;
+    const date = validDate(entry.startTime);
+    const duration = finiteNonNegative(entry.duration);
+    const source = getEntrySource(entry);
+    if (
+      !date ||
+      date < from ||
+      date >= to ||
+      duration <= 0 ||
+      source === 'codex' ||
+      source === 'claude'
+    )
+      continue;
+
+    const project = projectById.get(String(entry.projectId || ''));
+    const hourlyRate = Number(project?.hourlyRate);
+    if (!project || !Number.isFinite(hourlyRate) || hourlyRate <= 0) continue;
+
+    eligibleSeconds += duration;
+    totalEarned += (duration / 3600) * hourlyRate;
+  }
+
+  const hours = eligibleSeconds / 3600;
+  return {
+    hours,
+    totalEarned,
+    hourlyRate: hours > 0 ? totalEarned / hours : null
+  };
+}
+
 export function computeUnionSeconds(entries) {
   const intervals = (Array.isArray(entries) ? entries : [])
     .map((entry) => {
