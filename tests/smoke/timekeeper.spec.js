@@ -4744,7 +4744,7 @@ test('rolling 30-day hours show You, Codex, and Claude totals overall and per pr
   await expect(rollingCard).toContainText('You: 0% · Codex: 100% · Claude: 0%');
 });
 
-test('rolling card shows a weighted rate for personal hours on paid projects', async ({
+test('rolling card credits all paid-project hours to your hourly rate', async ({
   page
 }) => {
   await freezeTime(page, '2026-04-23T12:00:00');
@@ -4812,7 +4812,7 @@ test('rolling card shows a weighted rate for personal hours on paid projects', a
   const rollingCard = page
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Rolling 30 Days' });
-  await expect(rollingCard).toContainText('Avg. paid rate: 150 kr/h');
+  await expect(rollingCard).toContainText('Avg. paid rate: 370 kr/h');
 });
 
 test('Claude inbox imports into AI Activity once and remains readable on a phone', async ({

@@ -238,7 +238,7 @@ export function computeRollingPersonalHourlyRate(
   const from = validDate(start);
   const to = validDate(endExclusive);
   if (!from || !to) {
-    return { hours: 0, totalEarned: 0, hourlyRate: null };
+    return { personalHours: 0, totalPaidValue: 0, hourlyRate: null };
   }
 
   const projectById = new Map();
@@ -247,36 +247,30 @@ export function computeRollingPersonalHourlyRate(
     if (id && !projectById.has(id)) projectById.set(id, project);
   }
 
-  let eligibleSeconds = 0;
-  let totalEarned = 0;
+  let personalSeconds = 0;
+  let totalPaidValue = 0;
   for (const entry of Array.isArray(entries) ? entries : []) {
     if (!entry || entry.isRunning) continue;
     const date = validDate(entry.startTime);
     const duration = finiteNonNegative(entry.duration);
     const source = getEntrySource(entry);
-    if (
-      !date ||
-      date < from ||
-      date >= to ||
-      duration <= 0 ||
-      source === 'codex' ||
-      source === 'claude'
-    )
-      continue;
+    if (!date || date < from || date >= to || duration <= 0) continue;
 
     const project = projectById.get(String(entry.projectId || ''));
     const hourlyRate = Number(project?.hourlyRate);
     if (!project || !Number.isFinite(hourlyRate) || hourlyRate <= 0) continue;
 
-    eligibleSeconds += duration;
-    totalEarned += (duration / 3600) * hourlyRate;
+    totalPaidValue += (duration / 3600) * hourlyRate;
+    if (source !== 'codex' && source !== 'claude') {
+      personalSeconds += duration;
+    }
   }
 
-  const hours = eligibleSeconds / 3600;
+  const personalHours = personalSeconds / 3600;
   return {
-    hours,
-    totalEarned,
-    hourlyRate: hours > 0 ? totalEarned / hours : null
+    personalHours,
+    totalPaidValue,
+    hourlyRate: personalHours > 0 ? totalPaidValue / personalHours : null
   };
 }
 

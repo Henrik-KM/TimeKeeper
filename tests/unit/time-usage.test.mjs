@@ -9,7 +9,7 @@ import {
   normalizeEntryTiming
 } from '../../src/features/time-usage/core.mjs';
 
-test('rolling personal hourly rate weights only eligible hours and projects', () => {
+test('rolling personal hourly rate credits AI value to personal paid hours', () => {
   const projects = [
     { id: 'low', hourlyRate: 80 },
     { id: 'high', hourlyRate: 180 },
@@ -62,9 +62,22 @@ test('rolling personal hourly rate weights only eligible hours and projects', ()
     endExclusive: new Date('2026-08-01T00:00:00.000Z')
   });
 
-  assert.equal(result.hours, 3);
-  assert.equal(result.totalEarned, 440);
-  assert.equal(result.hourlyRate, 440 / 3);
+  assert.equal(result.personalHours, 3);
+  assert.equal(result.totalPaidValue, 1580);
+  assert.equal(result.hourlyRate, 1580 / 3);
+
+  const aiOnly = computeRollingPersonalHourlyRate(
+    entries.filter(
+      (entry) => entry.source === 'codex' || entry.source === 'claude'
+    ),
+    projects,
+    {
+      start: new Date('2026-07-01T00:00:00.000Z'),
+      endExclusive: new Date('2026-08-01T00:00:00.000Z')
+    }
+  );
+  assert.equal(aiOnly.personalHours, 0);
+  assert.equal(aiOnly.hourlyRate, null);
 });
 
 test('elapsed seconds remain independent from effective duration and focus', () => {

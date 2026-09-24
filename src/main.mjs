@@ -14889,7 +14889,7 @@ import {
         rateDiv.className = 'stat-change';
         rateDiv.textContent = `Avg. paid rate: ${Number.isFinite(card.averagePaidRate) ? `${formatCurrency(card.averagePaidRate, -1)}/h` : '—'}`;
         rateDiv.title =
-          'Weighted by your recorded hours on projects with a positive hourly rate; excludes Codex and Claude.';
+          'Value of your hours plus Codex and Claude on positive-rate projects, divided by your hours on those projects.';
         rateDiv.style.color = '#475569';
         div.appendChild(rateDiv);
       }
