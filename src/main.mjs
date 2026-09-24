@@ -12294,6 +12294,28 @@ import {
     const rolling30YouHours = rollingSources.you / 3600;
     const rolling30CodexHours = rollingSources.codex / 3600;
     const rolling30ClaudeHours = rollingSources.claude / 3600;
+    const rolling90Bounds = getRollingWindowBounds(now, 90);
+    const rolling90Hours = sumEntryHours(
+      entries,
+      rolling90Bounds.start,
+      rolling90Bounds.endExclusive
+    );
+    const rolling90Sources = computeRollingSourceTotals(entries, {
+      start: rolling90Bounds.start,
+      endExclusive: rolling90Bounds.endExclusive
+    });
+    const rolling90YouHours = rolling90Sources.you / 3600;
+    const rolling90CodexHours = rolling90Sources.codex / 3600;
+    const rolling90ClaudeHours = rolling90Sources.claude / 3600;
+    const rolling90TargetStart = maxDate(rolling90Bounds.start, created);
+    const rolling90TargetConst = rolling90TargetStart
+      ? getProjectPlannedHoursForPeriod(
+          project,
+          entries,
+          rolling90TargetStart,
+          rolling90Bounds.endExclusive
+        )
+      : 0;
     // Revenue
     const revenue = totalHours * project.hourlyRate;
     const weeklyRevenue = weeklyHours * project.hourlyRate;
@@ -12353,6 +12375,11 @@ import {
         rolling30CodexHours,
         rolling30ClaudeHours,
         rolling30TargetConst,
+        rolling90Hours,
+        rolling90YouHours,
+        rolling90CodexHours,
+        rolling90ClaudeHours,
+        rolling90TargetConst,
         revenue,
         weeklyRevenue,
         lastWeekRevenue,
@@ -12430,6 +12457,11 @@ import {
         rolling30CodexHours: 0,
         rolling30ClaudeHours: 0,
         rolling30TargetConst: 0,
+        rolling90Hours: 0,
+        rolling90YouHours: 0,
+        rolling90CodexHours: 0,
+        rolling90ClaudeHours: 0,
+        rolling90TargetConst: 0,
         revenue,
         weeklyRevenue,
         lastWeekRevenue,
@@ -12471,6 +12503,11 @@ import {
       rolling30CodexHours,
       rolling30ClaudeHours,
       rolling30TargetConst,
+      rolling90Hours,
+      rolling90YouHours,
+      rolling90CodexHours,
+      rolling90ClaudeHours,
+      rolling90TargetConst,
       revenue,
       weeklyRevenue,
       lastWeekRevenue,
@@ -12712,10 +12749,12 @@ import {
     let weekSeconds = 0;
     let monthSeconds = 0;
     let rollingSeconds = 0;
+    let rolling90Seconds = 0;
     let totalRevenue = 0;
     let monthlyRevenue = 0;
     let lastMonthRevenue = 0;
     let rollingRevenue = 0;
+    let rolling90Revenue = 0;
     // Revenue totals for today and this week (across all projects)
     let todayRevenue = 0;
     let yesterdayRevenue = 0;
@@ -12728,6 +12767,7 @@ import {
     let weeklyTarget = 0;
     let monthTarget = 0;
     let rollingTarget = 0;
+    let rolling90Target = 0;
     let dailyTarget = 0;
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, now)
@@ -12739,10 +12779,12 @@ import {
       weeklyTarget += sp.weeklyTargetConst || 0;
       monthTarget += sp.monthlyTargetConst || 0;
       rollingTarget += sp.rolling30TargetConst || 0;
+      rolling90Target += sp.rolling90TargetConst || 0;
       dailyPlans.push(getProjectDailyPlan(project, sp, weekContext));
     });
     dailyTarget = getPortfolioDailyTarget(dailyPlans);
     const rollingBounds = getRollingWindowBounds(now);
+    const rolling90Bounds = getRollingWindowBounds(now, 90);
     data.entries.forEach((entry) => {
       if (entry.isRunning || !entry.duration) return;
       const start = new Date(entry.startTime);
@@ -12771,6 +12813,13 @@ import {
         rollingSeconds += entry.duration;
         rollingRevenue += hours * project.hourlyRate;
       }
+      if (
+        start >= rolling90Bounds.start &&
+        start < rolling90Bounds.endExclusive
+      ) {
+        rolling90Seconds += entry.duration;
+        rolling90Revenue += hours * project.hourlyRate;
+      }
       totalRevenue += hours * project.hourlyRate;
       // Accumulate revenue for last week (previous 7 days before the current week)
       if (start >= lastWeekStart && start < lastWeekEnd) {
@@ -12782,6 +12831,7 @@ import {
     const weekHours = weekSeconds / 3600;
     const monthHours = monthSeconds / 3600;
     const rollingHours = rollingSeconds / 3600;
+    const rolling90Hours = rolling90Seconds / 3600;
     const rollingSources = computeRollingSourceTotals(data.entries, {
       start: rollingBounds.start,
       endExclusive: rollingBounds.endExclusive,
@@ -12795,6 +12845,19 @@ import {
         endExclusive: rollingBounds.endExclusive
       }
     );
+    const rolling90Sources = computeRollingSourceTotals(data.entries, {
+      start: rolling90Bounds.start,
+      endExclusive: rolling90Bounds.endExclusive,
+      projectIds: new Set(data.projects.map((project) => String(project.id)))
+    });
+    const rolling90PersonalRate = computeRollingPersonalHourlyRate(
+      data.entries,
+      data.projects,
+      {
+        start: rolling90Bounds.start,
+        endExclusive: rolling90Bounds.endExclusive
+      }
+    );
     const weeklyProgress =
       weeklyTarget > 0
         ? (weekHours / weeklyTarget) * 100
@@ -12805,6 +12868,12 @@ import {
       rollingTarget > 0
         ? (rollingHours / rollingTarget) * 100
         : rollingHours > 0
+          ? 100
+          : 0;
+    const rolling90Progress =
+      rolling90Target > 0
+        ? (rolling90Hours / rolling90Target) * 100
+        : rolling90Hours > 0
           ? 100
           : 0;
     const revenueChange =
@@ -12858,6 +12927,14 @@ import {
       rollingTarget,
       rollingProgress,
       rollingRevenue,
+      rolling90Hours,
+      rolling90YouHours: rolling90Sources.you / 3600,
+      rolling90CodexHours: rolling90Sources.codex / 3600,
+      rolling90ClaudeHours: rolling90Sources.claude / 3600,
+      rolling90PersonalRate: rolling90PersonalRate.hourlyRate,
+      rolling90Target,
+      rolling90Progress,
+      rolling90Revenue,
       lastMonthRevenue,
       revenueChange,
       todayChange,
@@ -14678,6 +14755,25 @@ import {
     // or behind schedule.
     // Build the dashboard cards. Each card includes a value, progress bar(s), and labels.
     // For the weekly and monthly cards we include both the percentage of target worked and the percentage of the period elapsed.
+    const createRollingCard = (
+      days,
+      hours,
+      target,
+      progress,
+      sourceBreakdown,
+      averagePaidRate,
+      revenue
+    ) => ({
+      title: `Rolling ${days} Days`,
+      value: `${hours.toFixed(1)} / ${target ? target.toFixed(1) : '0'}h`,
+      progress,
+      icon: String(days),
+      progressLabel: `${(progress || 0).toFixed(1)}% of required ${days}-day pace`,
+      sourceBreakdown,
+      averagePaidRate,
+      revenue: revenue || 0,
+      rollingWindowDays: days
+    });
     const cards = [
       {
         title: "Today's Hours",
@@ -14714,25 +14810,32 @@ import {
         // Show revenue earned this week on the same card
         revenue: stats.weekRevenue || 0
       },
-      {
-        title: 'Rolling 30 Days',
-        value:
-          stats.rollingHours.toFixed(1) +
-          ' / ' +
-          (stats.rollingTarget ? stats.rollingTarget.toFixed(1) : '0') +
-          'h',
-        progress: stats.rollingProgress,
-        icon: '30',
-        progressLabel:
-          (stats.rollingProgress || 0).toFixed(1) + '% of required 30-day pace',
-        sourceBreakdown: {
+      createRollingCard(
+        30,
+        stats.rollingHours,
+        stats.rollingTarget,
+        stats.rollingProgress,
+        {
           you: stats.rollingYouHours,
           codex: stats.rollingCodexHours,
           claude: stats.rollingClaudeHours
         },
-        averagePaidRate: stats.rollingPersonalRate,
-        revenue: stats.rollingRevenue || 0
-      },
+        stats.rollingPersonalRate,
+        stats.rollingRevenue
+      ),
+      createRollingCard(
+        90,
+        stats.rolling90Hours,
+        stats.rolling90Target,
+        stats.rolling90Progress,
+        {
+          you: stats.rolling90YouHours,
+          codex: stats.rolling90CodexHours,
+          claude: stats.rolling90ClaudeHours
+        },
+        stats.rolling90PersonalRate,
+        stats.rolling90Revenue
+      ),
       {
         title: 'Workout Progress',
         value: workoutValue,
@@ -14900,7 +15003,7 @@ import {
       if (
         card.title === "Today's Hours" ||
         card.title === 'This Week' ||
-        card.title === 'Rolling 30 Days'
+        card.rollingWindowDays
       ) {
         const list = document.createElement('div');
         list.style.marginTop = '0.5rem';
@@ -14926,22 +15029,22 @@ import {
             const onTrack = item.stats.weeklyHours >= expectedWeekSoFar - 0.01; // small tolerance
             row.style.color = onTrack ? '#15803d' : '#b91c1c';
           } else {
-            row.textContent = `${item.project.name}: ${item.stats.rolling30Hours.toFixed(1)} / ${item.stats.rolling30TargetConst.toFixed(1)}h`;
-            const onTrack =
-              item.stats.rolling30Hours >=
-              item.stats.rolling30TargetConst - 0.01;
+            const rollingPrefix = `rolling${card.rollingWindowDays}`;
+            const rollingHours = item.stats[`${rollingPrefix}Hours`];
+            const rollingTarget = item.stats[`${rollingPrefix}TargetConst`];
+            row.textContent = `${item.project.name}: ${rollingHours.toFixed(1)} / ${rollingTarget.toFixed(1)}h`;
+            const onTrack = rollingHours >= rollingTarget - 0.01;
             row.style.color = onTrack ? '#15803d' : '#b91c1c';
             const sourceBreakdown = document.createElement('span');
             sourceBreakdown.className = 'rolling-project-sources';
             const sourceHours =
-              item.stats.rolling30YouHours +
-              item.stats.rolling30CodexHours +
-              item.stats.rolling30ClaudeHours;
+              item.stats[`${rollingPrefix}YouHours`] +
+              item.stats[`${rollingPrefix}CodexHours`] +
+              item.stats[`${rollingPrefix}ClaudeHours`];
             const sourcePercent = (hours) =>
               sourceHours > 0 ? Math.round((hours / sourceHours) * 100) : 0;
-            sourceBreakdown.textContent = `You: ${sourcePercent(item.stats.rolling30YouHours)}% · Codex: ${sourcePercent(item.stats.rolling30CodexHours)}% · Claude: ${sourcePercent(item.stats.rolling30ClaudeHours)}%`;
-            sourceBreakdown.title =
-              'Share of this project’s rolling 30-day hours.';
+            sourceBreakdown.textContent = `You: ${sourcePercent(item.stats[`${rollingPrefix}YouHours`])}% · Codex: ${sourcePercent(item.stats[`${rollingPrefix}CodexHours`])}% · Claude: ${sourcePercent(item.stats[`${rollingPrefix}ClaudeHours`])}%`;
+            sourceBreakdown.title = `Share of this project’s rolling ${card.rollingWindowDays}-day hours.`;
             row.appendChild(sourceBreakdown);
           }
           list.appendChild(row);
@@ -21069,7 +21172,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=57')
+      .register('./service-worker.js?v=58')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

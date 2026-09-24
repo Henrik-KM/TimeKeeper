@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v57';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=52'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v58';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=53'");
   expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
@@ -1742,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '57')"
+    "url.searchParams.set('timekeeper-update', '58')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1752,7 +1752,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=57')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=58')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -4742,6 +4742,82 @@ test('rolling 30-day hours show You, Codex, and Claude totals overall and per pr
   );
   await expect(rollingCard).toContainText('Codex Project: 3.0 /');
   await expect(rollingCard).toContainText('You: 0% · Codex: 100% · Claude: 0%');
+});
+
+test('rolling 90-day card uses its own totals rate and project shares', async ({
+  page
+}) => {
+  await freezeTime(page, '2026-04-23T12:00:00');
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({
+        id: 'long-project',
+        name: 'Long Project',
+        budgetHours: 100,
+        hourlyRate: 120,
+        startDate: '2026-01-01',
+        createdAt: '2026-01-01T08:00:00.000',
+        deadline: '2026-12-31',
+        scheduleType: 'weekly',
+        weeklyExpectedHours: 5
+      })
+    ],
+    entries: [
+      entryFixture({
+        id: 'recent-personal',
+        projectId: 'long-project',
+        startTime: '2026-04-20T09:00:00.000',
+        endTime: '2026-04-20T11:00:00.000',
+        hours: 2
+      }),
+      {
+        ...entryFixture({
+          id: 'older-claude',
+          projectId: 'long-project',
+          startTime: '2026-03-01T09:00:00.000',
+          endTime: '2026-03-01T13:00:00.000',
+          hours: 4
+        }),
+        source: 'claude'
+      },
+      entryFixture({
+        id: 'outside-90-days',
+        projectId: 'long-project',
+        startTime: '2025-12-10T09:00:00.000',
+        endTime: '2025-12-10T16:00:00.000',
+        hours: 7
+      })
+    ]
+  });
+
+  await page.goto('/');
+  await gotoSection(page, 'dashboard', 'Dashboard');
+
+  const rolling30Card = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Rolling 30 Days' });
+  const rolling90Card = page
+    .locator('#statsGrid .stat-card')
+    .filter({ hasText: 'Rolling 90 Days' });
+  await expect(rolling30Card).toContainText('2.0 /');
+  await expect(rolling30Card).toContainText('Avg. paid rate: 120 kr/h');
+  await expect(rolling90Card).toContainText('6.0 /');
+  await expect(rolling90Card).toContainText('required 90-day pace');
+  await expect(rolling90Card).toContainText('You2.0h');
+  await expect(rolling90Card).toContainText('Claude4.0h');
+  await expect(rolling90Card).toContainText('Revenue: 720 kr');
+  await expect(rolling90Card).toContainText('Avg. paid rate: 360 kr/h');
+  await expect(rolling90Card).toContainText('Long Project: 6.0 /');
+  await expect(rolling90Card).toContainText(
+    'You: 33% · Codex: 0% · Claude: 67%'
+  );
+
+  const cardTitles = await page
+    .locator('#statsGrid .stat-title')
+    .allTextContents();
+  expect(cardTitles.indexOf('Rolling 90 Days')).toBe(
+    cardTitles.indexOf('Rolling 30 Days') + 1
+  );
 });
 
 test('rolling card credits all paid-project hours to your hourly rate', async ({
