@@ -1730,8 +1730,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v56';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=51'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v57';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=52'");
   expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
@@ -1742,7 +1742,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '56')"
+    "url.searchParams.set('timekeeper-update', '57')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1752,7 +1752,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=56')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=57')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
