@@ -1841,6 +1841,47 @@ test('mobile Stop keeps a running timer when its save fails', async ({
   );
 });
 
+test('mobile Stop All keeps both timers when its save fails', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  const now = new Date().toISOString();
+  await seedLocalStorage(page, {
+    projects: [
+      projectFixture({ id: 'first', name: 'First' }),
+      projectFixture({ id: 'second', name: 'Second' })
+    ],
+    entries: ['first', 'second'].map((projectId) => ({
+      ...entryFixture({ id: `running-${projectId}`, projectId }),
+      endTime: null,
+      duration: null,
+      isRunning: true,
+      effectiveSeconds: 0,
+      elapsedSeconds: 0,
+      lastUpdateTime: now,
+      focusFactor: 1,
+      manualFactor: 1
+    }))
+  });
+  await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(page.locator('#runningTimerPro')).toContainText('First');
+  await expect(page.locator('#runningTimerPro')).toContainText('Second');
+  await page.evaluate(() => {
+    Storage.prototype.setItem = function (key) {
+      if (key === 'timekeeperDataPro') {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      }
+    };
+  });
+  await page.getByRole('button', { name: 'Stop All Timers' }).click();
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'browser storage is full'
+  );
+  await expect(page.locator('#runningTimerPro')).toContainText('First');
+  await expect(page.locator('#runningTimerPro')).toContainText('Second');
+});
+
 test('large profile journals compact in a worker without losing changes', async ({
   page
 }) => {
@@ -1895,8 +1936,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v60';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=55'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v61';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=56'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
@@ -1912,7 +1953,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '60')"
+    "url.searchParams.set('timekeeper-update', '61')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1922,7 +1963,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=60')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=61')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({

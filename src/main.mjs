@@ -10383,7 +10383,11 @@ import {
 
   function showSection(sectionId, navItem = null, options = {}) {
     if (!sectionId || !sectionIds.has(sectionId)) return;
-    const { updateHash = true, resetScroll = true } = options;
+    const {
+      updateHash = true,
+      resetScroll = true,
+      quickTimer = false
+    } = options;
     activeSectionId = sectionId;
     companyOperatorController.setActive(sectionId === 'company');
     navList.querySelectorAll('li').forEach((item) => {
@@ -10421,7 +10425,7 @@ import {
     } else if (sectionId === 'entries') {
       updateEntriesTable();
     } else if (sectionId === 'timer') {
-      updateTimerSection();
+      updateTimerSection({ quick: quickTimer });
     } else if (sectionId === 'todo') {
       updateTodoSection();
     } else if (sectionId === 'grocery') {
@@ -11435,7 +11439,7 @@ import {
         label: `Start timer: ${project.name}`,
         meta: 'Timer',
         action: () => {
-          activateSection('timer');
+          showSection('timer', null, { quickTimer: true });
           startProjectTimer(project.id, { overrideFactor: null });
         }
       },
@@ -11459,7 +11463,7 @@ import {
           )}`,
           meta: 'Pinned Timer',
           action: () => {
-            activateSection('timer');
+            showSection('timer', null, { quickTimer: true });
             startProjectTimer(project.id, {
               description: preset.description,
               overrideFactor: preset.focusFactor
@@ -14680,8 +14684,10 @@ import {
     }
   }
 
+  let latestTimerStats = null;
   function updateDashboard() {
     const stats = computeGlobalStats();
+    latestTimerStats = stats;
     const nowTime = new Date();
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, nowTime)
@@ -16405,7 +16411,7 @@ import {
     bar.appendChild(controls);
   }
 
-  function updateTimerSection() {
+  function updateTimerSection({ quick = false } = {}) {
     const emptyState = document.getElementById('timerEmptyState');
     if (emptyState) emptyState.hidden = getActiveProjects().length > 0;
     const runningEntries = getRunningEntries();
@@ -16605,7 +16611,19 @@ import {
         runningDiv.appendChild(row);
       });
       // Start an interval that updates all running timers every second
-      const statsSnapshot = computeGlobalStats();
+      const statsSnapshot =
+        quick && latestTimerStats
+          ? { ...latestTimerStats }
+          : computeGlobalStats();
+      if (quick && latestTimerStats) {
+        const todayStart = startOfLocalDay(new Date());
+        statsSnapshot.todayHours = data.entries.reduce((hours, entry) => {
+          if (entry.isRunning || !entry.duration) return hours;
+          if (!(new Date(entry.startTime) >= todayStart)) return hours;
+          return getEntryProject(entry) ? hours + entry.duration / 3600 : hours;
+        }, 0);
+      }
+      latestTimerStats = statsSnapshot;
       const dailyTargetHours = Math.max(
         0,
         Number(statsSnapshot.dailyTarget) || 0
@@ -16713,9 +16731,43 @@ import {
       }
       renderMobileNowBar();
     }
-    // update project selects
-    updateProjectSelects();
-    renderTodayCommandPanel();
+    if (quick) updateTimerProjectAvailability();
+    else updateProjectSelects();
+    if (!quick && activeSectionId === 'dashboard') renderTodayCommandPanel();
+  }
+
+  let timerActionRefreshQueued = false;
+  function scheduleTimerActionRefresh() {
+    if (!['dashboard', 'entries', 'timer'].includes(activeSectionId)) return;
+    if (timerActionRefreshQueued) return;
+    timerActionRefreshQueued = true;
+    const sectionAtAction = activeSectionId;
+    requestAnimationFrame(() => {
+      window.setTimeout(() => {
+        timerActionRefreshQueued = false;
+        if (activeSectionId !== sectionAtAction) return;
+        if (activeSectionId === 'dashboard') updateDashboard();
+        else if (activeSectionId === 'entries') updateEntriesTable();
+        else if (activeSectionId === 'timer') updateProjectSelects();
+      }, 0);
+    });
+  }
+
+  function updateTodayTimerCardFast() {
+    if (activeSectionId !== 'dashboard') return;
+    const card = document.querySelector(
+      '#todayCommandPanel .mobile-today-primary .mobile-today-card'
+    );
+    if (!card) return;
+    const running = getRunningEntries()[0] || null;
+    const label = card.querySelector('span');
+    const value = card.querySelector('strong');
+    if (label) label.textContent = running ? 'Running now' : 'Timer';
+    if (value)
+      value.textContent = running
+        ? getEntryProject(running)?.name || 'Running timer'
+        : 'No active timer';
+    card.classList.toggle('warm', Boolean(running));
   }
 
   function pauseTimer(entryId) {
@@ -16900,9 +16952,9 @@ import {
       showTimerSaveError(error);
       return;
     }
-    updateTimerSection();
-    updateDashboard();
-    updateEntriesTable();
+    updateTimerSection({ quick: true });
+    updateTodayTimerCardFast();
+    scheduleTimerActionRefresh();
     // Do not immediately save backup here; periodic auto-sync will handle exporting
     // Recompute focus blocker activation after stopping this timer. If the total
     // factor has dropped below or equal to 50%, the blocker will be disabled.
@@ -16992,9 +17044,9 @@ import {
         String(DEFAULT_FOCUS_FACTOR);
     }
     // Update UI and timers
-    updateProjectSelects();
-    updateTimerSection();
-    updateDashboard();
+    updateTimerSection({ quick: true });
+    updateTodayTimerCardFast();
+    scheduleTimerActionRefresh();
     // After adding the new entry, update the focus blocker based on the new total factor
     updateFocusBlocker();
     return true;
@@ -17059,10 +17111,16 @@ import {
       delete e.factor;
       delete e.pausedAt;
     });
-    saveData();
-    updateTimerSection();
-    updateDashboard();
-    updateEntriesTable();
+    try {
+      saveData();
+    } catch (error) {
+      data = snapshot;
+      showTimerSaveError(error);
+      return;
+    }
+    updateTimerSection({ quick: true });
+    updateTodayTimerCardFast();
+    scheduleTimerActionRefresh();
     // Do not immediately save backup here; periodic auto-sync will handle exporting
     // After stopping all timers, recompute focus blocker activation based on total factor
     updateFocusBlocker();
@@ -17540,7 +17598,7 @@ import {
 
   function startTimerShortcut(shortcut, { navigate = false } = {}) {
     if (!shortcut || !shortcut.project) return;
-    if (navigate) activateSection('timer');
+    if (navigate) showSection('timer', null, { quickTimer: true });
     const timerSelect = document.getElementById('timerProjectPro');
     if (timerSelect) timerSelect.value = shortcut.project.id;
     return startProjectTimer(shortcut.project.id, {
@@ -17763,6 +17821,35 @@ import {
     );
   }
 
+  function updateTimerProjectAvailability() {
+    const timerSelect = document.getElementById('timerProjectPro');
+    if (!timerSelect) return;
+    const runningIds = new Set(
+      getRunningEntries().map((entry) => String(entry.projectId))
+    );
+    document
+      .querySelectorAll('#recentTimersPro .timer-chip')
+      .forEach((chip) => {
+        chip.disabled = runningIds.has(chip.dataset.projectId);
+      });
+    const options = Array.from(timerSelect.options);
+    options.forEach((option) => {
+      option.disabled = runningIds.has(String(option.value));
+    });
+    if (timerSelect.selectedOptions[0]?.disabled) {
+      const firstStartable = options.find(
+        (option) => option.value && !option.disabled
+      );
+      if (firstStartable) timerSelect.value = firstStartable.value;
+    }
+    const hasStartable = options.some(
+      (option) => option.value && !option.disabled
+    );
+    document.getElementById('startTimerBtnPro').disabled = !hasStartable;
+    const pinButton = document.getElementById('pinTimerPresetBtnPro');
+    if (pinButton) pinButton.disabled = !hasStartable;
+  }
+
   function renderTimerHints(
     timerSelect,
     recommendedForTimerId,
@@ -17817,6 +17904,7 @@ import {
       const button = document.createElement('button');
       button.type = 'button';
       button.className = 'timer-chip';
+      button.dataset.projectId = String(project.id);
       button.textContent = formatTimerPresetLabel(
         project,
         description,
@@ -21206,7 +21294,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=60')
+      .register('./service-worker.js?v=61')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
