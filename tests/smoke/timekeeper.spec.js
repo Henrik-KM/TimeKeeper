@@ -1724,14 +1724,126 @@ test('storage failure during legacy token writes cannot stop app startup', async
   expect(pageErrors).toEqual([]);
 });
 
+test('mobile timer survives a full profile store by compressing it', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'iflai', name: 'IFLAI' })],
+    entries: []
+  });
+  await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
+  await page.evaluate(() => {
+    const originalSetItem = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (key, value) {
+      if (
+        key === 'timekeeperDataPro' &&
+        !String(value).startsWith('timekeeper-lz1:')
+      ) {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      }
+      return originalSetItem.call(this, key, value);
+    };
+  });
+  await page.locator('#startTimerBtnPro').click();
+  await expect(page.locator('#runningTimerPro')).toContainText('IFLAI');
+  expect(
+    await page.evaluate(() => localStorage.getItem('timekeeperDataPro'))
+  ).toMatch(/^timekeeper-lz1:/);
+  const resumedPage = await page.context().newPage();
+  await resumedPage.goto('/');
+  await gotoSection(resumedPage, 'timer', 'Timer');
+  await expect(resumedPage.locator('#runningTimerPro')).toContainText('IFLAI');
+  await resumedPage
+    .locator('#runningTimerPro')
+    .getByRole('button', { name: 'Stop', exact: true })
+    .click();
+  await expect(resumedPage.locator('#runningTimerPro')).toBeHidden();
+  await resumedPage.reload();
+  await gotoSection(resumedPage, 'timer', 'Timer');
+  await expect(resumedPage.locator('#runningTimerPro')).toBeHidden();
+});
+
+test('mobile timer rolls back when all profile writes fail', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'iflai', name: 'IFLAI' })],
+    entries: []
+  });
+  await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
+  await page.evaluate(() => {
+    Storage.prototype.setItem = function (key) {
+      if (key === 'timekeeperDataPro') {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      }
+    };
+  });
+  await page.locator('#startTimerBtnPro').click();
+  await expect(page.locator('#runningTimerPro')).toBeHidden();
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'browser storage is full'
+  );
+  await page.locator('#startTimerBtnPro').click();
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'browser storage is full'
+  );
+  await expect(page.locator('#runningTimerPro')).toBeHidden();
+});
+
+test('mobile Stop keeps a running timer when its save fails', async ({
+  page
+}) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await seedLocalStorage(page, {
+    projects: [projectFixture({ id: 'iflai', name: 'IFLAI' })],
+    entries: [
+      {
+        ...entryFixture({ id: 'running-iflai', projectId: 'iflai' }),
+        endTime: null,
+        duration: null,
+        isRunning: true,
+        effectiveSeconds: 0,
+        elapsedSeconds: 0,
+        lastUpdateTime: new Date().toISOString(),
+        focusFactor: 1,
+        manualFactor: 1
+      }
+    ]
+  });
+  await page.goto('/');
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(page.locator('#runningTimerPro')).toContainText('IFLAI');
+  await page.evaluate(() => {
+    Storage.prototype.setItem = function (key) {
+      if (key === 'timekeeperDataPro') {
+        throw new DOMException('Storage quota exceeded', 'QuotaExceededError');
+      }
+    };
+  });
+  await page
+    .locator('#runningTimerPro')
+    .getByRole('button', { name: 'Stop', exact: true })
+    .click();
+  await expect(page.locator('#runningTimerPro')).toContainText('IFLAI');
+  await expect(page.locator('.app-toast').last()).toContainText(
+    'browser storage is full'
+  );
+});
+
 test('service worker never caches private cross-origin API responses', async () => {
   const serviceWorker = await readFile('service-worker.js', 'utf8');
 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v58';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=53'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v59';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=54'");
+  expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
+  expect(serviceWorker).toContain("'./src/shared/vendor/lz-string.mjs'");
   expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
@@ -1742,7 +1854,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '58')"
+    "url.searchParams.set('timekeeper-update', '59')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1752,7 +1864,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=58')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=59')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({

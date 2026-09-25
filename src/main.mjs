@@ -27,6 +27,10 @@ import {
   sumEntryHours
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
+import {
+  parseStoredProfile,
+  persistProfile
+} from './shared/profile-storage.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
@@ -2618,7 +2622,7 @@ import {
       );
     }
     try {
-      const parsed = JSON.parse(raw);
+      const parsed = parseStoredProfile(raw);
       return normalizeFinanceData(
         {
           ...parsed,
@@ -2693,6 +2697,7 @@ import {
         { now: new Date() }
       );
     } catch (err) {
+      if (raw.startsWith('timekeeper-lz1:')) throw err;
       return normalizeFinanceData(
         {
           projects: [],
@@ -2737,12 +2742,20 @@ import {
     }
   }
   function persistDataToLocalStorage() {
-    localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
+    persistProfile(localStorage, 'timekeeperDataPro', data);
   }
   function saveData() {
+    const previousUpdatedAt = data.updatedAt;
+    const previousBackupRevision = data.backupRevision;
     data.updatedAt = new Date().toISOString();
     data.backupRevision = (Number(data.backupRevision) || 0) + 1;
-    persistDataToLocalStorage();
+    try {
+      persistDataToLocalStorage();
+    } catch (error) {
+      data.updatedAt = previousUpdatedAt;
+      data.backupRevision = previousBackupRevision;
+      throw error;
+    }
     // Mark data as needing backup
     needsBackup = true;
     scheduleBackupSoon();
@@ -3732,7 +3745,7 @@ import {
         if (handle.name && data.backupDirName !== handle.name) {
           data.backupDirName = handle.name;
           try {
-            localStorage.setItem('timekeeperDataPro', JSON.stringify(data));
+            persistDataToLocalStorage();
           } catch (err) {
             // Ignore storage write errors; UI will still reflect the folder name.
           }
@@ -16879,7 +16892,13 @@ import {
       e.lastUpdateTime = now.toISOString();
     });
     // Persist and refresh
-    saveData();
+    try {
+      saveData();
+    } catch (error) {
+      data = snapshot;
+      showTimerSaveError(error);
+      return;
+    }
     updateTimerSection();
     updateDashboard();
     updateEntriesTable();
@@ -16893,6 +16912,13 @@ import {
   // Chart instances for weekly and monthly scatter plots
   let weeklyScatterChart = null;
   let monthlyScatterChart = null;
+  function showTimerSaveError(error) {
+    showToast(
+      error?.name === 'QuotaExceededError'
+        ? 'Timer could not be saved: browser storage is full. Your previous data is safe.'
+        : 'Timer could not be saved. Please try again.'
+    );
+  }
   function startProjectTimer(
     projectId,
     {
@@ -16924,6 +16950,7 @@ import {
 
     // Provide tactile feedback when starting a timer
     provideHaptic('long');
+    const snapshot = cloneData();
     const now = new Date();
     const newEntryFactor = normalizeFocusFactor(overrideFactor);
     // Update all existing running entries without mutating their explicit focus.
@@ -16949,6 +16976,13 @@ import {
       manualFactor: newEntryFactor
     };
     data.entries.push(newEntry);
+    try {
+      saveData();
+    } catch (error) {
+      data = snapshot;
+      showTimerSaveError(error);
+      return false;
+    }
     if (resetStartControls) {
       // Reset initial input and focus factor selection
       document.getElementById('timerDescriptionPro').value = '';
@@ -16956,7 +16990,6 @@ import {
       document.getElementById('startFactorPro').value =
         String(DEFAULT_FOCUS_FACTOR);
     }
-    saveData();
     // Update UI and timers
     updateProjectSelects();
     updateTimerSection();
@@ -21172,7 +21205,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=58')
+      .register('./service-worker.js?v=59')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
