@@ -28,7 +28,7 @@ import {
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import {
-  parseStoredProfile,
+  loadStoredProfile,
   persistProfile
 } from './shared/profile-storage.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
@@ -2622,7 +2622,7 @@ import {
       );
     }
     try {
-      const parsed = parseStoredProfile(raw);
+      const parsed = loadStoredProfile(localStorage, 'timekeeperDataPro');
       return normalizeFinanceData(
         {
           ...parsed,
@@ -5540,7 +5540,8 @@ import {
     try {
       const raw = localStorage.getItem('timekeeperDataPro') || '';
       if (!raw) return 'empty';
-      const bytes = new Blob([raw]).size;
+      const journal = localStorage.getItem('timekeeperDataPro:journal') || '';
+      const bytes = new Blob([raw, journal]).size;
       if (bytes < 1024) return `${bytes} B`;
       return `${(bytes / 1024).toFixed(1)} KB`;
     } catch {
@@ -21205,7 +21206,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=59')
+      .register('./service-worker.js?v=60')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
