@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-25T06:01:02.688Z",
+  "updatedAt": "2026-09-25T06:16:02.568Z",
   "dayStart": "2026-09-24T22:00:00.000Z",
   "rangeStart": "2026-06-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-25T06:01:03.470Z",
+    "observedAt": "2026-09-25T06:16:03.689Z",
     "primary": {
-      "usedPercent": 27,
-      "remainingPercent": 73,
+      "usedPercent": 28,
+      "remainingPercent": 72,
       "windowMinutes": 10080,
       "resetsAt": "2026-09-30T06:04:04.000Z"
     },
@@ -223,6 +223,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 11,
+      "assistantSessionCount": 11,
+      "lastSeenAt": "2026-09-25T06:16:15.519Z"
+    },
+    {
       "key": "github/iflai/aventix-iflai",
       "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
       "projectFolder": "IFLAI",
@@ -235,20 +249,6 @@
       "sessionCount": 3,
       "assistantSessionCount": 3,
       "lastSeenAt": "2026-09-25T06:01:09.113Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 11,
-      "assistantSessionCount": 11,
-      "lastSeenAt": "2026-09-25T06:01:08.393Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2711,6 +2711,23 @@
       "lastSeenAt": "2026-09-24T07:59:48.563Z"
     },
     {
+      "key": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
+      "sessionId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
+      "title": "Find BioTechX CHROMA-1 contacts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 823,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-09-25T06:16:15.519Z"
+    },
+    {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
       "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
       "title": "Update Aventix repo from Slack",
@@ -2726,23 +2743,6 @@
       "activityCount": 1725,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-25T06:01:09.113Z"
-    },
-    {
-      "key": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
-      "sessionId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
-      "title": "Find BioTechX CHROMA-1 contacts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 265,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-09-25T06:01:08.393Z"
     },
     {
       "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
@@ -93341,6 +93341,68 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 25,
           "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-e8563457d3284174d953d12b",
+      "threadId": "01a0d723-d755-7ea1-9017-9924554fb362",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-25T05:57:23.512Z",
+      "endTime": "2026-09-25T05:58:24.950Z",
+      "wallSeconds": 61,
+      "focusFactor": 0.4918,
+      "effectiveSeconds": 30,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 61,
+          "effectiveSeconds": 30
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-c4dcc504df455b664e6a59ab",
+      "threadId": "01a0d724-c711-7a71-a769-3f8608d7e017",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-25T05:58:26.053Z",
+      "endTime": "2026-09-25T05:58:53.718Z",
+      "wallSeconds": 27,
+      "focusFactor": 0.4815,
+      "effectiveSeconds": 13,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 27,
+          "effectiveSeconds": 13
         }
       ],
       "description": "Codex: email-helper"
