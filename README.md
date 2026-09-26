@@ -226,7 +226,7 @@ Before writing, TimeKeeper checks the selected folder's latest backup revision a
 
 This repo includes a GitHub Actions workflow that publishes a lightweight Strava JSON feed to `assets/strava.json`, which is rendered in the Workouts section of the app.
 
-The workflow runs once daily at 03:17 UTC and can also be started manually with **Run workflow** when a fresher feed is needed.
+The workflow runs every six hours at 00:17, 06:17, 12:17, and 18:17 UTC. GitHub may delay scheduled runs, so imports are not immediate. TimeKeeper checks the published feed every five minutes while visible and when you return to the app or reconnect, provided the last check was at least five minutes ago. These app checks only read the published JSON; they do not call Strava or start the workflow. **Run workflow** is still available for a manual import.
 
 ### Setup
 

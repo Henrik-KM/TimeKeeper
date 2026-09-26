@@ -1936,8 +1936,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v61';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=56'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v62';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=57'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
@@ -1953,7 +1953,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '61')"
+    "url.searchParams.set('timekeeper-update', '62')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1963,7 +1963,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=61')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=62')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -4670,6 +4670,105 @@ test('weekly workouts include Strava activities from the feed', async ({
   await expect(weeklyCard).toContainText('Lunch Weight Training');
   await expect(weeklyCard).toContainText('Strava');
   await expect(weeklyCard).not.toContainText('No workouts logged yet');
+});
+
+test.describe('Strava feed refresh', () => {
+  test.use({ serviceWorkers: 'block' });
+
+  test('Strava feed refreshes on return and preserves workouts if the refresh fails', async ({
+    page
+  }) => {
+    await seedLocalStorage(page);
+    let requests = 0;
+    await page.route('**/assets/strava.json', async (route) => {
+      requests += 1;
+      if (requests === 3) {
+        await route.abort();
+        return;
+      }
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          updated_utc: new Date().toISOString(),
+          activities: [
+            {
+              id: requests,
+              name:
+                requests === 1 ? 'Earlier workout' : 'Newly imported workout',
+              type: 'WeightTraining',
+              start_date: new Date().toISOString(),
+              elapsed_time_min: 60,
+              avg_hr: 140,
+              max_hr: 180
+            }
+          ],
+          error: null
+        })
+      });
+    });
+    await page.goto('/');
+    await gotoSection(page, 'todo', 'Workouts');
+    await expect(page.locator('#stravaFeedList')).toContainText(
+      'Earlier workout'
+    );
+
+    await page.evaluate(() => {
+      document.dispatchEvent(new Event('visibilitychange'));
+      window.dispatchEvent(new Event('online'));
+    });
+    expect(requests).toBe(1);
+
+    for (const expectedRequests of [2, 3]) {
+      await page.evaluate(() => {
+        const now = Date.now() + 5 * 60 * 1000;
+        Date.now = () => now;
+        document.dispatchEvent(new Event('visibilitychange'));
+        window.dispatchEvent(new Event('online'));
+      });
+      await expect.poll(() => requests).toBe(expectedRequests);
+      await expect(page.locator('#stravaFeedList')).toContainText(
+        'Newly imported workout'
+      );
+    }
+    await expect(page.locator('#stravaFeedStatus')).toContainText('Cached');
+  });
+
+  test('Strava feed refreshes periodically while the app stays open', async ({
+    page
+  }) => {
+    await seedLocalStorage(page);
+    let requests = 0;
+    await page.route('**/assets/strava.json', async (route) => {
+      requests += 1;
+      await route.fulfill({
+        contentType: 'application/json',
+        body: JSON.stringify({
+          updated_utc: new Date().toISOString(),
+          activities: [
+            {
+              id: 1,
+              name: requests === 1 ? 'Initial workout' : 'Updated workout',
+              type: 'WeightTraining',
+              start_date: new Date().toISOString(),
+              elapsed_time_min: 60
+            }
+          ],
+          error: null
+        })
+      });
+    });
+    await page.clock.install();
+    await page.goto('/');
+    await gotoSection(page, 'todo', 'Workouts');
+    await expect(page.locator('#stravaFeedList')).toContainText(
+      'Initial workout'
+    );
+    await page.clock.fastForward(5 * 60 * 1000);
+    await expect(page.locator('#stravaFeedList')).toContainText(
+      'Updated workout'
+    );
+    expect(requests).toBe(2);
+  });
 });
 
 test('Strava feed renders stale activities when refresh reports an error', async ({

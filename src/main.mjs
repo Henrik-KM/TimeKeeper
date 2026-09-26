@@ -11604,6 +11604,9 @@ import {
 
   // Shared runtime helpers imported from ./shared/runtime-helpers.mjs.
   const STRAVA_FEED_CACHE_KEY = 'timekeeperStravaFeedCache';
+  const STRAVA_FEED_REFRESH_MS = 5 * 60 * 1000;
+  let stravaFeedRefreshInFlight = false;
+  let stravaFeedLastAttempt = 0;
   let cachedStravaActivities = [];
   let cachedStravaScoreScale = STRAVA_SCORE_DEFAULT_SCALE;
 
@@ -11972,6 +11975,9 @@ import {
     const status = document.getElementById('stravaFeedStatus');
     const list = document.getElementById('stravaFeedList');
     if (!status || !list) return;
+    if (stravaFeedRefreshInFlight) return;
+    stravaFeedRefreshInFlight = true;
+    stravaFeedLastAttempt = Date.now();
     const renderPayload = (data, options = {}) => {
       const activities = Array.isArray(data?.activities) ? data.activities : [];
       const error =
@@ -12032,6 +12038,18 @@ import {
       status.textContent =
         'Strava feed not available yet. Run the GitHub Action or import a Strava export to publish activities.';
       updateAppHealthPanel();
+    } finally {
+      stravaFeedRefreshInFlight = false;
+    }
+  }
+
+  function refreshStravaFeedIfDue() {
+    if (
+      document.visibilityState === 'visible' &&
+      navigator.onLine &&
+      Date.now() - stravaFeedLastAttempt >= STRAVA_FEED_REFRESH_MS
+    ) {
+      loadStravaFeed();
     }
   }
 
@@ -21277,6 +21295,9 @@ import {
     scheduleCodexRemoteContextPublish({ delay: 0, force: true });
   });
   loadStravaFeed();
+  setInterval(refreshStravaFeedIfDue, STRAVA_FEED_REFRESH_MS);
+  document.addEventListener('visibilitychange', refreshStravaFeedIfDue);
+  window.addEventListener('online', refreshStravaFeedIfDue);
   if (
     'serviceWorker' in navigator &&
     window.location.protocol.startsWith('http')
@@ -21294,7 +21315,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=61')
+      .register('./service-worker.js?v=62')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
