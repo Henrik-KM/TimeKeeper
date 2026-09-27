@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-27T21:16:02.347Z",
+  "updatedAt": "2026-09-27T21:31:02.360Z",
   "dayStart": "2026-09-26T22:00:00.000Z",
   "rangeStart": "2026-06-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-27T21:16:03.226Z",
+    "observedAt": "2026-09-27T21:31:03.279Z",
     "primary": {
       "usedPercent": 18,
       "remainingPercent": 82,
@@ -97921,6 +97921,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-051edd7abaa182cf12a1f0d7",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-27T20:36:41.415Z",
+      "endTime": "2026-09-27T21:05:19.708Z",
+      "wallSeconds": 1718,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 859,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1718,
+          "effectiveSeconds": 859
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
