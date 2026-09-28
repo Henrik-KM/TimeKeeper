@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-28T13:16:01.919Z",
+  "updatedAt": "2026-09-28T13:31:01.964Z",
   "dayStart": "2026-09-27T22:00:00.000Z",
   "rangeStart": "2026-06-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-28T13:16:03.101Z",
+    "observedAt": "2026-09-28T13:31:02.835Z",
     "primary": {
       "usedPercent": 33,
       "remainingPercent": 67,
@@ -90871,6 +90871,65 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-b59fa46e6adfa0adf9332bc2",
+      "threadId": "01a0e7e0-ff6e-7c32-89a4-bdb8f110cae5",
+      "projectKey": "Website",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-28T11:57:59.017Z",
+      "endTime": "2026-09-28T13:02:47.089Z",
+      "wallSeconds": 3888,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 1943,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3741,
+          "effectiveSeconds": 1870
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 145,
+          "effectiveSeconds": 72
+        }
+      ],
+      "description": "Codex: Write AstraZeneca EIC Scaling Day"
     }
   ]
 }
