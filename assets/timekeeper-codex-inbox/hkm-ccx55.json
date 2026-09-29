@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-29T10:01:02.659Z",
+  "updatedAt": "2026-09-29T10:16:02.620Z",
   "dayStart": "2026-09-28T22:00:00.000Z",
   "rangeStart": "2026-07-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-29T10:01:03.721Z",
+    "observedAt": "2026-09-29T10:16:03.689Z",
     "primary": {
       "usedPercent": 40,
       "remainingPercent": 60,
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 2454,
       "assistantSessionCount": 2453,
-      "lastSeenAt": "2026-09-29T10:02:20.806Z"
+      "lastSeenAt": "2026-09-29T10:14:54.913Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 12555,
+      "activityCount": 12871,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-29T10:02:20.806Z"
+      "lastSeenAt": "2026-09-29T10:14:54.913Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -87563,6 +87563,37 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-146034ba51f3e69657cc57bb",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-29T09:55:24.553Z",
+      "endTime": "2026-09-29T09:57:54.990Z",
+      "wallSeconds": 150,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 45,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 150,
+          "effectiveSeconds": 45
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
