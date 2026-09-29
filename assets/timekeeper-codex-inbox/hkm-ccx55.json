@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-29T12:31:02.667Z",
+  "updatedAt": "2026-09-29T12:46:02.785Z",
   "dayStart": "2026-09-28T22:00:00.000Z",
   "rangeStart": "2026-07-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-29T12:31:03.766Z",
+    "observedAt": "2026-09-29T12:46:03.850Z",
     "primary": {
       "usedPercent": 43,
       "remainingPercent": 57,
@@ -87673,6 +87673,51 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-6f1cace504544429c7bddab1",
+      "threadId": "01a0ed15-d524-7991-bc92-2d96f27dfba7",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-29T12:13:46.899Z",
+      "endTime": "2026-09-29T12:20:27.773Z",
+      "wallSeconds": 400,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 200,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 398,
+          "effectiveSeconds": 199
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
