@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-09-29T11:26:01.628Z",
+  "updatedAt": "2026-09-29T11:46:01.660Z",
   "rangeStart": "2026-08-30T22:00:00.000Z",
   "lookbackDays": 30,
   "records": [
@@ -1204,33 +1204,6 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:cb749b36de515e9292bea6e638027f6e",
-      "sessionId": "e4334954-a407-4238-bfaa-efefd11dcc67",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "particle_iden",
-      "description": "Claude: particle_iden",
-      "startTime": "2026-09-29T06:29:27.780Z",
-      "endTime": "2026-09-29T07:54:16.206Z",
-      "wallSeconds": 5088,
-      "effectiveSeconds": 2544,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 5088,
-          "effectiveSeconds": 2544
-        }
-      ],
-      "focusFactor": 0.5,
-      "focusPolicyVersion": 1,
-      "delegationCredit": 0.35
-    },
-    {
       "id": "claude:73764dfbf333785964a7eaaaba723fb3",
       "sessionId": "f7ba39e3-f2e7-43ee-bb53-598a81f78688",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1251,6 +1224,33 @@
           "creditedFactor": 0.5,
           "wallSeconds": 7456,
           "effectiveSeconds": 3728
+        }
+      ],
+      "focusFactor": 0.5,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:cb749b36de515e9292bea6e638027f6e",
+      "sessionId": "e4334954-a407-4238-bfaa-efefd11dcc67",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "particle_iden",
+      "description": "Claude: particle_iden",
+      "startTime": "2026-09-29T06:29:27.780Z",
+      "endTime": "2026-09-29T07:54:16.206Z",
+      "wallSeconds": 5088,
+      "effectiveSeconds": 2544,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 5088,
+          "effectiveSeconds": 2544
         }
       ],
       "focusFactor": 0.5,
