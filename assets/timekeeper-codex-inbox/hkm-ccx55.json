@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-29T10:31:02.639Z",
+  "updatedAt": "2026-09-29T10:46:02.666Z",
   "dayStart": "2026-09-28T22:00:00.000Z",
   "rangeStart": "2026-07-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-29T10:31:03.541Z",
+    "observedAt": "2026-09-29T10:46:03.730Z",
     "primary": {
-      "usedPercent": 42,
-      "remainingPercent": 58,
+      "usedPercent": 43,
+      "remainingPercent": 57,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-03T17:10:59.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-09-29T10:31:31.014Z"
+      "lastSeenAt": "2026-09-29T10:39:59.621Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 12293,
+      "activityCount": 12374,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-29T10:31:31.014Z"
+      "lastSeenAt": "2026-09-29T10:39:59.621Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -87594,6 +87594,37 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-586f9736881646cee13eba6a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-29T10:00:53.810Z",
+      "endTime": "2026-09-29T10:14:54.913Z",
+      "wallSeconds": 841,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 420,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 841,
+          "effectiveSeconds": 420
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
