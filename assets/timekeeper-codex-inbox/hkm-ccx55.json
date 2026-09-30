@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-30T11:31:02.280Z",
+  "updatedAt": "2026-09-30T11:46:02.235Z",
   "dayStart": "2026-09-29T22:00:00.000Z",
   "rangeStart": "2026-07-02T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-30T11:31:03.336Z",
+    "observedAt": "2026-09-30T11:46:03.444Z",
     "primary": {
       "usedPercent": 81,
       "remainingPercent": 19,
@@ -84250,6 +84250,51 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-7a0e8a266dc7a1bb198c3640",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-30T10:31:50.639Z",
+      "endTime": "2026-09-30T11:19:04.947Z",
+      "wallSeconds": 2834,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1417,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "baseFactor": 0.75,
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2833,
+          "effectiveSeconds": 1416
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     }
   ]
 }
