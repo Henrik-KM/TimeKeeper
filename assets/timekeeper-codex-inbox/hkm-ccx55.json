@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-09-30T07:16:02.134Z",
+  "updatedAt": "2026-09-30T07:31:02.196Z",
   "dayStart": "2026-09-29T22:00:00.000Z",
   "rangeStart": "2026-07-02T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-09-30T07:16:02.945Z",
+    "observedAt": "2026-09-30T07:31:03.964Z",
     "primary": {
       "usedPercent": 80,
       "remainingPercent": 20,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-09-30T07:17:01.886Z"
+      "lastSeenAt": "2026-09-30T07:31:42.489Z"
     },
     {
       "key": "documents/codex/2026-09-28/please-x20",
@@ -2807,9 +2807,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 18047,
+      "activityCount": 18207,
       "assistantActivity": true,
-      "lastSeenAt": "2026-09-30T07:17:01.886Z"
+      "lastSeenAt": "2026-09-30T07:31:42.489Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -84123,6 +84123,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 2314,
           "effectiveSeconds": 1735
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-f0717574624afb71ccfe33de",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-30T06:31:05.893Z",
+      "endTime": "2026-09-30T07:00:44.385Z",
+      "wallSeconds": 1778,
+      "focusFactor": 0.7497,
+      "effectiveSeconds": 1333,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-astra",
+          "effort": "xhigh",
+          "baseFactor": 0.75,
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1778,
+          "effectiveSeconds": 1333
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
