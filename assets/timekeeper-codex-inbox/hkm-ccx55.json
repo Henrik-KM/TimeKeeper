@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-01T10:46:02.141Z",
+  "updatedAt": "2026-10-01T11:01:01.855Z",
   "dayStart": "2026-09-30T22:00:00.000Z",
   "rangeStart": "2026-07-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-01T10:46:06.892Z",
+    "observedAt": "2026-10-01T11:01:04.157Z",
     "primary": {
-      "usedPercent": 89,
-      "remainingPercent": 11,
+      "usedPercent": 90,
+      "remainingPercent": 10,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-03T17:10:59.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-01T10:47:30.682Z"
+      "lastSeenAt": "2026-10-01T11:01:34.590Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2974,
+      "activityCount": 3126,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-01T10:47:30.682Z"
+      "lastSeenAt": "2026-10-01T11:01:34.590Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -79424,6 +79424,82 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-b3bf6cc74e4d3899ad7f2899",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T10:22:57.026Z",
+      "endTime": "2026-10-01T10:41:31.341Z",
+      "wallSeconds": 1114,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 557,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5,
+          "effectiveSeconds": 2
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1108,
+          "effectiveSeconds": 554
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-fc7df869befd0c407b9a48bf",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T10:40:16.103Z",
+      "endTime": "2026-10-01T10:42:01.225Z",
+      "wallSeconds": 105,
+      "focusFactor": 0.2952,
+      "effectiveSeconds": 31,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 105,
+          "effectiveSeconds": 31
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
