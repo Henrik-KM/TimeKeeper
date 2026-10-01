@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-01T12:01:01.999Z",
+  "updatedAt": "2026-10-01T12:16:01.888Z",
   "dayStart": "2026-09-30T22:00:00.000Z",
   "rangeStart": "2026-07-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-01T12:01:03.272Z",
+    "observedAt": "2026-10-01T12:16:03.089Z",
     "primary": {
       "usedPercent": 91,
       "remainingPercent": 9,
@@ -79469,6 +79469,51 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-961bf565cdeac0eeca36d6af",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T10:28:07.407Z",
+      "endTime": "2026-10-01T11:44:56.987Z",
+      "wallSeconds": 4609,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 2304,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 17,
+          "effectiveSeconds": 8
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4592,
+          "effectiveSeconds": 2296
+        }
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
     },
     {
       "id": "codex-fc7df869befd0c407b9a48bf",
