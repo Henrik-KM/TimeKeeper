@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-01T17:16:02.436Z",
+  "updatedAt": "2026-10-01T17:31:02.520Z",
   "dayStart": "2026-09-30T22:00:00.000Z",
   "rangeStart": "2026-07-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-01T17:16:03.438Z",
+    "observedAt": "2026-10-01T17:31:03.801Z",
     "primary": {
       "usedPercent": 93,
       "remainingPercent": 7,
@@ -79801,6 +79801,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 3041,
           "effectiveSeconds": 1520
+        }
+      ],
+      "description": "Codex: Fill August Fortnox timesheet"
+    },
+    {
+      "id": "codex-c3dc2aa977e1ce1a896e4873",
+      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T16:58:33.889Z",
+      "endTime": "2026-10-01T17:10:44.828Z",
+      "wallSeconds": 730,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 365,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 730,
+          "effectiveSeconds": 365
         }
       ],
       "description": "Codex: Fill August Fortnox timesheet"
