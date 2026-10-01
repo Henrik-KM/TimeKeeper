@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-01T15:01:02.439Z",
+  "updatedAt": "2026-10-01T15:16:02.416Z",
   "dayStart": "2026-09-30T22:00:00.000Z",
   "rangeStart": "2026-07-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-01T15:01:03.347Z",
+    "observedAt": "2026-10-01T15:16:03.959Z",
     "primary": {
-      "usedPercent": 92,
-      "remainingPercent": 8,
+      "usedPercent": 93,
+      "remainingPercent": 7,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-03T17:10:59.000Z"
     },
@@ -248,7 +248,21 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-01T15:01:41.080Z"
+      "lastSeenAt": "2026-10-01T15:10:50.697Z"
+    },
+    {
+      "key": "github/iflai/rd-doc-personal",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "projectFolder": "IFLAI",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-01T15:04:23.659Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -263,20 +277,6 @@
       "sessionCount": 3,
       "assistantSessionCount": 3,
       "lastSeenAt": "2026-10-01T14:49:33.646Z"
-    },
-    {
-      "key": "github/iflai/rd-doc-personal",
-      "displayPath": "GitHub/IFLAI/RD-doc-personal",
-      "projectFolder": "IFLAI",
-      "repoName": "RD-doc-personal",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-01T14:46:31.500Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2824,9 +2824,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 4411,
+      "activityCount": 4568,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-01T15:01:41.080Z"
+      "lastSeenAt": "2026-10-01T15:10:50.697Z"
+    },
+    {
+      "key": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "sessionId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "title": "Align September FoU entries",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 873,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-01T15:04:23.659Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -2861,23 +2878,6 @@
       "activityCount": 5304,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-01T14:46:31.500Z"
-    },
-    {
-      "key": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "sessionId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "title": "Align September FoU entries",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/RD-doc-personal",
-      "repoName": "RD-doc-personal",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 830,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-01T14:20:14.333Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -79593,6 +79593,96 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-4e5f09432d57897c567e035c",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-01T14:19:59.869Z",
+      "endTime": "2026-10-01T14:49:33.646Z",
+      "wallSeconds": 1773,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 886,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1773,
+          "effectiveSeconds": 886
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-15f3c05a8871241089ea7ba9",
+      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T14:20:15.296Z",
+      "endTime": "2026-10-01T14:46:31.500Z",
+      "wallSeconds": 1576,
+      "focusFactor": 0.4854,
+      "effectiveSeconds": 765,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 112,
+          "effectiveSeconds": 33
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1463,
+          "effectiveSeconds": 731
+        }
+      ],
+      "description": "Codex: Fill August Fortnox timesheet"
     }
   ]
 }
