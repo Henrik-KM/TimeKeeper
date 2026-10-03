@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-03T07:46:02.339Z",
+  "updatedAt": "2026-10-03T08:01:02.354Z",
   "dayStart": "2026-10-02T22:00:00.000Z",
   "rangeStart": "2026-07-05T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-03T07:46:03.808Z",
+    "observedAt": "2026-10-03T08:01:04.509Z",
     "primary": {
-      "usedPercent": 9,
-      "remainingPercent": 91,
+      "usedPercent": 10,
+      "remainingPercent": 90,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-10T06:44:53.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-03T07:47:05.802Z"
+      "lastSeenAt": "2026-10-03T08:02:32.880Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 8745,
+      "activityCount": 8846,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-03T07:47:05.802Z"
+      "lastSeenAt": "2026-10-03T08:02:32.880Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -69802,6 +69802,37 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-5b0fd8e9eb03367c7fcf0f21",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-03T07:02:10.448Z",
+      "endTime": "2026-10-03T07:30:48.445Z",
+      "wallSeconds": 1717,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 515,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1717,
+          "effectiveSeconds": 515
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
