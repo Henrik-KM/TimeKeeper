@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-04T19:16:02.469Z",
+  "updatedAt": "2026-10-04T19:31:02.515Z",
   "dayStart": "2026-10-03T22:00:00.000Z",
   "rangeStart": "2026-07-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-04T19:16:03.817Z",
+    "observedAt": "2026-10-04T19:31:03.711Z",
     "primary": {
       "usedPercent": 48,
       "remainingPercent": 52,
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 2455,
       "assistantSessionCount": 2454,
-      "lastSeenAt": "2026-10-04T19:14:46.184Z"
+      "lastSeenAt": "2026-10-04T19:30:46.039Z"
     },
     {
       "key": "github/iflai",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 179,
+      "activityCount": 195,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-04T19:14:46.184Z"
+      "lastSeenAt": "2026-10-04T19:30:46.039Z"
     },
     {
       "key": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
@@ -68746,6 +68746,51 @@
         }
       ],
       "description": "Codex: Find BioTechX CHROMA-1 contacts"
+    },
+    {
+      "id": "codex-92e561cecab6160d901d5cb3",
+      "threadId": "01a10844-21ad-79a0-b0db-3576973ee390",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-04T18:54:08.332Z",
+      "endTime": "2026-10-04T19:14:46.184Z",
+      "wallSeconds": 1237,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 618,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1236,
+          "effectiveSeconds": 618
+        }
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
