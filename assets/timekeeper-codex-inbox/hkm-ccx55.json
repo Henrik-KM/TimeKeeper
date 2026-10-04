@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-04T15:31:02.380Z",
+  "updatedAt": "2026-10-04T15:46:02.393Z",
   "dayStart": "2026-10-03T22:00:00.000Z",
   "rangeStart": "2026-07-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-04T15:31:03.447Z",
+    "observedAt": "2026-10-04T15:46:03.675Z",
     "primary": {
       "usedPercent": 47,
       "remainingPercent": 53,
@@ -68684,6 +68684,51 @@
         }
       ],
       "description": "Codex: Align September FoU entries"
+    },
+    {
+      "id": "codex-5345748277c868a770b9dc10",
+      "threadId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-04T14:29:15.488Z",
+      "endTime": "2026-10-04T15:14:31.618Z",
+      "wallSeconds": 2716,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1358,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 30,
+          "effectiveSeconds": 15
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2685,
+          "effectiveSeconds": 1342
+        }
+      ],
+      "description": "Codex: Find BioTechX CHROMA-1 contacts"
     }
   ]
 }
