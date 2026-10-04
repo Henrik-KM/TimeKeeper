@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-04T07:31:02.033Z",
+  "updatedAt": "2026-10-04T07:46:02.074Z",
   "dayStart": "2026-10-03T22:00:00.000Z",
   "rangeStart": "2026-07-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-04T07:31:03.601Z",
+    "observedAt": "2026-10-04T07:46:03.934Z",
     "primary": {
       "usedPercent": 43,
       "remainingPercent": 57,
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-03T12:21:33.514Z"
+      "lastSeenAt": "2026-10-04T07:47:18.956Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2824,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 9554,
+      "activityCount": 9569,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-03T12:21:33.514Z"
+      "lastSeenAt": "2026-10-04T07:47:18.956Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -68425,6 +68425,37 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-40b428165ece86cd72f18e41",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-04T07:01:34.262Z",
+      "endTime": "2026-10-04T07:28:11.534Z",
+      "wallSeconds": 1597,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 479,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1597,
+          "effectiveSeconds": 479
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
