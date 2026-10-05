@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-05T13:46:02.139Z",
+  "updatedAt": "2026-10-05T14:01:02.084Z",
   "dayStart": "2026-10-04T22:00:00.000Z",
   "rangeStart": "2026-07-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-05T13:46:02.863Z",
+    "observedAt": "2026-10-05T14:01:03.763Z",
     "primary": {
-      "usedPercent": 81,
-      "remainingPercent": 19,
+      "usedPercent": 82,
+      "remainingPercent": 18,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-10T06:44:53.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-05T13:47:31.173Z"
+      "lastSeenAt": "2026-10-05T14:02:34.625Z"
     },
     {
       "key": "github/iflai/website",
@@ -2807,9 +2807,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 19506,
+      "activityCount": 19613,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-05T13:47:31.173Z"
+      "lastSeenAt": "2026-10-05T14:02:34.625Z"
     },
     {
       "key": "01a0e7e0-ff6e-7c32-89a4-bdb8f110cae5",
@@ -69071,6 +69071,51 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-9806b002a4c0352f95b0e9a5",
+      "threadId": "01a0e7e0-ff6e-7c32-89a4-bdb8f110cae5",
+      "projectKey": "Website",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-05T12:59:41.852Z",
+      "endTime": "2026-10-05T13:29:03.109Z",
+      "wallSeconds": 1761,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 880,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 99,
+          "effectiveSeconds": 49
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1662,
+          "effectiveSeconds": 831
+        }
+      ],
+      "description": "Codex: Write AstraZeneca EIC Scaling Day"
     }
   ]
 }
