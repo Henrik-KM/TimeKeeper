@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-05T12:16:03.041Z",
+  "updatedAt": "2026-10-05T12:31:02.030Z",
   "dayStart": "2026-10-04T22:00:00.000Z",
   "rangeStart": "2026-07-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-05T12:16:04.674Z",
+    "observedAt": "2026-10-05T12:31:03.500Z",
     "primary": {
-      "usedPercent": 76,
-      "remainingPercent": 24,
+      "usedPercent": 77,
+      "remainingPercent": 23,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-10T06:44:53.000Z"
     },
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 2454,
       "assistantSessionCount": 2453,
-      "lastSeenAt": "2026-10-05T12:16:13.293Z"
+      "lastSeenAt": "2026-10-05T12:31:04.514Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2807,9 +2807,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2477,
+      "activityCount": 2676,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-05T12:16:13.293Z"
+      "lastSeenAt": "2026-10-05T12:31:04.514Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -68916,6 +68916,37 @@
         }
       ],
       "description": "Codex: Find and adapt AI risk assessment"
+    },
+    {
+      "id": "codex-51a2392321835efe7be06b15",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-05T10:31:00.864Z",
+      "endTime": "2026-10-05T12:06:19.688Z",
+      "wallSeconds": 5718,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2859,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5718,
+          "effectiveSeconds": 2859
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     },
     {
       "id": "codex-5526caf8cbbc13b933acc2bc",
