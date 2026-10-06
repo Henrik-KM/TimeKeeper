@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-06T12:46:01.894Z",
+  "updatedAt": "2026-10-06T13:01:01.922Z",
   "dayStart": "2026-10-05T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-06T12:46:03.452Z",
+    "observedAt": "2026-10-06T13:01:03.824Z",
     "primary": {
       "usedPercent": 11,
       "remainingPercent": 89,
@@ -237,6 +237,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 5,
+      "assistantSessionCount": 5,
+      "lastSeenAt": "2026-10-06T13:02:44.956Z"
+    },
+    {
       "key": "github/iflai",
       "displayPath": "GitHub/IFLAI",
       "projectFolder": "IFLAI",
@@ -249,20 +263,6 @@
       "sessionCount": 14,
       "assistantSessionCount": 14,
       "lastSeenAt": "2026-10-06T12:34:12.470Z"
-    },
-    {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 5,
-      "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-06T12:21:58.514Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2795,6 +2795,23 @@
       "lastSeenAt": "2026-10-06T07:36:55.994Z"
     },
     {
+      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "title": "AZ SEM Foundation model tests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 25809,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-06T13:02:44.956Z"
+    },
+    {
       "key": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
       "sessionId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
       "title": "Find BioTechX CHROMA-1 contacts",
@@ -2810,23 +2827,6 @@
       "activityCount": 3369,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-06T12:34:12.470Z"
-    },
-    {
-      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "title": "AZ SEM Foundation model tests",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 25787,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T12:21:58.514Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69089,6 +69089,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-f6d827fe3cc2b66e91151c1d",
+      "threadId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-06T12:11:15.007Z",
+      "endTime": "2026-10-06T12:34:12.470Z",
+      "wallSeconds": 1377,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 688,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1377,
+          "effectiveSeconds": 688
+        }
+      ],
+      "description": "Codex: Find BioTechX CHROMA-1 contacts"
     }
   ]
 }
