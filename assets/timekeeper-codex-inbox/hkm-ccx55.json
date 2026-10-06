@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-06T10:46:01.819Z",
+  "updatedAt": "2026-10-06T11:01:01.877Z",
   "dayStart": "2026-10-05T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-06T10:46:02.926Z",
+    "observedAt": "2026-10-06T11:01:03.033Z",
     "primary": {
       "usedPercent": 9,
       "remainingPercent": 91,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-06T10:46:20.286Z"
+      "lastSeenAt": "2026-10-06T10:59:59.440Z"
     },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-06T10:30:35.004Z"
+      "lastSeenAt": "2026-10-06T11:02:50.545Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2365,9 +2365,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 2175,
+      "activityCount": 2371,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T10:46:20.286Z"
+      "lastSeenAt": "2026-10-06T10:59:59.440Z"
     },
     {
       "key": "01a0d26d-9d5d-74f3-99d0-2822c77a7cbe",
@@ -2807,9 +2807,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 25279,
+      "activityCount": 25354,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T10:30:35.004Z"
+      "lastSeenAt": "2026-10-06T11:02:50.545Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -68965,6 +68965,37 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-f909780bdb7d180ce8d009af",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-06T07:24:52.726Z",
+      "endTime": "2026-10-06T10:30:35.004Z",
+      "wallSeconds": 11142,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 5571,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 11142,
+          "effectiveSeconds": 5571
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     },
     {
       "id": "codex-eb0e3defde95df2a941d0dd9",
