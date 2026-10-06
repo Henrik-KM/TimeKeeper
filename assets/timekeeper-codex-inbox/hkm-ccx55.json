@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-06T17:31:02.082Z",
+  "updatedAt": "2026-10-06T19:16:30.375Z",
   "dayStart": "2026-10-05T22:00:00.000Z",
   "rangeStart": "2026-07-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-06T17:31:03.358Z",
+    "observedAt": "2026-10-06T19:16:36.051Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "projectFolder": "",
+      "repoName": "continue-the-user-s-linkedin-invitation",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-06T19:11:20.603Z"
+    },
     {
       "key": "documents/codex/2026-09-28/please-x20",
       "displayPath": "Documents/Codex/2026-09-28/please-x20",
@@ -39,20 +53,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-06T11:27:24.834Z"
-    },
-    {
-      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "projectFolder": "",
-      "repoName": "continue-the-user-s-linkedin-invitation",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-06T07:36:55.994Z"
     },
     {
       "key": "github/timekeeper",
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-06T17:24:53.064Z"
+      "lastSeenAt": "2026-10-06T19:17:58.501Z"
     },
     {
       "key": "github/iflai",
@@ -260,9 +260,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 14,
-      "assistantSessionCount": 14,
-      "lastSeenAt": "2026-10-06T14:13:54.088Z"
+      "sessionCount": 15,
+      "assistantSessionCount": 15,
+      "lastSeenAt": "2026-10-06T19:16:47.865Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -276,7 +276,7 @@
       "match": "IFLAI",
       "sessionCount": 2454,
       "assistantSessionCount": 2453,
-      "lastSeenAt": "2026-10-06T10:11:32.872Z"
+      "lastSeenAt": "2026-10-06T19:11:07.255Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2790,9 +2790,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 19584,
+      "activityCount": 19586,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T07:36:55.994Z"
+      "lastSeenAt": "2026-10-06T19:11:20.603Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -2807,9 +2807,43 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 27262,
+      "activityCount": 27342,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T17:24:53.064Z"
+      "lastSeenAt": "2026-10-06T19:17:58.501Z"
+    },
+    {
+      "key": "01a112a1-ac16-7bc3-ae7f-247d58938c97",
+      "sessionId": "01a112a1-ac16-7bc3-ae7f-247d58938c97",
+      "title": "Complete cybersecurity training",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 250,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-06T19:16:47.865Z"
+    },
+    {
+      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "title": "Restart HPC Arrhenius access",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1616,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-06T19:14:25.307Z"
     },
     {
       "key": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
@@ -2824,9 +2858,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3782,
+      "activityCount": 3783,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T14:13:54.088Z"
+      "lastSeenAt": "2026-10-06T19:12:40.799Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -2841,9 +2875,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 14422,
+      "activityCount": 14424,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-06T10:11:32.872Z"
+      "lastSeenAt": "2026-10-06T19:11:07.255Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -2963,23 +2997,6 @@
       "activityCount": 2151,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-05T08:29:12.619Z"
-    },
-    {
-      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "title": "Restart HPC Arrhenius access",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 1459,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-05T08:28:25.841Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -69272,6 +69289,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1089,
           "effectiveSeconds": 544
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-973c5f7d46765e41cc29dc1e",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-06T17:03:02.270Z",
+      "endTime": "2026-10-06T17:24:53.064Z",
+      "wallSeconds": 1310,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 655,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1310,
+          "effectiveSeconds": 655
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
