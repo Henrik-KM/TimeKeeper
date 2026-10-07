@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T21:46:02.017Z",
-  "dayStart": "2026-10-06T22:00:00.000Z",
-  "rangeStart": "2026-07-09T22:00:00.000Z",
+  "updatedAt": "2026-10-07T22:01:02.006Z",
+  "dayStart": "2026-10-07T22:00:00.000Z",
+  "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T21:46:03.556Z",
+    "observedAt": "2026-10-07T22:01:03.576Z",
     "primary": {
       "usedPercent": 22,
       "remainingPercent": 78,
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-07T21:47:39.680Z"
+      "lastSeenAt": "2026-10-07T21:47:57.228Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2447,7 +2447,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 18123,
+      "activityCount": 17338,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-23T09:51:32.668Z"
     },
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 35141,
+      "activityCount": 35148,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T21:47:39.680Z"
+      "lastSeenAt": "2026-10-07T21:47:57.228Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -36005,7 +36005,7 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 714,
+      "activityCount": 683,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-12T10:13:04.093Z"
     },
@@ -47769,7 +47769,7 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 114166,
+      "activityCount": 110695,
       "assistantActivity": true,
       "lastSeenAt": "2026-08-09T21:56:30.175Z"
     },
@@ -48245,7 +48245,7 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 7846,
+      "activityCount": 6782,
       "assistantActivity": true,
       "lastSeenAt": "2026-08-01T16:52:48.864Z"
     },
@@ -48302,126 +48302,6 @@
     }
   ],
   "records": [
-    {
-      "id": "codex-ce244f31f9bc194d63fa75ac",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-10T13:35:46.822Z",
-      "endTime": "2026-07-10T15:14:52.792Z",
-      "wallSeconds": 5945,
-      "focusFactor": 0.3082,
-      "effectiveSeconds": 1832,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 0.5,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 4,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.2,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.2,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0,
-          "baseFactor": 0.4,
-          "repositoryMultiplier": 0.5
-        },
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.25,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.25,
-          "wallSeconds": 5945,
-          "effectiveSeconds": 1486,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 0.5
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.2,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.07,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0,
-          "baseFactor": 0.4,
-          "repositoryMultiplier": 0.5
-        },
-        {
-          "role": "subagent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.25,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.0875,
-          "wallSeconds": 3957,
-          "effectiveSeconds": 346,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 0.5
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-3d431e5101e0c4cdafc446b1",
-        "codex-c7779d614131c025bfc0c4f2",
-        "codex-2a2df015d09fbf556989aada",
-        "codex-9a9788ce6ef2e6a5a52a3415",
-        "codex-d8b970e4fff4bb20927742c8"
-      ],
-      "description": "Codex: Execute research project end to end",
-      "codexBackfill": true
-    },
-    {
-      "id": "codex-21f4d3e04a0e38d34e330db5",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-10T20:13:28.898Z",
-      "endTime": "2026-07-10T21:08:57.829Z",
-      "wallSeconds": 3328,
-      "focusFactor": 0.25,
-      "effectiveSeconds": 832,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 0.5,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.25,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.25,
-          "wallSeconds": 3328,
-          "effectiveSeconds": 832,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 0.5
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-6815685c4dcf11b65e913df2"
-      ],
-      "description": "Codex: Execute research project end to end",
-      "codexBackfill": true
-    },
     {
       "id": "codex-c4acbbeddf249cca9ba24cc4",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
@@ -66473,99 +66353,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-be44390d28dba9f879b38c80",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-09-30T22:33:32.654Z",
-      "endTime": "2026-09-30T23:44:56.189Z",
-      "wallSeconds": 4283,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 2141,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 4283,
-          "effectiveSeconds": 2141
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-ed9e019229e6e9ddb9b22a20",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T02:35:07.077Z",
-      "endTime": "2026-10-01T04:49:44.675Z",
-      "wallSeconds": 8077,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 4038,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 8077,
-          "effectiveSeconds": 4038
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-37d0e86718f3c7c5c85b1bc1",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T06:56:24.498Z",
-      "endTime": "2026-10-01T07:50:13.150Z",
-      "wallSeconds": 3228,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1614,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3228,
-          "effectiveSeconds": 1614
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
       "id": "codex-d61d44d81cee6ad8c86f97d1",
       "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "projectKey": "email-helper",
@@ -66594,401 +66381,8 @@
           "effectiveSeconds": 222
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-b3bf6cc74e4d3899ad7f2899",
-      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T10:22:57.026Z",
-      "endTime": "2026-10-01T10:41:31.341Z",
-      "wallSeconds": 1114,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 557,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 5,
-          "effectiveSeconds": 2
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1108,
-          "effectiveSeconds": 554
-        }
-      ],
-      "description": "Codex: Edit outreach drafts"
-    },
-    {
-      "id": "codex-961bf565cdeac0eeca36d6af",
-      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "projectKey": "Aventix-IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T10:28:07.407Z",
-      "endTime": "2026-10-01T11:44:56.987Z",
-      "wallSeconds": 4609,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 2304,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 17,
-          "effectiveSeconds": 8
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 4592,
-          "effectiveSeconds": 2296
-        }
-      ],
-      "description": "Codex: Update Aventix repo from Slack"
-    },
-    {
-      "id": "codex-fc7df869befd0c407b9a48bf",
-      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T10:40:16.103Z",
-      "endTime": "2026-10-01T10:42:01.225Z",
-      "wallSeconds": 105,
-      "focusFactor": 0.2952,
-      "effectiveSeconds": 31,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 105,
-          "effectiveSeconds": 31
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-eb6b38e6f5d46c48330c5359",
-      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "projectKey": "Aventix-IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T13:21:18.397Z",
-      "endTime": "2026-10-01T13:33:29.268Z",
-      "wallSeconds": 730,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 365,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 730,
-          "effectiveSeconds": 365
-        }
-      ],
-      "description": "Codex: Update Aventix repo from Slack"
-    },
-    {
-      "id": "codex-4e5f09432d57897c567e035c",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-01T14:19:59.869Z",
-      "endTime": "2026-10-01T14:49:33.646Z",
-      "wallSeconds": 1773,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 886,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1773,
-          "effectiveSeconds": 886
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-15f3c05a8871241089ea7ba9",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T14:20:15.296Z",
-      "endTime": "2026-10-01T14:46:31.500Z",
-      "wallSeconds": 1576,
-      "focusFactor": 0.4854,
-      "effectiveSeconds": 765,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 112,
-          "effectiveSeconds": 33
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1463,
-          "effectiveSeconds": 731
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
-    },
-    {
-      "id": "codex-50478196a4454ba9606fea63",
-      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "projectKey": "Aventix-IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T14:23:27.354Z",
-      "endTime": "2026-10-01T15:10:50.697Z",
-      "wallSeconds": 2843,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1421,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 945,
-          "effectiveSeconds": 472
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1897,
-          "effectiveSeconds": 948
-        }
-      ],
-      "description": "Codex: Update Aventix repo from Slack"
-    },
-    {
-      "id": "codex-ec7fdf4c1eef209a0e44e5e2",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T15:01:25.702Z",
-      "endTime": "2026-10-01T15:04:23.659Z",
-      "wallSeconds": 177,
-      "focusFactor": 0.4972,
-      "effectiveSeconds": 88,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 45,
-          "effectiveSeconds": 22
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 132,
-          "effectiveSeconds": 66
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
-    },
-    {
-      "id": "codex-828972eea53a4842c8f0fb44",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T15:29:12.638Z",
-      "endTime": "2026-10-01T16:19:53.692Z",
-      "wallSeconds": 3041,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1520,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3041,
-          "effectiveSeconds": 1520
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
-    },
-    {
-      "id": "codex-c3dc2aa977e1ce1a896e4873",
-      "threadId": "01a014f1-7e93-7fb1-8c03-03466307a68c",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-01T16:58:33.889Z",
-      "endTime": "2026-10-01T17:10:44.828Z",
-      "wallSeconds": 730,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 365,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 730,
-          "effectiveSeconds": 365
-        }
-      ],
-      "description": "Codex: Fill August Fortnox timesheet"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-c924791c180c7beba45fa21a",
