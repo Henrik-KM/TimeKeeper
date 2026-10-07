@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T11:01:02.259Z",
+  "updatedAt": "2026-10-07T11:16:02.224Z",
   "dayStart": "2026-10-06T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T11:01:03.236Z",
+    "observedAt": "2026-10-07T11:16:03.296Z",
     "primary": {
       "usedPercent": 10,
       "remainingPercent": 90,
@@ -237,6 +237,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai/aventix-iflai",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-10-07T11:13:49.684Z"
+    },
+    {
       "key": "github/iflai",
       "displayPath": "GitHub/IFLAI",
       "projectFolder": "IFLAI",
@@ -263,20 +277,6 @@
       "sessionCount": 5,
       "assistantSessionCount": 5,
       "lastSeenAt": "2026-10-07T10:51:41.633Z"
-    },
-    {
-      "key": "github/iflai/aventix-iflai",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-07T10:42:04.492Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2795,6 +2795,23 @@
       "lastSeenAt": "2026-10-07T07:24:49.761Z"
     },
     {
+      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "title": "Update Aventix repo from Slack",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 11937,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-07T11:13:49.684Z"
+    },
+    {
       "key": "01a115bb-5f7f-75e1-86a4-cc6095920d93",
       "sessionId": "01a115bb-5f7f-75e1-86a4-cc6095920d93",
       "title": "Set up Teams meeting notes",
@@ -2827,23 +2844,6 @@
       "activityCount": 32573,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-07T10:51:41.633Z"
-    },
-    {
-      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "title": "Update Aventix repo from Slack",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 11862,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T10:42:04.492Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69487,6 +69487,37 @@
       "description": "Codex: AZ SEM Foundation model tests"
     },
     {
+      "id": "codex-73948c8407f5e56909252b77",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T09:10:29.197Z",
+      "endTime": "2026-10-07T10:51:41.633Z",
+      "wallSeconds": 6072,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 3036,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 6072,
+          "effectiveSeconds": 3036
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
       "id": "codex-f041868f14ca463a0a31e16b",
       "threadId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
       "projectKey": "IFLAI",
@@ -69547,6 +69578,51 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-a66fb36e17e45d6267822dad",
+      "threadId": "01a115bb-5f7f-75e1-86a4-cc6095920d93",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T09:40:16.901Z",
+      "endTime": "2026-10-07T10:57:23.333Z",
+      "wallSeconds": 4626,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2313,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4625,
+          "effectiveSeconds": 2312
+        }
+      ],
+      "description": "Codex: Set up Teams meeting notes"
     },
     {
       "id": "codex-91781b869ee6eb55714385f0",
