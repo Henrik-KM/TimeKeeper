@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T04:46:02.202Z",
+  "updatedAt": "2026-10-07T05:01:02.185Z",
   "dayStart": "2026-10-06T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T04:46:04.475Z",
+    "observedAt": "2026-10-07T05:01:04.403Z",
     "primary": {
       "usedPercent": 1,
       "remainingPercent": 99,
@@ -248,7 +248,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-07T04:33:33.963Z"
+      "lastSeenAt": "2026-10-07T05:02:16.095Z"
     },
     {
       "key": "github/iflai",
@@ -2807,9 +2807,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 30365,
+      "activityCount": 30403,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T04:33:33.963Z"
+      "lastSeenAt": "2026-10-07T05:02:16.095Z"
     },
     {
       "key": "01a112a1-ac16-7bc3-ae7f-247d58938c97",
@@ -69341,6 +69341,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1064,
           "effectiveSeconds": 532
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-6c980a4ff23cc3cbe8c5fede",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T04:04:55.027Z",
+      "endTime": "2026-10-07T04:33:33.963Z",
+      "wallSeconds": 1718,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 859,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1718,
+          "effectiveSeconds": 859
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
