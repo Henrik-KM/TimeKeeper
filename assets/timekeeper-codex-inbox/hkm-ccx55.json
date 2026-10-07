@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T20:16:02.021Z",
+  "updatedAt": "2026-10-07T20:31:01.995Z",
   "dayStart": "2026-10-06T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T20:16:03.516Z",
+    "observedAt": "2026-10-07T20:31:03.618Z",
     "primary": {
       "usedPercent": 20,
       "remainingPercent": 80,
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-07T20:17:21.307Z"
+      "lastSeenAt": "2026-10-07T20:32:24.100Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 34432,
+      "activityCount": 34542,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T20:17:21.307Z"
+      "lastSeenAt": "2026-10-07T20:32:24.100Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -70133,6 +70133,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-a2e57a901245f0632c73239a",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T20:09:59.591Z",
+      "endTime": "2026-10-07T20:10:38.650Z",
+      "wallSeconds": 39,
+      "focusFactor": 0.2821,
+      "effectiveSeconds": 11,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 39,
+          "effectiveSeconds": 11
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
