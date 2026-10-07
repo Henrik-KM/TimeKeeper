@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T14:46:02.409Z",
+  "updatedAt": "2026-10-07T15:01:02.300Z",
   "dayStart": "2026-10-06T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T14:46:06.074Z",
+    "observedAt": "2026-10-07T15:01:03.721Z",
     "primary": {
-      "usedPercent": 14,
-      "remainingPercent": 86,
+      "usedPercent": 15,
+      "remainingPercent": 85,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-14T04:05:41.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-07T14:46:14.787Z"
+      "lastSeenAt": "2026-10-07T14:52:35.547Z"
     },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-07T14:47:19.522Z"
+      "lastSeenAt": "2026-10-07T15:02:35.029Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2379,9 +2379,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 258,
+      "activityCount": 341,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T14:46:14.787Z"
+      "lastSeenAt": "2026-10-07T14:52:35.547Z"
     },
     {
       "key": "01a0e7b9-6bcc-78d3-8204-094bc98080ef",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 13215,
+      "activityCount": 13317,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T14:47:19.522Z"
+      "lastSeenAt": "2026-10-07T15:02:35.029Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69947,6 +69947,68 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-a8a70098909d2fa84219599a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T14:30:14.068Z",
+      "endTime": "2026-10-07T14:32:54.696Z",
+      "wallSeconds": 160,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 80,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 160,
+          "effectiveSeconds": 80
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-84a8b454dfa0c04be0461f52",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T14:30:14.358Z",
+      "endTime": "2026-10-07T14:32:54.891Z",
+      "wallSeconds": 160,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 48,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 160,
+          "effectiveSeconds": 48
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
