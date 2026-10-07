@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-07T11:31:02.209Z",
+  "updatedAt": "2026-10-07T11:46:02.244Z",
   "dayStart": "2026-10-06T22:00:00.000Z",
   "rangeStart": "2026-07-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-07T11:31:03.215Z",
+    "observedAt": "2026-10-07T11:46:03.519Z",
     "primary": {
       "usedPercent": 11,
       "remainingPercent": 89,
@@ -237,6 +237,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 5,
+      "assistantSessionCount": 5,
+      "lastSeenAt": "2026-10-07T11:48:05.991Z"
+    },
+    {
       "key": "github/iflai/aventix-iflai",
       "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
       "projectFolder": "IFLAI",
@@ -248,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-07T11:33:10.044Z"
+      "lastSeenAt": "2026-10-07T11:47:59.746Z"
     },
     {
       "key": "github/iflai",
@@ -263,20 +277,6 @@
       "sessionCount": 16,
       "assistantSessionCount": 16,
       "lastSeenAt": "2026-10-07T10:57:23.333Z"
-    },
-    {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 5,
-      "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-07T10:51:41.633Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2795,6 +2795,23 @@
       "lastSeenAt": "2026-10-07T07:24:49.761Z"
     },
     {
+      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "title": "AZ SEM Foundation model tests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 32684,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-07T11:48:05.991Z"
+    },
+    {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
       "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
       "title": "Update Aventix repo from Slack",
@@ -2807,9 +2824,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 12115,
+      "activityCount": 12369,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T11:33:10.044Z"
+      "lastSeenAt": "2026-10-07T11:47:59.746Z"
     },
     {
       "key": "01a11613-de48-79f1-9321-534f638b94f5",
@@ -2844,23 +2861,6 @@
       "activityCount": 1705,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-07T10:57:23.333Z"
-    },
-    {
-      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "title": "AZ SEM Foundation model tests",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 32573,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T10:51:41.633Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69702,6 +69702,51 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-c7b610c0215e26d10c586f64",
+      "threadId": "01a11613-de48-79f1-9321-534f638b94f5",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T11:16:03.821Z",
+      "endTime": "2026-10-07T11:21:03.845Z",
+      "wallSeconds": 300,
+      "focusFactor": 0.4867,
+      "effectiveSeconds": 146,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 35,
+          "effectiveSeconds": 14
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 264,
+          "effectiveSeconds": 132
+        }
+      ],
+      "description": "Codex: Update Aventix repo from Slack (2)"
     }
   ]
 }
