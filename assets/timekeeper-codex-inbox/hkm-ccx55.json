@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-08T10:46:02.504Z",
+  "updatedAt": "2026-10-08T11:01:02.402Z",
   "dayStart": "2026-10-07T22:00:00.000Z",
   "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-08T10:46:03.854Z",
+    "observedAt": "2026-10-08T11:01:04.077Z",
     "primary": {
       "usedPercent": 32,
       "remainingPercent": 68,
@@ -251,6 +251,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/anders/review/genai-review",
+      "displayPath": "GitHub/Anders/review/genAI-review",
+      "projectFolder": "Anders",
+      "repoName": "review",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-10-08T10:57:11.610Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -277,20 +291,6 @@
       "sessionCount": 2454,
       "assistantSessionCount": 2453,
       "lastSeenAt": "2026-10-08T10:02:05.820Z"
-    },
-    {
-      "key": "github/anders/review/genai-review",
-      "displayPath": "GitHub/Anders/review/genAI-review",
-      "projectFolder": "Anders",
-      "repoName": "review",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-08T09:53:05.569Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2826,6 +2826,23 @@
       "lastSeenAt": "2026-10-08T07:06:58.499Z"
     },
     {
+      "key": "01a0574f-ba01-7480-8786-7a23d63e6039",
+      "sessionId": "01a0574f-ba01-7480-8786-7a23d63e6039",
+      "title": "Submit Nature MI revision",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/review/genAI-review",
+      "repoName": "review",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 2127,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-08T10:57:11.610Z"
+    },
+    {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "title": "AZ SEM Foundation model tests",
@@ -2858,23 +2875,6 @@
       "activityCount": 14748,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-08T10:02:05.820Z"
-    },
-    {
-      "key": "01a0574f-ba01-7480-8786-7a23d63e6039",
-      "sessionId": "01a0574f-ba01-7480-8786-7a23d63e6039",
-      "title": "Submit Nature MI revision",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/review/genAI-review",
-      "repoName": "review",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 2071,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-08T09:53:05.569Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -69834,6 +69834,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1384,
           "effectiveSeconds": 692
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-749b5562195973f6a72ac19a",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-08T06:50:15.988Z",
+      "endTime": "2026-10-08T10:42:22.760Z",
+      "wallSeconds": 13926,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 6963,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 13926,
+          "effectiveSeconds": 6963
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
