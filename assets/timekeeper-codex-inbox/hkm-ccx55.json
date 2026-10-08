@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-08T11:01:02.402Z",
+  "updatedAt": "2026-10-08T11:16:02.451Z",
   "dayStart": "2026-10-07T22:00:00.000Z",
   "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-08T11:01:04.077Z",
+    "observedAt": "2026-10-08T11:16:04.263Z",
     "primary": {
       "usedPercent": 32,
       "remainingPercent": 68,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-08T07:47:04.711Z"
+      "lastSeenAt": "2026-10-08T11:16:22.830Z"
     },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -2379,9 +2379,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 671,
+      "activityCount": 693,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-08T07:47:04.711Z"
+      "lastSeenAt": "2026-10-08T11:16:22.830Z"
     },
     {
       "key": "01a0e7b9-6bcc-78d3-8204-094bc98080ef",
@@ -70006,6 +70006,37 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-e98a5b8076d194b0fcf7fa3a",
+      "threadId": "01a0574f-ba01-7480-8786-7a23d63e6039",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-08T10:54:08.627Z",
+      "endTime": "2026-10-08T10:57:11.610Z",
+      "wallSeconds": 182,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 91,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 182,
+          "effectiveSeconds": 91
+        }
+      ],
+      "description": "Codex: Submit Nature MI revision"
     }
   ]
 }
