@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-08T10:16:02.384Z",
+  "updatedAt": "2026-10-08T10:31:02.429Z",
   "dayStart": "2026-10-07T22:00:00.000Z",
   "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-08T10:16:03.931Z",
+    "observedAt": "2026-10-08T10:31:03.751Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-08T10:17:59.583Z"
+      "lastSeenAt": "2026-10-08T10:32:45.504Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 38118,
+      "activityCount": 38298,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-08T10:17:59.583Z"
+      "lastSeenAt": "2026-10-08T10:32:45.504Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69944,6 +69944,37 @@
         }
       ],
       "description": "Codex: Submit Nature MI revision"
+    },
+    {
+      "id": "codex-765c0edf0732b70d131bee23",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-08T09:59:49.376Z",
+      "endTime": "2026-10-08T10:02:05.820Z",
+      "wallSeconds": 136,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 68,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 136,
+          "effectiveSeconds": 68
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
