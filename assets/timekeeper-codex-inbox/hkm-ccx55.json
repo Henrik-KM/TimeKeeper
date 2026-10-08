@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-08T10:01:02.483Z",
+  "updatedAt": "2026-10-08T10:16:02.384Z",
   "dayStart": "2026-10-07T22:00:00.000Z",
   "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-08T10:01:04.363Z",
+    "observedAt": "2026-10-08T10:16:03.931Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-08T10:02:41.158Z"
+      "lastSeenAt": "2026-10-08T10:17:59.583Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 38028,
+      "activityCount": 38118,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-08T10:02:41.158Z"
+      "lastSeenAt": "2026-10-08T10:17:59.583Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -69899,6 +69899,51 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-923c33a0eed6434d34a60b00",
+      "threadId": "01a0574f-ba01-7480-8786-7a23d63e6039",
+      "projectKey": "review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-08T07:59:44.854Z",
+      "endTime": "2026-10-08T09:53:05.569Z",
+      "wallSeconds": 6800,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 3400,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 774,
+          "effectiveSeconds": 387
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 6026,
+          "effectiveSeconds": 3013
+        }
+      ],
+      "description": "Codex: Submit Nature MI revision"
     }
   ]
 }
