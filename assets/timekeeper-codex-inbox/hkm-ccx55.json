@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-08T07:16:02.365Z",
+  "updatedAt": "2026-10-08T07:31:02.294Z",
   "dayStart": "2026-10-07T22:00:00.000Z",
   "rangeStart": "2026-07-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-08T07:16:03.957Z",
+    "observedAt": "2026-10-08T07:31:03.599Z",
     "primary": {
       "usedPercent": 26,
       "remainingPercent": 74,
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-10-07/plea",
+      "displayPath": "Documents/Codex/2026-10-07/plea",
+      "projectFolder": "",
+      "repoName": "plea",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-08T07:30:58.679Z"
+    },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
       "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -39,20 +53,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-08T07:06:58.499Z"
-    },
-    {
-      "key": "documents/codex/2026-10-07/plea",
-      "displayPath": "Documents/Codex/2026-10-07/plea",
-      "projectFolder": "",
-      "repoName": "plea",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-07T15:32:45.626Z"
     },
     {
       "key": "documents/codex/2026-09-28/please-x20",
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-08T07:17:46.333Z"
+      "lastSeenAt": "2026-10-08T07:31:11.280Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2379,9 +2379,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 633,
+      "activityCount": 652,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T15:32:45.626Z"
+      "lastSeenAt": "2026-10-08T07:30:58.679Z"
     },
     {
       "key": "01a0e7b9-6bcc-78d3-8204-094bc98080ef",
@@ -2826,23 +2826,6 @@
       "lastSeenAt": "2026-10-08T07:06:58.499Z"
     },
     {
-      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "title": "AZ SEM Foundation model tests",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 37105,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-08T07:17:46.333Z"
-    },
-    {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
       "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
       "title": "Restart HPC Arrhenius access",
@@ -2855,9 +2838,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1850,
+      "activityCount": 1940,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T20:10:38.650Z"
+      "lastSeenAt": "2026-10-08T07:31:11.280Z"
+    },
+    {
+      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "title": "AZ SEM Foundation model tests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 37150,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-08T07:27:37.852Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -69837,6 +69837,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-c213fd3f8985f069cb845b3a",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-08T07:01:46.216Z",
+      "endTime": "2026-10-08T07:06:58.499Z",
+      "wallSeconds": 312,
+      "focusFactor": 0.2981,
+      "effectiveSeconds": 93,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 312,
+          "effectiveSeconds": 93
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
