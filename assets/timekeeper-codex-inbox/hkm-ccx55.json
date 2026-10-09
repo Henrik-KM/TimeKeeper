@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-09T11:46:02.216Z",
+  "updatedAt": "2026-10-09T12:01:02.254Z",
   "dayStart": "2026-10-08T22:00:00.000Z",
   "rangeStart": "2026-07-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-09T11:46:03.300Z",
+    "observedAt": "2026-10-09T12:01:04.747Z",
     "primary": {
-      "usedPercent": 42,
-      "remainingPercent": 58,
+      "usedPercent": 43,
+      "remainingPercent": 57,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-14T04:05:41.000Z"
     },
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-09T11:47:48.028Z"
+      "lastSeenAt": "2026-10-09T12:02:10.512Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -276,7 +276,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-09T11:34:56.431Z"
+      "lastSeenAt": "2026-10-09T12:02:05.846Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 16336,
+      "activityCount": 16497,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-09T11:47:48.028Z"
+      "lastSeenAt": "2026-10-09T12:02:10.512Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -2855,9 +2855,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 41034,
+      "activityCount": 41130,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-09T11:34:56.431Z"
+      "lastSeenAt": "2026-10-09T12:02:05.846Z"
     },
     {
       "key": "01a11613-de48-79f1-9321-534f638b94f5",
@@ -69901,6 +69901,37 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-c3c772ec32ba91533f701ca7",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-09T11:07:43.337Z",
+      "endTime": "2026-10-09T11:34:56.431Z",
+      "wallSeconds": 1633,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 816,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1633,
+          "effectiveSeconds": 816
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     }
   ]
 }
