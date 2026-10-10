@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-10T21:46:02.359Z",
-  "dayStart": "2026-10-09T22:00:00.000Z",
-  "rangeStart": "2026-07-12T22:00:00.000Z",
+  "updatedAt": "2026-10-10T22:01:02.270Z",
+  "dayStart": "2026-10-10T22:00:00.000Z",
+  "rangeStart": "2026-07-13T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-10T21:46:03.497Z",
+    "observedAt": "2026-10-10T22:01:03.318Z",
     "primary": {
       "usedPercent": 67,
       "remainingPercent": 33,
@@ -2478,7 +2478,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 17336,
+      "activityCount": 16828,
       "assistantActivity": true,
       "lastSeenAt": "2026-09-23T09:51:32.668Z"
     },
@@ -47817,7 +47817,7 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 96859,
+      "activityCount": 91445,
       "assistantActivity": true,
       "lastSeenAt": "2026-08-09T21:56:30.175Z"
     },
@@ -48350,43 +48350,6 @@
     }
   ],
   "records": [
-    {
-      "id": "codex-7d1cd2fa69792feb538364a9",
-      "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
-      "projectKey": "Research",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-07-13T08:57:41.947Z",
-      "endTime": "2026-07-13T14:58:25.377Z",
-      "wallSeconds": 21643,
-      "focusFactor": 0.25,
-      "effectiveSeconds": 5410,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 0.5,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "ultra",
-          "factor": 0.25,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.25,
-          "wallSeconds": 21643,
-          "effectiveSeconds": 5410,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 0.5
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-4ed48479450c53737f6adbb0"
-      ],
-      "description": "Codex: Execute research project end to end",
-      "codexBackfill": true
-    },
     {
       "id": "codex-a1cdfedb8807678a7d64ebd3",
       "threadId": "019f4c3d-73c7-7061-b40d-c1ce6b23cb06",
@@ -66093,356 +66056,8 @@
           "effectiveSeconds": 479
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-bceabc2385b2045294d774d2",
-      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "projectKey": "Aventix-IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T07:47:02.409Z",
-      "endTime": "2026-10-04T07:55:34.782Z",
-      "wallSeconds": 512,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 256,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 512,
-          "effectiveSeconds": 256
-        }
-      ],
-      "description": "Codex: Update Aventix repo from Slack"
-    },
-    {
-      "id": "codex-2e83af533ee5c4a8dd3b2c97",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T07:56:03.874Z",
-      "endTime": "2026-10-04T08:38:09.225Z",
-      "wallSeconds": 2525,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1262,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2525,
-          "effectiveSeconds": 1262
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-d7610ec194405bd52436ec67",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T10:00:11.510Z",
-      "endTime": "2026-10-04T10:25:19.743Z",
-      "wallSeconds": 1508,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 754,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1508,
-          "effectiveSeconds": 754
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-5d95a8d576281efe97d4be5b",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T12:04:12.348Z",
-      "endTime": "2026-10-04T12:39:42.669Z",
-      "wallSeconds": 2130,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1065,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 465,
-          "effectiveSeconds": 232
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1664,
-          "effectiveSeconds": 832
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-2af1f3feb8e03d861dfce885",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T12:04:35.500Z",
-      "endTime": "2026-10-04T12:42:58.607Z",
-      "wallSeconds": 2303,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1151,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 224,
-          "effectiveSeconds": 112
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2078,
-          "effectiveSeconds": 1039
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
-    },
-    {
-      "id": "codex-c29b7d9bcab97b73e26ce6f2",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T13:24:30.323Z",
-      "endTime": "2026-10-04T13:50:27.632Z",
-      "wallSeconds": 1557,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 778,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1557,
-          "effectiveSeconds": 778
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
-    },
-    {
-      "id": "codex-5345748277c868a770b9dc10",
-      "threadId": "01a0d722-e5d7-7aa1-a4de-4c96f890a626",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T14:29:15.488Z",
-      "endTime": "2026-10-04T15:14:31.618Z",
-      "wallSeconds": 2716,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1358,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 30,
-          "effectiveSeconds": 15
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2685,
-          "effectiveSeconds": 1342
-        }
-      ],
-      "description": "Codex: Find BioTechX CHROMA-1 contacts"
-    },
-    {
-      "id": "codex-92e561cecab6160d901d5cb3",
-      "threadId": "01a10844-21ad-79a0-b0db-3576973ee390",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T18:54:08.332Z",
-      "endTime": "2026-10-04T19:14:46.184Z",
-      "wallSeconds": 1237,
-      "focusFactor": 0.4996,
-      "effectiveSeconds": 618,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1236,
-          "effectiveSeconds": 618
-        }
-      ],
-      "description": "Codex: email-helper"
-    },
-    {
-      "id": "codex-cb1f789741f1bb879149f5ee",
-      "threadId": "01a10844-21ad-79a0-b0db-3576973ee390",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-04T19:30:23.503Z",
-      "endTime": "2026-10-04T20:52:13.699Z",
-      "wallSeconds": 4910,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 2455,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 4910,
-          "effectiveSeconds": 2455
-        }
-      ],
-      "description": "Codex: email-helper"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-2697196e321513cb130ce659",
