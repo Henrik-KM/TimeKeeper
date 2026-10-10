@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-10T15:01:02.131Z",
+  "updatedAt": "2026-10-10T15:16:02.097Z",
   "dayStart": "2026-10-09T22:00:00.000Z",
   "rangeStart": "2026-07-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-10T15:01:03.230Z",
+    "observedAt": "2026-10-10T15:16:03.269Z",
     "primary": {
       "usedPercent": 64,
       "remainingPercent": 36,
@@ -70168,6 +70168,82 @@
         }
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-5f57916e9da6495e5d1098f2",
+      "threadId": "01a10844-21ad-79a0-b0db-3576973ee390",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-10T14:33:17.833Z",
+      "endTime": "2026-10-10T14:44:04.703Z",
+      "wallSeconds": 646,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 323,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 646,
+          "effectiveSeconds": 323
+        }
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-b0e1eca67f702b96beefed06",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-10T14:36:31.587Z",
+      "endTime": "2026-10-10T14:52:51.537Z",
+      "wallSeconds": 979,
+      "focusFactor": 0.3003,
+      "effectiveSeconds": 294,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 979,
+          "effectiveSeconds": 293
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     }
   ]
 }
