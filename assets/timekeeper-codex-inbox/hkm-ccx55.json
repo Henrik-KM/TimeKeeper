@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-10T20:46:02.363Z",
+  "updatedAt": "2026-10-10T21:01:02.293Z",
   "dayStart": "2026-10-09T22:00:00.000Z",
   "rangeStart": "2026-07-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-10T20:46:03.486Z",
+    "observedAt": "2026-10-10T21:01:03.276Z",
     "primary": {
-      "usedPercent": 66,
-      "remainingPercent": 34,
+      "usedPercent": 67,
+      "remainingPercent": 33,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-14T04:05:41.000Z"
     },
@@ -265,6 +265,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2455,
+      "assistantSessionCount": 2454,
+      "lastSeenAt": "2026-10-10T21:01:02.345Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -277,20 +291,6 @@
       "sessionCount": 5,
       "assistantSessionCount": 5,
       "lastSeenAt": "2026-10-10T20:29:21.345Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2455,
-      "assistantSessionCount": 2454,
-      "lastSeenAt": "2026-10-10T14:52:51.537Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2857,6 +2857,23 @@
       "lastSeenAt": "2026-10-10T11:33:30.865Z"
     },
     {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1062,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-10T21:01:02.345Z"
+    },
+    {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "title": "AZ SEM Foundation model tests",
@@ -2872,23 +2889,6 @@
       "activityCount": 46728,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-10T20:29:21.345Z"
-    },
-    {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 553,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-10T14:52:51.537Z"
     },
     {
       "key": "01a10844-21ad-79a0-b0db-3576973ee390",
@@ -70272,6 +70272,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1618,
           "effectiveSeconds": 809
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-8c4903471c485de43356f649",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-10T20:02:33.384Z",
+      "endTime": "2026-10-10T20:29:21.345Z",
+      "wallSeconds": 1607,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 803,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1607,
+          "effectiveSeconds": 803
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
