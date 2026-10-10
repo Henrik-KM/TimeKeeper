@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-10T12:46:02.021Z",
+  "updatedAt": "2026-10-10T13:01:02.005Z",
   "dayStart": "2026-10-09T22:00:00.000Z",
   "rangeStart": "2026-07-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-10T12:46:03.068Z",
+    "observedAt": "2026-10-10T13:01:03.323Z",
     "primary": {
       "usedPercent": 61,
       "remainingPercent": 39,
@@ -70060,6 +70060,37 @@
       "description": "Codex: email-helper"
     },
     {
+      "id": "codex-c29fcd3805221ba776035ad5",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-10T12:05:25.132Z",
+      "endTime": "2026-10-10T12:38:54.987Z",
+      "wallSeconds": 2009,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1004,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2009,
+          "effectiveSeconds": 1004
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
       "id": "codex-8bc39b659676c8f5448c0927",
       "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
       "projectKey": "sem-imaging",
@@ -70089,6 +70120,37 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-1053a9eddc7004b69d44673d",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-10T12:32:12.475Z",
+      "endTime": "2026-10-10T12:35:25.824Z",
+      "wallSeconds": 193,
+      "focusFactor": 0.4974,
+      "effectiveSeconds": 96,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 193,
+          "effectiveSeconds": 96
+        }
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
     }
   ]
 }
