@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-11T15:01:01.865Z",
+  "updatedAt": "2026-10-11T15:16:01.810Z",
   "dayStart": "2026-10-10T22:00:00.000Z",
   "rangeStart": "2026-07-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-11T15:01:02.918Z",
+    "observedAt": "2026-10-11T15:16:03.047Z",
     "primary": {
       "usedPercent": 5,
       "remainingPercent": 95,
@@ -276,7 +276,7 @@
       "match": "IFLAI",
       "sessionCount": 2455,
       "assistantSessionCount": 2454,
-      "lastSeenAt": "2026-10-11T14:57:35.166Z"
+      "lastSeenAt": "2026-10-11T15:17:01.184Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2857,6 +2857,23 @@
       "lastSeenAt": "2026-10-11T07:28:24.841Z"
     },
     {
+      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "title": "LinkedIn weekly stale invitation cleanup",
+      "threadSource": "agent_forked_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 4614,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-11T15:17:01.184Z"
+    },
+    {
       "key": "01a1263e-5872-7101-b242-1746293af037",
       "sessionId": "01a1263e-5872-7101-b242-1746293af037",
       "title": "Email helper health monitor",
@@ -3127,23 +3144,6 @@
       "activityCount": 357,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-05T08:44:52.752Z"
-    },
-    {
-      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "title": "LinkedIn weekly stale invitation cleanup",
-      "threadSource": "agent_forked_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 4595,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-04T12:39:42.669Z"
     },
     {
       "key": "01a014f1-7e93-7fb1-8c03-03466307a68c",
@@ -70169,6 +70169,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-99009f2db5f6481a944b77d4",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-11T14:51:22.524Z",
+      "endTime": "2026-10-11T14:57:35.166Z",
+      "wallSeconds": 372,
+      "focusFactor": 0.2984,
+      "effectiveSeconds": 111,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 372,
+          "effectiveSeconds": 111
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     }
   ]
 }
