@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-11T19:02:02.397Z",
+  "updatedAt": "2026-10-11T19:07:02.149Z",
   "dayStart": "2026-10-10T22:00:00.000Z",
   "rangeStart": "2026-07-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-11T19:02:03.492Z",
+    "observedAt": "2026-10-11T19:07:04.075Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
       "windowMinutes": 10080,
-      "resetsAt": "2026-10-18T04:07:18.000Z"
+      "resetsAt": "2026-10-18T04:07:19.000Z"
     },
     "secondary": null
   },
@@ -1863,6 +1863,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 424,
           "effectiveSeconds": 212
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
+    },
+    {
+      "id": "codex-1c87a7e8e9b9a8442f6c3075",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-11T18:29:44.949Z",
+      "endTime": "2026-10-11T18:45:57.892Z",
+      "wallSeconds": 972,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 486,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 972,
+          "effectiveSeconds": 486
         }
       ],
       "description": "Codex: Import Lukas’s latest Drive data"
