@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-11T16:16:01.876Z",
+  "updatedAt": "2026-10-11T16:31:01.789Z",
   "dayStart": "2026-10-10T22:00:00.000Z",
   "rangeStart": "2026-07-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-11T16:16:02.997Z",
+    "observedAt": "2026-10-11T16:31:02.834Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
@@ -276,7 +276,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-11T16:18:13.006Z"
+      "lastSeenAt": "2026-10-11T16:32:09.296Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2869,9 +2869,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 48809,
+      "activityCount": 49062,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-11T16:18:13.006Z"
+      "lastSeenAt": "2026-10-11T16:32:09.296Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -70200,6 +70200,37 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-dbac4e02f555ee77ff82886e",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-11T15:16:20.502Z",
+      "endTime": "2026-10-11T16:07:08.961Z",
+      "wallSeconds": 3048,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1524,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3048,
+          "effectiveSeconds": 1524
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
