@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-12T10:16:02.510Z",
+  "updatedAt": "2026-10-12T10:31:02.466Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T10:16:03.677Z",
+    "observedAt": "2026-10-12T10:31:03.516Z",
     "primary": {
-      "usedPercent": 15,
-      "remainingPercent": 85,
+      "usedPercent": 16,
+      "remainingPercent": 84,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-18T04:07:18.000Z"
     },
@@ -265,6 +265,20 @@
       "lastSeenAt": "2026-07-15T12:57:00.340Z"
     },
     {
+      "key": "github/iflai/aventix-iflai",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-12T10:23:40.791Z"
+    },
+    {
       "key": "github/iflai/email-helper",
       "displayPath": "GitHub/IFLAI/email-helper",
       "projectFolder": "IFLAI",
@@ -291,20 +305,6 @@
       "sessionCount": 5,
       "assistantSessionCount": 5,
       "lastSeenAt": "2026-10-12T09:18:34.465Z"
-    },
-    {
-      "key": "github/iflai/aventix-iflai",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-10T12:35:25.824Z"
     },
     {
       "key": "github/iflai/rd-doc-personal",
@@ -2857,6 +2857,23 @@
       "lastSeenAt": "2026-10-12T07:25:01.706Z"
     },
     {
+      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "title": "Update Aventix repo from Slack",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 18445,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T10:23:40.791Z"
+    },
+    {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
       "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
       "title": "Edit outreach drafts",
@@ -2940,23 +2957,6 @@
       "activityCount": 3866,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-10T14:44:04.703Z"
-    },
-    {
-      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "title": "Update Aventix repo from Slack",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 18444,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-10T12:35:25.824Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -69643,6 +69643,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-73c37bc6f638008ea1a77eb5",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-12T09:59:12.813Z",
+      "endTime": "2026-10-12T10:08:07.748Z",
+      "wallSeconds": 534,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 267,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 534,
+          "effectiveSeconds": 267
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
