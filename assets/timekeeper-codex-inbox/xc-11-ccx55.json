@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-12T21:57:02.568Z",
-  "dayStart": "2026-10-11T22:00:00.000Z",
-  "rangeStart": "2026-07-14T22:00:00.000Z",
+  "updatedAt": "2026-10-12T22:02:02.541Z",
+  "dayStart": "2026-10-12T22:00:00.000Z",
+  "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T21:57:04.278Z",
+    "observedAt": "2026-10-12T22:02:04.691Z",
     "primary": {
       "usedPercent": 23,
       "remainingPercent": 77,
@@ -1047,7 +1047,7 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2144,
+      "activityCount": 1712,
       "assistantActivity": true,
       "lastSeenAt": "2026-08-04T11:18:57.214Z"
     },
@@ -1621,82 +1621,6 @@
       ],
       "description": "Codex: Coordinate with research agent",
       "codexBackfill": true
-    },
-    {
-      "id": "codex-c464305a2888258e1ac9ddf1",
-      "threadId": "019e5f78-41b2-79d0-bebd-baa3944e24ed",
-      "projectKey": "particle_iden",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-06T14:17:58.082Z",
-      "endTime": "2026-10-06T14:41:55.878Z",
-      "wallSeconds": 1437,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 718,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 10,
-          "effectiveSeconds": 5
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1427,
-          "effectiveSeconds": 713
-        }
-      ],
-      "description": "Codex: Recreate Figure 1 as vector"
-    },
-    {
-      "id": "codex-5b6fd15f9f1683b063441591",
-      "threadId": "019e5f78-41b2-79d0-bebd-baa3944e24ed",
-      "projectKey": "particle_iden",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-06T19:06:54.567Z",
-      "endTime": "2026-10-06T19:10:11.104Z",
-      "wallSeconds": 196,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 98,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 196,
-          "effectiveSeconds": 98
-        }
-      ],
-      "description": "Codex: Recreate Figure 1 as vector"
     },
     {
       "id": "codex-6e8e4acd98d4e7a5453ac87c",
