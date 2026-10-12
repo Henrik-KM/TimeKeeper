@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-12T14:01:01.951Z",
+  "updatedAt": "2026-10-12T14:16:02.017Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T14:01:03.326Z",
+    "observedAt": "2026-10-12T14:16:03.113Z",
     "primary": {
       "usedPercent": 18,
       "remainingPercent": 82,
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "projectFolder": "",
+      "repoName": "continue-the-user-s-linkedin-invitation",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-12T14:04:52.367Z"
+    },
     {
       "key": "github/timekeeper",
       "displayPath": "GitHub/TimeKeeper",
@@ -39,20 +53,6 @@
       "sessionCount": 12,
       "assistantSessionCount": 12,
       "lastSeenAt": "2026-10-12T10:36:56.647Z"
-    },
-    {
-      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "projectFolder": "",
-      "repoName": "continue-the-user-s-linkedin-invitation",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-12T07:25:01.706Z"
     },
     {
       "key": "documents/codex/2026-10-10/hit",
@@ -276,7 +276,21 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-12T12:56:53.085Z"
+      "lastSeenAt": "2026-10-12T14:06:43.428Z"
+    },
+    {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2455,
+      "assistantSessionCount": 2454,
+      "lastSeenAt": "2026-10-12T14:04:52.057Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -291,20 +305,6 @@
       "sessionCount": 4,
       "assistantSessionCount": 4,
       "lastSeenAt": "2026-10-12T12:26:00.353Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2455,
-      "assistantSessionCount": 2454,
-      "lastSeenAt": "2026-10-12T11:07:02.525Z"
     },
     {
       "key": "github/iflai/rd-doc-personal",
@@ -2852,9 +2852,60 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 20598,
+      "activityCount": 20599,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T07:25:01.706Z"
+      "lastSeenAt": "2026-10-12T14:04:52.367Z"
+    },
+    {
+      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "title": "Restart HPC Arrhenius access",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2349,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T14:06:43.428Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 15072,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T14:04:52.057Z"
+    },
+    {
+      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "title": "LinkedIn weekly stale invitation cleanup",
+      "threadSource": "agent_forked_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 5065,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T14:04:48.519Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -2869,9 +2920,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 51740,
+      "activityCount": 51741,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T12:56:53.085Z"
+      "lastSeenAt": "2026-10-12T14:04:48.103Z"
+    },
+    {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2582,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T14:04:47.565Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -2891,23 +2959,6 @@
       "lastSeenAt": "2026-10-12T12:26:00.353Z"
     },
     {
-      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "title": "Restart HPC Arrhenius access",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2241,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T12:10:26.690Z"
-    },
-    {
       "key": "01a10844-21ad-79a0-b0db-3576973ee390",
       "sessionId": "01a10844-21ad-79a0-b0db-3576973ee390",
       "title": "",
@@ -2923,57 +2974,6 @@
       "activityCount": 4259,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-12T11:07:02.525Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 15071,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T10:08:07.748Z"
-    },
-    {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2581,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T03:10:54.241Z"
-    },
-    {
-      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "title": "LinkedIn weekly stale invitation cleanup",
-      "threadSource": "agent_forked_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 5064,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-11T16:07:08.961Z"
     },
     {
       "key": "01a11613-de48-79f1-9321-534f638b94f5",
