@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-12T08:32:02.282Z",
+  "updatedAt": "2026-10-12T08:37:02.339Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T08:32:04.342Z",
+    "observedAt": "2026-10-12T08:37:04.685Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
       "windowMinutes": 10080,
-      "resetsAt": "2026-10-18T04:07:19.000Z"
+      "resetsAt": "2026-10-18T04:07:18.000Z"
     },
     "secondary": null
   },
@@ -1959,6 +1959,51 @@
         }
       ],
       "description": "Codex: Improve hybrid algorithm"
+    },
+    {
+      "id": "codex-32cfa30bc4efc422f413afdd",
+      "threadId": "01a12f16-ad4d-7911-a400-1ff9623f6b6c",
+      "projectKey": "genAI-review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-12T07:50:23.367Z",
+      "endTime": "2026-10-12T08:16:43.453Z",
+      "wallSeconds": 1580,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 789,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1579,
+          "effectiveSeconds": 789
+        }
+      ],
+      "description": "Codex: Upload latest npjCM perspective"
     }
   ]
 }
