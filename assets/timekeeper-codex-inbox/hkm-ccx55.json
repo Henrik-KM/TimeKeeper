@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-12T17:16:02.515Z",
+  "updatedAt": "2026-10-12T17:31:02.420Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T17:16:04.092Z",
+    "observedAt": "2026-10-12T17:31:04.487Z",
     "primary": {
-      "usedPercent": 20,
-      "remainingPercent": 80,
+      "usedPercent": 21,
+      "remainingPercent": 79,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-18T04:07:18.000Z"
     },
@@ -276,7 +276,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-12T17:16:15.476Z"
+      "lastSeenAt": "2026-10-12T17:18:30.648Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2869,9 +2869,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 748,
+      "activityCount": 814,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T17:16:15.476Z"
+      "lastSeenAt": "2026-10-12T17:18:30.648Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -76463,6 +76463,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1887,
           "effectiveSeconds": 943
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-9c0cc5264697101cce37980e",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-12T16:18:48.727Z",
+      "endTime": "2026-10-12T17:13:45.116Z",
+      "wallSeconds": 3296,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1648,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3296,
+          "effectiveSeconds": 1648
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
