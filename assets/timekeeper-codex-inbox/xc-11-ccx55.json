@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-12T17:22:02.108Z",
+  "updatedAt": "2026-10-12T17:27:02.146Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T17:22:03.303Z",
+    "observedAt": "2026-10-12T17:27:04.378Z",
     "primary": {
       "usedPercent": 20,
       "remainingPercent": 80,
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "github/mathem-agent",
+      "displayPath": "GitHub/Mathem-agent",
+      "projectFolder": "Mathem-agent",
+      "repoName": "Mathem-agent",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 9,
+      "assistantSessionCount": 9,
+      "lastSeenAt": "2026-10-12T17:26:33.474Z"
+    },
     {
       "key": "github/timekeeper",
       "displayPath": "GitHub/TimeKeeper",
@@ -39,20 +53,6 @@
       "sessionCount": 5,
       "assistantSessionCount": 5,
       "lastSeenAt": "2026-10-10T09:01:29.573Z"
-    },
-    {
-      "key": "github/mathem-agent",
-      "displayPath": "GitHub/Mathem-agent",
-      "projectFolder": "Mathem-agent",
-      "repoName": "Mathem-agent",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 9,
-      "assistantSessionCount": 9,
-      "lastSeenAt": "2026-10-07T18:43:54.913Z"
     },
     {
       "key": "github/project ironwright",
@@ -253,6 +253,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
+      "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Mathem-agent",
+      "repoName": "Mathem-agent",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 1402,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-12T17:26:33.474Z"
+    },
+    {
       "key": "01a0dc48-dd26-7961-b2e2-8bfeb7af2190",
       "sessionId": "01a0dc48-dd26-7961-b2e2-8bfeb7af2190",
       "title": "",
@@ -285,23 +302,6 @@
       "activityCount": 430,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-10T08:54:20.667Z"
-    },
-    {
-      "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
-      "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Mathem-agent",
-      "repoName": "Mathem-agent",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 1366,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-07T18:43:54.913Z"
     },
     {
       "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
