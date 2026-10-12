@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-12T07:31:02.327Z",
+  "updatedAt": "2026-10-12T07:46:02.574Z",
   "dayStart": "2026-10-11T22:00:00.000Z",
   "rangeStart": "2026-07-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-12T07:31:03.696Z",
+    "observedAt": "2026-10-12T07:46:04.359Z",
     "primary": {
       "usedPercent": 11,
       "remainingPercent": 89,
       "windowMinutes": 10080,
-      "resetsAt": "2026-10-18T04:07:19.000Z"
+      "resetsAt": "2026-10-18T04:07:18.000Z"
     },
     "secondary": null
   },
@@ -69581,6 +69581,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-63afb99f6dbe9998d476f102",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-12T07:01:09.357Z",
+      "endTime": "2026-10-12T07:25:01.706Z",
+      "wallSeconds": 1432,
+      "focusFactor": 0.2996,
+      "effectiveSeconds": 429,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1432,
+          "effectiveSeconds": 429
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
