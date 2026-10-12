@@ -6,6 +6,10 @@ import path from 'node:path';
 import process from 'node:process';
 import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
+import {
+  EMAIL_USAGE_BACKFILL_DAYS,
+  readEmailUsageRecords
+} from './henrik-email-usage.mjs';
 
 import {
   buildCodexMappingAudit,
@@ -102,6 +106,18 @@ export function buildOptions(args = parseArgs()) {
       args.sessionIndexPath ||
       process.env.TIMEKEEPER_CODEX_SESSION_INDEX ||
       getDefaultSessionIndexPath(),
+    emailUsageDir:
+      args.emailUsageDir ||
+      process.env.TIMEKEEPER_EMAIL_USAGE_DIR ||
+      path.join(
+        os.homedir(),
+        'Documents',
+        'Codex',
+        'henrik-email',
+        '.local',
+        'state',
+        'timekeeper_usage'
+      ),
     statePath:
       args.statePath ||
       process.env.TIMEKEEPER_CODEX_STATE_PATH ||
@@ -746,6 +762,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     sessionBackfillDays
   );
   const rangeStart = getLocalLookbackStart(now, historyLookbackDays);
+  const emailRangeStart = getLocalLookbackStart(now, EMAIL_USAGE_BACKFILL_DAYS);
   const files = await listSessionFilesChangedSince(
     options.sessionsDir,
     rangeStart
@@ -787,8 +804,19 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     focusFactor: config.focusFactor,
     focusPolicy: config.focusPolicy
   });
+  const emailUsage = await readEmailUsageRecords({
+    directory: options.emailUsageDir,
+    windowStart: emailRangeStart,
+    trackedProjects,
+    normalRecords: records,
+    now,
+    focusFactor: config.focusFactor,
+    focusPolicy: config.focusPolicy
+  });
   const allUniqueRecords = Array.from(
-    new Map(records.map((record) => [record.id, record])).values()
+    new Map(
+      [...records, ...emailUsage.records].map((record) => [record.id, record])
+    ).values()
   ).sort((a, b) => String(a.startTime).localeCompare(String(b.startTime)));
   const backfillRepositories = new Set(
     Object.entries(repositoryMultipliers)
@@ -806,6 +834,12 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     .filter((record) => {
       const start = parseTimestamp(record.startTime);
       if (start && start >= recentRangeStart) return true;
+      if (
+        start &&
+        start >= emailRangeStart &&
+        record.usageSource === 'henrik-email'
+      )
+        return true;
       const sessionBackfillStart = sessionBackfillStarts.get(
         String(record.threadId || '')
           .trim()
@@ -851,6 +885,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     retractedExternalIds,
     mappingAudit,
     sessionMappingAudit,
+    emailUsageAudit: emailUsage.audit,
     records: uniqueRecords
   };
 }
@@ -871,6 +906,7 @@ export function makeCodexPayloadKey(payload = {}) {
         sessionMappingAudit: Array.isArray(payload.sessionMappingAudit)
           ? payload.sessionMappingAudit
           : [],
+        emailUsageAudit: payload.emailUsageAudit || null,
         records: Array.isArray(payload.records) ? payload.records : []
       })
     )

@@ -157,6 +157,8 @@ TimeKeeper imports Codex desktop work using its published model policy. The Andr
 
 The helper never publishes prompts, tool output, or full local paths. It publishes repo/thread metadata, active timestamps, and effective seconds only. It scans the current day plus the previous six local calendar days. Stable record IDs prevent entries that were already imported from being added again.
 
+The independent Henrik email skill also exports a small accounting feed under `Documents/Codex/henrik-email/.local/state/timekeeper_usage`. The bridge imports finished real Codex sessions from that feed as `Codex: email-helper` under IFLAI, with the usual model/effort focus policy. Only session IDs, timing, model/effort, execution outcomes, and numeric token counts are published. The email sessions stay ephemeral and their source-bearing logs remain private. Run the skill's `email_helper.py export-usage` command for an idempotent backfill of retained runs. Legacy file-time estimates are labeled separately from newly measured elapsed times. Email records can be backfilled for 90 days, and stable session IDs prevent duplicate credit from repeated imports or ordinary Codex recordings. Set `TIMEKEEPER_EMAIL_USAGE_DIR` or pass `--email-usage-dir=<directory>` for a custom runtime; an absent feed is harmless.
+
 Setup:
 
 1. In TimeKeeper, open Backup / Sync -> AI Logging -> Configure Codex.
