@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T12:46:02.786Z",
+  "updatedAt": "2026-10-13T13:01:02.768Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T12:46:03.585Z",
+    "observedAt": "2026-10-13T13:01:03.800Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -76350,6 +76350,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1577,
           "effectiveSeconds": 788
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
+    },
+    {
+      "id": "codex-abecbded899dc24368e17cc8",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T12:35:38.369Z",
+      "endTime": "2026-10-13T12:42:50.859Z",
+      "wallSeconds": 432,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 216,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 432,
+          "effectiveSeconds": 216
         }
       ],
       "description": "Codex: Prepare NVIDIA Stockholm trip"
