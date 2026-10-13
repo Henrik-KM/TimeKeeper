@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T15:16:01.935Z",
+  "updatedAt": "2026-10-13T15:31:01.916Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T15:16:02.932Z",
+    "observedAt": "2026-10-13T15:31:02.956Z",
     "primary": {
-      "usedPercent": 12,
-      "remainingPercent": 88,
+      "usedPercent": 13,
+      "remainingPercent": 87,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-13T15:17:49.892Z"
+      "lastSeenAt": "2026-10-13T15:33:03.271Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -276,7 +276,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-13T15:16:26.247Z"
+      "lastSeenAt": "2026-10-13T15:25:21.991Z"
     },
     {
       "key": "github/anders",
@@ -2852,9 +2852,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 56067,
+      "activityCount": 56142,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T15:17:49.892Z"
+      "lastSeenAt": "2026-10-13T15:33:03.271Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -2869,9 +2869,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1948,
+      "activityCount": 2029,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T15:16:26.247Z"
+      "lastSeenAt": "2026-10-13T15:25:21.991Z"
     },
     {
       "key": "01a134a8-9319-77a3-9b43-905b1a733231",
@@ -76415,6 +76415,37 @@
         }
       ],
       "description": "Codex: Prepare NVIDIA Stockholm trip"
+    },
+    {
+      "id": "codex-e22567cc245c5f0dd50342cc",
+      "threadId": "01a134a8-9319-77a3-9b43-905b1a733231",
+      "projectKey": "Anders",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-13T14:33:30.962Z",
+      "endTime": "2026-10-13T15:07:43.995Z",
+      "wallSeconds": 2053,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1026,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2053,
+          "effectiveSeconds": 1026
+        }
+      ],
+      "description": "Codex: Simplify Japan travel itinerary"
     }
   ]
 }
