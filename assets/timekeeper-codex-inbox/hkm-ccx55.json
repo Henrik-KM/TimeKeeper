@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T08:01:02.189Z",
+  "updatedAt": "2026-10-13T08:16:02.185Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T08:01:02.997Z",
+    "observedAt": "2026-10-13T08:16:04.393Z",
     "primary": {
       "usedPercent": 2,
       "remainingPercent": 98,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-13T08:02:09.391Z"
+      "lastSeenAt": "2026-10-13T08:13:45.851Z"
     },
     {
       "key": "github/timekeeper",
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-13T08:02:58.113Z"
+      "lastSeenAt": "2026-10-13T08:18:08.489Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -276,7 +276,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-13T08:00:57.442Z"
+      "lastSeenAt": "2026-10-13T08:16:16.062Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -2821,9 +2821,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 20888,
+      "activityCount": 21088,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T08:02:09.391Z"
+      "lastSeenAt": "2026-10-13T08:13:45.851Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -2838,9 +2838,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 54680,
+      "activityCount": 54836,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T08:02:58.113Z"
+      "lastSeenAt": "2026-10-13T08:18:08.489Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -2855,9 +2855,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1171,
+      "activityCount": 1312,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T08:00:57.442Z"
+      "lastSeenAt": "2026-10-13T08:16:16.062Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -75874,6 +75874,37 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-1390e3d2e7d4332f16a4fd19",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T07:52:37.672Z",
+      "endTime": "2026-10-13T07:53:13.030Z",
+      "wallSeconds": 35,
+      "focusFactor": 0.2857,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 35,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
