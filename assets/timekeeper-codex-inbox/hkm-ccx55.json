@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T11:31:02.912Z",
+  "updatedAt": "2026-10-13T11:46:02.703Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T11:31:04.012Z",
+    "observedAt": "2026-10-13T11:46:03.695Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -262,7 +262,7 @@
       "match": "IFLAI",
       "sessionCount": 17,
       "assistantSessionCount": 17,
-      "lastSeenAt": "2026-10-13T11:23:26.518Z"
+      "lastSeenAt": "2026-10-13T11:45:53.270Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -2852,9 +2852,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1083,
+      "activityCount": 1129,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T11:23:26.518Z"
+      "lastSeenAt": "2026-10-13T11:45:53.270Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -76291,6 +76291,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-8f3acd4678c46831d9722bee",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T11:12:24.506Z",
+      "endTime": "2026-10-13T11:23:26.518Z",
+      "wallSeconds": 662,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 331,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 662,
+          "effectiveSeconds": 331
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     }
   ]
 }
