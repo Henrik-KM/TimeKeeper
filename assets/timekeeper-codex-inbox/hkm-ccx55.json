@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T07:01:01.859Z",
+  "updatedAt": "2026-10-13T07:52:20.404Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T07:01:03.080Z",
+    "observedAt": "2026-10-13T07:52:22.142Z",
     "primary": {
-      "usedPercent": 1,
-      "remainingPercent": 99,
+      "usedPercent": 2,
+      "remainingPercent": 98,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-13T07:01:16.562Z"
+      "lastSeenAt": "2026-10-13T07:53:43.449Z"
     },
     {
       "key": "github/timekeeper",
@@ -262,7 +262,21 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-13T06:35:14.367Z"
+      "lastSeenAt": "2026-10-13T07:52:40.314Z"
+    },
+    {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2455,
+      "assistantSessionCount": 2454,
+      "lastSeenAt": "2026-10-13T07:51:59.873Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -291,20 +305,6 @@
       "sessionCount": 4,
       "assistantSessionCount": 4,
       "lastSeenAt": "2026-10-12T14:18:21.916Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2455,
-      "assistantSessionCount": 2454,
-      "lastSeenAt": "2026-10-12T14:04:52.057Z"
     },
     {
       "key": "github/iflai/rd-doc-personal",
@@ -2821,9 +2821,43 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 20628,
+      "activityCount": 20723,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T07:01:16.562Z"
+      "lastSeenAt": "2026-10-13T07:53:43.449Z"
+    },
+    {
+      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "title": "Restart HPC Arrhenius access",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2568,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-13T07:52:40.314Z"
+    },
+    {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2583,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-13T07:51:59.873Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -2858,23 +2892,6 @@
       "activityCount": 1065,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-12T19:32:09.572Z"
-    },
-    {
-      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "title": "Restart HPC Arrhenius access",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2557,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T16:20:56.681Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -2926,23 +2943,6 @@
       "activityCount": 5065,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-12T14:04:48.519Z"
-    },
-    {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2582,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-12T14:04:47.565Z"
     },
     {
       "key": "01a10844-21ad-79a0-b0db-3576973ee390",
@@ -75843,6 +75843,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-ca784c2734f5f01bf97227e0",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T06:58:21.662Z",
+      "endTime": "2026-10-13T07:06:26.328Z",
+      "wallSeconds": 484,
+      "focusFactor": 0.2996,
+      "effectiveSeconds": 145,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 484,
+          "effectiveSeconds": 145
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
