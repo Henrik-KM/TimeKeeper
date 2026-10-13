@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-13T14:31:01.865Z",
+  "updatedAt": "2026-10-13T14:46:01.913Z",
   "dayStart": "2026-10-12T22:00:00.000Z",
   "rangeStart": "2026-07-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-13T14:31:02.975Z",
+    "observedAt": "2026-10-13T14:46:02.967Z",
     "primary": {
-      "usedPercent": 9,
-      "remainingPercent": 91,
+      "usedPercent": 10,
+      "remainingPercent": 90,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -251,6 +251,20 @@
       "lastSeenAt": "2026-08-08T13:06:26.034Z"
     },
     {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 5,
+      "assistantSessionCount": 5,
+      "lastSeenAt": "2026-10-13T14:48:00.896Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -262,7 +276,21 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-13T14:25:45.798Z"
+      "lastSeenAt": "2026-10-13T14:46:14.429Z"
+    },
+    {
+      "key": "github/anders",
+      "displayPath": "GitHub/Anders",
+      "projectFolder": "Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-13T14:46:01.257Z"
     },
     {
       "key": "github/iflai",
@@ -279,20 +307,6 @@
       "lastSeenAt": "2026-10-13T14:14:57.388Z"
     },
     {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 5,
-      "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-13T11:12:24.278Z"
-    },
-    {
       "key": "github/iflai/email-helper",
       "displayPath": "GitHub/IFLAI/email-helper",
       "projectFolder": "IFLAI",
@@ -305,20 +319,6 @@
       "sessionCount": 2455,
       "assistantSessionCount": 2454,
       "lastSeenAt": "2026-10-13T10:09:47.765Z"
-    },
-    {
-      "key": "github/anders",
-      "displayPath": "GitHub/Anders",
-      "projectFolder": "Anders",
-      "repoName": "Anders",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-13T09:52:29.965Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -2840,6 +2840,23 @@
       "lastSeenAt": "2026-10-13T08:13:45.851Z"
     },
     {
+      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "title": "AZ SEM Foundation model tests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 55862,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-13T14:48:00.896Z"
+    },
+    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -2852,9 +2869,26 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1326,
+      "activityCount": 1492,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T14:25:45.798Z"
+      "lastSeenAt": "2026-10-13T14:46:14.429Z"
+    },
+    {
+      "key": "01a134a8-9319-77a3-9b43-905b1a733231",
+      "sessionId": "01a134a8-9319-77a3-9b43-905b1a733231",
+      "title": "Simplify Japan travel itinerary",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 236,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-13T14:46:01.257Z"
     },
     {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
@@ -2872,23 +2906,6 @@
       "activityCount": 1662,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-13T14:14:57.388Z"
-    },
-    {
-      "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "title": "AZ SEM Foundation model tests",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 55748,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T11:12:24.278Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -2923,23 +2940,6 @@
       "activityCount": 15335,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-13T10:09:47.765Z"
-    },
-    {
-      "key": "01a134a8-9319-77a3-9b43-905b1a733231",
-      "sessionId": "01a134a8-9319-77a3-9b43-905b1a733231",
-      "title": "Simplify Japan travel itinerary",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders",
-      "repoName": "Anders",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 88,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T09:52:29.965Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -76381,6 +76381,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 432,
           "effectiveSeconds": 216
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
+    },
+    {
+      "id": "codex-5772a238eb0df190c7d90117",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T13:59:34.738Z",
+      "endTime": "2026-10-13T14:14:57.388Z",
+      "wallSeconds": 922,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 461,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 922,
+          "effectiveSeconds": 461
         }
       ],
       "description": "Codex: Prepare NVIDIA Stockholm trip"
