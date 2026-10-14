@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T10:16:03.343Z",
+  "updatedAt": "2026-10-14T10:31:03.249Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T10:16:04.363Z",
+    "observedAt": "2026-10-14T10:31:04.463Z",
     "primary": {
-      "usedPercent": 37,
-      "remainingPercent": 63,
+      "usedPercent": 38,
+      "remainingPercent": 62,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -83,20 +83,6 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
-      "key": "github/iflai/aventix-iflai",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-14T10:16:40.513Z"
-    },
-    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -108,7 +94,21 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-14T10:16:06.284Z"
+      "lastSeenAt": "2026-10-14T10:30:56.904Z"
+    },
+    {
+      "key": "github/iflai/aventix-iflai",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-14T10:28:44.106Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -282,23 +282,6 @@
       "lastSeenAt": "2026-10-14T07:23:16.030Z"
     },
     {
-      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "title": "Update Aventix repo from Slack",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 18689,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T10:16:40.513Z"
-    },
-    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -311,9 +294,26 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 4590,
+      "activityCount": 4743,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T10:16:06.284Z"
+      "lastSeenAt": "2026-10-14T10:30:56.904Z"
+    },
+    {
+      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "title": "Update Aventix repo from Slack",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 18774,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T10:28:44.106Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -41747,8 +41747,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 182,
-    "imported": 182,
+    "discovered": 183,
+    "imported": 183,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -54292,6 +54292,78 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6829,
         "reasoning_output_tokens": 2330
+      }
+    },
+    {
+      "id": "codex-c2daef79265af2265898b6cd",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T10:00:06.724Z",
+      "endTime": "2026-10-14T10:10:28.044Z",
+      "wallSeconds": 621,
+      "focusFactor": 0.4992,
+      "effectiveSeconds": 310,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 621,
+          "effectiveSeconds": 310
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-54c58f6bfa600f9f16317a31",
+      "threadId": "01a139f1-befe-7941-8ce1-8602dfc5ccc1",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T10:25:06.412Z",
+      "endTime": "2026-10-14T10:28:48.162Z",
+      "wallSeconds": 221,
+      "focusFactor": 0.4977,
+      "effectiveSeconds": 110,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 221,
+          "effectiveSeconds": 110
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 373027,
+        "cached_input_tokens": 308608,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6396,
+        "reasoning_output_tokens": 2154
       }
     }
   ]
