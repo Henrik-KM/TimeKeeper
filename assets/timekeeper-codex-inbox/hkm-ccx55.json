@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T13:01:03.404Z",
+  "updatedAt": "2026-10-14T13:16:04.933Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T13:01:04.928Z",
+    "observedAt": "2026-10-14T13:16:07.898Z",
     "primary": {
-      "usedPercent": 42,
-      "remainingPercent": 58,
+      "usedPercent": 43,
+      "remainingPercent": 57,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-10-14/yes-windows-can-restart-sign-you",
+      "displayPath": "Documents/Codex/2026-10-14/yes-windows-can-restart-sign-you",
+      "projectFolder": "",
+      "repoName": "yes-windows-can-restart-sign-you",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-14T13:16:29.044Z"
+    },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
       "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -94,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-14T13:00:57.631Z"
+      "lastSeenAt": "2026-10-14T13:16:15.294Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -211,6 +225,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a13a8c-6d17-7bf1-98d9-c181ea423f6b",
+      "sessionId": "01a13a8c-6d17-7bf1-98d9-c181ea423f6b",
+      "title": "Set up ChatGPT auto-restart",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-10-14/yes-windows-can-restart-sign-you",
+      "repoName": "yes-windows-can-restart-sign-you",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 60,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T13:16:29.044Z"
+    },
+    {
       "key": "019ed546-e82a-73d3-897e-3f1aadb15657",
       "sessionId": "019ed546-e82a-73d3-897e-3f1aadb15657",
       "title": "Add Codex session logging",
@@ -308,9 +339,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 963,
+      "activityCount": 1132,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T13:00:57.631Z"
+      "lastSeenAt": "2026-10-14T13:16:15.294Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -41778,8 +41809,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 188,
-    "imported": 188,
+    "discovered": 189,
+    "imported": 189,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -54906,6 +54937,98 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1735,
         "reasoning_output_tokens": 554
+      }
+    },
+    {
+      "id": "codex-41d59517270ac82bf522534c",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-14T12:49:02.385Z",
+      "endTime": "2026-10-14T12:57:14.736Z",
+      "wallSeconds": 492,
+      "focusFactor": 0.5081,
+      "effectiveSeconds": 250,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 492,
+          "effectiveSeconds": 246,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 27,
+          "effectiveSeconds": 3,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-c4078ca0de8d050f6e6867d5",
+        "codex-426e28e028d2b2d4c986d2f3"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-a7559b87c4a6ab057d637b32",
+      "threadId": "01a13a7f-0e29-7ef0-95af-976135c10f21",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T12:59:27.253Z",
+      "endTime": "2026-10-14T13:08:31.519Z",
+      "wallSeconds": 544,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 272,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 544,
+          "effectiveSeconds": 272
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1145802,
+        "cached_input_tokens": 1034112,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 15639,
+        "reasoning_output_tokens": 4870
       }
     }
   ]
