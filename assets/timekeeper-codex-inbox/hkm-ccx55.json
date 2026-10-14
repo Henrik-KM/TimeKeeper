@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T16:01:01.906Z",
+  "updatedAt": "2026-10-14T16:16:01.823Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T16:01:03.191Z",
+    "observedAt": "2026-10-14T16:16:03.002Z",
     "primary": {
       "usedPercent": 46,
       "remainingPercent": 54,
@@ -97,6 +97,20 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-10-14T16:15:57.688Z"
+    },
+    {
       "key": "github/iflai/albany",
       "displayPath": "GitHub/IFLAI/Albany",
       "projectFolder": "IFLAI",
@@ -151,20 +165,6 @@
       "sessionCount": 2,
       "assistantSessionCount": 2,
       "lastSeenAt": "2026-10-14T11:15:50.335Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-14T11:06:32.044Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -327,6 +327,23 @@
       "lastSeenAt": "2026-10-14T07:23:16.030Z"
     },
     {
+      "key": "01a13465-6800-7451-9f66-802c686303b8",
+      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
+      "title": "Prepare NVIDIA Stockholm trip",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2023,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T16:15:57.688Z"
+    },
+    {
       "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
       "sessionId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
       "title": "Review latest Slack and Outlook",
@@ -393,23 +410,6 @@
       "activityCount": 19002,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-14T11:15:50.335Z"
-    },
-    {
-      "key": "01a13465-6800-7451-9f66-802c686303b8",
-      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
-      "title": "Prepare NVIDIA Stockholm trip",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 1964,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T11:06:32.044Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -41809,8 +41809,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 194,
-    "imported": 194,
+    "discovered": 195,
+    "imported": 195,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -55395,6 +55395,112 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2072,
         "reasoning_output_tokens": 551
+      }
+    },
+    {
+      "id": "codex-135a120e3c1f1220161732e0",
+      "threadId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "projectKey": "Albany",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T15:48:03.091Z",
+      "endTime": "2026-10-14T15:49:47.886Z",
+      "wallSeconds": 104,
+      "focusFactor": 0.5096,
+      "effectiveSeconds": 53,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 104,
+          "effectiveSeconds": 52,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 8,
+          "effectiveSeconds": 1,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-fa1c61c5cb4fefdfb5916050",
+        "codex-6e2ee492d04f07a4bdb46166"
+      ],
+      "description": "Codex: Review latest Slack and Outlook"
+    },
+    {
+      "id": "codex-f9e2ca501ceb3b9b13e4e7ae",
+      "threadId": "01a13b29-a442-7181-b6ff-c841fab6af7d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T16:05:46.765Z",
+      "endTime": "2026-10-14T16:09:29.671Z",
+      "wallSeconds": 222,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 111,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 222,
+          "effectiveSeconds": 111
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 250887,
+        "cached_input_tokens": 189184,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6305,
+        "reasoning_output_tokens": 2545
       }
     }
   ]
