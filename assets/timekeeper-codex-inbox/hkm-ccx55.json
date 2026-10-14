@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T15:46:01.908Z",
+  "updatedAt": "2026-10-14T16:01:01.906Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T15:46:03.064Z",
+    "observedAt": "2026-10-14T16:01:03.191Z",
     "primary": {
       "usedPercent": 46,
       "remainingPercent": 54,
@@ -97,6 +97,20 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
+      "key": "github/iflai/albany",
+      "displayPath": "GitHub/IFLAI/Albany",
+      "projectFolder": "IFLAI",
+      "repoName": "Albany",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-14T15:49:47.886Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -123,20 +137,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-14T15:25:55.200Z"
-    },
-    {
-      "key": "github/iflai/albany",
-      "displayPath": "GitHub/IFLAI/Albany",
-      "projectFolder": "IFLAI",
-      "repoName": "Albany",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-14T13:28:05.763Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -327,6 +327,23 @@
       "lastSeenAt": "2026-10-14T07:23:16.030Z"
     },
     {
+      "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "sessionId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "title": "Review latest Slack and Outlook",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Albany",
+      "repoName": "Albany",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1311,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T15:49:47.886Z"
+    },
+    {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "title": "AZ SEM Foundation model tests",
@@ -359,23 +376,6 @@
       "activityCount": 6789,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-14T15:25:55.200Z"
-    },
-    {
-      "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
-      "sessionId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
-      "title": "Review latest Slack and Outlook",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Albany",
-      "repoName": "Albany",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 1262,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T13:28:05.763Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -55218,6 +55218,37 @@
         "output_tokens": 9993,
         "reasoning_output_tokens": 4180
       }
+    },
+    {
+      "id": "codex-4195232a7a7748767006dfed",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T14:58:41.228Z",
+      "endTime": "2026-10-14T15:36:21.026Z",
+      "wallSeconds": 2259,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1129,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2259,
+          "effectiveSeconds": 1129
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     },
     {
       "id": "codex-27b8cd0bf1309f7c0eb8ef20",
