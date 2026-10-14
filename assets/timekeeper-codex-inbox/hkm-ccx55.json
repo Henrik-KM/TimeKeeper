@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T11:31:03.247Z",
+  "updatedAt": "2026-10-14T11:46:03.402Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T11:31:04.185Z",
+    "observedAt": "2026-10-14T11:46:04.427Z",
     "primary": {
-      "usedPercent": 39,
-      "remainingPercent": 61,
+      "usedPercent": 40,
+      "remainingPercent": 60,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -83,6 +83,20 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
+      "key": "github/iflai/albany",
+      "displayPath": "GitHub/IFLAI/Albany",
+      "projectFolder": "IFLAI",
+      "repoName": "Albany",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-14T11:46:03.266Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -94,7 +108,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-14T11:31:13.121Z"
+      "lastSeenAt": "2026-10-14T11:45:51.925Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -282,6 +296,23 @@
       "lastSeenAt": "2026-10-14T07:23:16.030Z"
     },
     {
+      "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "sessionId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
+      "title": "Review latest Slack and Outlook",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Albany",
+      "repoName": "Albany",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 404,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T11:46:03.266Z"
+    },
+    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -294,9 +325,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 5392,
+      "activityCount": 5491,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T11:31:13.121Z"
+      "lastSeenAt": "2026-10-14T11:45:51.925Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -41747,8 +41778,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 184,
-    "imported": 184,
+    "discovered": 185,
+    "imported": 185,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -54464,6 +54495,37 @@
       }
     },
     {
+      "id": "codex-c167309063cfb9dd783f61c4",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T10:55:47.420Z",
+      "endTime": "2026-10-14T11:15:50.335Z",
+      "wallSeconds": 1202,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 601,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1202,
+          "effectiveSeconds": 601
+        }
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
       "id": "codex-5a2d22553982c3cf1889e236",
       "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "projectKey": "sem-imaging",
@@ -54533,6 +54595,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9090,
         "reasoning_output_tokens": 3445
+      }
+    },
+    {
+      "id": "codex-53601e95fc3b12ccf386dc9a",
+      "threadId": "01a13a2e-d8cb-7a50-b5be-29586e9580e9",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T11:31:50.577Z",
+      "endTime": "2026-10-14T11:36:10.233Z",
+      "wallSeconds": 259,
+      "focusFactor": 0.4981,
+      "effectiveSeconds": 129,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 259,
+          "effectiveSeconds": 129
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 457373,
+        "cached_input_tokens": 384896,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 7277,
+        "reasoning_output_tokens": 3162
       }
     }
   ]
