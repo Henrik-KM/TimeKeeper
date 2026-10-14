@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-14T09:16:04.198Z",
+  "updatedAt": "2026-10-14T09:31:03.597Z",
   "dayStart": "2026-10-13T22:00:00.000Z",
   "rangeStart": "2026-07-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-14T09:16:07.791Z",
+    "observedAt": "2026-10-14T09:31:06.482Z",
     "primary": {
-      "usedPercent": 35,
-      "remainingPercent": 65,
+      "usedPercent": 36,
+      "remainingPercent": 64,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-20T05:07:45.000Z"
     },
@@ -94,7 +94,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-14T09:17:10.825Z"
+      "lastSeenAt": "2026-10-14T09:28:21.550Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -108,7 +108,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-14T09:16:52.840Z"
+      "lastSeenAt": "2026-10-14T09:26:54.062Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -294,9 +294,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 58147,
+      "activityCount": 58244,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T09:17:10.825Z"
+      "lastSeenAt": "2026-10-14T09:28:21.550Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -311,9 +311,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 3912,
+      "activityCount": 3994,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T09:16:52.840Z"
+      "lastSeenAt": "2026-10-14T09:26:54.062Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -41747,8 +41747,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 181,
-    "imported": 181,
+    "discovered": 182,
+    "imported": 182,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -54220,6 +54220,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3171,
         "reasoning_output_tokens": 1141
+      }
+    },
+    {
+      "id": "codex-474173deff99c7f8ed959793",
+      "threadId": "01a139b3-a899-7f70-9a90-2f88cea60cac",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T09:17:15.638Z",
+      "endTime": "2026-10-14T09:22:00.997Z",
+      "wallSeconds": 285,
+      "focusFactor": 0.4982,
+      "effectiveSeconds": 142,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 285,
+          "effectiveSeconds": 142
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 382228,
+        "cached_input_tokens": 313728,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6829,
+        "reasoning_output_tokens": 2330
       }
     }
   ]
