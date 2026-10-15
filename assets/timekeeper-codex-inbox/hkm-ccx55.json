@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-15T11:46:02.632Z",
+  "updatedAt": "2026-10-15T12:01:02.203Z",
   "dayStart": "2026-10-14T22:00:00.000Z",
   "rangeStart": "2026-07-17T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-15T11:46:03.566Z",
+    "observedAt": "2026-10-15T12:01:03.146Z",
     "primary": {
       "usedPercent": 12,
       "remainingPercent": 88,
@@ -97,6 +97,20 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-15T11:54:31.964Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -137,20 +151,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-15T07:22:27.478Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-14T16:16:57.601Z"
     },
     {
       "key": "github/iflai/albany",
@@ -325,6 +325,23 @@
       "activityCount": 21906,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-15T07:25:42.864Z"
+    },
+    {
+      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 220,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-15T11:54:31.964Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -41809,8 +41826,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 210,
-    "imported": 210,
+    "discovered": 211,
+    "imported": 211,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -55920,6 +55937,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4484,
         "reasoning_output_tokens": 1009
+      }
+    },
+    {
+      "id": "codex-08f3b98256ac09882e9a4ae9",
+      "threadId": "01a13f6a-b27c-7940-a7fa-6145d8425550",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-15T11:55:19.158Z",
+      "endTime": "2026-10-15T11:56:13.252Z",
+      "wallSeconds": 54,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 27,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 54,
+          "effectiveSeconds": 27
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 145806,
+        "cached_input_tokens": 96768,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1523,
+        "reasoning_output_tokens": 627
       }
     }
   ]
