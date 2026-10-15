@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-15T19:31:02.423Z",
+  "updatedAt": "2026-10-15T19:46:02.495Z",
   "dayStart": "2026-10-14T22:00:00.000Z",
   "rangeStart": "2026-07-17T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-15T19:31:03.349Z",
+    "observedAt": "2026-10-15T19:46:03.455Z",
     "primary": {
       "usedPercent": 14,
       "remainingPercent": 86,
@@ -56311,6 +56311,37 @@
         "output_tokens": 1571,
         "reasoning_output_tokens": 360
       }
+    },
+    {
+      "id": "codex-ae903c8fcaa0a2697cc52cce",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-15T19:11:03.210Z",
+      "endTime": "2026-10-15T19:20:51.289Z",
+      "wallSeconds": 588,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 294,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 588,
+          "effectiveSeconds": 294
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     }
   ]
 }
