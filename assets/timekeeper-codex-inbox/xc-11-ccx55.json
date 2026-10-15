@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-15T21:57:02.091Z",
-  "dayStart": "2026-10-14T22:00:00.000Z",
-  "rangeStart": "2026-07-17T22:00:00.000Z",
+  "updatedAt": "2026-10-15T22:02:02.045Z",
+  "dayStart": "2026-10-15T22:00:00.000Z",
+  "rangeStart": "2026-07-18T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-15T21:57:02.951Z",
+    "observedAt": "2026-10-15T22:02:03.007Z",
     "primary": {
       "usedPercent": 15,
       "remainingPercent": 85,
@@ -346,175 +346,6 @@
     }
   ],
   "records": [
-    {
-      "id": "codex-305bacd00ca5918f17773ca7",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-09T10:07:48.712Z",
-      "endTime": "2026-10-09T10:24:39.206Z",
-      "wallSeconds": 1010,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 505,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1009,
-          "effectiveSeconds": 504
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
-    {
-      "id": "codex-57bbf5c7e4dfae3fb62fa014",
-      "threadId": "019e5f78-41b2-79d0-bebd-baa3944e24ed",
-      "projectKey": "particle_iden",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-09T12:53:32.991Z",
-      "endTime": "2026-10-09T13:11:30.053Z",
-      "wallSeconds": 1077,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 538,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1077,
-          "effectiveSeconds": 538
-        }
-      ],
-      "description": "Codex: Recreate Figure 1 as vector"
-    },
-    {
-      "id": "codex-4663254153a3871f02e9055b",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-09T16:15:15.644Z",
-      "endTime": "2026-10-09T17:17:37.372Z",
-      "wallSeconds": 3741,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 1870,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3741,
-          "effectiveSeconds": 1870
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
-    {
-      "id": "codex-e216184dfebdb6d71e09b784",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-09T18:15:33.605Z",
-      "endTime": "2026-10-09T18:49:10.010Z",
-      "wallSeconds": 2016,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1008,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2016,
-          "effectiveSeconds": 1008
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
-    {
-      "id": "codex-8f6ce4cde56cf48733e51690",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-09T19:40:19.647Z",
-      "endTime": "2026-10-09T19:47:24.346Z",
-      "wallSeconds": 424,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 212,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 424,
-          "effectiveSeconds": 212
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
     {
       "id": "codex-1c87a7e8e9b9a8442f6c3075",
       "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
