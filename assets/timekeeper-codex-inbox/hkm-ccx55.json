@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-16T07:16:02.776Z",
+  "updatedAt": "2026-10-16T07:31:02.646Z",
   "dayStart": "2026-10-15T22:00:00.000Z",
   "rangeStart": "2026-07-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-16T07:16:03.848Z",
+    "observedAt": "2026-10-16T07:31:03.646Z",
     "primary": {
       "usedPercent": 20,
       "remainingPercent": 80,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-16T07:16:11.114Z"
+      "lastSeenAt": "2026-10-16T07:24:39.411Z"
     },
     {
       "key": "documents/codex/2026-10-14/yes-windows-can-restart-sign-you",
@@ -108,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-16T07:16:49.203Z"
+      "lastSeenAt": "2026-10-16T07:29:36.539Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -322,9 +322,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 22146,
+      "activityCount": 22246,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-16T07:16:11.114Z"
+      "lastSeenAt": "2026-10-16T07:24:39.411Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -339,9 +339,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 63284,
+      "activityCount": 63520,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-16T07:16:49.203Z"
+      "lastSeenAt": "2026-10-16T07:29:36.539Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -56341,6 +56341,71 @@
         "output_tokens": 1132,
         "reasoning_output_tokens": 301
       }
+    },
+    {
+      "id": "codex-bfd51346699ed2b290616c20",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-16T06:58:13.439Z",
+      "endTime": "2026-10-16T07:12:25.521Z",
+      "wallSeconds": 852,
+      "focusFactor": 0.5669,
+      "effectiveSeconds": 483,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 852,
+          "effectiveSeconds": 426,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 413,
+          "effectiveSeconds": 57,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-c059f70b2ab77ead989f6883",
+        "codex-25a0231e2ac1236ca891c74f"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
