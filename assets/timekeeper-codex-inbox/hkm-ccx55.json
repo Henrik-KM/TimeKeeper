@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-16T07:31:02.646Z",
+  "updatedAt": "2026-10-16T07:46:02.718Z",
   "dayStart": "2026-10-15T22:00:00.000Z",
   "rangeStart": "2026-07-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-16T07:31:03.646Z",
+    "observedAt": "2026-10-16T07:46:03.994Z",
     "primary": {
-      "usedPercent": 20,
-      "remainingPercent": 80,
+      "usedPercent": 21,
+      "remainingPercent": 79,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-22T06:13:02.000Z"
     },
@@ -97,6 +97,20 @@
       "lastSeenAt": "2026-10-08T15:48:22.395Z"
     },
     {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2427,
+      "assistantSessionCount": 2427,
+      "lastSeenAt": "2026-10-16T07:46:00.528Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -137,20 +151,6 @@
       "sessionCount": 4,
       "assistantSessionCount": 4,
       "lastSeenAt": "2026-10-15T11:54:31.964Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2427,
-      "assistantSessionCount": 2427,
-      "lastSeenAt": "2026-10-15T07:47:56.747Z"
     },
     {
       "key": "github/iflai/albany",
@@ -327,6 +327,23 @@
       "lastSeenAt": "2026-10-16T07:24:39.411Z"
     },
     {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3320,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-16T07:46:00.528Z"
+    },
+    {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "title": "AZ SEM Foundation model tests",
@@ -376,23 +393,6 @@
       "activityCount": 220,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-15T11:54:31.964Z"
-    },
-    {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 3279,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-15T07:47:56.747Z"
     },
     {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
@@ -41826,8 +41826,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 222,
-    "imported": 222,
+    "discovered": 223,
+    "imported": 223,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -56343,6 +56343,37 @@
       }
     },
     {
+      "id": "codex-a73e3d7dcd680f7d1df39f98",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-16T06:56:43.610Z",
+      "endTime": "2026-10-16T07:24:39.411Z",
+      "wallSeconds": 1675,
+      "focusFactor": 0.2997,
+      "effectiveSeconds": 502,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1675,
+          "effectiveSeconds": 502
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
       "id": "codex-bfd51346699ed2b290616c20",
       "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
@@ -56406,6 +56437,47 @@
         "codex-25a0231e2ac1236ca891c74f"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-4ff9440391346c046859470a",
+      "threadId": "01a143a9-4f75-7ce1-9d1b-2f433f0def3c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-16T07:42:11.529Z",
+      "endTime": "2026-10-16T07:42:55.716Z",
+      "wallSeconds": 44,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 22,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 44,
+          "effectiveSeconds": 22
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 124797,
+        "cached_input_tokens": 81792,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1135,
+        "reasoning_output_tokens": 394
+      }
     }
   ]
 }
