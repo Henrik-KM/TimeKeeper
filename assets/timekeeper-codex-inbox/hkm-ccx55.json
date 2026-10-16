@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-16T16:46:01.881Z",
+  "updatedAt": "2026-10-16T17:01:01.962Z",
   "dayStart": "2026-10-15T22:00:00.000Z",
   "rangeStart": "2026-07-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-16T16:46:03.139Z",
+    "observedAt": "2026-10-16T17:01:03.031Z",
     "primary": {
-      "usedPercent": 50,
-      "remainingPercent": 50,
+      "usedPercent": 59,
+      "remainingPercent": 41,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-22T06:13:02.000Z"
     },
@@ -56838,6 +56838,37 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-35e10ce41e464a4411f47979",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-16T16:22:12.570Z",
+      "endTime": "2026-10-16T16:33:23.251Z",
+      "wallSeconds": 670,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 335,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 670,
+          "effectiveSeconds": 335
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     }
   ]
 }
