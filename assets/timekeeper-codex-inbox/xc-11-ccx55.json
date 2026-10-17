@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-17T21:57:02.482Z",
-  "dayStart": "2026-10-16T22:00:00.000Z",
-  "rangeStart": "2026-07-19T22:00:00.000Z",
+  "updatedAt": "2026-10-17T22:02:02.388Z",
+  "dayStart": "2026-10-17T22:00:00.000Z",
+  "rangeStart": "2026-07-20T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-17T21:57:03.424Z",
+    "observedAt": "2026-10-17T22:02:03.208Z",
     "primary": {
       "usedPercent": 0,
       "remainingPercent": 100,
@@ -346,37 +346,6 @@
     }
   ],
   "records": [
-    {
-      "id": "codex-1c87a7e8e9b9a8442f6c3075",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-11T18:29:44.949Z",
-      "endTime": "2026-10-11T18:45:57.892Z",
-      "wallSeconds": 972,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 486,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 972,
-          "effectiveSeconds": 486
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
     {
       "id": "codex-93dc90296a1570a943257fc7",
       "threadId": "019d6c4a-c8a6-7761-b514-682c24b870e5",
