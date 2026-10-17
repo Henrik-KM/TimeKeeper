@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-17T21:31:02.575Z",
+  "updatedAt": "2026-10-17T21:46:02.518Z",
   "dayStart": "2026-10-16T22:00:00.000Z",
   "rangeStart": "2026-07-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-17T21:31:03.431Z",
+    "observedAt": "2026-10-17T21:46:03.370Z",
     "primary": {
       "usedPercent": 0,
       "remainingPercent": 100,
@@ -41843,9 +41843,9 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 229,
-    "imported": 228,
-    "invalid": 1,
+    "discovered": 233,
+    "imported": 233,
+    "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -56620,6 +56620,211 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1191,
         "reasoning_output_tokens": 333
+      }
+    },
+    {
+      "id": "codex-d130e3f14ef3f311f18a733f",
+      "threadId": "01a14bc6-68af-7780-932e-23b0816bb0ef",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-17T21:30:56.232Z",
+      "endTime": "2026-10-17T21:31:16.529Z",
+      "wallSeconds": 20,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 20,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 91976,
+        "cached_input_tokens": 49408,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 712,
+        "reasoning_output_tokens": 217
+      }
+    },
+    {
+      "id": "codex-478f759ce63eb0f554e16fa1",
+      "threadId": "01a14bc9-0b81-7192-8abe-17a093b7b492",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-17T21:33:48.979Z",
+      "endTime": "2026-10-17T21:34:35.526Z",
+      "wallSeconds": 46,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 23,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 46,
+          "effectiveSeconds": 23
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 209064,
+        "cached_input_tokens": 151552,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2147,
+        "reasoning_output_tokens": 781
+      }
+    },
+    {
+      "id": "codex-a0bbbf471ce347f6c6681540",
+      "threadId": "01a14bcc-0a99-7063-a793-5dff31502111",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-17T21:37:05.375Z",
+      "endTime": "2026-10-17T21:37:47.406Z",
+      "wallSeconds": 42,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 42,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 161578,
+        "cached_input_tokens": 120192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1991,
+        "reasoning_output_tokens": 482
+      }
+    },
+    {
+      "id": "codex-3e0f653b36f595e5f32cb3bc",
+      "threadId": "01a14bce-defd-7c62-92ec-ea727e388756",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-17T21:40:10.790Z",
+      "endTime": "2026-10-17T21:40:47.977Z",
+      "wallSeconds": 37,
+      "focusFactor": 0.4865,
+      "effectiveSeconds": 18,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 37,
+          "effectiveSeconds": 18
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 120361,
+        "cached_input_tokens": 83840,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1503,
+        "reasoning_output_tokens": 802
+      }
+    },
+    {
+      "id": "codex-6052babbc7342c09e1d0c46c",
+      "threadId": "01a14bd1-c58c-78a0-a268-69e536bd1e47",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-17T21:43:20.870Z",
+      "endTime": "2026-10-17T21:43:41.557Z",
+      "wallSeconds": 20,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 10,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 20,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 79976,
+        "cached_input_tokens": 62464,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 717,
+        "reasoning_output_tokens": 163
       }
     }
   ]
