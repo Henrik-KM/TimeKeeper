@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-18T21:46:02.045Z",
-  "dayStart": "2026-10-17T22:00:00.000Z",
-  "rangeStart": "2026-07-20T22:00:00.000Z",
+  "updatedAt": "2026-10-18T22:01:02.037Z",
+  "dayStart": "2026-10-18T22:00:00.000Z",
+  "rangeStart": "2026-07-21T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-18T21:46:03.376Z",
+    "observedAt": "2026-10-18T22:01:02.918Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
@@ -49324,7 +49324,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8721,
         "reasoning_output_tokens": 3665
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-5edb93a47bf52c7512024a91",
@@ -49365,38 +49366,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8158,
         "reasoning_output_tokens": 3078
-      }
-    },
-    {
-      "id": "codex-fe2f9ac9a47c8eb4eea539cc",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T00:09:02.273Z",
-      "endTime": "2026-10-12T00:38:07.790Z",
-      "wallSeconds": 1745,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 872,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1745,
-          "effectiveSeconds": 872
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f00b33eac5af300133f58254",
@@ -49437,7 +49408,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 11153,
         "reasoning_output_tokens": 5850
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-09307bf6a22d748c84220bdf",
@@ -49478,38 +49450,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7411,
         "reasoning_output_tokens": 3085
-      }
-    },
-    {
-      "id": "codex-ff113c22476a56ec036a24be",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T03:03:35.384Z",
-      "endTime": "2026-10-12T03:10:54.241Z",
-      "wallSeconds": 438,
-      "focusFactor": 0.2991,
-      "effectiveSeconds": 131,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 438,
-          "effectiveSeconds": 131
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-c15cf38f90f7201d432fabd2",
@@ -49550,38 +49492,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7533,
         "reasoning_output_tokens": 2825
-      }
-    },
-    {
-      "id": "codex-7c86e17eccfaed723f000f27",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T04:04:36.456Z",
-      "endTime": "2026-10-12T04:48:37.646Z",
-      "wallSeconds": 2641,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1320,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2641,
-          "effectiveSeconds": 1320
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0dab220fc328b95b0328a53d",
@@ -49622,7 +49534,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8196,
         "reasoning_output_tokens": 2905
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-b23046293bd108ec3581d705",
@@ -49663,7 +49576,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7816,
         "reasoning_output_tokens": 3146
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-a5fba175451446634635f0da",
@@ -49704,7 +49618,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1277,
         "reasoning_output_tokens": 479
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0a91376e858ee1ff38c277a6",
@@ -49745,7 +49660,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7414,
         "reasoning_output_tokens": 2565
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-63afb99f6dbe9998d476f102",
@@ -49776,7 +49692,8 @@
           "effectiveSeconds": 429
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-d09c12622df1bf8a14d1feb1",
@@ -49817,38 +49734,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2305,
         "reasoning_output_tokens": 835
-      }
-    },
-    {
-      "id": "codex-4c8d6822d1390d0305c60294",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T08:13:10.387Z",
-      "endTime": "2026-10-12T09:18:34.465Z",
-      "wallSeconds": 3924,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1962,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3924,
-          "effectiveSeconds": 1962
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d12d496b412d50f032c9a212",
@@ -49889,7 +49776,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8425,
         "reasoning_output_tokens": 3178
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-fd37c93d9b1ea60614d9ebda",
@@ -49930,7 +49818,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 24952,
         "reasoning_output_tokens": 11184
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-019ff176753d0d775ed57566",
@@ -49971,7 +49860,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1666,
         "reasoning_output_tokens": 504
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-387c93115347eb7cd8fa30d9",
@@ -50012,7 +49902,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1586,
         "reasoning_output_tokens": 349
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-1d08d48d6356657154a990aa",
@@ -50053,7 +49944,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1141,
         "reasoning_output_tokens": 437
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-da2789370d1f2696d5455c6b",
@@ -50094,7 +49986,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3807,
         "reasoning_output_tokens": 1298
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-bc355dd55fa7b1cbfb2a471f",
@@ -50135,38 +50028,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 14972,
         "reasoning_output_tokens": 6100
-      }
-    },
-    {
-      "id": "codex-73c37bc6f638008ea1a77eb5",
-      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T09:59:12.813Z",
-      "endTime": "2026-10-12T10:08:07.748Z",
-      "wallSeconds": 534,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 267,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "high",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 534,
-          "effectiveSeconds": 267
-        }
-      ],
-      "description": "Codex: Edit outreach drafts"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-5074a9a138e61832e1ed7de8",
@@ -50207,7 +50070,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3605,
         "reasoning_output_tokens": 1218
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-71426c415522d59a1f7fa04c",
@@ -50248,7 +50112,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8000,
         "reasoning_output_tokens": 3071
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-4399d7c379021a59cc99da11",
@@ -50289,7 +50154,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2075,
         "reasoning_output_tokens": 594
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d66679de74665e767dd3da77",
@@ -50330,38 +50196,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 21478,
         "reasoning_output_tokens": 11565
-      }
-    },
-    {
-      "id": "codex-829b7a71e9c5b9a3d8c64d4f",
-      "threadId": "01a10844-21ad-79a0-b0db-3576973ee390",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T10:37:04.487Z",
-      "endTime": "2026-10-12T11:07:02.525Z",
-      "wallSeconds": 1798,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 899,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1798,
-          "effectiveSeconds": 899
-        }
-      ],
-      "description": "Codex: email-helper"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-db3df91b7655ed3bfbfd48c5",
@@ -50402,7 +50238,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 35,
         "reasoning_output_tokens": 19
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0ecc154d1ed07bc10fb296ff",
@@ -50443,7 +50280,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7452,
         "reasoning_output_tokens": 2915
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d37de1f4027d85bf22a92599",
@@ -50484,100 +50322,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 10012,
         "reasoning_output_tokens": 5030
-      }
-    },
-    {
-      "id": "codex-1576448375fe0649cbfe9613",
-      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T12:08:24.408Z",
-      "endTime": "2026-10-12T12:10:26.690Z",
-      "wallSeconds": 122,
-      "focusFactor": 0.2951,
-      "effectiveSeconds": 36,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 122,
-          "effectiveSeconds": 36
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-7a8075cd4d2c79d20b7cd591",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T12:10:27.627Z",
-      "endTime": "2026-10-12T12:56:53.085Z",
-      "wallSeconds": 2785,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1392,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2785,
-          "effectiveSeconds": 1392
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-5cb9ac66a8304dd8290c9c69",
-      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "projectKey": "Aventix-IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T12:13:30.655Z",
-      "endTime": "2026-10-12T12:26:00.353Z",
-      "wallSeconds": 749,
-      "focusFactor": 0.4993,
-      "effectiveSeconds": 374,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 749,
-          "effectiveSeconds": 374
-        }
-      ],
-      "description": "Codex: Update Aventix repo from Slack"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f23d15566cfca3c93328898d",
@@ -50618,7 +50364,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2869,
         "reasoning_output_tokens": 676
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-00550f252eec041ad1348b40",
@@ -50659,337 +50406,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8212,
         "reasoning_output_tokens": 3058
-      }
-    },
-    {
-      "id": "codex-87965e843b21e08e6c1f91aa",
-      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T14:04:46.950Z",
-      "endTime": "2026-10-12T14:22:52.728Z",
-      "wallSeconds": 1085,
-      "focusFactor": 0.2995,
-      "effectiveSeconds": 325,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1085,
-          "effectiveSeconds": 325
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-422abc76c574430e3a822fc0",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T14:04:48.103Z",
-      "endTime": "2026-10-12T14:36:15.473Z",
-      "wallSeconds": 1887,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 943,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1887,
-          "effectiveSeconds": 943
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-9c0cc5264697101cce37980e",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T16:18:48.727Z",
-      "endTime": "2026-10-12T17:13:45.116Z",
-      "wallSeconds": 3296,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1648,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3296,
-          "effectiveSeconds": 1648
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-c0715caaf9029aa9e922599a",
-      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T16:19:07.007Z",
-      "endTime": "2026-10-12T16:20:56.681Z",
-      "wallSeconds": 109,
-      "focusFactor": 0.2936,
-      "effectiveSeconds": 32,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 109,
-          "effectiveSeconds": 32
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-e022f2aa2220fd78eb52b25d",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-12T16:28:19.180Z",
-      "endTime": "2026-10-12T17:18:30.648Z",
-      "wallSeconds": 3011,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1505,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 3011,
-          "effectiveSeconds": 1505,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-879c2417dbeac6003299ee5e"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-9977b3c459a5d34cf34d3696",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T17:45:58.923Z",
-      "endTime": "2026-10-12T18:27:29.871Z",
-      "wallSeconds": 2490,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1245,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2490,
-          "effectiveSeconds": 1245
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-0ea767d02c5ddac241fefaf8",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-12T17:46:24.295Z",
-      "endTime": "2026-10-12T17:53:30.844Z",
-      "wallSeconds": 426,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 213,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 426,
-          "effectiveSeconds": 213,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-9238be7fe5530bf9eacf1912"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-2629bf9c9fcdf669ffd45579",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-12T18:38:50.424Z",
-      "endTime": "2026-10-12T18:40:34.990Z",
-      "wallSeconds": 104,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 52,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 104,
-          "effectiveSeconds": 52,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-52a104f03b38de217dc1e2e7"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-13319e24bf04e278aaedcdee",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-12T19:24:39.396Z",
-      "endTime": "2026-10-12T19:32:09.572Z",
-      "wallSeconds": 450,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 225,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 450,
-          "effectiveSeconds": 225,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-066b2be5f1fac79ae18161ba"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-928b6f114960f280c862a78a",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-12T20:40:12.565Z",
-      "endTime": "2026-10-12T21:40:18.110Z",
-      "wallSeconds": 3605,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 1802,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3605,
-          "effectiveSeconds": 1802
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d8ea810e7be440d69598b71b",
