@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-18T09:16:03.773Z",
+  "updatedAt": "2026-10-18T09:31:02.950Z",
   "dayStart": "2026-10-17T22:00:00.000Z",
   "rangeStart": "2026-07-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-18T09:16:06.203Z",
+    "observedAt": "2026-10-18T09:31:04.530Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
@@ -57010,6 +57010,51 @@
         "output_tokens": 895,
         "reasoning_output_tokens": 245
       }
+    },
+    {
+      "id": "codex-256833a6ec47f353fbf9d794",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-18T08:55:01.022Z",
+      "endTime": "2026-10-18T09:03:33.336Z",
+      "wallSeconds": 512,
+      "focusFactor": 0.498,
+      "effectiveSeconds": 255,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 510,
+          "effectiveSeconds": 255
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     }
   ]
 }
