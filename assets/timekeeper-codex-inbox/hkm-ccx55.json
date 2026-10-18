@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-18T09:01:02.775Z",
+  "updatedAt": "2026-10-18T09:16:03.773Z",
   "dayStart": "2026-10-17T22:00:00.000Z",
   "rangeStart": "2026-07-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-18T09:01:04.969Z",
+    "observedAt": "2026-10-18T09:16:06.203Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
@@ -108,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-18T09:00:53.974Z"
+      "lastSeenAt": "2026-10-18T09:03:33.336Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -339,9 +339,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2779,
+      "activityCount": 2813,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T09:00:53.974Z"
+      "lastSeenAt": "2026-10-18T09:03:33.336Z"
     },
     {
       "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
@@ -56856,6 +56856,37 @@
         "output_tokens": 1322,
         "reasoning_output_tokens": 307
       }
+    },
+    {
+      "id": "codex-8ede50d486809f12aff6530d",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-18T08:44:56.185Z",
+      "endTime": "2026-10-18T08:54:06.972Z",
+      "wallSeconds": 550,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 275,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 550,
+          "effectiveSeconds": 275
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     },
     {
       "id": "codex-39a8a11ef04e0f724cf425d2",
