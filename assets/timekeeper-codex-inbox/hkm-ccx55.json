@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-18T10:16:02.811Z",
+  "updatedAt": "2026-10-18T10:31:02.689Z",
   "dayStart": "2026-10-17T22:00:00.000Z",
   "rangeStart": "2026-07-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-18T10:16:04.108Z",
+    "observedAt": "2026-10-18T10:31:04.060Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -108,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-18T10:15:49.879Z"
+      "lastSeenAt": "2026-10-18T10:31:01.127Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -339,9 +339,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3391,
+      "activityCount": 3455,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T10:15:49.879Z"
+      "lastSeenAt": "2026-10-18T10:31:01.127Z"
     },
     {
       "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
@@ -41860,8 +41860,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 237,
-    "imported": 237,
+    "discovered": 239,
+    "imported": 239,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -57055,6 +57055,88 @@
         }
       ],
       "description": "Codex: Prepare NVIDIA Stockholm trip"
+    },
+    {
+      "id": "codex-66ab7e8a51ec1d38b9c361ee",
+      "threadId": "01a14e8b-d573-7130-88ae-b6ae8be30f12",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-18T10:25:49.083Z",
+      "endTime": "2026-10-18T10:27:16.958Z",
+      "wallSeconds": 87,
+      "focusFactor": 0.4943,
+      "effectiveSeconds": 43,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 87,
+          "effectiveSeconds": 43
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 386095,
+        "cached_input_tokens": 341120,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3698,
+        "reasoning_output_tokens": 988
+      }
+    },
+    {
+      "id": "codex-7303efd8f7c81cfbde97b330",
+      "threadId": "01a14e8e-45ad-7083-b52d-3947a686fd89",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-18T10:28:28.718Z",
+      "endTime": "2026-10-18T10:29:01.499Z",
+      "wallSeconds": 32,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 16,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 32,
+          "effectiveSeconds": 16
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 83133,
+        "cached_input_tokens": 49920,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1232,
+        "reasoning_output_tokens": 602
+      }
     }
   ]
 }
