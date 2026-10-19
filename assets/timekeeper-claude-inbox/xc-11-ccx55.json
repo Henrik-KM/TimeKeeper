@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-19T04:16:02.195Z",
+  "updatedAt": "2026-10-19T07:06:01.440Z",
   "rangeStart": "2026-09-19T22:00:00.000Z",
   "lookbackDays": 30,
   "records": [
@@ -3522,6 +3522,33 @@
         }
       ],
       "focusFactor": 0.5,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:97c54136b0ea0c20bad306128f91c819",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "genAI-review",
+      "description": "Claude: genAI-review",
+      "startTime": "2026-10-19T06:48:03.105Z",
+      "endTime": "2026-10-19T06:48:50.749Z",
+      "wallSeconds": 47,
+      "effectiveSeconds": 23,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 47,
+          "effectiveSeconds": 23
+        }
+      ],
+      "focusFactor": 0.4894,
       "focusPolicyVersion": 1,
       "delegationCredit": 0.35
     }
