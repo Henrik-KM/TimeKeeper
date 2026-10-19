@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-19T16:01:02.699Z",
+  "updatedAt": "2026-10-19T16:16:02.612Z",
   "dayStart": "2026-10-18T22:00:00.000Z",
   "rangeStart": "2026-07-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-19T16:01:03.642Z",
+    "observedAt": "2026-10-19T16:16:03.526Z",
     "primary": {
       "usedPercent": 59,
       "remainingPercent": 41,
@@ -58161,6 +58161,37 @@
         "codex-32dc29faa944c995d9cfadc8"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-8b7f59552aa9ac91e4e59cf5",
+      "threadId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-19T15:24:44.808Z",
+      "endTime": "2026-10-19T15:52:02.558Z",
+      "wallSeconds": 1637,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 818,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1637,
+          "effectiveSeconds": 818
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
