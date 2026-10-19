@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-19T06:46:02.377Z",
+  "updatedAt": "2026-10-19T07:01:02.392Z",
   "dayStart": "2026-10-18T22:00:00.000Z",
   "rangeStart": "2026-07-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-19T06:46:03.509Z",
+    "observedAt": "2026-10-19T07:01:04.220Z",
     "primary": {
-      "usedPercent": 16,
-      "remainingPercent": 84,
+      "usedPercent": 17,
+      "remainingPercent": 83,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-24T20:49:36.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-18T07:09:04.748Z"
+      "lastSeenAt": "2026-10-19T07:01:13.324Z"
     },
     {
       "key": "documents/codex/2026-10-14/yes-windows-can-restart-sign-you",
@@ -108,7 +108,35 @@
       "match": "IFLAI",
       "sessionCount": 2428,
       "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-10-19T05:52:19.389Z"
+      "lastSeenAt": "2026-10-19T07:01:22.595Z"
+    },
+    {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-19T07:01:20.701Z"
+    },
+    {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 6,
+      "assistantSessionCount": 6,
+      "lastSeenAt": "2026-10-19T07:00:59.755Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -125,20 +153,6 @@
       "lastSeenAt": "2026-10-19T04:03:19.857Z"
     },
     {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 5,
-      "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-18T10:49:41.749Z"
-    },
-    {
       "key": "github/iflai/albany",
       "displayPath": "GitHub/IFLAI/Albany",
       "projectFolder": "IFLAI",
@@ -151,20 +165,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-18T08:18:01.731Z"
-    },
-    {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-18T08:03:08.921Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -322,9 +322,94 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 22416,
+      "activityCount": 22504,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T07:09:04.748Z"
+      "lastSeenAt": "2026-10-19T07:01:13.324Z"
+    },
+    {
+      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "title": "LinkedIn weekly stale invitation cleanup",
+      "threadSource": "agent_forked_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 5367,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T07:01:22.595Z"
+    },
+    {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Submit Barbro Osher application",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 9431,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T07:01:20.701Z"
+    },
+    {
+      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 447,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T07:00:59.755Z"
+    },
+    {
+      "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "title": "Draft ZEISS follow-up",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 271,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T07:00:58.900Z"
+    },
+    {
+      "key": "01a13465-6800-7451-9f66-802c686303b8",
+      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
+      "title": "Prepare NVIDIA Stockholm trip",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3966,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T06:57:15.026Z"
     },
     {
       "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
@@ -361,23 +446,6 @@
       "lastSeenAt": "2026-10-19T04:03:19.857Z"
     },
     {
-      "key": "01a13465-6800-7451-9f66-802c686303b8",
-      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
-      "title": "Prepare NVIDIA Stockholm trip",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 3860,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T10:49:41.749Z"
-    },
-    {
       "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
       "sessionId": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
       "title": "Review latest Slack and Outlook",
@@ -393,23 +461,6 @@
       "activityCount": 1314,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-18T08:18:01.731Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Submit Barbro Osher application",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 9392,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T08:03:08.921Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -429,23 +480,6 @@
       "lastSeenAt": "2026-10-18T07:46:09.857Z"
     },
     {
-      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "title": "LinkedIn weekly stale invitation cleanup",
-      "threadSource": "agent_forked_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 5185,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-18T07:32:20.521Z"
-    },
-    {
       "key": "01a1440f-39c7-7f32-ad49-9d08a6067d74",
       "sessionId": "01a1440f-39c7-7f32-ad49-9d08a6067d74",
       "title": "",
@@ -461,23 +495,6 @@
       "activityCount": 101,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-16T09:46:51.664Z"
-    },
-    {
-      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 220,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-15T11:54:31.964Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -41860,9 +41877,9 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 246,
-    "imported": 246,
-    "invalid": 0,
+    "discovered": 248,
+    "imported": 247,
+    "invalid": 1,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -57027,6 +57044,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1048,
         "reasoning_output_tokens": 392
+      }
+    },
+    {
+      "id": "codex-f07508d2477abeda1a5788f4",
+      "threadId": "01a152ee-2ca7-7772-af6f-affcd4c5b6ff",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-19T06:51:42.770Z",
+      "endTime": "2026-10-19T06:55:53.020Z",
+      "wallSeconds": 250,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 125,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 250,
+          "effectiveSeconds": 125
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 580100,
+        "cached_input_tokens": 486528,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 10643,
+        "reasoning_output_tokens": 4107
       }
     }
   ]
