@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-19T08:31:02.471Z",
+  "updatedAt": "2026-10-19T08:46:02.569Z",
   "dayStart": "2026-10-18T22:00:00.000Z",
   "rangeStart": "2026-07-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-19T08:31:03.178Z",
+    "observedAt": "2026-10-19T08:46:03.446Z",
     "primary": {
-      "usedPercent": 24,
-      "remainingPercent": 76,
+      "usedPercent": 25,
+      "remainingPercent": 75,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-24T20:49:36.000Z"
     },
@@ -108,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-10-19T08:21:49.506Z"
+      "lastSeenAt": "2026-10-19T08:46:08.325Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -339,9 +339,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2900,
+      "activityCount": 3265,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T08:21:49.506Z"
+      "lastSeenAt": "2026-10-19T08:46:08.325Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -41895,8 +41895,8 @@
   "emailUsageAudit": {
     "source": "henrik-email",
     "discovered": 254,
-    "imported": 253,
-    "invalid": 1,
+    "imported": 254,
+    "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -57191,6 +57191,37 @@
       "description": "Codex: Prepare NVIDIA Stockholm trip"
     },
     {
+      "id": "codex-90ef5ba21b6f1ee07f2bf898",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-19T06:54:01.900Z",
+      "endTime": "2026-10-19T08:16:15.786Z",
+      "wallSeconds": 4933,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 2466,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4933,
+          "effectiveSeconds": 2466
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
+    },
+    {
       "id": "codex-fe1bb33c490ef650ea1a1792",
       "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "projectKey": "email-helper",
@@ -57643,6 +57674,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 901,
         "reasoning_output_tokens": 270
+      }
+    },
+    {
+      "id": "codex-0ec1e72ef8ae13e40a378095",
+      "threadId": "01a15348-8236-7191-9812-d1b21ac6d850",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-19T08:30:23.002Z",
+      "endTime": "2026-10-19T08:31:02.643Z",
+      "wallSeconds": 39,
+      "focusFactor": 0.4872,
+      "effectiveSeconds": 19,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 39,
+          "effectiveSeconds": 19
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 149894,
+        "cached_input_tokens": 95360,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1154,
+        "reasoning_output_tokens": 331
       }
     }
   ]
