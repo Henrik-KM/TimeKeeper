@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-19T14:16:02.656Z",
+  "updatedAt": "2026-10-19T14:31:02.687Z",
   "dayStart": "2026-10-18T22:00:00.000Z",
   "rangeStart": "2026-07-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-19T14:16:03.460Z",
+    "observedAt": "2026-10-19T14:31:03.583Z",
     "primary": {
-      "usedPercent": 52,
-      "remainingPercent": 48,
+      "usedPercent": 54,
+      "remainingPercent": 46,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-24T20:49:36.000Z"
     },
@@ -108,7 +108,7 @@
       "match": "IFLAI",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-10-19T14:16:31.681Z"
+      "lastSeenAt": "2026-10-19T14:31:30.592Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -339,9 +339,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 17692,
+      "activityCount": 18154,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T14:16:31.681Z"
+      "lastSeenAt": "2026-10-19T14:31:30.592Z"
+    },
+    {
+      "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "title": "Draft ZEISS follow-up",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 616,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-19T14:29:01.840Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -461,23 +478,6 @@
       "activityCount": 9828,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-19T07:12:35.286Z"
-    },
-    {
-      "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
-      "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
-      "title": "Draft ZEISS follow-up",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 464,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T07:11:22.596Z"
     },
     {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
@@ -41894,8 +41894,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 259,
-    "imported": 259,
+    "discovered": 260,
+    "imported": 260,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -57951,6 +57951,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7933,
         "reasoning_output_tokens": 2774
+      }
+    },
+    {
+      "id": "codex-928572ccc4dfb2e0945ca938",
+      "threadId": "01a1548d-ea34-7430-93c0-66db07a0ada1",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-19T14:25:48.811Z",
+      "endTime": "2026-10-19T14:27:25.139Z",
+      "wallSeconds": 96,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 48,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 96,
+          "effectiveSeconds": 48
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 274939,
+        "cached_input_tokens": 222336,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3453,
+        "reasoning_output_tokens": 639
       }
     }
   ]
