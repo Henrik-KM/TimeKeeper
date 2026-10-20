@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-20T14:07:06.316Z",
+  "updatedAt": "2026-10-20T14:12:07.357Z",
   "dayStart": "2026-10-19T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-20T14:06:46.354Z",
+    "observedAt": "2026-10-20T14:12:25.783Z",
     "primary": {
-      "usedPercent": 10,
-      "remainingPercent": 90,
+      "usedPercent": 11,
+      "remainingPercent": 89,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "github/project ironwright",
+      "displayPath": "GitHub/Project Ironwright",
+      "projectFolder": "Project Ironwright",
+      "repoName": "Project Ironwright",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-20T14:12:06.324Z"
+    },
     {
       "key": "documents/codex/2026-10-20/please-go-through-my-pc-x20",
       "displayPath": "Documents/Codex/2026-10-20/please-go-through-my-pc-x20",
@@ -38,7 +52,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-20T14:07:07.122Z"
+      "lastSeenAt": "2026-10-20T14:11:59.652Z"
     },
     {
       "key": ".../g-p-6a7c8abaa14c8191819e7c1df3bdc661",
@@ -67,20 +81,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-18T19:49:04.444Z"
-    },
-    {
-      "key": "github/project ironwright",
-      "displayPath": "GitHub/Project Ironwright",
-      "projectFolder": "Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-17T06:27:33.025Z"
     },
     {
       "key": "github/mathem-agent",
@@ -141,6 +141,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a159a7-4b93-7913-9c2d-06b425158a97",
+      "sessionId": "01a159a7-4b93-7913-9c2d-06b425158a97",
+      "title": "Find and remove project bloat",
+      "threadSource": "user",
+      "displayPath": "GitHub/Project Ironwright",
+      "repoName": "Project Ironwright",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 12,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-20T14:12:06.324Z"
+    },
+    {
       "key": "01a1599f-90a6-7a00-827b-846ca4899a7f",
       "sessionId": "01a1599f-90a6-7a00-827b-846ca4899a7f",
       "title": "Find biggest storage hogs",
@@ -153,9 +170,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 81,
+      "activityCount": 193,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T14:07:07.122Z"
+      "lastSeenAt": "2026-10-20T14:11:59.652Z"
     },
     {
       "key": "01a15432-334f-7fd0-91e6-e1302e438285",
