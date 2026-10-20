@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-20T07:01:02.477Z",
+  "updatedAt": "2026-10-20T07:16:02.101Z",
   "dayStart": "2026-10-19T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-20T07:01:03.376Z",
+    "observedAt": "2026-10-20T07:16:02.995Z",
     "primary": {
       "usedPercent": 1,
       "remainingPercent": 99,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-19T07:23:03.358Z"
+      "lastSeenAt": "2026-10-20T07:16:25.392Z"
     },
     {
       "key": "documents/codex/2026-10-14/yes-windows-can-restart-sign-you",
@@ -108,7 +108,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-20T07:01:26.745Z"
+      "lastSeenAt": "2026-10-20T07:16:07.750Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -322,9 +322,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 22765,
+      "activityCount": 22937,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T07:23:03.358Z"
+      "lastSeenAt": "2026-10-20T07:16:25.392Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -339,9 +339,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 11142,
+      "activityCount": 11442,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T07:01:26.745Z"
+      "lastSeenAt": "2026-10-20T07:16:07.750Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -41894,8 +41894,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 263,
-    "imported": 263,
+    "discovered": 265,
+    "imported": 265,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -57807,6 +57807,88 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-fb805d92b9dc59722a975dc3",
+      "threadId": "01a15820-54ac-7c63-8bfa-976ec1458627",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-20T07:04:35.956Z",
+      "endTime": "2026-10-20T07:05:19.846Z",
+      "wallSeconds": 43,
+      "focusFactor": 0.4884,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 43,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 115778,
+        "cached_input_tokens": 82048,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1254,
+        "reasoning_output_tokens": 489
+      }
+    },
+    {
+      "id": "codex-16b9d942aa25c2c7b97a08b9",
+      "threadId": "01a15825-ce56-7743-a8cb-f9fc6fdd6b30",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-20T07:10:34.781Z",
+      "endTime": "2026-10-20T07:11:09.609Z",
+      "wallSeconds": 34,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 17,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 34,
+          "effectiveSeconds": 17
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 93889,
+        "cached_input_tokens": 49024,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 982,
+        "reasoning_output_tokens": 295
+      }
     }
   ]
 }
