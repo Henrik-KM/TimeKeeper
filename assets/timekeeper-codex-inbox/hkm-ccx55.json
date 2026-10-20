@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-20T15:01:02.527Z",
+  "updatedAt": "2026-10-20T15:16:02.412Z",
   "dayStart": "2026-10-19T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-20T15:01:03.348Z",
+    "observedAt": "2026-10-20T15:16:03.511Z",
     "primary": {
-      "usedPercent": 15,
-      "remainingPercent": 85,
+      "usedPercent": 17,
+      "remainingPercent": 83,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-20T15:01:22.172Z"
+      "lastSeenAt": "2026-10-20T15:16:17.303Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-20T15:01:08.411Z"
+      "lastSeenAt": "2026-10-20T15:14:41.000Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 23901,
+      "activityCount": 24657,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T15:01:22.172Z"
+      "lastSeenAt": "2026-10-20T15:16:17.303Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -218,9 +218,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 11466,
+      "activityCount": 11764,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T15:01:08.411Z"
+      "lastSeenAt": "2026-10-20T15:14:41.000Z"
     },
     {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
@@ -58969,6 +58969,37 @@
         "output_tokens": 8696,
         "reasoning_output_tokens": 3467
       }
+    },
+    {
+      "id": "codex-e1dde8ec3b991ead3e2df52f",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-20T14:40:25.141Z",
+      "endTime": "2026-10-20T14:47:19.189Z",
+      "wallSeconds": 414,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 207,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 414,
+          "effectiveSeconds": 207
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     }
   ]
 }
