@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-20T06:36:01.586Z",
+  "updatedAt": "2026-10-20T07:31:01.683Z",
   "rangeStart": "2026-09-20T22:00:00.000Z",
   "lookbackDays": 30,
   "records": [
@@ -3792,6 +3792,33 @@
         }
       ],
       "focusFactor": 0.5,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:dd53a111759470f29b104ae66fe42818",
+      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Structured AL",
+      "description": "Claude: Structured AL",
+      "startTime": "2026-10-20T07:08:09.962Z",
+      "endTime": "2026-10-20T07:09:29.581Z",
+      "wallSeconds": 79,
+      "effectiveSeconds": 39,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 79,
+          "effectiveSeconds": 39
+        }
+      ],
+      "focusFactor": 0.4937,
       "focusPolicyVersion": 1,
       "delegationCredit": 0.35
     }
