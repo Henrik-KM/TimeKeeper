@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-20T12:16:02.795Z",
+  "updatedAt": "2026-10-20T12:31:02.469Z",
   "dayStart": "2026-10-19T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-20T12:16:04.948Z",
+    "observedAt": "2026-10-20T12:31:06.884Z",
     "primary": {
       "usedPercent": 4,
       "remainingPercent": 96,
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-20T12:18:33.781Z"
+      "lastSeenAt": "2026-10-20T12:31:38.049Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -80,7 +80,35 @@
       "match": "IFLAI",
       "sessionCount": 2427,
       "assistantSessionCount": 2427,
-      "lastSeenAt": "2026-10-20T12:16:55.674Z"
+      "lastSeenAt": "2026-10-20T12:31:05.240Z"
+    },
+    {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-20T12:22:52.034Z"
+    },
+    {
+      "key": "github/anders",
+      "displayPath": "GitHub/Anders",
+      "projectFolder": "Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-20T12:18:32.463Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -95,20 +123,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-20T12:15:48.088Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-19T19:00:09.221Z"
     },
     {
       "key": "github/iflai/albany",
@@ -137,20 +151,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-19T07:37:56.957Z"
-    },
-    {
-      "key": "github/anders",
-      "displayPath": "GitHub/Anders",
-      "projectFolder": "Anders",
-      "repoName": "Anders",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-13T15:07:43.995Z"
     }
   ],
   "sessionMappingAudit": [
@@ -201,9 +201,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 71726,
+      "activityCount": 71863,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T12:18:33.781Z"
+      "lastSeenAt": "2026-10-20T12:31:38.049Z"
+    },
+    {
+      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "title": "Find and adapt AI risk assessment",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2200,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-20T12:31:09.690Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -218,9 +235,60 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 4292,
+      "activityCount": 4761,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T12:16:55.674Z"
+      "lastSeenAt": "2026-10-20T12:31:05.240Z"
+    },
+    {
+      "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "title": "Draft ZEISS follow-up",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 617,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-20T12:22:52.034Z"
+    },
+    {
+      "key": "01a134a8-9319-77a3-9b43-905b1a733231",
+      "sessionId": "01a134a8-9319-77a3-9b43-905b1a733231",
+      "title": "Simplify Japan travel itinerary",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 540,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-20T12:18:32.463Z"
+    },
+    {
+      "key": "01a13465-6800-7451-9f66-802c686303b8",
+      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
+      "title": "Prepare NVIDIA Stockholm trip",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3967,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-20T12:18:28.388Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -257,23 +325,6 @@
       "lastSeenAt": "2026-10-20T12:15:48.088Z"
     },
     {
-      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "title": "Find and adapt AI risk assessment",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2067,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T09:57:40.802Z"
-    },
-    {
       "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
       "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
       "title": "",
@@ -289,23 +340,6 @@
       "activityCount": 20029,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-19T19:00:09.221Z"
-    },
-    {
-      "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
-      "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
-      "title": "Draft ZEISS follow-up",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 616,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T14:29:01.840Z"
     },
     {
       "key": "01a08b67-8d09-7f43-9e85-e10aa4cbff84",
@@ -357,23 +391,6 @@
       "activityCount": 1254,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-19T07:24:02.875Z"
-    },
-    {
-      "key": "01a13465-6800-7451-9f66-802c686303b8",
-      "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
-      "title": "Prepare NVIDIA Stockholm trip",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 3966,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T06:57:15.026Z"
     },
     {
       "key": "01a09460-97ce-7261-aeee-55ff7f9d770d",
@@ -442,23 +459,6 @@
       "activityCount": 2784,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-14T06:56:20.645Z"
-    },
-    {
-      "key": "01a134a8-9319-77a3-9b43-905b1a733231",
-      "sessionId": "01a134a8-9319-77a3-9b43-905b1a733231",
-      "title": "Simplify Japan travel itinerary",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders",
-      "repoName": "Anders",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 539,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-13T15:07:43.995Z"
     },
     {
       "key": "01a0e1a0-f1ca-76d1-9512-c9748c50f3d1",
