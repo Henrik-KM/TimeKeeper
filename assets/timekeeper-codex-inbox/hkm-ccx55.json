@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-20T14:16:02.434Z",
+  "updatedAt": "2026-10-20T14:31:02.527Z",
   "dayStart": "2026-10-19T22:00:00.000Z",
   "rangeStart": "2026-07-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-20T14:16:03.296Z",
+    "observedAt": "2026-10-20T14:31:03.989Z",
     "primary": {
-      "usedPercent": 12,
-      "remainingPercent": 88,
+      "usedPercent": 13,
+      "remainingPercent": 87,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-20T14:16:14.894Z"
+      "lastSeenAt": "2026-10-20T14:31:32.345Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 22132,
+      "activityCount": 22612,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T14:16:14.894Z"
+      "lastSeenAt": "2026-10-20T14:31:32.345Z"
     },
     {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
@@ -41671,8 +41671,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 287,
-    "imported": 287,
+    "discovered": 288,
+    "imported": 288,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -58858,6 +58858,37 @@
       }
     },
     {
+      "id": "codex-85d18a75666dac89f8653e1d",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-20T14:03:56.315Z",
+      "endTime": "2026-10-20T14:05:03.118Z",
+      "wallSeconds": 66,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 33,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 66,
+          "effectiveSeconds": 33
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
+    },
+    {
       "id": "codex-a0b098c4164e4fa0c8ee97b2",
       "threadId": "01a159a4-7834-7842-9658-4a2d2740ea27",
       "projectKey": "email-helper",
@@ -58896,6 +58927,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1138,
         "reasoning_output_tokens": 360
+      }
+    },
+    {
+      "id": "codex-549d4aeb7aba94c602b8cf90",
+      "threadId": "01a159ae-b765-7590-abca-27c4345be7b5",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-20T14:19:44.495Z",
+      "endTime": "2026-10-20T14:23:30.573Z",
+      "wallSeconds": 226,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 113,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 226,
+          "effectiveSeconds": 113
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 900423,
+        "cached_input_tokens": 791552,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 8696,
+        "reasoning_output_tokens": 3467
       }
     }
   ]
