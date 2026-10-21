@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T15:31:02.191Z",
+  "updatedAt": "2026-10-21T15:46:02.126Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T15:31:03.479Z",
+    "observedAt": "2026-10-21T15:46:02.992Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -59751,6 +59751,42 @@
         "output_tokens": 10548,
         "reasoning_output_tokens": 4123
       }
+    },
+    {
+      "id": "codex-859f47e0a5860656ed8dbfe8",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-21T15:04:11.165Z",
+      "endTime": "2026-10-21T15:16:16.109Z",
+      "wallSeconds": 724,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 362,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 724,
+          "effectiveSeconds": 362,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-45adcb09b57a9e7bd132f5b0"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
