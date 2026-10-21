@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T20:01:02.492Z",
+  "updatedAt": "2026-10-21T20:16:02.373Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T20:01:03.675Z",
+    "observedAt": "2026-10-21T20:16:03.337Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
@@ -59951,6 +59951,73 @@
         "output_tokens": 1614,
         "reasoning_output_tokens": 552
       }
+    },
+    {
+      "id": "codex-815b952d7faa24e72729a6d5",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-21T19:07:06.012Z",
+      "endTime": "2026-10-21T19:48:58.307Z",
+      "wallSeconds": 2512,
+      "focusFactor": 0.5808,
+      "effectiveSeconds": 1459,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 4,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 2512,
+          "effectiveSeconds": 1256,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "codex-auto-review",
+          "effort": "low",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1453,
+          "effectiveSeconds": 203,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-aed3c194bafe5fa90f05ca75",
+        "codex-7a192f464cccc41b5ad3c23e",
+        "codex-09d3fa7d035c9d6fbb9c00c8",
+        "codex-ddbbc7df88df33e3caccb269"
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
     },
     {
       "id": "codex-521ba7a3e46b48f19d415f9b",
