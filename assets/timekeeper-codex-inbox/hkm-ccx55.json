@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T19:01:02.537Z",
+  "updatedAt": "2026-10-21T19:16:02.397Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T19:01:03.507Z",
+    "observedAt": "2026-10-21T19:16:03.368Z",
     "primary": {
       "usedPercent": 30,
       "remainingPercent": 70,
@@ -53,6 +53,20 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-14T13:56:06.474Z"
+    },
+    {
+      "key": "github/iflai/aventix-iflai",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-21T19:07:07.426Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -137,20 +151,6 @@
       "sessionCount": 2,
       "assistantSessionCount": 2,
       "lastSeenAt": "2026-10-19T07:40:57.201Z"
-    },
-    {
-      "key": "github/iflai/aventix-iflai",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-19T07:37:56.957Z"
     }
   ],
   "sessionMappingAudit": [
@@ -187,6 +187,23 @@
       "activityCount": 23647,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-21T07:25:59.817Z"
+    },
+    {
+      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "title": "Update Aventix repo from Slack",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 19008,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-21T19:07:07.426Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -425,23 +442,6 @@
       "activityCount": 1595,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-19T07:40:57.201Z"
-    },
-    {
-      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "title": "Update Aventix repo from Slack",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 19005,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T07:37:56.957Z"
     },
     {
       "key": "01a060cd-45ac-7093-9e26-2ff23b754912",
@@ -41705,9 +41705,9 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 316,
+    "discovered": 317,
     "imported": 316,
-    "invalid": 0,
+    "invalid": 1,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
