@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T15:46:02.126Z",
+  "updatedAt": "2026-10-21T16:01:02.175Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T15:46:02.992Z",
+    "observedAt": "2026-10-21T16:01:03.045Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -41705,8 +41705,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 312,
-    "imported": 312,
+    "discovered": 313,
+    "imported": 313,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -59787,6 +59787,47 @@
         "codex-45adcb09b57a9e7bd132f5b0"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-fb40142359c1ef680c960553",
+      "threadId": "01a15f20-6676-7531-9ea3-9f7a6f6af231",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-21T15:42:00.918Z",
+      "endTime": "2026-10-21T15:47:19.871Z",
+      "wallSeconds": 318,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 159,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 318,
+          "effectiveSeconds": 159
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1042351,
+        "cached_input_tokens": 912128,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 9880,
+        "reasoning_output_tokens": 3515
+      }
     }
   ]
 }
