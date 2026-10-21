@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T08:16:02.146Z",
+  "updatedAt": "2026-10-21T08:31:01.940Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T08:16:03.179Z",
+    "observedAt": "2026-10-21T08:31:03.568Z",
     "primary": {
-      "usedPercent": 23,
-      "remainingPercent": 77,
+      "usedPercent": 24,
+      "remainingPercent": 76,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-21T08:16:13.829Z"
+      "lastSeenAt": "2026-10-21T08:30:59.160Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-21T08:15:52.987Z"
+      "lastSeenAt": "2026-10-21T08:28:32.175Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -189,23 +189,6 @@
       "lastSeenAt": "2026-10-21T07:25:59.817Z"
     },
     {
-      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 25994,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-21T08:16:13.829Z"
-    },
-    {
       "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "title": "Draft ZEISS follow-up",
@@ -218,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 688,
+      "activityCount": 852,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-21T08:15:54.511Z"
+      "lastSeenAt": "2026-10-21T08:30:59.160Z"
     },
     {
       "key": "01a15d85-7aed-7b43-b19f-8bcd979ef7e9",
@@ -235,9 +218,26 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 73,
+      "activityCount": 402,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-21T08:15:52.987Z"
+      "lastSeenAt": "2026-10-21T08:28:32.175Z"
+    },
+    {
+      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 26104,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-21T08:23:55.361Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -41688,8 +41688,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 292,
-    "imported": 292,
+    "discovered": 293,
+    "imported": 293,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -58669,6 +58669,47 @@
         }
       ],
       "description": "Codex: Draft ZEISS follow-up"
+    },
+    {
+      "id": "codex-6dd290cb8839fa3004661dc0",
+      "threadId": "01a15d8b-6e0c-7ce3-87e6-8c1eff2df38b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-21T08:19:40.858Z",
+      "endTime": "2026-10-21T08:22:13.999Z",
+      "wallSeconds": 153,
+      "focusFactor": 0.4967,
+      "effectiveSeconds": 76,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 153,
+          "effectiveSeconds": 76
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 348734,
+        "cached_input_tokens": 292224,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 6544,
+        "reasoning_output_tokens": 1418
+      }
     }
   ]
 }
