@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T12:31:02.167Z",
+  "updatedAt": "2026-10-21T12:46:02.380Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T12:31:03.025Z",
+    "observedAt": "2026-10-21T12:46:03.840Z",
     "primary": {
       "usedPercent": 27,
       "remainingPercent": 73,
@@ -59494,6 +59494,37 @@
         "output_tokens": 4867,
         "reasoning_output_tokens": 1565
       }
+    },
+    {
+      "id": "codex-fd7f3bbf561b964e4865554f",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-21T12:11:38.340Z",
+      "endTime": "2026-10-21T12:26:46.847Z",
+      "wallSeconds": 908,
+      "focusFactor": 0.2996,
+      "effectiveSeconds": 272,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 908,
+          "effectiveSeconds": 272
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     },
     {
       "id": "codex-96d9e016fecf2d8bf5b73ad5",
