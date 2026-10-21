@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-21T07:31:01.940Z",
+  "updatedAt": "2026-10-21T07:46:02.006Z",
   "dayStart": "2026-10-20T22:00:00.000Z",
   "rangeStart": "2026-07-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-21T07:31:02.879Z",
+    "observedAt": "2026-10-21T07:46:02.811Z",
     "primary": {
-      "usedPercent": 20,
-      "remainingPercent": 80,
+      "usedPercent": 21,
+      "remainingPercent": 79,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -66,7 +66,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-21T07:31:12.795Z"
+      "lastSeenAt": "2026-10-21T07:40:22.924Z"
     },
     {
       "key": "github/iflai",
@@ -201,9 +201,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 12513,
+      "activityCount": 12682,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-21T07:31:12.795Z"
+      "lastSeenAt": "2026-10-21T07:40:22.924Z"
     },
     {
       "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
@@ -58554,6 +58554,37 @@
         }
       ],
       "description": "Codex: IFLAI"
+    },
+    {
+      "id": "codex-e564d4b5d09f6750765c08d6",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-21T06:56:02.367Z",
+      "endTime": "2026-10-21T07:25:59.817Z",
+      "wallSeconds": 1797,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 539,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1797,
+          "effectiveSeconds": 539
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
