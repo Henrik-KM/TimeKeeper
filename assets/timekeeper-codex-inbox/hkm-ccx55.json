@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T15:01:02.119Z",
+  "updatedAt": "2026-10-22T15:16:02.088Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T15:01:02.994Z",
+    "observedAt": "2026-10-22T15:16:02.986Z",
     "primary": {
-      "usedPercent": 61,
-      "remainingPercent": 39,
+      "usedPercent": 62,
+      "remainingPercent": 38,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -52,7 +52,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-22T15:01:15.412Z"
+      "lastSeenAt": "2026-10-22T15:06:38.971Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -170,9 +170,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 13915,
+      "activityCount": 14049,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T15:01:15.412Z"
+      "lastSeenAt": "2026-10-22T15:06:38.971Z"
     },
     {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
@@ -61535,6 +61535,37 @@
         "output_tokens": 9882,
         "reasoning_output_tokens": 4390
       }
+    },
+    {
+      "id": "codex-c450cd4bee09fc1f4abb387e",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T14:03:44.686Z",
+      "endTime": "2026-10-22T14:50:22.800Z",
+      "wallSeconds": 2798,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1399,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2798,
+          "effectiveSeconds": 1399
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     },
     {
       "id": "codex-84c539387282c35bb96a9b33",
