@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T11:31:01.859Z",
+  "updatedAt": "2026-10-22T11:46:01.880Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T11:31:04.165Z",
+    "observedAt": "2026-10-22T11:46:02.761Z",
     "primary": {
       "usedPercent": 48,
       "remainingPercent": 52,
@@ -52,7 +52,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-22T11:21:20.718Z"
+      "lastSeenAt": "2026-10-22T11:46:04.325Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -170,9 +170,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 5944,
+      "activityCount": 6032,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T11:21:20.718Z"
+      "lastSeenAt": "2026-10-22T11:46:04.325Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -61036,6 +61036,37 @@
         "output_tokens": 1907,
         "reasoning_output_tokens": 824
       }
+    },
+    {
+      "id": "codex-1d2ba36e00385e2f334a29db",
+      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T10:35:48.163Z",
+      "endTime": "2026-10-22T11:21:20.718Z",
+      "wallSeconds": 2732,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1366,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2732,
+          "effectiveSeconds": 1366
+        }
+      ],
+      "description": "Codex: Prepare NVIDIA Stockholm trip"
     },
     {
       "id": "codex-0214ce790ec3716b76dd621c",
