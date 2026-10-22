@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-22T11:27:02.690Z",
+  "updatedAt": "2026-10-22T11:32:03.461Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T11:27:04.589Z",
+    "observedAt": "2026-10-22T11:32:05.709Z",
     "primary": {
       "usedPercent": 48,
       "remainingPercent": 52,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-22T11:27:05.660Z"
+      "lastSeenAt": "2026-10-22T11:31:56.772Z"
     },
     {
       "key": "github/scholarships",
@@ -139,9 +139,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 51597,
+      "activityCount": 51690,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T11:27:05.660Z"
+      "lastSeenAt": "2026-10-22T11:31:56.772Z"
     },
     {
       "key": "01a15d7f-e30c-7b93-af39-d6e6aa9bba02",
@@ -421,6 +421,37 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-00657f0edc8740de8b7d2ddb",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-22T10:48:50.720Z",
+      "endTime": "2026-10-22T11:10:15.687Z",
+      "wallSeconds": 1284,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 642,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1284,
+          "effectiveSeconds": 642
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
     }
   ]
 }
