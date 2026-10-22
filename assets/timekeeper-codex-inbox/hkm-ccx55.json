@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T06:46:02.670Z",
+  "updatedAt": "2026-10-22T07:01:02.735Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T06:46:03.705Z",
+    "observedAt": "2026-10-22T07:01:03.693Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
@@ -66,7 +66,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-22T06:31:12.981Z"
+      "lastSeenAt": "2026-10-22T07:01:12.312Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -201,9 +201,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 13505,
+      "activityCount": 13888,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T06:31:12.981Z"
+      "lastSeenAt": "2026-10-22T07:01:12.312Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -60293,6 +60293,42 @@
         "codex-3fcbc5405c5cd4bbe5f1c06f"
       ],
       "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
+      "id": "codex-a96f5832aabfd18517a6b929",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-22T06:08:22.391Z",
+      "endTime": "2026-10-22T06:31:12.981Z",
+      "wallSeconds": 1370,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 685,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 1370,
+          "effectiveSeconds": 685,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-6ebb99653a1d14796a2c5c2c"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     },
     {
       "id": "codex-026cd9da14b79ec9cd0653f7",
