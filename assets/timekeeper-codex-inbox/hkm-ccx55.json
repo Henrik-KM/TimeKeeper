@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T11:01:01.921Z",
+  "updatedAt": "2026-10-22T11:16:01.923Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T11:01:02.687Z",
+    "observedAt": "2026-10-22T11:16:03.100Z",
     "primary": {
-      "usedPercent": 46,
-      "remainingPercent": 54,
+      "usedPercent": 47,
+      "remainingPercent": 53,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -41,20 +41,6 @@
       "lastSeenAt": "2026-10-22T09:41:09.817Z"
     },
     {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-22T11:01:12.771Z"
-    },
-    {
       "key": "github/iflai",
       "displayPath": "GitHub/IFLAI",
       "projectFolder": "IFLAI",
@@ -66,7 +52,21 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-22T10:59:43.659Z"
+      "lastSeenAt": "2026-10-22T11:14:28.456Z"
+    },
+    {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-22T11:07:12.718Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -158,23 +158,6 @@
       "lastSeenAt": "2026-10-22T09:41:09.817Z"
     },
     {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Submit Barbro Osher application",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 13773,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T11:01:12.771Z"
-    },
-    {
       "key": "01a13465-6800-7451-9f66-802c686303b8",
       "sessionId": "01a13465-6800-7451-9f66-802c686303b8",
       "title": "Prepare NVIDIA Stockholm trip",
@@ -187,9 +170,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 5665,
+      "activityCount": 5839,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T10:59:43.659Z"
+      "lastSeenAt": "2026-10-22T11:14:28.456Z"
+    },
+    {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Submit Barbro Osher application",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 13833,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-22T11:07:12.718Z"
     },
     {
       "key": "01a15eb4-77cc-7b30-baf0-c7b339a541e9",
@@ -41657,8 +41657,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 343,
-    "imported": 343,
+    "discovered": 344,
+    "imported": 344,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -60999,6 +60999,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1907,
         "reasoning_output_tokens": 824
+      }
+    },
+    {
+      "id": "codex-0214ce790ec3716b76dd621c",
+      "threadId": "01a16343-17cc-79d3-865b-1458fc5eb578",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T10:58:23.311Z",
+      "endTime": "2026-10-22T11:04:02.076Z",
+      "wallSeconds": 338,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 169,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 338,
+          "effectiveSeconds": 169
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1465126,
+        "cached_input_tokens": 1337472,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 11016,
+        "reasoning_output_tokens": 3802
       }
     }
   ]
