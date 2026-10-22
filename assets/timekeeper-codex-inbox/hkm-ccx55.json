@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T08:46:01.948Z",
+  "updatedAt": "2026-10-22T09:01:01.896Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T08:46:02.950Z",
+    "observedAt": "2026-10-22T09:01:02.928Z",
     "primary": {
-      "usedPercent": 37,
-      "remainingPercent": 63,
+      "usedPercent": 38,
+      "remainingPercent": 62,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-22T08:46:10.842Z"
+      "lastSeenAt": "2026-10-22T08:56:35.616Z"
     },
     {
       "key": "documents/codex/2026-10-14/yes-windows-can-restart-sign-you",
@@ -53,6 +53,34 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-14T13:56:06.474Z"
+    },
+    {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 5,
+      "assistantSessionCount": 5,
+      "lastSeenAt": "2026-10-22T08:59:58.583Z"
+    },
+    {
+      "key": "github/iflai/aventix-iflai",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-22T08:51:48.009Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -81,34 +109,6 @@
       "sessionCount": 2,
       "assistantSessionCount": 2,
       "lastSeenAt": "2026-10-22T07:27:51.190Z"
-    },
-    {
-      "key": "github/iflai/aventix-iflai",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-22T06:18:28.710Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 5,
-      "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-21T12:24:02.237Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -184,9 +184,43 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 24081,
+      "activityCount": 24167,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T08:46:10.842Z"
+      "lastSeenAt": "2026-10-22T08:56:35.616Z"
+    },
+    {
+      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 26540,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-22T08:59:58.583Z"
+    },
+    {
+      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "title": "Update Aventix repo from Slack",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
+      "repoName": "Aventix-IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 20151,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-22T08:51:48.009Z"
     },
     {
       "key": "01a15eb4-77cc-7b30-baf0-c7b339a541e9",
@@ -223,23 +257,6 @@
       "lastSeenAt": "2026-10-22T07:27:51.190Z"
     },
     {
-      "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "sessionId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
-      "title": "Update Aventix repo from Slack",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/Aventix-IFLAI",
-      "repoName": "Aventix-IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 20141,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T06:18:28.710Z"
-    },
-    {
       "key": "01a1263e-5872-7101-b242-1746293af037",
       "sessionId": "01a1263e-5872-7101-b242-1746293af037",
       "title": "Email helper health monitor",
@@ -255,23 +272,6 @@
       "activityCount": 5248,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-21T12:26:46.847Z"
-    },
-    {
-      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 26346,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-21T12:24:02.237Z"
     },
     {
       "key": "01a15d85-7aed-7b43-b19f-8bcd979ef7e9",
@@ -41705,8 +41705,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 340,
-    "imported": 340,
+    "discovered": 341,
+    "imported": 341,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -60764,6 +60764,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9397,
         "reasoning_output_tokens": 3331
+      }
+    },
+    {
+      "id": "codex-1800d9d34600186af2bab6e5",
+      "threadId": "01a162cc-e646-7940-9379-7f20b7430a6d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T08:49:17.486Z",
+      "endTime": "2026-10-22T08:50:18.018Z",
+      "wallSeconds": 60,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 30,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 60,
+          "effectiveSeconds": 30
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 205615,
+        "cached_input_tokens": 150912,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1642,
+        "reasoning_output_tokens": 456
       }
     }
   ]
