@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T03:01:02.583Z",
+  "updatedAt": "2026-10-22T03:16:02.577Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T03:01:03.377Z",
+    "observedAt": "2026-10-22T03:16:03.416Z",
     "primary": {
       "usedPercent": 33,
       "remainingPercent": 67,
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-22T00:55:41.896Z"
+      "lastSeenAt": "2026-10-22T03:11:03.196Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 19951,
+      "activityCount": 19955,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T00:55:41.896Z"
+      "lastSeenAt": "2026-10-22T03:11:03.196Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -41705,8 +41705,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 327,
-    "imported": 327,
+    "discovered": 328,
+    "imported": 328,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -60078,6 +60078,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 10554,
         "reasoning_output_tokens": 3898
+      }
+    },
+    {
+      "id": "codex-27519a6bc79f2e0283d7829e",
+      "threadId": "01a1618d-9b63-7472-8d82-47937812316b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T03:00:32.295Z",
+      "endTime": "2026-10-22T03:06:24.764Z",
+      "wallSeconds": 352,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 176,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 352,
+          "effectiveSeconds": 176
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 826321,
+        "cached_input_tokens": 724096,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 10489,
+        "reasoning_output_tokens": 4171
       }
     }
   ]
