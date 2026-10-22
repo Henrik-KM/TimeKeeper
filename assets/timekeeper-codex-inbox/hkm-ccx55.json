@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T06:31:02.804Z",
+  "updatedAt": "2026-10-22T06:46:02.670Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T06:31:03.585Z",
+    "observedAt": "2026-10-22T06:46:03.705Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
@@ -41706,8 +41706,8 @@
   "emailUsageAudit": {
     "source": "henrik-email",
     "discovered": 333,
-    "imported": 332,
-    "invalid": 1,
+    "imported": 333,
+    "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -60245,6 +60245,56 @@
       }
     },
     {
+      "id": "codex-1cca9fb2c548d6e18ccddd0e",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T05:58:35.216Z",
+      "endTime": "2026-10-22T06:18:28.710Z",
+      "wallSeconds": 1193,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 596,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 1193,
+          "effectiveSeconds": 596,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-3fcbc5405c5cd4bbe5f1c06f"
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
+    },
+    {
       "id": "codex-026cd9da14b79ec9cd0653f7",
       "threadId": "01a16247-7b75-7393-9c88-a8abea1ef67d",
       "projectKey": "email-helper",
@@ -60283,6 +60333,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8480,
         "reasoning_output_tokens": 2487
+      }
+    },
+    {
+      "id": "codex-c0bfdbf6f7335c5f860a98a5",
+      "threadId": "01a1624e-3445-76a3-97fb-b711d381d058",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T06:30:54.408Z",
+      "endTime": "2026-10-22T06:31:44.986Z",
+      "wallSeconds": 50,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 25,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 50,
+          "effectiveSeconds": 25
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 163730,
+        "cached_input_tokens": 120576,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2202,
+        "reasoning_output_tokens": 958
       }
     }
   ]
