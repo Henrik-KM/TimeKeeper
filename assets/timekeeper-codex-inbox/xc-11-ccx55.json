@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-22T12:52:01.841Z",
+  "updatedAt": "2026-10-22T13:07:03.355Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T12:52:03.724Z",
+    "observedAt": "2026-10-22T13:07:08.091Z",
     "primary": {
-      "usedPercent": 53,
-      "remainingPercent": 47,
+      "usedPercent": 54,
+      "remainingPercent": 46,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -26,20 +26,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/project ironwright",
-      "displayPath": "GitHub/Project Ironwright",
-      "projectFolder": "Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-22T12:52:12.656Z"
-    },
     {
       "key": "github/scholarships",
       "displayPath": "GitHub/Scholarships",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-22T12:51:59.717Z"
+      "lastSeenAt": "2026-10-22T13:01:04.550Z"
+    },
+    {
+      "key": "github/project ironwright",
+      "displayPath": "GitHub/Project Ironwright",
+      "projectFolder": "Project Ironwright",
+      "repoName": "Project Ironwright",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-22T12:59:07.352Z"
     },
     {
       "key": "documents/codex/2026-10-20/please-go-through-my-pc-x20",
@@ -127,23 +127,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
-      "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 52620,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T12:52:12.656Z"
-    },
-    {
       "key": "01a15d7f-e30c-7b93-af39-d6e6aa9bba02",
       "sessionId": "01a15d7f-e30c-7b93-af39-d6e6aa9bba02",
       "title": "Set up scholarship search repo",
@@ -156,9 +139,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 2625,
+      "activityCount": 2689,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T12:51:59.717Z"
+      "lastSeenAt": "2026-10-22T13:01:04.550Z"
+    },
+    {
+      "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
+      "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Project Ironwright",
+      "repoName": "Project Ironwright",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 52649,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-22T12:59:07.352Z"
     },
     {
       "key": "01a159a7-4b93-7913-9c2d-06b425158a97",
@@ -449,6 +449,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 1284,
           "effectiveSeconds": 642
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
+    },
+    {
+      "id": "codex-ebfb73d74fd0b96eaa192760",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-22T11:50:07.812Z",
+      "endTime": "2026-10-22T12:42:41.166Z",
+      "wallSeconds": 3153,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1576,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3153,
+          "effectiveSeconds": 1576
         }
       ],
       "description": "Codex: Import Lukas’s latest Drive data"
