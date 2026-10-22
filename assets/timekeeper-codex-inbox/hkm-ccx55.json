@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-22T09:01:01.896Z",
+  "updatedAt": "2026-10-22T09:16:01.883Z",
   "dayStart": "2026-10-21T22:00:00.000Z",
   "rangeStart": "2026-07-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-22T09:01:02.928Z",
+    "observedAt": "2026-10-22T09:16:03.910Z",
     "primary": {
-      "usedPercent": 38,
-      "remainingPercent": 62,
+      "usedPercent": 39,
+      "remainingPercent": 61,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-27T06:50:18.000Z"
     },
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-10-22T08:59:58.583Z"
+      "lastSeenAt": "2026-10-22T09:10:01.489Z"
     },
     {
       "key": "github/iflai/aventix-iflai",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 26540,
+      "activityCount": 26749,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T08:59:58.583Z"
+      "lastSeenAt": "2026-10-22T09:10:01.489Z"
     },
     {
       "key": "01a03a27-fbc0-7193-a2ae-6a546693096d",
@@ -60726,6 +60726,37 @@
       }
     },
     {
+      "id": "codex-edc5d6b52ed0a7f7b964ebe5",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T08:25:27.710Z",
+      "endTime": "2026-10-22T08:56:35.616Z",
+      "wallSeconds": 1867,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 560,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1867,
+          "effectiveSeconds": 560
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
       "id": "codex-1beba6c617ac179cbe6ca5c9",
       "threadId": "01a162c3-e5ce-77b0-a5e1-d9e5faf60848",
       "projectKey": "email-helper",
@@ -60806,6 +60837,42 @@
         "output_tokens": 1642,
         "reasoning_output_tokens": 456
       }
+    },
+    {
+      "id": "codex-7a1e2f9c1ca67f374507c16a",
+      "threadId": "01a03a27-fbc0-7193-a2ae-6a546693096d",
+      "projectKey": "Aventix-IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-22T08:51:43.297Z",
+      "endTime": "2026-10-22T08:51:48.009Z",
+      "wallSeconds": 4,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 4,
+          "effectiveSeconds": 2,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-7923b98982121bd21ec3b212"
+      ],
+      "description": "Codex: Update Aventix repo from Slack"
     }
   ]
 }
