@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-23T09:46:02.723Z",
+  "updatedAt": "2026-10-23T10:01:03.245Z",
   "dayStart": "2026-10-22T22:00:00.000Z",
   "rangeStart": "2026-07-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-23T09:46:03.865Z",
+    "observedAt": "2026-10-23T10:01:05.932Z",
     "primary": {
-      "usedPercent": 55,
-      "remainingPercent": 45,
+      "usedPercent": 58,
+      "remainingPercent": 42,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-29T17:09:36.000Z"
     },
@@ -52,7 +52,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-23T09:46:20.790Z"
+      "lastSeenAt": "2026-10-23T10:01:05.822Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -170,9 +170,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 15015,
+      "activityCount": 15354,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T09:46:20.790Z"
+      "lastSeenAt": "2026-10-23T10:01:05.822Z"
     },
     {
       "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
@@ -41674,8 +41674,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 374,
-    "imported": 374,
+    "discovered": 375,
+    "imported": 375,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -62480,6 +62480,78 @@
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-e81d0cced57342871360ade7",
+      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-23T09:42:23.499Z",
+      "endTime": "2026-10-23T09:42:53.472Z",
+      "wallSeconds": 29,
+      "focusFactor": 0.2759,
+      "effectiveSeconds": 8,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 29,
+          "effectiveSeconds": 8
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-cfd2804c3503d107f43f4c9c",
+      "threadId": "01a1682d-f895-7d50-a955-3cfafa680913",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-23T09:53:25.268Z",
+      "endTime": "2026-10-23T09:54:30.721Z",
+      "wallSeconds": 65,
+      "focusFactor": 0.4923,
+      "effectiveSeconds": 32,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 65,
+          "effectiveSeconds": 32
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 167515,
+        "cached_input_tokens": 123392,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1562,
+        "reasoning_output_tokens": 500
+      }
     }
   ]
 }
