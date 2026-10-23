@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-23T10:32:02.002Z",
+  "updatedAt": "2026-10-23T10:37:02.090Z",
   "dayStart": "2026-10-22T22:00:00.000Z",
   "rangeStart": "2026-07-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-23T10:32:03.920Z",
+    "observedAt": "2026-10-23T10:37:04.813Z",
     "primary": {
       "usedPercent": 59,
       "remainingPercent": 41,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-23T10:31:50.474Z"
+      "lastSeenAt": "2026-10-23T10:36:59.912Z"
     },
     {
       "key": "github/project ironwright",
@@ -153,9 +153,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 19184,
+      "activityCount": 19238,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T10:31:50.474Z"
+      "lastSeenAt": "2026-10-23T10:36:59.912Z"
     },
     {
       "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
@@ -576,6 +576,51 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-7dd92558394f846234e5056c",
+      "threadId": "01a16822-3653-7ce0-802c-293eb59e3fee",
+      "projectKey": "genAI-review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-23T09:40:37.087Z",
+      "endTime": "2026-10-23T10:19:32.420Z",
+      "wallSeconds": 2335,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1167,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2334,
+          "effectiveSeconds": 1167
+        }
+      ],
+      "description": "Codex: Verify METAL methods and results"
     }
   ]
 }
