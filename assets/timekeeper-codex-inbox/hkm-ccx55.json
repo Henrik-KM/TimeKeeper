@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-23T05:01:02.542Z",
+  "updatedAt": "2026-10-23T05:16:02.584Z",
   "dayStart": "2026-10-22T22:00:00.000Z",
   "rangeStart": "2026-07-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-23T05:01:03.337Z",
+    "observedAt": "2026-10-23T05:16:03.434Z",
     "primary": {
-      "usedPercent": 37,
-      "remainingPercent": 63,
+      "usedPercent": 38,
+      "remainingPercent": 62,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-29T17:09:36.000Z"
     },
@@ -41674,8 +41674,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 365,
-    "imported": 365,
+    "discovered": 366,
+    "imported": 366,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -61950,6 +61950,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 797,
         "reasoning_output_tokens": 260
+      }
+    },
+    {
+      "id": "codex-0df7d54b49ed9cf5dff426a8",
+      "threadId": "01a1672f-6006-7912-af61-0f14a06075ee",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-23T05:15:19.939Z",
+      "endTime": "2026-10-23T05:16:02.470Z",
+      "wallSeconds": 42,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 42,
+          "effectiveSeconds": 21
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 134518,
+        "cached_input_tokens": 91904,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1234,
+        "reasoning_output_tokens": 492
       }
     }
   ]
