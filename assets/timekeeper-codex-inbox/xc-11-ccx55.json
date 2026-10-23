@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-23T09:52:02.760Z",
+  "updatedAt": "2026-10-23T09:57:03.428Z",
   "dayStart": "2026-10-22T22:00:00.000Z",
   "rangeStart": "2026-07-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-23T09:52:04.275Z",
+    "observedAt": "2026-10-23T09:57:11.467Z",
     "primary": {
-      "usedPercent": 56,
-      "remainingPercent": 44,
+      "usedPercent": 57,
+      "remainingPercent": 43,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-29T17:09:36.000Z"
     },
@@ -26,20 +26,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/scholarships",
-      "displayPath": "GitHub/Scholarships",
-      "projectFolder": "Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-23T09:52:05.551Z"
-    },
     {
       "key": "github/project ironwright",
       "displayPath": "GitHub/Project Ironwright",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-23T09:51:49.256Z"
+      "lastSeenAt": "2026-10-23T09:57:24.275Z"
+    },
+    {
+      "key": "github/scholarships",
+      "displayPath": "GitHub/Scholarships",
+      "projectFolder": "Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-23T09:57:02.454Z"
     },
     {
       "key": "documents/codex/2026-10-20/please-go-through-my-pc-x20",
@@ -108,7 +108,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-23T09:52:00.900Z"
+      "lastSeenAt": "2026-10-23T09:56:57.512Z"
     },
     {
       "key": "github/anders/structured al",
@@ -141,23 +141,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
-      "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
-      "title": "Find and submit competitive awards",
-      "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 18582,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T09:52:05.551Z"
-    },
-    {
       "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
       "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
       "title": "",
@@ -170,9 +153,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 63845,
+      "activityCount": 63913,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T09:51:49.256Z"
+      "lastSeenAt": "2026-10-23T09:57:24.275Z"
+    },
+    {
+      "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
+      "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
+      "title": "Find and submit competitive awards",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 18622,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-23T09:57:02.454Z"
     },
     {
       "key": "01a15d7f-e30c-7b93-af39-d6e6aa9bba02",
@@ -289,9 +289,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 462,
+      "activityCount": 600,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T09:52:00.900Z"
+      "lastSeenAt": "2026-10-23T09:56:57.512Z"
     },
     {
       "key": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
@@ -541,6 +541,37 @@
           "creditedFactor": 0.3,
           "repositoryMultiplier": 1,
           "wallSeconds": 41,
+          "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-8bf5fa412f485a276e325cf5",
+      "threadId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-23T09:37:45.836Z",
+      "endTime": "2026-10-23T09:38:28.690Z",
+      "wallSeconds": 42,
+      "focusFactor": 0.2857,
+      "effectiveSeconds": 12,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 42,
           "effectiveSeconds": 12
         }
       ],
