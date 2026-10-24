@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-24T21:46:01.775Z",
-  "dayStart": "2026-10-23T22:00:00.000Z",
-  "rangeStart": "2026-07-26T22:00:00.000Z",
+  "updatedAt": "2026-10-24T22:01:01.763Z",
+  "dayStart": "2026-10-24T22:00:00.000Z",
+  "rangeStart": "2026-07-27T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-24T21:46:02.880Z",
+    "observedAt": "2026-10-24T22:01:03.060Z",
     "primary": {
       "usedPercent": 46,
       "remainingPercent": 54,
@@ -167,7 +167,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 16561,
+      "activityCount": 16345,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
@@ -53475,68 +53475,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-eb036d2c477862f3559e9eca",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-17T23:27:14.909Z",
-      "endTime": "2026-10-18T00:02:24.123Z",
-      "wallSeconds": 2109,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1054,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2109,
-          "effectiveSeconds": 1054
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-b7f13c7a80516106766426d5",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T03:29:47.930Z",
-      "endTime": "2026-10-18T04:00:37.380Z",
-      "wallSeconds": 1849,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 924,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1849,
-          "effectiveSeconds": 924
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
       "id": "codex-7f62f256c55e00bffa91fa48",
       "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "projectKey": "email-helper",
@@ -53565,196 +53503,8 @@
           "effectiveSeconds": 129
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-dbd5fa630b9915060c65cbd1",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T07:26:22.394Z",
-      "endTime": "2026-10-18T07:32:20.521Z",
-      "wallSeconds": 358,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 179,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 358,
-          "effectiveSeconds": 179
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-fa58eff49c8fd6860cba9aec",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T07:32:26.837Z",
-      "endTime": "2026-10-18T07:53:37.642Z",
-      "wallSeconds": 1270,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 635,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1270,
-          "effectiveSeconds": 635
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-66730940a7d8c818b34d5899",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T07:42:51.597Z",
-      "endTime": "2026-10-18T07:46:09.857Z",
-      "wallSeconds": 198,
-      "focusFactor": 0.298,
-      "effectiveSeconds": 59,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 198,
-          "effectiveSeconds": 59
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
-    },
-    {
-      "id": "codex-743c5f777d077cd46b00f837",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-18T07:50:31.623Z",
-      "endTime": "2026-10-18T08:03:08.921Z",
-      "wallSeconds": 757,
-      "focusFactor": 0.576,
-      "effectiveSeconds": 436,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 757,
-          "effectiveSeconds": 378,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        },
-        {
-          "role": "subagent",
-          "model": "unknown",
-          "effort": "unknown",
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0,
-          "baseFactor": 0.4,
-          "repositoryMultiplier": 1
-        },
-        {
-          "role": "subagent",
-          "model": "codex-auto-review",
-          "effort": "low",
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.14,
-          "wallSeconds": 414,
-          "effectiveSeconds": 57,
-          "baseFactor": 0.4,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-81ec11974aa8aedc3bb9eaa6",
-        "codex-eaddb412a6d13c9da422660b"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-83a30a5d67bffb46a47a748f",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T08:11:59.927Z",
-      "endTime": "2026-10-18T08:28:00.980Z",
-      "wallSeconds": 961,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 480,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 961,
-          "effectiveSeconds": 480
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-f11cd7bef318af7be5b4a1ac",
@@ -53795,38 +53545,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1322,
         "reasoning_output_tokens": 307
-      }
-    },
-    {
-      "id": "codex-8ede50d486809f12aff6530d",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T08:44:56.185Z",
-      "endTime": "2026-10-18T08:54:06.972Z",
-      "wallSeconds": 550,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 275,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 550,
-          "effectiveSeconds": 275
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-39a8a11ef04e0f724cf425d2",
@@ -53867,7 +53587,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1450,
         "reasoning_output_tokens": 592
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-745ca37c95bd1dad6da3ec59",
@@ -53908,7 +53629,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1521,
         "reasoning_output_tokens": 425
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-711024f388172872ebb012d1",
@@ -53949,83 +53671,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 895,
         "reasoning_output_tokens": 245
-      }
-    },
-    {
-      "id": "codex-256833a6ec47f353fbf9d794",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T08:55:01.022Z",
-      "endTime": "2026-10-18T09:03:33.336Z",
-      "wallSeconds": 512,
-      "focusFactor": 0.498,
-      "effectiveSeconds": 255,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 510,
-          "effectiveSeconds": 255
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
-    },
-    {
-      "id": "codex-ca8dac201e21694879cc5103",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T09:45:55.680Z",
-      "endTime": "2026-10-18T10:49:41.749Z",
-      "wallSeconds": 3826,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1913,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3826,
-          "effectiveSeconds": 1913
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-66ab7e8a51ec1d38b9c361ee",
@@ -54066,7 +53713,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3698,
         "reasoning_output_tokens": 988
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7303efd8f7c81cfbde97b330",
@@ -54107,38 +53755,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1232,
         "reasoning_output_tokens": 602
-      }
-    },
-    {
-      "id": "codex-2198c0d81c145d30ead19a17",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T11:36:56.238Z",
-      "endTime": "2026-10-18T12:09:52.838Z",
-      "wallSeconds": 1976,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 988,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1976,
-          "effectiveSeconds": 988
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-17f31f52484c0d85ca1ef041",
@@ -54179,38 +53797,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 5213,
         "reasoning_output_tokens": 2520
-      }
-    },
-    {
-      "id": "codex-ec4830c0f6736e00591f98fe",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T15:37:30.833Z",
-      "endTime": "2026-10-18T16:05:17.658Z",
-      "wallSeconds": 1666,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 833,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1666,
-          "effectiveSeconds": 833
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7c34add566a75d6a34de0972",
@@ -54251,7 +53839,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 962,
         "reasoning_output_tokens": 405
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-e9868ed329051d2413e7dba8",
@@ -54292,7 +53881,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 723,
         "reasoning_output_tokens": 163
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-4a6d5b09eeb4e15b364a44ae",
@@ -54333,7 +53923,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1105,
         "reasoning_output_tokens": 445
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-27eff30656311f071b80b947",
@@ -54374,38 +53965,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 794,
         "reasoning_output_tokens": 237
-      }
-    },
-    {
-      "id": "codex-e430d9a377ee7ee18da394cb",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-18T19:39:05.055Z",
-      "endTime": "2026-10-18T20:06:34.202Z",
-      "wallSeconds": 1649,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 824,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1649,
-          "effectiveSeconds": 824
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ebfd23e25b3c702435c0cdd2",
