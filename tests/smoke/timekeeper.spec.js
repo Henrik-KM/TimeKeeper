@@ -2138,7 +2138,7 @@ test('Codex deep analysis renders windows, filters, charts, and CSV export', asy
   );
   await expect(todayCodexCard).not.toContainText('avg/day');
   await expect(todayCodexCard).toContainText('% used /');
-  await expect(todayCodexCard).toContainText('% expected this week (weekdays)');
+  await expect(todayCodexCard).toContainText('% expected this week (all days)');
   await expect(
     todayCodexCard.locator('.codex-usage-progress .progress-bar')
   ).toHaveCount(2);
@@ -6493,7 +6493,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
     .locator('#statsGrid .stat-card')
     .filter({ hasText: 'Codex Usage' });
   await expect(codexUsageCard).toContainText('% used /');
-  await expect(codexUsageCard).toContainText('% expected by now (weekdays)');
+  await expect(codexUsageCard).toContainText('% expected by now (all days)');
   await expect(codexUsageCard.locator('.progress-bar')).toHaveCount(2);
   const codexProgressWidths = await codexUsageCard
     .locator('.progress-bar .fill')
@@ -6507,7 +6507,7 @@ test('Codex inbox reconciles delegated entries and recalibrates changed records 
     .locator('#todayCommandPanel .today-command-item')
     .filter({ has: page.locator('.codex-usage-progress') });
   await expect(todayCodexUsage).toContainText(
-    '% expected this week (weekdays)'
+    '% expected this week (all days)'
   );
   await expect(
     todayCodexUsage.locator('.codex-usage-progress .progress-bar')

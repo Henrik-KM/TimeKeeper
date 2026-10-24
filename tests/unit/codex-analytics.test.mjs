@@ -92,7 +92,7 @@ function sampleWithSecondary(observedAt, primaryUsed, secondaryUsed) {
   };
 }
 
-test('computes quota use and weekday expected use for the current weekly window', () => {
+test('computes quota use and calendar-time expected use for the current weekly window', () => {
   const result = computeCodexQuotaProgress(
     {
       remainingPercent: 40,
@@ -105,14 +105,14 @@ test('computes quota use and weekday expected use for the current weekly window'
   assert.deepEqual(result, {
     usedPercent: 60,
     remainingPercent: 40,
-    expectedUsedPercent: 40,
-    expectedRemainingPercent: 60,
+    expectedUsedPercent: 57.1,
+    expectedRemainingPercent: 42.9,
     windowStartAt: '2026-08-13T12:00:00.000Z',
     resetsAt: '2026-08-20T12:00:00.000Z'
   });
 });
 
-test('does not advance expected Codex usage over the weekend', () => {
+test('advances expected Codex usage across weekend days', () => {
   const quotaWindow = {
     usedPercent: 30,
     windowMinutes: 10080,
@@ -135,10 +135,10 @@ test('does not advance expected Codex usage over the weekend', () => {
     new Date(2026, 7, 17, 12, 0, 0)
   );
 
-  assert.equal(friday.expectedUsedPercent, 20);
-  assert.equal(sunday.expectedUsedPercent, 30);
-  assert.equal(monday.expectedUsedPercent, 40);
-  assert.equal(saturday.expectedUsedPercent, sunday.expectedUsedPercent);
+  assert.equal(friday.expectedUsedPercent, 14.3);
+  assert.equal(saturday.expectedUsedPercent, 28.6);
+  assert.equal(sunday.expectedUsedPercent, 42.9);
+  assert.equal(monday.expectedUsedPercent, 57.1);
 });
 
 test('does not compare quota pacing after the reset or without a window', () => {

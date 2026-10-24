@@ -13839,7 +13839,7 @@ import {
         progress: usedPercent,
         timeProgress: expectedUsedPercent,
         icon: 'AI',
-        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(expectedUsedPercent)}% expected by now (weekdays)`,
+        progressLabel: `${formatCodexUsagePercent(usedPercent)}% used / ${formatCodexUsagePercent(expectedUsedPercent)}% expected by now (all days)`,
         scheduleLabel: pacingLabel,
         scheduleTone: pacingTone,
         metaLabel: `${usage.windowLabel} limit - ${usage.resetLabel} - ${usage.statusLabel}`
@@ -13881,7 +13881,7 @@ import {
       ? formatCodexUsagePercent(pacing.expectedUsedPercent)
       : '';
     const labelText = hasExpectedProgress
-      ? `${usedLabel}% used / ${expectedLabel}% expected this week (weekdays)`
+      ? `${usedLabel}% used / ${expectedLabel}% expected this week (all days)`
       : `${usedLabel}% used - weekly pacing unavailable`;
     const progress = document.createElement('span');
     progress.className = `codex-usage-progress${className ? ` ${className}` : ''}`;
