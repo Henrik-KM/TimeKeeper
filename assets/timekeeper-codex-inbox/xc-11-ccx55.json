@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-24T11:07:02.576Z",
+  "updatedAt": "2026-10-24T11:12:01.732Z",
   "dayStart": "2026-10-23T22:00:00.000Z",
   "rangeStart": "2026-07-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,31 +15,17 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-24T11:07:04.155Z",
+    "observedAt": "2026-10-24T11:12:02.901Z",
     "primary": {
       "usedPercent": 32,
       "remainingPercent": 68,
       "windowMinutes": 10080,
-      "resetsAt": "2026-10-30T17:41:21.000Z"
+      "resetsAt": "2026-10-30T17:41:22.000Z"
     },
     "secondary": null
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/scholarships",
-      "displayPath": "GitHub/Scholarships",
-      "projectFolder": "Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-24T11:07:07.911Z"
-    },
     {
       "key": "github/mathem-agent",
       "displayPath": "GitHub/Mathem-agent",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-24T11:07:01.016Z"
+      "lastSeenAt": "2026-10-24T11:11:59.818Z"
+    },
+    {
+      "key": "github/scholarships",
+      "displayPath": "GitHub/Scholarships",
+      "projectFolder": "Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-24T11:11:51.960Z"
     },
     {
       "key": "github/timekeeper",
@@ -169,23 +169,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
-      "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
-      "title": "Find and submit competitive awards",
-      "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 44296,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-24T11:07:07.911Z"
-    },
-    {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
       "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
       "title": "",
@@ -198,9 +181,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 3542,
+      "activityCount": 3621,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-24T11:07:01.016Z"
+      "lastSeenAt": "2026-10-24T11:11:59.818Z"
+    },
+    {
+      "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
+      "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
+      "title": "Find and submit competitive awards",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 44364,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-24T11:11:51.960Z"
     },
     {
       "key": "01a0dc48-dd26-7961-b2e2-8bfeb7af2190",
