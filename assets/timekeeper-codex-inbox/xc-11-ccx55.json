@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-24T12:32:02.486Z",
+  "updatedAt": "2026-10-24T12:37:01.920Z",
   "dayStart": "2026-10-23T22:00:00.000Z",
   "rangeStart": "2026-07-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-24T12:32:06.715Z",
+    "observedAt": "2026-10-24T12:37:04.193Z",
     "primary": {
-      "usedPercent": 36,
-      "remainingPercent": 64,
+      "usedPercent": 37,
+      "remainingPercent": 63,
       "windowMinutes": 10080,
       "resetsAt": "2026-10-30T17:41:21.000Z"
     },
@@ -26,20 +26,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/mathem-agent",
-      "displayPath": "GitHub/Mathem-agent",
-      "projectFolder": "Mathem-agent",
-      "repoName": "Mathem-agent",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-24T12:32:07.865Z"
-    },
     {
       "key": "github/scholarships",
       "displayPath": "GitHub/Scholarships",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-24T12:29:29.144Z"
+      "lastSeenAt": "2026-10-24T12:37:07.153Z"
+    },
+    {
+      "key": "github/mathem-agent",
+      "displayPath": "GitHub/Mathem-agent",
+      "projectFolder": "Mathem-agent",
+      "repoName": "Mathem-agent",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-24T12:36:35.639Z"
     },
     {
       "key": "github/timekeeper",
@@ -169,23 +169,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
-      "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Mathem-agent",
-      "repoName": "Mathem-agent",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 4868,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-24T12:32:07.865Z"
-    },
-    {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "title": "Find and submit competitive awards",
@@ -198,9 +181,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 45255,
+      "activityCount": 45390,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-24T12:29:29.144Z"
+      "lastSeenAt": "2026-10-24T12:37:07.153Z"
+    },
+    {
+      "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
+      "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Mathem-agent",
+      "repoName": "Mathem-agent",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 4961,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-24T12:36:35.639Z"
     },
     {
       "key": "01a0dc48-dd26-7961-b2e2-8bfeb7af2190",
