@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-25T16:01:02.296Z",
+  "updatedAt": "2026-10-25T16:16:02.248Z",
   "dayStart": "2026-10-24T22:00:00.000Z",
   "rangeStart": "2026-07-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-25T16:01:03.460Z",
+    "observedAt": "2026-10-25T16:16:03.443Z",
     "primary": {
       "usedPercent": 14,
       "remainingPercent": 86,
@@ -66,7 +66,7 @@
       "match": "IFLAI",
       "sessionCount": 2428,
       "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-10-25T16:01:04.197Z"
+      "lastSeenAt": "2026-10-25T16:09:29.007Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 6650,
+      "activityCount": 6761,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-25T16:01:04.197Z"
+      "lastSeenAt": "2026-10-25T16:09:29.007Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -63578,6 +63578,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 361,
           "effectiveSeconds": 108
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-971d6e3a1188f37ffc9254d1",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-25T15:53:21.121Z",
+      "endTime": "2026-10-25T15:54:32.164Z",
+      "wallSeconds": 71,
+      "focusFactor": 0.2958,
+      "effectiveSeconds": 21,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 71,
+          "effectiveSeconds": 21
         }
       ],
       "description": "Codex: Email helper health monitor"
