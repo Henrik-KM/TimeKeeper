@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-26T13:46:02.141Z",
+  "updatedAt": "2026-10-26T14:01:02.201Z",
   "dayStart": "2026-10-25T23:00:00.000Z",
   "rangeStart": "2026-07-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-26T13:46:03.016Z",
+    "observedAt": "2026-10-26T14:01:03.215Z",
     "primary": {
-      "usedPercent": 10,
-      "remainingPercent": 90,
+      "usedPercent": 11,
+      "remainingPercent": 89,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-26T13:45:57.206Z"
+      "lastSeenAt": "2026-10-26T13:59:38.900Z"
     },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -181,9 +181,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 267,
+      "activityCount": 483,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-26T13:45:57.206Z"
+      "lastSeenAt": "2026-10-26T13:59:38.900Z"
     },
     {
       "key": "019ed546-e82a-73d3-897e-3f1aadb15657",
@@ -63564,6 +63564,37 @@
         }
       ],
       "description": "Codex: Locate Henrik style guide"
+    },
+    {
+      "id": "codex-99c42ec09dff9c70f8c98b23",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-26T13:26:04.604Z",
+      "endTime": "2026-10-26T13:39:35.795Z",
+      "wallSeconds": 811,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 405,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 811,
+          "effectiveSeconds": 405
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
