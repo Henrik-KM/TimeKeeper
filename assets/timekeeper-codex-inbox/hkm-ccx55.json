@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-26T22:46:02.293Z",
-  "dayStart": "2026-10-25T23:00:00.000Z",
-  "rangeStart": "2026-07-28T22:00:00.000Z",
+  "updatedAt": "2026-10-26T23:01:02.303Z",
+  "dayStart": "2026-10-26T23:00:00.000Z",
+  "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-26T22:46:03.235Z",
+    "observedAt": "2026-10-26T23:01:03.220Z",
     "primary": {
-      "usedPercent": 54,
-      "remainingPercent": 46,
+      "usedPercent": 56,
+      "remainingPercent": 44,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -198,7 +198,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 16197,
+      "activityCount": 15936,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
@@ -54847,104 +54847,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-e4ec7151fe31001bea80ac14",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-19T23:37:47.243Z",
-      "endTime": "2026-10-19T23:50:33.743Z",
-      "wallSeconds": 766,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 383,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 766,
-          "effectiveSeconds": 383
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-8218f37359729bb16f8cfb40",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T03:37:21.148Z",
-      "endTime": "2026-10-20T03:47:50.290Z",
-      "wallSeconds": 629,
-      "focusFactor": 0.4992,
-      "effectiveSeconds": 314,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 629,
-          "effectiveSeconds": 314
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-d2c39adcaf7ca42bebffdae8",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-20T06:50:09.379Z",
-      "endTime": "2026-10-20T07:16:29.408Z",
-      "wallSeconds": 1580,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 790,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 1580,
-          "effectiveSeconds": 790,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-79b3ab0ad2eb88934bd1941e"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
       "id": "codex-fb805d92b9dc59722a975dc3",
       "threadId": "01a15820-54ac-7c63-8bfa-976ec1458627",
       "projectKey": "email-helper",
@@ -54983,7 +54885,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1254,
         "reasoning_output_tokens": 489
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-16b9d942aa25c2c7b97a08b9",
@@ -55024,7 +54927,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 982,
         "reasoning_output_tokens": 295
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-fb8f1cd3ec4d43d6e8972e5c",
@@ -55055,7 +54959,8 @@
           "effectiveSeconds": 528
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-b1df02a3bd548b6b45f9e184",
@@ -55096,7 +55001,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 13714,
         "reasoning_output_tokens": 5672
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-b7b0eb4db202d274efe919ac",
@@ -55137,7 +55043,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4995,
         "reasoning_output_tokens": 2231
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-8af09a26c5e8f36b8452dfe3",
@@ -55178,7 +55085,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9956,
         "reasoning_output_tokens": 3030
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-25832bb55c5443154e9c2569",
@@ -55219,7 +55127,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1077,
         "reasoning_output_tokens": 302
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-8830caa8c0f5edd079f00fd8",
@@ -55260,38 +55169,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 20697,
         "reasoning_output_tokens": 10429
-      }
-    },
-    {
-      "id": "codex-012d1c71ec4f81c635ae13b6",
-      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T09:36:04.254Z",
-      "endTime": "2026-10-20T09:57:40.802Z",
-      "wallSeconds": 1296,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 648,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1296,
-          "effectiveSeconds": 648
-        }
-      ],
-      "description": "Codex: Find and adapt AI risk assessment"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-56569322326854c061a78525",
@@ -55332,7 +55211,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 16073,
         "reasoning_output_tokens": 7288
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-852e6e6d644b1afd0cb8762a",
@@ -55373,7 +55253,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8641,
         "reasoning_output_tokens": 3381
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-60bdc9799e84d6d65b0c0a4d",
@@ -55414,7 +55295,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2537,
         "reasoning_output_tokens": 1184
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ebac0135d1beacdd571ddebe",
@@ -55455,7 +55337,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6667,
         "reasoning_output_tokens": 2761
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-76176236bbcf71ab01f7a22a",
@@ -55496,7 +55379,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3829,
         "reasoning_output_tokens": 1330
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-4070f626bbb5dcf16826453b",
@@ -55537,69 +55421,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2993,
         "reasoning_output_tokens": 1021
-      }
-    },
-    {
-      "id": "codex-0115e70f36fdf7d13031b9e5",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T12:15:47.524Z",
-      "endTime": "2026-10-20T12:31:38.049Z",
-      "wallSeconds": 950,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 475,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 950,
-          "effectiveSeconds": 475
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-2f3d37bd9c100a63ced63d45",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T12:15:48.901Z",
-      "endTime": "2026-10-20T12:31:52.992Z",
-      "wallSeconds": 964,
-      "focusFactor": 0.2998,
-      "effectiveSeconds": 289,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 964,
-          "effectiveSeconds": 289
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7230e3e581adb382668a3f6d",
@@ -55630,38 +55453,8 @@
           "effectiveSeconds": 11
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-fd653a53f602034c212bd3a8",
-      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T12:18:53.783Z",
-      "endTime": "2026-10-20T13:03:36.673Z",
-      "wallSeconds": 2682,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1341,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2682,
-          "effectiveSeconds": 1341
-        }
-      ],
-      "description": "Codex: Find and adapt AI risk assessment"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-0e0a782694c552edf33c45fc",
@@ -55702,52 +55495,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 14550,
         "reasoning_output_tokens": 4644
-      }
-    },
-    {
-      "id": "codex-169e9665d87dbac7cfcd8832",
-      "threadId": "01a15958-d259-77f1-9726-2a5a5464bc59",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T12:46:33.448Z",
-      "endTime": "2026-10-20T12:54:41.654Z",
-      "wallSeconds": 488,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 244,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 487,
-          "effectiveSeconds": 243
-        }
-      ],
-      "description": "Codex: Draft CHROMA-1 reply to Syam"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-01cac59f2d2dfcab16f0248d",
@@ -55788,7 +55537,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 15078,
         "reasoning_output_tokens": 4874
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7a52781c33bde7fd3281ec65",
@@ -55829,69 +55579,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4424,
         "reasoning_output_tokens": 1568
-      }
-    },
-    {
-      "id": "codex-5bb872d9bf3f1efe1a591e3c",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T13:04:37.570Z",
-      "endTime": "2026-10-20T13:29:50.813Z",
-      "wallSeconds": 1513,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 756,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1513,
-          "effectiveSeconds": 756
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
-    },
-    {
-      "id": "codex-881e1ffd4f331f1443df1b36",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T13:06:04.491Z",
-      "endTime": "2026-10-20T13:24:18.450Z",
-      "wallSeconds": 1093,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 546,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1093,
-          "effectiveSeconds": 546
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7e99cc22912b9987416a56f6",
@@ -55932,7 +55621,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3255,
         "reasoning_output_tokens": 1205
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-a4100b885ae96815d916f4f4",
@@ -55973,7 +55663,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 934,
         "reasoning_output_tokens": 256
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-59e9bf95a058cc005a7cde0f",
@@ -56014,38 +55705,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1185,
         "reasoning_output_tokens": 387
-      }
-    },
-    {
-      "id": "codex-320be48f9ff9210f6548ff87",
-      "threadId": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T13:20:55.439Z",
-      "endTime": "2026-10-20T15:46:41.893Z",
-      "wallSeconds": 8746,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 4373,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 8746,
-          "effectiveSeconds": 4373
-        }
-      ],
-      "description": "Codex: IFLAI"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-1a46c83e9e2e134370c44cc0",
@@ -56086,7 +55747,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1656,
         "reasoning_output_tokens": 576
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d1120674473edee1a873ae46",
@@ -56127,7 +55789,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3838,
         "reasoning_output_tokens": 1232
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-584428cda283107b902e6868",
@@ -56168,7 +55831,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2179,
         "reasoning_output_tokens": 1041
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-8dc4d685d3aa7d3641b3cc93",
@@ -56209,38 +55873,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2893,
         "reasoning_output_tokens": 796
-      }
-    },
-    {
-      "id": "codex-85d18a75666dac89f8653e1d",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T14:03:56.315Z",
-      "endTime": "2026-10-20T14:05:03.118Z",
-      "wallSeconds": 66,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 33,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 66,
-          "effectiveSeconds": 33
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-a0b098c4164e4fa0c8ee97b2",
@@ -56281,7 +55915,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1138,
         "reasoning_output_tokens": 360
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-549d4aeb7aba94c602b8cf90",
@@ -56322,136 +55957,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8696,
         "reasoning_output_tokens": 3467
-      }
-    },
-    {
-      "id": "codex-e1dde8ec3b991ead3e2df52f",
-      "threadId": "01a13465-6800-7451-9f66-802c686303b8",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T14:40:25.141Z",
-      "endTime": "2026-10-20T14:47:19.189Z",
-      "wallSeconds": 414,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 207,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 414,
-          "effectiveSeconds": 207
-        }
-      ],
-      "description": "Codex: Prepare NVIDIA Stockholm trip"
-    },
-    {
-      "id": "codex-7d232f93909ec13e583f2a30",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-20T15:00:45.726Z",
-      "endTime": "2026-10-20T15:14:41.000Z",
-      "wallSeconds": 835,
-      "focusFactor": 0.4994,
-      "effectiveSeconds": 417,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 835,
-          "effectiveSeconds": 417,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-d5b4c897bef3fafef128a163"
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-034cb7f5f7375eb2655b7045",
-      "threadId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T15:18:39.342Z",
-      "endTime": "2026-10-20T15:20:08.199Z",
-      "wallSeconds": 88,
-      "focusFactor": 0.2955,
-      "effectiveSeconds": 26,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-5.6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 88,
-          "effectiveSeconds": 26
-        }
-      ],
-      "description": "Codex: Restart HPC Arrhenius access"
-    },
-    {
-      "id": "codex-14725142d29fb45772936876",
-      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
-      "projectKey": "sem-imaging",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-20T15:20:34.529Z",
-      "endTime": "2026-10-20T15:22:47.143Z",
-      "wallSeconds": 132,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 66,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 132,
-          "effectiveSeconds": 66
-        }
-      ],
-      "description": "Codex: AZ SEM Foundation model tests"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ad0ce13d3b24209c9b58054b",
