@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-26T13:16:02.026Z",
+  "updatedAt": "2026-10-26T13:31:02.408Z",
   "dayStart": "2026-10-25T23:00:00.000Z",
   "rangeStart": "2026-07-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-26T13:16:02.810Z",
+    "observedAt": "2026-10-26T13:31:03.325Z",
     "primary": {
-      "usedPercent": 9,
-      "remainingPercent": 91,
+      "usedPercent": 10,
+      "remainingPercent": 90,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "github/magdalena",
+      "displayPath": "GitHub/Magdalena",
+      "projectFolder": "Magdalena",
+      "repoName": "Magdalena",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-26T13:30:48.738Z"
+    },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
       "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -38,7 +52,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-26T07:25:09.104Z"
+      "lastSeenAt": "2026-10-26T13:25:17.301Z"
     },
     {
       "key": "github/timekeeper",
@@ -66,7 +80,35 @@
       "match": "IFLAI",
       "sessionCount": 2427,
       "assistantSessionCount": 2427,
-      "lastSeenAt": "2026-10-26T12:28:00.595Z"
+      "lastSeenAt": "2026-10-26T13:30:55.738Z"
+    },
+    {
+      "key": "github/anders/research",
+      "displayPath": "GitHub/Anders/Research",
+      "projectFolder": "Anders",
+      "repoName": "Research",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-26T13:27:50.540Z"
+    },
+    {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-26T13:26:45.344Z"
     },
     {
       "key": "github/iflai",
@@ -81,20 +123,6 @@
       "sessionCount": 8,
       "assistantSessionCount": 8,
       "lastSeenAt": "2026-10-26T09:21:27.050Z"
-    },
-    {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-26T08:14:03.286Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -141,6 +169,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a17867-6ff8-78a1-8158-4e375be18283",
+      "sessionId": "01a17867-6ff8-78a1-8158-4e375be18283",
+      "title": "Plan research paper structure",
+      "threadSource": "user",
+      "displayPath": "GitHub/Magdalena",
+      "repoName": "Magdalena",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 31,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-26T13:30:48.738Z"
+    },
+    {
       "key": "019ed546-e82a-73d3-897e-3f1aadb15657",
       "sessionId": "019ed546-e82a-73d3-897e-3f1aadb15657",
       "title": "Add Codex session logging",
@@ -170,9 +215,60 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 25398,
+      "activityCount": 25399,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-26T07:25:09.104Z"
+      "lastSeenAt": "2026-10-26T13:25:17.301Z"
+    },
+    {
+      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "title": "LinkedIn weekly stale invitation cleanup",
+      "threadSource": "agent_forked_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 6822,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-26T13:30:55.738Z"
+    },
+    {
+      "key": "01a1785f-bdfb-7c20-9840-049665d1d017",
+      "sessionId": "01a1785f-bdfb-7c20-9840-049665d1d017",
+      "title": "Locate Henrik style guide",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Research",
+      "repoName": "Research",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 136,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-26T13:27:50.540Z"
+    },
+    {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Submit Barbro Osher application",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 16798,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-26T13:26:45.344Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -241,40 +337,6 @@
       "activityCount": 358,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-26T08:39:52.046Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Submit Barbro Osher application",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 16797,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-26T08:14:03.286Z"
-    },
-    {
-      "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "sessionId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "title": "LinkedIn weekly stale invitation cleanup",
-      "threadSource": "agent_forked_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 6761,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-25T16:09:29.007Z"
     },
     {
       "key": "01a16cff-ffa8-7d10-98fe-6830f5fcbdc0",
