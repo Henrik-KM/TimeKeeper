@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-26T08:46:01.969Z",
+  "updatedAt": "2026-10-26T09:01:02.167Z",
   "dayStart": "2026-10-25T23:00:00.000Z",
   "rangeStart": "2026-07-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-26T08:46:02.997Z",
+    "observedAt": "2026-10-26T09:01:03.068Z",
     "primary": {
-      "usedPercent": 2,
-      "remainingPercent": 98,
+      "usedPercent": 3,
+      "remainingPercent": 97,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -63186,6 +63186,51 @@
         "codex-147b3be3df77ad8cf97ec126"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-b7442e6d261b2744310d0358",
+      "threadId": "01a1775e-aeb0-7213-b196-4d8eede02bb1",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-26T08:40:57.131Z",
+      "endTime": "2026-10-26T08:42:03.360Z",
+      "wallSeconds": 66,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 33,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 65,
+          "effectiveSeconds": 32
+        }
+      ],
+      "description": "Codex: Open latest CP project SoW"
     }
   ]
 }
