@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-27T08:46:02.882Z",
+  "updatedAt": "2026-10-27T09:01:02.965Z",
   "dayStart": "2026-10-26T23:00:00.000Z",
   "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-27T08:46:05.848Z",
+    "observedAt": "2026-10-27T09:01:03.935Z",
     "primary": {
-      "usedPercent": 97,
-      "remainingPercent": 3,
+      "usedPercent": 98,
+      "remainingPercent": 2,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-27T08:38:26.951Z"
+      "lastSeenAt": "2026-10-27T09:01:23.797Z"
     },
     {
       "key": "github/magdalena",
@@ -69,6 +69,20 @@
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
     {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-10-27T09:00:52.490Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -81,20 +95,6 @@
       "sessionCount": 2,
       "assistantSessionCount": 2,
       "lastSeenAt": "2026-10-27T08:34:15.689Z"
-    },
-    {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-27T08:11:01.591Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -215,9 +215,26 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 25682,
+      "activityCount": 25866,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T08:38:26.951Z"
+      "lastSeenAt": "2026-10-27T09:01:23.797Z"
+    },
+    {
+      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "title": "Find and adapt AI risk assessment",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2830,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-27T09:00:52.490Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -235,23 +252,6 @@
       "activityCount": 18036,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-27T08:34:15.689Z"
-    },
-    {
-      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "title": "Find and adapt AI risk assessment",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2726,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T08:11:01.591Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -63174,6 +63174,42 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-30e2ec9fe354cdd498068af1",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-27T07:12:10.821Z",
+      "endTime": "2026-10-27T08:34:15.689Z",
+      "wallSeconds": 4924,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2462,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 4924,
+          "effectiveSeconds": 2462,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-ebb9e0d87a4112c01e98b60b"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     },
     {
       "id": "codex-314e7e0df50482e8eca44a5c",
