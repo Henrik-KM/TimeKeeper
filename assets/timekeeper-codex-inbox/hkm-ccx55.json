@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-27T11:16:02.686Z",
+  "updatedAt": "2026-10-27T11:31:02.788Z",
   "dayStart": "2026-10-26T23:00:00.000Z",
   "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-27T11:16:03.758Z",
+    "observedAt": "2026-10-27T11:31:03.700Z",
     "primary": {
-      "usedPercent": 8,
-      "remainingPercent": 92,
+      "usedPercent": 9,
+      "remainingPercent": 91,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-03T09:07:14.000Z"
     },
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-27T11:16:19.361Z"
+      "lastSeenAt": "2026-10-27T11:30:48.610Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -232,9 +232,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 18409,
+      "activityCount": 18606,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T11:16:19.361Z"
+      "lastSeenAt": "2026-10-27T11:30:48.610Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -63482,6 +63482,37 @@
         }
       ],
       "description": "Codex: Find latest CP model share date"
+    },
+    {
+      "id": "codex-a2d47d22cb713b4489ca6502",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T10:53:03.084Z",
+      "endTime": "2026-10-27T11:05:42.553Z",
+      "wallSeconds": 759,
+      "focusFactor": 0.4993,
+      "effectiveSeconds": 379,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 759,
+          "effectiveSeconds": 379
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
     },
     {
       "id": "codex-0ab8bd1cf0a0970fe9046ba4",
