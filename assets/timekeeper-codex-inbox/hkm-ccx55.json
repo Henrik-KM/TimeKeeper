@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-27T10:31:02.708Z",
+  "updatedAt": "2026-10-27T10:46:02.681Z",
   "dayStart": "2026-10-26T23:00:00.000Z",
   "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-27T10:31:03.608Z",
+    "observedAt": "2026-10-27T10:46:03.576Z",
     "primary": {
-      "usedPercent": 5,
-      "remainingPercent": 95,
+      "usedPercent": 6,
+      "remainingPercent": 94,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-03T09:07:14.000Z"
     },
@@ -63406,6 +63406,82 @@
         }
       ],
       "description": "Codex: Find and adapt AI risk assessment"
+    },
+    {
+      "id": "codex-fc1e08feb8c009ab13db3a50",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T09:31:36.132Z",
+      "endTime": "2026-10-27T10:23:02.413Z",
+      "wallSeconds": 3086,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1543,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3086,
+          "effectiveSeconds": 1543
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
+    },
+    {
+      "id": "codex-8fa25bffd8acd536a38a99a6",
+      "threadId": "01a17cda-c7fb-75e1-87cb-5d3e9301cdc7",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T10:14:36.338Z",
+      "endTime": "2026-10-27T10:17:50.448Z",
+      "wallSeconds": 194,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 97,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 193,
+          "effectiveSeconds": 96
+        }
+      ],
+      "description": "Codex: Find latest CP model share date"
     }
   ]
 }
