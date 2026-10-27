@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-27T11:01:02.673Z",
+  "updatedAt": "2026-10-27T11:16:02.686Z",
   "dayStart": "2026-10-26T23:00:00.000Z",
   "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-27T11:01:03.497Z",
+    "observedAt": "2026-10-27T11:16:03.758Z",
     "primary": {
-      "usedPercent": 7,
-      "remainingPercent": 93,
+      "usedPercent": 8,
+      "remainingPercent": 92,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-03T09:07:14.000Z"
     },
@@ -69,20 +69,6 @@
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
     {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-10-27T11:00:39.734Z"
-    },
-    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -94,7 +80,21 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-27T11:00:08.639Z"
+      "lastSeenAt": "2026-10-27T11:16:19.361Z"
+    },
+    {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-10-27T11:05:42.553Z"
     },
     {
       "key": "github/iflai",
@@ -220,23 +220,6 @@
       "lastSeenAt": "2026-10-27T09:47:19.015Z"
     },
     {
-      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "title": "Find and adapt AI risk assessment",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 3547,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T11:00:39.734Z"
-    },
-    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -249,9 +232,26 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 18141,
+      "activityCount": 18409,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T11:00:08.639Z"
+      "lastSeenAt": "2026-10-27T11:16:19.361Z"
+    },
+    {
+      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "title": "Find and adapt AI risk assessment",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3626,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-27T11:05:42.553Z"
     },
     {
       "key": "01a17cda-c7fb-75e1-87cb-5d3e9301cdc7",
@@ -41770,8 +41770,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 414,
-    "imported": 414,
+    "discovered": 415,
+    "imported": 415,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -63482,6 +63482,47 @@
         }
       ],
       "description": "Codex: Find latest CP model share date"
+    },
+    {
+      "id": "codex-0ab8bd1cf0a0970fe9046ba4",
+      "threadId": "01a17d02-8d38-79e3-8a89-d490f13cc50d",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T10:58:01.257Z",
+      "endTime": "2026-10-27T11:03:14.757Z",
+      "wallSeconds": 313,
+      "focusFactor": 0.4984,
+      "effectiveSeconds": 156,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 313,
+          "effectiveSeconds": 156
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 795133,
+        "cached_input_tokens": 714112,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 13198,
+        "reasoning_output_tokens": 5381
+      }
     }
   ]
 }
