@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-27T08:16:02.650Z",
+  "updatedAt": "2026-10-27T08:31:02.645Z",
   "dayStart": "2026-10-26T23:00:00.000Z",
   "rangeStart": "2026-07-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-27T08:16:03.554Z",
+    "observedAt": "2026-10-27T08:31:03.530Z",
     "primary": {
-      "usedPercent": 96,
-      "remainingPercent": 4,
+      "usedPercent": 97,
+      "remainingPercent": 3,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-02T05:59:21.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-27T08:16:03.748Z"
+      "lastSeenAt": "2026-10-27T08:20:45.453Z"
     },
     {
       "key": "github/magdalena",
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-27T08:16:20.936Z"
+      "lastSeenAt": "2026-10-27T08:31:21.009Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -215,9 +215,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 25647,
+      "activityCount": 25677,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T08:16:03.748Z"
+      "lastSeenAt": "2026-10-27T08:20:45.453Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -232,9 +232,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 17693,
+      "activityCount": 17999,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-27T08:16:20.936Z"
+      "lastSeenAt": "2026-10-27T08:31:21.009Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -41753,8 +41753,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 413,
-    "imported": 413,
+    "discovered": 414,
+    "imported": 414,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -63174,6 +63174,78 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-314e7e0df50482e8eca44a5c",
+      "threadId": "01a17c64-77ce-7882-aa44-23c08939e9cc",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T08:05:21.032Z",
+      "endTime": "2026-10-27T08:19:43.063Z",
+      "wallSeconds": 862,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 431,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 862,
+          "effectiveSeconds": 431
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 2005330,
+        "cached_input_tokens": 1871616,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 25519,
+        "reasoning_output_tokens": 11599
+      }
+    },
+    {
+      "id": "codex-3f04c8102b56ec1a3cb5680f",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-27T08:07:42.824Z",
+      "endTime": "2026-10-27T08:11:01.591Z",
+      "wallSeconds": 198,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 99,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 198,
+          "effectiveSeconds": 99
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
     }
   ]
 }
