@@ -2,7 +2,7 @@
   "version": 1,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-28T04:51:01.789Z",
+  "updatedAt": "2026-10-28T06:36:01.862Z",
   "rangeStart": "2026-09-28T22:00:00.000Z",
   "lookbackDays": 30,
   "records": [
@@ -925,42 +925,6 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:0bcddb737c6c6a1d8d7f4894bafcd5ad",
-      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "genAI-review",
-      "description": "Claude: genAI-review",
-      "startTime": "2026-10-08T10:58:48.467Z",
-      "endTime": "2026-10-08T11:31:51.808Z",
-      "wallSeconds": 1983,
-      "effectiveSeconds": 1562,
-      "delegatedSessionCount": 4,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 1983,
-          "effectiveSeconds": 991
-        },
-        {
-          "role": "subagent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 3263,
-          "effectiveSeconds": 571
-        }
-      ],
-      "focusFactor": 0.7877,
-      "focusPolicyVersion": 1,
-      "delegationCredit": 0.35
-    },
-    {
       "id": "claude:e62be65498e86a96db0b601339ad8656",
       "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -997,17 +961,17 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:d42124973ff186e869f09bd23063594f",
+      "id": "claude:0bcddb737c6c6a1d8d7f4894bafcd5ad",
       "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
       "description": "Claude: genAI-review",
-      "startTime": "2026-10-08T13:21:32.202Z",
-      "endTime": "2026-10-08T13:35:00.299Z",
-      "wallSeconds": 808,
-      "effectiveSeconds": 404,
-      "delegatedSessionCount": 0,
+      "startTime": "2026-10-08T10:58:48.467Z",
+      "endTime": "2026-10-08T11:31:51.808Z",
+      "wallSeconds": 1983,
+      "effectiveSeconds": 1562,
+      "delegatedSessionCount": 4,
       "modelBreakdown": [
         {
           "role": "parent",
@@ -1015,11 +979,20 @@
           "factor": 0.5,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
-          "wallSeconds": 808,
-          "effectiveSeconds": 404
+          "wallSeconds": 1983,
+          "effectiveSeconds": 991
+        },
+        {
+          "role": "subagent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 3263,
+          "effectiveSeconds": 571
         }
       ],
-      "focusFactor": 0.5,
+      "focusFactor": 0.7877,
       "focusPolicyVersion": 1,
       "delegationCredit": 0.35
     },
@@ -1051,16 +1024,16 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:8c843665e0b7797f65b6187f05f6ebb7",
+      "id": "claude:d42124973ff186e869f09bd23063594f",
       "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
       "description": "Claude: genAI-review",
-      "startTime": "2026-10-08T14:59:06.636Z",
-      "endTime": "2026-10-08T15:04:31.740Z",
-      "wallSeconds": 325,
-      "effectiveSeconds": 162,
+      "startTime": "2026-10-08T13:21:32.202Z",
+      "endTime": "2026-10-08T13:35:00.299Z",
+      "wallSeconds": 808,
+      "effectiveSeconds": 404,
       "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
@@ -1069,11 +1042,11 @@
           "factor": 0.5,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
-          "wallSeconds": 325,
-          "effectiveSeconds": 162
+          "wallSeconds": 808,
+          "effectiveSeconds": 404
         }
       ],
-      "focusFactor": 0.4985,
+      "focusFactor": 0.5,
       "focusPolicyVersion": 1,
       "delegationCredit": 0.35
     },
@@ -1105,8 +1078,35 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:bc247740382f945633897b9b52f216d7",
+      "id": "claude:8c843665e0b7797f65b6187f05f6ebb7",
       "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "genAI-review",
+      "description": "Claude: genAI-review",
+      "startTime": "2026-10-08T14:59:06.636Z",
+      "endTime": "2026-10-08T15:04:31.740Z",
+      "wallSeconds": 325,
+      "effectiveSeconds": 162,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 325,
+          "effectiveSeconds": 162
+        }
+      ],
+      "focusFactor": 0.4985,
+      "focusPolicyVersion": 1,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:b35c4c1ca583218d95aabf691a367845",
+      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1132,8 +1132,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:b35c4c1ca583218d95aabf691a367845",
-      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
+      "id": "claude:bc247740382f945633897b9b52f216d7",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1186,8 +1186,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:7c309f8aa2cca87dc4ac08669bbbde6a",
-      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "id": "claude:9aa1e8ffb0d86364b6a260f69fa6893e",
+      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1213,8 +1213,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:9aa1e8ffb0d86364b6a260f69fa6893e",
-      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
+      "id": "claude:7c309f8aa2cca87dc4ac08669bbbde6a",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1303,8 +1303,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:498904228d97bfad3ba1173e90442c4a",
-      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "id": "claude:3d8da36f6d1314b7d63e9f93740d15b6",
+      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1330,8 +1330,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:3d8da36f6d1314b7d63e9f93740d15b6",
-      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
+      "id": "claude:498904228d97bfad3ba1173e90442c4a",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1438,8 +1438,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:c2fcbd83d43a4fb53ff0c41ba04d2f81",
-      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "id": "claude:7b4a1550bdff96294a7a09234e823136",
+      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1465,8 +1465,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:7b4a1550bdff96294a7a09234e823136",
-      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
+      "id": "claude:c2fcbd83d43a4fb53ff0c41ba04d2f81",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1546,8 +1546,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:42e8e70b7d211af8e1cbc8da3f42e087",
-      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
+      "id": "claude:3f24daed2f4fb5b226215e72159f957d",
+      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
@@ -1573,8 +1573,8 @@
       "delegationCredit": 0.35
     },
     {
-      "id": "claude:3f24daed2f4fb5b226215e72159f957d",
-      "sessionId": "367008d9-1774-4623-b8a6-674d55d94693",
+      "id": "claude:42e8e70b7d211af8e1cbc8da3f42e087",
+      "sessionId": "c7f92e07-1158-4d78-92bf-522649e40c0a",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
       "timekeeperProjectName": "Anders",
       "repoName": "genAI-review",
