@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T13:46:02.466Z",
+  "updatedAt": "2026-10-28T14:01:02.608Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T13:46:03.596Z",
+    "observedAt": "2026-10-28T14:01:03.661Z",
     "primary": {
-      "usedPercent": 42,
-      "remainingPercent": 58,
+      "usedPercent": 44,
+      "remainingPercent": 56,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -67,6 +67,20 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
+    },
+    {
+      "key": "github/anders",
+      "displayPath": "GitHub/Anders",
+      "projectFolder": "Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-28T14:01:02.207Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -151,20 +165,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-22T08:51:48.009Z"
-    },
-    {
-      "key": "github/anders",
-      "displayPath": "GitHub/Anders",
-      "projectFolder": "Anders",
-      "repoName": "Anders",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-20T12:18:32.463Z"
     }
   ],
   "sessionMappingAudit": [
@@ -218,6 +218,23 @@
       "activityCount": 30244,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-28T07:36:42.217Z"
+    },
+    {
+      "key": "01a182cf-f672-7500-8160-cf3fe74b3794",
+      "sessionId": "01a182cf-f672-7500-8160-cf3fe74b3794",
+      "title": "Draft AI meeting reminder",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders",
+      "repoName": "Anders",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 32,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-28T14:01:02.207Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
