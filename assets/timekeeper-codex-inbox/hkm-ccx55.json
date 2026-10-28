@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T10:01:02.460Z",
+  "updatedAt": "2026-10-28T10:16:02.391Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T10:01:03.876Z",
+    "observedAt": "2026-10-28T10:16:03.239Z",
     "primary": {
-      "usedPercent": 14,
-      "remainingPercent": 86,
+      "usedPercent": 15,
+      "remainingPercent": 85,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -63665,6 +63665,42 @@
         "output_tokens": 11158,
         "reasoning_output_tokens": 5024
       }
+    },
+    {
+      "id": "codex-8cc00e37a7d382b2be21682c",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-28T09:40:07.015Z",
+      "endTime": "2026-10-28T09:47:07.676Z",
+      "wallSeconds": 420,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 210,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 420,
+          "effectiveSeconds": 210,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-7c4e8b6f148abe428114b9f7"
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
