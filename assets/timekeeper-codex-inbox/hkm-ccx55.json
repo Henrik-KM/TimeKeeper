@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T12:31:02.451Z",
+  "updatedAt": "2026-10-28T12:46:02.607Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T12:31:03.284Z",
+    "observedAt": "2026-10-28T12:46:04.345Z",
     "primary": {
-      "usedPercent": 33,
-      "remainingPercent": 67,
+      "usedPercent": 35,
+      "remainingPercent": 65,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -63701,6 +63701,37 @@
         "codex-7c4e8b6f148abe428114b9f7"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-f303bf89c845a2017b6f9c94",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-28T12:21:35.074Z",
+      "endTime": "2026-10-28T12:28:06.952Z",
+      "wallSeconds": 391,
+      "focusFactor": 0.2992,
+      "effectiveSeconds": 117,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 391,
+          "effectiveSeconds": 117
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     }
   ]
 }
