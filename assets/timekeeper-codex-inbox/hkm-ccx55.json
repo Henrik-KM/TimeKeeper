@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T09:31:02.451Z",
+  "updatedAt": "2026-10-28T09:46:02.464Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T09:31:03.301Z",
+    "observedAt": "2026-10-28T09:46:03.507Z",
     "primary": {
-      "usedPercent": 11,
-      "remainingPercent": 89,
+      "usedPercent": 12,
+      "remainingPercent": 88,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -69,6 +69,20 @@
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
     {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-10-28T09:45:48.398Z"
+    },
+    {
       "key": "github/iflai",
       "displayPath": "GitHub/IFLAI",
       "projectFolder": "IFLAI",
@@ -81,20 +95,6 @@
       "sessionCount": 9,
       "assistantSessionCount": 9,
       "lastSeenAt": "2026-10-28T08:45:56.937Z"
-    },
-    {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-10-28T08:22:16.066Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -220,6 +220,23 @@
       "lastSeenAt": "2026-10-28T07:36:42.217Z"
     },
     {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Submit Barbro Osher application",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 19306,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-28T09:45:48.398Z"
+    },
+    {
       "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "title": "Draft ZEISS follow-up",
@@ -235,23 +252,6 @@
       "activityCount": 970,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-28T08:45:56.937Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Submit Barbro Osher application",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 19173,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-28T08:22:16.066Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -41770,8 +41770,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 422,
-    "imported": 422,
+    "discovered": 423,
+    "imported": 423,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -63624,6 +63624,47 @@
         }
       ],
       "description": "Codex: Draft ZEISS follow-up"
+    },
+    {
+      "id": "codex-f2e95ba8295aecfecc15e3af",
+      "threadId": "01a181da-8998-76a0-b3e6-31aea179d592",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-28T09:32:24.810Z",
+      "endTime": "2026-10-28T09:39:09.341Z",
+      "wallSeconds": 404,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 202,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 404,
+          "effectiveSeconds": 202
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1263315,
+        "cached_input_tokens": 1157888,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 11158,
+        "reasoning_output_tokens": 5024
+      }
     }
   ]
 }
