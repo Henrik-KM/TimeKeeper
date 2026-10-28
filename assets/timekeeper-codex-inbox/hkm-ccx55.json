@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T14:16:02.552Z",
+  "updatedAt": "2026-10-28T14:31:02.661Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T14:16:03.700Z",
+    "observedAt": "2026-10-28T14:31:03.530Z",
     "primary": {
-      "usedPercent": 45,
-      "remainingPercent": 55,
+      "usedPercent": 47,
+      "remainingPercent": 53,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -41787,8 +41787,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 423,
-    "imported": 423,
+    "discovered": 424,
+    "imported": 424,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -63749,6 +63749,92 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-ad07a96c95f778c54971de57",
+      "threadId": "01a182cf-f672-7500-8160-cf3fe74b3794",
+      "projectKey": "Anders",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-28T14:00:38.539Z",
+      "endTime": "2026-10-28T14:04:00.679Z",
+      "wallSeconds": 202,
+      "focusFactor": 0.495,
+      "effectiveSeconds": 100,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 201,
+          "effectiveSeconds": 100
+        }
+      ],
+      "description": "Codex: Draft AI meeting reminder"
+    },
+    {
+      "id": "codex-9cda91c6ff87341021bf40f5",
+      "threadId": "01a182e5-50ad-7290-b4ab-0be7ff7ede13",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-28T14:23:48.479Z",
+      "endTime": "2026-10-28T14:24:20.744Z",
+      "wallSeconds": 32,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 16,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 32,
+          "effectiveSeconds": 16
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 122386,
+        "cached_input_tokens": 83328,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1122,
+        "reasoning_output_tokens": 330
+      }
     }
   ]
 }
