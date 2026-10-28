@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-28T09:01:02.459Z",
+  "updatedAt": "2026-10-28T09:16:02.406Z",
   "dayStart": "2026-10-27T23:00:00.000Z",
   "rangeStart": "2026-07-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-28T09:01:03.370Z",
+    "observedAt": "2026-10-28T09:16:03.244Z",
     "primary": {
-      "usedPercent": 9,
-      "remainingPercent": 91,
+      "usedPercent": 10,
+      "remainingPercent": 90,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -63593,6 +63593,37 @@
         "codex-a7eb7292c55d26ca0e4d2a6a"
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-bcde9d881fcd11013dab584f",
+      "threadId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-28T08:32:37.817Z",
+      "endTime": "2026-10-28T08:45:56.937Z",
+      "wallSeconds": 799,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 399,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 799,
+          "effectiveSeconds": 399
+        }
+      ],
+      "description": "Codex: Draft ZEISS follow-up"
     }
   ]
 }
