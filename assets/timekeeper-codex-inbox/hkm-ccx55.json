@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-29T17:16:02.358Z",
+  "updatedAt": "2026-10-29T17:31:01.989Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T17:16:03.285Z",
+    "observedAt": "2026-10-29T17:31:03.394Z",
     "primary": {
       "usedPercent": 33,
       "remainingPercent": 67,
@@ -63862,6 +63862,51 @@
         "output_tokens": 3574,
         "reasoning_output_tokens": 1161
       }
+    },
+    {
+      "id": "codex-df8e661c8a40e6a05e208907",
+      "threadId": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T16:50:02.853Z",
+      "endTime": "2026-10-29T17:08:42.215Z",
+      "wallSeconds": 1119,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 559,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1118,
+          "effectiveSeconds": 559
+        }
+      ],
+      "description": "Codex: IFLAI"
     },
     {
       "id": "codex-6e4481357008ee7df01f9185",
