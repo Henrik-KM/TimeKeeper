@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-29T09:46:02.870Z",
+  "updatedAt": "2026-10-29T10:01:02.848Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T09:46:03.723Z",
+    "observedAt": "2026-10-29T10:01:03.676Z",
     "primary": {
-      "usedPercent": 57,
-      "remainingPercent": 43,
+      "usedPercent": 58,
+      "remainingPercent": 42,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-29T09:46:35.095Z"
+      "lastSeenAt": "2026-10-29T10:01:37.563Z"
     },
     {
       "key": "github/magdalena",
@@ -78,9 +78,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 2428,
-      "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-10-29T09:40:43.810Z"
+      "sessionCount": 2429,
+      "assistantSessionCount": 2429,
+      "lastSeenAt": "2026-10-29T10:00:55.304Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -215,9 +215,26 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 32473,
+      "activityCount": 33489,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T09:46:35.095Z"
+      "lastSeenAt": "2026-10-29T10:01:37.563Z"
+    },
+    {
+      "key": "01a1871a-336d-71d2-8ca5-f5e792f48e7c",
+      "sessionId": "01a1871a-336d-71d2-8ca5-f5e792f48e7c",
+      "title": "Plan Bay Area LinkedIn outreach",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 43,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-29T10:00:55.304Z"
     },
     {
       "key": "01a186f4-b4e6-7bb1-aaa1-59c279ccdf58",
@@ -41754,8 +41771,8 @@
   "emailUsageAudit": {
     "source": "henrik-email",
     "discovered": 425,
-    "imported": 424,
-    "invalid": 1,
+    "imported": 425,
+    "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -63142,6 +63159,123 @@
         }
       ],
       "description": "Codex: Draft AI meeting reminder"
+    },
+    {
+      "id": "codex-6103fcd86edee74d47a04f02",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-29T09:14:26.202Z",
+      "endTime": "2026-10-29T09:38:52.209Z",
+      "wallSeconds": 1466,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 733,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1466,
+          "effectiveSeconds": 733
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-e58c5630e5b94ef0f12f7c72",
+      "threadId": "01a186f4-b4e6-7bb1-aaa1-59c279ccdf58",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T09:19:08.483Z",
+      "endTime": "2026-10-29T09:40:43.810Z",
+      "wallSeconds": 1295,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 647,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1294,
+          "effectiveSeconds": 647
+        }
+      ],
+      "description": "Codex: Schedule Zoom with Eddie"
+    },
+    {
+      "id": "codex-967976f85d96a38020a15bc5",
+      "threadId": "01a1870b-de18-7ae3-86b9-bffb69c143fc",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T09:44:23.871Z",
+      "endTime": "2026-10-29T09:46:30.230Z",
+      "wallSeconds": 126,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 63,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 126,
+          "effectiveSeconds": 63
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 204558,
+        "cached_input_tokens": 149888,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 3762,
+        "reasoning_output_tokens": 1675
+      }
     }
   ]
 }
