@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-29T11:52:03.115Z",
+  "updatedAt": "2026-10-29T12:32:01.885Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T11:52:18.713Z",
+    "observedAt": "2026-10-29T12:32:14.630Z",
     "primary": {
-      "usedPercent": 60,
-      "remainingPercent": 40,
+      "usedPercent": 62,
+      "remainingPercent": 38,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-29T11:52:50.296Z"
+      "lastSeenAt": "2026-10-29T12:32:31.362Z"
     },
     {
       "key": "github/income-agents",
@@ -52,7 +52,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-29T11:52:09.821Z"
+      "lastSeenAt": "2026-10-29T12:05:57.118Z"
     },
     {
       "key": "github/mathem-agent",
@@ -136,7 +136,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-29T11:52:04.176Z"
+      "lastSeenAt": "2026-10-29T11:53:32.030Z"
     },
     {
       "key": "github/anders/structured al",
@@ -181,9 +181,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 292325,
+      "activityCount": 293175,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T11:52:50.296Z"
+      "lastSeenAt": "2026-10-29T12:32:31.362Z"
     },
     {
       "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
@@ -198,9 +198,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 29641,
+      "activityCount": 30714,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T11:52:09.821Z"
+      "lastSeenAt": "2026-10-29T12:05:57.118Z"
     },
     {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
@@ -368,9 +368,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 3165,
+      "activityCount": 3188,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T11:52:04.176Z"
+      "lastSeenAt": "2026-10-29T11:53:32.030Z"
     },
     {
       "key": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
@@ -576,6 +576,37 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-9174fc2091554be25418e33a",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-29T11:47:05.855Z",
+      "endTime": "2026-10-29T11:53:32.030Z",
+      "wallSeconds": 386,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 193,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 386,
+          "effectiveSeconds": 193
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
     }
   ]
 }
