@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-29T10:52:02.870Z",
+  "updatedAt": "2026-10-29T11:47:16.171Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T10:52:05.514Z",
+    "observedAt": "2026-10-29T11:48:32.798Z",
     "primary": {
-      "usedPercent": 59,
-      "remainingPercent": 41,
+      "usedPercent": 60,
+      "remainingPercent": 40,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-29T10:52:31.069Z"
+      "lastSeenAt": "2026-10-29T11:48:38.019Z"
     },
     {
       "key": "github/income-agents",
@@ -52,7 +52,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-28T14:52:38.004Z"
+      "lastSeenAt": "2026-10-29T11:47:50.920Z"
     },
     {
       "key": "github/mathem-agent",
@@ -125,6 +125,20 @@
       "lastSeenAt": "2026-10-19T12:50:35.544Z"
     },
     {
+      "key": "github/anders/bao",
+      "displayPath": "GitHub/Anders/Bao",
+      "projectFolder": "Anders",
+      "repoName": "Bao",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-29T11:47:05.855Z"
+    },
+    {
       "key": "github/anders/structured al",
       "displayPath": "GitHub/Anders/Structured AL",
       "projectFolder": "Anders",
@@ -151,20 +165,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-23T10:19:32.420Z"
-    },
-    {
-      "key": "github/anders/bao",
-      "displayPath": "GitHub/Anders/Bao",
-      "projectFolder": "Anders",
-      "repoName": "Bao",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-22T12:42:41.166Z"
     }
   ],
   "sessionMappingAudit": [
@@ -181,9 +181,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 290474,
+      "activityCount": 292146,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T10:52:31.069Z"
+      "lastSeenAt": "2026-10-29T11:48:38.019Z"
+    },
+    {
+      "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
+      "sessionId": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
+      "title": "Publish income-agents privately",
+      "threadSource": "user",
+      "displayPath": "GitHub/income-agents",
+      "repoName": "income-agents",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 29060,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-29T11:47:50.920Z"
     },
     {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
@@ -235,23 +252,6 @@
       "activityCount": 235,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-28T15:09:18.604Z"
-    },
-    {
-      "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
-      "sessionId": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
-      "title": "Publish income-agents privately",
-      "threadSource": "user",
-      "displayPath": "GitHub/income-agents",
-      "repoName": "income-agents",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 28827,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-28T14:52:38.004Z"
     },
     {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
@@ -356,6 +356,23 @@
       "lastSeenAt": "2026-10-19T12:50:35.544Z"
     },
     {
+      "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "sessionId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "title": "Import Lukas’s latest Drive data",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Bao",
+      "repoName": "Bao",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 3058,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-29T11:47:05.855Z"
+    },
+    {
       "key": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
       "sessionId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
       "title": "Restart HPC Arrhenius access",
@@ -388,23 +405,6 @@
       "activityCount": 929,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-23T10:19:32.420Z"
-    },
-    {
-      "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "sessionId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "title": "Import Lukas’s latest Drive data",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Bao",
-      "repoName": "Bao",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 3057,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-22T12:42:41.166Z"
     }
   ],
   "records": [
