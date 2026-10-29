@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-29T15:31:04.397Z",
+  "updatedAt": "2026-10-29T15:46:01.969Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T15:31:07.956Z",
+    "observedAt": "2026-10-29T15:46:04.203Z",
     "primary": {
       "usedPercent": 65,
       "remainingPercent": 35,
@@ -63732,6 +63732,37 @@
         "output_tokens": 1267,
         "reasoning_output_tokens": 350
       }
+    },
+    {
+      "id": "codex-2eebc353b35cfb214d7cc209",
+      "threadId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T14:00:24.233Z",
+      "endTime": "2026-10-29T15:17:33.117Z",
+      "wallSeconds": 4628,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 2314,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4628,
+          "effectiveSeconds": 2314
+        }
+      ],
+      "description": "Codex: Draft ZEISS follow-up"
     }
   ]
 }
