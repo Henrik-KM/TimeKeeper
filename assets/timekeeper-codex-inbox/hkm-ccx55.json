@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-29T10:16:02.919Z",
+  "updatedAt": "2026-10-29T11:46:02.761Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T10:16:03.827Z",
+    "observedAt": "2026-10-29T11:46:05.430Z",
     "primary": {
       "usedPercent": 59,
       "remainingPercent": 41,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-29T10:16:35.746Z"
+      "lastSeenAt": "2026-10-29T11:42:07.359Z"
     },
     {
       "key": "github/magdalena",
@@ -215,9 +215,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 34438,
+      "activityCount": 34507,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T10:16:35.746Z"
+      "lastSeenAt": "2026-10-29T11:42:07.359Z"
     },
     {
       "key": "01a1871a-336d-71d2-8ca5-f5e792f48e7c",
@@ -63161,6 +63161,37 @@
       "description": "Codex: Draft AI meeting reminder"
     },
     {
+      "id": "codex-5984baead44a65805bd58937",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T09:14:26.202Z",
+      "endTime": "2026-10-29T10:32:30.980Z",
+      "wallSeconds": 4684,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 1405,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4684,
+          "effectiveSeconds": 1405
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
       "id": "codex-6103fcd86edee74d47a04f02",
       "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
@@ -63276,6 +63307,51 @@
         "output_tokens": 3762,
         "reasoning_output_tokens": 1675
       }
+    },
+    {
+      "id": "codex-f8d2e5f7da7b19386b92de09",
+      "threadId": "01a1871a-336d-71d2-8ca5-f5e792f48e7c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-29T10:00:05.106Z",
+      "endTime": "2026-10-29T10:05:01.509Z",
+      "wallSeconds": 296,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 148,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 296,
+          "effectiveSeconds": 148
+        }
+      ],
+      "description": "Codex: Plan Bay Area LinkedIn outreach"
     }
   ]
 }
