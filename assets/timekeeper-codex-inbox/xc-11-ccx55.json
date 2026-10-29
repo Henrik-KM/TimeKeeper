@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-29T06:42:02.283Z",
+  "updatedAt": "2026-10-29T08:52:02.959Z",
   "dayStart": "2026-10-28T23:00:00.000Z",
   "rangeStart": "2026-07-31T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-29T06:43:31.720Z",
+    "observedAt": "2026-10-29T08:52:04.644Z",
     "primary": {
       "usedPercent": 54,
       "remainingPercent": 46,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-29T06:43:31.720Z"
+      "lastSeenAt": "2026-10-29T08:52:27.551Z"
     },
     {
       "key": "github/income-agents",
@@ -136,7 +136,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-26T07:51:31.429Z"
+      "lastSeenAt": "2026-10-29T06:45:24.031Z"
     },
     {
       "key": "github/anders/genai-review",
@@ -181,9 +181,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 282666,
+      "activityCount": 286675,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T06:43:31.720Z"
+      "lastSeenAt": "2026-10-29T08:52:27.551Z"
     },
     {
       "key": "01a18286-a77c-7d52-b954-ba96bf396d40",
@@ -368,9 +368,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1125,
+      "activityCount": 1190,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-26T07:51:31.429Z"
+      "lastSeenAt": "2026-10-29T06:45:24.031Z"
     },
     {
       "key": "01a16822-3653-7ce0-802c-293eb59e3fee",
@@ -542,6 +542,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 33,
           "effectiveSeconds": 9
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-a1d56eec4af1d4275a0da448",
+      "threadId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-10-29T06:43:59.989Z",
+      "endTime": "2026-10-29T06:45:24.031Z",
+      "wallSeconds": 84,
+      "focusFactor": 0.2976,
+      "effectiveSeconds": 25,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 84,
+          "effectiveSeconds": 25
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
