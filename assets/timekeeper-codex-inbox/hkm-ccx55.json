@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T22:46:02.566Z",
-  "dayStart": "2026-10-29T23:00:00.000Z",
-  "rangeStart": "2026-08-01T22:00:00.000Z",
+  "updatedAt": "2026-10-30T23:01:02.618Z",
+  "dayStart": "2026-10-30T23:00:00.000Z",
+  "rangeStart": "2026-08-02T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T22:46:03.534Z",
+    "observedAt": "2026-10-30T23:01:03.477Z",
     "primary": {
       "usedPercent": 72,
       "remainingPercent": 28,
@@ -60482,7 +60482,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8335,
         "reasoning_output_tokens": 2455
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-300364f327754155dd50a9b3",
@@ -60523,7 +60524,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9831,
         "reasoning_output_tokens": 3456
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-5f85f0c466d4a20e1bea9faa",
@@ -60564,7 +60566,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9330,
         "reasoning_output_tokens": 3153
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ad8aee8cb108917e0b2a9095",
@@ -60605,7 +60608,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9564,
         "reasoning_output_tokens": 3785
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0790836dc7786d0207ee62b0",
@@ -60646,7 +60650,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 8500,
         "reasoning_output_tokens": 2987
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-cf77b0b64581df67d8ae1655",
@@ -60687,7 +60692,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9985,
         "reasoning_output_tokens": 3474
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ab9ba5d78b8eafff77b48d11",
@@ -60728,7 +60734,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9979,
         "reasoning_output_tokens": 4185
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-c20ef70eefe674765c0f3d80",
@@ -60769,7 +60776,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 10698,
         "reasoning_output_tokens": 4358
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0b4354897ee1b23fced81660",
@@ -60800,7 +60808,8 @@
           "effectiveSeconds": 64
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-0b7d6aa82edb6078b896fdab",
@@ -60841,52 +60850,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9996,
         "reasoning_output_tokens": 4231
-      }
-    },
-    {
-      "id": "codex-30c1c817d18f123e5d135467",
-      "threadId": "01a16cff-ffa8-7d10-98fe-6830f5fcbdc0",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-24T08:21:19.792Z",
-      "endTime": "2026-10-24T08:36:33.219Z",
-      "wallSeconds": 913,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 456,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 911,
-          "effectiveSeconds": 455
-        }
-      ],
-      "description": "Codex: email-helper"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-e271c815c0ad6b79db5042eb",
@@ -60927,7 +60892,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1078,
         "reasoning_output_tokens": 294
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f4ae3871d819cdf56e822d21",
@@ -60968,38 +60934,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1055,
         "reasoning_output_tokens": 302
-      }
-    },
-    {
-      "id": "codex-175e12fb6528dba01edf70fe",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-24T12:22:43.267Z",
-      "endTime": "2026-10-24T12:27:39.427Z",
-      "wallSeconds": 296,
-      "focusFactor": 0.2973,
-      "effectiveSeconds": 88,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 296,
-          "effectiveSeconds": 88
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-64f8c1030dac4b7c0b7f3e95",
@@ -61040,7 +60976,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2732,
         "reasoning_output_tokens": 1087
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-15de48734e93d5db302d2561",
