@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T12:46:02.412Z",
+  "updatedAt": "2026-10-30T13:01:02.374Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T12:46:03.769Z",
+    "observedAt": "2026-10-30T13:01:03.171Z",
     "primary": {
       "usedPercent": 56,
       "remainingPercent": 44,
       "windowMinutes": 10080,
-      "resetsAt": "2026-11-04T06:35:24.000Z"
+      "resetsAt": "2026-11-04T06:35:23.000Z"
     },
     "secondary": null
   },
@@ -80,7 +80,7 @@
       "match": "IFLAI",
       "sessionCount": 2428,
       "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-10-30T12:46:04.042Z"
+      "lastSeenAt": "2026-10-30T12:56:58.391Z"
     },
     {
       "key": "github/iflai",
@@ -218,9 +218,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 8529,
+      "activityCount": 8900,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-30T12:46:04.042Z"
+      "lastSeenAt": "2026-10-30T12:56:58.391Z"
     },
     {
       "key": "01a18cb6-c647-7350-8f1b-c61fbf961256",
@@ -64390,6 +64390,82 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 416,
           "effectiveSeconds": 208
+        }
+      ],
+      "description": "Codex: Configure a text-entry macro"
+    },
+    {
+      "id": "codex-7ce89c64d083e17f96130ba8",
+      "threadId": "01a18cc8-b601-7932-8137-030e30c23b3c",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T12:28:47.383Z",
+      "endTime": "2026-10-30T12:34:01.308Z",
+      "wallSeconds": 313,
+      "focusFactor": 0.4984,
+      "effectiveSeconds": 156,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 313,
+          "effectiveSeconds": 156
+        }
+      ],
+      "description": "Codex: Resolve IFLAI MFA lockout"
+    },
+    {
+      "id": "codex-86876fb44a8e417823960827",
+      "threadId": "01a18cb6-c647-7350-8f1b-c61fbf961256",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T12:34:49.094Z",
+      "endTime": "2026-10-30T12:35:30.091Z",
+      "wallSeconds": 40,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 20,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 40,
+          "effectiveSeconds": 20
         }
       ],
       "description": "Codex: Configure a text-entry macro"
