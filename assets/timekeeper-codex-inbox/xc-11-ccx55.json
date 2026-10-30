@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-10-30T12:32:02.180Z",
+  "updatedAt": "2026-10-30T12:42:06.858Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T12:32:04.355Z",
+    "observedAt": "2026-10-30T12:42:12.505Z",
     "primary": {
       "usedPercent": 56,
       "remainingPercent": 44,
@@ -26,20 +26,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/scholarships",
-      "displayPath": "GitHub/Scholarships",
-      "projectFolder": "Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-10-30T12:32:37.598Z"
-    },
     {
       "key": "github/income-agents",
       "displayPath": "GitHub/income-agents",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-30T11:52:28.384Z"
+      "lastSeenAt": "2026-10-30T12:37:04.914Z"
+    },
+    {
+      "key": "github/scholarships",
+      "displayPath": "GitHub/Scholarships",
+      "projectFolder": "Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-10-30T12:37:00.030Z"
     },
     {
       "key": "github/mathem-agent",
@@ -78,8 +78,8 @@
       "projectName": "",
       "matchType": null,
       "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-26T20:29:58.289Z"
     },
     {
@@ -95,34 +95,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-24T08:10:14.026Z"
-    },
-    {
-      "key": "documents/codex/2026-10-20/please-go-through-my-pc-x20",
-      "displayPath": "Documents/Codex/2026-10-20/please-go-through-my-pc-x20",
-      "projectFolder": "",
-      "repoName": "please-go-through-my-pc-x20",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-20T14:16:12.630Z"
-    },
-    {
-      "key": ".../g-p-6a7c8abaa14c8191819e7c1df3bdc661",
-      "displayPath": ".../g-p-6a7c8abaa14c8191819e7c1df3bdc661",
-      "projectFolder": "",
-      "repoName": "g-p-6a7c8abaa14c8191819e7c1df3bdc661",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-19T12:50:35.544Z"
     },
     {
       "key": "github/anders/structured al",
@@ -151,23 +123,26 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-29T11:53:32.030Z"
-    },
-    {
-      "key": "github/anders/genai-review",
-      "displayPath": "GitHub/Anders/genAI-review",
-      "projectFolder": "Anders",
-      "repoName": "genAI-review",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-23T10:19:32.420Z"
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
+      "sessionId": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
+      "title": "Publish income-agents privately",
+      "threadSource": "user",
+      "displayPath": "GitHub/income-agents",
+      "repoName": "income-agents",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 55200,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-30T12:37:04.914Z"
+    },
     {
       "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
       "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
@@ -181,9 +156,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 341989,
+      "activityCount": 342177,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-30T12:32:37.598Z"
+      "lastSeenAt": "2026-10-30T12:37:00.030Z"
     },
     {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
@@ -198,26 +173,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 187360,
+      "activityCount": 182841,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-30T12:03:28.579Z"
-    },
-    {
-      "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
-      "sessionId": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
-      "title": "Publish income-agents privately",
-      "threadSource": "user",
-      "displayPath": "GitHub/income-agents",
-      "repoName": "income-agents",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 54903,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-30T11:52:28.384Z"
     },
     {
       "key": "01a15d7f-e30c-7b93-af39-d6e6aa9bba02",
@@ -232,7 +190,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 21402,
+      "activityCount": 10387,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-29T10:03:22.927Z"
     },
@@ -283,7 +241,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 76499,
+      "activityCount": 71025,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-26T20:29:58.289Z"
     },
@@ -303,57 +261,6 @@
       "activityCount": 287,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-24T08:10:14.026Z"
-    },
-    {
-      "key": "01a159a7-4b93-7913-9c2d-06b425158a97",
-      "sessionId": "01a159a7-4b93-7913-9c2d-06b425158a97",
-      "title": "Find and remove project bloat",
-      "threadSource": "user",
-      "displayPath": "GitHub/Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 1055,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T14:37:34.432Z"
-    },
-    {
-      "key": "01a1599f-90a6-7a00-827b-846ca4899a7f",
-      "sessionId": "01a1599f-90a6-7a00-827b-846ca4899a7f",
-      "title": "Find biggest storage hogs",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-10-20/please-go-through-my-pc-x20",
-      "repoName": "please-go-through-my-pc-x20",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 249,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-20T14:16:12.630Z"
-    },
-    {
-      "key": "01a15432-334f-7fd0-91e6-e1302e438285",
-      "sessionId": "01a15432-334f-7fd0-91e6-e1302e438285",
-      "title": "Review Albany meeting discussion",
-      "threadSource": "chatgpt_handoff",
-      "displayPath": ".../g-p-6a7c8abaa14c8191819e7c1df3bdc661",
-      "repoName": "g-p-6a7c8abaa14c8191819e7c1df3bdc661",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 127,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-19T12:50:35.544Z"
     },
     {
       "key": "01a18c38-d38e-7cc2-b977-31afefaaaa7b",
@@ -405,23 +312,6 @@
       "activityCount": 1190,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-29T06:45:24.031Z"
-    },
-    {
-      "key": "01a16822-3653-7ce0-802c-293eb59e3fee",
-      "sessionId": "01a16822-3653-7ce0-802c-293eb59e3fee",
-      "title": "Verify METAL methods and results",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/genAI-review",
-      "repoName": "genAI-review",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 929,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T10:19:32.420Z"
     }
   ],
   "records": [
