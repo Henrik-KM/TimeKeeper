@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T11:31:02.223Z",
+  "updatedAt": "2026-10-30T11:46:02.314Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T11:31:03.020Z",
+    "observedAt": "2026-10-30T11:46:03.162Z",
     "primary": {
-      "usedPercent": 53,
-      "remainingPercent": 47,
+      "usedPercent": 55,
+      "remainingPercent": 45,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -78,9 +78,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 11,
-      "assistantSessionCount": 11,
-      "lastSeenAt": "2026-10-30T11:20:16.517Z"
+      "sessionCount": 12,
+      "assistantSessionCount": 12,
+      "lastSeenAt": "2026-10-30T11:46:23.081Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -204,6 +204,23 @@
       "activityCount": 39078,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-30T08:04:09.171Z"
+    },
+    {
+      "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "sessionId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 26848,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-30T11:46:23.081Z"
     },
     {
       "key": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
@@ -64211,6 +64228,37 @@
         "output_tokens": 4030,
         "reasoning_output_tokens": 1251
       }
+    },
+    {
+      "id": "codex-19c754effd37131c2b4da542",
+      "threadId": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T11:09:43.239Z",
+      "endTime": "2026-10-30T11:20:16.517Z",
+      "wallSeconds": 633,
+      "focusFactor": 0.4992,
+      "effectiveSeconds": 316,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 633,
+          "effectiveSeconds": 316
+        }
+      ],
+      "description": "Codex: IFLAI"
     },
     {
       "id": "codex-5b094833dfe646b60915992e",
