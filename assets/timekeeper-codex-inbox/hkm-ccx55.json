@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T14:16:02.290Z",
+  "updatedAt": "2026-10-30T14:31:02.397Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T14:16:03.106Z",
+    "observedAt": "2026-10-30T14:31:03.313Z",
     "primary": {
-      "usedPercent": 57,
-      "remainingPercent": 43,
+      "usedPercent": 58,
+      "remainingPercent": 42,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -64517,6 +64517,51 @@
         }
       ],
       "description": "Codex: Configure a text-entry macro"
+    },
+    {
+      "id": "codex-8ef885e969ad3bcbcd6cd44a",
+      "threadId": "01a18d11-5489-7ef0-97a2-93509a85ff49",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T13:48:06.358Z",
+      "endTime": "2026-10-30T14:11:21.318Z",
+      "wallSeconds": 1394,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 697,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1392,
+          "effectiveSeconds": 696
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
