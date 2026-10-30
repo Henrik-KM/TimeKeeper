@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T12:01:02.268Z",
+  "updatedAt": "2026-10-30T12:16:02.411Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T12:01:03.182Z",
+    "observedAt": "2026-10-30T12:16:03.317Z",
     "primary": {
       "usedPercent": 55,
       "remainingPercent": 45,
@@ -78,9 +78,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 12,
-      "assistantSessionCount": 12,
-      "lastSeenAt": "2026-10-30T11:52:44.510Z"
+      "sessionCount": 13,
+      "assistantSessionCount": 13,
+      "lastSeenAt": "2026-10-30T12:16:02.536Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -134,8 +134,8 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
       "lastSeenAt": "2026-10-27T11:05:42.553Z"
     },
     {
@@ -204,6 +204,23 @@
       "activityCount": 39078,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-30T08:04:09.171Z"
+    },
+    {
+      "key": "01a18cb6-c647-7350-8f1b-c61fbf961256",
+      "sessionId": "01a18cb6-c647-7350-8f1b-c61fbf961256",
+      "title": "Configure a text-entry macro",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 126,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-30T12:16:02.536Z"
     },
     {
       "key": "01a13f64-e505-7641-88bf-13a69afc07a0",
@@ -561,23 +578,6 @@
       "activityCount": 271,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-23T13:31:54.311Z"
-    },
-    {
-      "key": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "sessionId": "01a08aa0-4b86-75f0-9e7d-d566c75ba908",
-      "title": "Restart HPC Arrhenius access",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2998,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-23T09:42:53.472Z"
     },
     {
       "key": "01a0e1a0-f1ca-76d1-9512-c9748c50f3d1",
@@ -64300,6 +64300,37 @@
         "output_tokens": 1137,
         "reasoning_output_tokens": 227
       }
+    },
+    {
+      "id": "codex-8117b8a4bc7e43908375373d",
+      "threadId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T11:45:18.493Z",
+      "endTime": "2026-10-30T11:52:44.510Z",
+      "wallSeconds": 446,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 223,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 446,
+          "effectiveSeconds": 223
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
