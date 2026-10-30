@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T06:46:02.091Z",
+  "updatedAt": "2026-10-30T07:01:02.110Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T06:46:02.984Z",
+    "observedAt": "2026-10-30T07:01:03.080Z",
     "primary": {
-      "usedPercent": 45,
-      "remainingPercent": 55,
+      "usedPercent": 46,
+      "remainingPercent": 54,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
+      "projectFolder": "",
+      "repoName": "continue-the-user-s-linkedin-invitation",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-30T07:01:29.706Z"
+    },
     {
       "key": "github/magdalena",
       "displayPath": "GitHub/Magdalena",
@@ -39,20 +53,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-29T12:26:21.270Z"
-    },
-    {
-      "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
-      "projectFolder": "",
-      "repoName": "continue-the-user-s-linkedin-invitation",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-10-29T11:42:07.359Z"
     },
     {
       "key": "github/timekeeper",
@@ -201,9 +201,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 34507,
+      "activityCount": 34778,
       "assistantActivity": true,
-      "lastSeenAt": "2026-10-29T11:42:07.359Z"
+      "lastSeenAt": "2026-10-30T07:01:29.706Z"
     },
     {
       "key": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
@@ -41773,8 +41773,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 435,
-    "imported": 435,
+    "discovered": 436,
+    "imported": 436,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -63733,6 +63733,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 11410,
         "reasoning_output_tokens": 3395
+      }
+    },
+    {
+      "id": "codex-30191a1d3d47ec393f8ec751",
+      "threadId": "01a18b94-39e2-78a0-a52c-6a773ae98ef1",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T06:51:48.945Z",
+      "endTime": "2026-10-30T06:52:34.086Z",
+      "wallSeconds": 45,
+      "focusFactor": 0.4889,
+      "effectiveSeconds": 22,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 45,
+          "effectiveSeconds": 22
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 229463,
+        "cached_input_tokens": 161408,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1321,
+        "reasoning_output_tokens": 312
       }
     }
   ]
