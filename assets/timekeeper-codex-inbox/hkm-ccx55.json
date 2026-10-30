@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-30T08:16:02.143Z",
+  "updatedAt": "2026-10-30T08:31:04.275Z",
   "dayStart": "2026-10-29T23:00:00.000Z",
   "rangeStart": "2026-08-01T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-30T08:16:03.494Z",
+    "observedAt": "2026-10-30T08:31:10.125Z",
     "primary": {
-      "usedPercent": 47,
-      "remainingPercent": 53,
+      "usedPercent": 48,
+      "remainingPercent": 52,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -69,6 +69,20 @@
       "lastSeenAt": "2026-10-24T08:18:03.190Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 11,
+      "assistantSessionCount": 11,
+      "lastSeenAt": "2026-10-30T08:23:17.316Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -81,20 +95,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-30T08:16:20.867Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 11,
-      "assistantSessionCount": 11,
-      "lastSeenAt": "2026-10-30T08:15:53.085Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -206,6 +206,23 @@
       "lastSeenAt": "2026-10-30T08:04:09.171Z"
     },
     {
+      "key": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
+      "sessionId": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 731,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-30T08:23:17.316Z"
+    },
+    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -221,23 +238,6 @@
       "activityCount": 19875,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-30T08:16:20.867Z"
-    },
-    {
-      "key": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
-      "sessionId": "01a18891-8aff-7f01-85bc-49aff2c12ca5",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 658,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-30T08:15:53.085Z"
     },
     {
       "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
@@ -63775,6 +63775,37 @@
         "output_tokens": 1321,
         "reasoning_output_tokens": 312
       }
+    },
+    {
+      "id": "codex-57d5cd92919203e5ef6668e0",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-30T06:54:36.515Z",
+      "endTime": "2026-10-30T08:04:09.171Z",
+      "wallSeconds": 4172,
+      "focusFactor": 0.2999,
+      "effectiveSeconds": 1251,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 4172,
+          "effectiveSeconds": 1251
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     },
     {
       "id": "codex-45f2c6da4777662b1e17d86c",
