@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-10-31T22:46:02.785Z",
-  "dayStart": "2026-10-30T23:00:00.000Z",
-  "rangeStart": "2026-08-02T22:00:00.000Z",
+  "updatedAt": "2026-10-31T23:01:02.562Z",
+  "dayStart": "2026-10-31T23:00:00.000Z",
+  "rangeStart": "2026-08-03T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-10-31T22:46:03.659Z",
+    "observedAt": "2026-10-31T23:01:03.464Z",
     "primary": {
       "usedPercent": 79,
       "remainingPercent": 21,
@@ -61018,7 +61018,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1082,
         "reasoning_output_tokens": 434
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-11f099decb45e746d78c3f12",
@@ -61059,7 +61060,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1318,
         "reasoning_output_tokens": 485
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-2ef1ad0939c5ebf21ed35d35",
@@ -61090,162 +61092,8 @@
           "effectiveSeconds": 31
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-91538b511db0fe9f629ed93f",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-25T08:24:30.168Z",
-      "endTime": "2026-10-25T08:38:26.359Z",
-      "wallSeconds": 836,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 418,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 836,
-          "effectiveSeconds": 418
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-64a8c8ca705f764eaa02197b",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-25T11:46:56.410Z",
-      "endTime": "2026-10-25T13:30:54.715Z",
-      "wallSeconds": 6238,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 3119,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 6238,
-          "effectiveSeconds": 3119
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-b419391c96fe856c49ce04f4",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-25T12:22:31.344Z",
-      "endTime": "2026-10-25T12:28:32.738Z",
-      "wallSeconds": 361,
-      "focusFactor": 0.2992,
-      "effectiveSeconds": 108,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 361,
-          "effectiveSeconds": 108
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
-    },
-    {
-      "id": "codex-f81497ee8d2837f152e3e29a",
-      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-25T15:52:21.964Z",
-      "endTime": "2026-10-25T16:09:29.007Z",
-      "wallSeconds": 1027,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 513,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1027,
-          "effectiveSeconds": 513
-        }
-      ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-971d6e3a1188f37ffc9254d1",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-25T15:53:21.121Z",
-      "endTime": "2026-10-25T15:54:32.164Z",
-      "wallSeconds": 71,
-      "focusFactor": 0.2958,
-      "effectiveSeconds": 21,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 71,
-          "effectiveSeconds": 21
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-ddd4054fb0b3a5460174364d",
