@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-01T13:46:01.935Z",
+  "updatedAt": "2026-11-01T14:01:02.110Z",
   "dayStart": "2026-10-31T23:00:00.000Z",
   "rangeStart": "2026-08-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-01T13:46:02.756Z",
+    "observedAt": "2026-11-01T14:01:03.512Z",
     "primary": {
       "usedPercent": 83,
       "remainingPercent": 17,
@@ -26,6 +26,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": ".../g-p-6a218226e71c8191bf2bdcb97d58820b",
+      "displayPath": ".../g-p-6a218226e71c8191bf2bdcb97d58820b",
+      "projectFolder": "",
+      "repoName": "g-p-6a218226e71c8191bf2bdcb97d58820b",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-01T14:01:00.991Z"
+    },
     {
       "key": "documents/codex/2026-09-01/continue-the-user-s-linkedin-invitation",
       "displayPath": "Documents/Codex/2026-09-01/continue-the-user-s-linkedin-invitation",
@@ -140,6 +154,23 @@
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a19761-55b7-7aa2-a791-d76681df097e",
+      "sessionId": "01a19761-55b7-7aa2-a791-d76681df097e",
+      "title": "Enter sustainability awards",
+      "threadSource": "user",
+      "displayPath": ".../g-p-6a218226e71c8191bf2bdcb97d58820b",
+      "repoName": "g-p-6a218226e71c8191bf2bdcb97d58820b",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 381,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-01T14:01:00.991Z"
+    },
     {
       "key": "01a17867-6ff8-78a1-8158-4e375be18283",
       "sessionId": "01a17867-6ff8-78a1-8158-4e375be18283",
@@ -64862,6 +64893,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 305,
           "effectiveSeconds": 152
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
+    },
+    {
+      "id": "codex-e09ea80c0904fe1d0a4207a3",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-01T12:53:32.361Z",
+      "endTime": "2026-11-01T13:29:18.328Z",
+      "wallSeconds": 2145,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1072,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2145,
+          "effectiveSeconds": 1072
         }
       ],
       "description": "Codex: LinkedIn weekly stale invitation cleanup"
