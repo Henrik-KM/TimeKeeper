@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-01T15:16:02.011Z",
+  "updatedAt": "2026-11-01T15:31:01.935Z",
   "dayStart": "2026-10-31T23:00:00.000Z",
   "rangeStart": "2026-08-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-01T15:16:02.908Z",
+    "observedAt": "2026-11-01T15:31:02.810Z",
     "primary": {
       "usedPercent": 84,
       "remainingPercent": 16,
@@ -65075,6 +65075,37 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-a9fae1e049bd2db07314edd3",
+      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-01T14:54:11.286Z",
+      "endTime": "2026-11-01T15:02:28.220Z",
+      "wallSeconds": 496,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 248,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 496,
+          "effectiveSeconds": 248
+        }
+      ],
+      "description": "Codex: Align September FoU entries"
     }
   ]
 }
