@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-01T08:46:01.820Z",
+  "updatedAt": "2026-11-01T09:01:01.814Z",
   "dayStart": "2026-10-31T23:00:00.000Z",
   "rangeStart": "2026-08-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-01T08:46:02.803Z",
+    "observedAt": "2026-11-01T09:01:02.782Z",
     "primary": {
       "usedPercent": 82,
       "remainingPercent": 18,
@@ -64882,6 +64882,37 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-f19296224ed6f378961e2503",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-01T08:33:22.744Z",
+      "endTime": "2026-11-01T08:38:28.478Z",
+      "wallSeconds": 305,
+      "focusFactor": 0.4984,
+      "effectiveSeconds": 152,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 305,
+          "effectiveSeconds": 152
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
