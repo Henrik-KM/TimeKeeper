@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-01T15:01:02.066Z",
+  "updatedAt": "2026-11-01T15:16:02.011Z",
   "dayStart": "2026-10-31T23:00:00.000Z",
   "rangeStart": "2026-08-03T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-01T15:01:03.149Z",
+    "observedAt": "2026-11-01T15:16:02.908Z",
     "primary": {
       "usedPercent": 84,
       "remainingPercent": 16,
@@ -80,7 +80,7 @@
       "match": "IFLAI",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-01T15:01:01.798Z"
+      "lastSeenAt": "2026-11-01T15:02:28.220Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -232,9 +232,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 2623,
+      "activityCount": 2646,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-01T15:01:01.798Z"
+      "lastSeenAt": "2026-11-01T15:02:28.220Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -65044,6 +65044,37 @@
         "output_tokens": 1630,
         "reasoning_output_tokens": 287
       }
+    },
+    {
+      "id": "codex-4f1c7094499328deddf95705",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-01T14:37:09.152Z",
+      "endTime": "2026-11-01T14:51:49.608Z",
+      "wallSeconds": 880,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 264,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 880,
+          "effectiveSeconds": 264
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     }
   ]
 }
