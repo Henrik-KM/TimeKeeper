@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-02T11:31:02.061Z",
+  "updatedAt": "2026-11-02T11:46:02.084Z",
   "dayStart": "2026-11-01T23:00:00.000Z",
   "rangeStart": "2026-08-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-02T11:31:03.196Z",
+    "observedAt": "2026-11-02T11:46:03.097Z",
     "primary": {
       "usedPercent": 86,
       "remainingPercent": 14,
@@ -65435,6 +65435,37 @@
         "output_tokens": 6906,
         "reasoning_output_tokens": 2873
       }
+    },
+    {
+      "id": "codex-ad1e332fe190007e621d8155",
+      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-02T11:05:33.699Z",
+      "endTime": "2026-11-02T11:27:05.680Z",
+      "wallSeconds": 1291,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 645,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1291,
+          "effectiveSeconds": 645
+        }
+      ],
+      "description": "Codex: Align September FoU entries"
     }
   ]
 }
