@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-02T09:16:02.101Z",
+  "updatedAt": "2026-11-02T09:31:02.324Z",
   "dayStart": "2026-11-01T23:00:00.000Z",
   "rangeStart": "2026-08-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-02T09:16:04.931Z",
+    "observedAt": "2026-11-02T09:31:07.088Z",
     "primary": {
       "usedPercent": 85,
       "remainingPercent": 15,
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-02T09:16:24.450Z"
+      "lastSeenAt": "2026-11-02T09:32:01.317Z"
     },
     {
       "key": "github/iflai/rd-doc-personal",
@@ -232,9 +232,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 21560,
+      "activityCount": 21897,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-02T09:16:24.450Z"
+      "lastSeenAt": "2026-11-02T09:32:01.317Z"
     },
     {
       "key": "01a0a92e-1992-7821-8997-48c061783f6b",
@@ -65256,6 +65256,37 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-8c625614b77c1eb57d387312",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-02T08:18:41.461Z",
+      "endTime": "2026-11-02T09:00:39.275Z",
+      "wallSeconds": 2517,
+      "focusFactor": 0.3,
+      "effectiveSeconds": 755,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2517,
+          "effectiveSeconds": 755
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     },
     {
       "id": "codex-07e4c028b425a06af442c34c",
