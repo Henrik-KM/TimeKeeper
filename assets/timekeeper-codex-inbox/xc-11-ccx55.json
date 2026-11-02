@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-02T12:32:02.283Z",
+  "updatedAt": "2026-11-02T12:37:02.286Z",
   "dayStart": "2026-11-01T23:00:00.000Z",
   "rangeStart": "2026-08-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-02T12:32:03.401Z",
+    "observedAt": "2026-11-02T12:37:03.569Z",
     "primary": {
       "usedPercent": 86,
       "remainingPercent": 14,
@@ -469,6 +469,37 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-e0c09120e5a2988bbf8a8a22",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-02T11:42:36.077Z",
+      "endTime": "2026-11-02T12:17:22.746Z",
+      "wallSeconds": 2086,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1043,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2086,
+          "effectiveSeconds": 1043
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
     }
   ]
 }
