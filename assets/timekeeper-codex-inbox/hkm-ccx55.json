@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-02T10:01:02.077Z",
+  "updatedAt": "2026-11-02T10:16:02.001Z",
   "dayStart": "2026-11-01T23:00:00.000Z",
   "rangeStart": "2026-08-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-02T10:01:03.159Z",
+    "observedAt": "2026-11-02T10:16:03.127Z",
     "primary": {
       "usedPercent": 85,
       "remainingPercent": 15,
@@ -65349,6 +65349,51 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-bc761a2622ff6b18b394c8cd",
+      "threadId": "01a13f64-e505-7641-88bf-13a69afc07a0",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-02T09:36:38.981Z",
+      "endTime": "2026-11-02T09:45:29.471Z",
+      "wallSeconds": 530,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 265,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 514,
+          "effectiveSeconds": 257
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "low",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 16,
+          "effectiveSeconds": 8
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
