@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-02T08:31:02.036Z",
+  "updatedAt": "2026-11-02T08:46:02.026Z",
   "dayStart": "2026-11-01T23:00:00.000Z",
   "rangeStart": "2026-08-04T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-02T08:31:03.820Z",
+    "observedAt": "2026-11-02T08:46:04.495Z",
     "primary": {
       "usedPercent": 84,
       "remainingPercent": 16,
@@ -38,7 +38,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-02T08:31:40.247Z"
+      "lastSeenAt": "2026-11-02T08:46:40.488Z"
     },
     {
       "key": ".../g-p-6a218226e71c8191bf2bdcb97d58820b",
@@ -69,6 +69,20 @@
       "lastSeenAt": "2026-10-29T12:26:21.270Z"
     },
     {
+      "key": "github/iflai/rd-doc-personal",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "projectFolder": "IFLAI",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-02T08:46:00.517Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -81,20 +95,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-11-02T08:21:40.233Z"
-    },
-    {
-      "key": "github/iflai/rd-doc-personal",
-      "displayPath": "GitHub/IFLAI/RD-doc-personal",
-      "projectFolder": "IFLAI",
-      "repoName": "RD-doc-personal",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-01T15:02:28.220Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -215,9 +215,26 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 44526,
+      "activityCount": 45356,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-02T08:31:40.247Z"
+      "lastSeenAt": "2026-11-02T08:46:40.488Z"
+    },
+    {
+      "key": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "sessionId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "title": "Align September FoU entries",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 2673,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-02T08:46:00.517Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -235,23 +252,6 @@
       "activityCount": 21202,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-02T08:21:40.233Z"
-    },
-    {
-      "key": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "sessionId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "title": "Align September FoU entries",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/RD-doc-personal",
-      "repoName": "RD-doc-personal",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 2646,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-01T15:02:28.220Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -65225,6 +65225,37 @@
         "output_tokens": 907,
         "reasoning_output_tokens": 168
       }
+    },
+    {
+      "id": "codex-624153237499db9f24d1d389",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-02T07:58:46.503Z",
+      "endTime": "2026-11-02T08:21:40.233Z",
+      "wallSeconds": 1373,
+      "focusFactor": 0.4996,
+      "effectiveSeconds": 686,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1373,
+          "effectiveSeconds": 686
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
