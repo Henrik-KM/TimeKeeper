@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-03T12:01:03.010Z",
+  "updatedAt": "2026-11-03T12:16:02.752Z",
   "dayStart": "2026-11-02T23:00:00.000Z",
   "rangeStart": "2026-08-05T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-03T12:01:04.067Z",
+    "observedAt": "2026-11-03T12:16:03.736Z",
     "primary": {
-      "usedPercent": 88,
-      "remainingPercent": 12,
+      "usedPercent": 89,
+      "remainingPercent": 11,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-04T06:35:23.000Z"
     },
@@ -65845,6 +65845,37 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 2091,
           "effectiveSeconds": 1045
+        }
+      ],
+      "description": "Codex: Assess Redpine synergy"
+    },
+    {
+      "id": "codex-751df9f91a6f2c2a2efd6459",
+      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-03T11:39:20.157Z",
+      "endTime": "2026-11-03T11:56:32.882Z",
+      "wallSeconds": 1032,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 516,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1032,
+          "effectiveSeconds": 516
         }
       ],
       "description": "Codex: Assess Redpine synergy"
