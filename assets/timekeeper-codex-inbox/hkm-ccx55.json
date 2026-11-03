@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-03T17:16:01.883Z",
+  "updatedAt": "2026-11-03T17:31:01.829Z",
   "dayStart": "2026-11-02T23:00:00.000Z",
   "rangeStart": "2026-08-05T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-03T17:16:02.737Z",
+    "observedAt": "2026-11-03T17:31:02.619Z",
     "primary": {
       "usedPercent": 92,
       "remainingPercent": 8,
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-03T17:16:18.945Z"
+      "lastSeenAt": "2026-11-03T17:30:37.664Z"
     },
     {
       "key": "github/iflai",
@@ -204,9 +204,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 23680,
+      "activityCount": 23887,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-03T17:16:18.945Z"
+      "lastSeenAt": "2026-11-03T17:30:37.664Z"
     },
     {
       "key": "01a1a260-3ca7-7a10-8711-fa7b3e1a7bbc",
@@ -66145,6 +66145,51 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-7bfa84fcd4ef5aab4fd5d083",
+      "threadId": "01a1a260-3ca7-7a10-8711-fa7b3e1a7bbc",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-03T17:06:19.262Z",
+      "endTime": "2026-11-03T17:07:07.551Z",
+      "wallSeconds": 48,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 24,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 47,
+          "effectiveSeconds": 23
+        }
+      ],
+      "description": "Codex: Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2"
     }
   ]
 }
