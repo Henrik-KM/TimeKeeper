@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-03T22:46:01.896Z",
-  "dayStart": "2026-11-02T23:00:00.000Z",
-  "rangeStart": "2026-08-05T22:00:00.000Z",
+  "updatedAt": "2026-11-03T23:01:01.920Z",
+  "dayStart": "2026-11-03T23:00:00.000Z",
+  "rangeStart": "2026-08-06T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-03T22:46:02.821Z",
+    "observedAt": "2026-11-03T23:01:02.976Z",
     "primary": {
       "usedPercent": 96,
       "remainingPercent": 4,
@@ -61723,7 +61723,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 827,
         "reasoning_output_tokens": 213
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-eb055f767e348e0d5f03c3d3",
@@ -61764,7 +61765,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1002,
         "reasoning_output_tokens": 239
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-99148057477c478526243cc4",
@@ -61805,7 +61807,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1295,
         "reasoning_output_tokens": 345
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f858bd3013fcc83f29a7d677",
@@ -61836,7 +61839,8 @@
           "effectiveSeconds": 741
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-37124378dfe4f534d5764128",
@@ -61871,7 +61875,8 @@
       "usageSource": "henrik-email",
       "timingSource": "measured",
       "executionOutcome": "failed",
-      "tokenUsage": {}
+      "tokenUsage": {},
+      "codexBackfill": true
     },
     {
       "id": "codex-c1b4752f2e380393bb5b6d98",
@@ -61912,69 +61917,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1373,
         "reasoning_output_tokens": 345
-      }
-    },
-    {
-      "id": "codex-a7eb7292c55d26ca0e4d2a6a",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-28T08:01:30.707Z",
-      "endTime": "2026-10-28T08:22:16.066Z",
-      "wallSeconds": 1245,
-      "focusFactor": 0.4996,
-      "effectiveSeconds": 622,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1245,
-          "effectiveSeconds": 622
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-bcde9d881fcd11013dab584f",
-      "threadId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-28T08:32:37.817Z",
-      "endTime": "2026-10-28T08:45:56.937Z",
-      "wallSeconds": 799,
-      "focusFactor": 0.4994,
-      "effectiveSeconds": 399,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 799,
-          "effectiveSeconds": 399
-        }
-      ],
-      "description": "Codex: Draft ZEISS follow-up"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f2e95ba8295aecfecc15e3af",
@@ -62015,114 +61959,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 11158,
         "reasoning_output_tokens": 5024
-      }
-    },
-    {
-      "id": "codex-7c4e8b6f148abe428114b9f7",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-28T09:40:07.015Z",
-      "endTime": "2026-10-28T09:47:07.676Z",
-      "wallSeconds": 420,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 210,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 420,
-          "effectiveSeconds": 210
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-f303bf89c845a2017b6f9c94",
-      "threadId": "01a1263e-5872-7101-b242-1746293af037",
-      "projectKey": "email-helper",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-10-28T12:21:35.074Z",
-      "endTime": "2026-10-28T12:28:06.952Z",
-      "wallSeconds": 391,
-      "focusFactor": 0.2992,
-      "effectiveSeconds": 117,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6-luna",
-          "effort": "max",
-          "baseFactor": 0.3,
-          "factor": 0.3,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.3,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 391,
-          "effectiveSeconds": 117
-        }
-      ],
-      "description": "Codex: Email helper health monitor"
-    },
-    {
-      "id": "codex-ad07a96c95f778c54971de57",
-      "threadId": "01a182cf-f672-7500-8160-cf3fe74b3794",
-      "projectKey": "Anders",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-28T14:00:38.539Z",
-      "endTime": "2026-10-28T14:04:00.679Z",
-      "wallSeconds": 202,
-      "focusFactor": 0.495,
-      "effectiveSeconds": 100,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 201,
-          "effectiveSeconds": 100
-        }
-      ],
-      "description": "Codex: Draft AI meeting reminder"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-9cda91c6ff87341021bf40f5",
@@ -62163,38 +62001,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1122,
         "reasoning_output_tokens": 330
-      }
-    },
-    {
-      "id": "codex-4c5632d0321fa78d4dd462c5",
-      "threadId": "01a182cf-f672-7500-8160-cf3fe74b3794",
-      "projectKey": "Anders",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-10-28T14:41:08.187Z",
-      "endTime": "2026-10-28T14:44:19.633Z",
-      "wallSeconds": 191,
-      "focusFactor": 0.4974,
-      "effectiveSeconds": 95,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 191,
-          "effectiveSeconds": 95
-        }
-      ],
-      "description": "Codex: Draft AI meeting reminder"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-5984baead44a65805bd58937",
