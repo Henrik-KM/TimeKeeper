@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-03T07:16:02.593Z",
+  "updatedAt": "2026-11-03T07:31:02.670Z",
   "dayStart": "2026-11-02T23:00:00.000Z",
   "rangeStart": "2026-08-05T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-03T07:16:03.433Z",
+    "observedAt": "2026-11-03T07:31:03.529Z",
     "primary": {
       "usedPercent": 87,
       "remainingPercent": 13,
@@ -41838,8 +41838,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 465,
-    "imported": 465,
+    "discovered": 466,
+    "imported": 466,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -65418,6 +65418,37 @@
       }
     },
     {
+      "id": "codex-2a089806c917722917d9bfc3",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-03T06:42:30.774Z",
+      "endTime": "2026-11-03T07:07:23.740Z",
+      "wallSeconds": 1492,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 746,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1492,
+          "effectiveSeconds": 746
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
+    },
+    {
       "id": "codex-d1115ac9ee41284237220c02",
       "threadId": "01a1a039-d979-74b0-9c9f-0c34cb890d9d",
       "projectKey": "email-helper",
@@ -65456,6 +65487,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1197,
         "reasoning_output_tokens": 285
+      }
+    },
+    {
+      "id": "codex-0a391ab5c988d475c82af45a",
+      "threadId": "01a1a04d-2747-7983-b231-e5688189b16f",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-03T07:26:12.935Z",
+      "endTime": "2026-11-03T07:27:16.919Z",
+      "wallSeconds": 63,
+      "focusFactor": 0.4921,
+      "effectiveSeconds": 31,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 63,
+          "effectiveSeconds": 31
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 199140,
+        "cached_input_tokens": 148480,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1793,
+        "reasoning_output_tokens": 449
       }
     }
   ]
