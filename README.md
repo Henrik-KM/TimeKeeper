@@ -264,3 +264,15 @@ From GitHub Pages, you can also open Import / Export and choose either a TimeKee
 ### Troubleshooting
 
 If the workflow logs show `Missing Strava refresh token`, restore `_private/strava_token.json`. If the logs show `401 Unauthorized`, generate a fresh refresh token with `activity:read_all` scope and update `_private/strava_token.json`, or use the free export import path instead.
+
+## License
+
+TimeKeeper's original source code and accompanying documentation are licensed
+under the [MIT License](LICENSE).
+
+Third-party code and assets retain their existing licenses, including
+[Lucide icons](assets/icons/LICENSE) (ISC) and
+[lz-string](src/shared/vendor/LICENSE-lz-string.txt) (MIT).
+
+This license covers the application, not personal data, activity feeds,
+credentials, or user records.
