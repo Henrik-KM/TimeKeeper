@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-04T08:31:02.393Z",
+  "updatedAt": "2026-11-04T08:46:02.573Z",
   "dayStart": "2026-11-03T23:00:00.000Z",
   "rangeStart": "2026-08-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-04T08:31:07.061Z",
+    "observedAt": "2026-11-04T08:46:08.567Z",
     "primary": {
       "usedPercent": 3,
       "remainingPercent": 97,
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-04T08:26:36.577Z"
+      "lastSeenAt": "2026-11-04T08:46:42.995Z"
     },
     {
       "key": "github/iflai",
@@ -192,6 +192,23 @@
       "lastSeenAt": "2026-11-04T07:34:34.056Z"
     },
     {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Submit Barbro Osher application",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 24778,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-04T08:46:42.995Z"
+    },
+    {
       "key": "01a1a59b-3616-74a3-87bb-dba8152c3d94",
       "sessionId": "01a1a59b-3616-74a3-87bb-dba8152c3d94",
       "title": "",
@@ -207,23 +224,6 @@
       "activityCount": 455,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-04T08:26:36.577Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Submit Barbro Osher application",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 24615,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-04T08:26:02.743Z"
     },
     {
       "key": "01a1a260-3ca7-7a10-8711-fa7b3e1a7bbc",
@@ -66190,6 +66190,51 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-61ab1bc7386ac1d1013f8ec5",
+      "threadId": "01a1a59b-3616-74a3-87bb-dba8152c3d94",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-04T08:09:35.971Z",
+      "endTime": "2026-11-04T08:26:36.577Z",
+      "wallSeconds": 1020,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 510,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1020,
+          "effectiveSeconds": 510
+        }
+      ],
+      "description": "Codex: Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2"
     }
   ]
 }
