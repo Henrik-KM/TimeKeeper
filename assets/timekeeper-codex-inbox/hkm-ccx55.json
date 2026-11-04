@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-04T10:01:02.303Z",
+  "updatedAt": "2026-11-04T10:16:02.587Z",
   "dayStart": "2026-11-03T23:00:00.000Z",
   "rangeStart": "2026-08-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-04T10:01:03.362Z",
+    "observedAt": "2026-11-04T10:16:07.384Z",
     "primary": {
-      "usedPercent": 6,
-      "remainingPercent": 94,
+      "usedPercent": 7,
+      "remainingPercent": 93,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-11T06:35:46.000Z"
     },
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-04T10:01:13.486Z"
+      "lastSeenAt": "2026-11-04T10:17:08.963Z"
     },
     {
       "key": "github/iflai",
@@ -137,6 +137,20 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-10-28T14:44:19.633Z"
+    },
+    {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-10-27T11:05:42.553Z"
     }
   ],
   "sessionMappingAudit": [
@@ -204,9 +218,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 25227,
+      "activityCount": 25402,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-04T10:01:13.486Z"
+      "lastSeenAt": "2026-11-04T10:17:08.963Z"
     },
     {
       "key": "01a1a59b-3616-74a3-87bb-dba8152c3d94",
@@ -530,6 +544,23 @@
       "activityCount": 247,
       "assistantActivity": true,
       "lastSeenAt": "2026-10-28T14:44:19.633Z"
+    },
+    {
+      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "title": "Find and adapt AI risk assessment",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3626,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-27T11:05:42.553Z"
     },
     {
       "key": "01a0e1a0-f1ca-76d1-9512-c9748c50f3d1",
@@ -41742,8 +41773,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 479,
-    "imported": 479,
+    "discovered": 480,
+    "imported": 480,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -66266,6 +66297,47 @@
         }
       ],
       "description": "Codex: Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2"
+    },
+    {
+      "id": "codex-e0a117bf4a7d7b0d4dc8c2c2",
+      "threadId": "01a1a604-56d4-7751-a579-e7913c242084",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-04T10:04:24.048Z",
+      "endTime": "2026-11-04T10:05:29.345Z",
+      "wallSeconds": 65,
+      "focusFactor": 0.4923,
+      "effectiveSeconds": 32,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 65,
+          "effectiveSeconds": 32
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 177230,
+        "cached_input_tokens": 94464,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1701,
+        "reasoning_output_tokens": 586
+      }
     }
   ]
 }
