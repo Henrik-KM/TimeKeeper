@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-04T13:16:02.597Z",
+  "updatedAt": "2026-11-04T13:31:02.337Z",
   "dayStart": "2026-11-03T23:00:00.000Z",
   "rangeStart": "2026-08-06T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-04T13:16:03.518Z",
+    "observedAt": "2026-11-04T13:31:03.127Z",
     "primary": {
-      "usedPercent": 12,
-      "remainingPercent": 88,
+      "usedPercent": 13,
+      "remainingPercent": 87,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-11T06:35:46.000Z"
     },
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-04T13:16:05.642Z"
+      "lastSeenAt": "2026-11-04T13:31:09.254Z"
     },
     {
       "key": "github/iflai",
@@ -218,9 +218,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 25671,
+      "activityCount": 26035,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-04T13:16:05.642Z"
+      "lastSeenAt": "2026-11-04T13:31:09.254Z"
     },
     {
       "key": "01a1a6a7-6a88-7090-a242-bf2c57b7c12a",
@@ -66746,6 +66746,51 @@
         "output_tokens": 4988,
         "reasoning_output_tokens": 1364
       }
+    },
+    {
+      "id": "codex-355ababe23dd6e26342487a5",
+      "threadId": "01a1a6a7-6a88-7090-a242-bf2c57b7c12a",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-04T13:02:33.526Z",
+      "endTime": "2026-11-04T13:07:50.771Z",
+      "wallSeconds": 317,
+      "focusFactor": 0.4984,
+      "effectiveSeconds": 158,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 316,
+          "effectiveSeconds": 158
+        }
+      ],
+      "description": "Codex: Review latest SOW for sign-off"
     }
   ]
 }
