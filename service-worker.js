@@ -3,15 +3,15 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v62';
+const CACHE_NAME = 'timekeeper-app-v64';
 const APP_SHELL = [
   './',
   './index.html',
   './codex-analysis.html',
   './style.css?v=49',
-  './src/main.mjs?v=57',
-  './src/features/claude/policy.mjs',
-  './src/features/claude/inbox.mjs',
+  './src/main.mjs?v=59',
+  './src/features/claude/policy.mjs?v=2',
+  './src/features/claude/inbox.mjs?v=2',
   './src/features/codex/performance-worker.mjs',
   './src/features/codex/top-performance-cache.mjs',
   './src/features/codex/analysis-page.mjs?v=2',
@@ -93,8 +93,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '62') return;
-          url.searchParams.set('timekeeper-update', '62');
+          if (url.searchParams.get('timekeeper-update') === '64') return;
+          url.searchParams.set('timekeeper-update', '64');
           client.navigate(url.href).catch(() => undefined);
         });
       })

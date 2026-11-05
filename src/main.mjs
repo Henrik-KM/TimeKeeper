@@ -102,12 +102,12 @@ import {
   DEFAULT_CODEX_FOCUS_POLICY
 } from './features/codex/policy.mjs';
 import { migrateCodexEntries } from './features/codex/revaluation.mjs';
-import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs';
+import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs?v=2';
 import {
   CLAUDE_INBOX_PATH,
   importClaudeInboxRecords,
   normalizeClaudeIntegration
-} from './features/claude/inbox.mjs';
+} from './features/claude/inbox.mjs?v=2';
 import {
   computeRollingPersonalHourlyRate,
   computeRollingSourceTotals,
@@ -4983,16 +4983,20 @@ import {
     const result = importClaudeInboxRecords({
       entries: data.entries,
       payloads,
+      retractedExternalIds: config.retractedRecordIds,
+      minimumPolicyVersion: DEFAULT_CLAUDE_POLICY.version,
       activeProjectIds,
       windowStart: getRollingWindowBounds(now).start,
       now,
       createId: uuid
     });
     data.entries = result.entries;
+    config.retractedRecordIds = result.retractedExternalIds;
     config.lastImportAt = now.toISOString();
     config.lastImportSummary = {
       imported: result.imported,
       updated: result.updated,
+      reconciled: result.reconciled,
       unchanged: result.unchanged,
       skipped: result.skipped
     };
@@ -5001,7 +5005,7 @@ import {
       checkedAt: config.lastImportAt,
       error: ''
     };
-    if (result.imported || result.updated) {
+    if (result.imported || result.updated || result.reconciled) {
       saveData();
       refreshAllViews();
     } else {
@@ -5030,6 +5034,7 @@ import {
           const summary = [
             result.imported && `${result.imported} new`,
             result.updated && `${result.updated} updated`,
+            result.reconciled && `${result.reconciled} reconciled`,
             result.unchanged && `${result.unchanged} already imported`,
             result.skipped && `${result.skipped} excluded`
           ]
@@ -21315,7 +21320,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=62')
+      .register('./service-worker.js?v=64')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

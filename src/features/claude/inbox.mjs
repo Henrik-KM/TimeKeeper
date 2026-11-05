@@ -8,6 +8,7 @@ export function normalizeClaudeIntegration(value = {}) {
   return {
     enabled: input.enabled === true,
     inboxPath: CLAUDE_INBOX_PATH,
+    retractedRecordIds: normalizeRecordIds(input.retractedRecordIds),
     lastImportAt:
       typeof input.lastImportAt === 'string' ? input.lastImportAt : null,
     lastImportSummary:
@@ -15,6 +16,16 @@ export function normalizeClaudeIntegration(value = {}) {
         ? input.lastImportSummary
         : null
   };
+}
+
+function normalizeRecordIds(ids) {
+  return [
+    ...new Set(
+      (Array.isArray(ids) ? ids : [])
+        .map((id) => String(id || '').trim())
+        .filter((id) => /^claude:[0-9a-f]{32}$/.test(id))
+    )
+  ];
 }
 
 function validTimestamp(value) {
@@ -33,7 +44,8 @@ export function validateClaudeRecord(
   record,
   activeProjectIds,
   windowStart,
-  now = new Date()
+  now = new Date(),
+  { allowHistorical = false } = {}
 ) {
   if (!record || typeof record !== 'object') return null;
   const externalId = String(record.id || '');
@@ -51,7 +63,7 @@ export function validateClaudeRecord(
     !start ||
     !end ||
     end <= start ||
-    start < windowStart ||
+    (!allowHistorical && start < windowStart) ||
     start > now ||
     end > now ||
     elapsedSeconds === null ||
@@ -113,67 +125,120 @@ export function validateClaudeRecord(
   };
 }
 
-/** @param {{ entries?: any[], payloads?: any[], activeProjectIds?: Set<string>, windowStart?: Date, now?: Date, createId?: () => string }} options */
+/** @param {{ entries?: any[], payloads?: any[], retractedExternalIds?: string[], minimumPolicyVersion?: number, activeProjectIds?: Set<string>, windowStart?: Date, now?: Date, createId?: () => string }} options */
 export function importClaudeInboxRecords({
   entries = [],
   payloads = [],
+  retractedExternalIds = [],
+  minimumPolicyVersion = 1,
   activeProjectIds = new Set(),
   windowStart,
   now = new Date(),
   createId = uuid
 } = {}) {
-  const next = [...entries];
+  const validPayloads = payloads.filter(
+    (payload) =>
+      payload?.source === 'timekeeper-claude-bridge' &&
+      Array.isArray(payload.records)
+  );
+  const retractedIds = new Set(
+    normalizeRecordIds([
+      ...retractedExternalIds,
+      ...validPayloads.flatMap((payload) =>
+        Number(payload.focusPolicyVersion) >= 2 &&
+        Array.isArray(payload.retractedExternalIds)
+          ? payload.retractedExternalIds
+          : []
+      )
+    ])
+  );
+  const next = entries.filter(
+    (entry) =>
+      !(entry.source === 'claude' && retractedIds.has(entry.externalId))
+  );
+  const reconciled = entries.length - next.length;
   let imported = 0;
   let updated = 0;
   let unchanged = 0;
-  let skipped = 0;
-  for (const payload of payloads) {
+  let skipped = payloads.length - validPayloads.length;
+  const candidates = validPayloads
+    .flatMap((payload) =>
+      payload.records.map((raw) => ({
+        raw,
+        updatedAt: validTimestamp(payload.updatedAt)?.toISOString() || null
+      }))
+    )
+    .sort(
+      (left, right) =>
+        (Number(left.raw?.focusPolicyVersion) || 1) -
+          (Number(right.raw?.focusPolicyVersion) || 1) ||
+        Date.parse(left.updatedAt || '1970-01-01') -
+          Date.parse(right.updatedAt || '1970-01-01')
+    );
+  for (const { raw, updatedAt } of candidates) {
+    const existing = next.find(
+      (entry) => entry.source === 'claude' && entry.externalId === raw?.id
+    );
     if (
-      payload?.source !== 'timekeeper-claude-bridge' ||
-      !Array.isArray(payload.records)
+      (Number(raw?.focusPolicyVersion) || 1) < minimumPolicyVersion ||
+      retractedIds.has(raw?.id) ||
+      (raw?.repairOnly && !existing)
     ) {
       skipped += 1;
       continue;
     }
-    for (const raw of payload.records) {
-      const normalized = validateClaudeRecord(
-        raw,
-        activeProjectIds,
-        windowStart,
-        now
-      );
-      if (!normalized) {
+    const normalized = validateClaudeRecord(
+      raw,
+      activeProjectIds,
+      windowStart,
+      now,
+      { allowHistorical: Boolean(existing) }
+    );
+    if (!normalized) {
+      skipped += 1;
+      continue;
+    }
+    if (updatedAt) normalized.claudeRecordUpdatedAt = updatedAt;
+    if (existing) {
+      const oldVersion = Number(existing.claudeFocusPolicyVersion) || 1;
+      if (
+        normalized.claudeFocusPolicyVersion < oldVersion ||
+        (normalized.claudeFocusPolicyVersion === oldVersion &&
+          Date.parse(existing.claudeRecordUpdatedAt || '') >
+            Date.parse(updatedAt || '1970-01-01'))
+      ) {
         skipped += 1;
         continue;
       }
-      const existing = next.find(
-        (entry) =>
-          entry.source === 'claude' &&
-          entry.externalId === normalized.externalId
+      const changed = Object.entries(normalized).some(
+        ([key, value]) =>
+          JSON.stringify(existing[key] ?? null) !==
+          JSON.stringify(value ?? null)
       );
-      if (existing) {
-        const changed = Object.entries(normalized).some(
-          ([key, value]) =>
-            JSON.stringify(existing[key] ?? null) !==
-            JSON.stringify(value ?? null)
-        );
-        if (changed) {
-          Object.assign(existing, normalized);
-          updated += 1;
-        } else {
-          unchanged += 1;
-        }
+      if (changed) {
+        Object.assign(existing, normalized);
+        updated += 1;
       } else {
-        next.push({
-          id: createId(),
-          source: 'claude',
-          isRunning: false,
-          createdAt: now.toISOString(),
-          ...normalized
-        });
-        imported += 1;
+        unchanged += 1;
       }
+    } else {
+      next.push({
+        id: createId(),
+        source: 'claude',
+        isRunning: false,
+        createdAt: now.toISOString(),
+        ...normalized
+      });
+      imported += 1;
     }
   }
-  return { entries: next, imported, updated, unchanged, skipped };
+  return {
+    entries: next,
+    imported,
+    updated,
+    unchanged,
+    skipped,
+    reconciled,
+    retractedExternalIds: [...retractedIds]
+  };
 }

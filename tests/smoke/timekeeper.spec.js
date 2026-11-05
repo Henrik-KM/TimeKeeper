@@ -1936,14 +1936,14 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v62';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=57'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v64';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=59'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
   );
   expect(serviceWorker).toContain("'./src/shared/vendor/lz-string.mjs'");
-  expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs'");
+  expect(serviceWorker).toContain("'./src/features/claude/inbox.mjs?v=2'");
   expect(serviceWorker).toContain(
     "'./src/features/codex/top-performance-cache.mjs'"
   );
@@ -1953,7 +1953,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '62')"
+    "url.searchParams.set('timekeeper-update', '64')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1963,7 +1963,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=62')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=64')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5237,7 +5237,7 @@ test('Claude inbox imports into AI Activity once and remains readable on a phone
     wallSeconds: 3600,
     effectiveSeconds: 1800,
     delegatedSessionCount: 0,
-    focusPolicyVersion: 1,
+    focusPolicyVersion: 2,
     modelBreakdown: [
       {
         role: 'parent',

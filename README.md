@@ -198,7 +198,9 @@ On the Windows PC, install the separate five-minute task:
 npm.cmd run claude:bridge:install
 ```
 
-The task scans parent and nested subagent transcripts in `%USERPROFILE%\.claude\projects` (or `CLAUDE_CONFIG_DIR\projects`) for today and the previous 29 local calendar days. It publishes only session IDs, active timestamps, model families, project names, and measured seconds to `assets/timekeeper-claude-inbox/`. Prompts, tool output, and full local paths stay on the PC. A span closes after a gap over 15 minutes and is published 17 minutes after its last event. Overlapping parent and subagent activity counts wall time once; delegated work receives 35% of its model factor. Claude uses Fable 0.75, Opus 0.50, Sonnet 0.40, Haiku 0.30, and unknown 0.40.
+The task scans parent and nested subagent transcripts in `%USERPROFILE%\.claude\projects` (or `CLAUDE_CONFIG_DIR\projects`) for today and the previous 29 local calendar days. It publishes only session IDs, active timestamps, model families, project names, and measured seconds to `assets/timekeeper-claude-inbox/`. Prompts, tool output, and full local paths stay on the PC. Policy v2 excludes pauses after completed turns, question/approval waits, and passive sleep/polling tools. A span closes after a gap over 15 minutes and is published 17 minutes after its last event. Overlapping parent and subagent activity counts wall time once; delegated work receives 35% of its model factor. Claude uses Fable 0.75, Opus 0.50, Sonnet 0.40, Haiku 0.30, and unknown 0.40.
+
+`node scripts/claude-usage-bridge.mjs --dry-run --lookback-days=all` rebuilds all available history as a repair-only payload. Existing entries, including those older than 30 days, update in place; missing historical entries are not recreated. Zero-work spans are retracted persistently, and older policies or stale payloads cannot undo corrections.
 
 To preview sanitized records without publishing, run `npm.cmd run claude:bridge -- --dry-run`. To publish immediately, run `npm.cmd run claude:bridge`. To remove only the Claude task, run `npm.cmd run claude:bridge:uninstall`.
 

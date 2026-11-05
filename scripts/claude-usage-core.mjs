@@ -17,6 +17,41 @@ function validDate(value) {
   return Number.isNaN(date.getTime()) ? null : date;
 }
 
+function isPassiveTool(tool) {
+  const name = String(tool?.name || '')
+    .split('__')
+    .at(-1);
+  if (
+    /^(AskUserQuestion|ExitPlanMode|Monitor|TaskOutput|request_user_input|request_user_input_async|wait)$/i.test(
+      name
+    )
+  )
+    return true;
+  const command = String(tool?.input?.command || tool?.input?.cmd || '');
+  const waits =
+    /\bsleep\s+\d|\bStart-Sleep\b|\btimeout\s+\d+(?:\.\d+)?\s+tail\s+-f\s+\/dev\/null|\btime\.sleep\s*\(/i.test(
+      command
+    );
+  // A wait appended to a build, test, or job launch does not make that work idle.
+  const readOnlyPython =
+    /\bimport\s+json\b/.test(command) &&
+    /\bprint\s*\(/.test(command) &&
+    !/\b(?:write|write_text|write_bytes|dump|save|fit|train|run|call|Popen)\s*\(/.test(
+      command
+    );
+  const startsWork =
+    /\b(?:sbatch|salloc|mpirun|mpiexec|make|cmake|ninja|pytest|ctest|npm(?:\.cmd)?|node(?:\.exe)?|pip|uv|Rscript)\s/i.test(
+      command
+    ) ||
+    (/\bsrun\s/.test(command) &&
+      !/\bsrun\s[^;]*--overlap\b[^;]*\b(?:wc|tail|grep|cat)\b/.test(command)) ||
+    (!readOnlyPython &&
+      /\bpython[\d.]*(?:\.exe)?\s+(?!-c\s+["'](?:import\s+time\s*;\s*)?time\.sleep\()/i.test(
+        command
+      ));
+  return waits && !startsWork;
+}
+
 export function parseClaudeTranscript(
   text = '',
   { parentSessionId = '', agentId = '', windowStart = null } = {}
@@ -35,7 +70,11 @@ export function parseClaudeTranscript(
     } catch {
       continue;
     }
-    if (event?.type !== 'user' && event?.type !== 'assistant') continue;
+    const isError =
+      event?.isApiErrorMessage === true ||
+      (event?.type === 'system' && event?.subtype === 'api_error');
+    if (event?.type !== 'user' && event?.type !== 'assistant' && !isError)
+      continue;
     const time = validDate(event.timestamp);
     if (!time || time.getTime() < cutoff) continue;
     sessionId ||= String(event.sessionId || '').trim();
@@ -43,6 +82,21 @@ export function parseClaudeTranscript(
     foundAgentId ||= String(event.agentId || '').trim();
     events.push({
       time: time.getTime(),
+      type: event.type,
+      messageId: String(event.message?.id || ''),
+      closesTurn: [
+        'end_turn',
+        'stop_sequence',
+        'max_tokens',
+        'pause_turn'
+      ].includes(event.message?.stop_reason),
+      passive:
+        Array.isArray(event.message?.content) &&
+        event.message.content.some(
+          (block) => block?.type === 'tool_use' && isPassiveTool(block)
+        ),
+      synthetic: event.message?.model === '<synthetic>',
+      isError,
       model:
         event.type === 'assistant' && event.message?.model !== '<synthetic>'
           ? getClaudeModelFamily(event.message?.model)
@@ -50,15 +104,31 @@ export function parseClaudeTranscript(
     });
   }
   events.sort((left, right) => left.time - right.time);
+  const lastMessageEvents = new Map(
+    events
+      .filter((event) => event.type === 'assistant' && event.messageId)
+      .map((event) => [event.messageId, event])
+  );
   const initialModel = events.find((event) => event.model)?.model || 'unknown';
   let activeModel = initialModel;
+  let active = true;
   const activity = [];
   for (const event of events) {
     activeModel = event.model || activeModel;
+    if (event.isError) active = false;
+    else if (!event.synthetic) {
+      active = !(
+        event.passive ||
+        (event.closesTurn &&
+          (!event.messageId ||
+            lastMessageEvents.get(event.messageId) === event))
+      );
+    }
     if (activity.at(-1)?.time === event.time) {
       activity[activity.length - 1].model = activeModel;
+      activity[activity.length - 1].active = active;
     } else {
-      activity.push({ time: event.time, model: activeModel });
+      activity.push({ time: event.time, model: activeModel, active });
     }
   }
   return {
@@ -83,6 +153,7 @@ function makeIntervals(session, policy) {
     intervals.push({
       start: previous.time,
       end: current.time,
+      active: previous.active !== false,
       model,
       factor,
       role: session.isSubagent ? 'subagent' : 'parent',
@@ -116,6 +187,7 @@ function splitAtIdleGaps(intervals, idleGapMs) {
 
 function aggregateGroup(group) {
   const events = group.intervals
+    .filter((interval) => interval.active !== false)
     .flatMap((interval, index) => [
       { time: interval.start, start: true, index, interval },
       { time: interval.end, start: false, index, interval }
@@ -174,7 +246,7 @@ function aggregateGroup(group) {
   };
 }
 
-export function buildClaudeUsageRecordsFromSessionGroup({
+export function buildClaudeUsagePartitionsFromSessionGroup({
   sessions = [],
   trackedProjects = [],
   mappings = [],
@@ -184,27 +256,30 @@ export function buildClaudeUsageRecordsFromSessionGroup({
   const normalizedPolicy = normalizeClaudePolicy(policy);
   const parent = sessions.find((session) => !session.isSubagent);
   const root = parent || sessions[0];
-  if (!root?.sessionId || !root.cwd) return [];
+  if (!root?.sessionId || !root.cwd)
+    return { records: [], retractedExternalIds: [] };
   const projects = normalizeTrackedProjects(trackedProjects);
   const matched = findTrackedProjectForCwd(root.cwd, projects, mappings);
   const project = projects.find(
     (item) => item.projectId === matched?.projectId
   );
-  if (!project) return [];
+  if (!project) return { records: [], retractedExternalIds: [] };
   const repoName =
     getGitHubProjectPathInfo(root.cwd)?.repoName ||
     getRepoNameFromCwd(root.cwd);
   const intervals = sessions.flatMap((session) =>
     makeIntervals(session, normalizedPolicy)
   );
-  return splitAtIdleGaps(intervals, normalizedPolicy.idleGapMinutes * 60000)
+  const records = [];
+  const retractedExternalIds = [];
+  // Keep the original grouping and anchors so corrected records update in place.
+  splitAtIdleGaps(intervals, normalizedPolicy.idleGapMinutes * 60000)
     .filter(
       (group) =>
         now.getTime() - group.end >= normalizedPolicy.matureMinutes * 60000
     )
-    .map((group) => {
+    .forEach((group) => {
       const aggregate = aggregateGroup(group);
-      if (!aggregate.wallSeconds || !aggregate.effectiveSeconds) return null;
       const startTime = new Date(group.start).toISOString();
       const endTime = new Date(group.end).toISOString();
       const parentStart = Math.min(
@@ -222,8 +297,13 @@ export function buildClaudeUsageRecordsFromSessionGroup({
         )
         .digest('hex')
         .slice(0, 32);
-      return {
-        id: `claude:${hash}`,
+      const id = `claude:${hash}`;
+      if (!aggregate.wallSeconds || !aggregate.effectiveSeconds) {
+        retractedExternalIds.push(id);
+        return;
+      }
+      records.push({
+        id,
         sessionId: root.sessionId,
         timekeeperProjectId: project.projectId,
         timekeeperProjectName: project.name,
@@ -237,7 +317,11 @@ export function buildClaudeUsageRecordsFromSessionGroup({
         ),
         focusPolicyVersion: normalizedPolicy.version,
         delegationCredit: normalizedPolicy.delegationCredit
-      };
-    })
-    .filter(Boolean);
+      });
+    });
+  return { records, retractedExternalIds };
+}
+
+export function buildClaudeUsageRecordsFromSessionGroup(options = {}) {
+  return buildClaudeUsagePartitionsFromSessionGroup(options).records;
 }

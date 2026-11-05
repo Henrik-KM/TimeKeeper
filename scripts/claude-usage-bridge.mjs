@@ -13,7 +13,7 @@ import {
   writeJsonFile
 } from './codex-usage-bridge.mjs';
 import {
-  buildClaudeUsageRecordsFromSessionGroup,
+  buildClaudeUsagePartitionsFromSessionGroup,
   parseClaudeTranscript
 } from './claude-usage-core.mjs';
 import { getLocalLookbackStart } from './codex-usage-core.mjs';
@@ -47,6 +47,7 @@ export function buildClaudeBridgeOptions(args = parseArgs()) {
       process.env.TIMEKEEPER_CLAUDE_STATE_PATH ||
       defaultStatePath(),
     inboxPath: DEFAULT_INBOX_PATH,
+    repairHistory: args.lookbackDays === 'all',
     now: args.now ? new Date(args.now) : new Date()
   };
 }
@@ -100,27 +101,29 @@ export async function buildClaudeInboxPayload(
     options.now instanceof Date && !Number.isNaN(options.now.getTime())
       ? options.now
       : new Date();
-  const rangeStart = getLocalLookbackStart(now, CLAUDE_LOOKBACK_DAYS);
+  const rangeStart = options.repairHistory
+    ? new Date(0)
+    : getLocalLookbackStart(now, CLAUDE_LOOKBACK_DAYS);
   const files = await listClaudeTranscriptFiles(
     options.projectsDir,
     rangeStart
   );
-  const sessions = await Promise.all(
-    files.map(async (filePath) => {
-      const identity = transcriptIdentity(filePath);
-      let text;
-      try {
-        text = await fs.readFile(filePath, 'utf8');
-      } catch (error) {
-        if (['ENOENT', 'EBUSY', 'EACCES'].includes(error.code)) return null;
-        throw error;
-      }
-      return parseClaudeTranscript(text, {
-        ...identity,
-        windowStart: rangeStart
-      });
-    })
-  );
+  const sessions = [];
+  // Read one transcript at a time; a full history repair can span large logs.
+  for (const filePath of files) {
+    const identity = transcriptIdentity(filePath);
+    let text;
+    try {
+      text = await fs.readFile(filePath, 'utf8');
+    } catch (error) {
+      if (['ENOENT', 'EBUSY', 'EACCES'].includes(error.code)) continue;
+      throw error;
+    }
+    sessions.push(
+      // Filter completed records below, rather than truncating their ID anchor.
+      parseClaudeTranscript(text, identity)
+    );
+  }
   const groups = new Map();
   sessions.forEach((session) => {
     if (!session?.sessionId || !session.activity.length) return;
@@ -129,25 +132,33 @@ export async function buildClaudeInboxPayload(
     groups.set(session.sessionId, group);
   });
   const policy = normalizeClaudePolicy(config.claude?.focusPolicy);
-  const records = [...groups.values()]
-    .flatMap((group) =>
-      buildClaudeUsageRecordsFromSessionGroup({
-        sessions: group,
-        trackedProjects: config.trackedProjects || [],
-        mappings: config.mappings || [],
-        now,
-        policy
-      })
-    )
+  const partitions = [...groups.values()].map((group) =>
+    buildClaudeUsagePartitionsFromSessionGroup({
+      sessions: group,
+      trackedProjects: config.trackedProjects || [],
+      mappings: config.mappings || [],
+      now,
+      policy
+    })
+  );
+  const records = partitions
+    .flatMap((partition) => partition.records)
     .filter((record) => new Date(record.startTime) >= rangeStart)
+    .map((record) =>
+      options.repairHistory ? { ...record, repairOnly: true } : record
+    )
     .sort((left, right) => left.startTime.localeCompare(right.startTime));
   return {
-    version: 1,
+    version: 2,
+    focusPolicyVersion: policy.version,
     source: 'timekeeper-claude-bridge',
     machineId: options.machineId,
     updatedAt: now.toISOString(),
     rangeStart: rangeStart.toISOString(),
-    lookbackDays: CLAUDE_LOOKBACK_DAYS,
+    lookbackDays: options.repairHistory ? null : CLAUDE_LOOKBACK_DAYS,
+    retractedExternalIds: partitions.flatMap(
+      (partition) => partition.retractedExternalIds
+    ),
     records
   };
 }
@@ -155,14 +166,20 @@ export async function buildClaudeInboxPayload(
 export function makeClaudePayloadKey(payload) {
   return crypto
     .createHash('sha256')
-    .update(JSON.stringify(payload.records || []))
+    .update(
+      JSON.stringify({
+        focusPolicyVersion: payload.focusPolicyVersion,
+        retractedExternalIds: payload.retractedExternalIds || [],
+        records: payload.records || []
+      })
+    )
     .digest('hex');
 }
 
 export async function runClaudeUsageBridge(args = parseArgs()) {
   if (args.help) {
     process.stdout.write(
-      'Usage: node scripts/claude-usage-bridge.mjs [--dry-run] [--force] [--projects-dir=path]\n'
+      'Usage: node scripts/claude-usage-bridge.mjs [--dry-run] [--force] [--projects-dir=path] [--lookback-days=all]\n'
     );
     return { skipped: true, reason: 'help' };
   }
@@ -184,7 +201,8 @@ export async function runClaudeUsageBridge(args = parseArgs()) {
     );
     return payload;
   }
-  const inboxFile = `${options.inboxPath}/${options.machineId}.json`;
+  const suffix = options.repairHistory ? '-history-repair-v2' : '';
+  const inboxFile = `${options.inboxPath}/${options.machineId}${suffix}.json`;
   await putGitHubJsonFile({
     options,
     pathValue: inboxFile,
