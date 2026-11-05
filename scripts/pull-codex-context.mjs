@@ -139,42 +139,42 @@ export function fetchPrivateContext(
   options = {},
   runCommand = /** @type {CommandRunner} */ (/** @type {unknown} */ (spawnSync))
 ) {
-  const apiPath = getContextApiPath(options);
-  const result = runCommand(
-    process.platform === 'win32' ? 'gh.exe' : 'gh',
-    ['api', apiPath, '--jq', '.content'],
-    {
-      encoding: 'utf8',
-      maxBuffer: GITHUB_CONTEXT_MAX_BUFFER,
-      windowsHide: true
-    }
+  return decodeGitHubContextContent(
+    fetchGitHubFileContent(options, runCommand)
   );
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    throw new Error(
-      String(result.stderr || 'GitHub context fetch failed.').trim()
-    );
-  }
-  return decodeGitHubContextContent(result.stdout);
 }
 
 function fetchGitHubFileContent(options, runCommand) {
-  const result = runCommand(
-    process.platform === 'win32' ? 'gh.exe' : 'gh',
-    ['api', getContextApiPath(options), '--jq', '.content'],
-    {
-      encoding: 'utf8',
-      maxBuffer: GITHUB_CONTEXT_MAX_BUFFER,
-      windowsHide: true
+  const read = (apiPath) => {
+    const result = runCommand(
+      process.platform === 'win32' ? 'gh.exe' : 'gh',
+      ['api', apiPath],
+      {
+        encoding: 'utf8',
+        maxBuffer: GITHUB_CONTEXT_MAX_BUFFER,
+        windowsHide: true
+      }
+    );
+    if (result.error) throw result.error;
+    if (result.status !== 0) {
+      throw new Error(
+        String(result.stderr || 'GitHub context fetch failed.').trim()
+      );
     }
-  );
-  if (result.error) throw result.error;
-  if (result.status !== 0) {
-    throw new Error(
-      String(result.stderr || 'GitHub context fetch failed.').trim()
+    return JSON.parse(result.stdout);
+  };
+  let metadata = read(getContextApiPath(options));
+  // Contents responses omit inline data above 1 MiB. Read the exact blob rather
+  // than silently falling back to an older encrypted context.
+  if (!metadata.content && /^[0-9a-f]{40}$/.test(metadata.sha || '')) {
+    metadata = read(
+      `repos/${normalizeRepository(options.repository || DEFAULT_CONTEXT_REPOSITORY)}/git/blobs/${metadata.sha}`
     );
   }
-  return String(result.stdout || '');
+  if (metadata.encoding !== 'base64' || !metadata.content) {
+    throw new Error('GitHub context content was missing.');
+  }
+  return String(metadata.content);
 }
 
 export function fetchEncryptedContext(

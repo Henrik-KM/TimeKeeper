@@ -76,7 +76,20 @@ function normalizeEntry(entry, nowMs) {
     wallClockSeconds: Math.round(wallClockSeconds),
     timestampIntervalSeconds: Math.round(timestampIntervalSeconds),
     effectiveSeconds: Math.round(effectiveSeconds),
-    source: String(entry?.source || (entry?.manual ? 'manual' : 'timer'))
+    source: String(entry?.source || (entry?.manual ? 'manual' : 'timer')),
+    ...(/^codex[-:]/.test(String(entry?.externalId || ''))
+      ? {
+          externalId: String(entry.externalId),
+          codexThreadId: String(entry.codexThreadId || ''),
+          codexSupersedesExternalIds: Array.isArray(
+            entry.codexSupersedesExternalIds
+          )
+            ? entry.codexSupersedesExternalIds.filter(
+                (id) => typeof id === 'string' && /^codex[-:]/.test(id)
+              )
+            : []
+        }
+      : {})
   };
 }
 
@@ -194,6 +207,17 @@ export function buildCodexDevelopmentContext(data, { now = new Date() } = {}) {
   return {
     schema: 'timekeeper-codex-development-context/v1',
     generatedAt: new Date(nowMs).toISOString(),
+    codexReconciliation: {
+      lastRunAt: data?.codexReconciliationHistory?.at(-1)?.appliedAt || null,
+      removedEntries: (Array.isArray(data?.codexReconciliationHistory)
+        ? data.codexReconciliationHistory
+        : []
+      ).reduce(
+        (total, item) =>
+          total + (Array.isArray(item?.removed) ? item.removed.length : 0),
+        0
+      )
+    },
     dataUpdatedAt: toIso(data?.updatedAt),
     privacy: {
       storage: 'local-gitignored-file',

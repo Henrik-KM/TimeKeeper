@@ -3,6 +3,40 @@ import test from 'node:test';
 
 import { buildCodexDevelopmentContext } from '../../src/features/codex/context.mjs';
 
+test('Codex context includes reconciliation evidence without recovery contents', () => {
+  const context = buildCodexDevelopmentContext({
+    projects: [],
+    entries: [
+      {
+        id: 'retained',
+        source: 'codex',
+        externalId: 'codex-retained',
+        codexThreadId: 'thread-id',
+        codexSupersedesExternalIds: ['codex-old', 'unrelated'],
+        startTime: '2026-11-01T08:00:00.000Z',
+        endTime: '2026-11-01T09:00:00.000Z',
+        duration: 1800
+      }
+    ],
+    codexReconciliationHistory: [
+      {
+        appliedAt: '2026-11-02T08:00:00.000Z',
+        removed: [{ entry: { notes: 'Private recovery contents' } }]
+      }
+    ]
+  });
+  assert.equal(context.entries[0].externalId, 'codex-retained');
+  assert.equal(context.entries[0].codexThreadId, 'thread-id');
+  assert.deepEqual(context.entries[0].codexSupersedesExternalIds, [
+    'codex-old'
+  ]);
+  assert.deepEqual(context.codexReconciliation, {
+    lastRunAt: '2026-11-02T08:00:00.000Z',
+    removedEntries: 1
+  });
+  assert.doesNotMatch(JSON.stringify(context), /Private recovery contents/);
+});
+
 test('buildCodexDevelopmentContext exposes project usage without private domains', () => {
   const context = buildCodexDevelopmentContext(
     {

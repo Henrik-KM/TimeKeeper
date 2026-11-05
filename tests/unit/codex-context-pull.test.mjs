@@ -59,13 +59,17 @@ test('fetches context through authenticated gh without exposing a token', () => 
     calls.push({ command, args, options });
     return {
       status: 0,
-      stdout: Buffer.from(JSON.stringify(context)).toString('base64'),
+      stdout: JSON.stringify({
+        encoding: 'base64',
+        content: Buffer.from(JSON.stringify(context)).toString('base64')
+      }),
       stderr: ''
     };
   });
   assert.deepEqual(fetched, context);
   assert.match(calls[0].command, /^gh(?:\.exe)?$/);
-  assert.deepEqual(calls[0].args.slice(-2), ['--jq', '.content']);
+  assert.equal(calls[0].args[0], 'api');
+  assert.ok(calls[0].args[1].includes('contents/codex-context.json'));
   assert.ok(calls[0].options.maxBuffer >= 64 * 1024 * 1024);
   assert.equal(JSON.stringify(calls).includes('token'), false);
 });
@@ -97,8 +101,46 @@ test('round trips an encrypted fallback through the private key', async () => {
   ];
   const fetched = fetchEncryptedContext({}, () => ({
     status: 0,
-    stdout: responses.shift(),
+    stdout: JSON.stringify({ encoding: 'base64', content: responses.shift() }),
     stderr: ''
   }));
   assert.deepEqual(fetched, context);
+});
+
+test('reads large private context from its exact Git blob instead of stale fallback', () => {
+  const calls = [];
+  const sha = 'a'.repeat(40);
+  const fetched = fetchPrivateContext({}, (_command, args) => {
+    calls.push(args);
+    return {
+      status: 0,
+      stdout: JSON.stringify(
+        calls.length === 1
+          ? { encoding: 'none', content: '', sha, size: 3 * 1024 * 1024 }
+          : {
+              encoding: 'base64',
+              content: Buffer.from(JSON.stringify(context)).toString('base64')
+            }
+      ),
+      stderr: ''
+    };
+  });
+  assert.deepEqual(fetched, context);
+  assert.equal(calls.length, 2);
+  assert.equal(
+    calls[1][1],
+    `repos/Henrik-KM/timekeeper-private-context/git/blobs/${sha}`
+  );
+});
+
+test('rejects missing GitHub content instead of treating it as an empty snapshot', () => {
+  assert.throws(
+    () =>
+      fetchPrivateContext({}, () => ({
+        status: 0,
+        stdout: JSON.stringify({ encoding: 'none', content: '' }),
+        stderr: ''
+      })),
+    /content was missing/
+  );
 });

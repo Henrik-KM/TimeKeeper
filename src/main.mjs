@@ -34,6 +34,11 @@ import {
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
+  normalizeCodexCorrections,
+  normalizeCodexRecordIds,
+  reconcileCodexEntries
+} from './features/codex/reconciliation.mjs';
+import {
   buildWealthGoalChartSeries,
   calculateHistoricalRegression,
   calculateWealthFreshness,
@@ -84,7 +89,7 @@ import {
   resolveStravaExertion
 } from './features/strava/core.mjs';
 import { buildStravaPayloadFromCsv } from './features/strava/import.mjs';
-import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=13';
+import { buildCodexDevelopmentContext } from './features/codex/context.mjs?v=14';
 import {
   buildCodexAnalytics,
   buildCodexSourceAverages,
@@ -101,7 +106,10 @@ import {
   DEFAULT_CODEX_FOCUS_FACTOR,
   DEFAULT_CODEX_FOCUS_POLICY
 } from './features/codex/policy.mjs';
-import { migrateCodexEntries } from './features/codex/revaluation.mjs';
+import {
+  migrateCodexEntries,
+  revalueCodexEntry
+} from './features/codex/revaluation.mjs';
 import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs?v=2';
 import {
   CLAUDE_INBOX_PATH,
@@ -2328,6 +2336,8 @@ import {
       mappingAudit: [],
       sessionMappingAudit: [],
       importedCodexRecordIds: [],
+      retractedCodexRecordIds: [],
+      codexEntryCorrections: [],
       lastImportAt: null,
       lastImportSummary: null,
       codexPolicyMigration: null,
@@ -2431,6 +2441,12 @@ import {
         config.sessionMappingAudit
       ),
       importedCodexRecordIds: [...new Set(importedIds)].slice(-1000),
+      retractedCodexRecordIds: normalizeCodexRecordIds(
+        config.retractedCodexRecordIds
+      ),
+      codexEntryCorrections: normalizeCodexCorrections(
+        config.codexEntryCorrections
+      ),
       lastImportAt: config.lastImportAt || null,
       lastImportSummary:
         config.lastImportSummary && typeof config.lastImportSummary === 'object'
@@ -3444,6 +3460,7 @@ import {
   ensureMonthlyRecurringPayments();
   ensureWealthData();
   runCodexPolicyMigration();
+  if (applyCodexEntryReconciliation() > 0) saveData();
   // Flag to track whether to show all entries or only recent ones. If false,
   // entries older than approximately one month are hidden by default to keep
   // the list manageable. This can be toggled via a button in the Entries section.
@@ -4621,18 +4638,36 @@ import {
     ];
   }
 
-  function reconcileCodexSupersededEntries(supersededIds = []) {
-    if (!supersededIds.length) return 0;
-    const superseded = new Set(supersededIds);
-    const before = data.entries.length;
-    data.entries = data.entries.filter(
-      (entry) =>
-        !(
-          isCodexTimeEntry(entry) &&
-          superseded.has(String(entry?.externalId || ''))
-        )
-    );
-    return before - data.entries.length;
+  function applyCodexEntryReconciliation(retractedIds = [], corrections = []) {
+    const config = data.codexIntegration;
+    config.codexEntryCorrections = [
+      ...new Map(
+        normalizeCodexCorrections([
+          ...(config.codexEntryCorrections || []),
+          ...corrections
+        ]).map((correction) => [correction.entryId, correction])
+      ).values()
+    ];
+    const result = reconcileCodexEntries(data.entries, {
+      retractedExternalIds: [
+        ...(config.retractedCodexRecordIds || []),
+        ...retractedIds
+      ],
+      corrections: config.codexEntryCorrections
+    });
+    config.retractedCodexRecordIds = result.retractedExternalIds;
+    if (result.removed.length) {
+      // Store complete removed entries in the same atomic profile write as the
+      // correction, including any user fields needed to recover them.
+      data.codexReconciliationHistory = [
+        ...(Array.isArray(data.codexReconciliationHistory)
+          ? data.codexReconciliationHistory
+          : []),
+        { appliedAt: new Date().toISOString(), removed: result.removed }
+      ];
+      data.entries = result.entries;
+    }
+    return result.removed.length;
   }
 
   function importCodexInboxPayloads(payloads = []) {
@@ -4645,13 +4680,19 @@ import {
     let updated = 0;
     const nowIso = new Date().toISOString();
     const retractedExternalIds = new Set(
+      normalizeCodexRecordIds([
+        ...config.retractedCodexRecordIds,
+        ...payloads.flatMap((payload) => payload?.retractedExternalIds || [])
+      ])
+    );
+    reconciled += applyCodexEntryReconciliation(
+      [...retractedExternalIds],
       payloads.flatMap((payload) =>
-        Array.isArray(payload?.retractedExternalIds)
-          ? payload.retractedExternalIds
-              .map((id) => String(id || '').trim())
-              .filter(Boolean)
-          : []
+        normalizeCodexCorrections(payload?.entryCorrections)
       )
+    );
+    config.retractedCodexRecordIds.forEach((id) =>
+      retractedExternalIds.add(id)
     );
     const mappingAuditRows = payloads.flatMap((payload) =>
       Array.isArray(payload?.mappingAudit) ? payload.mappingAudit : []
@@ -4676,137 +4717,184 @@ import {
         .sort(
           (a, b) => Date.parse(b.observedAt) - Date.parse(a.observedAt)
         )[0] || config.usageLimits;
-    payloads.forEach((payload) => {
-      const records = Array.isArray(payload?.records) ? payload.records : [];
-      const retractedIds = Array.isArray(payload?.retractedExternalIds)
-        ? [
-            ...new Set(
-              payload.retractedExternalIds
-                .map((id) => String(id || '').trim())
-                .filter(Boolean)
-            )
-          ]
-        : [];
-      reconciled += reconcileCodexSupersededEntries(retractedIds);
-      retractedIds.forEach((id) => importedIds.add(id));
-      records.forEach((record) => {
-        const recordId = String(record?.id || '').trim();
-        let projectId = String(record?.timekeeperProjectId || '').trim();
-        const namedProject = findCodexProjectByName(
-          record?.timekeeperProjectName
-        );
-        if (projectId && !getActiveCodexProject(projectId)) {
-          projectId = '';
-        }
-        if (!projectId && namedProject) projectId = String(namedProject.id);
-        const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
-        const recordFocusFactor = normalizeFocusFactor(
-          record?.focusFactor,
-          CODEX_FOCUS_FACTOR
-        );
-        const start = new Date(record?.startTime || '');
-        const end = new Date(record?.endTime || '');
-        const recordElapsedSeconds =
-          record?.wallSeconds === null || record?.wallSeconds === undefined
-            ? NaN
-            : Math.floor(Number(record.wallSeconds));
-        const existingEntry = data.entries.find(
-          (entry) =>
-            isCodexTimeEntry(entry) &&
-            String(entry?.externalId || '') === recordId
-        );
-        // The cached ID list is only a hint. A restored or partially imported
-        // dataset can retain an ID without retaining its actual entry, so the
-        // entry itself is the source of truth for reconciliation.
-        const alreadyImported = Boolean(existingEntry);
-        if (existingEntry) importedIds.add(recordId);
-        if (
-          !recordId ||
-          retractedExternalIds.has(recordId) ||
-          (!existingEntry &&
-            !isCodexRecordInImportWindow(record, windowStart)) ||
-          !projectId ||
-          !getActiveCodexProject(projectId) ||
-          !Number.isFinite(effectiveSeconds) ||
-          effectiveSeconds <= 0 ||
-          Number.isNaN(start.getTime()) ||
-          Number.isNaN(end.getTime()) ||
-          end <= start
-        ) {
-          skipped += 1;
-          return;
-        }
-        const supersededIds = getCodexSupersededRecordIds(record, recordId);
-        reconciled += reconcileCodexSupersededEntries(supersededIds);
-        supersededIds.forEach((id) => importedIds.add(id));
-        const focusPolicyVersion = Number(record?.focusPolicyVersion) || null;
-        const codexRepoName = String(
-          record?.repoName || record?.codexRepoName || record?.projectKey || ''
-        ).trim();
-        const codexMetadata = {
-          duration: effectiveSeconds,
-          elapsedSeconds:
-            Number.isFinite(recordElapsedSeconds) && recordElapsedSeconds >= 0
-              ? recordElapsedSeconds
-              : Math.floor((end.getTime() - start.getTime()) / 1000),
-          focusFactor: recordFocusFactor,
-          manualFactor: recordFocusFactor,
-          codexFocusPolicyVersion: focusPolicyVersion,
-          codexModelBreakdown: Array.isArray(record?.modelBreakdown)
-            ? record.modelBreakdown
-            : [],
-          codexDelegatedSessionCount:
-            Math.max(0, Math.floor(Number(record?.delegatedSessionCount))) || 0,
-          codexDelegationCredit:
-            Number(record?.delegationCredit) >= 0
-              ? Number(record.delegationCredit)
-              : null,
-          codexSupersedesExternalIds: supersededIds,
-          ...(codexRepoName ? { codexRepoName } : {})
-        };
-        if (alreadyImported) {
-          const existingPolicyVersion =
-            Number(existingEntry?.codexFocusPolicyVersion) || 0;
-          const repositoryMetadataChanged =
-            Boolean(codexRepoName) &&
-            String(existingEntry?.codexRepoName || '') !== codexRepoName;
-          const codexMetadataChanged =
-            existingEntry &&
-            Object.entries(codexMetadata).some(
-              ([key, value]) =>
-                JSON.stringify(existingEntry[key] ?? null) !==
-                JSON.stringify(value ?? null)
-            );
+    [...payloads]
+      .sort(
+        (left, right) =>
+          (Date.parse(left?.updatedAt || '') || 0) -
+          (Date.parse(right?.updatedAt || '') || 0)
+      )
+      .forEach((payload) => {
+        const records = Array.isArray(payload?.records) ? payload.records : [];
+        const retractedIds = Array.isArray(payload?.retractedExternalIds)
+          ? [
+              ...new Set(
+                payload.retractedExternalIds
+                  .map((id) => String(id || '').trim())
+                  .filter(Boolean)
+              )
+            ]
+          : [];
+        reconciled += applyCodexEntryReconciliation(retractedIds);
+        retractedIds.forEach((id) => importedIds.add(id));
+        records.forEach((record) => {
+          const recordId = String(record?.id || '').trim();
+          let projectId = String(record?.timekeeperProjectId || '').trim();
+          const namedProject = findCodexProjectByName(
+            record?.timekeeperProjectName
+          );
+          if (projectId && !getActiveCodexProject(projectId)) {
+            projectId = '';
+          }
+          if (!projectId && namedProject) projectId = String(namedProject.id);
+          const effectiveSeconds = Math.floor(Number(record?.effectiveSeconds));
+          const recordFocusFactor = normalizeFocusFactor(
+            record?.focusFactor,
+            CODEX_FOCUS_FACTOR
+          );
+          const start = new Date(record?.startTime || '');
+          const end = new Date(record?.endTime || '');
+          const recordElapsedSeconds =
+            record?.wallSeconds === null || record?.wallSeconds === undefined
+              ? NaN
+              : Math.floor(Number(record.wallSeconds));
+          const existingEntry = data.entries.find(
+            (entry) =>
+              isCodexTimeEntry(entry) &&
+              String(entry?.externalId || '') === recordId
+          );
+          // The cached ID list is only a hint. A restored or partially imported
+          // dataset can retain an ID without retaining its actual entry, so the
+          // entry itself is the source of truth for reconciliation.
+          const alreadyImported = Boolean(existingEntry);
+          if (existingEntry) importedIds.add(recordId);
+          if (
+            !recordId ||
+            retractedExternalIds.has(recordId) ||
+            (!existingEntry &&
+              !isCodexRecordInImportWindow(record, windowStart)) ||
+            !projectId ||
+            !getActiveCodexProject(projectId) ||
+            !Number.isFinite(effectiveSeconds) ||
+            effectiveSeconds <= 0 ||
+            Number.isNaN(start.getTime()) ||
+            Number.isNaN(end.getTime()) ||
+            end <= start
+          ) {
+            skipped += 1;
+            return;
+          }
           if (
             existingEntry &&
-            ((focusPolicyVersion &&
-              focusPolicyVersion >= existingPolicyVersion) ||
-              repositoryMetadataChanged) &&
-            codexMetadataChanged
+            ((Number(record.focusPolicyVersion) > 0 &&
+              Number(record.focusPolicyVersion) <
+                (Number(existingEntry.codexSourcePolicyVersion) || 0)) ||
+              Date.parse(existingEntry.codexRecordUpdatedAt || '') >
+                Date.parse(payload.updatedAt || '1970-01-01'))
           ) {
-            Object.assign(existingEntry, codexMetadata);
-            updated += 1;
-          } else {
             skipped += 1;
+            return;
           }
-          return;
-        }
-        data.entries.push({
-          id: uuid(),
-          projectId,
-          description: String(record.description || 'Codex work').trim(),
-          startTime: start.toISOString(),
-          endTime: end.toISOString(),
-          isRunning: false,
-          createdAt: nowIso,
-          source: 'codex',
-          externalId: recordId,
-          ...codexMetadata
+          const supersededIds = getCodexSupersededRecordIds(record, recordId);
+          if (supersededIds.length) {
+            reconciled += applyCodexEntryReconciliation(supersededIds);
+          }
+          supersededIds.forEach((id) => importedIds.add(id));
+          supersededIds.forEach((id) => retractedExternalIds.add(id));
+          const focusPolicyVersion = Number(record?.focusPolicyVersion) || null;
+          const codexRepoName = String(
+            record?.repoName ||
+              record?.codexRepoName ||
+              record?.projectKey ||
+              ''
+          ).trim();
+          const codexMetadata = {
+            startTime: start.toISOString(),
+            endTime: end.toISOString(),
+            duration: effectiveSeconds,
+            elapsedSeconds:
+              Number.isFinite(recordElapsedSeconds) && recordElapsedSeconds >= 0
+                ? recordElapsedSeconds
+                : Math.floor((end.getTime() - start.getTime()) / 1000),
+            focusFactor: recordFocusFactor,
+            manualFactor: recordFocusFactor,
+            codexFocusPolicyVersion: focusPolicyVersion,
+            codexSourcePolicyVersion: focusPolicyVersion,
+            codexModelBreakdown: Array.isArray(record?.modelBreakdown)
+              ? record.modelBreakdown
+              : [],
+            codexDelegatedSessionCount:
+              Math.max(0, Math.floor(Number(record?.delegatedSessionCount))) ||
+              0,
+            codexDelegationCredit:
+              Number(record?.delegationCredit) >= 0
+                ? Number(record.delegationCredit)
+                : null,
+            codexSupersedesExternalIds: supersededIds,
+            codexIsAggregate: Array.isArray(record.supersedesExternalIds),
+            ...(record.threadId
+              ? { codexThreadId: String(record.threadId) }
+              : {}),
+            ...(Number.isFinite(Date.parse(payload.updatedAt))
+              ? {
+                  codexRecordUpdatedAt: new Date(
+                    payload.updatedAt
+                  ).toISOString()
+                }
+              : {}),
+            ...(codexRepoName ? { codexRepoName } : {})
+          };
+          if ((focusPolicyVersion || 0) < CODEX_FOCUS_POLICY.version) {
+            const valuation = revalueCodexEntry(
+              { source: 'codex', ...codexMetadata },
+              CODEX_FOCUS_POLICY
+            );
+            if (valuation.patch) Object.assign(codexMetadata, valuation.patch);
+          }
+          if (alreadyImported) {
+            const existingPolicyVersion =
+              Number(existingEntry?.codexFocusPolicyVersion) || 0;
+            const codexMetadataChanged =
+              existingEntry &&
+              Object.entries(codexMetadata).some(
+                ([key, value]) =>
+                  key !== 'codexRecordUpdatedAt' &&
+                  JSON.stringify(existingEntry[key] ?? null) !==
+                    JSON.stringify(value ?? null)
+              );
+            if (
+              existingEntry &&
+              Number(codexMetadata.codexFocusPolicyVersion) >=
+                existingPolicyVersion &&
+              codexMetadataChanged
+            ) {
+              Object.assign(existingEntry, codexMetadata);
+              updated += 1;
+            } else {
+              if (codexMetadata.codexRecordUpdatedAt) {
+                existingEntry.codexRecordUpdatedAt =
+                  codexMetadata.codexRecordUpdatedAt;
+              }
+              skipped += 1;
+            }
+            return;
+          }
+          data.entries.push({
+            id: uuid(),
+            projectId,
+            description: String(record.description || 'Codex work').trim(),
+            startTime: start.toISOString(),
+            endTime: end.toISOString(),
+            isRunning: false,
+            createdAt: nowIso,
+            source: 'codex',
+            externalId: recordId,
+            ...codexMetadata
+          });
+          importedIds.add(recordId);
+          imported += 1;
         });
-        importedIds.add(recordId);
-        imported += 1;
       });
-    });
+    reconciled += applyCodexEntryReconciliation([...retractedExternalIds]);
     config.importedCodexRecordIds = [...importedIds].slice(-1000);
     config.lastImportAt = nowIso;
     config.lastImportSummary = { imported, skipped, reconciled, updated };
@@ -21320,7 +21408,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=64')
+      .register('./service-worker.js?v=65')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
