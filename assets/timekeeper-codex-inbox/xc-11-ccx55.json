@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-05T19:42:04.756Z",
+  "updatedAt": "2026-11-05T19:47:02.978Z",
   "dayStart": "2026-11-04T23:00:00.000Z",
   "rangeStart": "2026-08-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-05T19:42:10.137Z",
+    "observedAt": "2026-11-05T19:47:05.945Z",
     "primary": {
       "usedPercent": 70,
       "remainingPercent": 30,
@@ -26,20 +26,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/scholarships",
-      "displayPath": "GitHub/Scholarships",
-      "projectFolder": "Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-05T19:42:57.756Z"
-    },
     {
       "key": "github/project ironwright",
       "displayPath": "GitHub/Project Ironwright",
@@ -52,7 +38,21 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-05T19:42:13.810Z"
+      "lastSeenAt": "2026-11-05T19:47:23.983Z"
+    },
+    {
+      "key": "github/scholarships",
+      "displayPath": "GitHub/Scholarships",
+      "projectFolder": "Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-11-05T19:47:11.421Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -66,7 +66,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-05T19:42:05.834Z"
+      "lastSeenAt": "2026-11-05T19:46:59.745Z"
     },
     {
       "key": "github/timekeeper",
@@ -155,21 +155,21 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
+      "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
       "title": "",
       "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
+      "displayPath": "GitHub/Project Ironwright",
+      "repoName": "Project Ironwright",
       "status": "unmapped",
       "mappingSource": null,
       "projectId": null,
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 560879,
+      "activityCount": 131154,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T19:42:57.756Z"
+      "lastSeenAt": "2026-11-05T19:47:23.983Z"
     },
     {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
@@ -184,26 +184,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 185178,
+      "activityCount": 185241,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T19:42:34.172Z"
-    },
-    {
-      "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
-      "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 131030,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T19:42:13.810Z"
+      "lastSeenAt": "2026-11-05T19:47:11.421Z"
     },
     {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
@@ -218,9 +201,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 2054,
+      "activityCount": 2128,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T19:42:05.834Z"
+      "lastSeenAt": "2026-11-05T19:46:59.745Z"
+    },
+    {
+      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 560908,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-05T19:44:41.065Z"
     },
     {
       "key": "01a1a14e-18fd-7920-8a08-1ef5b7a59e81",
