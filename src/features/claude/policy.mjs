@@ -1,6 +1,6 @@
 /** @type {{ version: number, idleGapMinutes: number, matureMinutes: number, delegationCredit: number, modelFactors: Record<string, number> }} */
 export const DEFAULT_CLAUDE_POLICY = Object.freeze({
-  version: 2,
+  version: 3,
   idleGapMinutes: 15,
   matureMinutes: 17,
   delegationCredit: 0.35,

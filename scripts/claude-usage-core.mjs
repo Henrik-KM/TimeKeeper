@@ -1,4 +1,5 @@
 import crypto from 'node:crypto';
+import { isPassiveAgentTool } from '../src/features/agents/activity.mjs';
 
 import {
   DEFAULT_CLAUDE_POLICY,
@@ -15,41 +16,6 @@ import {
 function validDate(value) {
   const date = new Date(value || '');
   return Number.isNaN(date.getTime()) ? null : date;
-}
-
-function isPassiveTool(tool) {
-  const name = String(tool?.name || '')
-    .split('__')
-    .at(-1);
-  if (
-    /^(AskUserQuestion|ExitPlanMode|Monitor|TaskOutput|request_user_input|request_user_input_async|wait)$/i.test(
-      name
-    )
-  )
-    return true;
-  const command = String(tool?.input?.command || tool?.input?.cmd || '');
-  const waits =
-    /\bsleep\s+\d|\bStart-Sleep\b|\btimeout\s+\d+(?:\.\d+)?\s+tail\s+-f\s+\/dev\/null|\btime\.sleep\s*\(/i.test(
-      command
-    );
-  // A wait appended to a build, test, or job launch does not make that work idle.
-  const readOnlyPython =
-    /\bimport\s+json\b/.test(command) &&
-    /\bprint\s*\(/.test(command) &&
-    !/\b(?:write|write_text|write_bytes|dump|save|fit|train|run|call|Popen)\s*\(/.test(
-      command
-    );
-  const startsWork =
-    /\b(?:sbatch|salloc|mpirun|mpiexec|make|cmake|ninja|pytest|ctest|npm(?:\.cmd)?|node(?:\.exe)?|pip|uv|Rscript)\s/i.test(
-      command
-    ) ||
-    (/\bsrun\s/.test(command) &&
-      !/\bsrun\s[^;]*--overlap\b[^;]*\b(?:wc|tail|grep|cat)\b/.test(command)) ||
-    (!readOnlyPython &&
-      /\bpython[\d.]*(?:\.exe)?\s+(?!-c\s+["'](?:import\s+time\s*;\s*)?time\.sleep\()/i.test(
-        command
-      ));
-  return waits && !startsWork;
 }
 
 export function parseClaudeTranscript(
@@ -82,6 +48,7 @@ export function parseClaudeTranscript(
     foundAgentId ||= String(event.agentId || '').trim();
     events.push({
       time: time.getTime(),
+      eventId: String(event.uuid || ''),
       type: event.type,
       messageId: String(event.message?.id || ''),
       closesTurn: [
@@ -93,7 +60,7 @@ export function parseClaudeTranscript(
       passive:
         Array.isArray(event.message?.content) &&
         event.message.content.some(
-          (block) => block?.type === 'tool_use' && isPassiveTool(block)
+          (block) => block?.type === 'tool_use' && isPassiveAgentTool(block)
         ),
       synthetic: event.message?.model === '<synthetic>',
       isError,
@@ -127,8 +94,14 @@ export function parseClaudeTranscript(
     if (activity.at(-1)?.time === event.time) {
       activity[activity.length - 1].model = activeModel;
       activity[activity.length - 1].active = active;
+      if (event.eventId) activity.at(-1).eventIds.push(event.eventId);
     } else {
-      activity.push({ time: event.time, model: activeModel, active });
+      activity.push({
+        time: event.time,
+        model: activeModel,
+        active,
+        eventIds: event.eventId ? [event.eventId] : []
+      });
     }
   }
   return {
@@ -140,7 +113,7 @@ export function parseClaudeTranscript(
   };
 }
 
-function makeIntervals(session, policy) {
+function makeIntervals(session, policy, seenExecutions) {
   const points = Array.isArray(session.activity) ? session.activity : [];
   const intervals = [];
   for (let index = 1; index < points.length; index += 1) {
@@ -150,10 +123,27 @@ function makeIntervals(session, policy) {
     if (gap <= 0 || gap > policy.idleGapMinutes * 60000) continue;
     const model = getClaudeModelFamily(previous.model);
     const factor = policy.modelFactors[model];
+    // Forks rewrite sessionId, but retain the actual execution UUIDs and times.
+    const executionId =
+      previous.eventIds?.length && current.eventIds?.length
+        ? crypto
+            .createHash('sha256')
+            .update(
+              JSON.stringify([
+                previous.time,
+                current.time,
+                [...previous.eventIds].sort(),
+                [...current.eventIds].sort()
+              ])
+            )
+            .digest('hex')
+        : '';
+    const duplicate = executionId && seenExecutions.has(executionId);
+    if (executionId) seenExecutions.add(executionId);
     intervals.push({
       start: previous.time,
       end: current.time,
-      active: previous.active !== false,
+      active: previous.active !== false && !duplicate,
       model,
       factor,
       role: session.isSubagent ? 'subagent' : 'parent',
@@ -251,7 +241,8 @@ export function buildClaudeUsagePartitionsFromSessionGroup({
   trackedProjects = [],
   mappings = [],
   now = new Date(),
-  policy = DEFAULT_CLAUDE_POLICY
+  policy = DEFAULT_CLAUDE_POLICY,
+  seenExecutions = new Set()
 } = {}) {
   const normalizedPolicy = normalizeClaudePolicy(policy);
   const parent = sessions.find((session) => !session.isSubagent);
@@ -268,7 +259,7 @@ export function buildClaudeUsagePartitionsFromSessionGroup({
     getGitHubProjectPathInfo(root.cwd)?.repoName ||
     getRepoNameFromCwd(root.cwd);
   const intervals = sessions.flatMap((session) =>
-    makeIntervals(session, normalizedPolicy)
+    makeIntervals(session, normalizedPolicy, seenExecutions)
   );
   const records = [];
   const retractedExternalIds = [];

@@ -32,6 +32,7 @@ function isManagedEntry(entry) {
 
 function rank(entry) {
   return [
+    Number(entry.codexActivityPolicyVersion) || 0,
     Number(entry.codexFocusPolicyVersion) || 0,
     Date.parse(entry.codexRecordUpdatedAt || '') || 0,
     Number(entry.codexDelegatedSessionCount) || 0

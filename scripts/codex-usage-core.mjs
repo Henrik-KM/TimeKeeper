@@ -1,6 +1,10 @@
 import crypto from 'node:crypto';
 import os from 'node:os';
 import path from 'node:path';
+import {
+  CODEX_ACTIVITY_POLICY_VERSION,
+  createCodexActivityTracker
+} from '../src/features/agents/activity.mjs';
 
 import {
   DEFAULT_CODEX_FOCUS_FACTOR,
@@ -585,7 +589,9 @@ export function getCodexSessionActivity(events = [], dayStart = null) {
   let activeEffort = '';
   let activeFastMode = false;
   const activity = [];
+  const tracker = createCodexActivityTracker();
   events.forEach((event) => {
+    tracker.observe(event);
     if (event?.type === 'turn_context') {
       activeModel = String(event?.payload?.model || activeModel || '').trim();
       activeEffort = String(
@@ -604,7 +610,8 @@ export function getCodexSessionActivity(events = [], dayStart = null) {
       timestamp,
       model: activeModel,
       effort: activeEffort,
-      fastMode: activeFastMode
+      fastMode: activeFastMode,
+      active: tracker.active
     };
     const previous = activity[activity.length - 1];
     if (previous && previous.timestamp.getTime() === timestamp.getTime()) {
@@ -676,7 +683,8 @@ export function buildModelWeightedActiveSpans(
           : parseTimestamp(point?.timestamp),
       model: String(point?.model || '').trim(),
       effort: String(point?.effort || '').trim(),
-      fastMode: point?.fastMode === true
+      fastMode: point?.fastMode === true,
+      active: point?.active !== false
     }))
     .filter((point) => point.timestamp)
     .sort(
@@ -688,6 +696,7 @@ export function buildModelWeightedActiveSpans(
   let spanStart = sorted[0].timestamp;
   let spanEnd = sorted[0].timestamp;
   let activeMs = 0;
+  let identityActiveMs = 0;
   let effectiveMs = 0;
   let breakdown = new Map();
   const closeSpan = () => {
@@ -710,6 +719,7 @@ export function buildModelWeightedActiveSpans(
       start: spanStart,
       end: spanEnd,
       activeMs,
+      identityActiveMs,
       effectiveMs,
       focusFactor: effectiveMs / activeMs,
       focusPolicyVersion: policy.version,
@@ -725,11 +735,15 @@ export function buildModelWeightedActiveSpans(
       spanStart = current.timestamp;
       spanEnd = current.timestamp;
       activeMs = 0;
+      identityActiveMs = 0;
       effectiveMs = 0;
       breakdown = new Map();
       continue;
     }
     if (gap <= 0) continue;
+    identityActiveMs += gap;
+    spanEnd = current.timestamp;
+    if (!previous.active) continue;
     const resolved = resolveNormalizedCodexFocusFactor({
       model: previous.model,
       effort: previous.effort,
@@ -900,7 +914,7 @@ export function buildCodexUsageRecordsFromSessionData({
           projectMatch.projectId,
           startIso,
           endIso,
-          wallSeconds
+          Math.floor((span.identityActiveMs ?? span.activeMs) / 1000)
         ]),
         threadId: meta.id || null,
         projectKey: projectMatch.repoName,
@@ -911,6 +925,7 @@ export function buildCodexUsageRecordsFromSessionData({
         wallSeconds,
         focusFactor: recordFocusFactor,
         effectiveSeconds,
+        activityPolicyVersion: CODEX_ACTIVITY_POLICY_VERSION,
         focusPolicyVersion: span.focusPolicyVersion || normalizedPolicy.version,
         repositoryFocusMultiplier,
         modelBreakdown: span.modelBreakdown,
@@ -939,7 +954,8 @@ function buildCodexActivityIntervals(
           : parseTimestamp(point?.timestamp),
       model: String(point?.model || '').trim(),
       effort: String(point?.effort || '').trim(),
-      fastMode: point?.fastMode === true
+      fastMode: point?.fastMode === true,
+      active: point?.active !== false
     }))
     .filter((point) => point.timestamp)
     .sort(
@@ -962,6 +978,7 @@ function buildCodexActivityIntervals(
       policy
     });
     const interval = {
+      active: previous.active,
       start: previous.timestamp,
       end: current.timestamp,
       factor: resolved.factor,
@@ -979,6 +996,7 @@ function buildCodexActivityIntervals(
       last &&
       last.end.getTime() === interval.start.getTime() &&
       last.factor === interval.factor &&
+      last.active === interval.active &&
       last.model === interval.model &&
       last.effort === interval.effort &&
       last.fastMode === interval.fastMode &&
@@ -1023,6 +1041,7 @@ function splitCodexIntervalsAtIdleGaps(
 
 function aggregateCodexIntervals(intervals = []) {
   const events = intervals
+    .filter((interval) => interval.active !== false)
     .flatMap((interval, index) => [
       { time: interval.start.getTime(), type: 'start', index, interval },
       { time: interval.end.getTime(), type: 'end', index, interval }
@@ -1104,8 +1123,14 @@ function aggregateCodexIntervals(intervals = []) {
     }))
     .sort((left, right) => String(left.role).localeCompare(String(right.role)));
   return {
-    start: new Date(events[0].time),
-    end: new Date(events[events.length - 1].time),
+    start: intervals.reduce(
+      (first, interval) => (interval.start < first ? interval.start : first),
+      intervals[0].start
+    ),
+    end: intervals.reduce(
+      (last, interval) => (interval.end > last ? interval.end : last),
+      intervals[0].end
+    ),
     wallMs,
     effectiveMs,
     focusFactor: effectiveMs / wallMs,
@@ -1266,6 +1291,7 @@ export function buildCodexUsageRecordsFromSessionGroup({
         wallSeconds,
         focusFactor: Number((effectiveSeconds / wallSeconds).toFixed(4)),
         effectiveSeconds,
+        activityPolicyVersion: CODEX_ACTIVITY_POLICY_VERSION,
         focusPolicyVersion: span.focusPolicyVersion || normalizedPolicy.version,
         repositoryFocusMultiplier,
         delegationCredit: normalizedPolicy.delegationCredit,

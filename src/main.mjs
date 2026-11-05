@@ -27,6 +27,7 @@ import {
   sumEntryHours
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
+import { acceptsCodexActivityRecord } from './features/agents/activity.mjs?v=1';
 import {
   loadStoredProfile,
   persistProfile
@@ -37,7 +38,7 @@ import {
   normalizeCodexCorrections,
   normalizeCodexRecordIds,
   reconcileCodexEntries
-} from './features/codex/reconciliation.mjs?v=1';
+} from './features/codex/reconciliation.mjs?v=2';
 import {
   buildWealthGoalChartSeries,
   calculateHistoricalRegression,
@@ -110,12 +111,12 @@ import {
   migrateCodexEntries,
   revalueCodexEntry
 } from './features/codex/revaluation.mjs';
-import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs?v=2';
+import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs?v=3';
 import {
   CLAUDE_INBOX_PATH,
   importClaudeInboxRecords,
   normalizeClaudeIntegration
-} from './features/claude/inbox.mjs?v=2';
+} from './features/claude/inbox.mjs?v=3';
 import {
   computeRollingPersonalHourlyRate,
   computeRollingSourceTotals,
@@ -4679,6 +4680,7 @@ import {
     let reconciled = 0;
     let updated = 0;
     const nowIso = new Date().toISOString();
+    let outdatedActivityRecords = 0;
     const retractedExternalIds = new Set(
       normalizeCodexRecordIds([
         ...config.retractedCodexRecordIds,
@@ -4767,8 +4769,14 @@ import {
           // entry itself is the source of truth for reconciliation.
           const alreadyImported = Boolean(existingEntry);
           if (existingEntry) importedIds.add(recordId);
+          if (!acceptsCodexActivityRecord(record)) {
+            outdatedActivityRecords += 1;
+            skipped += 1;
+            return;
+          }
           if (
             !recordId ||
+            (record.repairOnly && !existingEntry) ||
             retractedExternalIds.has(recordId) ||
             (!existingEntry &&
               !isCodexRecordInImportWindow(record, windowStart)) ||
@@ -4785,11 +4793,15 @@ import {
           }
           if (
             existingEntry &&
-            ((Number(record.focusPolicyVersion) > 0 &&
-              Number(record.focusPolicyVersion) <
-                (Number(existingEntry.codexSourcePolicyVersion) || 0)) ||
-              Date.parse(existingEntry.codexRecordUpdatedAt || '') >
-                Date.parse(payload.updatedAt || '1970-01-01'))
+            ((Number(record.activityPolicyVersion) || 0) <
+              (Number(existingEntry.codexActivityPolicyVersion) || 0) ||
+              ((Number(record.activityPolicyVersion) || 0) ===
+                (Number(existingEntry.codexActivityPolicyVersion) || 0) &&
+                ((Number(record.focusPolicyVersion) > 0 &&
+                  Number(record.focusPolicyVersion) <
+                    (Number(existingEntry.codexSourcePolicyVersion) || 0)) ||
+                  Date.parse(existingEntry.codexRecordUpdatedAt || '') >
+                    Date.parse(payload.updatedAt || '1970-01-01'))))
           ) {
             skipped += 1;
             return;
@@ -4819,6 +4831,8 @@ import {
             manualFactor: recordFocusFactor,
             codexFocusPolicyVersion: focusPolicyVersion,
             codexSourcePolicyVersion: focusPolicyVersion,
+            codexActivityPolicyVersion:
+              Number(record.activityPolicyVersion) || 0,
             codexModelBreakdown: Array.isArray(record?.modelBreakdown)
               ? record.modelBreakdown
               : [],
@@ -4897,13 +4911,21 @@ import {
     reconciled += applyCodexEntryReconciliation([...retractedExternalIds]);
     config.importedCodexRecordIds = [...importedIds].slice(-1000);
     config.lastImportAt = nowIso;
-    config.lastImportSummary = { imported, skipped, reconciled, updated };
+    config.lastImportSummary = {
+      imported,
+      skipped,
+      reconciled,
+      updated,
+      outdatedActivityRecords
+    };
     if (imported > 0) runCodexPolicyMigration({ persist: false });
     codexImportRuntimeStatus = {
       pending: false,
       checkedAt: nowIso,
       error: '',
-      warning: '',
+      warning: outdatedActivityRecords
+        ? 'Update the Codex helper: entries from the old activity counter were skipped.'
+        : '',
       imported,
       skipped,
       reconciled,
@@ -5080,6 +5102,14 @@ import {
     });
     data.entries = result.entries;
     config.retractedRecordIds = result.retractedExternalIds;
+    if (result.removed.length) {
+      data.claudeReconciliationHistory = [
+        ...(Array.isArray(data.claudeReconciliationHistory)
+          ? data.claudeReconciliationHistory
+          : []),
+        { appliedAt: now.toISOString(), removed: result.removed }
+      ];
+    }
     config.lastImportAt = now.toISOString();
     config.lastImportSummary = {
       imported: result.imported,
@@ -21408,7 +21438,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=66')
+      .register('./service-worker.js?v=67')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

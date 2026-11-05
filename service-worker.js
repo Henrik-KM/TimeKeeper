@@ -3,20 +3,21 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v66';
+const CACHE_NAME = 'timekeeper-app-v67';
 const APP_SHELL = [
   './',
   './index.html',
   './codex-analysis.html',
   './style.css?v=49',
-  './src/main.mjs?v=61',
-  './src/features/claude/policy.mjs?v=2',
-  './src/features/claude/inbox.mjs?v=2',
+  './src/main.mjs?v=62',
+  './src/features/agents/activity.mjs?v=1',
+  './src/features/claude/policy.mjs?v=3',
+  './src/features/claude/inbox.mjs?v=3',
   './src/features/codex/performance-worker.mjs',
   './src/features/codex/top-performance-cache.mjs',
   './src/features/codex/analysis-page.mjs?v=2',
   './src/features/codex/analytics.mjs',
-  './src/features/codex/reconciliation.mjs?v=1',
+  './src/features/codex/reconciliation.mjs?v=2',
   './src/features/codex/policy.mjs',
   './src/features/codex/revaluation.mjs',
   './src/shared/runtime-helpers.mjs',
@@ -95,7 +96,7 @@ sw.addEventListener('activate', (event) => {
         clients.forEach((client) => {
           const url = new URL(client.url);
           if (url.searchParams.get('timekeeper-update') === '66') return;
-          url.searchParams.set('timekeeper-update', '66');
+          url.searchParams.set('timekeeper-update', '67');
           client.navigate(url.href).catch(() => undefined);
         });
       })

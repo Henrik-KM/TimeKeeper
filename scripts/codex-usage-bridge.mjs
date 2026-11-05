@@ -7,6 +7,10 @@ import process from 'node:process';
 import * as readline from 'node:readline';
 import { fileURLToPath } from 'node:url';
 import {
+  CODEX_ACTIVITY_POLICY_VERSION,
+  createCodexActivityTracker
+} from '../src/features/agents/activity.mjs';
+import {
   EMAIL_USAGE_BACKFILL_DAYS,
   readEmailUsageRecords
 } from './henrik-email-usage.mjs';
@@ -468,6 +472,7 @@ export async function readLiveCodexUsageLimits({
 }
 
 export async function readCodexSessionSummary(filePath, windowStart) {
+  const tracker = createCodexActivityTracker();
   const minTime = windowStart instanceof Date ? windowStart.getTime() : null;
   const meta = {
     id: '',
@@ -502,6 +507,7 @@ export async function readCodexSessionSummary(filePath, windowStart) {
     ) {
       try {
         const event = JSON.parse(line);
+        tracker.observe(event);
         const payload = event?.payload || {};
         if (event?.type === 'session_meta' && !hasSessionMeta) {
           meta.id = String(payload.id || '').trim();
@@ -571,7 +577,8 @@ export async function readCodexSessionSummary(filePath, windowStart) {
           timestamp,
           model: activeModel,
           effort: activeEffort,
-          fastMode: activeFastMode
+          fastMode: activeFastMode,
+          active: tracker.active
         });
         lastTimestampMs = timestampMs;
       } else if (activity.length) {
@@ -579,7 +586,8 @@ export async function readCodexSessionSummary(filePath, windowStart) {
           timestamp,
           model: activeModel,
           effort: activeEffort,
-          fastMode: activeFastMode
+          fastMode: activeFastMode,
+          active: tracker.active
         };
       }
     }
@@ -627,16 +635,30 @@ export function buildCodexSessionGroupPartitions({
   const records = [];
   const retractedExternalIds = [];
   sessionGroups.forEach((sessions) => {
-    const groupRecords = buildCodexUsageRecordsFromSessionGroup({
-      sessions,
-      trackedProjects,
-      mappings,
-      sessionMappings,
-      threadNamesById,
-      now,
-      focusFactor,
-      focusPolicy
-    });
+    const buildRecords = (groupSessions) =>
+      buildCodexUsageRecordsFromSessionGroup({
+        sessions: groupSessions,
+        trackedProjects,
+        mappings,
+        sessionMappings,
+        threadNamesById,
+        now,
+        focusFactor,
+        focusPolicy
+      });
+    const groupRecords = buildRecords(sessions);
+    const legacyRecords = buildRecords(
+      sessions.map((session) => ({
+        ...session,
+        activity: session.activity.map((point) => ({ ...point, active: true }))
+      }))
+    );
+    const retained = new Set(groupRecords.map((record) => record.id));
+    retractedExternalIds.push(
+      ...legacyRecords
+        .filter((record) => !retained.has(record.id))
+        .map((record) => record.id)
+    );
     if (hasCreditableCodexActivity(sessions)) {
       records.push(...groupRecords);
     } else {
@@ -869,6 +891,7 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
   const usageLimits = (await liveUsageLimitsPromise) || sessionUsageLimits;
   return {
     version: 5,
+    activityPolicyVersion: CODEX_ACTIVITY_POLICY_VERSION,
     schemaVersion: 2,
     source: 'timekeeper-codex-bridge',
     machineId: options.machineId,

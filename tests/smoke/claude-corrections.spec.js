@@ -37,7 +37,7 @@ for (const width of [390, 1280]) {
     };
     const corrected = {
       ...record,
-      focusPolicyVersion: 2,
+      focusPolicyVersion: 3,
       wallSeconds: 600,
       effectiveSeconds: 300,
       repairOnly: true
@@ -112,7 +112,7 @@ for (const width of [390, 1280]) {
         await route.fulfill({
           json: {
             source: 'timekeeper-claude-bridge',
-            focusPolicyVersion: 2,
+            focusPolicyVersion: 3,
             updatedAt: now.toISOString(),
             records: [
               corrected,
@@ -147,7 +147,7 @@ for (const width of [390, 1280]) {
       expect(data.entries.find((entry) => entry.id === id)).toMatchObject({
         duration: 300,
         elapsedSeconds: 600,
-        claudeFocusPolicyVersion: 2,
+        claudeFocusPolicyVersion: 3,
         notes: 'Preserve this user field'
       });
     }
@@ -155,10 +155,21 @@ for (const width of [390, 1280]) {
       data.entries.find((entry) => entry.id === 'keep-manual').duration
     ).toBe(1800);
     expect(data.claudeIntegration.retractedRecordIds).toEqual([zeroId]);
+    expect(data.claudeReconciliationHistory[0].removed[0]).toMatchObject({
+      id: 'remove-passive-only',
+      notes: 'Preserve this user field'
+    });
     await expect(page.locator('#entriesTableBodyPro')).toContainText(
       '10m 0s active'
     );
     repairAvailable = false;
+    await page.reload();
+    await expect
+      .poll(
+        async () =>
+          (await read()).claudeReconciliationHistory[0].removed[0].notes
+      )
+      .toBe('Preserve this user field');
     await page.goto('/#importExport');
     await page
       .getByRole('button', { name: 'Import Claude', exact: true })

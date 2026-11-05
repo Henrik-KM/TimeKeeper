@@ -48,6 +48,7 @@ export function buildClaudeBridgeOptions(args = parseArgs()) {
       defaultStatePath(),
     inboxPath: DEFAULT_INBOX_PATH,
     repairHistory: args.lookbackDays === 'all',
+    sessionOrder: [],
     now: args.now ? new Date(args.now) : new Date()
   };
 }
@@ -106,7 +107,7 @@ export async function buildClaudeInboxPayload(
     : getLocalLookbackStart(now, CLAUDE_LOOKBACK_DAYS);
   const files = await listClaudeTranscriptFiles(
     options.projectsDir,
-    rangeStart
+    new Date(0)
   );
   const sessions = [];
   // Read one transcript at a time; a full history repair can span large logs.
@@ -119,10 +120,9 @@ export async function buildClaudeInboxPayload(
       if (['ENOENT', 'EBUSY', 'EACCES'].includes(error.code)) continue;
       throw error;
     }
-    sessions.push(
-      // Filter completed records below, rather than truncating their ID anchor.
-      parseClaudeTranscript(text, identity)
-    );
+    const session = parseClaudeTranscript(text, identity);
+    session.createdAt = (await fs.stat(filePath)).birthtimeMs;
+    sessions.push(session);
   }
   const groups = new Map();
   sessions.forEach((session) => {
@@ -132,15 +132,38 @@ export async function buildClaudeInboxPayload(
     groups.set(session.sessionId, group);
   });
   const policy = normalizeClaudePolicy(config.claude?.focusPolicy);
-  const partitions = [...groups.values()].map((group) =>
-    buildClaudeUsagePartitionsFromSessionGroup({
-      sessions: group,
-      trackedProjects: config.trackedProjects || [],
-      mappings: config.mappings || [],
-      now,
-      policy
-    })
-  );
+  const state = await readJsonFile(options.statePath, {});
+  const sessionOrder = [
+    ...new Set(Array.isArray(state.sessionOrder) ? state.sessionOrder : [])
+  ];
+  [...sessions]
+    .sort(
+      (a, b) =>
+        a.createdAt - b.createdAt || a.sessionId.localeCompare(b.sessionId)
+    )
+    .forEach((session) => {
+      if (session.sessionId && !sessionOrder.includes(session.sessionId))
+        sessionOrder.push(session.sessionId);
+    });
+  // Persist ownership order so a newly copied session cannot take old credit.
+  options.sessionOrder = sessionOrder;
+  const seenExecutions = new Set();
+  const partitions = [...groups.values()]
+    .sort(
+      (a, b) =>
+        sessionOrder.indexOf(a[0].sessionId) -
+        sessionOrder.indexOf(b[0].sessionId)
+    )
+    .map((group) =>
+      buildClaudeUsagePartitionsFromSessionGroup({
+        sessions: group,
+        trackedProjects: config.trackedProjects || [],
+        mappings: config.mappings || [],
+        now,
+        policy,
+        seenExecutions
+      })
+    );
   const records = partitions
     .flatMap((partition) => partition.records)
     .filter((record) => new Date(record.startTime) >= rangeStart)
@@ -196,6 +219,10 @@ export async function runClaudeUsageBridge(args = parseArgs()) {
   const state = await readJsonFile(options.statePath, {});
   const key = makeClaudePayloadKey(payload);
   if (!options.force && state.lastPayloadKey === key) {
+    await writeJsonFile(options.statePath, {
+      ...state,
+      sessionOrder: options.sessionOrder
+    });
     process.stdout.write(
       `Claude bridge unchanged: ${payload.records.length} records\n`
     );
@@ -210,6 +237,8 @@ export async function runClaudeUsageBridge(args = parseArgs()) {
     message: 'Update TimeKeeper Claude inbox [skip ci]'
   });
   await writeJsonFile(options.statePath, {
+    ...state,
+    sessionOrder: options.sessionOrder,
     lastPayloadKey: key,
     lastPublishedAt: new Date().toISOString(),
     lastRecordCount: payload.records.length

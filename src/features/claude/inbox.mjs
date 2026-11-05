@@ -156,6 +156,7 @@ export function importClaudeInboxRecords({
     (entry) =>
       !(entry.source === 'claude' && retractedIds.has(entry.externalId))
   );
+  const removed = entries.filter((entry) => !next.includes(entry));
   const reconciled = entries.length - next.length;
   let imported = 0;
   let updated = 0;
@@ -234,6 +235,7 @@ export function importClaudeInboxRecords({
   }
   return {
     entries: next,
+    removed,
     imported,
     updated,
     unchanged,

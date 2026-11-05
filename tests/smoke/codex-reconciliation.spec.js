@@ -80,6 +80,7 @@ for (const width of [390, 1280]) {
       }
     };
     const asRecord = (row, overrides = {}) => ({
+      activityPolicyVersion: 1,
       id: row.externalId,
       threadId: row.id,
       timekeeperProjectId: 'work',
