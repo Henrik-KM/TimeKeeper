@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-05T09:31:02.307Z",
+  "updatedAt": "2026-11-05T09:46:02.345Z",
   "dayStart": "2026-11-04T23:00:00.000Z",
   "rangeStart": "2026-08-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,10 +15,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-05T09:31:03.431Z",
+    "observedAt": "2026-11-05T09:46:06.103Z",
     "primary": {
-      "usedPercent": 34,
-      "remainingPercent": 66,
+      "usedPercent": 35,
+      "remainingPercent": 65,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-11T06:35:46.000Z"
     },
@@ -80,7 +80,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-05T09:18:34.283Z"
+      "lastSeenAt": "2026-11-05T09:47:08.162Z"
     },
     {
       "key": "github/iflai",
@@ -218,9 +218,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 27091,
+      "activityCount": 27138,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T09:18:34.283Z"
+      "lastSeenAt": "2026-11-05T09:47:08.162Z"
     },
     {
       "key": "01a1a727-7653-7783-a99f-dce70c93b632",
@@ -66984,6 +66984,37 @@
         "output_tokens": 1485,
         "reasoning_output_tokens": 599
       }
+    },
+    {
+      "id": "codex-921388ac2c6d3ea62a36e374",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-05T09:08:23.475Z",
+      "endTime": "2026-11-05T09:18:34.283Z",
+      "wallSeconds": 610,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 305,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 610,
+          "effectiveSeconds": 305
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
