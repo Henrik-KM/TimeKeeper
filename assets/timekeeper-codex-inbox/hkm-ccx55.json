@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-05T15:16:02.210Z",
+  "updatedAt": "2026-11-05T15:31:02.277Z",
   "dayStart": "2026-11-04T23:00:00.000Z",
   "rangeStart": "2026-08-07T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,12 +15,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-05T15:16:03.602Z",
+    "observedAt": "2026-11-05T15:31:03.197Z",
     "primary": {
-      "usedPercent": 48,
-      "remainingPercent": 52,
+      "usedPercent": 49,
+      "remainingPercent": 51,
       "windowMinutes": 10080,
-      "resetsAt": "2026-11-11T06:35:47.000Z"
+      "resetsAt": "2026-11-11T06:35:46.000Z"
     },
     "secondary": null
   },
@@ -69,6 +69,20 @@
       "lastSeenAt": "2026-10-29T12:26:21.270Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 16,
+      "assistantSessionCount": 16,
+      "lastSeenAt": "2026-11-05T15:20:11.559Z"
+    },
+    {
       "key": "github/iflai/email-helper",
       "displayPath": "GitHub/IFLAI/email-helper",
       "projectFolder": "IFLAI",
@@ -81,20 +95,6 @@
       "sessionCount": 2427,
       "assistantSessionCount": 2427,
       "lastSeenAt": "2026-11-05T15:04:48.059Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 16,
-      "assistantSessionCount": 16,
-      "lastSeenAt": "2026-11-05T13:48:04.049Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -206,6 +206,23 @@
       "lastSeenAt": "2026-11-05T07:55:32.097Z"
     },
     {
+      "key": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
+      "sessionId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
+      "title": "Assess Redpine synergy",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1584,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-05T15:20:11.559Z"
+    },
+    {
       "key": "01a1263e-5872-7101-b242-1746293af037",
       "sessionId": "01a1263e-5872-7101-b242-1746293af037",
       "title": "Email helper health monitor",
@@ -221,23 +238,6 @@
       "activityCount": 12132,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-05T15:04:48.059Z"
-    },
-    {
-      "key": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "sessionId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "title": "Assess Redpine synergy",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 1552,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T13:48:04.049Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -41841,8 +41841,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 498,
-    "imported": 498,
+    "discovered": 499,
+    "imported": 499,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -67284,6 +67284,37 @@
       "description": "Codex: Assess Redpine synergy"
     },
     {
+      "id": "codex-c56410786e109b9144f379df",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-05T14:40:11.184Z",
+      "endTime": "2026-11-05T15:04:48.059Z",
+      "wallSeconds": 1476,
+      "focusFactor": 0.3001,
+      "effectiveSeconds": 443,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1476,
+          "effectiveSeconds": 442
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
+    },
+    {
       "id": "codex-64e4f7e13e085cc57d43949d",
       "threadId": "01a1ac2c-65be-70d3-a4d4-4b3bae153fbe",
       "projectKey": "email-helper",
@@ -67404,6 +67435,47 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1298,
         "reasoning_output_tokens": 414
+      }
+    },
+    {
+      "id": "codex-a456a80a2117fba3336494fb",
+      "threadId": "01a1ac48-8a76-7611-aeb2-7d47d647e21a",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-05T15:16:37.127Z",
+      "endTime": "2026-11-05T15:17:17.127Z",
+      "wallSeconds": 40,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 20,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 40,
+          "effectiveSeconds": 20
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 142122,
+        "cached_input_tokens": 93440,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1289,
+        "reasoning_output_tokens": 397
       }
     }
   ]
