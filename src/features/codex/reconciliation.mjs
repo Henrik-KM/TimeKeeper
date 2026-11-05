@@ -47,6 +47,15 @@ function prefer(left, right) {
   return left;
 }
 
+function isAggregate(entry) {
+  return entry.codexIsAggregate || entry.codexDelegatedSessionCount > 0;
+}
+
+function hasContinuousTiming(entry) {
+  const span = (Date.parse(entry.endTime) - Date.parse(entry.startTime)) / 1000;
+  return span > 0 && Math.abs(span - Number(entry.elapsedSeconds)) <= 2;
+}
+
 /**
  * Reconcile imported identity and explicit replacements, never descriptions or
  * overlapping timestamps alone. Removed entries are returned intact for recovery.
@@ -173,10 +182,7 @@ export function reconcileCodexEntries(
   }
   for (const group of threads.values()) {
     const aggregates = group
-      .filter(
-        (entry) =>
-          entry.codexIsAggregate || entry.codexDelegatedSessionCount > 0
-      )
+      .filter((entry) => isAggregate(entry) || hasContinuousTiming(entry))
       .sort(
         (a, b) =>
           Date.parse(b.endTime) -
@@ -189,6 +195,8 @@ export function reconcileCodexEntries(
         if (
           entry === aggregate ||
           removals.has(entry) ||
+          (!isAggregate(aggregate) &&
+            (isAggregate(entry) || !hasContinuousTiming(entry))) ||
           Date.parse(aggregate.startTime) > Date.parse(entry.startTime) ||
           Date.parse(aggregate.endTime) < Date.parse(entry.endTime) ||
           !Number.isFinite(Date.parse(entry.startTime)) ||

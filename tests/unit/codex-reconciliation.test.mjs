@@ -142,6 +142,20 @@ test('guarded corrections retire an old alias without touching its replacement',
   );
 });
 
+test('same-parent continuous copies with slightly different starts are reconciled', () => {
+  const original = entry({ codexThreadId: 'same-parent' });
+  const copy = entry({
+    id: 'wrapper-copy',
+    externalId: 'codex-wrapper-copy',
+    codexThreadId: 'same-parent',
+    startTime: '2026-09-01T08:00:01.000Z',
+    elapsedSeconds: 3599
+  });
+  const result = reconcileCodexEntries([original, copy]);
+  assert.deepEqual(result.entries, [original]);
+  assert.deepEqual(result.retractedExternalIds, ['codex-wrapper-copy']);
+});
+
 test('guarded duplicates do not retire an ID shared by the surviving entry', () => {
   const original = entry();
   const duplicate = entry({ id: 'duplicate' });

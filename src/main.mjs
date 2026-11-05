@@ -37,7 +37,7 @@ import {
   normalizeCodexCorrections,
   normalizeCodexRecordIds,
   reconcileCodexEntries
-} from './features/codex/reconciliation.mjs';
+} from './features/codex/reconciliation.mjs?v=1';
 import {
   buildWealthGoalChartSeries,
   calculateHistoricalRegression,
@@ -21408,7 +21408,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=65')
+      .register('./service-worker.js?v=66')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
