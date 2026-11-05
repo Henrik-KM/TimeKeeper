@@ -4762,7 +4762,13 @@ import {
           const existingEntry = data.entries.find(
             (entry) =>
               isCodexTimeEntry(entry) &&
-              String(entry?.externalId || '') === recordId
+              (String(entry?.externalId || '') === recordId ||
+                (Number(record.activityPolicyVersion) >= 1 &&
+                  Number(entry.codexActivityPolicyVersion) >= 1 &&
+                  record.threadId &&
+                  entry.codexThreadId === String(record.threadId) &&
+                  String(entry.projectId) === projectId &&
+                  entry.startTime === record.startTime))
           );
           // The cached ID list is only a hint. A restored or partially imported
           // dataset can retain an ID without retaining its actual entry, so the
@@ -4806,7 +4812,15 @@ import {
             skipped += 1;
             return;
           }
-          const supersededIds = getCodexSupersededRecordIds(record, recordId);
+          const previousExternalId = String(existingEntry?.externalId || '');
+          const supersededIds = normalizeCodexRecordIds([
+            ...getCodexSupersededRecordIds(record, recordId),
+            ...(existingEntry?.codexSupersedesExternalIds || []),
+            ...(previousExternalId && previousExternalId !== recordId
+              ? [previousExternalId]
+              : [])
+          ]).filter((id) => id !== recordId);
+          if (existingEntry) existingEntry.externalId = recordId;
           if (supersededIds.length) {
             reconciled += applyCodexEntryReconciliation(supersededIds);
           }
@@ -21438,7 +21452,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=67')
+      .register('./service-worker.js?v=68')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

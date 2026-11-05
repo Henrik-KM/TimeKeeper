@@ -66,6 +66,7 @@ for (const width of [390, 1280]) {
       repairOnly: true
     };
     let withRepair = true;
+    let resumed = false;
     await page.route('https://cdn.jsdelivr.net/**', (route) => route.abort());
     await page.route('https://api.github.com/**', async (route) => {
       const directory =
@@ -86,7 +87,14 @@ for (const width of [390, 1280]) {
             updatedAt: new Date(now - 60000).toISOString(),
             retractedExternalIds: ['codex-zero-work'],
             records: [
-              repair,
+              resumed
+                ? {
+                    ...repair,
+                    id: 'codex-resumed-id',
+                    wallSeconds: 1400,
+                    effectiveSeconds: 700
+                  }
+                : repair,
               {
                 ...repair,
                 id: 'codex-missing-repair',
@@ -148,6 +156,22 @@ for (const width of [390, 1280]) {
     expect(
       saved.codexIntegration.lastImportSummary.outdatedActivityRecords
     ).toBe(1);
+    resumed = true;
+    await page.reload();
+    await expect
+      .poll(
+        async () =>
+          (await read()).entries.find((row) => row.id === entry.id)?.externalId
+      )
+      .toBe('codex-resumed-id');
+    saved = await read();
+    expect(saved.entries).toHaveLength(2);
+    expect(saved.entries.find((row) => row.id === entry.id)).toMatchObject({
+      duration: 700,
+      notes: 'User note',
+      custom: { preserve: true }
+    });
+    expect(saved.codexIntegration.retractedCodexRecordIds).toContain(record.id);
     withRepair = false;
     await page.reload();
     await expect
@@ -157,7 +181,7 @@ for (const width of [390, 1280]) {
       .toBe(3);
     saved = await read();
     expect(saved.entries).toHaveLength(2);
-    expect(saved.entries.find((row) => row.id === entry.id).duration).toBe(600);
+    expect(saved.entries.find((row) => row.id === entry.id).duration).toBe(700);
     expect(saved.entries.find((row) => row.id === 'manual').duration).toBe(
       1800
     );
