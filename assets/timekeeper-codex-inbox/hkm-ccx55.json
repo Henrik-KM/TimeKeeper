@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-06T17:46:02.026Z",
+  "updatedAt": "2026-11-06T18:01:02.058Z",
   "dayStart": "2026-11-05T23:00:00.000Z",
   "rangeStart": "2026-08-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-06T17:46:03.265Z",
+    "observedAt": "2026-11-06T18:01:02.978Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -94,7 +94,7 @@
       "match": "IFLAI",
       "sessionCount": 2429,
       "assistantSessionCount": 2429,
-      "lastSeenAt": "2026-11-06T17:45:55.844Z"
+      "lastSeenAt": "2026-11-06T17:47:33.509Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -249,9 +249,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 768,
+      "activityCount": 802,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-06T17:45:55.844Z"
+      "lastSeenAt": "2026-11-06T17:47:33.509Z"
     },
     {
       "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
@@ -67728,6 +67728,90 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-46477c75d76717f74159045d",
+      "threadId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-06T12:32:24.521Z",
+      "endTime": "2026-11-06T17:30:54.247Z",
+      "wallSeconds": 17909,
+      "focusFactor": 0.5323,
+      "effectiveSeconds": 9533,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 17908,
+          "effectiveSeconds": 8954,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.14,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.175,
+          "wallSeconds": 3304,
+          "effectiveSeconds": 578,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-ced8e7973df8e186a217e275",
+        "codex-970855e9e97539fdbedfc093",
+        "codex-f38bd49e4c1510cb1c108211",
+        "codex-ba1520fecc15e1c8c772095b",
+        "codex-c7a5d883ab71edfc96e7d3ba",
+        "codex-8245742c4360c70387024291",
+        "codex-fcb88cd229f57be1598c5a8b"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-0edffb50fe283d3d80b7d268",
