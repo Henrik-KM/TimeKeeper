@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-06T07:07:02.481Z",
+  "updatedAt": "2026-11-06T07:12:02.490Z",
   "dayStart": "2026-11-05T23:00:00.000Z",
   "rangeStart": "2026-08-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,31 +16,17 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-06T07:07:03.645Z",
+    "observedAt": "2026-11-06T07:12:05.852Z",
     "primary": {
-      "usedPercent": 100,
-      "remainingPercent": 0,
+      "usedPercent": 0,
+      "remainingPercent": 100,
       "windowMinutes": 10080,
-      "resetsAt": "2026-11-11T06:35:46.000Z"
+      "resetsAt": "2026-11-13T07:10:21.000Z"
     },
     "secondary": null
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/project ironwright",
-      "displayPath": "GitHub/Project Ironwright",
-      "projectFolder": "Project Ironwright",
-      "repoName": "Project Ironwright",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 4,
-      "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-06T04:05:36.107Z"
-    },
     {
       "key": "github/scholarships",
       "displayPath": "GitHub/Scholarships",
@@ -53,7 +39,7 @@
       "match": "",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-06T04:05:08.629Z"
+      "lastSeenAt": "2026-11-06T07:13:04.935Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -67,7 +53,21 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-05T20:47:52.071Z"
+      "lastSeenAt": "2026-11-06T07:11:05.048Z"
+    },
+    {
+      "key": "github/project ironwright",
+      "displayPath": "GitHub/Project Ironwright",
+      "projectFolder": "Project Ironwright",
+      "repoName": "Project Ironwright",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 4,
+      "assistantSessionCount": 4,
+      "lastSeenAt": "2026-11-06T04:05:36.107Z"
     },
     {
       "key": "github/timekeeper",
@@ -156,6 +156,40 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 573478,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-06T07:13:04.935Z"
+    },
+    {
+      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "title": "Extend CS:CZ single-player campaign",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "repoName": "hey",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 3390,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-06T07:11:05.048Z"
+    },
+    {
       "key": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
       "sessionId": "01a10083-9cce-7c71-b170-8fb8aaef58b5",
       "title": "",
@@ -173,23 +207,6 @@
       "lastSeenAt": "2026-11-06T04:05:36.107Z"
     },
     {
-      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 573376,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-06T04:05:08.629Z"
-    },
-    {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "title": "Find and submit competitive awards",
@@ -205,23 +222,6 @@
       "activityCount": 189976,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-06T01:38:31.150Z"
-    },
-    {
-      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "title": "Extend CS:CZ single-player campaign",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "repoName": "hey",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 3389,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-05T20:47:52.071Z"
     },
     {
       "key": "01a1a14e-18fd-7920-8a08-1ef5b7a59e81",
