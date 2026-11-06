@@ -3,13 +3,13 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v68';
+const CACHE_NAME = 'timekeeper-app-v69';
 const APP_SHELL = [
   './',
   './index.html',
   './codex-analysis.html',
-  './style.css?v=49',
-  './src/main.mjs?v=63',
+  './style.css?v=50',
+  './src/main.mjs?v=64',
   './src/features/agents/activity.mjs?v=1',
   './src/features/claude/policy.mjs?v=3',
   './src/features/claude/inbox.mjs?v=3',
@@ -37,6 +37,9 @@ const APP_SHELL = [
   './src/features/workouts/runtime.mjs',
   './src/features/company-operator/core.mjs',
   './src/features/company-operator/runtime.mjs',
+  './src/features/outreach/core.mjs',
+  './src/features/outreach/runtime.mjs',
+  './src/styles/outreach.css?v=1',
   './src/styles/base.css',
   './src/styles/components.css?v=49',
   './src/styles/features.css?v=49',

@@ -11564,7 +11564,7 @@ import {
       ['todo', 'Open Workouts'],
       ['grocery', 'Open Finances'],
       ['analytics', 'Open Reports'],
-      ['company', 'Open Company'],
+      ['company', 'Open Outreach'],
       ['codex', 'Open AI Activity']
     ].map(([sectionId, label]) => ({
       label,
@@ -21452,7 +21452,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=68')
+      .register('./service-worker.js?v=69')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
