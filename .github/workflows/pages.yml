@@ -1,0 +1,38 @@
+name: Publish TimeKeeper
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+  # Usage feeds intentionally use [skip ci]. Publish their newest snapshots too.
+  schedule:
+    - cron: '*/5 * * * *'
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Frequent usage updates must not cancel a deployment waiting in the Pages queue.
+concurrency:
+  group: timekeeper-pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with:
+          path: .
+      - uses: actions/deploy-pages@v4
+        id: deployment
