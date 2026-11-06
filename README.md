@@ -13,13 +13,15 @@ The Dashboard includes an App Health panel that summarizes local data, backup/sn
 
 On mobile, **Today** is the short whole-life overview: one card each for the current or next timer, today's work target, workout progress, and Company. At most one important exception appears above those cards, such as a stale timer, a company decision, a ready company result, a missed workout target, a budget overrun, or a backup conflict. The underlying detail remains in the existing Timer, Projects, Workouts, Company, Finances, and Backup screens.
 
-## Mobile Company workspace
+## Customer outreach
 
-The mobile bottom bar includes a **Company** tab. It shows the current evidence-backed company priority, the next concrete action, prepared internal work, decisions that genuinely need judgment, work already handled, and source freshness.
+The **Outreach** tab replaces the Company workspace at the existing `#company` route. It shows customer needs, concrete next steps, plans, active conversations and verified results from the independent Henrik Outreach skill. Its weekday runs are at 09:30 and 15:00 Europe/Berlin. Customer email remains draft-only; eligible LinkedIn messages and fixed-recipient self-alerts use the skill's explicit standing authorization.
 
-Connect it once from **Company > Connect** with a fine-grained GitHub token that has Contents read/write access only to the private `Henrik-KM/timekeeper-private-context` repository. Company and Codex private sync now share that one connection. Existing Company or Codex tokens and repository settings migrate automatically. The token, cached Company view, pending instructions, and receipts are stored separately from `timekeeperDataPro`, so they are not included in normal TimeKeeper exports or backups.
+Existing private connection settings are reused. Use **Outreach > Connection** with a fine-grained GitHub token limited to Contents read/write on `Henrik-KM/timekeeper-private-context` when connecting a new device. The private `outreach/` namespace contains bounded summaries, metadata, commands and receipts. Raw correspondence stays on the desktop. Tokens and cached outreach state stay separate from `timekeeperDataPro` exports and backups.
 
-Mobile controls can add direction, reprioritize, pause or mark an item handled, record a decision, or ask the desktop operator to work on the next safe item. They cannot send mail, post to Slack, change calendars, deploy, delete data, or make legal or financial commitments. The desktop operator validates freshness and evidence before applying each instruction and returns a receipt to the app.
+Controls can pause/resume, take over or release a LinkedIn relationship, snooze, suppress, reopen a parked follow-up or mark work handled. They stay queued until the desktop validates and acknowledges them. Personal LinkedIn messages protect the person across threads; release requires explicit control and fresh history. The skill owns its limits and send guards.
+
+GitHub Pages uses `.github/workflows/pages.yml`. Deployments finish before the next queued release begins, so frequent usage-feed commits cannot cancel a waiting deployment. A five-minute scheduled check also publishes feed commits marked `[skip ci]`; GitHub may delay scheduled runs. No build framework is required.
 
 The Entries view supports project, search, and custom date-range filters; stopped entries can be edited, split, or duplicated after the fact, and exported visible CSVs use the currently filtered rows. A grouped summary CSV is also available for client/project billing checks.
 
