@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-06T16:31:02.004Z",
+  "updatedAt": "2026-11-06T16:46:02.012Z",
   "dayStart": "2026-11-05T23:00:00.000Z",
   "rangeStart": "2026-08-08T22:00:00.000Z",
   "lookbackDays": 90,
@@ -15,7 +15,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-06T16:31:02.854Z",
+    "observedAt": "2026-11-06T16:46:03.667Z",
     "primary": {
       "usedPercent": 14,
       "remainingPercent": 86,
@@ -94,7 +94,7 @@
       "match": "IFLAI",
       "sessionCount": 2429,
       "assistantSessionCount": 2429,
-      "lastSeenAt": "2026-11-06T16:31:00.727Z"
+      "lastSeenAt": "2026-11-06T16:46:00.963Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -249,9 +249,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3134,
+      "activityCount": 3440,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-06T16:31:00.727Z"
+      "lastSeenAt": "2026-11-06T16:46:00.963Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -68009,6 +68009,37 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-c193bd49cafa1348e3579d8f",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-06T15:57:05.732Z",
+      "endTime": "2026-11-06T16:18:16.589Z",
+      "wallSeconds": 1270,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 635,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1270,
+          "effectiveSeconds": 635
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     },
     {
       "id": "codex-021621aea28cce2bb9d1eb0a",
