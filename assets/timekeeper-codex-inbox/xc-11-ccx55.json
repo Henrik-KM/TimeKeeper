@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-07T16:22:02.628Z",
+  "updatedAt": "2026-11-07T16:27:02.529Z",
   "dayStart": "2026-11-06T23:00:00.000Z",
   "rangeStart": "2026-08-09T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-07T16:22:04.449Z",
+    "observedAt": "2026-11-07T16:27:04.474Z",
     "primary": {
       "usedPercent": 24,
       "remainingPercent": 76,
@@ -799,6 +799,43 @@
       ],
       "supersedesExternalIds": [
         "codex-4f47b753c74b2fbdc095d291"
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-487ebe7766db300b227fba39",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-07T15:57:53.326Z",
+      "endTime": "2026-11-07T16:05:27.484Z",
+      "wallSeconds": 263,
+      "focusFactor": 0.4981,
+      "effectiveSeconds": 131,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 263,
+          "effectiveSeconds": 131,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-4fc0364bf0e8bc9307fab5d8"
       ],
       "description": "Codex: Structured AL"
     }
