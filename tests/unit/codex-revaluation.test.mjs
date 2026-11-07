@@ -9,7 +9,7 @@ import {
 
 const POLICY = {
   ...DEFAULT_CODEX_FOCUS_POLICY,
-  repositoryMultipliers: { research: 0.5 }
+  repositoryMultipliers: { research: 0.5, 'email-helper': 0.5 }
 };
 
 function historicalEntry(overrides = {}) {
@@ -319,6 +319,60 @@ test('is idempotent and leaves manual entries unchanged', () => {
   assert.deepEqual(first.entries[0], manual);
   assert.equal(first.entries[1].id, codex.id);
   assert.equal(first.entries[1].externalId, codex.externalId);
+});
+
+test('halves existing email-helper model credit at the current policy version once', () => {
+  const cases = [
+    { model: 'gpt-6-luna', factor: 0.15 },
+    { model: 'gpt-6.1-terra', factor: 0.2 },
+    { model: 'gpt-6.1-sol', factor: 0.25 },
+    { model: 'gpt-6-astra', factor: 0.375 },
+    { model: 'gpt-6.1-sol', fastMode: true, factor: 0.3 }
+  ];
+  const entries = cases.map(({ model, fastMode = false }, index) => {
+    const entry = historicalEntry({
+      id: `email-${index}`,
+      externalId: `codex-email-${index}`,
+      codexRepoName: 'email-helper',
+      customMetadata: { keep: true },
+      codexModelBreakdown: [{ model, fastMode, wallSeconds: 3600 }]
+    });
+    return { ...entry, ...revalueCodexEntry(entry).patch };
+  });
+  const unrelated = { ...entries[0], codexRepoName: 'other-repo' };
+  const first = migrateCodexEntries([...entries, unrelated], POLICY);
+
+  assert.equal(first.report.updated, cases.length);
+  assert.equal(first.report.unable, 0);
+  cases.forEach(({ factor }, index) => {
+    const entry = first.entries[index];
+    assert.equal(entry.duration, Math.floor(3600 * factor));
+    assert.equal(entry.focusFactor, factor);
+    assert.equal(entry.manualFactor, factor);
+    assert.equal(entry.repositoryFocusMultiplier, 0.5);
+    assert.equal(entry.codexModelBreakdown[0].repositoryMultiplier, 0.5);
+    assert.equal(entry.codexModelBreakdown[0].factor, factor);
+    assert.equal(entry.elapsedSeconds, entries[index].elapsedSeconds);
+    assert.equal(entry.startTime, entries[index].startTime);
+    assert.equal(entry.endTime, entries[index].endTime);
+    assert.equal(entry.id, entries[index].id);
+    assert.equal(entry.externalId, entries[index].externalId);
+    assert.deepEqual(entry.customMetadata, { keep: true });
+  });
+  assert.strictEqual(first.entries.at(-1), unrelated);
+
+  const second = migrateCodexEntries(first.entries, POLICY);
+  assert.equal(second.report.updated, 0);
+  assert.deepEqual(second.entries, first.entries);
+});
+
+test('recognizes an email-helper multiplier already recorded only in model rows', () => {
+  const entry = historicalEntry({ codexRepoName: 'email-helper' });
+  const applied = { ...entry, ...revalueCodexEntry(entry, POLICY).patch };
+  delete applied.repositoryFocusMultiplier;
+  const result = migrateCodexEntries([applied], POLICY);
+  assert.equal(result.report.updated, 0);
+  assert.strictEqual(result.entries[0], applied);
 });
 
 test('reports entries that cannot be revalued without changing them', () => {

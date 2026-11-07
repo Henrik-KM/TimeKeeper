@@ -1784,8 +1784,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v69';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=64'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v70';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=65'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
@@ -1799,9 +1799,9 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./src/features/codex/performance-worker.mjs'"
   );
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
-  expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs'");
+  expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs?v=2'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '68')"
+    "url.searchParams.set('timekeeper-update', '70')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1811,7 +1811,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=69')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=70')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -5789,7 +5789,7 @@ test('Codex config publish retries after a stale GitHub sha', async ({
         max: 0,
         ultra: 0
       },
-      repositoryMultipliers: { research: 0.5 },
+      repositoryMultipliers: { research: 0.5, 'email-helper': 0.5 },
       repositoryBackfillDays: 90,
       repositoryMultiplierPolicyVersion: 4
     },

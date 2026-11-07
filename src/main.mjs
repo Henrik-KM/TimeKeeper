@@ -109,8 +109,9 @@ import {
 } from './features/codex/policy.mjs';
 import {
   migrateCodexEntries,
+  needsCodexFocusRevaluation,
   revalueCodexEntry
-} from './features/codex/revaluation.mjs';
+} from './features/codex/revaluation.mjs?v=2';
 import { DEFAULT_CLAUDE_POLICY } from './features/claude/policy.mjs?v=3';
 import {
   CLAUDE_INBOX_PATH,
@@ -2085,7 +2086,8 @@ import {
   const CODEX_FOCUS_POLICY = {
     ...DEFAULT_CODEX_FOCUS_POLICY,
     repositoryMultipliers: {
-      research: 0.5
+      research: 0.5,
+      'email-helper': 0.5
     },
     repositoryBackfillDays: 90
   };
@@ -4871,7 +4873,7 @@ import {
               : {}),
             ...(codexRepoName ? { codexRepoName } : {})
           };
-          if ((focusPolicyVersion || 0) < CODEX_FOCUS_POLICY.version) {
+          if (needsCodexFocusRevaluation(codexMetadata, CODEX_FOCUS_POLICY)) {
             const valuation = revalueCodexEntry(
               { source: 'codex', ...codexMetadata },
               CODEX_FOCUS_POLICY
@@ -21452,7 +21454,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=69')
+      .register('./service-worker.js?v=70')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

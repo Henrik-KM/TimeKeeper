@@ -84,6 +84,10 @@ function getRepositoryMultiplier(entry, rawRows, policy) {
   const configured = finiteNumber(policy.repositoryMultipliers[repositoryName]);
   if (configured !== null && configured > 0) return configured;
 
+  return getStoredRepositoryMultiplier(entry, rawRows);
+}
+
+function getStoredRepositoryMultiplier(entry, rawRows) {
   const storedEntryMultiplier = finiteNumber(entry.repositoryFocusMultiplier);
   if (storedEntryMultiplier !== null && storedEntryMultiplier > 0) {
     return storedEntryMultiplier;
@@ -93,6 +97,20 @@ function getRepositoryMultiplier(entry, rawRows, policy) {
     return value !== null && value > 0;
   });
   return storedRow ? finiteNumber(storedRow.repositoryMultiplier) : 1;
+}
+
+export function needsCodexFocusRevaluation(
+  entry,
+  focusPolicy = DEFAULT_CODEX_FOCUS_POLICY
+) {
+  const policy = normalizeCodexFocusPolicy(focusPolicy);
+  const entryVersion = Number(entry.codexFocusPolicyVersion) || 0;
+  if (entryVersion !== policy.version) return entryVersion < policy.version;
+  const rawRows = getRawRows(entry);
+  return (
+    getStoredRepositoryMultiplier(entry, rawRows) !==
+    getRepositoryMultiplier(entry, rawRows, policy)
+  );
 }
 
 function getRowWallSeconds(row, rawRows, elapsedSeconds) {
@@ -263,7 +281,7 @@ export function migrateCodexEntries(
     ? entries.map((entry) => {
         if (!isCodexEntry(entry)) return entry;
         scanned += 1;
-        if (Number(entry.codexFocusPolicyVersion) >= policy.version) {
+        if (!needsCodexFocusRevaluation(entry, policy)) {
           unchanged += 1;
           return entry;
         }
