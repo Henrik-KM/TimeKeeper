@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-07T22:46:01.936Z",
-  "dayStart": "2026-11-06T23:00:00.000Z",
-  "rangeStart": "2026-08-09T22:00:00.000Z",
+  "updatedAt": "2026-11-07T23:01:01.886Z",
+  "dayStart": "2026-11-07T23:00:00.000Z",
+  "rangeStart": "2026-08-10T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-07T22:46:03.679Z",
+    "observedAt": "2026-11-07T23:01:04.365Z",
     "primary": {
       "usedPercent": 24,
       "remainingPercent": 76,
@@ -138256,7 +138256,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1231,
         "reasoning_output_tokens": 451
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-3288d43e83bde5d7d5c7c24b",
@@ -138297,7 +138298,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1585,
         "reasoning_output_tokens": 476
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d42c19b256397f7129dbd13b",
@@ -138328,7 +138330,8 @@
           "effectiveSeconds": 222
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-5e02feff464904dc722ea70d",
@@ -138369,38 +138372,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1058,
         "reasoning_output_tokens": 247
-      }
-    },
-    {
-      "id": "codex-5871f33544fc4b507218242a",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-01T08:04:03.435Z",
-      "endTime": "2026-11-01T08:12:53.348Z",
-      "wallSeconds": 529,
-      "focusFactor": 0.4991,
-      "effectiveSeconds": 264,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 529,
-          "effectiveSeconds": 264
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f19296224ed6f378961e2503",
@@ -138431,7 +138404,8 @@
           "effectiveSeconds": 76
         }
       ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
+      "description": "Codex: LinkedIn weekly stale invitation cleanup",
+      "codexBackfill": true
     },
     {
       "id": "codex-e09ea80c0904fe1d0a4207a3",
@@ -138462,52 +138436,8 @@
           "effectiveSeconds": 536
         }
       ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-5ad193f6452054e51d1ba1ce",
-      "threadId": "01a19738-c0c9-71f0-91af-ea345d67cdcd",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-01T13:07:22.491Z",
-      "endTime": "2026-11-01T13:09:15.901Z",
-      "wallSeconds": 113,
-      "focusFactor": 0.4956,
-      "effectiveSeconds": 56,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 113,
-          "effectiveSeconds": 56
-        }
-      ],
-      "description": "Codex: Check pitch for our contribution"
+      "description": "Codex: LinkedIn weekly stale invitation cleanup",
+      "codexBackfill": true
     },
     {
       "id": "codex-96f3d425f4532d9223821609",
@@ -138548,7 +138478,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1630,
         "reasoning_output_tokens": 287
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-4f1c7094499328deddf95705",
@@ -138579,38 +138510,8 @@
           "effectiveSeconds": 132
         }
       ],
-      "description": "Codex: Email helper health monitor"
-    },
-    {
-      "id": "codex-a9fae1e049bd2db07314edd3",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-01T14:54:11.286Z",
-      "endTime": "2026-11-01T15:02:28.220Z",
-      "wallSeconds": 496,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 248,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 496,
-          "effectiveSeconds": 248
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
+      "description": "Codex: Email helper health monitor",
+      "codexBackfill": true
     },
     {
       "id": "codex-7d51f5280e3666abb63dc57d",
