@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-08T09:46:02.245Z",
+  "updatedAt": "2026-11-08T10:01:02.251Z",
   "dayStart": "2026-11-07T23:00:00.000Z",
   "rangeStart": "2026-08-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-08T09:46:07.832Z",
+    "observedAt": "2026-11-08T10:01:06.501Z",
     "primary": {
       "usedPercent": 25,
       "remainingPercent": 75,
@@ -39,7 +39,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-08T09:39:20.213Z"
+      "lastSeenAt": "2026-11-08T10:01:43.976Z"
     },
     {
       "key": "documents/codex/2026-11-06/pls-set-the-volume-of-this",
@@ -109,7 +109,7 @@
       "match": "IFLAI",
       "sessionCount": 2429,
       "assistantSessionCount": 2429,
-      "lastSeenAt": "2026-11-08T08:37:01.296Z"
+      "lastSeenAt": "2026-11-08T09:55:41.487Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -264,9 +264,9 @@
       "projectName": "IFLAI",
       "match": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "backfillDays": 90,
-      "activityCount": 57154,
+      "activityCount": 57274,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-08T09:39:20.213Z"
+      "lastSeenAt": "2026-11-08T10:01:43.976Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -281,9 +281,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 7608,
+      "activityCount": 7701,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-08T08:37:01.296Z"
+      "lastSeenAt": "2026-11-08T09:55:41.487Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -143142,6 +143142,37 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-5674718ddd4ed36d4dd41134",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-08T06:56:49.781Z",
+      "endTime": "2026-11-08T09:39:20.213Z",
+      "wallSeconds": 9750,
+      "focusFactor": 0.1499,
+      "effectiveSeconds": 1462,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 9750,
+          "effectiveSeconds": 1462
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     },
     {
       "id": "codex-18b351e131f4f087d40dc4f2",
