@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-08T16:16:02.500Z",
+  "updatedAt": "2026-11-08T16:31:02.371Z",
   "dayStart": "2026-11-07T23:00:00.000Z",
   "rangeStart": "2026-08-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-08T16:16:03.824Z",
+    "observedAt": "2026-11-08T16:31:03.717Z",
     "primary": {
       "usedPercent": 26,
       "remainingPercent": 74,
@@ -143359,6 +143359,37 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-743bd09e1080aa8606c36e2e",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-08T15:55:27.595Z",
+      "endTime": "2026-11-08T16:10:15.038Z",
+      "wallSeconds": 887,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 443,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 887,
+          "effectiveSeconds": 443
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
