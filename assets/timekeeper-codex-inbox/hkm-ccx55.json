@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-08T22:46:02.706Z",
-  "dayStart": "2026-11-07T23:00:00.000Z",
-  "rangeStart": "2026-08-10T22:00:00.000Z",
+  "updatedAt": "2026-11-08T23:01:02.675Z",
+  "dayStart": "2026-11-08T23:00:00.000Z",
+  "rangeStart": "2026-08-11T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-08T22:46:04.538Z",
+    "observedAt": "2026-11-08T23:01:04.009Z",
     "primary": {
       "usedPercent": 26,
       "remainingPercent": 74,
@@ -138552,7 +138552,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1591,
         "reasoning_output_tokens": 586
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-b0336b847a2f70e02ffe6c81",
@@ -138593,7 +138594,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1253,
         "reasoning_output_tokens": 541
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-c860b31f8de392fec7a3d626",
@@ -138634,7 +138636,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3597,
         "reasoning_output_tokens": 1179
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-9be11d5b72a3ba6c7a66bef8",
@@ -138675,7 +138678,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4353,
         "reasoning_output_tokens": 1545
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7d89f6caae064181fe4f36c8",
@@ -138716,7 +138720,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1189,
         "reasoning_output_tokens": 233
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-62fafc1e2d439307cd2cef48",
@@ -138747,7 +138752,8 @@
           "effectiveSeconds": 102
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-69ccd0369e61da82b3488cc7",
@@ -138788,38 +138794,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 907,
         "reasoning_output_tokens": 168
-      }
-    },
-    {
-      "id": "codex-624153237499db9f24d1d389",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-02T07:58:46.503Z",
-      "endTime": "2026-11-02T08:21:40.233Z",
-      "wallSeconds": 1373,
-      "focusFactor": 0.4996,
-      "effectiveSeconds": 686,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1373,
-          "effectiveSeconds": 686
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-8c625614b77c1eb57d387312",
@@ -138850,114 +138826,8 @@
           "effectiveSeconds": 377
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-07e4c028b425a06af442c34c",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-02T08:44:04.575Z",
-      "endTime": "2026-11-02T08:55:07.258Z",
-      "wallSeconds": 662,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 331,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 662,
-          "effectiveSeconds": 331
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
-    },
-    {
-      "id": "codex-5746273934cb057f9867006c",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-02T08:52:30.694Z",
-      "endTime": "2026-11-02T09:39:44.505Z",
-      "wallSeconds": 2833,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1416,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2833,
-          "effectiveSeconds": 1416
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-bc761a2622ff6b18b394c8cd",
-      "threadId": "01a13f64-e505-7641-88bf-13a69afc07a0",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-02T09:36:38.981Z",
-      "endTime": "2026-11-02T09:45:29.471Z",
-      "wallSeconds": 530,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 265,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 514,
-          "effectiveSeconds": 257
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "low",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 16,
-          "effectiveSeconds": 8
-        }
-      ],
-      "description": "Codex: IFLAI"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-6dd289f713b21d319317e7bf",
@@ -138998,38 +138868,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6906,
         "reasoning_output_tokens": 2873
-      }
-    },
-    {
-      "id": "codex-ad1e332fe190007e621d8155",
-      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
-      "projectKey": "RD-doc-personal",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-02T11:05:33.699Z",
-      "endTime": "2026-11-02T11:27:05.680Z",
-      "wallSeconds": 1291,
-      "focusFactor": 0.4996,
-      "effectiveSeconds": 645,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1291,
-          "effectiveSeconds": 645
-        }
-      ],
-      "description": "Codex: Align September FoU entries"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-007af5b5182d3a2c6c2dbac6",
@@ -139070,7 +138910,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 12232,
         "reasoning_output_tokens": 4464
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-19a1baed0188447d63567901",
@@ -139111,7 +138952,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1142,
         "reasoning_output_tokens": 326
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-adafb9630c60d588a278eb61",
@@ -139152,7 +138994,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2403,
         "reasoning_output_tokens": 622
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-b7dc8c32317f4a8c1c0359dd",
@@ -139193,7 +139036,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1141,
         "reasoning_output_tokens": 320
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-98a66d5d717b6810cad3f933",
@@ -139224,7 +139068,8 @@
           "effectiveSeconds": 131
         }
       ],
-      "description": "Codex: Email helper health monitor"
+      "description": "Codex: Email helper health monitor",
+      "codexBackfill": true
     },
     {
       "id": "codex-8757518307aae7959b3c0a0d",
@@ -139265,7 +139110,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1227,
         "reasoning_output_tokens": 456
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-2a089806c917722917d9bfc3",
