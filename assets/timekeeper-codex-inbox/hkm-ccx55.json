@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-08T10:16:02.321Z",
+  "updatedAt": "2026-11-08T10:31:02.497Z",
   "dayStart": "2026-11-07T23:00:00.000Z",
   "rangeStart": "2026-08-10T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-08T10:16:03.619Z",
+    "observedAt": "2026-11-08T10:31:06.895Z",
     "primary": {
       "usedPercent": 25,
       "remainingPercent": 75,
@@ -143266,6 +143266,37 @@
         }
       ],
       "description": "Codex: LinkedIn weekly stale invitation cleanup"
+    },
+    {
+      "id": "codex-422a6d188be2360ba06876a7",
+      "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-08T09:56:47.851Z",
+      "endTime": "2026-11-08T10:04:34.857Z",
+      "wallSeconds": 467,
+      "focusFactor": 0.1499,
+      "effectiveSeconds": 70,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 467,
+          "effectiveSeconds": 70
+        }
+      ],
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
     }
   ]
 }
