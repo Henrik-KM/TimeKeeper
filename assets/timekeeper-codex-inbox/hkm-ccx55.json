@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-09T11:46:02.135Z",
+  "updatedAt": "2026-11-09T12:01:02.100Z",
   "dayStart": "2026-11-08T23:00:00.000Z",
   "rangeStart": "2026-08-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-09T11:46:03.145Z",
+    "observedAt": "2026-11-09T12:01:03.012Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -41972,8 +41972,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 522,
-    "imported": 522,
+    "discovered": 523,
+    "imported": 523,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -143729,6 +143729,47 @@
         }
       ],
       "description": "Codex: Find and adapt AI risk assessment"
+    },
+    {
+      "id": "codex-60902b6f3c2eaaa555b83aa5",
+      "threadId": "01a1c026-7645-71f0-a8a3-942a1bd6879e",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-09T11:51:47.961Z",
+      "endTime": "2026-11-09T11:52:49.242Z",
+      "wallSeconds": 61,
+      "focusFactor": 0.2459,
+      "effectiveSeconds": 15,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 61,
+          "effectiveSeconds": 15
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 209876,
+        "cached_input_tokens": 152192,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2090,
+        "reasoning_output_tokens": 616
+      }
     }
   ]
 }
