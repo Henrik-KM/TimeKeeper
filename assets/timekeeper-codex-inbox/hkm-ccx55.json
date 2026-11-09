@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-09T10:31:02.037Z",
+  "updatedAt": "2026-11-09T10:46:02.085Z",
   "dayStart": "2026-11-08T23:00:00.000Z",
   "rangeStart": "2026-08-11T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-09T10:31:02.891Z",
+    "observedAt": "2026-11-09T10:46:02.914Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -98,6 +98,20 @@
       "lastSeenAt": "2026-10-29T12:26:21.270Z"
     },
     {
+      "key": "github/iflai/sem-imaging",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "projectFolder": "IFLAI",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-09T10:46:00.942Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -110,20 +124,6 @@
       "sessionCount": 3,
       "assistantSessionCount": 3,
       "lastSeenAt": "2026-11-09T10:29:44.991Z"
-    },
-    {
-      "key": "github/iflai/sem-imaging",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "projectFolder": "IFLAI",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-09T10:26:30.370Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -269,6 +269,23 @@
       "lastSeenAt": "2026-11-08T13:12:18.332Z"
     },
     {
+      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "title": "Find and adapt AI risk assessment",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/sem-imaging",
+      "repoName": "sem-imaging",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 4969,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-09T10:46:00.942Z"
+    },
+    {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "title": "Submit Barbro Osher application",
@@ -284,23 +301,6 @@
       "activityCount": 33101,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-09T10:29:44.991Z"
-    },
-    {
-      "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "sessionId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
-      "title": "Find and adapt AI risk assessment",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/sem-imaging",
-      "repoName": "sem-imaging",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 4935,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-09T10:26:30.370Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -143390,6 +143390,37 @@
         "output_tokens": 28167,
         "reasoning_output_tokens": 11876
       }
+    },
+    {
+      "id": "codex-d361e4a0af757c377c68861f",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-09T08:33:48.269Z",
+      "endTime": "2026-11-09T10:26:30.370Z",
+      "wallSeconds": 6762,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 3381,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 6762,
+          "effectiveSeconds": 3381
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
     },
     {
       "id": "codex-278fd373d0527d191704dfb3",
