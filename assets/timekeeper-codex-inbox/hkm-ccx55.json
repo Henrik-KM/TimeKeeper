@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-09T22:46:02.427Z",
-  "dayStart": "2026-11-08T23:00:00.000Z",
-  "rangeStart": "2026-08-11T22:00:00.000Z",
+  "updatedAt": "2026-11-09T23:01:02.435Z",
+  "dayStart": "2026-11-09T23:00:00.000Z",
+  "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-09T22:46:03.279Z",
+    "observedAt": "2026-11-09T23:01:03.446Z",
     "primary": {
       "usedPercent": 31,
       "remainingPercent": 69,
@@ -139114,37 +139114,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-2a089806c917722917d9bfc3",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-03T06:42:30.774Z",
-      "endTime": "2026-11-03T07:07:23.740Z",
-      "wallSeconds": 1492,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 746,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1492,
-          "effectiveSeconds": 746
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
       "id": "codex-33065395a87aac9cb52b5fee",
       "threadId": "01a05bde-fee1-7303-89e3-8f54b5e16505",
       "projectKey": "email-helper",
@@ -139173,7 +139142,8 @@
           "effectiveSeconds": 139
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-d1115ac9ee41284237220c02",
@@ -139214,7 +139184,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1197,
         "reasoning_output_tokens": 285
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0a391ab5c988d475c82af45a",
@@ -139255,38 +139226,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1793,
         "reasoning_output_tokens": 449
-      }
-    },
-    {
-      "id": "codex-6caa485066699e318e7f9e9b",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-03T07:58:12.637Z",
-      "endTime": "2026-11-03T08:10:59.922Z",
-      "wallSeconds": 767,
-      "focusFactor": 0.4993,
-      "effectiveSeconds": 383,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 767,
-          "effectiveSeconds": 383
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-98d23f0e1017cb631c1bd9fa",
@@ -139327,7 +139268,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9220,
         "reasoning_output_tokens": 3622
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-51b1ba8b6e666d2b2b254362",
@@ -139368,52 +139310,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4028,
         "reasoning_output_tokens": 1770
-      }
-    },
-    {
-      "id": "codex-b145cbd439294bcd88f839c9",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T09:13:34.397Z",
-      "endTime": "2026-11-03T09:22:38.917Z",
-      "wallSeconds": 544,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 272,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 544,
-          "effectiveSeconds": 272
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d896a6882533b1e9fa7fe611",
@@ -139454,7 +139352,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1317,
         "reasoning_output_tokens": 371
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f049532b6ef3e1a50a7426b3",
@@ -139495,69 +139394,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1631,
         "reasoning_output_tokens": 382
-      }
-    },
-    {
-      "id": "codex-65404741c425cbc5ea1ca1cc",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T10:12:03.815Z",
-      "endTime": "2026-11-03T10:46:55.206Z",
-      "wallSeconds": 2091,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1045,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2091,
-          "effectiveSeconds": 1045
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
-    },
-    {
-      "id": "codex-751df9f91a6f2c2a2efd6459",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T11:39:20.157Z",
-      "endTime": "2026-11-03T11:56:32.882Z",
-      "wallSeconds": 1032,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 516,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1032,
-          "effectiveSeconds": 516
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-e8a01a121ffd90f649d0db5e",
@@ -139598,38 +139436,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 11115,
         "reasoning_output_tokens": 4192
-      }
-    },
-    {
-      "id": "codex-5a28ff23d2f47dfbf2d75df9",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T12:24:19.542Z",
-      "endTime": "2026-11-03T12:40:10.796Z",
-      "wallSeconds": 951,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 475,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 951,
-          "effectiveSeconds": 475
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-0b886020d1240ba84b690635",
@@ -139670,7 +139478,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7527,
         "reasoning_output_tokens": 2355
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ff7296aa2ae63d7e996d941b",
@@ -139711,7 +139520,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 9360,
         "reasoning_output_tokens": 3225
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-c8fa18bf7d7716797a29808e",
@@ -139752,38 +139562,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2577,
         "reasoning_output_tokens": 999
-      }
-    },
-    {
-      "id": "codex-76e8e0d52fdea31e8c1488e4",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T14:08:48.746Z",
-      "endTime": "2026-11-03T14:10:23.652Z",
-      "wallSeconds": 94,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 47,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 94,
-          "effectiveSeconds": 47
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-750d024445c441dc3e3f3120",
@@ -139824,7 +139604,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6991,
         "reasoning_output_tokens": 2897
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-b7c6a01356e8abce69f509cc",
@@ -139855,7 +139636,8 @@
           "effectiveSeconds": 252
         }
       ],
-      "description": "Codex: Email helper health monitor"
+      "description": "Codex: Email helper health monitor",
+      "codexBackfill": true
     },
     {
       "id": "codex-2e9e33df0241234dcbe920c6",
@@ -139896,38 +139678,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2435,
         "reasoning_output_tokens": 375
-      }
-    },
-    {
-      "id": "codex-b1ee1b1d88c577fa20b5adc0",
-      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-03T15:22:02.049Z",
-      "endTime": "2026-11-03T15:39:20.419Z",
-      "wallSeconds": 1038,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 519,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1038,
-          "effectiveSeconds": 519
-        }
-      ],
-      "description": "Codex: Assess Redpine synergy"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-6afe2fe2c7fdb524656b642a",
@@ -139968,114 +139720,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 5512,
         "reasoning_output_tokens": 2233
-      }
-    },
-    {
-      "id": "codex-c1a7664ab2c98392ab174864",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-03T15:58:47.023Z",
-      "endTime": "2026-11-03T16:18:09.148Z",
-      "wallSeconds": 1162,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 581,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1162,
-          "effectiveSeconds": 581
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-38aec7e0fc7ee27075268e36",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-03T16:57:05.353Z",
-      "endTime": "2026-11-03T17:30:37.664Z",
-      "wallSeconds": 2012,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1006,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2012,
-          "effectiveSeconds": 1006
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-7bfa84fcd4ef5aab4fd5d083",
-      "threadId": "01a1a260-3ca7-7a10-8711-fa7b3e1a7bbc",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-03T17:06:19.262Z",
-      "endTime": "2026-11-03T17:07:07.551Z",
-      "wallSeconds": 48,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 24,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 47,
-          "effectiveSeconds": 23
-        }
-      ],
-      "description": "Codex: Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d90dea01c462da906c3ac90e",
@@ -140116,7 +139762,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 926,
         "reasoning_output_tokens": 167
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-befcbf1c062705e3f173a6d1",
@@ -140157,7 +139804,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1277,
         "reasoning_output_tokens": 413
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ca6cefe94d252c29cdbeb15c",
@@ -140188,7 +139836,8 @@
           "effectiveSeconds": 390
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-665ce0856bd2e6cba9362c4a",
