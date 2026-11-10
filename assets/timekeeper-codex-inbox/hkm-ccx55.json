@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T22:01:02.110Z",
+  "updatedAt": "2026-11-10T22:16:02.080Z",
   "dayStart": "2026-11-09T23:00:00.000Z",
   "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,10 +16,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T22:01:03.144Z",
+    "observedAt": "2026-11-10T22:16:02.928Z",
     "primary": {
-      "usedPercent": 54,
-      "remainingPercent": 46,
+      "usedPercent": 55,
+      "remainingPercent": 45,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -143772,6 +143772,37 @@
         }
       ],
       "description": "Codex: LinkedIn weekly stale invitation cleanup"
+    },
+    {
+      "id": "codex-c49c40c8eef86d2a0b307297",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-10T20:14:39.873Z",
+      "endTime": "2026-11-10T21:46:35.503Z",
+      "wallSeconds": 5515,
+      "focusFactor": 0.4999,
+      "effectiveSeconds": 2757,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5515,
+          "effectiveSeconds": 2757
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     },
     {
       "id": "codex-8c07fa3532c15f3727028612",
