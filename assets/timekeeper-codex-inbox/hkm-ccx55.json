@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T10:31:01.820Z",
+  "updatedAt": "2026-11-10T10:46:01.795Z",
   "dayStart": "2026-11-09T23:00:00.000Z",
   "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T10:31:02.895Z",
+    "observedAt": "2026-11-10T10:46:02.758Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
@@ -109,7 +109,7 @@
       "match": "IFLAI",
       "sessionCount": 2430,
       "assistantSessionCount": 2430,
-      "lastSeenAt": "2026-11-10T10:21:54.875Z"
+      "lastSeenAt": "2026-11-10T10:46:00.414Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -281,9 +281,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 858,
+      "activityCount": 973,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-10T10:21:54.875Z"
+      "lastSeenAt": "2026-11-10T10:46:00.414Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -41989,8 +41989,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 528,
-    "imported": 528,
+    "discovered": 529,
+    "imported": 529,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -143664,6 +143664,37 @@
       }
     },
     {
+      "id": "codex-d8ab6cd51141ed9bf9a47a6d",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-10T07:16:48.100Z",
+      "endTime": "2026-11-10T10:15:06.997Z",
+      "wallSeconds": 10698,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 5349,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 10698,
+          "effectiveSeconds": 5349
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
+    },
+    {
       "id": "codex-bb23ff8d31278f695f5d8cd6",
       "threadId": "01a1c480-c775-7931-947b-fd4350a58c3b",
       "projectKey": "email-helper",
@@ -143734,6 +143765,92 @@
         }
       ],
       "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
+    },
+    {
+      "id": "codex-d7cc0906dc68b325ee4b65f7",
+      "threadId": "01a1c4d8-133a-73e2-8d51-06eb1fe376b8",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-10T09:44:18.765Z",
+      "endTime": "2026-11-10T10:21:54.875Z",
+      "wallSeconds": 2256,
+      "focusFactor": 0.1498,
+      "effectiveSeconds": 338,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.2,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 2255,
+          "effectiveSeconds": 338
+        }
+      ],
+      "description": "Codex: Continue LinkedIn invitation run"
+    },
+    {
+      "id": "codex-49ddb818c5f915e29b241dc3",
+      "threadId": "01a1c504-fc0f-7df1-87e0-0d7ad52e4e01",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-10T10:33:20.051Z",
+      "endTime": "2026-11-10T10:34:19.129Z",
+      "wallSeconds": 59,
+      "focusFactor": 0.2373,
+      "effectiveSeconds": 14,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 59,
+          "effectiveSeconds": 14
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 206352,
+        "cached_input_tokens": 152960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1704,
+        "reasoning_output_tokens": 531
+      }
     }
   ]
 }
