@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T18:31:01.975Z",
+  "updatedAt": "2026-11-10T18:46:02.077Z",
   "dayStart": "2026-11-09T23:00:00.000Z",
   "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,10 +16,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T18:31:03.709Z",
+    "observedAt": "2026-11-10T18:46:03.460Z",
     "primary": {
-      "usedPercent": 47,
-      "remainingPercent": 53,
+      "usedPercent": 48,
+      "remainingPercent": 52,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -109,7 +109,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-10T18:31:40.817Z"
+      "lastSeenAt": "2026-11-10T18:46:43.370Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -281,9 +281,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 40594,
+      "activityCount": 41028,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-10T18:31:40.817Z"
+      "lastSeenAt": "2026-11-10T18:46:43.370Z"
     },
     {
       "key": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
@@ -144119,6 +144119,51 @@
         }
       ],
       "description": "Codex: Submit Barbro Osher application"
+    },
+    {
+      "id": "codex-150d6ecc00d01ac297431802",
+      "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-10T17:21:35.017Z",
+      "endTime": "2026-11-10T18:23:32.340Z",
+      "wallSeconds": 3717,
+      "focusFactor": 0.2499,
+      "effectiveSeconds": 929,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.2,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 3716,
+          "effectiveSeconds": 929
+        }
+      ],
+      "description": "Codex: LinkedIn weekly stale invitation cleanup"
     }
   ]
 }
