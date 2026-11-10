@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T14:46:02.024Z",
+  "updatedAt": "2026-11-10T15:01:02.226Z",
   "dayStart": "2026-11-09T23:00:00.000Z",
   "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T14:46:03.604Z",
+    "observedAt": "2026-11-10T15:01:03.535Z",
     "primary": {
       "usedPercent": 40,
       "remainingPercent": 60,
@@ -109,7 +109,7 @@
       "match": "IFLAI",
       "sessionCount": 2430,
       "assistantSessionCount": 2430,
-      "lastSeenAt": "2026-11-10T14:46:09.446Z"
+      "lastSeenAt": "2026-11-10T14:56:25.176Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -281,9 +281,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 14400,
+      "activityCount": 14574,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-10T14:46:09.446Z"
+      "lastSeenAt": "2026-11-10T14:56:25.176Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -144026,6 +144026,37 @@
         "output_tokens": 855,
         "reasoning_output_tokens": 230
       }
+    },
+    {
+      "id": "codex-d9d27e4bae9c12e3d55b7419",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-10T14:10:27.322Z",
+      "endTime": "2026-11-10T14:35:25.704Z",
+      "wallSeconds": 1498,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 749,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1498,
+          "effectiveSeconds": 749
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
