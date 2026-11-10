@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T15:46:02.187Z",
+  "updatedAt": "2026-11-10T17:16:01.949Z",
   "dayStart": "2026-11-09T23:00:00.000Z",
   "rangeStart": "2026-08-12T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,10 +16,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T15:46:03.500Z",
+    "observedAt": "2026-11-10T17:16:03.883Z",
     "primary": {
-      "usedPercent": 41,
-      "remainingPercent": 59,
+      "usedPercent": 42,
+      "remainingPercent": 58,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -109,7 +109,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-10T15:46:21.159Z"
+      "lastSeenAt": "2026-11-10T17:16:32.311Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -281,9 +281,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 38679,
+      "activityCount": 38926,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-10T15:46:21.159Z"
+      "lastSeenAt": "2026-11-10T17:16:32.311Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -144088,6 +144088,37 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-55f43332569fb34c43327b38",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-10T15:24:40.637Z",
+      "endTime": "2026-11-10T16:08:54.265Z",
+      "wallSeconds": 2653,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1326,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2653,
+          "effectiveSeconds": 1326
+        }
+      ],
+      "description": "Codex: Submit Barbro Osher application"
     }
   ]
 }
