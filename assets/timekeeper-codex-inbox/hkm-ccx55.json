@@ -3,9 +3,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-10T22:46:02.062Z",
-  "dayStart": "2026-11-09T23:00:00.000Z",
-  "rangeStart": "2026-08-12T22:00:00.000Z",
+  "updatedAt": "2026-11-10T23:01:01.983Z",
+  "dayStart": "2026-11-10T23:00:00.000Z",
+  "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-10T22:46:03.156Z",
+    "observedAt": "2026-11-10T23:01:02.867Z",
     "primary": {
       "usedPercent": 55,
       "remainingPercent": 45,
@@ -139462,114 +139462,8 @@
           "effectiveSeconds": 303
         }
       ],
-      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete"
-    },
-    {
-      "id": "codex-eaa3e1f3b0de25d727d2ad03",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T07:47:42.892Z",
-      "endTime": "2026-11-04T08:57:16.414Z",
-      "wallSeconds": 4173,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 2086,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 4173,
-          "effectiveSeconds": 2086
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-61ab1bc7386ac1d1013f8ec5",
-      "threadId": "01a1a59b-3616-74a3-87bb-dba8152c3d94",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T08:09:35.971Z",
-      "endTime": "2026-11-04T08:26:36.577Z",
-      "wallSeconds": 1020,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 510,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1020,
-          "effectiveSeconds": 510
-        }
-      ],
-      "description": "Codex: Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2"
-    },
-    {
-      "id": "codex-dd622565e41a2ce4ae17c9d8",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T09:45:08.511Z",
-      "endTime": "2026-11-04T10:17:52.927Z",
-      "wallSeconds": 1964,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 982,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1964,
-          "effectiveSeconds": 982
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
+      "description": "Codex: LinkedIn invitations — 30 confirmed daily until complete",
+      "codexBackfill": true
     },
     {
       "id": "codex-e0a117bf4a7d7b0d4dc8c2c2",
@@ -139610,52 +139504,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1701,
         "reasoning_output_tokens": 586
-      }
-    },
-    {
-      "id": "codex-aa3fcb76a7fdb00a537da2e9",
-      "threadId": "01a1a61d-f038-7a60-944d-cc431d89e030",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-04T10:32:23.381Z",
-      "endTime": "2026-11-04T11:00:46.806Z",
-      "wallSeconds": 1703,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 851,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1702,
-          "effectiveSeconds": 851
-        }
-      ],
-      "description": "Codex: Clarify next steps"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-233a4036ccbbc106411282db",
@@ -139696,7 +139546,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6801,
         "reasoning_output_tokens": 2380
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-4917e2a417318fcb5dd0cdcd",
@@ -139737,38 +139588,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4220,
         "reasoning_output_tokens": 1628
-      }
-    },
-    {
-      "id": "codex-9e02520d8d3443593a9e6eca",
-      "threadId": "01a1a61d-f038-7a60-944d-cc431d89e030",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-04T12:10:31.060Z",
-      "endTime": "2026-11-04T12:40:24.854Z",
-      "wallSeconds": 1793,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 896,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1793,
-          "effectiveSeconds": 896
-        }
-      ],
-      "description": "Codex: Clarify next steps"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-43d83fdf710b62df0f4c4c7e",
@@ -139809,52 +139630,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6305,
         "reasoning_output_tokens": 1651
-      }
-    },
-    {
-      "id": "codex-2130a4f23d8688c4e79e0575",
-      "threadId": "01a1a688-00d7-70e3-b4af-284a6b5e231f",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-04T12:28:14.614Z",
-      "endTime": "2026-11-04T12:31:07.831Z",
-      "wallSeconds": 173,
-      "focusFactor": 0.4971,
-      "effectiveSeconds": 86,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 172,
-          "effectiveSeconds": 86
-        }
-      ],
-      "description": "Codex: Review Mattias’s Slack request"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d71b0777cd7774ddd5c84cb5",
@@ -139895,7 +139672,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 16877,
         "reasoning_output_tokens": 6198
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-207e28691ffcd245375c9167",
@@ -139936,114 +139714,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 4988,
         "reasoning_output_tokens": 1364
-      }
-    },
-    {
-      "id": "codex-355ababe23dd6e26342487a5",
-      "threadId": "01a1a6a7-6a88-7090-a242-bf2c57b7c12a",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-04T13:02:33.526Z",
-      "endTime": "2026-11-04T13:07:50.771Z",
-      "wallSeconds": 317,
-      "focusFactor": 0.4984,
-      "effectiveSeconds": 158,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 316,
-          "effectiveSeconds": 158
-        }
-      ],
-      "description": "Codex: Review latest SOW for sign-off"
-    },
-    {
-      "id": "codex-e58596e142a859aaf228f398",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T13:07:14.180Z",
-      "endTime": "2026-11-04T13:48:24.858Z",
-      "wallSeconds": 2470,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1235,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2470,
-          "effectiveSeconds": 1235
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
-    },
-    {
-      "id": "codex-3e92d5589cbe769c4bb82f4a",
-      "threadId": "01a182cf-f672-7500-8160-cf3fe74b3794",
-      "projectKey": "Anders",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T14:00:56.427Z",
-      "endTime": "2026-11-04T14:11:48.001Z",
-      "wallSeconds": 651,
-      "focusFactor": 0.4992,
-      "effectiveSeconds": 325,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 651,
-          "effectiveSeconds": 325
-        }
-      ],
-      "description": "Codex: Draft AI meeting reminder"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-ff722419e0f954044ad11acb",
@@ -140074,7 +139746,8 @@
           "effectiveSeconds": 130
         }
       ],
-      "description": "Codex: Email helper health monitor"
+      "description": "Codex: Email helper health monitor",
+      "codexBackfill": true
     },
     {
       "id": "codex-d1497b09e74398cdcc2d009e",
@@ -140115,83 +139788,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 3408,
         "reasoning_output_tokens": 987
-      }
-    },
-    {
-      "id": "codex-e631257f25dbbed508961945",
-      "threadId": "01a1a727-7653-7783-a99f-dce70c93b632",
-      "projectKey": "IFLAI",
-      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "timekeeperProjectName": "IFLAI",
-      "startTime": "2026-11-04T15:22:25.389Z",
-      "endTime": "2026-11-04T15:30:31.379Z",
-      "wallSeconds": 485,
-      "focusFactor": 0.499,
-      "effectiveSeconds": 242,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "unknown",
-          "effort": "unknown",
-          "baseFactor": 0.4,
-          "factor": 0.4,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.4,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 0,
-          "effectiveSeconds": 0
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 485,
-          "effectiveSeconds": 242
-        }
-      ],
-      "description": "Codex: Prepare for Inisito meeting"
-    },
-    {
-      "id": "codex-3196a39ea6fd182f7d753b00",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-04T15:56:10.811Z",
-      "endTime": "2026-11-04T16:13:54.522Z",
-      "wallSeconds": 1063,
-      "focusFactor": 0.4995,
-      "effectiveSeconds": 531,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1063,
-          "effectiveSeconds": 531
-        }
-      ],
-      "description": "Codex: Submit Barbro Osher application"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-762e3222cc492eff7937c738",
@@ -140232,7 +139830,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1053,
         "reasoning_output_tokens": 280
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-56fbd20224f592d251b76377",
@@ -140273,7 +139872,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 6432,
         "reasoning_output_tokens": 2449
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-f987e698409e28ff50f79688",
