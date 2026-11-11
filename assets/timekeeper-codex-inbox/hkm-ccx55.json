@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T14:16:02.791Z",
+  "updatedAt": "2026-11-11T14:31:03.974Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T14:16:09.177Z",
+    "observedAt": "2026-11-11T14:31:11.266Z",
     "primary": {
       "usedPercent": 70,
       "remainingPercent": 30,
@@ -30,6 +30,20 @@
     "codex-6cdb418f51c26f09891bf26a"
   ],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-11-11/please",
+      "displayPath": "Documents/Codex/2026-11-11/please",
+      "projectFolder": "",
+      "repoName": "please",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-11T14:31:22.919Z"
+    },
     {
       "key": "github/timekeeper",
       "displayPath": "GitHub/TimeKeeper",
@@ -59,6 +73,20 @@
       "lastSeenAt": "2026-11-06T18:13:13.532Z"
     },
     {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2428,
+      "assistantSessionCount": 2428,
+      "lastSeenAt": "2026-11-11T14:31:35.948Z"
+    },
+    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -70,7 +98,7 @@
       "match": "IFLAI",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-11T14:16:01.878Z"
+      "lastSeenAt": "2026-11-11T14:31:30.266Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -85,20 +113,6 @@
       "sessionCount": 6,
       "assistantSessionCount": 6,
       "lastSeenAt": "2026-11-11T11:44:34.889Z"
-    },
-    {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2428,
-      "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-11-11T09:40:04.952Z"
     },
     {
       "key": "github/anders",
@@ -130,6 +144,23 @@
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a1cb01-80c4-76e1-b8ab-da9da8669717",
+      "sessionId": "01a1cb01-80c4-76e1-b8ab-da9da8669717",
+      "title": "Review and clean Chrome tabs",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-11/please",
+      "repoName": "please",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 190,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-11T14:31:22.919Z"
+    },
     {
       "key": "019ed546-e82a-73d3-897e-3f1aadb15657",
       "sessionId": "019ed546-e82a-73d3-897e-3f1aadb15657",
@@ -182,6 +213,23 @@
       "lastSeenAt": "2026-11-05T20:08:40.628Z"
     },
     {
+      "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "sessionId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 4842,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-11T14:31:35.948Z"
+    },
+    {
       "key": "01a1caf2-5f5a-7c42-91e9-33552c7c8303",
       "sessionId": "01a1caf2-5f5a-7c42-91e9-33552c7c8303",
       "title": "Prepare repo for transfer",
@@ -194,9 +242,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 137,
+      "activityCount": 331,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T14:16:01.878Z"
+      "lastSeenAt": "2026-11-11T14:31:30.266Z"
     },
     {
       "key": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
@@ -282,23 +330,6 @@
       "activityCount": 90,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T11:08:16.144Z"
-    },
-    {
-      "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
-      "sessionId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 4602,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T09:40:04.952Z"
     },
     {
       "key": "01a182cf-f672-7500-8160-cf3fe74b3794",
