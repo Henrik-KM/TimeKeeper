@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-11T18:32:02.087Z",
+  "updatedAt": "2026-11-11T18:37:02.162Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T18:32:04.340Z",
+    "observedAt": "2026-11-11T18:37:04.345Z",
     "primary": {
-      "usedPercent": 75,
-      "remainingPercent": 25,
+      "usedPercent": 76,
+      "remainingPercent": 24,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-11T18:32:12.531Z"
+      "lastSeenAt": "2026-11-11T18:37:03.017Z"
     },
     {
       "key": "github/mathem-agent",
@@ -155,9 +155,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 15836,
+      "activityCount": 15896,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T18:32:12.531Z"
+      "lastSeenAt": "2026-11-11T18:37:03.017Z"
     },
     {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
@@ -1394,6 +1394,43 @@
       ],
       "supersedesExternalIds": [
         "codex-9ab3a720a5ad91acad692e59"
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-d70f248a97863147082b01e1",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-11T18:16:49.046Z",
+      "endTime": "2026-11-11T18:17:05.257Z",
+      "wallSeconds": 16,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 8,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 16,
+          "effectiveSeconds": 8,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-165c59b82bf03b6e5cdb16d6"
       ],
       "description": "Codex: Structured AL"
     }
