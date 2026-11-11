@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T09:46:02.537Z",
+  "updatedAt": "2026-11-11T10:01:02.437Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,10 +16,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T09:46:06.115Z",
+    "observedAt": "2026-11-11T10:01:05.523Z",
     "primary": {
-      "usedPercent": 65,
-      "remainingPercent": 35,
+      "usedPercent": 66,
+      "remainingPercent": 34,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -67,7 +67,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-11T09:46:18.207Z"
+      "lastSeenAt": "2026-11-11T10:01:14.005Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -174,9 +174,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 44936,
+      "activityCount": 45299,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T09:46:18.207Z"
+      "lastSeenAt": "2026-11-11T10:01:14.005Z"
     },
     {
       "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
@@ -140619,6 +140619,42 @@
         "output_tokens": 7343,
         "reasoning_output_tokens": 3370
       }
+    },
+    {
+      "id": "codex-2a36f2a39e2bf641c10882d7",
+      "threadId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-11T09:37:26.657Z",
+      "endTime": "2026-11-11T09:40:04.952Z",
+      "wallSeconds": 158,
+      "focusFactor": 0.2468,
+      "effectiveSeconds": 39,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 158,
+          "effectiveSeconds": 39,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-6111c84dae97bb09d542d866"
+      ],
+      "description": "Codex: email-helper"
     }
   ]
 }
