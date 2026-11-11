@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T15:16:02.693Z",
+  "updatedAt": "2026-11-11T15:31:02.676Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T15:16:04.682Z",
+    "observedAt": "2026-11-11T15:31:03.668Z",
     "primary": {
       "usedPercent": 71,
       "remainingPercent": 29,
@@ -84,7 +84,7 @@
       "match": "IFLAI",
       "sessionCount": 2428,
       "assistantSessionCount": 2428,
-      "lastSeenAt": "2026-11-11T15:09:27.964Z"
+      "lastSeenAt": "2026-11-11T15:30:45.398Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -225,9 +225,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 5452,
+      "activityCount": 5474,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T15:09:27.964Z"
+      "lastSeenAt": "2026-11-11T15:30:45.398Z"
     },
     {
       "key": "01a1caf2-5f5a-7c42-91e9-33552c7c8303",
@@ -144015,6 +144015,89 @@
         }
       ],
       "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-2d7e0d426d8a0ae35b7483cf",
+      "threadId": "01a1caf2-5f5a-7c42-91e9-33552c7c8303",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-11T14:10:45.801Z",
+      "endTime": "2026-11-11T14:59:26.306Z",
+      "wallSeconds": 2085,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1042,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2085,
+          "effectiveSeconds": 1042
+        }
+      ],
+      "description": "Codex: Prepare repo for transfer"
+    },
+    {
+      "id": "codex-3985d5293d2424b1f9d7a96a",
+      "threadId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-11T14:21:36.233Z",
+      "endTime": "2026-11-11T15:09:27.964Z",
+      "wallSeconds": 2863,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 715,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 2863,
+          "effectiveSeconds": 715,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-76c64b96b3615c8ce6b6a2f0"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-2401489dfda8a5b9ca9f35fc",
