@@ -3,7 +3,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T12:01:02.382Z",
+  "updatedAt": "2026-11-11T12:16:02.587Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -16,7 +16,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T12:01:04.430Z",
+    "observedAt": "2026-11-11T12:16:03.627Z",
     "primary": {
       "usedPercent": 69,
       "remainingPercent": 31,
@@ -141016,6 +141016,37 @@
         }
       ],
       "description": "Codex: Stanford travel and arrival"
+    },
+    {
+      "id": "codex-f4fe9f5399e654cedab6083c",
+      "threadId": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-11T11:27:24.693Z",
+      "endTime": "2026-11-11T11:44:34.889Z",
+      "wallSeconds": 1030,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 515,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1030,
+          "effectiveSeconds": 515
+        }
+      ],
+      "description": "Codex: Stanford insurance"
     }
   ]
 }
