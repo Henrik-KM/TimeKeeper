@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T16:46:02.616Z",
+  "updatedAt": "2026-11-11T17:01:02.732Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T16:46:03.477Z",
+    "observedAt": "2026-11-11T17:01:04.750Z",
     "primary": {
       "usedPercent": 74,
       "remainingPercent": 26,
@@ -84,7 +84,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-11T16:46:00.973Z"
+      "lastSeenAt": "2026-11-11T17:01:19.684Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -225,9 +225,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 46924,
+      "activityCount": 47357,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T16:46:00.973Z"
+      "lastSeenAt": "2026-11-11T17:01:19.684Z"
     },
     {
       "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
@@ -144130,6 +144130,43 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-a8da5536a4333c70b7da87d2",
+      "threadId": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-11T15:29:50.895Z",
+      "endTime": "2026-11-11T16:31:34.021Z",
+      "wallSeconds": 3702,
+      "focusFactor": 0.2499,
+      "effectiveSeconds": 925,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 3702,
+          "effectiveSeconds": 925,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-fbe6f6933f5bc85beb78c2c8"
+      ],
+      "description": "Codex: email-helper"
     },
     {
       "id": "codex-276bf59a4cbe945f28b981db",
