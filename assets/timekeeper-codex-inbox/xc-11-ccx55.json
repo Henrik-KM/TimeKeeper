@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-11T16:02:02.192Z",
+  "updatedAt": "2026-11-11T16:07:01.832Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T16:02:04.142Z",
+    "observedAt": "2026-11-11T16:07:03.709Z",
     "primary": {
-      "usedPercent": 72,
-      "remainingPercent": 28,
+      "usedPercent": 73,
+      "remainingPercent": 27,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -1357,6 +1357,43 @@
       ],
       "supersedesExternalIds": [
         "codex-d6f9de3ce650e4ed36713d4b"
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-3630156ab83d864f68ec22d7",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-11T15:47:36.199Z",
+      "endTime": "2026-11-11T15:48:05.071Z",
+      "wallSeconds": 28,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 14,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 28,
+          "effectiveSeconds": 14,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-9ab3a720a5ad91acad692e59"
       ],
       "description": "Codex: Structured AL"
     }
