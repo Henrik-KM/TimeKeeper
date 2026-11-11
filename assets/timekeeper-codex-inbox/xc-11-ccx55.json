@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-11T10:12:03.018Z",
+  "updatedAt": "2026-11-11T10:17:03.250Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T10:12:08.727Z",
+    "observedAt": "2026-11-11T10:17:05.356Z",
     "primary": {
       "usedPercent": 66,
       "remainingPercent": 34,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-11T10:12:12.007Z"
+      "lastSeenAt": "2026-11-11T10:16:39.049Z"
     },
     {
       "key": "github/scholarships",
@@ -110,7 +110,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-11T09:58:06.068Z"
+      "lastSeenAt": "2026-11-11T10:14:32.370Z"
     },
     {
       "key": "github/anders/bao",
@@ -141,9 +141,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 14473,
+      "activityCount": 14552,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T10:12:12.007Z"
+      "lastSeenAt": "2026-11-11T10:16:39.049Z"
     },
     {
       "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
@@ -345,9 +345,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1719,
+      "activityCount": 1740,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T09:58:06.068Z"
+      "lastSeenAt": "2026-11-11T10:14:32.370Z"
     },
     {
       "key": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
@@ -1129,6 +1129,57 @@
         }
       ],
       "description": "Codex: Restart HPC Arrhenius access"
+    },
+    {
+      "id": "codex-92f733c61cf61d3a5bc8b191",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-11T09:44:06.128Z",
+      "endTime": "2026-11-11T09:58:06.068Z",
+      "wallSeconds": 823,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 411,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 579,
+          "effectiveSeconds": 289,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 244,
+          "effectiveSeconds": 122,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-3619054f60cb0acb972482dc"
+      ],
+      "description": "Codex: Structured AL"
     }
   ]
 }
