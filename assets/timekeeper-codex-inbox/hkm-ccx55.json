@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-11T21:31:03.686Z",
+  "updatedAt": "2026-11-11T21:46:02.973Z",
   "dayStart": "2026-11-10T23:00:00.000Z",
   "rangeStart": "2026-08-13T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-11T21:31:06.968Z",
+    "observedAt": "2026-11-11T21:46:04.551Z",
     "primary": {
-      "usedPercent": 78,
-      "remainingPercent": 22,
+      "usedPercent": 79,
+      "remainingPercent": 21,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -84,7 +84,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-11T21:16:25.744Z"
+      "lastSeenAt": "2026-11-11T21:46:14.002Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -225,9 +225,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 50338,
+      "activityCount": 50516,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-11T21:16:25.744Z"
+      "lastSeenAt": "2026-11-11T21:46:14.002Z"
     },
     {
       "key": "01a1b0d8-8bea-7ea2-9a78-2afa009beda0",
@@ -144472,6 +144472,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 4444,
           "effectiveSeconds": 2222
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-961f0df63d2e1b89de838675",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-11T20:12:43.553Z",
+      "endTime": "2026-11-11T21:16:25.744Z",
+      "wallSeconds": 3820,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1910,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3820,
+          "effectiveSeconds": 1910
         }
       ],
       "description": "Codex: Stanford family visas"
