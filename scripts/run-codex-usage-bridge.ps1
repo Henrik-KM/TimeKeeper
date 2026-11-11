@@ -1,5 +1,6 @@
 param(
-  [switch]$Check
+  [switch]$Check,
+  [switch]$RefreshRuntime
 )
 
 $ErrorActionPreference = 'Stop'
@@ -9,10 +10,12 @@ $NodeCommand = Get-Command node -ErrorAction Stop
 if ($Check) {
   Write-Output "Node: $($NodeCommand.Source)"
   Write-Output "Repo: $RepoRoot"
-  Write-Output "Codex bridge: $(Join-Path $RepoRoot 'scripts\codex-usage-bridge.mjs')"
+  Write-Output "Codex bridge runtime: $(Join-Path $RepoRoot 'scripts\codex-bridge-runtime.mjs')"
   exit 0
 }
 
 Set-Location $RepoRoot
-& $NodeCommand.Source "scripts\codex-usage-bridge.mjs"
+$RuntimeArguments = @("--repo-root=$RepoRoot")
+if ($RefreshRuntime) { $RuntimeArguments += '--refresh-runtime' }
+& $NodeCommand.Source "scripts\codex-bridge-runtime.mjs" @RuntimeArguments
 exit $LASTEXITCODE

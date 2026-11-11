@@ -178,7 +178,11 @@ Setup:
 npm run codex:bridge:install
 ```
 
-The task runs at logon and every 15 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. The browser checks the inbox every five minutes and reuses unchanged files. To run it manually:
+The task runs at logon and every 15 minutes, scans Codex session files changed during the seven-day window under `%USERPROFILE%\.codex\sessions`, writes one file per desktop under `assets/timekeeper-codex-inbox/`, and exits. The browser checks the inbox every five minutes and reuses unchanged files.
+
+The scheduled launcher uses a cached copy of the collector from `origin/main`, stored under `%LOCALAPPDATA%\TimeKeeper\codex-bridge-runtime`. It checks for source updates every six hours, so changing the development branch cannot leave the scheduled collector on an older activity policy. If the source check fails, the launcher uses its last complete cached copy. `scripts/run-codex-usage-bridge.ps1 -RefreshRuntime` checks immediately. Existing installations adopt this launcher when these launcher files are updated; the scheduled task does not need to be reinstalled.
+
+To run the collector from the current checkout manually:
 
 ```bash
 npm run codex:bridge
