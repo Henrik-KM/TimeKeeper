@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-12T14:31:02.472Z",
+  "updatedAt": "2026-11-12T14:46:02.693Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T14:31:03.666Z",
+    "observedAt": "2026-11-12T14:46:03.759Z",
     "primary": {
       "usedPercent": 85,
       "remainingPercent": 15,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-12T14:21:41.131Z"
+      "lastSeenAt": "2026-11-12T14:40:38.361Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -227,9 +227,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 167,
+      "activityCount": 457,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T14:21:41.131Z"
+      "lastSeenAt": "2026-11-12T14:40:38.361Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -146103,6 +146103,38 @@
         }
       ],
       "description": "Codex: Draft WASP LinkedIn post"
+    },
+    {
+      "id": "codex-1be8c6950d8670a8d0a2765c",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-12T14:03:53.817Z",
+      "endTime": "2026-11-12T14:15:11.723Z",
+      "wallSeconds": 677,
+      "focusFactor": 0.2496,
+      "effectiveSeconds": 169,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 677,
+          "effectiveSeconds": 169
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
