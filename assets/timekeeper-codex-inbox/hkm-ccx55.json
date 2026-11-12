@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-12T13:16:02.075Z",
+  "updatedAt": "2026-11-12T14:01:07.231Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T13:16:03.013Z",
+    "observedAt": "2026-11-12T14:01:09.396Z",
     "primary": {
-      "usedPercent": 83,
-      "remainingPercent": 17,
+      "usedPercent": 84,
+      "remainingPercent": 16,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-12T13:11:32.907Z"
+      "lastSeenAt": "2026-11-12T14:00:29.852Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -227,9 +227,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 62,
+      "activityCount": 151,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T13:11:32.907Z"
+      "lastSeenAt": "2026-11-12T14:00:29.852Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -146025,6 +146025,52 @@
         }
       ],
       "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-41afb326b1e01f05155310d4",
+      "threadId": "01a1cfe1-2511-76c1-9d00-1bbc135477b7",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-12T13:10:02.238Z",
+      "endTime": "2026-11-12T13:11:32.907Z",
+      "wallSeconds": 90,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 45,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 89,
+          "effectiveSeconds": 44
+        }
+      ],
+      "description": "Codex: Draft WASP LinkedIn post"
     }
   ]
 }
