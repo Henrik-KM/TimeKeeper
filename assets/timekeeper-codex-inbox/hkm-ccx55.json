@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-12T08:16:01.983Z",
+  "updatedAt": "2026-11-12T08:31:01.999Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T08:16:03.538Z",
+    "observedAt": "2026-11-12T08:31:02.886Z",
     "primary": {
       "usedPercent": 80,
       "remainingPercent": 20,
@@ -27,6 +27,8 @@
     "secondary": null
   },
   "retractedExternalIds": [
+    "codex-9b0a2ef4c2afebf167c0d799",
+    "codex-a8a70098909d2fa84219599a",
     "codex-6cdb418f51c26f09891bf26a"
   ],
   "mappingAudit": [
@@ -82,9 +84,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 2429,
-      "assistantSessionCount": 2429,
-      "lastSeenAt": "2026-11-12T08:16:02.978Z"
+      "sessionCount": 2430,
+      "assistantSessionCount": 2430,
+      "lastSeenAt": "2026-11-12T08:28:00.172Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -98,7 +100,7 @@
       "match": "Anders",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-12T08:15:54.380Z"
+      "lastSeenAt": "2026-11-12T08:25:52.496Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -225,9 +227,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 4491,
+      "activityCount": 4832,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T08:16:02.978Z"
+      "lastSeenAt": "2026-11-12T08:28:00.172Z"
     },
     {
       "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
@@ -242,9 +244,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 484,
+      "activityCount": 599,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T08:15:54.380Z"
+      "lastSeenAt": "2026-11-12T08:25:52.496Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -259,9 +261,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 603,
+      "activityCount": 699,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T08:15:53.926Z"
+      "lastSeenAt": "2026-11-12T08:23:35.124Z"
     },
     {
       "key": "01a1ca47-7103-7c02-9086-a72afd9ce9e5",
@@ -500,6 +502,23 @@
       "activityCount": 2910,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-06T07:54:08.903Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 15631,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-10-14T10:10:28.044Z"
     },
     {
       "key": "01a0e1a0-f1ca-76d1-9512-c9748c50f3d1",
@@ -48800,6 +48819,218 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-a0cf926adc5eec31f5564501",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T07:16:05.316Z",
+      "endTime": "2026-08-24T08:03:18.638Z",
+      "wallSeconds": 2194,
+      "focusFactor": 0.2498,
+      "effectiveSeconds": 548,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.2,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 2192,
+          "effectiveSeconds": 548
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-88b8c94bfa5a7b5b93b4a1e5",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T13:05:17.924Z",
+      "endTime": "2026-08-24T13:08:01.654Z",
+      "wallSeconds": 163,
+      "focusFactor": 0.2454,
+      "effectiveSeconds": 40,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 163,
+          "effectiveSeconds": 40
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-cb990950224dd399d6cae03a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-24T13:33:50.441Z",
+      "endTime": "2026-08-24T13:45:06.531Z",
+      "wallSeconds": 675,
+      "focusFactor": 0.2489,
+      "effectiveSeconds": 168,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 675,
+          "effectiveSeconds": 168
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-dac3b4cbd01718d7e7a2d580",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-25T08:13:22.395Z",
+      "endTime": "2026-08-25T09:02:13.288Z",
+      "wallSeconds": 1898,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 474,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1898,
+          "effectiveSeconds": 474
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-63bf8774c7bce08b2238aa22",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-25T10:00:11.189Z",
+      "endTime": "2026-08-25T10:15:31.200Z",
+      "wallSeconds": 735,
+      "focusFactor": 0.249,
+      "effectiveSeconds": 183,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 735,
+          "effectiveSeconds": 183
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-bafce83222ea4672c304e716",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-26T10:00:41.008Z",
+      "endTime": "2026-08-26T10:03:52.796Z",
+      "wallSeconds": 191,
+      "focusFactor": 0.2461,
+      "effectiveSeconds": 47,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 191,
+          "effectiveSeconds": 47
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-1e17fb5f5609592ea2a5fa35",
       "threadId": "01a03db4-6711-7b22-8674-52ce4317b64e",
       "projectKey": "email-helper",
@@ -48863,6 +49094,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-f5213d0cab018f85d3b59667",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-26T11:53:29.022Z",
+      "endTime": "2026-08-26T11:58:08.718Z",
+      "wallSeconds": 279,
+      "focusFactor": 0.2473,
+      "effectiveSeconds": 69,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 279,
+          "effectiveSeconds": 69
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -48995,6 +49259,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-55bb72dace7abd0b38d28240",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-27T15:50:22.403Z",
+      "endTime": "2026-08-27T16:02:41.527Z",
+      "wallSeconds": 604,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 151,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 604,
+          "effectiveSeconds": 151
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -49757,6 +50054,72 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-3ee3635192ecb4e2c60f8877",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-28T07:49:50.363Z",
+      "endTime": "2026-08-28T08:13:01.396Z",
+      "wallSeconds": 537,
+      "focusFactor": 0.2495,
+      "effectiveSeconds": 134,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 537,
+          "effectiveSeconds": 134
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-b58cad50678c7700a795f772",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-28T08:43:35.966Z",
+      "endTime": "2026-08-28T08:44:09.427Z",
+      "wallSeconds": 32,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 8,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 32,
+          "effectiveSeconds": 8
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-13d5d4c948659fa91cf53f00",
       "threadId": "01a04795-7dc8-7a53-9d66-9aeb83cdfbb4",
       "projectKey": "email-helper",
@@ -49787,6 +50150,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-4d053f724ce0cd6c51ea3276",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-28T10:01:28.697Z",
+      "endTime": "2026-08-28T10:06:46.263Z",
+      "wallSeconds": 317,
+      "focusFactor": 0.2492,
+      "effectiveSeconds": 79,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 317,
+          "effectiveSeconds": 79
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -50054,6 +50450,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-54d4d480ce45e5e4905bf8fe",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-28T14:29:11.547Z",
+      "endTime": "2026-08-28T14:40:32.642Z",
+      "wallSeconds": 663,
+      "focusFactor": 0.2489,
+      "effectiveSeconds": 165,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 663,
+          "effectiveSeconds": 165
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-255b4cc838070d5a47ac25ee",
       "threadId": "01a049df-b912-7bf1-8034-81c0cead4f15",
       "projectKey": "email-helper",
@@ -50252,6 +50681,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-63e9ec1565cadf86d29a49d3",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-08-31T10:01:44.694Z",
+      "endTime": "2026-08-31T10:31:45.206Z",
+      "wallSeconds": 1209,
+      "focusFactor": 0.2498,
+      "effectiveSeconds": 302,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1209,
+          "effectiveSeconds": 302
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-e298d6c26e2fb0d49a0af906",
       "threadId": "01a0579f-fc11-72a2-aefd-78d909b7b317",
       "projectKey": "email-helper",
@@ -50414,6 +50876,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-1e355d73a6f230987db92766",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-01T10:02:03.653Z",
+      "endTime": "2026-09-01T10:17:04.322Z",
+      "wallSeconds": 900,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 225,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 900,
+          "effectiveSeconds": 225
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -50711,6 +51206,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-a5ee33cafad6412cebf556cd",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-02T10:01:08.093Z",
+      "endTime": "2026-09-02T10:02:52.175Z",
+      "wallSeconds": 103,
+      "focusFactor": 0.2427,
+      "effectiveSeconds": 25,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 103,
+          "effectiveSeconds": 25
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -52463,6 +52991,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-de6b569d8e097caa26e4e154",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-03T10:02:11.106Z",
+      "endTime": "2026-09-03T10:05:57.081Z",
+      "wallSeconds": 224,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 56,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 224,
+          "effectiveSeconds": 56
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-4db1b36b5fe850e7c44aa1f7",
       "threadId": "01a066d3-c088-74e2-9ee2-3fe5a2979141",
       "projectKey": "email-helper",
@@ -52958,6 +53519,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-2a11de1080cefa7855847e9b",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-03T14:00:10.379Z",
+      "endTime": "2026-09-03T14:03:06.879Z",
+      "wallSeconds": 175,
+      "focusFactor": 0.2457,
+      "effectiveSeconds": 43,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 175,
+          "effectiveSeconds": 43
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-ef74768eaffdc52a4983aedb",
       "threadId": "01a067aa-89e0-7360-a0f7-f4d8e777b4c2",
       "projectKey": "email-helper",
@@ -53219,6 +53813,105 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-b09e00c4344164b46d0f1401",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-04T10:01:27.458Z",
+      "endTime": "2026-09-04T10:02:57.296Z",
+      "wallSeconds": 89,
+      "focusFactor": 0.2472,
+      "effectiveSeconds": 22,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 89,
+          "effectiveSeconds": 22
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-91bc045a748b5b9f075ccf14",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-04T10:25:18.803Z",
+      "endTime": "2026-09-04T10:39:34.153Z",
+      "wallSeconds": 333,
+      "focusFactor": 0.2492,
+      "effectiveSeconds": 83,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 333,
+          "effectiveSeconds": 83
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-c2137b79dbcbfc3d6b82aa79",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-04T11:49:07.875Z",
+      "endTime": "2026-09-04T11:57:52.986Z",
+      "wallSeconds": 523,
+      "focusFactor": 0.2486,
+      "effectiveSeconds": 130,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 523,
+          "effectiveSeconds": 130
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -55645,6 +56338,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-4ffbb744b2a68c201dac481d",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-07T10:01:29.494Z",
+      "endTime": "2026-09-07T10:15:04.627Z",
+      "wallSeconds": 752,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 188,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 752,
+          "effectiveSeconds": 188
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-0496ab9d4af5d09eb39dbefe",
       "threadId": "01a07b57-9e13-7b32-a0fd-822a54cd4222",
       "projectKey": "email-helper",
@@ -57460,6 +58186,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-10730eac4f9d9199e7fe2cce",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-08T10:00:21.554Z",
+      "endTime": "2026-09-08T10:02:29.310Z",
+      "wallSeconds": 127,
+      "focusFactor": 0.2441,
+      "effectiveSeconds": 31,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 127,
+          "effectiveSeconds": 31
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-352b2c00e1215b1781e51554",
       "threadId": "01a08085-4661-72c2-bff6-6a9c164078cc",
       "projectKey": "email-helper",
@@ -58648,6 +59407,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-5b62e9903eacf81cc686a9eb",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T10:01:55.103Z",
+      "endTime": "2026-09-09T10:08:25.691Z",
+      "wallSeconds": 390,
+      "focusFactor": 0.2487,
+      "effectiveSeconds": 97,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 390,
+          "effectiveSeconds": 97
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-46a009c99eac5f6da79a902b",
       "threadId": "01a085aa-e7da-7e90-b8c5-20851f8b29c5",
       "projectKey": "email-helper",
@@ -58744,6 +59536,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-9078cd80ff7d0e4330cadfb0",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-09T10:52:00.575Z",
+      "endTime": "2026-09-09T10:55:24.401Z",
+      "wallSeconds": 202,
+      "focusFactor": 0.2475,
+      "effectiveSeconds": 50,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 202,
+          "effectiveSeconds": 50
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -59176,6 +60001,72 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-4a97308a0bc45455020e998c",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-10T10:01:33.350Z",
+      "endTime": "2026-09-10T10:16:15.591Z",
+      "wallSeconds": 861,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 215,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 861,
+          "effectiveSeconds": 215
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-fdebc8d8b417dc85cea1cf3a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-11T10:13:16.101Z",
+      "endTime": "2026-09-11T10:30:32.143Z",
+      "wallSeconds": 1034,
+      "focusFactor": 0.2495,
+      "effectiveSeconds": 258,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1034,
+          "effectiveSeconds": 258
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-ef6ae1430d8edeeb64deb06c",
       "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
       "projectKey": "email-helper",
@@ -59239,6 +60130,39 @@
         }
       ],
       "description": "Codex: LinkedIn weekly stale invitation cleanup",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-eb2939579a97b9688582130e",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-14T10:14:23.543Z",
+      "endTime": "2026-09-14T10:39:48.776Z",
+      "wallSeconds": 624,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 156,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 624,
+          "effectiveSeconds": 156
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -59833,6 +60757,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-6e2e981cc774310d15490422",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-15T10:00:09.468Z",
+      "endTime": "2026-09-15T10:12:49.447Z",
+      "wallSeconds": 757,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 189,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 757,
+          "effectiveSeconds": 189
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -66007,6 +66964,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-110fae548a58f22ee041f399",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-16T10:00:58.364Z",
+      "endTime": "2026-09-16T10:09:14.107Z",
+      "wallSeconds": 494,
+      "focusFactor": 0.249,
+      "effectiveSeconds": 123,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 494,
+          "effectiveSeconds": 123
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-df7b34920ccb566427be6870",
       "threadId": "01a0a9bc-2617-77d0-81c4-0af8b8139dfb",
       "projectKey": "email-helper",
@@ -70129,6 +71119,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-dfb12d10dc095815b46e78d7",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-17T10:56:37.096Z",
+      "endTime": "2026-09-17T11:10:41.483Z",
+      "wallSeconds": 840,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 210,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 840,
+          "effectiveSeconds": 210
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -74620,6 +75643,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-990e32637df4de190eadb6ae",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-18T10:00:38.511Z",
+      "endTime": "2026-09-18T10:05:05.763Z",
+      "wallSeconds": 266,
+      "focusFactor": 0.2481,
+      "effectiveSeconds": 66,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 266,
+          "effectiveSeconds": 66
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-d7a16d3ddf4b8090da479d11",
       "threadId": "01a0b3f7-e0cf-7c51-9aa4-a8dcc0714e61",
       "projectKey": "email-helper",
@@ -74650,6 +75706,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-575e2f2cf01d6d7155ed6c59",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-18T10:29:02.255Z",
+      "endTime": "2026-09-18T10:54:39.608Z",
+      "wallSeconds": 1033,
+      "focusFactor": 0.2498,
+      "effectiveSeconds": 258,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1033,
+          "effectiveSeconds": 258
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -90031,6 +91120,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-8d002da7e1b2033bc656a337",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T10:02:05.076Z",
+      "endTime": "2026-09-21T10:07:51.098Z",
+      "wallSeconds": 345,
+      "focusFactor": 0.2493,
+      "effectiveSeconds": 86,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 345,
+          "effectiveSeconds": 86
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-16a927dfcd5b4d1f8d47c376",
       "threadId": "01a0c379-8c78-7f41-be98-010df811ea2b",
       "projectKey": "email-helper",
@@ -90856,6 +91978,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-9cbe160d61bdc9f3e13f0323",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T14:04:08.099Z",
+      "endTime": "2026-09-21T14:13:37.275Z",
+      "wallSeconds": 558,
+      "focusFactor": 0.2491,
+      "effectiveSeconds": 139,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 558,
+          "effectiveSeconds": 139
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-6d34eb8cbb2bf9c586b45800",
       "threadId": "01a0c455-102c-7dd1-a37e-d2b5341703e7",
       "projectKey": "email-helper",
@@ -91150,6 +92305,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-2452470acbfd16cbca91d9d9",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-21T14:30:20.790Z",
+      "endTime": "2026-09-21T14:34:43.359Z",
+      "wallSeconds": 261,
+      "focusFactor": 0.249,
+      "effectiveSeconds": 65,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 261,
+          "effectiveSeconds": 65
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -94915,6 +96103,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-21f50958f01dbca08f959887",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-22T10:29:31.424Z",
+      "endTime": "2026-09-22T10:39:57.650Z",
+      "wallSeconds": 624,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 156,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 624,
+          "effectiveSeconds": 156
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-db4ad62e917e6f5a332d3785",
       "threadId": "01a0c92a-54df-7d82-91a3-1cf939737e0b",
       "projectKey": "email-helper",
@@ -97519,6 +98740,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-07481b86ecbcc78b6d61ef63",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-23T10:00:17.672Z",
+      "endTime": "2026-09-23T10:09:54.398Z",
+      "wallSeconds": 575,
+      "focusFactor": 0.2487,
+      "effectiveSeconds": 143,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 575,
+          "effectiveSeconds": 143
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -103627,6 +104881,53 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-ab93ad2eee55ac143e3ea1c5",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-24T10:01:18.464Z",
+      "endTime": "2026-09-24T10:11:41.026Z",
+      "wallSeconds": 621,
+      "focusFactor": 0.2496,
+      "effectiveSeconds": 155,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 621,
+          "effectiveSeconds": 155
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-4de8358a4d49a929dea9fe04",
       "threadId": "01a0d2ee-6acf-7480-8bd9-c9949b6cec99",
       "projectKey": "email-helper",
@@ -108739,6 +110040,39 @@
         }
       ],
       "description": "Codex: email-helper",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-b4da9a110f62448fb2c48ed4",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-25T10:02:13.446Z",
+      "endTime": "2026-09-25T10:11:35.512Z",
+      "wallSeconds": 561,
+      "focusFactor": 0.2496,
+      "effectiveSeconds": 140,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 561,
+          "effectiveSeconds": 140
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -117256,6 +118590,218 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-af7ab452725376eaf0fbdd4f",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-28T10:16:22.339Z",
+      "endTime": "2026-09-28T10:28:08.817Z",
+      "wallSeconds": 653,
+      "focusFactor": 0.2496,
+      "effectiveSeconds": 163,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 653,
+          "effectiveSeconds": 163
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-96e2fc506952cca529b66e43",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-28T14:22:38.377Z",
+      "endTime": "2026-09-28T14:28:34.675Z",
+      "wallSeconds": 344,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 86,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 344,
+          "effectiveSeconds": 86
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-586f9736881646cee13eba6a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-29T10:00:53.810Z",
+      "endTime": "2026-09-29T10:14:54.913Z",
+      "wallSeconds": 836,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 209,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 836,
+          "effectiveSeconds": 209
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-6ef7015dcdeed98bb2edcf39",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-09-30T10:01:20.397Z",
+      "endTime": "2026-09-30T10:19:28.004Z",
+      "wallSeconds": 1085,
+      "focusFactor": 0.2498,
+      "effectiveSeconds": 271,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1085,
+          "effectiveSeconds": 271
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-b3bf6cc74e4d3899ad7f2899",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-01T10:22:57.026Z",
+      "endTime": "2026-10-01T10:41:31.341Z",
+      "wallSeconds": 826,
+      "focusFactor": 0.2494,
+      "effectiveSeconds": 206,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 5,
+          "effectiveSeconds": 1
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 820,
+          "effectiveSeconds": 205
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-02e91051329510fc1061745d",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-02T10:01:18.308Z",
+      "endTime": "2026-10-02T10:17:43.407Z",
+      "wallSeconds": 983,
+      "focusFactor": 0.2492,
+      "effectiveSeconds": 245,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 983,
+          "effectiveSeconds": 245
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-5d95a8d576281efe97d4be5b",
       "threadId": "01a051ec-0267-7bf2-ad70-0c0d56ea3d54",
       "projectKey": "email-helper",
@@ -118045,6 +119591,39 @@
         "output_tokens": 9133,
         "reasoning_output_tokens": 2550
       },
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-185d55671384048a2eeb2cf7",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-05T10:01:30.619Z",
+      "endTime": "2026-10-05T10:04:12.915Z",
+      "wallSeconds": 162,
+      "focusFactor": 0.2469,
+      "effectiveSeconds": 40,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 162,
+          "effectiveSeconds": 40
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -119209,6 +120788,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-eb0e3defde95df2a941d0dd9",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-06T10:01:55.697Z",
+      "endTime": "2026-10-06T10:11:32.872Z",
+      "wallSeconds": 574,
+      "focusFactor": 0.2491,
+      "effectiveSeconds": 143,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 574,
+          "effectiveSeconds": 143
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-d84df966f580b3e390c97e45",
       "threadId": "01a110b3-5bf2-7f30-9152-3613c4eeebaf",
       "projectKey": "email-helper",
@@ -119421,6 +121033,105 @@
         "output_tokens": 1619,
         "reasoning_output_tokens": 350
       },
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-91781b869ee6eb55714385f0",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-07T10:01:30.463Z",
+      "endTime": "2026-10-07T10:14:19.120Z",
+      "wallSeconds": 765,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 191,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 765,
+          "effectiveSeconds": 191
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-765c0edf0732b70d131bee23",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-08T09:59:49.376Z",
+      "endTime": "2026-10-08T10:02:05.820Z",
+      "wallSeconds": 136,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 34,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 136,
+          "effectiveSeconds": 34
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-42b8e39c54f7c6f53e586a1d",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-09T10:02:12.910Z",
+      "endTime": "2026-10-09T10:11:18.069Z",
+      "wallSeconds": 540,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 135,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 540,
+          "effectiveSeconds": 135
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -124088,6 +125799,39 @@
       "codexBackfill": true
     },
     {
+      "id": "codex-73c37bc6f638008ea1a77eb5",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-12T09:59:12.813Z",
+      "endTime": "2026-10-12T10:08:07.748Z",
+      "wallSeconds": 530,
+      "focusFactor": 0.2491,
+      "effectiveSeconds": 132,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 530,
+          "effectiveSeconds": 132
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
+      "codexBackfill": true
+    },
+    {
       "id": "codex-5074a9a138e61832e1ed7de8",
       "threadId": "01a12f90-52dd-7421-bbce-6e68a2393101",
       "projectKey": "email-helper",
@@ -124472,6 +126216,39 @@
         "output_tokens": 8212,
         "reasoning_output_tokens": 3058
       },
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-063501cfaec800d1b36ec532",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-13T10:00:59.880Z",
+      "endTime": "2026-10-13T10:09:47.765Z",
+      "wallSeconds": 525,
+      "focusFactor": 0.2495,
+      "effectiveSeconds": 131,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 525,
+          "effectiveSeconds": 131
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -125445,6 +127222,39 @@
         "output_tokens": 6829,
         "reasoning_output_tokens": 2330
       },
+      "codexBackfill": true
+    },
+    {
+      "id": "codex-c2daef79265af2265898b6cd",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-10-14T10:00:06.724Z",
+      "endTime": "2026-10-14T10:10:28.044Z",
+      "wallSeconds": 620,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 155,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 620,
+          "effectiveSeconds": 155
+        }
+      ],
+      "description": "Codex: Edit outreach drafts",
       "codexBackfill": true
     },
     {
@@ -143910,6 +145720,70 @@
         }
       ],
       "description": "Codex: email-helper"
+    },
+    {
+      "id": "codex-19de98e5e2e034cf869ab98a",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T07:55:58.456Z",
+      "endTime": "2026-11-12T08:08:27.003Z",
+      "wallSeconds": 671,
+      "focusFactor": 0.4993,
+      "effectiveSeconds": 335,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 671,
+          "effectiveSeconds": 335
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-3cd1069466679ef6809c12fc",
+      "threadId": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T08:00:06.269Z",
+      "endTime": "2026-11-12T08:06:51.791Z",
+      "wallSeconds": 336,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 168,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 336,
+          "effectiveSeconds": 168
+        }
+      ],
+      "description": "Codex: Stanford insurance"
     }
   ]
 }
