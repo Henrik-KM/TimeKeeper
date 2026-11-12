@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-12T06:16:01.829Z",
+  "updatedAt": "2026-11-12T06:31:01.927Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T06:16:02.786Z",
+    "observedAt": "2026-11-12T06:31:02.766Z",
     "primary": {
       "usedPercent": 79,
       "remainingPercent": 21,
@@ -143815,6 +143815,38 @@
         }
       ],
       "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-a80d0f4f92b34d67fb628959",
+      "threadId": "01a1c4d8-133a-73e2-8d51-06eb1fe376b8",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-12T06:02:29.812Z",
+      "endTime": "2026-11-12T06:05:21.004Z",
+      "wallSeconds": 97,
+      "focusFactor": 0.1443,
+      "effectiveSeconds": 14,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 97,
+          "effectiveSeconds": 14
+        }
+      ],
+      "description": "Codex: Continue LinkedIn invitation run"
     }
   ]
 }
