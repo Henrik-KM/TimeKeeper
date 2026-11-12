@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-12T08:31:01.999Z",
+  "updatedAt": "2026-11-12T08:46:02.256Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T08:31:02.886Z",
+    "observedAt": "2026-11-12T08:46:04.506Z",
     "primary": {
-      "usedPercent": 80,
-      "remainingPercent": 20,
+      "usedPercent": 81,
+      "remainingPercent": 19,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-13T07:10:21.000Z"
     },
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 2430,
       "assistantSessionCount": 2430,
-      "lastSeenAt": "2026-11-12T08:28:00.172Z"
+      "lastSeenAt": "2026-11-12T08:34:53.533Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -213,6 +213,23 @@
       "activityCount": 750,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-05T20:08:40.628Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 15752,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-12T08:34:53.533Z"
     },
     {
       "key": "01a1c4d8-133a-73e2-8d51-06eb1fe376b8",
@@ -502,23 +519,6 @@
       "activityCount": 2910,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-06T07:54:08.903Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 15631,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-10-14T10:10:28.044Z"
     },
     {
       "key": "01a0e1a0-f1ca-76d1-9512-c9748c50f3d1",
@@ -145676,6 +145676,38 @@
       "description": "Codex: Continue LinkedIn invitation run"
     },
     {
+      "id": "codex-06e931847c7feb984cafc37b",
+      "threadId": "01a1c4d8-133a-73e2-8d51-06eb1fe376b8",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-12T07:53:42.770Z",
+      "endTime": "2026-11-12T08:28:00.172Z",
+      "wallSeconds": 2051,
+      "focusFactor": 0.1497,
+      "effectiveSeconds": 307,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 2051,
+          "effectiveSeconds": 307
+        }
+      ],
+      "description": "Codex: Continue LinkedIn invitation run"
+    },
+    {
       "id": "codex-7f0647909398c8526bea9f8e",
       "threadId": "01a1cec0-f00b-7432-881b-7af69f0792d2",
       "projectKey": "email-helper",
@@ -145754,6 +145786,38 @@
       "description": "Codex: Stanford family visas"
     },
     {
+      "id": "codex-8c01d8402fa22f0fe2f90886",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T07:58:42.127Z",
+      "endTime": "2026-11-12T08:23:35.124Z",
+      "wallSeconds": 1429,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 714,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1429,
+          "effectiveSeconds": 714
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
       "id": "codex-3cd1069466679ef6809c12fc",
       "threadId": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
       "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
@@ -145784,6 +145848,70 @@
         }
       ],
       "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-81e7fc89a359891e74d1d25d",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T08:02:48.233Z",
+      "endTime": "2026-11-12T08:25:52.496Z",
+      "wallSeconds": 1296,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 648,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1296,
+          "effectiveSeconds": 648
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-98be27d89eed553e0a1dd695",
+      "threadId": "01a1ca47-7103-7c02-9086-a72afd9ce9e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T08:04:45.604Z",
+      "endTime": "2026-11-12T08:15:00.105Z",
+      "wallSeconds": 614,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 307,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 614,
+          "effectiveSeconds": 307
+        }
+      ],
+      "description": "Codex: Stanford travel and arrival"
     }
   ]
 }
