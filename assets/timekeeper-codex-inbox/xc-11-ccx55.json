@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-12T16:57:02.115Z",
+  "updatedAt": "2026-11-12T17:02:02.183Z",
   "dayStart": "2026-11-11T23:00:00.000Z",
   "rangeStart": "2026-08-14T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-12T16:57:04.788Z",
+    "observedAt": "2026-11-12T17:02:04.325Z",
     "primary": {
       "usedPercent": 87,
       "remainingPercent": 13,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-12T16:58:01.126Z"
+      "lastSeenAt": "2026-11-12T17:02:15.909Z"
     },
     {
       "key": "github/income-agents",
@@ -143,23 +143,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 625999,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T16:58:01.126Z"
-    },
-    {
       "key": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "sessionId": "01a1642a-3f57-7390-95e8-58659fc8a2f5",
       "title": "Find and submit competitive awards",
@@ -172,9 +155,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 218354,
+      "activityCount": 218399,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-12T16:57:19.033Z"
+      "lastSeenAt": "2026-11-12T17:02:15.909Z"
+    },
+    {
+      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 626093,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-12T17:02:13.222Z"
     },
     {
       "key": "01a181eb-f7e7-7fc1-ba6a-b6b8cf54d076",
@@ -1564,6 +1564,43 @@
       ],
       "supersedesExternalIds": [
         "codex-faacd93b2f3f29a7af8b1337"
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-7f8ff33d7104708ae00417b8",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-12T16:36:40.520Z",
+      "endTime": "2026-11-12T16:42:57.939Z",
+      "wallSeconds": 35,
+      "focusFactor": 0.4857,
+      "effectiveSeconds": 17,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 35,
+          "effectiveSeconds": 17,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-b494bc8d0f74c5fed2371562"
       ],
       "description": "Codex: Structured AL"
     }
