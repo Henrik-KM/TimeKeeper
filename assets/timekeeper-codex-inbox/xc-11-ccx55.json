@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T20:47:01.859Z",
+  "updatedAt": "2026-11-13T20:52:01.830Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T20:47:04.729Z",
+    "observedAt": "2026-11-13T20:52:03.892Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -124,7 +124,7 @@
       "match": "Anders",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-13T20:46:46.731Z"
+      "lastSeenAt": "2026-11-13T20:49:22.133Z"
     },
     {
       "key": "github/anders/bao",
@@ -339,9 +339,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 2365,
+      "activityCount": 2387,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-13T20:46:46.731Z"
+      "lastSeenAt": "2026-11-13T20:49:22.133Z"
     },
     {
       "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
@@ -1903,6 +1903,38 @@
         "codex-3ae435bffe3c95a662a9432a"
       ],
       "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-caba22343dfd95708a590e63",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-13T20:28:36.231Z",
+      "endTime": "2026-11-13T20:32:46.416Z",
+      "wallSeconds": 199,
+      "focusFactor": 0.4975,
+      "effectiveSeconds": 99,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 199,
+          "effectiveSeconds": 99
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
     }
   ]
 }
