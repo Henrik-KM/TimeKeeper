@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T12:32:02.086Z",
+  "updatedAt": "2026-11-13T12:37:02.094Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T12:32:04.254Z",
+    "observedAt": "2026-11-13T12:37:06.235Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
@@ -28,6 +28,20 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
+    {
+      "key": "github/timekeeper",
+      "displayPath": "GitHub/TimeKeeper",
+      "projectFolder": "TimeKeeper",
+      "repoName": "TimeKeeper",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 3,
+      "assistantSessionCount": 3,
+      "lastSeenAt": "2026-11-13T12:36:59.890Z"
+    },
     {
       "key": "github/mathem-agent",
       "displayPath": "GitHub/Mathem-agent",
@@ -99,18 +113,18 @@
       "lastSeenAt": "2026-11-12T11:15:35.062Z"
     },
     {
-      "key": "github/timekeeper",
-      "displayPath": "GitHub/TimeKeeper",
-      "projectFolder": "TimeKeeper",
-      "repoName": "TimeKeeper",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-07T08:10:01.315Z"
+      "key": "github/anders/bao",
+      "displayPath": "GitHub/Anders/Bao",
+      "projectFolder": "Anders",
+      "repoName": "Bao",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-13T12:35:05.524Z"
     },
     {
       "key": "github/anders/structured al",
@@ -125,23 +139,26 @@
       "sessionCount": 2,
       "assistantSessionCount": 2,
       "lastSeenAt": "2026-11-13T10:06:51.526Z"
-    },
-    {
-      "key": "github/anders/bao",
-      "displayPath": "GitHub/Anders/Bao",
-      "projectFolder": "Anders",
-      "repoName": "Bao",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-10T19:49:08.355Z"
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a1d4e8-b859-7972-a9f6-95cfd4b85ad9",
+      "sessionId": "01a1d4e8-b859-7972-a9f6-95cfd4b85ad9",
+      "title": "Fix timer startup performance",
+      "threadSource": "user",
+      "displayPath": "GitHub/TimeKeeper",
+      "repoName": "TimeKeeper",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 43,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-13T12:36:59.890Z"
+    },
     {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
       "sessionId": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
@@ -296,6 +313,23 @@
       "lastSeenAt": "2026-11-07T07:42:29.147Z"
     },
     {
+      "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "sessionId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "title": "Import Lukas’s latest Drive data",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Bao",
+      "repoName": "Bao",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 5165,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-13T12:35:05.524Z"
+    },
+    {
       "key": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "sessionId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "title": "",
@@ -328,23 +362,6 @@
       "activityCount": 3802,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T09:53:32.532Z"
-    },
-    {
-      "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "sessionId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "title": "Import Lukas’s latest Drive data",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Bao",
-      "repoName": "Bao",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 5112,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-10T19:49:08.355Z"
     }
   ],
   "emailUsageAudit": {
