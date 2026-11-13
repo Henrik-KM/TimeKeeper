@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T21:17:01.940Z",
+  "updatedAt": "2026-11-13T21:22:01.923Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T21:17:03.791Z",
+    "observedAt": "2026-11-13T21:22:03.661Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -1935,6 +1935,57 @@
         }
       ],
       "description": "Codex: Import Lukas’s latest Drive data"
+    },
+    {
+      "id": "codex-67150871e87136bc764a1924",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-13T20:45:05.391Z",
+      "endTime": "2026-11-13T21:04:03.416Z",
+      "wallSeconds": 348,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 174,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 347,
+          "effectiveSeconds": 173,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-a4dc1747e6ffe88fb774923f"
+      ],
+      "description": "Codex: Structured AL"
     }
   ]
 }
