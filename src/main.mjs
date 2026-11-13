@@ -5,6 +5,7 @@
 import {
   addLocalDays,
   countWorkdays,
+  createEntryHoursIndex,
   diffCalendarDays,
   formatCurrency,
   formatDate,
@@ -23,8 +24,7 @@ import {
   isWeeklyPaceProject,
   maxDate,
   parseLocalDateString,
-  startOfLocalDay,
-  sumEntryHours
+  startOfLocalDay
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import { acceptsCodexActivityRecord } from './features/agents/activity.mjs?v=1';
@@ -153,6 +153,29 @@ import {
 } from './features/workouts/runtime.mjs';
 
 (function () {
+  let activeSectionId = null;
+  let renderStatsCache = null;
+  let localAuditCache = null;
+  let appHealthRefreshQueued = false;
+
+  function getRenderStatsCache() {
+    if (!renderStatsCache) {
+      const cache = {
+        projects: new WeakMap(),
+        completedEntries: new Map(),
+        entryHours: new WeakMap(),
+        global: null
+      };
+      renderStatsCache = cache;
+      // Share calculations only within this task; dates and unsaved changes
+      // must be read again on the next interaction.
+      queueMicrotask(() => {
+        if (renderStatsCache === cache) renderStatsCache = null;
+      });
+    }
+    return renderStatsCache;
+  }
+
   function ensureFitnessDefaults() {
     data.fitness = applyFitnessDefaults(data.fitness);
     const fitness = data.fitness;
@@ -1052,6 +1075,7 @@ import {
   }
 
   function renderWealthHistoryTable() {
+    if (activeSectionId !== 'grocery') return;
     const body = document.getElementById('wealthHistoryBody');
     const mobileList = document.getElementById('wealthHistoryList');
     if (!body && !mobileList) return;
@@ -1721,6 +1745,7 @@ import {
   }
 
   function updateWealthDashboard() {
+    if (activeSectionId !== 'grocery') return;
     ensureWealthData();
     const history = data.wealthHistory;
     const latest = getLatestWealthSnapshot(history);
@@ -2761,6 +2786,8 @@ import {
     }
   }
   function persistDataToLocalStorage() {
+    renderStatsCache = null;
+    localAuditCache = null;
     persistProfile(localStorage, 'timekeeperDataPro', data);
   }
   function saveData() {
@@ -2825,15 +2852,12 @@ import {
     updateTimerSection();
     updateTodoSection();
     updateGrocerySection();
-    updateWealthDashboard();
-    renderWealthHistoryTable();
     updateFocusBlocker();
     updateAutoSyncStatus();
     updateCodexIntegrationPanel();
     updateCodexPage();
     updateReminderSettingsPanel();
     updatePwaStatusPanel();
-    renderTodayCommandPanel();
     renderMobileSyncStatus();
     renderMobileUndoTray();
   }
@@ -3030,6 +3054,33 @@ import {
   }
 
   function getLocalDataAudit(now = new Date()) {
+    const day = startOfLocalDay(now).getTime();
+    if (
+      localAuditCache?.data === data &&
+      localAuditCache.revision === data.backupRevision &&
+      localAuditCache.day === day &&
+      localAuditCache.entries === data.entries &&
+      localAuditCache.entryCount === data.entries.length &&
+      localAuditCache.projects === data.projects &&
+      localAuditCache.projectCount === data.projects.length
+    ) {
+      return localAuditCache.audit;
+    }
+    const audit = getLocalDataAuditUncached(now);
+    localAuditCache = {
+      data,
+      revision: data.backupRevision,
+      day,
+      entries: data.entries,
+      entryCount: data.entries.length,
+      projects: data.projects,
+      projectCount: data.projects.length,
+      audit
+    };
+    return audit;
+  }
+
+  function getLocalDataAuditUncached(now) {
     const projectIds = new Set();
     const duplicateProjectIds = new Set();
     data.projects.forEach((project) => {
@@ -3475,6 +3526,9 @@ import {
   let entryDateTo = '';
   const selectedEntryIds = new Set();
   const expandedEntryGroupIds = new Set();
+  const ENTRY_PAGE_SIZE = 100;
+  let entryPageIndex = 0;
+  let entryPageViewKey = '';
   let pendingInstallPrompt = null;
   let pendingServiceWorkerRegistration = null;
   let reloadAfterServiceWorkerUpdate = false;
@@ -5966,6 +6020,20 @@ import {
   }
 
   function updateAppHealthPanel() {
+    if (appHealthRefreshQueued) return;
+    appHealthRefreshQueued = true;
+    const render = () => {
+      appHealthRefreshQueued = false;
+      renderAppHealthPanel();
+    };
+    if (typeof window.requestIdleCallback === 'function') {
+      window.requestIdleCallback(render, { timeout: 1000 });
+    } else {
+      requestAnimationFrame(() => window.setTimeout(render, 0));
+    }
+  }
+
+  function renderAppHealthPanel() {
     const panel = document.getElementById('appHealthPanel');
     if (!panel) return;
     panel.innerHTML = '';
@@ -6585,6 +6653,7 @@ import {
   }
 
   function updateTodoSection() {
+    if (activeSectionId !== 'todo') return;
     const workouts = ensureWorkoutData();
     const fitnessData = ensureFitnessDefaults();
     const presetsContent = document.getElementById('workoutPresetsContent');
@@ -8819,6 +8888,7 @@ import {
   }
 
   function updateGrocerySection(force = false) {
+    if (activeSectionId !== 'grocery') return;
     if (!force) {
       if (groceryRenderQueued) return;
       groceryRenderQueued = true;
@@ -10485,8 +10555,6 @@ import {
       (section) => section.id
     )
   );
-  let activeSectionId = null;
-
   function updateSectionHash(sectionId) {
     if (!sectionIds.has(sectionId) || !window.history) return;
     const nextHash = `#${encodeURIComponent(sectionId)}`;
@@ -12223,12 +12291,30 @@ import {
 
   function getCompletedProjectEntries(projectId, options = {}) {
     const includeCodexEntries = options.includeCodexEntries !== false;
-    return data.entries.filter(
+    const cache = getRenderStatsCache();
+    let projectEntries = cache.completedEntries.get(projectId);
+    if (!projectEntries) {
+      projectEntries = new Map();
+      cache.completedEntries.set(projectId, projectEntries);
+    }
+    if (projectEntries.has(includeCodexEntries))
+      return projectEntries.get(includeCodexEntries);
+    const entries = data.entries.filter(
       (entry) =>
         entry.projectId === projectId &&
         !entry.isRunning &&
         (includeCodexEntries || !isCodexTimeEntry(entry))
     );
+    projectEntries.set(includeCodexEntries, entries);
+    return entries;
+  }
+
+  function getEntryHoursIndex(entries) {
+    const cache = getRenderStatsCache();
+    if (!cache.entryHours.has(entries)) {
+      cache.entryHours.set(entries, createEntryHoursIndex(entries));
+    }
+    return cache.entryHours.get(entries);
   }
 
   const ROLLING_TARGET_BUFFER_RECOVERY_WEEKS = 4;
@@ -12239,7 +12325,13 @@ import {
     return Math.min(max, Math.max(min, value));
   }
 
-  function getRollingTargetBuffer(project, entries, weeklyBaseline, weekStart) {
+  function getRollingTargetBuffer(
+    project,
+    entries,
+    weeklyBaseline,
+    weekStart,
+    sumHours
+  ) {
     const baseline = Math.max(0, Number(weeklyBaseline) || 0);
     const emptyBuffer = {
       adjustmentHours: 0,
@@ -12260,14 +12352,11 @@ import {
             project,
             entries,
             rollingTargetStart,
-            rollingEndExclusive
+            rollingEndExclusive,
+            sumHours
           )
         : 0;
-    const rollingActualHours = sumEntryHours(
-      entries,
-      rollingStart,
-      rollingEndExclusive
-    );
+    const rollingActualHours = sumHours(rollingStart, rollingEndExclusive);
     if (rollingTargetHours <= 0) {
       return {
         ...emptyBuffer,
@@ -12296,14 +12385,16 @@ import {
     project,
     entries,
     weeklyBaseline,
-    weekStart
+    weekStart,
+    sumHours
   ) {
     const baseline = Math.max(0, Number(weeklyBaseline) || 0);
     const buffer = getRollingTargetBuffer(
       project,
       entries,
       baseline,
-      weekStart
+      weekStart,
+      sumHours
     );
     return {
       ...buffer,
@@ -12314,9 +12405,30 @@ import {
 
   // Compute statistics per project
   function computeProjectStats(project, options = {}) {
+    if (Object.keys(options).some((key) => key !== 'includeCodexEntries')) {
+      return computeProjectStatsUncached(project, options);
+    }
+    const cache = getRenderStatsCache();
+    let projectCache = cache.projects.get(project);
+    if (!projectCache) {
+      projectCache = new Map();
+      cache.projects.set(project, projectCache);
+    }
+    const includeCodexEntries = options.includeCodexEntries !== false;
+    if (!projectCache.has(includeCodexEntries)) {
+      projectCache.set(
+        includeCodexEntries,
+        computeProjectStatsUncached(project, options)
+      );
+    }
+    return projectCache.get(includeCodexEntries);
+  }
+
+  function computeProjectStatsUncached(project, options = {}) {
     const now = new Date();
     const entries = getCompletedProjectEntries(project.id, options);
-    const totalHours = sumEntryHours(entries);
+    const sumHours = getEntryHoursIndex(entries);
+    const totalHours = sumHours();
     const remainingHours = project.budgetHours - totalHours;
     const created = getProjectStartDate(project);
     const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
@@ -12329,7 +12441,8 @@ import {
     const planningSnapshot = getProjectPlanningSnapshot(
       project,
       entries,
-      todayStart
+      todayStart,
+      sumHours
     );
     const requiredDailyPace = Math.max(
       0,
@@ -12447,18 +12560,17 @@ import {
     const lastWeekStart = new Date(weekStart);
     lastWeekStart.setDate(weekStart.getDate() - 7);
     const lastWeekEnd = new Date(weekStart);
-    const weeklyHours = sumEntryHours(entries, weekStart);
-    const lastWeekHours = sumEntryHours(entries, lastWeekStart, lastWeekEnd);
+    const weeklyHours = sumHours(weekStart);
+    const lastWeekHours = sumHours(lastWeekStart, lastWeekEnd);
     // Monthly hours and last month hours
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const startNextMonth = new Date(now.getFullYear(), now.getMonth() + 1, 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
     const lastMonthEnd = monthStart;
-    const monthlyHours = sumEntryHours(entries, monthStart);
-    const lastMonthHours = sumEntryHours(entries, lastMonthStart, lastMonthEnd);
+    const monthlyHours = sumHours(monthStart);
+    const lastMonthHours = sumHours(lastMonthStart, lastMonthEnd);
     const rollingBounds = getRollingWindowBounds(now);
-    const rolling30Hours = sumEntryHours(
-      entries,
+    const rolling30Hours = sumHours(
       rollingBounds.start,
       rollingBounds.endExclusive
     );
@@ -12470,8 +12582,7 @@ import {
     const rolling30CodexHours = rollingSources.codex / 3600;
     const rolling30ClaudeHours = rollingSources.claude / 3600;
     const rolling90Bounds = getRollingWindowBounds(now, 90);
-    const rolling90Hours = sumEntryHours(
-      entries,
+    const rolling90Hours = sumHours(
       rolling90Bounds.start,
       rolling90Bounds.endExclusive
     );
@@ -12488,7 +12599,8 @@ import {
           project,
           entries,
           rolling90TargetStart,
-          rolling90Bounds.endExclusive
+          rolling90Bounds.endExclusive,
+          sumHours
         )
       : 0;
     // Revenue
@@ -12502,20 +12614,23 @@ import {
         project,
         entries,
         weekStart,
-        startNextWeek
+        startNextWeek,
+        sumHours
       );
       const rollingTargetBuffer = applyRollingTargetBuffer(
         project,
         entries,
         weeklyTargetBeforeRollingCredit,
-        weekStart
+        weekStart,
+        sumHours
       );
       const weeklyTargetConst = rollingTargetBuffer.weeklyTarget;
       const monthlyTargetConst = getProjectPlannedHoursForPeriod(
         project,
         entries,
         monthStart,
-        startNextMonth
+        startNextMonth,
+        sumHours
       );
       const rollingTargetStart = maxDate(rollingBounds.start, created);
       const rollingWorkdays = rollingTargetStart
@@ -12579,13 +12694,15 @@ import {
       project,
       entries,
       weekStart,
-      startNextWeek
+      startNextWeek,
+      sumHours
     );
     let monthlyTargetConst = getProjectPlannedHoursForPeriod(
       project,
       entries,
       monthStart,
-      startNextMonth
+      startNextMonth,
+      sumHours
     );
     const rollingTargetStart = maxDate(rollingBounds.start, created);
     const rolling30TargetConst = rollingTargetStart
@@ -12593,7 +12710,8 @@ import {
           project,
           entries,
           rollingTargetStart,
-          rollingBounds.endExclusive
+          rollingBounds.endExclusive,
+          sumHours
         )
       : 0;
     const weeklyTargetBeforeRollingCredit = weeklyTargetConst;
@@ -12601,7 +12719,8 @@ import {
       project,
       entries,
       weeklyTargetBeforeRollingCredit,
-      weekStart
+      weekStart,
+      sumHours
     );
     weeklyTargetConst = rollingTargetBuffer.weeklyTarget;
     if (projectNotStarted) {
@@ -12741,7 +12860,7 @@ import {
     options = {}
   ) {
     const projectEntries = getCompletedProjectEntries(projectId, options);
-    return sumEntryHours(projectEntries, start, end);
+    return getEntryHoursIndex(projectEntries)(start, end);
   }
 
   function getProjectDailyPlan(project, stats, context, options = {}) {
@@ -12887,6 +13006,12 @@ import {
 
   // Compute global statistics
   function computeGlobalStats() {
+    const cache = getRenderStatsCache();
+    if (!cache.global) cache.global = computeGlobalStatsUncached();
+    return cache.global;
+  }
+
+  function computeGlobalStatsUncached() {
     const now = new Date();
     const todayStart = new Date(
       now.getFullYear(),
@@ -14443,6 +14568,7 @@ import {
   }
 
   function updateCodexPage() {
+    if (activeSectionId !== 'codex') return;
     const content = document.getElementById('codexPageContent');
     if (!content) return;
     const renderToken = ++codexPageRenderToken;
@@ -14841,10 +14967,9 @@ import {
     }
   }
 
-  let latestTimerStats = null;
   function updateDashboard() {
+    if (activeSectionId !== 'dashboard') return;
     const stats = computeGlobalStats();
-    latestTimerStats = stats;
     const nowTime = new Date();
     const activeProjects = data.projects.filter((project) =>
       isProjectActive(project, nowTime)
@@ -15853,6 +15978,7 @@ import {
 
   // Projects page rendering
   function updateProjectsPage() {
+    if (activeSectionId !== 'projects') return;
     updateProjectSelects();
     renderProjectsPageList();
   }
@@ -16568,6 +16694,31 @@ import {
     bar.appendChild(controls);
   }
 
+  function computeTimerStats() {
+    const context = getCurrentWeekPlanningContext();
+    const now = new Date();
+    const dailyPlans = data.projects
+      .filter((project) => isProjectActive(project, now))
+      .map((project) => getProjectDailyPlan(project, null, context));
+    const todayStart = context.todayStart.getTime();
+    const projectIds = new Set(data.projects.map((project) => project.id));
+    let todaySeconds = 0;
+    data.entries.forEach((entry) => {
+      if (
+        !entry.isRunning &&
+        entry.duration &&
+        projectIds.has(entry.projectId) &&
+        new Date(entry.startTime).getTime() >= todayStart
+      ) {
+        todaySeconds += entry.duration;
+      }
+    });
+    return {
+      dailyTarget: getPortfolioDailyTarget(dailyPlans),
+      todayHours: todaySeconds / 3600
+    };
+  }
+
   function updateTimerSection({ quick = false } = {}) {
     const emptyState = document.getElementById('timerEmptyState');
     if (emptyState) emptyState.hidden = getActiveProjects().length > 0;
@@ -16768,19 +16919,7 @@ import {
         runningDiv.appendChild(row);
       });
       // Start an interval that updates all running timers every second
-      const statsSnapshot =
-        quick && latestTimerStats
-          ? { ...latestTimerStats }
-          : computeGlobalStats();
-      if (quick && latestTimerStats) {
-        const todayStart = startOfLocalDay(new Date());
-        statsSnapshot.todayHours = data.entries.reduce((hours, entry) => {
-          if (entry.isRunning || !entry.duration) return hours;
-          if (!(new Date(entry.startTime) >= todayStart)) return hours;
-          return getEntryProject(entry) ? hours + entry.duration / 3600 : hours;
-        }, 0);
-      }
-      latestTimerStats = statsSnapshot;
+      const statsSnapshot = computeTimerStats();
       const dailyTargetHours = Math.max(
         0,
         Number(statsSnapshot.dailyTarget) || 0
@@ -16790,8 +16929,10 @@ import {
         Number(statsSnapshot.todayHours) || 0
       );
       const tick = () => {
+        if (document.hidden) return;
         const now = new Date();
         renderMobileNowBar(now);
+        if (activeSectionId !== 'timer') return;
         const todayStart = new Date(
           now.getFullYear(),
           now.getMonth(),
@@ -16877,9 +17018,11 @@ import {
           totalFactorSpan.textContent = Math.round(totalFactor * 100) + '%';
       };
       tick();
+      timerTick = tick;
       timerInterval = setInterval(tick, 1000);
     } else {
       // No running entries: hide running timer section and show start form
+      timerTick = null;
       runningDiv.style.display = 'none';
       runningDiv.innerHTML = '';
       startDiv.style.display = '';
@@ -17119,6 +17262,10 @@ import {
     offerUndo('Timer stopped.', snapshot);
   }
   let timerInterval = null;
+  let timerTick = null;
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) timerTick?.();
+  });
   // Chart instances for weekly and monthly scatter plots
   let weeklyScatterChart = null;
   let monthlyScatterChart = null;
@@ -17160,7 +17307,9 @@ import {
 
     // Provide tactile feedback when starting a timer
     provideHaptic('long');
-    const snapshot = cloneData();
+    // Only running entries can change before this action's durable save.
+    const previousEntryCount = data.entries.length;
+    const runningSnapshots = runningEntries.map((entry) => ({ ...entry }));
     const now = new Date();
     const newEntryFactor = normalizeFocusFactor(overrideFactor);
     // Update all existing running entries without mutating their explicit focus.
@@ -17189,7 +17338,14 @@ import {
     try {
       saveData();
     } catch (error) {
-      data = snapshot;
+      data.entries.length = previousEntryCount;
+      runningEntries.forEach((entry, index) => {
+        const previous = runningSnapshots[index];
+        Object.keys(entry).forEach((key) => {
+          if (!Object.hasOwn(previous, key)) delete entry[key];
+        });
+        Object.assign(entry, previous);
+      });
       showTimerSaveError(error);
       return false;
     }
@@ -17494,17 +17650,18 @@ import {
   }
 
   function getLastStoppedTimerShortcut(runningProjectIds) {
-    const entry = data.entries
-      .slice()
-      .filter(
-        (candidate) =>
-          !candidate.isRunning && !isImportedAgentTimeEntry(candidate)
-      )
-      .sort((a, b) => {
-        const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
-        const bTime = new Date(b.endTime || b.createdAt || b.startTime || 0);
-        return bTime - aTime;
-      })[0];
+    let entry = null;
+    let latestTime = -Infinity;
+    data.entries.forEach((candidate) => {
+      if (candidate.isRunning || isImportedAgentTimeEntry(candidate)) return;
+      const time = new Date(
+        candidate.endTime || candidate.createdAt || candidate.startTime || 0
+      ).getTime();
+      if (!entry || time > latestTime) {
+        entry = candidate;
+        latestTime = time;
+      }
+    });
     if (!entry) return null;
     const project = getStartableTimerProject(
       entry.projectId,
@@ -17528,18 +17685,20 @@ import {
     const seen = new Set(excludeKeys);
     const shortcuts = [];
     data.entries
-      .slice()
-      .filter((entry) => !entry.isRunning && !isImportedAgentTimeEntry(entry))
-      .sort((a, b) => {
-        const aTime = new Date(a.endTime || a.createdAt || a.startTime || 0);
-        const bTime = new Date(b.endTime || b.createdAt || b.startTime || 0);
-        return bTime - aTime;
-      })
-      .forEach((entry) => {
-        if (shortcuts.length >= limit) return;
+      .filter((entry) => {
+        if (entry.isRunning || isImportedAgentTimeEntry(entry)) return false;
         const start = new Date(entry.startTime);
-        if (Number.isNaN(start.getTime())) return;
-        if (start < yesterday || start >= today) return;
+        return start >= yesterday && start < today;
+      })
+      .map((entry) => ({
+        entry,
+        time: new Date(
+          entry.endTime || entry.createdAt || entry.startTime || 0
+        ).getTime()
+      }))
+      .sort((a, b) => b.time - a.time)
+      .forEach(({ entry }) => {
+        if (shortcuts.length >= limit) return;
         const project = getStartableTimerProject(
           entry.projectId,
           runningProjectIds
@@ -17566,15 +17725,14 @@ import {
     const shortcuts = [];
     const seen = new Set(excludeKeys);
     data.entries
-      .slice()
-      .sort((a, b) => {
-        const aTime = new Date(a.createdAt || a.startTime || 0).getTime();
-        const bTime = new Date(b.createdAt || b.startTime || 0).getTime();
-        return bTime - aTime;
-      })
-      .forEach((entry) => {
+      .filter((entry) => !entry.isRunning && !isImportedAgentTimeEntry(entry))
+      .map((entry) => ({
+        entry,
+        time: new Date(entry.createdAt || entry.startTime || 0).getTime()
+      }))
+      .sort((a, b) => b.time - a.time)
+      .forEach(({ entry }) => {
         if (shortcuts.length >= limit) return;
-        if (entry.isRunning || isImportedAgentTimeEntry(entry)) return;
         const project = getStartableTimerProject(
           entry.projectId,
           runningProjectIds
@@ -19304,17 +19462,14 @@ import {
     const panel = document.getElementById('todayCommandPanel');
     if (!panel) return;
     syncTodayCommandPanelVisibility();
+    if (!shouldShowTodayCommandPanel()) return;
     panel.innerHTML = '';
     panel.classList.remove('mobile-today-panel');
     const runningEntries = getRunningEntries();
     const activeEntries = getActiveRunningEntries();
     const stats = computeGlobalStats();
     const recommendation = getRecommendedProjectForToday();
-    const audit = getLocalDataAudit();
     const settings = ensureReminderSettings();
-    const codexTopPerformance = hasCodexEntries()
-      ? getCodexTopPerformanceState()
-      : null;
     if (
       renderMobileTodayCommandPanel({
         panel,
@@ -19327,6 +19482,11 @@ import {
     ) {
       return;
     }
+
+    const audit = getLocalDataAudit();
+    const codexTopPerformance = hasCodexEntries()
+      ? getCodexTopPerformanceState()
+      : null;
 
     const header = document.createElement('div');
     header.className = 'today-command-header';
@@ -20467,12 +20627,12 @@ import {
     const label = document.createElement('span');
     label.textContent = count
       ? `${count} selected`
-      : `${entriesToShow.length} visible`;
+      : `${entriesToShow.length} matching`;
     bulkEl.appendChild(label);
     const selectAllBtn = document.createElement('button');
     selectAllBtn.type = 'button';
     selectAllBtn.className = 'btn secondary';
-    selectAllBtn.textContent = 'Select Visible';
+    selectAllBtn.textContent = 'Select Matching';
     selectAllBtn.disabled = entriesToShow.length === 0;
     selectAllBtn.addEventListener('click', () => {
       visibleIds.forEach((id) => selectedEntryIds.add(id));
@@ -20542,7 +20702,7 @@ import {
     const exportVisibleBtn = document.createElement('button');
     exportVisibleBtn.type = 'button';
     exportVisibleBtn.className = 'btn secondary';
-    exportVisibleBtn.textContent = 'Export Visible CSV';
+    exportVisibleBtn.textContent = 'Export Matching CSV';
     exportVisibleBtn.disabled = entriesToShow.length === 0;
     exportVisibleBtn.addEventListener('click', () => {
       exportEntriesCsv(entriesToShow);
@@ -20579,7 +20739,61 @@ import {
   }
 
   // Entries table
+  function renderEntryPagination(groups) {
+    const pagination = document.getElementById('entryPagination');
+    const preferences = ensureUsagePreferences();
+    const viewKey = JSON.stringify([
+      showAllEntries,
+      entryProjectFilter,
+      entrySearchQuery,
+      entryDateFrom,
+      entryDateTo,
+      preferences.groupEntries
+    ]);
+    if (viewKey !== entryPageViewKey) {
+      entryPageIndex = 0;
+      entryPageViewKey = viewKey;
+    }
+    const lastPage = Math.max(
+      0,
+      Math.ceil(groups.length / ENTRY_PAGE_SIZE) - 1
+    );
+    entryPageIndex = Math.min(entryPageIndex, lastPage);
+    const start = entryPageIndex * ENTRY_PAGE_SIZE;
+    if (pagination) {
+      pagination.replaceChildren();
+      pagination.hidden = groups.length <= ENTRY_PAGE_SIZE;
+      pagination.style.display = pagination.hidden ? 'none' : 'flex';
+      if (!pagination.hidden) {
+        const previous = document.createElement('button');
+        previous.type = 'button';
+        previous.className = 'btn secondary';
+        previous.textContent = 'Previous';
+        previous.disabled = entryPageIndex === 0;
+        const status = document.createElement('span');
+        status.setAttribute('role', 'status');
+        const end = Math.min(start + ENTRY_PAGE_SIZE, groups.length);
+        status.textContent = `${start + 1}–${end} of ${groups.length} ${preferences.groupEntries ? 'groups' : 'entries'}`;
+        const next = document.createElement('button');
+        next.type = 'button';
+        next.className = 'btn secondary';
+        next.textContent = 'Next';
+        next.disabled = entryPageIndex === lastPage;
+        const changePage = (delta) => {
+          entryPageIndex += delta;
+          updateEntriesTable();
+          pagination.scrollIntoView({ block: 'nearest' });
+        };
+        previous.addEventListener('click', () => changePage(-1));
+        next.addEventListener('click', () => changePage(1));
+        pagination.append(previous, status, next);
+      }
+    }
+    return groups.slice(start, start + ENTRY_PAGE_SIZE);
+  }
+
   function updateEntriesTable() {
+    if (activeSectionId !== 'entries') return;
     const tbody = document.getElementById('entriesTableBodyPro');
     tbody.innerHTML = '';
     const entriesToShow = getEntriesForCurrentView();
@@ -20588,6 +20802,7 @@ import {
     renderEntryBulkActions(entriesToShow);
     renderTodayCommandPanel();
     if (data.entries.length === 0 || entriesToShow.length === 0) {
+      renderEntryPagination([]);
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 9;
@@ -20611,7 +20826,7 @@ import {
           count: 1,
           entries: [entry]
         }));
-    groups.forEach((group) => {
+    renderEntryPagination(groups).forEach((group) => {
       if (group.count > 1) {
         const headerRow = document.createElement('tr');
         headerRow.className = 'entry-group-row';
@@ -21412,18 +21627,12 @@ import {
   }
 
   // Initial render
-  const initialLaunchSectionId =
-    getSectionFromHash(window.location.hash) || defaultSectionId;
   updateCodexContextStatus();
   primeStravaCacheFromBrowserStorage();
   updateProjectSelects();
-  updateEntriesTable();
-  updateProjectsPage();
-  if (initialLaunchSectionId !== 'dashboard') updateDashboard();
-  updateTimerSection();
+  updateTimerSection({ quick: true });
   updateCodexIntegrationPanel();
   updateClaudeIntegrationPanel();
-  updateCodexPage();
   scheduleCodexAutoImport();
   scheduleClaudeAutoImport();
   scheduleCodexRemoteContextPublish({ delay: 0, force: true });
@@ -21454,7 +21663,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=70')
+      .register('./service-worker.js?v=71')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();

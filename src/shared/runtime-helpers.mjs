@@ -97,6 +97,40 @@ export function sumEntryHours(
   return totalSeconds / 3600;
 }
 
+// A snapshot for repeated range queries during one render. Rebuild after edits.
+export function createEntryHoursIndex(entries) {
+  const rows = [];
+  for (const entry of entries) {
+    if (!entry || !entry.duration) continue;
+    if (!Number.isFinite(entry.duration)) {
+      return (start = null, end = null) => sumEntryHours(entries, start, end);
+    }
+    const time = new Date(entry.startTime).getTime();
+    if (Number.isFinite(time)) rows.push({ time, seconds: entry.duration });
+  }
+  rows.sort((a, b) => a.time - b.time);
+  const totals = [0];
+  for (const row of rows) totals.push(totals[totals.length - 1] + row.seconds);
+  const lowerBound = (time) => {
+    let low = 0;
+    let high = rows.length;
+    while (low < high) {
+      const middle = Math.floor((low + high) / 2);
+      if (rows[middle].time < time) low = middle + 1;
+      else high = middle;
+    }
+    return low;
+  };
+  return (start = null, end = null) => {
+    const from = start ? Number(start) : -Infinity;
+    const to = end ? Number(end) : Infinity;
+    if (to <= from) return 0;
+    const first = Number.isNaN(from) ? 0 : lowerBound(from);
+    const last = Number.isNaN(to) ? rows.length : lowerBound(to);
+    return (totals[last] - totals[first]) / 3600;
+  };
+}
+
 export function countWorkdays(startDate, endDate) {
   const start = new Date(
     startDate.getFullYear(),
@@ -175,7 +209,12 @@ export function getRollingWindowBounds(
   return { start, endExclusive };
 }
 
-export function getProjectPlanningSnapshot(project, entries, snapshotDate) {
+export function getProjectPlanningSnapshot(
+  project,
+  entries,
+  snapshotDate,
+  sumHours = null
+) {
   const weeklyExpectedHours = getProjectWeeklyExpectedHours(project);
   if (weeklyExpectedHours > 0) {
     const projectStart = getProjectStartDate(project);
@@ -202,7 +241,9 @@ export function getProjectPlanningSnapshot(project, entries, snapshotDate) {
       dailyRate: 0
     };
   }
-  const workedBeforeSnapshot = sumEntryHours(entries, null, snapshotStart);
+  const workedBeforeSnapshot = sumHours
+    ? sumHours(null, snapshotStart)
+    : sumEntryHours(entries, null, snapshotStart);
   const remainingHours = Math.max(
     0,
     (project.budgetHours || 0) - workedBeforeSnapshot
@@ -228,7 +269,8 @@ export function getProjectPlannedHoursForPeriod(
   project,
   entries,
   snapshotDate,
-  periodEndExclusive
+  periodEndExclusive,
+  sumHours = null
 ) {
   const weeklyExpectedHours = getProjectWeeklyExpectedHours(project);
   if (weeklyExpectedHours > 0) {
@@ -241,7 +283,12 @@ export function getProjectPlannedHoursForPeriod(
     return (weeklyExpectedHours / 5) * Math.max(0, workdaysInPeriod);
   }
   const deadlineEndExclusive = getProjectDeadlineEndExclusive(project);
-  const snapshot = getProjectPlanningSnapshot(project, entries, snapshotDate);
+  const snapshot = getProjectPlanningSnapshot(
+    project,
+    entries,
+    snapshotDate,
+    sumHours
+  );
   if (
     !deadlineEndExclusive ||
     !snapshot.snapshotStart ||

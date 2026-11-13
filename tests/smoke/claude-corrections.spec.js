@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('./fixtures');
 
 for (const width of [390, 1280]) {
   test(`Claude history corrections survive reload and stale feeds at ${width}px`, async ({

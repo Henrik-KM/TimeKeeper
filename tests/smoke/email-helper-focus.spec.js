@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('./fixtures');
 
 for (const width of [390, 1280]) {
   test(`email-helper focus migrates all history and survives stale imports at ${width}px`, async ({

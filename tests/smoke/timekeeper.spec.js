@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('./fixtures');
 const { readFile } = require('node:fs/promises');
 
 /** @typedef {Window & { __timekeeperFinanceXssFired?: boolean }} FinanceSmokeWindow */
@@ -953,7 +953,7 @@ test('entry bulk tools can move selected entries and export CSV summaries', asyn
   );
 
   const download = page.waitForEvent('download');
-  await page.getByRole('button', { name: 'Export Visible CSV' }).click();
+  await page.getByRole('button', { name: 'Export Matching CSV' }).click();
   const visibleDownload = await download;
   await expect(visibleDownload.suggestedFilename()).toContain(
     'timekeeper-entries'
@@ -1784,8 +1784,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v70';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=65'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v71';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=66'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
@@ -1801,7 +1801,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs?v=2'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '70')"
+    "url.searchParams.set('timekeeper-update', '71')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1811,7 +1811,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=70')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=71')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -2431,7 +2431,10 @@ test('mobile shell exposes Now bar More menu sync status charts and richer quick
 
   await nowBar.getByRole('button', { name: 'Stop' }).click();
   await expect(nowBar).toBeHidden();
-  await expect(page.locator('.app-toast')).toHaveCount(0);
+  // Background app notices are independent of the timer's mobile undo feedback.
+  await expect(
+    page.locator('.app-toast').filter({ hasText: 'Timer stopped.' })
+  ).toHaveCount(0);
   await expect(page.locator('#mobileUndoTray')).toContainText('Timer stopped.');
   await expect
     .poll(() =>

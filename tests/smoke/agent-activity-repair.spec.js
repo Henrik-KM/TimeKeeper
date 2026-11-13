@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('./fixtures');
 
 for (const width of [390, 1280]) {
   test(`Codex activity repairs preserve notes and reject outdated producers at ${width}px`, async ({

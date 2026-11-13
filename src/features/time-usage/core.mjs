@@ -206,14 +206,16 @@ export function computeRollingSourceTotals(
   const from = validDate(start);
   const to = validDate(endExclusive);
   if (!from || !to) return totals;
+  const fromTime = from.getTime();
+  const toTime = to.getTime();
   for (const entry of Array.isArray(entries) ? entries : []) {
     if (!entry || entry.isRunning) continue;
-    const date = validDate(entry.startTime);
+    const time = validDate(entry.startTime)?.getTime();
     const duration = finiteNonNegative(entry.duration);
     if (
-      !date ||
-      date < from ||
-      date >= to ||
+      time == null ||
+      time < fromTime ||
+      time >= toTime ||
       duration <= 0 ||
       (projectIds && !projectIds.has(String(entry.projectId || '')))
     )
@@ -240,6 +242,8 @@ export function computeRollingPersonalHourlyRate(
   if (!from || !to) {
     return { personalHours: 0, totalPaidValue: 0, hourlyRate: null };
   }
+  const fromTime = from.getTime();
+  const toTime = to.getTime();
 
   const projectById = new Map();
   for (const project of Array.isArray(projects) ? projects : []) {
@@ -251,10 +255,11 @@ export function computeRollingPersonalHourlyRate(
   let totalPaidValue = 0;
   for (const entry of Array.isArray(entries) ? entries : []) {
     if (!entry || entry.isRunning) continue;
-    const date = validDate(entry.startTime);
+    const time = validDate(entry.startTime)?.getTime();
     const duration = finiteNonNegative(entry.duration);
     const source = getEntrySource(entry);
-    if (!date || date < from || date >= to || duration <= 0) continue;
+    if (time == null || time < fromTime || time >= toTime || duration <= 0)
+      continue;
 
     const project = projectById.get(String(entry.projectId || ''));
     const hourlyRate = Number(project?.hourlyRate);

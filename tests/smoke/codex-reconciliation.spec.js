@@ -1,4 +1,4 @@
-const { expect, test } = require('@playwright/test');
+const { expect, test } = require('./fixtures');
 
 for (const width of [390, 1280]) {
   test(`Codex corrections survive reload, expired feeds and stale replay at ${width}px`, async ({
