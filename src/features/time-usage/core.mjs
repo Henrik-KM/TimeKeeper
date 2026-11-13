@@ -130,16 +130,12 @@ export function groupTimeEntries(
   { gapSeconds = ENTRY_GROUP_GAP_SECONDS } = {}
 ) {
   const ordered = (Array.isArray(entries) ? entries : [])
-    .slice()
-    .filter((entry) => validDate(entry?.startTime))
-    .sort(
-      (left, right) =>
-        validDate(left.startTime).getTime() -
-        validDate(right.startTime).getTime()
-    );
+    .map((entry) => ({ entry, start: validDate(entry?.startTime) }))
+    .filter((row) => row.start)
+    .sort((left, right) => left.start.getTime() - right.start.getTime());
   const groups = [];
   const agentGroups = new Map();
-  ordered.forEach((entry) => {
+  ordered.forEach(({ entry, start }) => {
     const source = getEntrySource(entry);
     const dateKey = localDateKey(entry.startTime);
     const projectId = String(entry.projectId || '');
@@ -152,7 +148,6 @@ export function groupTimeEntries(
         groups.push(group);
       } else {
         group.entries.push(entry);
-        const start = validDate(entry.startTime);
         const end = validDate(entry.endTime) || start;
         if (start && (!group.start || start < group.start)) group.start = start;
         if (end && (!group.end || end > group.end)) group.end = end;
@@ -161,7 +156,6 @@ export function groupTimeEntries(
     }
 
     const previous = groups.at(-1);
-    const start = validDate(entry.startTime);
     const end = validDate(entry.endTime) || start;
     const gap =
       previous?.end && start

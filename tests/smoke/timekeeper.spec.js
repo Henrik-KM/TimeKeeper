@@ -1784,8 +1784,9 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v71';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=66'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v72';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=67'");
+  expect(serviceWorker).toContain("'./src/shared/vendor/chart.umd.js?v=4.6.1'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
     "'./src/shared/profile-compression-worker.mjs'"
@@ -1801,7 +1802,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs?v=2'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '71')"
+    "url.searchParams.set('timekeeper-update', '72')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1811,7 +1812,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=71')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=72')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -4505,7 +4506,7 @@ test('timer recommendation uses remaining project hours over workdays left', asy
     ]
   });
 
-  await page.goto('/');
+  await page.goto('/#timer');
 
   await expect(page.locator('#timerProjectPro option').first()).toContainText(
     /IFLAI.*Recommended.*~14\.6h today/
@@ -4549,15 +4550,16 @@ test('daily recommendation credits hours worked on another active project', asyn
 
   await page.goto('/');
 
-  await expect(page.locator('#timerRecommendationPro')).toBeHidden();
-  await expect(
-    page.locator('#timerProjectPro option').first()
-  ).not.toContainText('Recommended');
   await expect(
     page.locator('#todayCommandPanel .today-command-item').filter({
       hasText: 'Next'
     })
   ).toContainText('caught up');
+  await gotoSection(page, 'timer', 'Timer');
+  await expect(page.locator('#timerRecommendationPro')).toBeHidden();
+  await expect(
+    page.locator('#timerProjectPro option').first()
+  ).not.toContainText('Recommended');
 });
 
 test('portfolio daily target nets projects ahead and behind schedule', async ({

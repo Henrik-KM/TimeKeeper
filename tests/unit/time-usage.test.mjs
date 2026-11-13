@@ -160,3 +160,42 @@ test('union time does not double-count simultaneous entries', () => {
     5400
   );
 });
+
+test('large shuffled history groups without repeatedly parsing dates while sorting', () => {
+  let timestampReads = 0;
+  const count = 5000;
+  const now = new Date('2026-11-13T12:00:00').getTime();
+  const entries = Array.from({ length: count }, (_, index) => {
+    const offset = ((index * 1543) % count) + 1;
+    const start = new Date(now - offset * 1200000).toISOString();
+    return {
+      id: 'entry-' + index,
+      projectId: 'project',
+      get startTime() {
+        timestampReads += 1;
+        return start;
+      },
+      endTime: new Date(now - offset * 1200000 + 600000).toISOString(),
+      duration: 600,
+      elapsedSeconds: 600,
+      originalMetadata: { index }
+    };
+  });
+  const groups = groupTimeEntries(entries);
+  assert.equal(
+    groups.reduce((total, group) => total + group.count, 0),
+    count
+  );
+  assert.equal(
+    groups.reduce((total, group) => total + group.effectiveSeconds, 0),
+    count * 600
+  );
+  assert.equal(
+    groups.reduce((total, group) => total + group.elapsedSeconds, 0),
+    count * 600
+  );
+  assert.ok(timestampReads < count * 8);
+  const groupedEntries = new Set(groups.flatMap((group) => group.entries));
+  assert.ok(entries.every((entry) => groupedEntries.has(entry)));
+  assert.equal(entries[0].originalMetadata.index, 0);
+});

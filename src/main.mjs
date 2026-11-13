@@ -156,13 +156,16 @@ import {
   let activeSectionId = null;
   let renderStatsCache = null;
   let localAuditCache = null;
+  let timerShortcutGroupsCache = null;
   let appHealthRefreshQueued = false;
 
   function getRenderStatsCache() {
     if (!renderStatsCache) {
       const cache = {
         projects: new WeakMap(),
-        completedEntries: new Map(),
+        projectLookup: null,
+        completedEntries: null,
+        nonCodexEntries: new Map(),
         entryHours: new WeakMap(),
         global: null
       };
@@ -750,7 +753,18 @@ import {
 
   function createChartIfAvailable(context, config) {
     if (typeof Chart === 'undefined' || !context) return null;
-    return new Chart(context, config);
+    return new Chart(context, {
+      ...config,
+      options: { ...config.options, animation: false }
+    });
+  }
+
+  function destroyChartsIn(container) {
+    if (typeof Chart === 'undefined' || typeof Chart.getChart !== 'function')
+      return;
+    container.querySelectorAll('canvas').forEach((canvas) => {
+      Chart.getChart(canvas)?.destroy();
+    });
   }
 
   function setWealthText(id, value) {
@@ -2788,6 +2802,7 @@ import {
   function persistDataToLocalStorage() {
     renderStatsCache = null;
     localAuditCache = null;
+    timerShortcutGroupsCache = null;
     persistProfile(localStorage, 'timekeeperDataPro', data);
   }
   function saveData() {
@@ -8923,7 +8938,6 @@ import {
   // function is called whenever navigating to the Reports section or when data is
   // updated (e.g., after modifying entries). It recomputes the heatmap for the
   // current month and builds burndown charts for each project using Chart.js.
-  let burndownCharts = {};
   function updateAnalyticsSection() {
     const heatmapContainer = document.getElementById('heatmapContainer');
     const burndownContainer = document.getElementById('burndownContainer');
@@ -8953,6 +8967,8 @@ import {
       return scroll;
     };
     // Clear previous contents
+    destroyChartsIn(heatmapContainer);
+    destroyChartsIn(burndownContainer);
     heatmapContainer.innerHTML = '';
     burndownContainer.innerHTML = '';
     // ---------- Build monthly heatmap ----------
@@ -9078,7 +9094,7 @@ import {
       const displayBarLabels = isMobile
         ? barLabels.map((label) => truncateLabel(label, 18))
         : barLabels;
-      new Chart(ctxBar, {
+      createChartIfAvailable(ctxBar, {
         type: 'bar',
         data: {
           labels: displayBarLabels,
@@ -9167,7 +9183,7 @@ import {
       lineCard.appendChild(wrapChartForMobile(lineCanvas));
       heatmapContainer.appendChild(lineCard);
       const ctxLine = lineCanvas.getContext('2d');
-      new Chart(ctxLine, {
+      createChartIfAvailable(ctxLine, {
         type: 'line',
         data: {
           labels: dailyLabels,
@@ -9222,11 +9238,7 @@ import {
       });
     }
     // ---------- Build per-project burndown charts ----------
-    // Destroy existing charts to prevent memory leaks
-    Object.values(burndownCharts).forEach((ch) => {
-      if (ch && typeof ch.destroy === 'function') ch.destroy();
-    });
-    burndownCharts = {};
+    // The old canvases and their charts were released before replacing the DOM.
     data.projects.forEach((project) => {
       if (!chartsAvailable) return;
       // Compute daily cumulative hours from project creation to now
@@ -9301,7 +9313,7 @@ import {
       burndownContainer.appendChild(projectCard);
       // Create Chart.js line chart
       const ctx = canvas.getContext('2d');
-      burndownCharts[project.id] = new Chart(ctx, {
+      createChartIfAvailable(ctx, {
         type: 'line',
         data: {
           labels: labels,
@@ -9328,17 +9340,19 @@ import {
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          elements: { point: { radius: 0, hitRadius: 6, hoverRadius: 3 } },
           scales: {
             x: {
               title: { display: true, text: 'Date' },
               ticks: isMobile
                 ? {
+                    sampleSize: 30,
                     autoSkip: true,
                     maxTicksLimit: 6,
                     maxRotation: 0,
                     minRotation: 0
                   }
-                : { maxRotation: 90, minRotation: 45 }
+                : { sampleSize: 30, maxTicksLimit: 12, maxRotation: 45 }
             },
             y: {
               title: { display: true, text: 'Hours' },
@@ -9392,7 +9406,7 @@ import {
         ? labels.map((label) => truncateLabel(label, 18))
         : labels;
       const ctxHours = hoursCanvas.getContext('2d');
-      window.hoursByProjectChart = new Chart(ctxHours, {
+      window.hoursByProjectChart = createChartIfAvailable(ctxHours, {
         type: 'bar',
         data: {
           labels: displayLabels,
@@ -10630,8 +10644,14 @@ import {
     } else if (sectionId === 'projects') {
       updateProjectsPage();
     } else if (sectionId === 'entries') {
+      updateProjectSelects();
       updateEntriesTable();
     } else if (sectionId === 'timer') {
+      if (
+        quickTimer &&
+        !document.getElementById('timerProjectPro').options.length
+      )
+        updateProjectSelects();
       updateTimerSection({ quick: quickTimer });
     } else if (sectionId === 'todo') {
       updateTodoSection();
@@ -12292,21 +12312,29 @@ import {
   function getCompletedProjectEntries(projectId, options = {}) {
     const includeCodexEntries = options.includeCodexEntries !== false;
     const cache = getRenderStatsCache();
-    let projectEntries = cache.completedEntries.get(projectId);
-    if (!projectEntries) {
-      projectEntries = new Map();
-      cache.completedEntries.set(projectId, projectEntries);
+    if (!cache.completedEntries) {
+      cache.completedEntries = new Map();
+      data.entries.forEach((entry) => {
+        if (entry.isRunning) return;
+        let entries = cache.completedEntries.get(entry.projectId);
+        if (!entries) {
+          entries = [];
+          cache.completedEntries.set(entry.projectId, entries);
+        }
+        entries.push(entry);
+      });
     }
-    if (projectEntries.has(includeCodexEntries))
-      return projectEntries.get(includeCodexEntries);
-    const entries = data.entries.filter(
-      (entry) =>
-        entry.projectId === projectId &&
-        !entry.isRunning &&
-        (includeCodexEntries || !isCodexTimeEntry(entry))
-    );
-    projectEntries.set(includeCodexEntries, entries);
-    return entries;
+    if (!cache.completedEntries.has(projectId))
+      cache.completedEntries.set(projectId, []);
+    const entries = cache.completedEntries.get(projectId);
+    if (includeCodexEntries) return entries;
+    if (!cache.nonCodexEntries.has(projectId)) {
+      cache.nonCodexEntries.set(
+        projectId,
+        entries.filter((entry) => !isCodexTimeEntry(entry))
+      );
+    }
+    return cache.nonCodexEntries.get(projectId);
   }
 
   function getEntryHoursIndex(entries) {
@@ -13040,10 +13068,8 @@ import {
     // itself as the end of last week.
     const lastWeekStart = new Date(weekStart);
     lastWeekStart.setDate(weekStart.getDate() - 7);
-    const lastWeekEnd = new Date(weekStart);
     const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
     const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    const lastMonthEnd = monthStart;
     let todaySeconds = 0;
     let yesterdaySeconds = 0;
     let weekSeconds = 0;
@@ -13085,44 +13111,53 @@ import {
     dailyTarget = getPortfolioDailyTarget(dailyPlans);
     const rollingBounds = getRollingWindowBounds(now);
     const rolling90Bounds = getRollingWindowBounds(now, 90);
+    const periodTimes = {
+      today: todayStart.getTime(),
+      yesterday: yesterdayStart.getTime(),
+      week: weekStart.getTime(),
+      lastWeek: lastWeekStart.getTime(),
+      month: monthStart.getTime(),
+      lastMonth: lastMonthStart.getTime(),
+      rolling: rollingBounds.start.getTime(),
+      rollingEnd: rollingBounds.endExclusive.getTime(),
+      rolling90: rolling90Bounds.start.getTime(),
+      rolling90End: rolling90Bounds.endExclusive.getTime()
+    };
     data.entries.forEach((entry) => {
       if (entry.isRunning || !entry.duration) return;
-      const start = new Date(entry.startTime);
+      const start = new Date(entry.startTime).getTime();
       const project = getEntryProject(entry);
       const hours = entry.duration / 3600;
       if (!project) return;
-      if (start >= todayStart) {
+      if (start >= periodTimes.today) {
         todaySeconds += entry.duration;
         todayRevenue += hours * project.hourlyRate;
       }
-      if (start >= yesterdayStart && start < todayStart) {
+      if (start >= periodTimes.yesterday && start < periodTimes.today) {
         yesterdaySeconds += entry.duration;
         yesterdayRevenue += hours * project.hourlyRate;
       }
-      if (start >= weekStart) {
+      if (start >= periodTimes.week) {
         weekSeconds += entry.duration;
         weekRevenue += hours * project.hourlyRate;
       }
-      if (start >= monthStart) {
+      if (start >= periodTimes.month) {
         monthSeconds += entry.duration;
         monthlyRevenue += hours * project.hourlyRate;
-      } else if (start >= lastMonthStart && start < lastMonthEnd) {
+      } else if (start >= periodTimes.lastMonth && start < periodTimes.month) {
         lastMonthRevenue += hours * project.hourlyRate;
       }
-      if (start >= rollingBounds.start && start < rollingBounds.endExclusive) {
+      if (start >= periodTimes.rolling && start < periodTimes.rollingEnd) {
         rollingSeconds += entry.duration;
         rollingRevenue += hours * project.hourlyRate;
       }
-      if (
-        start >= rolling90Bounds.start &&
-        start < rolling90Bounds.endExclusive
-      ) {
+      if (start >= periodTimes.rolling90 && start < periodTimes.rolling90End) {
         rolling90Seconds += entry.duration;
         rolling90Revenue += hours * project.hourlyRate;
       }
       totalRevenue += hours * project.hourlyRate;
       // Accumulate revenue for last week (previous 7 days before the current week)
-      if (start >= lastWeekStart && start < lastWeekEnd) {
+      if (start >= periodTimes.lastWeek && start < periodTimes.week) {
         lastWeekRevenue += hours * project.hourlyRate;
       }
     });
@@ -15444,7 +15479,7 @@ import {
     if (weeklyCanvas && typeof Chart !== 'undefined') {
       if (!weeklyScatterChart) {
         const ctx = weeklyCanvas.getContext('2d');
-        weeklyScatterChart = new Chart(ctx, {
+        weeklyScatterChart = createChartIfAvailable(ctx, {
           type: 'scatter',
           data: { datasets: weeklyDatasets },
           options: {
@@ -15489,7 +15524,7 @@ import {
         });
       } else {
         weeklyScatterChart.data.datasets = weeklyDatasets;
-        weeklyScatterChart.update();
+        weeklyScatterChart.update('none');
       }
     }
     // Monthly scatter chart
@@ -15497,7 +15532,7 @@ import {
     if (monthlyCanvas && typeof Chart !== 'undefined') {
       if (!monthlyScatterChart) {
         const ctx2 = monthlyCanvas.getContext('2d');
-        monthlyScatterChart = new Chart(ctx2, {
+        monthlyScatterChart = createChartIfAvailable(ctx2, {
           type: 'scatter',
           data: { datasets: monthlyDatasets },
           options: {
@@ -15542,7 +15577,7 @@ import {
         });
       } else {
         monthlyScatterChart.data.datasets = monthlyDatasets;
-        monthlyScatterChart.update();
+        monthlyScatterChart.update('none');
       }
     }
   }
@@ -15926,7 +15961,7 @@ import {
       expected.push(project.budgetHours * ratio);
     }
     // Create chart
-    window.burndownChart = new Chart(ctx, {
+    window.burndownChart = createChartIfAvailable(ctx, {
       type: 'line',
       data: {
         labels: labels,
@@ -15951,6 +15986,7 @@ import {
       },
       options: {
         responsive: true,
+        elements: { point: { radius: 0, hitRadius: 6, hoverRadius: 3 } },
         plugins: {
           legend: {
             display: true,
@@ -15966,6 +16002,7 @@ import {
             }
           },
           x: {
+            ticks: { sampleSize: 30, maxTicksLimit: 12, maxRotation: 45 },
             title: {
               display: true,
               text: 'Date'
@@ -15979,7 +16016,6 @@ import {
   // Projects page rendering
   function updateProjectsPage() {
     if (activeSectionId !== 'projects') return;
-    updateProjectSelects();
     renderProjectsPageList();
   }
 
@@ -17609,9 +17645,7 @@ import {
   }
 
   function getStartableTimerProject(projectId, runningProjectIds) {
-    const project = data.projects.find(
-      (candidate) => String(candidate.id) === String(projectId)
-    );
+    const project = getProjectLookup().get(String(projectId));
     if (!project || isProjectArchived(project)) return null;
     if (runningProjectIds.has(String(project.id))) return null;
     return project;
@@ -17758,6 +17792,45 @@ import {
     runningProjectIds,
     { limit = 3, excludeKeys = new Set(), minCount = 1 } = {}
   ) {
+    if (
+      timerShortcutGroupsCache?.data !== data ||
+      timerShortcutGroupsCache.entries !== data.entries ||
+      timerShortcutGroupsCache.projects !== data.projects ||
+      timerShortcutGroupsCache.revision !== data.backupRevision
+    ) {
+      timerShortcutGroupsCache = {
+        data,
+        entries: data.entries,
+        projects: data.projects,
+        revision: data.backupRevision,
+        groups: new Map()
+      };
+    }
+    const cache = timerShortcutGroupsCache.groups;
+    const key = JSON.stringify([...runningProjectIds].sort());
+    if (!cache.has(key)) {
+      cache.set(
+        key,
+        computeMostUsedTimerShortcuts(runningProjectIds, {
+          limit: Infinity,
+          minCount: 0
+        })
+      );
+    }
+    return cache
+      .get(key)
+      .filter(
+        (shortcut) =>
+          shortcut.count >= minCount &&
+          !excludeKeys.has(getTimerShortcutKey(shortcut))
+      )
+      .slice(0, limit);
+  }
+
+  function computeMostUsedTimerShortcuts(
+    runningProjectIds,
+    { limit = 3, excludeKeys = new Set(), minCount = 1 } = {}
+  ) {
     const groups = new Map();
     data.entries.forEach((entry) => {
       if (entry.isRunning || isImportedAgentTimeEntry(entry)) return;
@@ -17878,16 +17951,20 @@ import {
     }
 
     getPinnedTimerShortcuts(runningIds).forEach(addShortcut);
+    if (shortcuts.length >= limit) return shortcuts;
     getMostUsedTimerShortcuts(runningIds, {
       limit,
       excludeKeys: seen,
       minCount: 2
     }).forEach(addShortcut);
+    if (shortcuts.length >= limit) return shortcuts;
     addShortcut(getLastStoppedTimerShortcut(runningIds));
+    if (shortcuts.length >= limit) return shortcuts;
     getYesterdayTimerShortcuts(runningIds, {
       limit,
       excludeKeys: seen
     }).forEach(addShortcut);
+    if (shortcuts.length >= limit) return shortcuts;
     getRecentTimerShortcuts(runningIds, {
       limit,
       excludeKeys: seen
@@ -17958,13 +18035,15 @@ import {
 
   // Update project selects for timer and manual forms
   function updateProjectSelects() {
+    if (activeSectionId !== 'timer' && activeSectionId !== 'entries') return;
     updateRecentDescriptionOptions();
     const timerSelect = document.getElementById('timerProjectPro');
     const manualSelect = document.getElementById('manualProjectPro');
+    const previousManualValue = manualSelect.value;
     const entryFilterSelect = document.getElementById('entryProjectFilter');
     const startBtn = document.getElementById('startTimerBtnPro');
     const pinTimerPresetBtn = document.getElementById('pinTimerPresetBtnPro');
-    timerSelect.innerHTML = '';
+    if (activeSectionId === 'timer') timerSelect.innerHTML = '';
     manualSelect.innerHTML = '';
     if (entryFilterSelect) {
       const selectedFilter = entryProjectFilter || entryFilterSelect.value;
@@ -17992,6 +18071,20 @@ import {
         entryProjectFilter = '';
       }
       entryFilterSelect.value = entryProjectFilter;
+    }
+    if (activeSectionId === 'entries' && activeProjects.length) {
+      activeProjects.forEach((project) => {
+        const option = document.createElement('option');
+        option.value = project.id;
+        option.textContent = project.name;
+        manualSelect.appendChild(option);
+      });
+      const preferred = [previousManualValue, currentRecommendedMonthlyId].find(
+        (id) =>
+          activeProjects.some((project) => String(project.id) === String(id))
+      );
+      if (preferred != null) manualSelect.value = String(preferred);
+      return;
     }
     if (activeProjects.length === 0) {
       const opt = document.createElement('option');
@@ -18600,6 +18693,7 @@ import {
   }
 
   function openMobileQuickLogSheet(seedText = '') {
+    updateRecentDescriptionOptions();
     const sheet = createMobileSheet('Quick log', {
       className: 'mobile-quick-log-sheet',
       description: 'Paste or dictate a log, or use the structured controls.'
@@ -20356,11 +20450,20 @@ import {
     });
   }
 
+  function getProjectLookup() {
+    const cache = getRenderStatsCache();
+    if (!cache.projectLookup) {
+      cache.projectLookup = new Map();
+      data.projects.forEach((project) => {
+        const id = String(project.id);
+        if (!cache.projectLookup.has(id)) cache.projectLookup.set(id, project);
+      });
+    }
+    return cache.projectLookup;
+  }
+
   function getEntryProject(entry) {
-    return (
-      data.projects.find((p) => String(p.id) === String(entry.projectId)) ||
-      null
-    );
+    return getProjectLookup().get(String(entry.projectId)) || null;
   }
 
   function getEntryDateRangeFilter() {
@@ -20400,10 +20503,11 @@ import {
     if (!showAllEntries && !hasDateFilter) {
       const cutoff = new Date();
       cutoff.setDate(cutoff.getDate() - 30);
+      const cutoffTime = cutoff.getTime();
       entriesToShow = entriesToShow.filter((entry) => {
-        const startDate = new Date(entry.startTime);
-        const endDate = entry.endTime ? new Date(entry.endTime) : startDate;
-        return startDate >= cutoff || endDate >= cutoff;
+        const start = new Date(entry.startTime).getTime();
+        const end = entry.endTime ? new Date(entry.endTime).getTime() : start;
+        return start >= cutoffTime || end >= cutoffTime;
       });
     }
     if (hasDateFilter) {
@@ -20432,7 +20536,7 @@ import {
     return entriesToShow;
   }
 
-  function renderEntrySummary(entriesToShow) {
+  function renderEntrySummary(entriesToShow, groups) {
     const summaryEl = document.getElementById('entrySummaryPro');
     if (!summaryEl) return;
     summaryEl.innerHTML = '';
@@ -20445,7 +20549,6 @@ import {
       0
     );
     const unionSeconds = computeUnionSeconds(entriesToShow);
-    const groups = groupTimeEntries(entriesToShow);
     const sourceCounts = entriesToShow.reduce((counts, entry) => {
       const source = getEntrySource(entry);
       counts[source] = (counts[source] || 0) + 1;
@@ -20797,8 +20900,18 @@ import {
     const tbody = document.getElementById('entriesTableBodyPro');
     tbody.innerHTML = '';
     const entriesToShow = getEntriesForCurrentView();
+    const groups = ensureUsagePreferences().groupEntries
+      ? groupTimeEntries(entriesToShow)
+      : entriesToShow
+          .map((entry, index) => ({
+            id: 'raw:' + (entry.id || index),
+            count: 1,
+            entries: [entry],
+            time: new Date(entry.startTime).getTime()
+          }))
+          .sort((a, b) => b.time - a.time);
     syncBillingPresetControls();
-    renderEntrySummary(entriesToShow);
+    renderEntrySummary(entriesToShow, groups);
     renderEntryBulkActions(entriesToShow);
     renderTodayCommandPanel();
     if (data.entries.length === 0 || entriesToShow.length === 0) {
@@ -20815,17 +20928,6 @@ import {
       tbody.appendChild(tr);
       return;
     }
-    // sort by start time desc
-    const sorted = [...entriesToShow].sort(
-      (a, b) => new Date(b.startTime) - new Date(a.startTime)
-    );
-    const groups = ensureUsagePreferences().groupEntries
-      ? groupTimeEntries(sorted)
-      : sorted.map((entry, index) => ({
-          id: `raw:${entry.id || index}`,
-          count: 1,
-          entries: [entry]
-        }));
     renderEntryPagination(groups).forEach((group) => {
       if (group.count > 1) {
         const headerRow = document.createElement('tr');
@@ -21663,7 +21765,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=71')
+      .register('./service-worker.js?v=72')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
