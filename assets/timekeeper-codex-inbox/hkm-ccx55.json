@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-13T12:31:02.594Z",
+  "updatedAt": "2026-11-13T12:46:02.514Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T12:31:03.812Z",
+    "observedAt": "2026-11-13T12:46:04.382Z",
     "primary": {
-      "usedPercent": 7,
-      "remainingPercent": 93,
+      "usedPercent": 8,
+      "remainingPercent": 92,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-20T07:10:45.000Z"
     },
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-13T12:30:59.269Z"
+      "lastSeenAt": "2026-11-13T12:46:02.595Z"
     },
     {
       "key": "github/iflai",
@@ -227,9 +227,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 54516,
+      "activityCount": 54762,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-13T12:30:59.269Z"
+      "lastSeenAt": "2026-11-13T12:46:02.595Z"
     },
     {
       "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
@@ -145945,6 +145945,38 @@
         "output_tokens": 9264,
         "reasoning_output_tokens": 4655
       }
+    },
+    {
+      "id": "codex-3f5f700e9b714eb9d8e8db6a",
+      "threadId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-13T12:12:00.793Z",
+      "endTime": "2026-11-13T12:18:58.170Z",
+      "wallSeconds": 417,
+      "focusFactor": 0.4988,
+      "effectiveSeconds": 208,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 417,
+          "effectiveSeconds": 208
+        }
+      ],
+      "description": "Codex: Draft ZEISS follow-up"
     }
   ]
 }
