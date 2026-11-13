@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-13T10:01:02.386Z",
+  "updatedAt": "2026-11-13T10:16:02.404Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T10:01:03.395Z",
+    "observedAt": "2026-11-13T10:16:03.594Z",
     "primary": {
-      "usedPercent": 5,
-      "remainingPercent": 95,
+      "usedPercent": 6,
+      "remainingPercent": 94,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-20T07:10:45.000Z"
     },
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-13T10:01:18.148Z"
+      "lastSeenAt": "2026-11-13T10:14:45.161Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -227,9 +227,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 53136,
+      "activityCount": 53366,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-13T10:01:18.148Z"
+      "lastSeenAt": "2026-11-13T10:14:45.161Z"
     },
     {
       "key": "01a1d3ed-1637-7230-9f52-d303bcc9fee4",
@@ -145622,6 +145622,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 2181,
           "effectiveSeconds": 1090
+        }
+      ],
+      "description": "Codex: Prepare full trip budget"
+    },
+    {
+      "id": "codex-312ada69be00cade0f8cddb3",
+      "threadId": "01a1d3ed-1637-7230-9f52-d303bcc9fee4",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-13T09:46:34.727Z",
+      "endTime": "2026-11-13T09:57:08.522Z",
+      "wallSeconds": 633,
+      "focusFactor": 0.4992,
+      "effectiveSeconds": 316,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 633,
+          "effectiveSeconds": 316
         }
       ],
       "description": "Codex: Prepare full trip budget"
