@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T15:32:02.410Z",
+  "updatedAt": "2026-11-13T15:37:02.330Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T15:32:04.940Z",
+    "observedAt": "2026-11-13T15:37:04.463Z",
     "primary": {
       "usedPercent": 13,
       "remainingPercent": 87,
@@ -1783,6 +1783,52 @@
         "codex-ab7a51f20b596bc1b9933902"
       ],
       "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-9fcdb6b313b3e5484365d4df",
+      "threadId": "01a1d568-f5e4-7162-a012-fa3d751179f9",
+      "projectKey": "genAI-review",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-13T14:56:28.692Z",
+      "endTime": "2026-11-13T15:18:58.343Z",
+      "wallSeconds": 792,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 396,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 791,
+          "effectiveSeconds": 395
+        }
+      ],
+      "description": "Codex: genAI-review"
     }
   ]
 }
