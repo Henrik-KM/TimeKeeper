@@ -4,6 +4,11 @@ on:
   push:
     branches: [main]
   workflow_dispatch:
+  # Feed commits use GITHUB_TOKEN, whose pushes do not trigger other workflows.
+  workflow_run:
+    workflows: [Update Strava feed]
+    types: [completed]
+    branches: [main]
   # Usage feeds intentionally use [skip ci]. Publish their newest snapshots too.
   schedule:
     - cron: '*/5 * * * *'
@@ -31,8 +36,10 @@ jobs:
           ref: main
           persist-credentials: false
       - uses: actions/configure-pages@v5
+      - name: Prepare public app files
+        run: node scripts/prepare-pages.mjs
       - uses: actions/upload-pages-artifact@v4
         with:
-          path: .
+          path: .pages-site
       - uses: actions/deploy-pages@v4
         id: deployment
