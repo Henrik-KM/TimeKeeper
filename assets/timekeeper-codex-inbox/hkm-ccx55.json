@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-13T10:31:02.321Z",
+  "updatedAt": "2026-11-13T10:46:02.497Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T10:31:03.156Z",
+    "observedAt": "2026-11-13T10:46:03.655Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-13T10:30:52.926Z"
+      "lastSeenAt": "2026-11-13T10:34:25.400Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -227,9 +227,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 53720,
+      "activityCount": 53811,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-13T10:30:52.926Z"
+      "lastSeenAt": "2026-11-13T10:34:25.400Z"
     },
     {
       "key": "01a1d3ed-1637-7230-9f52-d303bcc9fee4",
@@ -41782,8 +41782,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 545,
-    "imported": 545,
+    "discovered": 546,
+    "imported": 546,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -145657,6 +145657,48 @@
         }
       ],
       "description": "Codex: Prepare full trip budget"
+    },
+    {
+      "id": "codex-c3fb485d144c2d4690eeda70",
+      "threadId": "01a1d481-8391-7951-a3e4-86f1f9ef86d8",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-13T10:43:11.726Z",
+      "endTime": "2026-11-13T10:45:11.226Z",
+      "wallSeconds": 119,
+      "focusFactor": 0.2437,
+      "effectiveSeconds": 29,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 119,
+          "effectiveSeconds": 29
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 135441,
+        "cached_input_tokens": 95232,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1037,
+        "reasoning_output_tokens": 297
+      }
     }
   ]
 }
