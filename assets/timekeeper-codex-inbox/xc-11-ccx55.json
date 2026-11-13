@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T12:57:02.118Z",
+  "updatedAt": "2026-11-13T13:02:02.042Z",
   "dayStart": "2026-11-12T23:00:00.000Z",
   "rangeStart": "2026-08-15T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-13T12:57:04.034Z",
+    "observedAt": "2026-11-13T13:02:04.358Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-13T12:57:00.384Z"
+      "lastSeenAt": "2026-11-13T12:59:03.022Z"
     },
     {
       "key": "github/mathem-agent",
@@ -155,9 +155,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 379,
+      "activityCount": 418,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-13T12:57:00.384Z"
+      "lastSeenAt": "2026-11-13T12:59:03.022Z"
     },
     {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
@@ -1683,6 +1683,38 @@
         "codex-59dad4be8bfaeb41b17f75f3"
       ],
       "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-011df91b07a7fa9b388ecb3c",
+      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
+      "projectKey": "Bao",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-13T12:32:42.052Z",
+      "endTime": "2026-11-13T12:40:08.724Z",
+      "wallSeconds": 446,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 223,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 446,
+          "effectiveSeconds": 223
+        }
+      ],
+      "description": "Codex: Import Lukas’s latest Drive data"
     }
   ]
 }
