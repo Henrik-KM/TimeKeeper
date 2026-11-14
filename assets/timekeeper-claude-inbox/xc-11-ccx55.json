@@ -3,7 +3,7 @@
   "focusPolicyVersion": 3,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-13T23:21:01.859Z",
+  "updatedAt": "2026-11-14T01:21:02.057Z",
   "rangeStart": "2026-10-15T22:00:00.000Z",
   "lookbackDays": 30,
   "retractedExternalIds": [
@@ -5595,6 +5595,33 @@
         }
       ],
       "focusFactor": 0.4484,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:9f73488e82b5c78cebbbd5be2e99aa32",
+      "sessionId": "5bf3382a-844a-48b6-b727-304859fa2357",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Research",
+      "description": "Claude: Research",
+      "startTime": "2026-11-14T00:56:23.549Z",
+      "endTime": "2026-11-14T01:00:26.465Z",
+      "wallSeconds": 242,
+      "effectiveSeconds": 121,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 242,
+          "effectiveSeconds": 121
+        }
+      ],
+      "focusFactor": 0.5,
       "focusPolicyVersion": 3,
       "delegationCredit": 0.35
     }
