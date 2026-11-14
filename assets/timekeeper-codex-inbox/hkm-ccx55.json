@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-14T16:31:02.264Z",
+  "updatedAt": "2026-11-14T16:46:02.209Z",
   "dayStart": "2026-11-13T23:00:00.000Z",
   "rangeStart": "2026-08-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-14T16:31:03.201Z",
+    "observedAt": "2026-11-14T16:46:03.326Z",
     "primary": {
       "usedPercent": 21,
       "remainingPercent": 79,
@@ -146910,6 +146910,38 @@
       "description": "Codex: Email helper health monitor"
     },
     {
+      "id": "codex-105dee593acdf96be430e1f0",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-14T15:59:46.024Z",
+      "endTime": "2026-11-14T16:15:48.429Z",
+      "wallSeconds": 961,
+      "focusFactor": 0.4995,
+      "effectiveSeconds": 480,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 961,
+          "effectiveSeconds": 480
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
       "id": "codex-141fa0074547fd28297d0373",
       "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
       "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
@@ -146940,6 +146972,38 @@
         }
       ],
       "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-a1c114b091655c30d073a5b5",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-14T16:02:45.741Z",
+      "endTime": "2026-11-14T16:18:08.544Z",
+      "wallSeconds": 922,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 461,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 922,
+          "effectiveSeconds": 461
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     },
     {
       "id": "codex-ec63466e527a77937f3cce69",
