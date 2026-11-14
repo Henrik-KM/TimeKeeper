@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-14T06:01:02.146Z",
+  "updatedAt": "2026-11-14T06:16:02.157Z",
   "dayStart": "2026-11-13T23:00:00.000Z",
   "rangeStart": "2026-08-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-14T06:01:03.806Z",
+    "observedAt": "2026-11-14T06:16:03.037Z",
     "primary": {
       "usedPercent": 17,
       "remainingPercent": 83,
@@ -146642,6 +146642,38 @@
         }
       ],
       "description": "Codex: IFLAI"
+    },
+    {
+      "id": "codex-eef2234e490b66a7cce89f65",
+      "threadId": "01a1c4d8-133a-73e2-8d51-06eb1fe376b8",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-14T05:55:36.853Z",
+      "endTime": "2026-11-14T05:58:40.835Z",
+      "wallSeconds": 183,
+      "focusFactor": 0.1475,
+      "effectiveSeconds": 27,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 183,
+          "effectiveSeconds": 27
+        }
+      ],
+      "description": "Codex: Continue LinkedIn invitation run"
     }
   ]
 }
