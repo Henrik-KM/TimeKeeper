@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-14T16:16:02.235Z",
+  "updatedAt": "2026-11-14T16:31:02.264Z",
   "dayStart": "2026-11-13T23:00:00.000Z",
   "rangeStart": "2026-08-16T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-14T16:16:03.585Z",
+    "observedAt": "2026-11-14T16:31:03.201Z",
     "primary": {
       "usedPercent": 21,
       "remainingPercent": 79,
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-14T16:16:02.575Z"
+      "lastSeenAt": "2026-11-14T16:18:08.544Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -227,9 +227,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 57196,
+      "activityCount": 57234,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-14T16:16:02.575Z"
+      "lastSeenAt": "2026-11-14T16:18:08.544Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -146908,6 +146908,102 @@
         }
       ],
       "description": "Codex: Email helper health monitor"
+    },
+    {
+      "id": "codex-141fa0074547fd28297d0373",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-14T16:00:15.313Z",
+      "endTime": "2026-11-14T16:13:38.751Z",
+      "wallSeconds": 803,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 401,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 803,
+          "effectiveSeconds": 401
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-ec63466e527a77937f3cce69",
+      "threadId": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-14T16:03:45.391Z",
+      "endTime": "2026-11-14T16:07:41.099Z",
+      "wallSeconds": 235,
+      "focusFactor": 0.4979,
+      "effectiveSeconds": 117,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 235,
+          "effectiveSeconds": 117
+        }
+      ],
+      "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-b4a5787fe2544ef7e53a9f5d",
+      "threadId": "01a1ca47-7103-7c02-9086-a72afd9ce9e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-14T16:04:45.353Z",
+      "endTime": "2026-11-14T16:08:13.915Z",
+      "wallSeconds": 208,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 104,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 208,
+          "effectiveSeconds": 104
+        }
+      ],
+      "description": "Codex: Stanford travel and arrival"
     }
   ]
 }
