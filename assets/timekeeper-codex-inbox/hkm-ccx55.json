@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-15T08:31:01.829Z",
+  "updatedAt": "2026-11-15T08:46:02.231Z",
   "dayStart": "2026-11-14T23:00:00.000Z",
   "rangeStart": "2026-08-17T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-15T08:31:03.462Z",
+    "observedAt": "2026-11-15T08:46:06.176Z",
     "primary": {
       "usedPercent": 24,
       "remainingPercent": 76,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 2431,
       "assistantSessionCount": 2431,
-      "lastSeenAt": "2026-11-15T08:30:47.744Z"
+      "lastSeenAt": "2026-11-15T08:35:24.671Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -227,9 +227,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 8615,
+      "activityCount": 8677,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-15T08:30:47.744Z"
+      "lastSeenAt": "2026-11-15T08:35:24.671Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -147136,6 +147136,38 @@
         }
       ],
       "description": "Codex: Stanford travel and arrival"
+    },
+    {
+      "id": "codex-d36b75aca5732b201ed73382",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-15T07:59:00.527Z",
+      "endTime": "2026-11-15T08:23:14.552Z",
+      "wallSeconds": 1453,
+      "focusFactor": 0.4997,
+      "effectiveSeconds": 726,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1453,
+          "effectiveSeconds": 726
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
     },
     {
       "id": "codex-1bce30342d404b386efe4eb9",
