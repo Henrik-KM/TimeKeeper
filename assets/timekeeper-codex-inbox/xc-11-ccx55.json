@@ -4,9 +4,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-16T22:47:01.970Z",
-  "dayStart": "2026-11-15T23:00:00.000Z",
-  "rangeStart": "2026-08-18T22:00:00.000Z",
+  "updatedAt": "2026-11-16T23:02:01.973Z",
+  "dayStart": "2026-11-16T23:00:00.000Z",
+  "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T22:47:03.485Z",
+    "observedAt": "2026-11-16T23:02:03.556Z",
     "primary": {
       "usedPercent": 39,
       "remainingPercent": 61,
@@ -231,7 +231,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 730050,
+      "activityCount": 730051,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-16T18:52:58.699Z"
     },
@@ -570,181 +570,6 @@
     "blocker": ""
   },
   "records": [
-    {
-      "id": "codex-311fb6d44f1401d8c6b8461e",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T07:46:35.606Z",
-      "endTime": "2026-11-10T07:46:58.624Z",
-      "wallSeconds": 22,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 11,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "medium",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 22,
-          "effectiveSeconds": 11,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-bdece8acb16c79a86ef01211"
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-067778c5edbaeb2444e80fb9",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T11:04:37.774Z",
-      "endTime": "2026-11-10T11:05:22.110Z",
-      "wallSeconds": 38,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 19,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "medium",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 38,
-          "effectiveSeconds": 19,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-aa77d5397af86fe8edd71a67"
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-014b581a7eeabc525e08772d",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T17:25:33.672Z",
-      "endTime": "2026-11-10T18:36:04.281Z",
-      "wallSeconds": 3415,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 1707,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3415,
-          "effectiveSeconds": 1707
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
-    {
-      "id": "codex-9e9fdcc1976bb22140446fa8",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T17:36:39.641Z",
-      "endTime": "2026-11-10T17:44:32.065Z",
-      "wallSeconds": 43,
-      "focusFactor": 0.4884,
-      "effectiveSeconds": 21,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "medium",
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 43,
-          "effectiveSeconds": 21,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
-        }
-      ],
-      "supersedesExternalIds": [
-        "codex-070c82e2a19783e8fb63f5e9"
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-8db60d16f3dc5969e37a25c7",
-      "threadId": "01a12021-bb23-7742-94d9-3d526529e0f5",
-      "projectKey": "Bao",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T19:47:42.030Z",
-      "endTime": "2026-11-10T19:49:08.355Z",
-      "wallSeconds": 86,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 43,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 86,
-          "effectiveSeconds": 43
-        }
-      ],
-      "description": "Codex: Import Lukas’s latest Drive data"
-    },
     {
       "id": "codex-54b90c3c0c25dac674f485cc",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
