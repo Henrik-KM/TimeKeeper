@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T09:16:02.709Z",
+  "updatedAt": "2026-11-16T09:31:05.001Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T09:16:04.457Z",
+    "observedAt": "2026-11-16T09:31:05.882Z",
     "primary": {
       "usedPercent": 33,
       "remainingPercent": 67,
@@ -40691,8 +40691,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 565,
-    "imported": 565,
+    "discovered": 566,
+    "imported": 566,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -145920,6 +145920,73 @@
       "description": "Codex: Stanford travel and arrival"
     },
     {
+      "id": "codex-7568dfce73845b7334f22d91",
+      "threadId": "01a1e0d2-6a2a-7a51-9aa2-66c55d28103e",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T08:05:16.843Z",
+      "endTime": "2026-11-16T09:12:14.057Z",
+      "wallSeconds": 4017,
+      "focusFactor": 0.2726,
+      "effectiveSeconds": 1095,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 2,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "wallSeconds": 4017,
+          "effectiveSeconds": 1004,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        },
+        {
+          "role": "subagent",
+          "model": "unknown",
+          "effort": "unknown",
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.07,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0,
+          "baseFactor": 0.4,
+          "repositoryMultiplier": 0.5
+        },
+        {
+          "role": "subagent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 0.35,
+          "creditedFactor": 0.0875,
+          "wallSeconds": 1039,
+          "effectiveSeconds": 90,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 0.5
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-187d55e980620bd00db77f46",
+        "codex-03e889068123b67354693e92",
+        "codex-770add2d406464d84262e67e"
+      ],
+      "description": "Codex: email-helper"
+    },
+    {
       "id": "codex-b0fb54090b3fd1ebd7ea69d2",
       "threadId": "01a1e36b-e57d-72e2-b67d-e99399abaf5f",
       "projectKey": "email-helper",
@@ -146207,6 +146274,48 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7611,
         "reasoning_output_tokens": 4626
+      }
+    },
+    {
+      "id": "codex-660c9b8243a4b93008e03a2e",
+      "threadId": "01a1e3a7-98cb-7162-9221-f9ffdf371f36",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T09:19:32.105Z",
+      "endTime": "2026-11-16T09:21:27.715Z",
+      "wallSeconds": 115,
+      "focusFactor": 0.2435,
+      "effectiveSeconds": 28,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 115,
+          "effectiveSeconds": 28
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 350251,
+        "cached_input_tokens": 296960,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 2617,
+        "reasoning_output_tokens": 895
       }
     }
   ]
