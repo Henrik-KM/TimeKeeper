@@ -4,9 +4,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T22:46:02.134Z",
-  "dayStart": "2026-11-15T23:00:00.000Z",
-  "rangeStart": "2026-08-18T22:00:00.000Z",
+  "updatedAt": "2026-11-16T23:01:02.134Z",
+  "dayStart": "2026-11-16T23:00:00.000Z",
+  "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T22:46:03.763Z",
+    "observedAt": "2026-11-16T23:01:03.291Z",
     "primary": {
       "usedPercent": 39,
       "remainingPercent": 61,
@@ -140512,38 +140512,6 @@
       "codexBackfill": true
     },
     {
-      "id": "codex-d8ab6cd51141ed9bf9a47a6d",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T07:16:48.100Z",
-      "endTime": "2026-11-10T10:15:06.997Z",
-      "wallSeconds": 10573,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 5286,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 10573,
-          "effectiveSeconds": 5286
-        }
-      ],
-      "description": "Codex: Stanford family visas"
-    },
-    {
       "id": "codex-bb23ff8d31278f695f5d8cd6",
       "threadId": "01a1c480-c775-7931-947b-fd4350a58c3b",
       "projectKey": "email-helper",
@@ -140583,7 +140551,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1195,
         "reasoning_output_tokens": 535
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d7cc0906dc68b325ee4b65f7",
@@ -140629,7 +140598,8 @@
           "effectiveSeconds": 329
         }
       ],
-      "description": "Codex: Continue LinkedIn invitation run"
+      "description": "Codex: Continue LinkedIn invitation run",
+      "codexBackfill": true
     },
     {
       "id": "codex-49ddb818c5f915e29b241dc3",
@@ -140671,7 +140641,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1704,
         "reasoning_output_tokens": 531
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-7a0e983c2e48c963ed41019e",
@@ -140703,71 +140674,8 @@
           "effectiveSeconds": 32
         }
       ],
-      "description": "Codex: Continue LinkedIn invitation run"
-    },
-    {
-      "id": "codex-45b7cc8222d6bf49bc297b3f",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T11:13:40.611Z",
-      "endTime": "2026-11-10T11:39:14.304Z",
-      "wallSeconds": 1533,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 766,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1533,
-          "effectiveSeconds": 766
-        }
-      ],
-      "description": "Codex: Stanford family visas"
-    },
-    {
-      "id": "codex-788da61588795f8b546e084c",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T11:55:24.843Z",
-      "endTime": "2026-11-10T12:36:54.225Z",
-      "wallSeconds": 2484,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1242,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2484,
-          "effectiveSeconds": 1242
-        }
-      ],
-      "description": "Codex: Stanford family visas"
+      "description": "Codex: Continue LinkedIn invitation run",
+      "codexBackfill": true
     },
     {
       "id": "codex-d3a084a2670ca0c2617f9643",
@@ -140809,7 +140717,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 25664,
         "reasoning_output_tokens": 11489
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-84eef682bb3c055dd403cfcf",
@@ -140851,39 +140760,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 855,
         "reasoning_output_tokens": 230
-      }
-    },
-    {
-      "id": "codex-d9d27e4bae9c12e3d55b7419",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T14:10:27.322Z",
-      "endTime": "2026-11-10T14:35:25.704Z",
-      "wallSeconds": 1497,
-      "focusFactor": 0.4997,
-      "effectiveSeconds": 748,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 1497,
-          "effectiveSeconds": 748
-        }
-      ],
-      "description": "Codex: Stanford family visas"
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-43b52d536045cc6601401b12",
@@ -140915,71 +140793,8 @@
           "effectiveSeconds": 191
         }
       ],
-      "description": "Codex: Email helper health monitor"
-    },
-    {
-      "id": "codex-55f43332569fb34c43327b38",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T15:24:40.637Z",
-      "endTime": "2026-11-10T16:08:54.265Z",
-      "wallSeconds": 2653,
-      "focusFactor": 0.4998,
-      "effectiveSeconds": 1326,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2653,
-          "effectiveSeconds": 1326
-        }
-      ],
-      "description": "Codex: Stanford family visas"
-    },
-    {
-      "id": "codex-c14630d25b45434d789ea24e",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T17:15:05.795Z",
-      "endTime": "2026-11-10T19:54:12.553Z",
-      "wallSeconds": 8177,
-      "focusFactor": 0.4999,
-      "effectiveSeconds": 4088,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 8177,
-          "effectiveSeconds": 4088
-        }
-      ],
-      "description": "Codex: Stanford family visas"
+      "description": "Codex: Email helper health monitor",
+      "codexBackfill": true
     },
     {
       "id": "codex-150d6ecc00d01ac297431802",
@@ -141025,39 +140840,8 @@
           "effectiveSeconds": 913
         }
       ],
-      "description": "Codex: LinkedIn weekly stale invitation cleanup"
-    },
-    {
-      "id": "codex-c49c40c8eef86d2a0b307297",
-      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-10T20:14:39.873Z",
-      "endTime": "2026-11-10T21:46:35.503Z",
-      "wallSeconds": 3958,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1979,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 3958,
-          "effectiveSeconds": 1979
-        }
-      ],
-      "description": "Codex: Stanford family visas"
+      "description": "Codex: LinkedIn weekly stale invitation cleanup",
+      "codexBackfill": true
     },
     {
       "id": "codex-8c07fa3532c15f3727028612",
@@ -141099,7 +140883,8 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1121,
         "reasoning_output_tokens": 291
-      }
+      },
+      "codexBackfill": true
     },
     {
       "id": "codex-d2f08f042dcdf9854d80d1d1",
