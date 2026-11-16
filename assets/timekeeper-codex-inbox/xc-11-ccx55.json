@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-16T03:12:02.324Z",
+  "updatedAt": "2026-11-16T03:17:02.217Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T03:12:05.631Z",
+    "observedAt": "2026-11-16T03:17:04.065Z",
     "primary": {
       "usedPercent": 28,
       "remainingPercent": 72,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-16T03:12:50.734Z"
+      "lastSeenAt": "2026-11-16T03:17:44.714Z"
     },
     {
       "key": "github/timekeeper",
@@ -169,9 +169,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 709330,
+      "activityCount": 709450,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T03:12:50.734Z"
+      "lastSeenAt": "2026-11-16T03:17:44.714Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -2378,6 +2378,43 @@
       ],
       "supersedesExternalIds": [
         "codex-887112eb89b977b2428756b1"
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-74249ec6bb8a897ae7aeb0f8",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-16T02:57:08.563Z",
+      "endTime": "2026-11-16T02:57:44.984Z",
+      "wallSeconds": 36,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 18,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "delegationCredit": 0.35,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 36,
+          "effectiveSeconds": 18,
+          "baseFactor": 0.5,
+          "repositoryMultiplier": 1
+        }
+      ],
+      "supersedesExternalIds": [
+        "codex-c1ef55822649d8f763678226"
       ],
       "description": "Codex: Structured AL"
     }
