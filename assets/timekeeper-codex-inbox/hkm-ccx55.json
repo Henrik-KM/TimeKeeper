@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T16:31:01.910Z",
+  "updatedAt": "2026-11-16T16:46:01.953Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T16:31:02.845Z",
+    "observedAt": "2026-11-16T16:46:03.305Z",
     "primary": {
       "usedPercent": 37,
       "remainingPercent": 63,
@@ -146877,6 +146877,70 @@
         }
       ],
       "description": "Codex: Stanford travel and arrival"
+    },
+    {
+      "id": "codex-2c25cb9f6eced4defa4dfccc",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-16T16:04:02.430Z",
+      "endTime": "2026-11-16T16:18:00.444Z",
+      "wallSeconds": 837,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 418,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 837,
+          "effectiveSeconds": 418
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-0dade7da8324ab66af5ef5ff",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-16T16:05:01.421Z",
+      "endTime": "2026-11-16T16:23:31.605Z",
+      "wallSeconds": 1109,
+      "focusFactor": 0.4995,
+      "effectiveSeconds": 554,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1109,
+          "effectiveSeconds": 554
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
     }
   ]
 }
