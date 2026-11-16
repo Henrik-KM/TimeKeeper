@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T18:31:02.050Z",
+  "updatedAt": "2026-11-16T18:46:01.982Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T18:31:02.956Z",
+    "observedAt": "2026-11-16T18:46:03.107Z",
     "primary": {
       "usedPercent": 39,
       "remainingPercent": 61,
@@ -40691,8 +40691,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 574,
-    "imported": 574,
+    "discovered": 575,
+    "imported": 575,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -146941,6 +146941,48 @@
         }
       ],
       "description": "Codex: Stanford housing and payment"
+    },
+    {
+      "id": "codex-dc820edef7b135fd32dd1054",
+      "threadId": "01a1e5aa-561c-7aa0-af6b-ca5bf1fc2c13",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T18:41:47.059Z",
+      "endTime": "2026-11-16T18:42:37.949Z",
+      "wallSeconds": 50,
+      "focusFactor": 0.24,
+      "effectiveSeconds": 12,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 50,
+          "effectiveSeconds": 12
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 148218,
+        "cached_input_tokens": 92544,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1340,
+        "reasoning_output_tokens": 447
+      }
     }
   ]
 }
