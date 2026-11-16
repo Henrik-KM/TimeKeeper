@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T13:01:02.802Z",
+  "updatedAt": "2026-11-16T13:16:03.055Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T13:01:05.711Z",
+    "observedAt": "2026-11-16T13:16:04.458Z",
     "primary": {
       "usedPercent": 34,
       "remainingPercent": 66,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 8,
       "assistantSessionCount": 8,
-      "lastSeenAt": "2026-11-16T13:00:56.583Z"
+      "lastSeenAt": "2026-11-16T13:16:00.181Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -258,9 +258,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3004,
+      "activityCount": 3238,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T13:00:56.583Z"
+      "lastSeenAt": "2026-11-16T13:16:00.181Z"
     },
     {
       "key": "01a1e0d2-6a2a-7a51-9aa2-66c55d28103e",
@@ -40691,8 +40691,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 568,
-    "imported": 568,
+    "discovered": 570,
+    "imported": 570,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -146400,6 +146400,90 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 1451,
         "reasoning_output_tokens": 443
+      }
+    },
+    {
+      "id": "codex-5af14d8edf73a71422dddb79",
+      "threadId": "01a1e473-0b6a-7a41-87f5-d70037d31430",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T13:01:46.846Z",
+      "endTime": "2026-11-16T13:03:58.346Z",
+      "wallSeconds": 131,
+      "focusFactor": 0.2443,
+      "effectiveSeconds": 32,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 131,
+          "effectiveSeconds": 32
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 360056,
+        "cached_input_tokens": 288128,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 4622,
+        "reasoning_output_tokens": 1533
+      }
+    },
+    {
+      "id": "codex-e100d063987b2edaf5fa3acb",
+      "threadId": "01a1e479-88d3-7a33-9ba6-9a8eefd158bb",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T13:08:52.164Z",
+      "endTime": "2026-11-16T13:13:20.492Z",
+      "wallSeconds": 268,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 67,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 268,
+          "effectiveSeconds": 67
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 705309,
+        "cached_input_tokens": 639104,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 10450,
+        "reasoning_output_tokens": 3532
       }
     }
   ]
