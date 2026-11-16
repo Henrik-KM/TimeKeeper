@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T12:01:02.950Z",
+  "updatedAt": "2026-11-16T12:16:02.812Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T12:01:04.178Z",
+    "observedAt": "2026-11-16T12:16:03.981Z",
     "primary": {
       "usedPercent": 34,
       "remainingPercent": 66,
@@ -40691,8 +40691,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 566,
-    "imported": 566,
+    "discovered": 567,
+    "imported": 567,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -146316,6 +146316,48 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2617,
         "reasoning_output_tokens": 895
+      }
+    },
+    {
+      "id": "codex-e3a3495d6e04b59ce3f68b18",
+      "threadId": "01a1e43e-3bd2-7dc3-9b88-d90da29a83c6",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T12:04:05.642Z",
+      "endTime": "2026-11-16T12:05:15.517Z",
+      "wallSeconds": 69,
+      "focusFactor": 0.2464,
+      "effectiveSeconds": 17,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 69,
+          "effectiveSeconds": 17
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 177790,
+        "cached_input_tokens": 135040,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1696,
+        "reasoning_output_tokens": 532
       }
     }
   ]
