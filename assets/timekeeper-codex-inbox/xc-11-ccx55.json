@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-16T16:22:02.530Z",
+  "updatedAt": "2026-11-16T16:27:02.370Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T16:22:04.808Z",
+    "observedAt": "2026-11-16T16:27:04.417Z",
     "primary": {
       "usedPercent": 37,
       "remainingPercent": 63,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-16T16:22:56.248Z"
+      "lastSeenAt": "2026-11-16T16:26:24.189Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -54,7 +54,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-16T16:21:02.442Z"
+      "lastSeenAt": "2026-11-16T16:22:21.833Z"
     },
     {
       "key": "documents/codex/2026-11-16/ple",
@@ -183,9 +183,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 727075,
+      "activityCount": 727180,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T16:22:56.248Z"
+      "lastSeenAt": "2026-11-16T16:26:24.189Z"
     },
     {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
@@ -200,9 +200,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 23314,
+      "activityCount": 23319,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T16:21:02.442Z"
+      "lastSeenAt": "2026-11-16T16:22:21.833Z"
     },
     {
       "key": "01a1e4e4-b0b1-7ac3-bd3c-97d02c80aa86",
@@ -2708,6 +2708,38 @@
         "codex-f40098013f85aaf5492db779"
       ],
       "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-8d1530600dbeda294f6014af",
+      "threadId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-16T16:07:10.725Z",
+      "endTime": "2026-11-16T16:07:57.736Z",
+      "wallSeconds": 46,
+      "focusFactor": 0.3043,
+      "effectiveSeconds": 14,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 46,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
