@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-16T13:46:02.761Z",
+  "updatedAt": "2026-11-16T14:01:01.819Z",
   "dayStart": "2026-11-15T23:00:00.000Z",
   "rangeStart": "2026-08-18T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-16T13:46:03.604Z",
+    "observedAt": "2026-11-16T14:01:03.378Z",
     "primary": {
       "usedPercent": 35,
       "remainingPercent": 65,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 8,
       "assistantSessionCount": 8,
-      "lastSeenAt": "2026-11-16T13:29:51.124Z"
+      "lastSeenAt": "2026-11-16T14:00:58.724Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -114,7 +114,7 @@
       "match": "IFLAI",
       "sessionCount": 2362,
       "assistantSessionCount": 2362,
-      "lastSeenAt": "2026-11-16T09:12:14.057Z"
+      "lastSeenAt": "2026-11-16T13:58:07.134Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -258,9 +258,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3450,
+      "activityCount": 3466,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T13:29:51.124Z"
+      "lastSeenAt": "2026-11-16T14:00:58.724Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 17294,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-16T13:58:07.134Z"
     },
     {
       "key": "01a1e0d2-6a2a-7a51-9aa2-66c55d28103e",
@@ -329,23 +346,6 @@
       "activityCount": 3651,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-16T08:46:09.329Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 17259,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-16T08:43:51.292Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -146401,6 +146401,38 @@
         "output_tokens": 1451,
         "reasoning_output_tokens": 443
       }
+    },
+    {
+      "id": "codex-18dfb51951a876bc71a8b514",
+      "threadId": "01a1a0af-6b9e-7c51-91d5-3ea5a7f63e1b",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-16T12:56:22.568Z",
+      "endTime": "2026-11-16T13:29:51.124Z",
+      "wallSeconds": 2008,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1004,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2008,
+          "effectiveSeconds": 1004
+        }
+      ],
+      "description": "Codex: Assess Redpine synergy"
     },
     {
       "id": "codex-5af14d8edf73a71422dddb79",
