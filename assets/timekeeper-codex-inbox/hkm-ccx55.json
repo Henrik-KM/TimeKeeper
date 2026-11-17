@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-17T11:01:02.207Z",
+  "updatedAt": "2026-11-17T11:16:01.879Z",
   "dayStart": "2026-11-16T23:00:00.000Z",
   "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-17T11:01:03.953Z",
+    "observedAt": "2026-11-17T11:16:03.621Z",
     "primary": {
       "usedPercent": 45,
       "remainingPercent": 55,
@@ -85,7 +85,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-17T10:58:49.422Z"
+      "lastSeenAt": "2026-11-17T11:16:03.256Z"
     },
     {
       "key": "github/iflai/sem-imaging",
@@ -209,9 +209,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 59430,
+      "activityCount": 60001,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-17T10:58:49.422Z"
+      "lastSeenAt": "2026-11-17T11:16:03.256Z"
     },
     {
       "key": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
@@ -146203,6 +146203,38 @@
         "output_tokens": 8809,
         "reasoning_output_tokens": 2849
       }
+    },
+    {
+      "id": "codex-0b240c316f1c8858670f2886",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-17T10:39:43.510Z",
+      "endTime": "2026-11-17T10:45:35.616Z",
+      "wallSeconds": 352,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 176,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 352,
+          "effectiveSeconds": 176
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
     }
   ]
 }
