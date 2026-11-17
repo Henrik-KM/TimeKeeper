@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-17T10:16:02.757Z",
+  "updatedAt": "2026-11-17T10:46:01.886Z",
   "dayStart": "2026-11-16T23:00:00.000Z",
   "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-17T10:16:04.467Z",
+    "observedAt": "2026-11-17T10:46:04.173Z",
     "primary": {
-      "usedPercent": 44,
-      "remainingPercent": 56,
+      "usedPercent": 45,
+      "remainingPercent": 55,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-20T07:10:45.000Z"
     },
@@ -85,7 +85,7 @@
       "match": "IFLAI",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-17T10:16:11.869Z"
+      "lastSeenAt": "2026-11-17T10:45:35.616Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -99,7 +99,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-17T10:16:04.139Z"
+      "lastSeenAt": "2026-11-17T10:45:28.650Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -209,9 +209,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 5747,
+      "activityCount": 5911,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-17T10:16:11.869Z"
+      "lastSeenAt": "2026-11-17T10:45:35.616Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -226,9 +226,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 59200,
+      "activityCount": 59302,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-17T10:16:04.139Z"
+      "lastSeenAt": "2026-11-17T10:45:28.650Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -40591,8 +40591,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 581,
-    "imported": 581,
+    "discovered": 582,
+    "imported": 582,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -145885,6 +145885,70 @@
       "description": "Codex: Stanford family visas"
     },
     {
+      "id": "codex-1af879e69c9c0bb2e7804f22",
+      "threadId": "01a0f2ac-8a6d-7772-b150-fb92f0e97e32",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-17T09:24:59.423Z",
+      "endTime": "2026-11-17T10:22:22.539Z",
+      "wallSeconds": 3204,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1602,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3204,
+          "effectiveSeconds": 1602
+        }
+      ],
+      "description": "Codex: Find and adapt AI risk assessment"
+    },
+    {
+      "id": "codex-1358e862411579ec767a8648",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-17T09:37:33.077Z",
+      "endTime": "2026-11-17T10:22:15.762Z",
+      "wallSeconds": 2325,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1162,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2325,
+          "effectiveSeconds": 1162
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
       "id": "codex-7f1c3ba2d25de71d06533855",
       "threadId": "01a1e8e2-a92a-7da2-a3ae-00a48c77b445",
       "projectKey": "email-helper",
@@ -145925,6 +145989,52 @@
         "output_tokens": 9635,
         "reasoning_output_tokens": 2659
       }
+    },
+    {
+      "id": "codex-ced2e870df21f71f92819d80",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-17T09:47:02.677Z",
+      "endTime": "2026-11-17T10:03:43.781Z",
+      "wallSeconds": 722,
+      "focusFactor": 0.2493,
+      "effectiveSeconds": 180,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "high",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 722,
+          "effectiveSeconds": 180
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     },
     {
       "id": "codex-e240cb4cc85e1518da2b3fee",
@@ -146050,6 +146160,48 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 7124,
         "reasoning_output_tokens": 3457
+      }
+    },
+    {
+      "id": "codex-38a50ea81d145cbf5334e040",
+      "threadId": "01a1e902-686b-7c70-9b2d-039b7a6b7642",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-17T10:16:51.216Z",
+      "endTime": "2026-11-17T10:20:31.888Z",
+      "wallSeconds": 220,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 55,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 220,
+          "effectiveSeconds": 55
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 388669,
+        "cached_input_tokens": 327680,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 8809,
+        "reasoning_output_tokens": 2849
       }
     }
   ]
