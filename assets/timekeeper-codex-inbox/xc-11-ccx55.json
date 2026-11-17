@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-17T05:52:02.636Z",
+  "updatedAt": "2026-11-17T05:57:02.722Z",
   "dayStart": "2026-11-16T23:00:00.000Z",
   "rangeStart": "2026-08-19T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-17T05:52:04.577Z",
+    "observedAt": "2026-11-17T05:57:04.587Z",
     "primary": {
       "usedPercent": 40,
       "remainingPercent": 60,
@@ -94,8 +94,8 @@
       "projectName": "",
       "matchType": null,
       "match": "",
-      "sessionCount": 3,
-      "assistantSessionCount": 3,
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
       "lastSeenAt": "2026-11-13T20:24:14.613Z"
     },
     {
@@ -333,7 +333,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 223774,
+      "activityCount": 223775,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-14T09:31:09.798Z"
     },
@@ -384,7 +384,7 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 37561,
+      "activityCount": 37257,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-13T06:59:39.455Z"
     },
@@ -406,40 +406,6 @@
       "lastSeenAt": "2026-11-12T11:15:35.062Z"
     },
     {
-      "key": "01a1b4ff-fda6-7a41-8bef-27a648d7fb7c",
-      "sessionId": "01a1b4ff-fda6-7a41-8bef-27a648d7fb7c",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/TimeKeeper",
-      "repoName": "TimeKeeper",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 318,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-07T08:10:01.315Z"
-    },
-    {
-      "key": "01a1b4f2-b5b6-7db2-883d-6f54bbde30ec",
-      "sessionId": "01a1b4f2-b5b6-7db2-883d-6f54bbde30ec",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/TimeKeeper",
-      "repoName": "TimeKeeper",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 93,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-07T07:42:29.147Z"
-    },
-    {
       "key": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "sessionId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "title": "",
@@ -452,7 +418,7 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 3268,
+      "activityCount": 3217,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-17T02:57:40.956Z"
     },
@@ -571,7 +537,7 @@
   },
   "records": [
     {
-      "id": "codex-54b90c3c0c25dac674f485cc",
+      "id": "codex-4846630c5ee0c5473f80487a",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -584,26 +550,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "medium",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 73,
-          "effectiveSeconds": 36,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 36
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-4846630c5ee0c5473f80487a"
       ],
       "description": "Codex: Structured AL"
     },
@@ -640,7 +601,7 @@
       "description": "Codex: Restart HPC Arrhenius access"
     },
     {
-      "id": "codex-92f733c61cf61d3a5bc8b191",
+      "id": "codex-3619054f60cb0acb972482dc",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -653,45 +614,40 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "medium",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 579,
-          "effectiveSeconds": 289,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 289
         },
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 244,
-          "effectiveSeconds": 122,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 122
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-3619054f60cb0acb972482dc"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-7d904af4ebc77627a0d1665c",
+      "id": "codex-f11e70f776d8641a7064c260",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -704,31 +660,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 29,
-          "effectiveSeconds": 14,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 14
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-f11e70f776d8641a7064c260"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-a54dc0689770d93def1b0f6b",
+      "id": "codex-9939d33f7ba61ff120d618ec",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -741,31 +692,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-9939d33f7ba61ff120d618ec"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-fe646b53ccd7641820485482",
+      "id": "codex-dc88b6177f87d8db1c6e15ed",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -778,31 +724,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 24,
-          "effectiveSeconds": 12,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 12
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-dc88b6177f87d8db1c6e15ed"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-bb79c7171b895f020d86dc39",
+      "id": "codex-d6f9de3ce650e4ed36713d4b",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -815,31 +756,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-d6f9de3ce650e4ed36713d4b"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-3630156ab83d864f68ec22d7",
+      "id": "codex-9ab3a720a5ad91acad692e59",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -852,31 +788,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 28,
-          "effectiveSeconds": 14,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 14
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-9ab3a720a5ad91acad692e59"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-d70f248a97863147082b01e1",
+      "id": "codex-165c59b82bf03b6e5cdb16d6",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -889,31 +820,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 16,
-          "effectiveSeconds": 8,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 8
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-165c59b82bf03b6e5cdb16d6"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-7b43ebfe4bf7bd0fac315292",
+      "id": "codex-1c68c6564f95051192ced406",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -926,31 +852,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 18,
-          "effectiveSeconds": 9,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 9
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-1c68c6564f95051192ced406"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-d500220103bb6acead1e24b3",
+      "id": "codex-2165b514bc7b695a0da6c357",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -963,31 +884,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 62,
-          "effectiveSeconds": 31,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 31
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-2165b514bc7b695a0da6c357"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-ad4dae93f2709654a179029e",
+      "id": "codex-9a1c5b9fe3017d5b24b1cab3",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1000,31 +916,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 140,
-          "effectiveSeconds": 70,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 70
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-9a1c5b9fe3017d5b24b1cab3"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-d17f5a2ed708545616f67ed9",
+      "id": "codex-faacd93b2f3f29a7af8b1337",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1037,31 +948,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 18,
-          "effectiveSeconds": 9,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 9
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-faacd93b2f3f29a7af8b1337"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-7f8ff33d7104708ae00417b8",
+      "id": "codex-b494bc8d0f74c5fed2371562",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1074,31 +980,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-b494bc8d0f74c5fed2371562"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-f389cc311324d81bd9e66a2f",
+      "id": "codex-af6695b125322e7b59b45002",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1111,31 +1012,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 26,
-          "effectiveSeconds": 13,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 13
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-af6695b125322e7b59b45002"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-41843fd99f345f1fc62f47c8",
+      "id": "codex-8b0a204e07cc82f41907b049",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1148,31 +1044,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 28,
-          "effectiveSeconds": 14,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 14
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-8b0a204e07cc82f41907b049"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-3ae84fa6a60cb858e791d6b1",
+      "id": "codex-d89c409cbcb7fef69c49052d",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1185,31 +1076,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-d89c409cbcb7fef69c49052d"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-0121db3b1a4c362db1ea701c",
+      "id": "codex-59dad4be8bfaeb41b17f75f3",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1222,26 +1108,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 177,
-          "effectiveSeconds": 88,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 88
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-59dad4be8bfaeb41b17f75f3"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1278,7 +1159,7 @@
       "description": "Codex: Import Lukas’s latest Drive data"
     },
     {
-      "id": "codex-04202df92e946df0430b26d7",
+      "id": "codex-ab7a51f20b596bc1b9933902",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1291,26 +1172,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 22,
-          "effectiveSeconds": 11,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 11
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-ab7a51f20b596bc1b9933902"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1361,7 +1237,7 @@
       "description": "Codex: genAI-review"
     },
     {
-      "id": "codex-57d72b9326c70b27fca8fdf1",
+      "id": "codex-fd14147633f3165acf870a5b",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1374,31 +1250,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 22,
-          "effectiveSeconds": 11,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 11
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-fd14147633f3165acf870a5b"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-9ec30a5de1f56d1787487a51",
+      "id": "codex-3ae435bffe3c95a662a9432a",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1411,26 +1282,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 129,
-          "effectiveSeconds": 64,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 64
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-3ae435bffe3c95a662a9432a"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1467,7 +1333,7 @@
       "description": "Codex: Import Lukas’s latest Drive data"
     },
     {
-      "id": "codex-67150871e87136bc764a1924",
+      "id": "codex-a4dc1747e6ffe88fb774923f",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1480,40 +1346,35 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "high",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 0,
-          "effectiveSeconds": 0,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 0
         },
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 347,
-          "effectiveSeconds": 173,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 173
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-a4dc1747e6ffe88fb774923f"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1596,7 +1457,7 @@
       "description": "Codex: Import Lukas’s latest Drive data"
     },
     {
-      "id": "codex-0f7af6b91aae69185c15b5c4",
+      "id": "codex-a336bb1a44b610e0100625ad",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1609,31 +1470,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 47,
-          "effectiveSeconds": 23,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 23
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-a336bb1a44b610e0100625ad"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-375f9078598a23dee39869a9",
+      "id": "codex-51858827418362a4b362dee1",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1646,31 +1502,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-51858827418362a4b362dee1"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-23e8cf142d7a61528f05c08f",
+      "id": "codex-42827651a38788a529e93a68",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1683,31 +1534,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 32,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-42827651a38788a529e93a68"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-26e9f4862fa88e215c803c8b",
+      "id": "codex-6b937c8e6c8c87e5390cebc1",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1720,31 +1566,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 32,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-6b937c8e6c8c87e5390cebc1"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-1b683a1a24f943c76ab97112",
+      "id": "codex-0372caf4b00b31dfa9b03282",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1757,31 +1598,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-0372caf4b00b31dfa9b03282"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-7e8153d200040d27c2433f44",
+      "id": "codex-a5a7389229073f3d5fd927b5",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1794,26 +1630,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 30,
-          "effectiveSeconds": 15,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 15
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-a5a7389229073f3d5fd927b5"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1864,7 +1695,7 @@
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-48508d9f3c6e65a0c4e7637e",
+      "id": "codex-138288e28192cb83e0a8b0b1",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1877,26 +1708,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-138288e28192cb83e0a8b0b1"
       ],
       "description": "Codex: Structured AL"
     },
@@ -1933,7 +1759,7 @@
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-c40e801ffbcaea022097bbea",
+      "id": "codex-aae32169bea82d64e21242c1",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1946,31 +1772,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-aae32169bea82d64e21242c1"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-c40114feb9df3bc021185b88",
+      "id": "codex-aa61ce9de0386a18623769a4",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -1983,31 +1804,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 30,
-          "effectiveSeconds": 15,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 15
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-aa61ce9de0386a18623769a4"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-6ae7a02924a982c619cd97f3",
+      "id": "codex-e7b7276167d84dd09e4144f7",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2020,31 +1836,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 30,
-          "effectiveSeconds": 15,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 15
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-e7b7276167d84dd09e4144f7"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-b1ab3980d7e09987c4c41a73",
+      "id": "codex-fe33f875ad9352f376600d3f",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2057,31 +1868,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 31,
-          "effectiveSeconds": 15,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 15
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-fe33f875ad9352f376600d3f"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-0e012dfee10c8cd8b5cb1bdf",
+      "id": "codex-524cdf0cd991afc274de0025",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2094,31 +1900,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 37,
-          "effectiveSeconds": 18,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 18
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-524cdf0cd991afc274de0025"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-d038ac709508cd2c407cc1e6",
+      "id": "codex-0b45820b55b1d3a219b95e5b",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2131,31 +1932,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-0b45820b55b1d3a219b95e5b"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-e3a32af1a197b01da6cd37fd",
+      "id": "codex-805014d2f2939c22d3132d9c",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2168,31 +1964,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 32,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-805014d2f2939c22d3132d9c"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-dab88d8c78086e414fa79775",
+      "id": "codex-be569589ed5a9b21433b14dd",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2205,31 +1996,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-be569589ed5a9b21433b14dd"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-6b4eef2c827405d7c5f792ef",
+      "id": "codex-e8f50c286b6ad02316f05193",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2242,31 +2028,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 34,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-e8f50c286b6ad02316f05193"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-8d73a740212c46dba0c78c19",
+      "id": "codex-887112eb89b977b2428756b1",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2279,31 +2060,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 35,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-887112eb89b977b2428756b1"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-74249ec6bb8a897ae7aeb0f8",
+      "id": "codex-c1ef55822649d8f763678226",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2316,31 +2092,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 36,
-          "effectiveSeconds": 18,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 18
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-c1ef55822649d8f763678226"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-06a9bd05b11d9b6bfef01f74",
+      "id": "codex-7c0a79e8513b680fac6a2af9",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2353,26 +2124,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-7c0a79e8513b680fac6a2af9"
       ],
       "description": "Codex: Structured AL"
     },
@@ -2409,7 +2175,7 @@
       "description": "Codex: Import Lukas’s latest Drive data"
     },
     {
-      "id": "codex-ff066aef02baff88b3654043",
+      "id": "codex-f9edbb1a84c0b15656344508",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2422,26 +2188,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 34,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-f9edbb1a84c0b15656344508"
       ],
       "description": "Codex: Structured AL"
     },
@@ -2492,7 +2253,7 @@
       "description": "Codex: Download Andrew’s shared Drive files"
     },
     {
-      "id": "codex-b1e039fdb8419db7b80f9449",
+      "id": "codex-be8a38cdc2719f9ccb31d162",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2505,31 +2266,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 33,
-          "effectiveSeconds": 16,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 16
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-be8a38cdc2719f9ccb31d162"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-69cc7e0a4c4ae62c62f1d92f",
+      "id": "codex-f40098013f85aaf5492db779",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2542,26 +2298,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 34,
-          "effectiveSeconds": 17,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 17
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-f40098013f85aaf5492db779"
       ],
       "description": "Codex: Structured AL"
     },
@@ -2598,7 +2349,7 @@
       "description": "Codex: Restart HPC Arrhenius access"
     },
     {
-      "id": "codex-04163030e35ed4d2b4b8c3ef",
+      "id": "codex-2cc10830056a2218c6a0b327",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2611,31 +2362,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 214,
-          "effectiveSeconds": 107,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 107
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-2cc10830056a2218c6a0b327"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-86b201339f5db57c652c45e9",
+      "id": "codex-8412d084d027685c90e1590c",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2648,31 +2394,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 36,
-          "effectiveSeconds": 18,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 18
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-8412d084d027685c90e1590c"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-256620010e835d0331bca5e8",
+      "id": "codex-19a0b6320c1837847b4cf4ce",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2685,31 +2426,26 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 37,
-          "effectiveSeconds": 18,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 18
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-19a0b6320c1837847b4cf4ce"
       ],
       "description": "Codex: Structured AL"
     },
     {
-      "id": "codex-8f2ce9107fd6b34186712dba",
+      "id": "codex-05df8167c36d52d073b47b73",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
       "projectKey": "Structured AL",
       "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
@@ -2722,26 +2458,21 @@
       "activityPolicyVersion": 1,
       "focusPolicyVersion": 7,
       "repositoryFocusMultiplier": 1,
-      "delegationCredit": 0.35,
-      "delegatedSessionCount": 0,
       "modelBreakdown": [
         {
           "role": "parent",
           "model": "gpt-6.1-sol",
           "effort": "max",
+          "baseFactor": 0.5,
           "factor": 0.5,
           "fastMode": false,
           "fastModeMultiplier": 1,
           "creditMultiplier": 1,
           "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
           "wallSeconds": 39,
-          "effectiveSeconds": 19,
-          "baseFactor": 0.5,
-          "repositoryMultiplier": 1
+          "effectiveSeconds": 19
         }
-      ],
-      "supersedesExternalIds": [
-        "codex-05df8167c36d52d073b47b73"
       ],
       "description": "Codex: Structured AL"
     }
