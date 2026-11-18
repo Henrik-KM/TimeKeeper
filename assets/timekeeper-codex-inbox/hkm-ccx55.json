@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T14:31:02.893Z",
+  "updatedAt": "2026-11-18T14:46:02.926Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T14:31:04.440Z",
+    "observedAt": "2026-11-18T14:46:04.491Z",
     "primary": {
-      "usedPercent": 64,
-      "remainingPercent": 36,
+      "usedPercent": 65,
+      "remainingPercent": 35,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-20T07:10:45.000Z"
     },
@@ -85,7 +85,7 @@
       "match": "IFLAI",
       "sessionCount": 8,
       "assistantSessionCount": 8,
-      "lastSeenAt": "2026-11-18T14:31:04.070Z"
+      "lastSeenAt": "2026-11-18T14:45:59.896Z"
     },
     {
       "key": "github/anders",
@@ -99,7 +99,7 @@
       "match": "Anders",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-18T14:30:47.309Z"
+      "lastSeenAt": "2026-11-18T14:36:48.552Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -209,9 +209,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 702,
+      "activityCount": 1003,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T14:31:04.070Z"
+      "lastSeenAt": "2026-11-18T14:45:59.896Z"
     },
     {
       "key": "01a182cf-f672-7500-8160-cf3fe74b3794",
@@ -226,9 +226,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 1023,
+      "activityCount": 1188,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T14:30:47.309Z"
+      "lastSeenAt": "2026-11-18T14:36:48.552Z"
     },
     {
       "key": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
@@ -40081,8 +40081,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 589,
-    "imported": 589,
+    "discovered": 590,
+    "imported": 590,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -145010,6 +145010,48 @@
         }
       ],
       "description": "Codex: Prepare GAIA speaker application"
+    },
+    {
+      "id": "codex-ed4448b81436c800b2fcf1c3",
+      "threadId": "01a1ef0c-1547-7ed0-b470-f015e1ea9bbe",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T14:25:07.844Z",
+      "endTime": "2026-11-18T14:31:40.032Z",
+      "wallSeconds": 392,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 98,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 392,
+          "effectiveSeconds": 98
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1508926,
+        "cached_input_tokens": 1380480,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 13960,
+        "reasoning_output_tokens": 6103
+      }
     }
   ]
 }
