@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T13:46:02.770Z",
+  "updatedAt": "2026-11-18T14:01:02.901Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T13:46:05.537Z",
+    "observedAt": "2026-11-18T14:01:04.479Z",
     "primary": {
       "usedPercent": 63,
       "remainingPercent": 37,
@@ -83,9 +83,9 @@
       "projectName": "IFLAI",
       "matchType": "githubParentFolder",
       "match": "IFLAI",
-      "sessionCount": 7,
-      "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-18T13:31:38.817Z"
+      "sessionCount": 8,
+      "assistantSessionCount": 8,
+      "lastSeenAt": "2026-11-18T14:00:56.519Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -195,6 +195,23 @@
       "activityCount": 11602,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
+    },
+    {
+      "key": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "sessionId": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "title": "Complete Scientist.com requests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 71,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-18T14:00:56.519Z"
     },
     {
       "key": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
@@ -144947,6 +144964,52 @@
         }
       ],
       "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-2b0262e6556f6ea23545839e",
+      "threadId": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T12:52:11.932Z",
+      "endTime": "2026-11-18T13:31:38.817Z",
+      "wallSeconds": 2289,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1144,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2289,
+          "effectiveSeconds": 1144
+        }
+      ],
+      "description": "Codex: Prepare GAIA speaker application"
     }
   ]
 }
