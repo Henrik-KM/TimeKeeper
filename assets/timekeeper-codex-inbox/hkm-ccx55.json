@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T06:31:02.546Z",
+  "updatedAt": "2026-11-18T06:46:02.624Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T06:31:04.298Z",
+    "observedAt": "2026-11-18T06:46:04.226Z",
     "primary": {
       "usedPercent": 55,
       "remainingPercent": 45,
@@ -144508,6 +144508,38 @@
         "output_tokens": 2536,
         "reasoning_output_tokens": 614
       }
+    },
+    {
+      "id": "codex-c21280b97c637376563fcad5",
+      "threadId": "01a1e891-81c4-7673-834c-ed3d1439df47",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T06:04:28.769Z",
+      "endTime": "2026-11-18T06:20:10.856Z",
+      "wallSeconds": 941,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 235,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 941,
+          "effectiveSeconds": 235
+        }
+      ],
+      "description": "Codex: Automate morning LinkedIn invitations"
     }
   ]
 }
