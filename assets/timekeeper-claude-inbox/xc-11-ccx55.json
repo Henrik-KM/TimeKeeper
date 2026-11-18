@@ -3,7 +3,7 @@
   "focusPolicyVersion": 3,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-18T11:36:01.897Z",
+  "updatedAt": "2026-11-18T12:46:02.070Z",
   "rangeStart": "2026-10-19T22:00:00.000Z",
   "lookbackDays": 30,
   "retractedExternalIds": [
@@ -6042,6 +6042,60 @@
           "creditedFactor": 0.5,
           "wallSeconds": 70,
           "effectiveSeconds": 35
+        }
+      ],
+      "focusFactor": 0.5,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:e56ad1aeef3c05d15362490bb35d0018",
+      "sessionId": "5bf3382a-844a-48b6-b727-304859fa2357",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Research",
+      "description": "Claude: Research",
+      "startTime": "2026-11-18T11:35:45.628Z",
+      "endTime": "2026-11-18T12:25:46.691Z",
+      "wallSeconds": 867,
+      "effectiveSeconds": 433,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 867,
+          "effectiveSeconds": 433
+        }
+      ],
+      "focusFactor": 0.4994,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:52448268582df0215fedecec8b073290",
+      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Structured AL",
+      "description": "Claude: Structured AL",
+      "startTime": "2026-11-18T12:09:17.988Z",
+      "endTime": "2026-11-18T12:28:47.076Z",
+      "wallSeconds": 1158,
+      "effectiveSeconds": 579,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 1158,
+          "effectiveSeconds": 579
         }
       ],
       "focusFactor": 0.5,
