@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T09:16:02.676Z",
+  "updatedAt": "2026-11-18T09:31:02.703Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T09:16:04.968Z",
+    "observedAt": "2026-11-18T09:31:05.422Z",
     "primary": {
       "usedPercent": 58,
       "remainingPercent": 42,
@@ -85,7 +85,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-18T09:16:17.552Z"
+      "lastSeenAt": "2026-11-18T09:31:12.519Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -209,9 +209,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 62357,
+      "activityCount": 62647,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T09:16:17.552Z"
+      "lastSeenAt": "2026-11-18T09:31:12.519Z"
     },
     {
       "key": "01a1e36d-a504-79c0-95b6-cf1c99849cc0",
@@ -144774,6 +144774,38 @@
         "output_tokens": 1618,
         "reasoning_output_tokens": 515
       }
+    },
+    {
+      "id": "codex-a143e39a32bc0a3759f3efbb",
+      "threadId": "01a1e36d-a504-79c0-95b6-cf1c99849cc0",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T08:56:39.733Z",
+      "endTime": "2026-11-18T08:59:55.913Z",
+      "wallSeconds": 115,
+      "focusFactor": 0.2435,
+      "effectiveSeconds": 28,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 115,
+          "effectiveSeconds": 28
+        }
+      ],
+      "description": "Codex: Clean up stale Chrome tabs"
     }
   ]
 }
