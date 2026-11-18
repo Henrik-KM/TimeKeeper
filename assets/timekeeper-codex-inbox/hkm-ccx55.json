@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T16:16:01.818Z",
+  "updatedAt": "2026-11-18T16:31:04.729Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T16:16:02.814Z",
+    "observedAt": "2026-11-18T16:31:05.597Z",
     "primary": {
       "usedPercent": 66,
       "remainingPercent": 34,
@@ -145236,6 +145236,70 @@
         }
       ],
       "description": "Codex: Prepare GAIA speaker application"
+    },
+    {
+      "id": "codex-d2ed20dc316f71b4ec8e59b0",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T15:56:34.893Z",
+      "endTime": "2026-11-18T16:13:57.987Z",
+      "wallSeconds": 894,
+      "focusFactor": 0.2494,
+      "effectiveSeconds": 223,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 894,
+          "effectiveSeconds": 223
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-a7a6271503329f0b44eacbb0",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-18T15:58:34.724Z",
+      "endTime": "2026-11-18T16:06:41.108Z",
+      "wallSeconds": 485,
+      "focusFactor": 0.499,
+      "effectiveSeconds": 242,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 485,
+          "effectiveSeconds": 242
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     }
   ]
 }
