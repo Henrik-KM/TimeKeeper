@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T13:01:02.805Z",
+  "updatedAt": "2026-11-18T13:16:02.772Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T13:01:04.513Z",
+    "observedAt": "2026-11-18T13:16:04.455Z",
     "primary": {
-      "usedPercent": 62,
-      "remainingPercent": 38,
+      "usedPercent": 63,
+      "remainingPercent": 37,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-20T07:10:45.000Z"
     },
@@ -85,7 +85,7 @@
       "match": "IFLAI",
       "sessionCount": 7,
       "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-18T13:00:54.731Z"
+      "lastSeenAt": "2026-11-18T13:15:58.773Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -209,9 +209,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 250,
+      "activityCount": 530,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T13:00:54.731Z"
+      "lastSeenAt": "2026-11-18T13:15:58.773Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -144915,6 +144915,38 @@
         }
       ],
       "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-ff04d5a33a261a1c96d22813",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-18T12:18:11.977Z",
+      "endTime": "2026-11-18T12:49:17.337Z",
+      "wallSeconds": 1834,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 917,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1834,
+          "effectiveSeconds": 917
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     }
   ]
 }
