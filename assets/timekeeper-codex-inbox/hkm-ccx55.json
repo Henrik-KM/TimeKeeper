@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T15:01:02.882Z",
+  "updatedAt": "2026-11-18T15:16:02.788Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T15:01:04.427Z",
+    "observedAt": "2026-11-18T15:16:04.013Z",
     "primary": {
       "usedPercent": 65,
       "remainingPercent": 35,
@@ -85,7 +85,7 @@
       "match": "IFLAI",
       "sessionCount": 2329,
       "assistantSessionCount": 2329,
-      "lastSeenAt": "2026-11-18T15:01:12.789Z"
+      "lastSeenAt": "2026-11-18T15:16:05.548Z"
     },
     {
       "key": "github/iflai",
@@ -99,7 +99,7 @@
       "match": "IFLAI",
       "sessionCount": 8,
       "assistantSessionCount": 8,
-      "lastSeenAt": "2026-11-18T14:54:28.983Z"
+      "lastSeenAt": "2026-11-18T15:15:57.588Z"
     },
     {
       "key": "github/anders",
@@ -209,9 +209,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 18716,
+      "activityCount": 18978,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T15:01:12.789Z"
+      "lastSeenAt": "2026-11-18T15:16:05.548Z"
+    },
+    {
+      "key": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
+      "sessionId": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
+      "title": "Prepare GAIA speaker application",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1018,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-18T15:15:57.588Z"
     },
     {
       "key": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
@@ -246,23 +263,6 @@
       "activityCount": 1188,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-18T14:36:48.552Z"
-    },
-    {
-      "key": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
-      "sessionId": "01a1eeb6-f7cc-7e73-a194-8e25386398ee",
-      "title": "Prepare GAIA speaker application",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 791,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T13:31:38.817Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -40081,8 +40081,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 590,
-    "imported": 590,
+    "discovered": 591,
+    "imported": 591,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -145012,6 +145012,52 @@
       "description": "Codex: Prepare GAIA speaker application"
     },
     {
+      "id": "codex-470693b998a19a6a8d433ecb",
+      "threadId": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T13:59:21.366Z",
+      "endTime": "2026-11-18T14:54:28.983Z",
+      "wallSeconds": 2448,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 1224,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2447,
+          "effectiveSeconds": 1223
+        }
+      ],
+      "description": "Codex: Complete Scientist.com requests"
+    },
+    {
       "id": "codex-aac25c1316f4741bc9ad6f26",
       "threadId": "01a182cf-f672-7500-8160-cf3fe74b3794",
       "projectKey": "Anders",
@@ -145083,6 +145129,48 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 13960,
         "reasoning_output_tokens": 6103
+      }
+    },
+    {
+      "id": "codex-b286c9d65e7e7bbabd8997af",
+      "threadId": "01a1ef2d-5531-75f1-a227-11c948fd3214",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T15:01:27.565Z",
+      "endTime": "2026-11-18T15:05:07.221Z",
+      "wallSeconds": 219,
+      "focusFactor": 0.2466,
+      "effectiveSeconds": 54,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 219,
+          "effectiveSeconds": 54
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 605104,
+        "cached_input_tokens": 533632,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 8219,
+        "reasoning_output_tokens": 4701
       }
     }
   ]
