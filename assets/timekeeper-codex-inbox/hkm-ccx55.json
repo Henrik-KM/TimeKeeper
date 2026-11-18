@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T10:16:04.435Z",
+  "updatedAt": "2026-11-18T10:31:02.952Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T10:16:05.247Z",
+    "observedAt": "2026-11-18T10:31:05.226Z",
     "primary": {
       "usedPercent": 59,
       "remainingPercent": 41,
@@ -85,7 +85,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-18T10:15:52.244Z"
+      "lastSeenAt": "2026-11-18T10:31:16.696Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -209,9 +209,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 63290,
+      "activityCount": 63527,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T10:15:52.244Z"
+      "lastSeenAt": "2026-11-18T10:31:16.696Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -144806,6 +144806,38 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-8d52cf6d28f083f5d9c81c51",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-18T09:56:29.905Z",
+      "endTime": "2026-11-18T10:13:33.937Z",
+      "wallSeconds": 727,
+      "focusFactor": 0.249,
+      "effectiveSeconds": 181,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 727,
+          "effectiveSeconds": 181
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     }
   ]
 }
