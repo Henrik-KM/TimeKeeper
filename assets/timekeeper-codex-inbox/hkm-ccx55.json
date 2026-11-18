@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-18T11:46:02.662Z",
+  "updatedAt": "2026-11-18T12:01:03.208Z",
   "dayStart": "2026-11-17T23:00:00.000Z",
   "rangeStart": "2026-08-20T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-18T11:46:03.768Z",
+    "observedAt": "2026-11-18T12:01:06.238Z",
     "primary": {
       "usedPercent": 61,
       "remainingPercent": 39,
@@ -144806,6 +144806,66 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-effdbbd0bed06fa223cf62cf",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-18T09:05:06.741Z",
+      "endTime": "2026-11-18T11:31:31.661Z",
+      "wallSeconds": 7150,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 3575,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 5643,
+          "effectiveSeconds": 2821
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1498,
+          "effectiveSeconds": 749
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "low",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 8,
+          "effectiveSeconds": 4
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     },
     {
       "id": "codex-8d52cf6d28f083f5d9c81c51",
