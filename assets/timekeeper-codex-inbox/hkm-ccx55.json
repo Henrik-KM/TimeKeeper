@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-19T11:46:02.338Z",
+  "updatedAt": "2026-11-19T12:01:02.507Z",
   "dayStart": "2026-11-18T23:00:00.000Z",
   "rangeStart": "2026-08-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-19T11:46:03.783Z",
+    "observedAt": "2026-11-19T12:01:04.636Z",
     "primary": {
       "usedPercent": 72,
       "remainingPercent": 28,
@@ -75,6 +75,20 @@
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
     },
     {
+      "key": "github/iflai",
+      "displayPath": "GitHub/IFLAI",
+      "projectFolder": "IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 9,
+      "assistantSessionCount": 9,
+      "lastSeenAt": "2026-11-19T11:55:33.271Z"
+    },
+    {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
       "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
       "projectFolder": "Anders",
@@ -115,20 +129,6 @@
       "sessionCount": 2205,
       "assistantSessionCount": 2205,
       "lastSeenAt": "2026-11-19T10:30:08.690Z"
-    },
-    {
-      "key": "github/iflai",
-      "displayPath": "GitHub/IFLAI",
-      "projectFolder": "IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 8,
-      "assistantSessionCount": 8,
-      "lastSeenAt": "2026-11-18T15:16:11.937Z"
     },
     {
       "key": "github/anders",
@@ -196,6 +196,23 @@
       "activityCount": 11602,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
+    },
+    {
+      "key": "01a1f3a5-8d0a-7332-bf56-99534c964127",
+      "sessionId": "01a1f3a5-8d0a-7332-bf56-99534c964127",
+      "title": "Store group meeting notes",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 106,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-19T11:55:33.271Z"
     },
     {
       "key": "01a1d3ed-1637-7230-9f52-d303bcc9fee4",
@@ -139401,6 +139418,38 @@
         "output_tokens": 2491,
         "reasoning_output_tokens": 721
       }
+    },
+    {
+      "id": "codex-a6bd15d8b29d8808d9241d73",
+      "threadId": "01a1d3ed-1637-7230-9f52-d303bcc9fee4",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-19T11:06:33.767Z",
+      "endTime": "2026-11-19T11:34:50.460Z",
+      "wallSeconds": 1182,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 591,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1182,
+          "effectiveSeconds": 591
+        }
+      ],
+      "description": "Codex: Prepare full trip budget"
     }
   ]
 }
