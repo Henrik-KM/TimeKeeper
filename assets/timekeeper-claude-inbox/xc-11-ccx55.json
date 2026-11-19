@@ -3,8 +3,8 @@
   "focusPolicyVersion": 3,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-19T22:21:02.309Z",
-  "rangeStart": "2026-10-20T22:00:00.000Z",
+  "updatedAt": "2026-11-19T23:01:02.390Z",
+  "rangeStart": "2026-10-21T22:00:00.000Z",
   "lookbackDays": 30,
   "retractedExternalIds": [
     "claude:6a64f8afebca6c84f79053f1af67b2f6",
@@ -37,231 +37,6 @@
     "claude:42e8e70b7d211af8e1cbc8da3f42e087"
   ],
   "records": [
-    {
-      "id": "claude:6bda8753e7d925ed716662b97868efb6",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-20T23:24:26.735Z",
-      "endTime": "2026-10-20T23:26:26.243Z",
-      "wallSeconds": 119,
-      "effectiveSeconds": 59,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 119,
-          "effectiveSeconds": 59
-        }
-      ],
-      "focusFactor": 0.4958,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:905b7d9d7a597baa12245aea86df5806",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T05:54:30.445Z",
-      "endTime": "2026-10-21T05:56:33.123Z",
-      "wallSeconds": 122,
-      "effectiveSeconds": 61,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 122,
-          "effectiveSeconds": 61
-        }
-      ],
-      "focusFactor": 0.5,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:ed7a37d964bc467abda95bccd2d2c53e",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T08:26:35.118Z",
-      "endTime": "2026-10-21T08:43:16.545Z",
-      "wallSeconds": 1001,
-      "effectiveSeconds": 281,
-      "delegatedSessionCount": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 307,
-          "effectiveSeconds": 153
-        },
-        {
-          "role": "subagent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 0.35,
-          "creditedFactor": 0.175,
-          "wallSeconds": 731,
-          "effectiveSeconds": 128
-        }
-      ],
-      "focusFactor": 0.2807,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:51578659843e1dab46e78d0b46a19c4b",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T10:30:18.063Z",
-      "endTime": "2026-10-21T10:32:39.366Z",
-      "wallSeconds": 141,
-      "effectiveSeconds": 70,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 141,
-          "effectiveSeconds": 70
-        }
-      ],
-      "focusFactor": 0.4965,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:537427b7a398de2ca0f6e469aa4f4ae3",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T11:00:47.682Z",
-      "endTime": "2026-10-21T11:03:15.683Z",
-      "wallSeconds": 147,
-      "effectiveSeconds": 73,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 147,
-          "effectiveSeconds": 73
-        }
-      ],
-      "focusFactor": 0.4966,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:05d4a06d69083c5a7b04bf11c622e721",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T11:38:06.372Z",
-      "endTime": "2026-10-21T11:40:03.937Z",
-      "wallSeconds": 117,
-      "effectiveSeconds": 58,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 117,
-          "effectiveSeconds": 58
-        }
-      ],
-      "focusFactor": 0.4957,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:e61aa117f50062117835a355fb195d25",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T13:20:07.287Z",
-      "endTime": "2026-10-21T13:22:58.267Z",
-      "wallSeconds": 170,
-      "effectiveSeconds": 85,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 170,
-          "effectiveSeconds": 85
-        }
-      ],
-      "focusFactor": 0.5,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
-    {
-      "id": "claude:b727e0fd45eff1f98c86d4f81f57c504",
-      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "repoName": "Structured AL",
-      "description": "Claude: Structured AL",
-      "startTime": "2026-10-21T21:35:36.760Z",
-      "endTime": "2026-10-21T21:41:40.786Z",
-      "wallSeconds": 363,
-      "effectiveSeconds": 181,
-      "delegatedSessionCount": 0,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "opus",
-          "factor": 0.5,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "wallSeconds": 363,
-          "effectiveSeconds": 181
-        }
-      ],
-      "focusFactor": 0.4986,
-      "focusPolicyVersion": 3,
-      "delegationCredit": 0.35
-    },
     {
       "id": "claude:340b3ea0baa46042f86f426c59ff1097",
       "sessionId": "67072183-18b5-4d4f-b785-b9dbfb3455cf",
@@ -6691,6 +6466,33 @@
           "creditedFactor": 0.5,
           "wallSeconds": 2056,
           "effectiveSeconds": 1028
+        }
+      ],
+      "focusFactor": 0.5,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:adbe8daf98eabf2da4808d62401889a0",
+      "sessionId": "a7da06fe-3891-4aaa-8470-161fee157050",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Structured AL",
+      "description": "Claude: Structured AL",
+      "startTime": "2026-11-19T22:38:02.776Z",
+      "endTime": "2026-11-19T22:39:23.127Z",
+      "wallSeconds": 80,
+      "effectiveSeconds": 40,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 80,
+          "effectiveSeconds": 40
         }
       ],
       "focusFactor": 0.5,
