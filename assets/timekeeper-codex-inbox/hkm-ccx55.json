@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-19T12:46:02.326Z",
+  "updatedAt": "2026-11-19T13:01:02.411Z",
   "dayStart": "2026-11-18T23:00:00.000Z",
   "rangeStart": "2026-08-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-19T12:46:03.676Z",
+    "observedAt": "2026-11-19T13:01:03.683Z",
     "primary": {
       "usedPercent": 72,
       "remainingPercent": 28,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 9,
       "assistantSessionCount": 9,
-      "lastSeenAt": "2026-11-19T11:55:33.271Z"
+      "lastSeenAt": "2026-11-19T12:57:01.739Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -196,6 +196,23 @@
       "activityCount": 11602,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
+    },
+    {
+      "key": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "sessionId": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "title": "Complete Scientist.com requests",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI",
+      "repoName": "IFLAI",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 1409,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-19T12:57:01.739Z"
     },
     {
       "key": "01a1f3a5-8d0a-7332-bf56-99534c964127",
@@ -400,23 +417,6 @@
       "activityCount": 1023,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-18T15:16:11.937Z"
-    },
-    {
-      "key": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
-      "sessionId": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
-      "title": "Complete Scientist.com requests",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI",
-      "repoName": "IFLAI",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 1154,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-18T14:54:28.983Z"
     },
     {
       "key": "01a182cf-f672-7500-8160-cf3fe74b3794",
@@ -38008,8 +38008,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 597,
-    "imported": 597,
+    "discovered": 598,
+    "imported": 598,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -139496,6 +139496,48 @@
         }
       ],
       "description": "Codex: Store group meeting notes"
+    },
+    {
+      "id": "codex-aa7a13b5d4667df985040c1a",
+      "threadId": "01a1f3dc-d4fb-7883-8486-7fd31f875e3a",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-19T12:51:37.460Z",
+      "endTime": "2026-11-19T12:52:25.366Z",
+      "wallSeconds": 47,
+      "focusFactor": 0.234,
+      "effectiveSeconds": 11,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 47,
+          "effectiveSeconds": 11
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 141634,
+        "cached_input_tokens": 96128,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1037,
+        "reasoning_output_tokens": 376
+      }
     }
   ]
 }
