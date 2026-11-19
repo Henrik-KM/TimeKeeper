@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-19T18:31:02.602Z",
+  "updatedAt": "2026-11-19T18:46:02.634Z",
   "dayStart": "2026-11-18T23:00:00.000Z",
   "rangeStart": "2026-08-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-19T18:31:03.502Z",
+    "observedAt": "2026-11-19T18:46:04.117Z",
     "primary": {
       "usedPercent": 81,
       "remainingPercent": 19,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 2205,
       "assistantSessionCount": 2205,
-      "lastSeenAt": "2026-11-19T18:25:36.372Z"
+      "lastSeenAt": "2026-11-19T18:46:26.636Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -210,9 +210,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 20140,
+      "activityCount": 20202,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-19T18:25:36.372Z"
+      "lastSeenAt": "2026-11-19T18:46:26.636Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -139878,6 +139878,52 @@
         }
       ],
       "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-55a505874588da7e5ce4e16a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-19T17:39:50.674Z",
+      "endTime": "2026-11-19T18:25:36.372Z",
+      "wallSeconds": 1844,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 461,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 0,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1843,
+          "effectiveSeconds": 460
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     },
     {
       "id": "codex-e383fefdca43cb6f796f6e2c",
