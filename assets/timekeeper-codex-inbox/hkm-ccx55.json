@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-19T13:01:02.411Z",
+  "updatedAt": "2026-11-19T13:16:02.309Z",
   "dayStart": "2026-11-18T23:00:00.000Z",
   "rangeStart": "2026-08-21T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-19T13:01:03.683Z",
+    "observedAt": "2026-11-19T13:16:03.092Z",
     "primary": {
       "usedPercent": 72,
       "remainingPercent": 28,
@@ -139496,6 +139496,38 @@
         }
       ],
       "description": "Codex: Store group meeting notes"
+    },
+    {
+      "id": "codex-8ecdd016d656eb6e5c39a051",
+      "threadId": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-19T12:47:56.931Z",
+      "endTime": "2026-11-19T12:57:01.739Z",
+      "wallSeconds": 486,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 243,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 486,
+          "effectiveSeconds": 243
+        }
+      ],
+      "description": "Codex: Complete Scientist.com requests"
     },
     {
       "id": "codex-aa7a13b5d4667df985040c1a",
