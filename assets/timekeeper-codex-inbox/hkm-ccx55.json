@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T06:31:01.933Z",
+  "updatedAt": "2026-11-20T06:46:01.884Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T06:31:03.930Z",
+    "observedAt": "2026-11-20T06:46:03.910Z",
     "primary": {
       "usedPercent": 94,
       "remainingPercent": 6,
@@ -139130,6 +139130,38 @@
         }
       ],
       "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-a43a120b464387c6cf0fd333",
+      "threadId": "01a1e891-81c4-7673-834c-ed3d1439df47",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-20T05:58:31.218Z",
+      "endTime": "2026-11-20T06:21:17.435Z",
+      "wallSeconds": 1365,
+      "focusFactor": 0.2498,
+      "effectiveSeconds": 341,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "medium",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1365,
+          "effectiveSeconds": 341
+        }
+      ],
+      "description": "Codex: Automate morning LinkedIn invitations"
     }
   ]
 }
