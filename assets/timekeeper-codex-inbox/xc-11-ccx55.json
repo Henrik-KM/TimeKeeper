@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-20T09:32:02.953Z",
+  "updatedAt": "2026-11-20T09:37:02.958Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T09:32:04.959Z",
+    "observedAt": "2026-11-20T09:37:04.873Z",
     "primary": {
       "usedPercent": 2,
       "remainingPercent": 98,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-20T09:31:30.161Z"
+      "lastSeenAt": "2026-11-20T09:37:53.493Z"
     },
     {
       "key": "documents/codex/2026-11-16/the-github-sub-i-pay-for",
@@ -138,7 +138,7 @@
       "match": "Anders",
       "sessionCount": 4,
       "assistantSessionCount": 4,
-      "lastSeenAt": "2026-11-20T09:16:28.346Z"
+      "lastSeenAt": "2026-11-20T09:37:02.259Z"
     },
     {
       "key": "github/anders/bao",
@@ -183,9 +183,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 799780,
+      "activityCount": 799829,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T09:31:30.161Z"
+      "lastSeenAt": "2026-11-20T09:37:53.493Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -387,9 +387,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 6406,
+      "activityCount": 6492,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T09:16:28.346Z"
+      "lastSeenAt": "2026-11-20T09:37:02.259Z"
     },
     {
       "key": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
@@ -2349,6 +2349,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 399,
           "effectiveSeconds": 199
+        }
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-0026d3794100075a888eea57",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T08:54:16.081Z",
+      "endTime": "2026-11-20T09:16:28.346Z",
+      "wallSeconds": 825,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 412,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 825,
+          "effectiveSeconds": 412
         }
       ],
       "description": "Codex: Structured AL"
