@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T16:31:02.439Z",
+  "updatedAt": "2026-11-20T16:46:02.539Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T16:31:03.806Z",
+    "observedAt": "2026-11-20T16:46:03.476Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -139944,6 +139944,102 @@
         }
       ],
       "description": "Codex: Stanford travel and arrival"
+    },
+    {
+      "id": "codex-2db1992d54071e487a96ea1b",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T16:00:53.423Z",
+      "endTime": "2026-11-20T16:14:39.891Z",
+      "wallSeconds": 826,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 413,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 826,
+          "effectiveSeconds": 413
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
+      "id": "codex-52b6ee0cc0d5a834efeb6721",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-20T16:01:53.422Z",
+      "endTime": "2026-11-20T16:18:02.372Z",
+      "wallSeconds": 968,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 242,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 968,
+          "effectiveSeconds": 242
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-e29e5511afb76067d52449c0",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T16:02:53.386Z",
+      "endTime": "2026-11-20T16:14:39.560Z",
+      "wallSeconds": 675,
+      "focusFactor": 0.4993,
+      "effectiveSeconds": 337,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 675,
+          "effectiveSeconds": 337
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
     }
   ]
 }
