@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T14:31:02.586Z",
+  "updatedAt": "2026-11-20T14:46:02.498Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T14:31:04.455Z",
+    "observedAt": "2026-11-20T14:46:03.335Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
@@ -139668,6 +139668,70 @@
         "output_tokens": 51426,
         "reasoning_output_tokens": 27612
       }
+    },
+    {
+      "id": "codex-09cf0e8a311d4495712b8588",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T13:46:44.432Z",
+      "endTime": "2026-11-20T14:23:22.292Z",
+      "wallSeconds": 2039,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1019,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2039,
+          "effectiveSeconds": 1019
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
+      "id": "codex-7d9736ea06c517f96f979667",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T14:06:59.469Z",
+      "endTime": "2026-11-20T14:14:17.343Z",
+      "wallSeconds": 437,
+      "focusFactor": 0.4989,
+      "effectiveSeconds": 218,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 437,
+          "effectiveSeconds": 218
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
     }
   ]
 }
