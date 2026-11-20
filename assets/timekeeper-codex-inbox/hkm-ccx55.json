@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T16:16:02.584Z",
+  "updatedAt": "2026-11-20T16:31:02.439Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T16:16:04.615Z",
+    "observedAt": "2026-11-20T16:31:03.806Z",
     "primary": {
       "usedPercent": 8,
       "remainingPercent": 92,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 2201,
       "assistantSessionCount": 2201,
-      "lastSeenAt": "2026-11-20T16:16:34.628Z"
+      "lastSeenAt": "2026-11-20T16:18:02.372Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -210,9 +210,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 21752,
+      "activityCount": 21793,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T16:16:34.628Z"
+      "lastSeenAt": "2026-11-20T16:18:02.372Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -139848,6 +139848,102 @@
         "output_tokens": 6106,
         "reasoning_output_tokens": 3035
       }
+    },
+    {
+      "id": "codex-a1b02a3722701c24ac79c11d",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T15:55:23.396Z",
+      "endTime": "2026-11-20T16:05:52.114Z",
+      "wallSeconds": 628,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 314,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 628,
+          "effectiveSeconds": 314
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-f47156f2bfa724045bbce01a",
+      "threadId": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T15:55:53.535Z",
+      "endTime": "2026-11-20T15:59:13.718Z",
+      "wallSeconds": 200,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 100,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 200,
+          "effectiveSeconds": 100
+        }
+      ],
+      "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-7837623a1401f6c012eeb59e",
+      "threadId": "01a1ca47-7103-7c02-9086-a72afd9ce9e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T15:57:53.382Z",
+      "endTime": "2026-11-20T16:01:24.248Z",
+      "wallSeconds": 210,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 105,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 210,
+          "effectiveSeconds": 105
+        }
+      ],
+      "description": "Codex: Stanford travel and arrival"
     }
   ]
 }
