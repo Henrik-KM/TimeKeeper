@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T11:31:04.375Z",
+  "updatedAt": "2026-11-20T11:46:02.423Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T11:31:11.572Z",
+    "observedAt": "2026-11-20T11:46:06.024Z",
     "primary": {
       "usedPercent": 4,
       "remainingPercent": 96,
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-20T11:20:35.322Z"
+      "lastSeenAt": "2026-11-20T11:45:58.768Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -198,6 +198,23 @@
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
     },
     {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Stanford family visas",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 67632,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-20T11:45:58.768Z"
+    },
+    {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
       "sessionId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
       "title": "Stanford housing and payment",
@@ -247,23 +264,6 @@
       "activityCount": 3426,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-20T11:15:03.908Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Stanford family visas",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 67368,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T11:13:46.271Z"
     },
     {
       "key": "01a1ca47-7103-7c02-9086-a72afd9ce9e5",
@@ -139196,6 +139196,70 @@
       "description": "Codex: Stanford insurance"
     },
     {
+      "id": "codex-a1d5c335e3918e1ed87b261f",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T10:59:58.316Z",
+      "endTime": "2026-11-20T11:15:03.908Z",
+      "wallSeconds": 905,
+      "focusFactor": 0.4994,
+      "effectiveSeconds": 452,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 905,
+          "effectiveSeconds": 452
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-48dd81b1857d6a1576d34a55",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T10:59:58.318Z",
+      "endTime": "2026-11-20T11:20:35.322Z",
+      "wallSeconds": 1236,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 618,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1236,
+          "effectiveSeconds": 618
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
       "id": "codex-82b3f1afab1e3b4cc797af38",
       "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
       "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
@@ -139290,6 +139354,38 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-9e9d87a4cfadeeb24a3cdd7f",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-20T11:02:52.563Z",
+      "endTime": "2026-11-20T11:16:23.368Z",
+      "wallSeconds": 810,
+      "focusFactor": 0.2494,
+      "effectiveSeconds": 202,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 810,
+          "effectiveSeconds": 202
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
     },
     {
       "id": "codex-07402f97eb00486148480326",
