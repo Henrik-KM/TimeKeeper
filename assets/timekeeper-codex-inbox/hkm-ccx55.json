@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T17:46:02.518Z",
+  "updatedAt": "2026-11-20T18:01:02.507Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T17:46:04.385Z",
+    "observedAt": "2026-11-20T18:01:03.578Z",
     "primary": {
-      "usedPercent": 9,
-      "remainingPercent": 91,
+      "usedPercent": 10,
+      "remainingPercent": 90,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-27T07:10:47.000Z"
     },
@@ -86,7 +86,7 @@
       "match": "Anders",
       "sessionCount": 6,
       "assistantSessionCount": 6,
-      "lastSeenAt": "2026-11-20T17:44:58.531Z"
+      "lastSeenAt": "2026-11-20T18:01:13.590Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -210,9 +210,9 @@
       "projectName": "Anders",
       "match": "Anders",
       "backfillDays": 7,
-      "activityCount": 8331,
+      "activityCount": 8658,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T17:44:58.531Z"
+      "lastSeenAt": "2026-11-20T18:01:13.590Z"
     },
     {
       "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
@@ -140037,6 +140037,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 675,
           "effectiveSeconds": 337
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-5dd36e558311765a878ea862",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T17:39:45.584Z",
+      "endTime": "2026-11-20T17:43:02.273Z",
+      "wallSeconds": 196,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 98,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 196,
+          "effectiveSeconds": 98
         }
       ],
       "description": "Codex: Stanford IP and legal"
