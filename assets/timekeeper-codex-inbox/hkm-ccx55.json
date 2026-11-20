@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-20T18:46:02.458Z",
+  "updatedAt": "2026-11-20T19:01:03.446Z",
   "dayStart": "2026-11-19T23:00:00.000Z",
   "rangeStart": "2026-08-22T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-20T18:46:03.341Z",
+    "observedAt": "2026-11-20T19:01:08.674Z",
     "primary": {
-      "usedPercent": 10,
-      "remainingPercent": 90,
+      "usedPercent": 11,
+      "remainingPercent": 89,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-27T07:10:47.000Z"
     },
@@ -32,6 +32,20 @@
     "codex-eba210b920a8acb36c60240d"
   ],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
+      "displayPath": "Documents/Codex/2026-11-20/can-you-please-find-potential-ways",
+      "projectFolder": "",
+      "repoName": "can-you-please-find-potential-ways",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-20T19:01:22.542Z"
+    },
     {
       "key": "github/magdalena",
       "displayPath": "GitHub/Magdalena",
@@ -146,6 +160,23 @@
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
+      "sessionId": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-20/can-you-please-find-potential-ways",
+      "repoName": "can-you-please-find-potential-ways",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 236,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-20T19:01:22.542Z"
+    },
     {
       "key": "01a17867-6ff8-78a1-8158-4e375be18283",
       "sessionId": "01a17867-6ff8-78a1-8158-4e375be18283",
@@ -140040,6 +140071,38 @@
         }
       ],
       "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-aedafb4282de43a2fcf9b479",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-20T17:24:42.855Z",
+      "endTime": "2026-11-20T18:31:35.448Z",
+      "wallSeconds": 2941,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1470,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2941,
+          "effectiveSeconds": 1470
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
     },
     {
       "id": "codex-5dd36e558311765a878ea862",
