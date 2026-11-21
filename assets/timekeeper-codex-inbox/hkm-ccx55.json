@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-21T16:31:02.447Z",
+  "updatedAt": "2026-11-21T16:46:02.377Z",
   "dayStart": "2026-11-20T23:00:00.000Z",
   "rangeStart": "2026-08-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-21T16:31:05.444Z",
+    "observedAt": "2026-11-21T16:46:05.267Z",
     "primary": {
       "usedPercent": 22,
       "remainingPercent": 78,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-21T16:32:14.024Z"
+      "lastSeenAt": "2026-11-21T16:47:11.279Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -241,9 +241,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 82708,
+      "activityCount": 82991,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-21T16:32:14.024Z"
+      "lastSeenAt": "2026-11-21T16:47:11.279Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -140502,6 +140502,38 @@
         }
       ],
       "description": "Codex: Stanford housing and payment"
+    },
+    {
+      "id": "codex-9de241c4c02bbab024ffcd55",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-21T16:01:15.970Z",
+      "endTime": "2026-11-21T16:15:17.009Z",
+      "wallSeconds": 840,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 420,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 840,
+          "effectiveSeconds": 420
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     }
   ]
 }
