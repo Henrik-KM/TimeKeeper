@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-21T17:46:04.167Z",
+  "updatedAt": "2026-11-21T18:01:02.346Z",
   "dayStart": "2026-11-20T23:00:00.000Z",
   "rangeStart": "2026-08-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-21T17:46:06.183Z",
+    "observedAt": "2026-11-21T18:01:03.294Z",
     "primary": {
       "usedPercent": 23,
       "remainingPercent": 77,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-21T17:30:49.446Z"
+      "lastSeenAt": "2026-11-21T17:47:47.566Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -241,9 +241,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 83821,
+      "activityCount": 83822,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-21T17:30:49.446Z"
+      "lastSeenAt": "2026-11-21T17:47:47.566Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -140339,6 +140339,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 2503,
           "effectiveSeconds": 1251
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-4fb34bb44a6f64dfa6ebe664",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-21T13:10:20.312Z",
+      "endTime": "2026-11-21T17:30:49.446Z",
+      "wallSeconds": 15339,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 7669,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 15339,
+          "effectiveSeconds": 7669
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
