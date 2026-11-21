@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-21T08:31:01.980Z",
+  "updatedAt": "2026-11-21T08:46:02.349Z",
   "dayStart": "2026-11-20T23:00:00.000Z",
   "rangeStart": "2026-08-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-21T08:31:03.971Z",
+    "observedAt": "2026-11-21T08:46:04.262Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-21T08:18:55.318Z"
+      "lastSeenAt": "2026-11-21T08:47:25.526Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -241,9 +241,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 77653,
+      "activityCount": 77677,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-21T08:18:55.318Z"
+      "lastSeenAt": "2026-11-21T08:47:25.526Z"
     },
     {
       "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
@@ -139991,6 +139991,38 @@
         }
       ],
       "description": "Codex: Automate morning LinkedIn invitations"
+    },
+    {
+      "id": "codex-9118ead6caf2ceb2475785a4",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-21T07:32:05.281Z",
+      "endTime": "2026-11-21T08:18:55.318Z",
+      "wallSeconds": 1910,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 955,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1910,
+          "effectiveSeconds": 955
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
     },
     {
       "id": "codex-a210b87b6e8cf242424faded",
