@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-21T08:16:02.043Z",
+  "updatedAt": "2026-11-21T08:31:01.980Z",
   "dayStart": "2026-11-20T23:00:00.000Z",
   "rangeStart": "2026-08-23T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-21T08:16:03.914Z",
+    "observedAt": "2026-11-21T08:31:03.971Z",
     "primary": {
       "usedPercent": 16,
       "remainingPercent": 84,
@@ -100,7 +100,7 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-21T08:16:41.052Z"
+      "lastSeenAt": "2026-11-21T08:18:55.318Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -241,9 +241,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 77607,
+      "activityCount": 77653,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-21T08:16:41.052Z"
+      "lastSeenAt": "2026-11-21T08:18:55.318Z"
     },
     {
       "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
@@ -139991,6 +139991,70 @@
         }
       ],
       "description": "Codex: Automate morning LinkedIn invitations"
+    },
+    {
+      "id": "codex-a210b87b6e8cf242424faded",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-21T07:56:38.736Z",
+      "endTime": "2026-11-21T08:09:24.767Z",
+      "wallSeconds": 765,
+      "focusFactor": 0.4993,
+      "effectiveSeconds": 382,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 765,
+          "effectiveSeconds": 382
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-0ae230636a813bea574cc4c5",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-21T07:59:08.087Z",
+      "endTime": "2026-11-21T08:09:31.039Z",
+      "wallSeconds": 552,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 276,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 552,
+          "effectiveSeconds": 276
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
     }
   ]
 }
