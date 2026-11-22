@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-22T15:16:02.078Z",
+  "updatedAt": "2026-11-22T15:31:02.044Z",
   "dayStart": "2026-11-21T23:00:00.000Z",
   "rangeStart": "2026-08-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-22T15:16:03.631Z",
+    "observedAt": "2026-11-22T15:31:03.678Z",
     "primary": {
       "usedPercent": 28,
       "remainingPercent": 72,
@@ -140417,6 +140417,38 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-4f16b3b1600b712b55b3fc19",
+      "threadId": "01a1263e-5872-7101-b242-1746293af037",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-22T14:55:08.110Z",
+      "endTime": "2026-11-22T15:06:28.888Z",
+      "wallSeconds": 680,
+      "focusFactor": 0.15,
+      "effectiveSeconds": 102,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.15,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.15,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 680,
+          "effectiveSeconds": 102
+        }
+      ],
+      "description": "Codex: Email helper health monitor"
     }
   ]
 }
