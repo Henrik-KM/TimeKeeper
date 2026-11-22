@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-22T16:31:02.761Z",
+  "updatedAt": "2026-11-22T16:46:02.037Z",
   "dayStart": "2026-11-21T23:00:00.000Z",
   "rangeStart": "2026-08-24T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-22T16:31:05.394Z",
+    "observedAt": "2026-11-22T16:46:04.075Z",
     "primary": {
       "usedPercent": 29,
       "remainingPercent": 71,
@@ -140513,6 +140513,38 @@
         }
       ],
       "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-d6890688d358ef060458c081",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-22T15:59:08.492Z",
+      "endTime": "2026-11-22T16:15:13.265Z",
+      "wallSeconds": 964,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 482,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 964,
+          "effectiveSeconds": 482
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
     },
     {
       "id": "codex-d2e611c1be1afc6f912606e5",
