@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-23T07:01:02.626Z",
+  "updatedAt": "2026-11-23T07:16:02.594Z",
   "dayStart": "2026-11-22T23:00:00.000Z",
   "rangeStart": "2026-08-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-23T07:01:06.128Z",
+    "observedAt": "2026-11-23T07:16:04.922Z",
     "primary": {
       "usedPercent": 30,
       "remainingPercent": 70,
@@ -37988,8 +37988,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 606,
-    "imported": 606,
+    "discovered": 607,
+    "imported": 607,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140149,6 +140149,48 @@
         }
       ],
       "description": "Codex: Automate morning LinkedIn invitations"
+    },
+    {
+      "id": "codex-543f48bb69cd36babbfb9b86",
+      "threadId": "01a20737-6324-7943-839d-2c5dbe9e1848",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-23T07:03:18.430Z",
+      "endTime": "2026-11-23T07:04:11.665Z",
+      "wallSeconds": 53,
+      "focusFactor": 0.2453,
+      "effectiveSeconds": 13,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 53,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 136850,
+        "cached_input_tokens": 92672,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1107,
+        "reasoning_output_tokens": 308
+      }
     }
   ]
 }
