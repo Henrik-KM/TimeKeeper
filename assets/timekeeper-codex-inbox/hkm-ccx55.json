@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-23T10:31:02.686Z",
+  "updatedAt": "2026-11-23T10:46:02.796Z",
   "dayStart": "2026-11-22T23:00:00.000Z",
   "rangeStart": "2026-08-25T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-23T10:31:03.790Z",
+    "observedAt": "2026-11-23T10:46:03.954Z",
     "primary": {
       "usedPercent": 32,
       "remainingPercent": 68,
@@ -89,20 +89,6 @@
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
     },
     {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 7,
-      "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-23T10:31:12.042Z"
-    },
-    {
       "key": "github/iflai/sem-imaging",
       "displayPath": "GitHub/IFLAI/sem-imaging",
       "projectFolder": "IFLAI",
@@ -114,7 +100,21 @@
       "match": "IFLAI",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-23T10:23:32.690Z"
+      "lastSeenAt": "2026-11-23T10:46:32.892Z"
+    },
+    {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 7,
+      "assistantSessionCount": 7,
+      "lastSeenAt": "2026-11-23T10:46:09.956Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -229,23 +229,6 @@
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
     },
     {
-      "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
-      "sessionId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
-      "title": "Stanford IP and legal",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 7415,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-23T10:31:12.042Z"
-    },
-    {
       "key": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "sessionId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
       "title": "AZ SEM Foundation model tests",
@@ -258,9 +241,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 85040,
+      "activityCount": 85133,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-23T10:23:32.690Z"
+      "lastSeenAt": "2026-11-23T10:46:32.892Z"
+    },
+    {
+      "key": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "sessionId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "title": "Stanford IP and legal",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 7731,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-23T10:46:09.956Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -140444,6 +140444,70 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 829,
           "effectiveSeconds": 414
+        }
+      ],
+      "description": "Codex: AZ SEM Foundation model tests"
+    },
+    {
+      "id": "codex-2e239f5751888355e3570724",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-23T10:01:26.950Z",
+      "endTime": "2026-11-23T10:17:18.380Z",
+      "wallSeconds": 949,
+      "focusFactor": 0.2497,
+      "effectiveSeconds": 237,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 949,
+          "effectiveSeconds": 237
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-5f14142c8bfc330c01c3f98c",
+      "threadId": "01a08079-931c-7f01-86f3-6ca4a8e46d6b",
+      "projectKey": "sem-imaging",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-23T10:20:47.779Z",
+      "endTime": "2026-11-23T10:23:32.690Z",
+      "wallSeconds": 164,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 82,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 164,
+          "effectiveSeconds": 82
         }
       ],
       "description": "Codex: AZ SEM Foundation model tests"
