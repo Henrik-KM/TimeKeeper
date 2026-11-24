@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-24T09:31:02.782Z",
+  "updatedAt": "2026-11-24T09:46:03.864Z",
   "dayStart": "2026-11-23T23:00:00.000Z",
   "rangeStart": "2026-08-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-24T09:31:04.786Z",
+    "observedAt": "2026-11-24T09:46:06.392Z",
     "primary": {
       "usedPercent": 44,
       "remainingPercent": 56,
@@ -128,7 +128,7 @@
       "match": "IFLAI",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-24T09:30:53.063Z"
+      "lastSeenAt": "2026-11-24T09:44:43.562Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -317,9 +317,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 3040,
+      "activityCount": 3280,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-24T09:30:53.063Z"
+      "lastSeenAt": "2026-11-24T09:44:43.562Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -141057,6 +141057,38 @@
         }
       ],
       "description": "Codex: Stanford IP and legal"
+    },
+    {
+      "id": "codex-73bf8faae681bfe885d22199",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-24T09:01:01.603Z",
+      "endTime": "2026-11-24T09:16:31.715Z",
+      "wallSeconds": 926,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 463,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 926,
+          "effectiveSeconds": 463
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
     },
     {
       "id": "codex-da0f967da527b8077ffcb272",
