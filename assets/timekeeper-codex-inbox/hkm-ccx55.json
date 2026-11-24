@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-24T18:01:02.092Z",
+  "updatedAt": "2026-11-24T18:16:02.182Z",
   "dayStart": "2026-11-23T23:00:00.000Z",
   "rangeStart": "2026-08-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-24T18:01:03.576Z",
+    "observedAt": "2026-11-24T18:16:03.936Z",
     "primary": {
       "usedPercent": 48,
       "remainingPercent": 52,
@@ -128,7 +128,7 @@
       "match": "IFLAI",
       "sessionCount": 11,
       "assistantSessionCount": 11,
-      "lastSeenAt": "2026-11-24T17:46:05.558Z"
+      "lastSeenAt": "2026-11-24T18:15:58.950Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -317,9 +317,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1184,
+      "activityCount": 1326,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-24T17:46:05.558Z"
+      "lastSeenAt": "2026-11-24T18:15:58.950Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -141710,6 +141710,52 @@
         }
       ],
       "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-351f2eba0a1a5fc69235913c",
+      "threadId": "01a20e7c-757b-70c1-a5a1-167cdd4a317a",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-24T16:56:07.902Z",
+      "endTime": "2026-11-24T17:46:05.558Z",
+      "wallSeconds": 2315,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1157,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 2313,
+          "effectiveSeconds": 1156
+        }
+      ],
+      "description": "Codex: IFLAI"
     }
   ]
 }
