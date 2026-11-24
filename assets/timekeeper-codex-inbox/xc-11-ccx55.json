@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-24T13:52:01.907Z",
+  "updatedAt": "2026-11-24T13:57:01.906Z",
   "dayStart": "2026-11-23T23:00:00.000Z",
   "rangeStart": "2026-08-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-24T13:52:04.867Z",
+    "observedAt": "2026-11-24T13:57:03.804Z",
     "primary": {
       "usedPercent": 46,
       "remainingPercent": 54,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-24T13:52:16.177Z"
+      "lastSeenAt": "2026-11-24T13:55:43.943Z"
     },
     {
       "key": "github/scholarships",
@@ -199,23 +199,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "title": "Extend CS:CZ single-player campaign",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "repoName": "hey",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 40137,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-24T13:52:16.177Z"
-    },
-    {
       "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
       "sessionId": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
       "title": "Extend CS single-player campaign (2)",
@@ -228,9 +211,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 1222,
+      "activityCount": 1240,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-24T13:33:20.214Z"
+      "lastSeenAt": "2026-11-24T13:55:43.943Z"
+    },
+    {
+      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "title": "Extend CS:CZ single-player campaign",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "repoName": "hey",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 40180,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-24T13:52:58.467Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -2446,6 +2446,38 @@
         }
       ],
       "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-31da953c614e86de684ddac3",
+      "threadId": "01a08aed-fd69-7ee0-8b50-617d5570ae6c",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-24T13:31:47.414Z",
+      "endTime": "2026-11-24T13:35:05.799Z",
+      "wallSeconds": 74,
+      "focusFactor": 0.2973,
+      "effectiveSeconds": 22,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-5.6-luna",
+          "effort": "max",
+          "baseFactor": 0.3,
+          "factor": 0.3,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.3,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 74,
+          "effectiveSeconds": 22
+        }
+      ],
+      "description": "Codex: Restart HPC Arrhenius access"
     }
   ]
 }
