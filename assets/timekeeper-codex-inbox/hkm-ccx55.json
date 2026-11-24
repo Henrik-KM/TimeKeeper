@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-24T09:16:05.332Z",
+  "updatedAt": "2026-11-24T09:31:02.782Z",
   "dayStart": "2026-11-23T23:00:00.000Z",
   "rangeStart": "2026-08-26T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-24T09:16:09.371Z",
+    "observedAt": "2026-11-24T09:31:04.786Z",
     "primary": {
       "usedPercent": 44,
       "remainingPercent": 56,
@@ -115,6 +115,20 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
+    },
+    {
+      "key": "github/iflai/rd-doc-personal",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "projectFolder": "IFLAI",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-24T09:30:53.063Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -289,6 +303,23 @@
       "activityCount": 8290,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-11T13:47:53.208Z"
+    },
+    {
+      "key": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "sessionId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "title": "Align September FoU entries",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/RD-doc-personal",
+      "repoName": "RD-doc-personal",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 3040,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-24T09:30:53.063Z"
     },
     {
       "key": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
@@ -37965,8 +37996,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 618,
-    "imported": 618,
+    "discovered": 619,
+    "imported": 619,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -141067,6 +141098,48 @@
         "cache_write_input_tokens": 0,
         "output_tokens": 2361,
         "reasoning_output_tokens": 543
+      }
+    },
+    {
+      "id": "codex-362eac99f80c66b37102b406",
+      "threadId": "01a20cd8-eff3-7f22-8d92-7e3e4633cd51",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-24T09:17:51.877Z",
+      "endTime": "2026-11-24T09:18:45.814Z",
+      "wallSeconds": 53,
+      "focusFactor": 0.2453,
+      "effectiveSeconds": 13,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 53,
+          "effectiveSeconds": 13
+        }
+      ],
+      "description": "Codex: email-helper",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 213565,
+        "cached_input_tokens": 127104,
+        "cache_write_input_tokens": 0,
+        "output_tokens": 1406,
+        "reasoning_output_tokens": 455
       }
     }
   ]
