@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-25T11:01:03.584Z",
+  "updatedAt": "2026-11-25T11:16:02.689Z",
   "dayStart": "2026-11-24T23:00:00.000Z",
   "rangeStart": "2026-08-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-25T11:01:07.287Z",
+    "observedAt": "2026-11-25T11:16:05.481Z",
     "primary": {
       "usedPercent": 54,
       "remainingPercent": 46,
@@ -86,7 +86,7 @@
       "match": "IFLAI",
       "sessionCount": 7,
       "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-25T11:00:45.426Z"
+      "lastSeenAt": "2026-11-25T11:16:09.251Z"
     },
     {
       "key": "github/iflai/email-helper",
@@ -224,9 +224,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 5434,
+      "activityCount": 5654,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-25T11:00:45.426Z"
+      "lastSeenAt": "2026-11-25T11:16:09.251Z"
     },
     {
       "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
@@ -37393,8 +37393,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 684,
-    "imported": 631,
+    "discovered": 685,
+    "imported": 632,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140362,6 +140362,50 @@
         "cache_write_input_tokens": 13037,
         "output_tokens": 886,
         "reasoning_output_tokens": 755
+      }
+    },
+    {
+      "id": "codex-96d0efa617ecfc5b291c4b2d",
+      "threadId": "4f41de19-0a31-4d67-bf06-b5097cb0ef2d",
+      "projectKey": "IFLAI",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-25T11:10:59.830Z",
+      "endTime": "2026-11-25T11:14:56.674Z",
+      "wallSeconds": 236,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 118,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 236,
+          "effectiveSeconds": 118
+        }
+      ],
+      "description": "API: writing",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-writing",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 5720,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 5717,
+        "output_tokens": 14063,
+        "reasoning_output_tokens": 13132
       }
     }
   ]
