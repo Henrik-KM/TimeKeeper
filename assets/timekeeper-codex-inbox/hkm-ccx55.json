@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-25T10:16:02.780Z",
+  "updatedAt": "2026-11-25T10:31:02.803Z",
   "dayStart": "2026-11-24T23:00:00.000Z",
   "rangeStart": "2026-08-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-25T10:16:05.156Z",
+    "observedAt": "2026-11-25T10:31:08.284Z",
     "primary": {
       "usedPercent": 54,
       "remainingPercent": 46,
@@ -75,20 +75,6 @@
       "lastSeenAt": "2026-11-23T13:00:43.388Z"
     },
     {
-      "key": "github/iflai/email-helper",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "projectFolder": "IFLAI",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "matchType": "githubParentFolder",
-      "match": "IFLAI",
-      "sessionCount": 2170,
-      "assistantSessionCount": 2170,
-      "lastSeenAt": "2026-11-25T10:16:33.251Z"
-    },
-    {
       "key": "github/iflai",
       "displayPath": "GitHub/IFLAI",
       "projectFolder": "IFLAI",
@@ -100,7 +86,21 @@
       "match": "IFLAI",
       "sessionCount": 7,
       "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-25T10:16:14.044Z"
+      "lastSeenAt": "2026-11-25T10:31:14.190Z"
+    },
+    {
+      "key": "github/iflai/email-helper",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "projectFolder": "IFLAI",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "matchType": "githubParentFolder",
+      "match": "IFLAI",
+      "sessionCount": 2170,
+      "assistantSessionCount": 2170,
+      "lastSeenAt": "2026-11-25T10:21:52.680Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -212,23 +212,6 @@
       "lastSeenAt": "2026-11-23T13:00:43.388Z"
     },
     {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 20918,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-25T10:16:33.251Z"
-    },
-    {
       "key": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "sessionId": "01a152e8-c373-74a3-95b8-b810dc851c0e",
       "title": "Draft ZEISS follow-up",
@@ -241,9 +224,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 4819,
+      "activityCount": 4963,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-25T10:16:14.044Z"
+      "lastSeenAt": "2026-11-25T10:31:14.190Z"
+    },
+    {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 21080,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-25T10:21:52.680Z"
     },
     {
       "key": "01a1ca46-f905-7ff1-bddb-3127397b9b8e",
@@ -37393,9 +37393,9 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 683,
-    "imported": 628,
-    "invalid": 2,
+    "discovered": 684,
+    "imported": 631,
+    "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
     "estimatedSessions": 155,
@@ -140199,6 +140199,138 @@
         }
       ],
       "description": "Codex: Stanford insurance"
+    },
+    {
+      "id": "codex-1ee5aca794002a88ab20a08b",
+      "threadId": "1952c352-f363-49ba-a4c5-03aac2c0e11b",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-25T10:13:48.007Z",
+      "endTime": "2026-11-25T10:23:56.070Z",
+      "wallSeconds": 608,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 152,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 608,
+          "effectiveSeconds": 152
+        }
+      ],
+      "description": "API: email drafting",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-email",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 948264,
+        "cached_input_tokens": 780335,
+        "cache_write_input_tokens": 134152,
+        "output_tokens": 21299,
+        "reasoning_output_tokens": 11847
+      }
+    },
+    {
+      "id": "codex-1c9db5dc420a1f583f6275b7",
+      "threadId": "f83d2d24-30ca-45ec-9717-65c255ae162f",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-25T10:16:09.523Z",
+      "endTime": "2026-11-25T10:16:51.976Z",
+      "wallSeconds": 42,
+      "focusFactor": 0.2381,
+      "effectiveSeconds": 10,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 42,
+          "effectiveSeconds": 10
+        }
+      ],
+      "description": "API: outreach",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-outreach",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 8512,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 8509,
+        "output_tokens": 2557,
+        "reasoning_output_tokens": 2368
+      }
+    },
+    {
+      "id": "codex-037eac681c1abc4ae7ef35d6",
+      "threadId": "1fc49e39-e809-4b74-9046-bf3126330dd3",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-25T10:16:52.044Z",
+      "endTime": "2026-11-25T10:17:11.029Z",
+      "wallSeconds": 18,
+      "focusFactor": 0.2222,
+      "effectiveSeconds": 4,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 18,
+          "effectiveSeconds": 4
+        }
+      ],
+      "description": "API: outreach",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-outreach",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 13040,
+        "cached_input_tokens": 0,
+        "cache_write_input_tokens": 13037,
+        "output_tokens": 886,
+        "reasoning_output_tokens": 755
+      }
     }
   ]
 }
