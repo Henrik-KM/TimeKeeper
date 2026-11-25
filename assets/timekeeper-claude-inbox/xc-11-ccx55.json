@@ -3,7 +3,7 @@
   "focusPolicyVersion": 3,
   "source": "timekeeper-claude-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-25T07:21:02.175Z",
+  "updatedAt": "2026-11-25T08:01:02.387Z",
   "rangeStart": "2026-10-26T23:00:00.000Z",
   "lookbackDays": 30,
   "retractedExternalIds": [
@@ -7192,6 +7192,60 @@
         }
       ],
       "focusFactor": 0.5,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:6008bbc7228913315a94b4e5933c93ab",
+      "sessionId": "c7b3c2f8-dc99-4d31-8045-43b9b301520e",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Structured AL",
+      "description": "Claude: Structured AL",
+      "startTime": "2026-11-25T07:38:02.820Z",
+      "endTime": "2026-11-25T07:41:44.760Z",
+      "wallSeconds": 219,
+      "effectiveSeconds": 109,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 219,
+          "effectiveSeconds": 109
+        }
+      ],
+      "focusFactor": 0.4977,
+      "focusPolicyVersion": 3,
+      "delegationCredit": 0.35
+    },
+    {
+      "id": "claude:eb5d71b7552ef3e2f9ae608cd9779d75",
+      "sessionId": "6a17d6fa-891f-4e62-a569-16510bd42b8b",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "repoName": "Bao",
+      "description": "Claude: Bao",
+      "startTime": "2026-11-25T07:39:09.055Z",
+      "endTime": "2026-11-25T07:41:37.009Z",
+      "wallSeconds": 147,
+      "effectiveSeconds": 73,
+      "delegatedSessionCount": 0,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "opus",
+          "factor": 0.5,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "wallSeconds": 147,
+          "effectiveSeconds": 73
+        }
+      ],
+      "focusFactor": 0.4966,
       "focusPolicyVersion": 3,
       "delegationCredit": 0.35
     }
