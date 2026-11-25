@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-25T19:01:02.067Z",
+  "updatedAt": "2026-11-25T19:16:03.876Z",
   "dayStart": "2026-11-24T23:00:00.000Z",
   "rangeStart": "2026-08-27T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-25T19:01:03.344Z",
+    "observedAt": "2026-11-25T19:16:05.258Z",
     "primary": {
-      "usedPercent": 61,
-      "remainingPercent": 39,
+      "usedPercent": 62,
+      "remainingPercent": 38,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-27T07:10:47.000Z"
     },
@@ -140871,6 +140871,38 @@
         "output_tokens": 2007,
         "reasoning_output_tokens": 1101
       }
+    },
+    {
+      "id": "codex-2b6f43819946cfd59ba328f1",
+      "threadId": "01a1ca47-463f-7f80-a131-227d4e6b67e5",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-25T18:25:45.584Z",
+      "endTime": "2026-11-25T18:57:25.940Z",
+      "wallSeconds": 1498,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 749,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1498,
+          "effectiveSeconds": 749
+        }
+      ],
+      "description": "Codex: Stanford IP and legal"
     }
   ]
 }
