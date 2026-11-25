@@ -831,6 +831,8 @@ export async function buildCodexInboxPayload(options = buildOptions()) {
     windowStart: emailRangeStart,
     trackedProjects,
     normalRecords: records,
+    mappings,
+    sessionMappings,
     now,
     focusFactor: config.focusFactor,
     focusPolicy: config.focusPolicy

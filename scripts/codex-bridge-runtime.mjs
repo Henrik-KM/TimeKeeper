@@ -10,6 +10,7 @@ import { promisify } from 'node:util';
 const execFileAsync = promisify(execFile);
 const manifestPath = 'scripts/codex-bridge-runtime.json';
 const refreshIntervalMs = 6 * 60 * 60 * 1000;
+const authoringReaderPath = 'scripts/henrik-email-usage.mjs';
 
 async function runGit(args, repositoryRoot) {
   const { stdout } = await execFileAsync('git', args, {
@@ -59,6 +60,79 @@ async function validCachedRuntime(runtimeRoot, state) {
     return null;
   }
   return { ...state, entrypoint: path.join(directory, state.entrypoint) };
+}
+
+async function materializeRuntime(runtimeRoot, state, sources) {
+  const cached = await validCachedRuntime(runtimeRoot, state);
+  if (cached) return cached;
+  const directory = path.join(runtimeRoot, state.runtimeKey);
+  await fs.mkdir(runtimeRoot, { recursive: true });
+  const staging = await fs.mkdtemp(path.join(runtimeRoot, 'staging-'));
+  try {
+    for (const source of sources) {
+      const target = path.join(staging, source.file);
+      await fs.mkdir(path.dirname(target), { recursive: true });
+      await fs.writeFile(target, source.content, 'utf8');
+    }
+    await fs.rename(staging, directory);
+  } catch (error) {
+    if (!(await validCachedRuntime(runtimeRoot, state))) {
+      if (!['EEXIST', 'ENOTEMPTY', 'EPERM'].includes(error.code)) throw error;
+      await fs.cp(staging, directory, { recursive: true });
+    }
+  } finally {
+    await fs.rm(staging, { recursive: true, force: true });
+  }
+  return { ...state, entrypoint: path.join(directory, state.entrypoint) };
+}
+
+/** Use the installed reader until the normally updated bridge supports it. */
+export async function withInstalledAuthoringReader(runtimeRoot, runtime) {
+  if (!runtime.files.includes(authoringReaderPath)) return runtime;
+  const baseDirectory = path.join(runtimeRoot, runtime.runtimeKey);
+  const supported = await fs.readFile(
+    path.join(baseDirectory, authoringReaderPath),
+    'utf8'
+  );
+  if (supported.includes('export const AUTHORING_USAGE_SCHEMA_VERSION'))
+    return runtime;
+  let reader;
+  try {
+    reader = await fs.readFile(
+      path.join(runtimeRoot, 'authoring-usage-v2.mjs'),
+      'utf8'
+    );
+  } catch (error) {
+    if (error.code === 'ENOENT') return runtime;
+    throw error;
+  }
+  const runtimeKey = crypto
+    .createHash('sha256')
+    .update(runtime.runtimeKey)
+    .update(reader)
+    .digest('hex');
+  const entrypoint = path
+    .relative(baseDirectory, runtime.entrypoint)
+    .split(path.sep)
+    .join('/');
+  const state = {
+    ...runtime,
+    runtimeKey,
+    entrypoint,
+    installedAuthoringReader: true
+  };
+  const cached = await validCachedRuntime(runtimeRoot, state);
+  if (cached) return cached;
+  const sources = await Promise.all(
+    runtime.files.map(async (file) => ({
+      file,
+      content:
+        file === authoringReaderPath
+          ? reader
+          : await fs.readFile(path.join(baseDirectory, file), 'utf8')
+    }))
+  );
+  return materializeRuntime(runtimeRoot, state, sources);
 }
 
 /** Read a pinned main revision without changing the development checkout. */
@@ -116,7 +190,6 @@ export async function prepareCodexBridgeRuntime({
     .createHash('sha256')
     .update(JSON.stringify({ manifest, sources }))
     .digest('hex');
-  const directory = path.join(runtimeRoot, runtimeKey);
   const nextState = {
     runtimeKey,
     sourceRevision: revision,
@@ -124,25 +197,7 @@ export async function prepareCodexBridgeRuntime({
     files,
     checkedAt: new Date(now).toISOString()
   };
-  if (!(await validCachedRuntime(runtimeRoot, nextState))) {
-    await fs.mkdir(runtimeRoot, { recursive: true });
-    const staging = await fs.mkdtemp(path.join(runtimeRoot, 'staging-'));
-    try {
-      for (const source of sources) {
-        const target = path.join(staging, source.file);
-        await fs.mkdir(path.dirname(target), { recursive: true });
-        await fs.writeFile(target, source.content, 'utf8');
-      }
-      await fs.rename(staging, directory);
-    } catch (error) {
-      if (!(await validCachedRuntime(runtimeRoot, nextState))) {
-        if (!['EEXIST', 'ENOTEMPTY', 'EPERM'].includes(error.code)) throw error;
-        await fs.cp(staging, directory, { recursive: true });
-      }
-    } finally {
-      await fs.rm(staging, { recursive: true, force: true });
-    }
-  }
+  const prepared = await materializeRuntime(runtimeRoot, nextState, sources);
   const temporaryState = `${statePath}.${process.pid}.tmp`;
   await fs.writeFile(
     temporaryState,
@@ -151,8 +206,7 @@ export async function prepareCodexBridgeRuntime({
   );
   await fs.rename(temporaryState, statePath);
   return {
-    ...nextState,
-    entrypoint: path.join(directory, manifest.entrypoint),
+    ...prepared,
     warning
   };
 }
@@ -170,14 +224,15 @@ async function main() {
     'TimeKeeper',
     'codex-bridge-runtime'
   );
-  const runtime = await prepareCodexBridgeRuntime({
+  const base = await prepareCodexBridgeRuntime({
     repositoryRoot,
     runtimeRoot,
     refresh: args.includes('--refresh-runtime')
   });
+  const runtime = await withInstalledAuthoringReader(runtimeRoot, base);
   if (runtime.warning) process.stderr.write(`${runtime.warning}\n`);
   process.stdout.write(
-    `Codex bridge source: main ${runtime.sourceRevision.slice(0, 9)}\n`
+    `Codex bridge source: main ${runtime.sourceRevision.slice(0, 9)}${runtime.installedAuthoringReader ? ' + local authoring reader' : ''}\n`
   );
   const child = spawn(
     process.execPath,

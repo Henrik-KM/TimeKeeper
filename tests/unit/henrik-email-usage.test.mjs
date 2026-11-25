@@ -163,3 +163,73 @@ test('missing IFLAI mapping is an explicit blocker and an absent feed is harmles
     assert.equal(absent.audit.blocker, '');
   });
 });
+
+test('API email, outreach, and writing credit the correct project once without publishing private paths', async () => {
+  await fixture(async (directory) => {
+    const root = (name) =>
+      path.join(directory, name, '.local', 'state', 'timekeeper_usage');
+    const otherId = '33333333-2222-7333-8444-555555555555';
+    const writingId = '44444444-2222-7333-8444-555555555555';
+    const parentId = '55555555-2222-7333-8444-555555555555';
+    const mail = metadata({
+      schema_version: 2,
+      provider: 'openai-responses',
+      model: 'gpt-6.2-sol'
+    });
+    const outreach = {
+      ...mail,
+      source: 'henrik-outreach',
+      session_id: otherId
+    };
+    const writing = {
+      ...mail,
+      source: 'henrik-writing',
+      session_id: writingId,
+      parent_session_id: parentId,
+      project: undefined,
+      repository: undefined,
+      cwd: 'C:\\Users\\Private\\Documents\\GitHub\\PhD\\Research'
+    };
+    for (const record of [mail, outreach, writing]) {
+      await fs.mkdir(root(record.source), { recursive: true });
+      await fs.writeFile(
+        path.join(root(record.source), `${record.session_id}.json`),
+        JSON.stringify(record)
+      );
+    }
+    const parent = {
+      threadId: parentId,
+      timekeeperProjectId: 'research-project',
+      timekeeperProjectName: 'PhD',
+      projectKey: 'Research'
+    };
+    const settings = options(root('henrik-email'), {
+      normalRecords: [parent],
+      focusPolicy: { modelOverrides: { 'gpt-6.2-sol': 0.5 } }
+    });
+    const { records, audit } = await readEmailUsageRecords(settings);
+    assert.deepEqual(
+      records.map((record) => [record.description, record.timekeeperProjectId]),
+      [
+        ['API: email drafting', 'iflai-project'],
+        ['API: outreach', 'iflai-project'],
+        ['API: writing', 'research-project']
+      ]
+    );
+    assert.equal(audit.imported, 3);
+    assert.equal(JSON.stringify(records).includes('\\\\Private\\\\'), false);
+    assert.ok(
+      records.every(
+        (record) =>
+          record.effectiveSeconds === 600 &&
+          record.tokenUsage.output_tokens === 100
+      )
+    );
+    const repeat = await readEmailUsageRecords({
+      ...settings,
+      normalRecords: [parent, ...records]
+    });
+    assert.equal(repeat.audit.duplicateSessions, 3);
+    assert.deepEqual(repeat.records, []);
+  });
+});
