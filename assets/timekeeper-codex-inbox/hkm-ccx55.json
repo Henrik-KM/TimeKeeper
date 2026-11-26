@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-26T11:46:02.706Z",
+  "updatedAt": "2026-11-26T12:22:50.899Z",
   "dayStart": "2026-11-25T23:00:00.000Z",
   "rangeStart": "2026-08-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T11:46:04.345Z",
+    "observedAt": "2026-11-26T12:22:57.126Z",
     "primary": {
       "usedPercent": 78,
       "remainingPercent": 22,
@@ -37223,8 +37223,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 697,
-    "imported": 644,
+    "discovered": 698,
+    "imported": 645,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140366,6 +140366,50 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-a200b3a80059ad33d9eee545",
+      "threadId": "4822d40c-e166-4f6e-8c1b-022cd8a92f14",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-26T12:09:29.582Z",
+      "endTime": "2026-11-26T12:14:25.535Z",
+      "wallSeconds": 295,
+      "focusFactor": 0.2475,
+      "effectiveSeconds": 73,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 295,
+          "effectiveSeconds": 73
+        }
+      ],
+      "description": "API: email drafting",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-email",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 1314125,
+        "cached_input_tokens": 1153649,
+        "cache_write_input_tokens": 160443,
+        "output_tokens": 12714,
+        "reasoning_output_tokens": 6170
+      }
     }
   ]
 }
