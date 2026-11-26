@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-26T06:32:02.750Z",
+  "updatedAt": "2026-11-26T06:37:02.739Z",
   "dayStart": "2026-11-25T23:00:00.000Z",
   "rangeStart": "2026-08-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T06:32:04.441Z",
+    "observedAt": "2026-11-26T06:37:04.928Z",
     "primary": {
       "usedPercent": 75,
       "remainingPercent": 25,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-26T06:33:00.308Z"
+      "lastSeenAt": "2026-11-26T06:37:59.799Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -54,7 +54,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-26T06:32:01.913Z"
+      "lastSeenAt": "2026-11-26T06:37:08.872Z"
     },
     {
       "key": "github/mathem-agent",
@@ -211,9 +211,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 892374,
+      "activityCount": 892502,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T06:33:00.308Z"
+      "lastSeenAt": "2026-11-26T06:37:59.799Z"
     },
     {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
@@ -228,9 +228,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 60737,
+      "activityCount": 60830,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T06:32:01.913Z"
+      "lastSeenAt": "2026-11-26T06:37:08.872Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -2397,6 +2397,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 53,
           "effectiveSeconds": 26
+        }
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-101a516d4d37723834e9cb26",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-26T06:15:22.519Z",
+      "endTime": "2026-11-26T06:16:22.527Z",
+      "wallSeconds": 59,
+      "focusFactor": 0.4915,
+      "effectiveSeconds": 29,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 59,
+          "effectiveSeconds": 29
         }
       ],
       "description": "Codex: Structured AL"
