@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-26T21:27:02.176Z",
+  "updatedAt": "2026-11-26T21:32:02.213Z",
   "dayStart": "2026-11-25T23:00:00.000Z",
   "rangeStart": "2026-08-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T21:27:03.943Z",
+    "observedAt": "2026-11-26T21:32:04.434Z",
     "primary": {
       "usedPercent": 84,
       "remainingPercent": 16,
@@ -28,20 +28,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "documents/codex/2026-11-05/hey",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "projectFolder": "",
-      "repoName": "hey",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-26T21:27:14.877Z"
-    },
     {
       "key": "github/scholarships",
       "displayPath": "GitHub/Scholarships",
@@ -54,7 +40,21 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-26T21:27:07.359Z"
+      "lastSeenAt": "2026-11-26T21:33:06.673Z"
+    },
+    {
+      "key": "documents/codex/2026-11-05/hey",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "projectFolder": "",
+      "repoName": "hey",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-11-26T21:32:09.048Z"
     },
     {
       "key": "github/mathem-agent",
@@ -199,6 +199,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 912443,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-26T21:33:06.673Z"
+    },
+    {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
       "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
       "title": "Extend CS:CZ single-player campaign",
@@ -211,9 +228,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 63080,
+      "activityCount": 63173,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T21:27:14.877Z"
+      "lastSeenAt": "2026-11-26T21:32:09.048Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -228,26 +245,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 26467,
+      "activityCount": 26541,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T21:27:07.359Z"
-    },
-    {
-      "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 912426,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T21:26:08.398Z"
+      "lastSeenAt": "2026-11-26T21:32:07.168Z"
     },
     {
       "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
@@ -2589,6 +2589,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 78,
           "effectiveSeconds": 39
+        }
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-65089addf78f1d5eb24e7935",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-26T21:13:35.802Z",
+      "endTime": "2026-11-26T21:14:45.929Z",
+      "wallSeconds": 70,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 35,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 70,
+          "effectiveSeconds": 35
         }
       ],
       "description": "Codex: Structured AL"
