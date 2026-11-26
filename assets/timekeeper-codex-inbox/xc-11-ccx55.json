@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-26T18:32:01.908Z",
+  "updatedAt": "2026-11-26T18:37:01.843Z",
   "dayStart": "2026-11-25T23:00:00.000Z",
   "rangeStart": "2026-08-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T18:32:04.319Z",
+    "observedAt": "2026-11-26T18:37:04.097Z",
     "primary": {
       "usedPercent": 81,
       "remainingPercent": 19,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-26T18:32:59.752Z"
+      "lastSeenAt": "2026-11-26T18:37:58.008Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -211,9 +211,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 908038,
+      "activityCount": 908117,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T18:32:59.752Z"
+      "lastSeenAt": "2026-11-26T18:37:58.008Z"
     },
     {
       "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
@@ -2557,6 +2557,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 72,
           "effectiveSeconds": 36
+        }
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-8c6b60a45a934ff44c17b3f1",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-26T18:18:03.617Z",
+      "endTime": "2026-11-26T18:19:21.839Z",
+      "wallSeconds": 78,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 39,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 78,
+          "effectiveSeconds": 39
         }
       ],
       "description": "Codex: Structured AL"
