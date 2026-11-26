@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-26T14:46:02.541Z",
+  "updatedAt": "2026-11-26T15:01:02.563Z",
   "dayStart": "2026-11-25T23:00:00.000Z",
   "rangeStart": "2026-08-28T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T14:46:03.430Z",
+    "observedAt": "2026-11-26T15:01:03.462Z",
     "primary": {
-      "usedPercent": 79,
-      "remainingPercent": 21,
+      "usedPercent": 80,
+      "remainingPercent": 20,
       "windowMinutes": 10080,
       "resetsAt": "2026-11-27T07:10:47.000Z"
     },
@@ -32,6 +32,20 @@
     "codex-eba210b920a8acb36c60240d"
   ],
   "mappingAudit": [
+    {
+      "key": "documents/codex/2026-11-26/task-verify-whether-switching-from-dnb",
+      "displayPath": "Documents/Codex/2026-11-26/task-verify-whether-switching-from-dnb",
+      "projectFolder": "",
+      "repoName": "task-verify-whether-switching-from-dnb",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 1,
+      "assistantSessionCount": 1,
+      "lastSeenAt": "2026-11-26T15:00:49.096Z"
+    },
     {
       "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
       "displayPath": "Documents/Codex/2026-11-20/can-you-please-find-potential-ways",
@@ -160,6 +174,23 @@
     }
   ],
   "sessionMappingAudit": [
+    {
+      "key": "01a21858-abc9-72d1-b3e7-f9af17eaa097",
+      "sessionId": "01a21858-abc9-72d1-b3e7-f9af17eaa097",
+      "title": "Verify DNB-to-LYSAG switch",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-26/task-verify-whether-switching-from-dnb",
+      "repoName": "task-verify-whether-switching-from-dnb",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 332,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-26T15:00:49.096Z"
+    },
     {
       "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
       "sessionId": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
