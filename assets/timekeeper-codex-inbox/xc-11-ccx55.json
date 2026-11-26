@@ -4,9 +4,9 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-26T22:57:02.244Z",
-  "dayStart": "2026-11-25T23:00:00.000Z",
-  "rangeStart": "2026-08-28T22:00:00.000Z",
+  "updatedAt": "2026-11-26T23:02:02.323Z",
+  "dayStart": "2026-11-26T23:00:00.000Z",
+  "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
   "recentLookbackDays": 7,
   "policyBackfillRepositories": [
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-26T22:57:04.221Z",
+    "observedAt": "2026-11-26T23:02:05.156Z",
     "primary": {
       "usedPercent": 87,
       "remainingPercent": 13,
@@ -40,7 +40,7 @@
       "match": "",
       "sessionCount": 5,
       "assistantSessionCount": 5,
-      "lastSeenAt": "2026-11-26T22:58:03.894Z"
+      "lastSeenAt": "2026-11-26T23:03:05.977Z"
     },
     {
       "key": "documents/codex/2026-11-05/hey",
@@ -54,7 +54,7 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-26T22:57:16.334Z"
+      "lastSeenAt": "2026-11-26T23:02:09.889Z"
     },
     {
       "key": "github/mathem-agent",
@@ -211,9 +211,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 914369,
+      "activityCount": 914447,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T22:58:03.894Z"
+      "lastSeenAt": "2026-11-26T23:03:05.977Z"
     },
     {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
@@ -228,9 +228,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 65028,
+      "activityCount": 65310,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T22:57:16.334Z"
+      "lastSeenAt": "2026-11-26T23:02:09.889Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -245,9 +245,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 27875,
+      "activityCount": 28001,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T22:56:56.264Z"
+      "lastSeenAt": "2026-11-26T23:02:04.196Z"
     },
     {
       "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
@@ -567,340 +567,6 @@
     "blocker": ""
   },
   "records": [
-    {
-      "id": "codex-171973aa161d8f17683b2f28",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-19T23:52:02.420Z",
-      "endTime": "2026-11-19T23:53:00.504Z",
-      "wallSeconds": 58,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 29,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 58,
-          "effectiveSeconds": 29
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-80f5d4cbba09e9a3336777ba",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T02:52:05.017Z",
-      "endTime": "2026-11-20T02:53:06.095Z",
-      "wallSeconds": 61,
-      "focusFactor": 0.4918,
-      "effectiveSeconds": 30,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 61,
-          "effectiveSeconds": 30
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-87b7aa13ff6da6dff7216651",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T05:54:32.797Z",
-      "endTime": "2026-11-20T05:58:05.268Z",
-      "wallSeconds": 142,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 71,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 142,
-          "effectiveSeconds": 71
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-6928c980b754c7ea5fc25fed",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T06:56:50.279Z",
-      "endTime": "2026-11-20T08:04:58.625Z",
-      "wallSeconds": 3272,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 1636,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 2873,
-          "effectiveSeconds": 1436
-        },
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "medium",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 399,
-          "effectiveSeconds": 199
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-0026d3794100075a888eea57",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T08:54:16.081Z",
-      "endTime": "2026-11-20T09:16:28.346Z",
-      "wallSeconds": 825,
-      "focusFactor": 0.4994,
-      "effectiveSeconds": 412,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 825,
-          "effectiveSeconds": 412
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-6ecf596dce8d1a1fdae12bf0",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T09:32:33.822Z",
-      "endTime": "2026-11-20T09:39:16.303Z",
-      "wallSeconds": 402,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 201,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 402,
-          "effectiveSeconds": 201
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-487a94cec5497b73eab30290",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T11:51:18.383Z",
-      "endTime": "2026-11-20T11:54:31.687Z",
-      "wallSeconds": 193,
-      "focusFactor": 0.4974,
-      "effectiveSeconds": 96,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 193,
-          "effectiveSeconds": 96
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-e56e9fe132d01dc333fb3ba1",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T14:54:22.244Z",
-      "endTime": "2026-11-20T14:55:55.673Z",
-      "wallSeconds": 93,
-      "focusFactor": 0.4946,
-      "effectiveSeconds": 46,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 93,
-          "effectiveSeconds": 46
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-4ba338b60dfb4ba0a6199346",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T17:54:24.040Z",
-      "endTime": "2026-11-20T17:55:56.807Z",
-      "wallSeconds": 92,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 46,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 92,
-          "effectiveSeconds": 46
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
-    {
-      "id": "codex-2d1d67dcf62d2c540ce8d7fd",
-      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "projectKey": "Structured AL",
-      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "timekeeperProjectName": "Anders",
-      "startTime": "2026-11-20T20:52:58.637Z",
-      "endTime": "2026-11-20T20:54:14.840Z",
-      "wallSeconds": 76,
-      "focusFactor": 0.5,
-      "effectiveSeconds": 38,
-      "activityPolicyVersion": 1,
-      "focusPolicyVersion": 7,
-      "repositoryFocusMultiplier": 1,
-      "modelBreakdown": [
-        {
-          "role": "parent",
-          "model": "gpt-6.1-sol",
-          "effort": "max",
-          "baseFactor": 0.5,
-          "factor": 0.5,
-          "fastMode": false,
-          "fastModeMultiplier": 1,
-          "creditMultiplier": 1,
-          "creditedFactor": 0.5,
-          "repositoryMultiplier": 1,
-          "wallSeconds": 76,
-          "effectiveSeconds": 38
-        }
-      ],
-      "description": "Codex: Structured AL"
-    },
     {
       "id": "codex-98e80a564682115dd4a5e86f",
       "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
