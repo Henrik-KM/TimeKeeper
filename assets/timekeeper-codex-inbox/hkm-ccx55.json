@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T15:31:02.448Z",
+  "updatedAt": "2026-11-27T15:46:02.312Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T15:31:03.800Z",
+    "observedAt": "2026-11-27T15:46:03.914Z",
     "primary": {
-      "usedPercent": 18,
-      "remainingPercent": 82,
+      "usedPercent": 20,
+      "remainingPercent": 80,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -44,7 +44,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-27T15:29:37.992Z"
+      "lastSeenAt": "2026-11-27T15:45:54.851Z"
     },
     {
       "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
@@ -114,7 +114,7 @@
       "match": "IFLAI",
       "sessionCount": 2160,
       "assistantSessionCount": 2160,
-      "lastSeenAt": "2026-11-27T15:31:05.593Z"
+      "lastSeenAt": "2026-11-27T15:45:57.009Z"
     },
     {
       "key": "github/iflai/website",
@@ -215,9 +215,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 668,
+      "activityCount": 1015,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:29:37.992Z"
+      "lastSeenAt": "2026-11-27T15:45:54.851Z"
     },
     {
       "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
@@ -288,23 +288,6 @@
       "lastSeenAt": "2026-11-23T13:00:43.388Z"
     },
     {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 21765,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:31:05.593Z"
-    },
-    {
       "key": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "sessionId": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "title": "Audit email and outreach automation",
@@ -317,9 +300,26 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 815,
+      "activityCount": 1162,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:30:58.191Z"
+      "lastSeenAt": "2026-11-27T15:45:57.009Z"
+    },
+    {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 21981,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-27T15:45:04.109Z"
     },
     {
       "key": "01a21d7e-6ffe-7760-9368-1e019a614a82",
@@ -37316,8 +37316,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 708,
-    "imported": 654,
+    "discovered": 709,
+    "imported": 655,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140621,6 +140621,84 @@
       }
     },
     {
+      "id": "codex-b1b0e0cba97ba69736b32315",
+      "threadId": "01a21d7e-6ffe-7760-9368-1e019a614a82",
+      "projectKey": "Website",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T14:52:35.898Z",
+      "endTime": "2026-11-27T15:21:06.418Z",
+      "wallSeconds": 1709,
+      "focusFactor": 0.7501,
+      "effectiveSeconds": 1282,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.4,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.4,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-astra",
+          "effort": "max",
+          "baseFactor": 0.75,
+          "factor": 0.75,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.75,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1708,
+          "effectiveSeconds": 1281
+        }
+      ],
+      "description": "Codex: Audit website performance"
+    },
+    {
+      "id": "codex-1fd50722d9eaf75924e58666",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-27T14:56:51.592Z",
+      "endTime": "2026-11-27T15:14:36.437Z",
+      "wallSeconds": 1012,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 506,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 1012,
+          "effectiveSeconds": 506
+        }
+      ],
+      "description": "Codex: Stanford family visas"
+    },
+    {
       "id": "codex-2a52d8f4584c329a369037c3",
       "threadId": "802e943d-1c2c-4234-8f41-9e629b71726c",
       "projectKey": "Website",
@@ -140706,6 +140784,50 @@
         "cache_write_input_tokens": 14298,
         "output_tokens": 761,
         "reasoning_output_tokens": 372
+      }
+    },
+    {
+      "id": "codex-8c94e31b2b6a2ee2d2cfd592",
+      "threadId": "f3518b62-93ed-45f5-916a-88cd8f7c1770",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T15:36:59.616Z",
+      "endTime": "2026-11-27T15:39:21.225Z",
+      "wallSeconds": 141,
+      "focusFactor": 0.2482,
+      "effectiveSeconds": 35,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 141,
+          "effectiveSeconds": 35
+        }
+      ],
+      "description": "API: outreach",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-outreach",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 422771,
+        "cached_input_tokens": 335274,
+        "cache_write_input_tokens": 85310,
+        "output_tokens": 6622,
+        "reasoning_output_tokens": 3701
       }
     }
   ]
