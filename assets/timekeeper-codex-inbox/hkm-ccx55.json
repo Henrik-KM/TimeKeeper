@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T09:16:02.176Z",
+  "updatedAt": "2026-11-27T09:31:02.170Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T09:16:03.588Z",
+    "observedAt": "2026-11-27T09:31:03.348Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
@@ -140260,6 +140260,38 @@
         }
       ],
       "description": "Codex: Stanford travel and arrival"
+    },
+    {
+      "id": "codex-a4969af3d1bbe7a709e50ffa",
+      "threadId": "01a0a92e-1992-7821-8997-48c061783f6b",
+      "projectKey": "RD-doc-personal",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T08:00:19.896Z",
+      "endTime": "2026-11-27T09:07:55.610Z",
+      "wallSeconds": 3251,
+      "focusFactor": 0.4998,
+      "effectiveSeconds": 1625,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 3251,
+          "effectiveSeconds": 1625
+        }
+      ],
+      "description": "Codex: Align September FoU entries"
     },
     {
       "id": "codex-1de9041b0f26ef921738171b",
