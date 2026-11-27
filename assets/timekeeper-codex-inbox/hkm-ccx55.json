@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T12:31:03.563Z",
+  "updatedAt": "2026-11-27T12:46:02.235Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T12:31:06.011Z",
+    "observedAt": "2026-11-27T12:46:03.220Z",
     "primary": {
       "usedPercent": 7,
       "remainingPercent": 93,
@@ -140432,6 +140432,38 @@
         }
       ],
       "description": "Codex: Stanford family visas"
+    },
+    {
+      "id": "codex-d43f184917eafdbd09ce85b4",
+      "threadId": "01a1871a-336d-71d2-8ca5-f5e792f48e7c",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T12:15:00.833Z",
+      "endTime": "2026-11-27T12:16:41.255Z",
+      "wallSeconds": 100,
+      "focusFactor": 0.25,
+      "effectiveSeconds": 25,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 100,
+          "effectiveSeconds": 25
+        }
+      ],
+      "description": "Codex: Plan Bay Area LinkedIn outreach"
     }
   ]
 }
