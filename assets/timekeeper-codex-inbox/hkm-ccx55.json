@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T15:46:02.312Z",
+  "updatedAt": "2026-11-27T16:01:02.347Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T15:46:03.914Z",
+    "observedAt": "2026-11-27T16:01:03.301Z",
     "primary": {
-      "usedPercent": 20,
-      "remainingPercent": 80,
+      "usedPercent": 22,
+      "remainingPercent": 78,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -44,7 +44,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-27T15:45:54.851Z"
+      "lastSeenAt": "2026-11-27T15:58:29.939Z"
     },
     {
       "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
@@ -114,7 +114,21 @@
       "match": "IFLAI",
       "sessionCount": 2160,
       "assistantSessionCount": 2160,
-      "lastSeenAt": "2026-11-27T15:45:57.009Z"
+      "lastSeenAt": "2026-11-27T16:01:24.325Z"
+    },
+    {
+      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "projectFolder": "Anders",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "matchType": "githubParentFolder",
+      "match": "Anders",
+      "sessionCount": 7,
+      "assistantSessionCount": 7,
+      "lastSeenAt": "2026-11-27T16:01:21.409Z"
     },
     {
       "key": "github/iflai/website",
@@ -129,20 +143,6 @@
       "sessionCount": 1,
       "assistantSessionCount": 1,
       "lastSeenAt": "2026-11-27T15:21:06.418Z"
-    },
-    {
-      "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "projectFolder": "Anders",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "matchType": "githubParentFolder",
-      "match": "Anders",
-      "sessionCount": 7,
-      "assistantSessionCount": 7,
-      "lastSeenAt": "2026-11-27T15:14:36.437Z"
     },
     {
       "key": "github/iflai",
@@ -215,9 +215,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 1015,
+      "activityCount": 1359,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:45:54.851Z"
+      "lastSeenAt": "2026-11-27T15:58:29.939Z"
     },
     {
       "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
@@ -288,6 +288,40 @@
       "lastSeenAt": "2026-11-23T13:00:43.388Z"
     },
     {
+      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "title": "Edit outreach drafts",
+      "threadSource": "user",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 21179,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-27T16:01:24.325Z"
+    },
+    {
+      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "title": "Stanford family visas",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 17569,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-27T16:01:21.409Z"
+    },
+    {
       "key": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "sessionId": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "title": "Audit email and outreach automation",
@@ -300,9 +334,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 1162,
+      "activityCount": 1428,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:45:57.009Z"
+      "lastSeenAt": "2026-11-27T16:00:36.914Z"
     },
     {
       "key": "01a1263e-5872-7101-b242-1746293af037",
@@ -317,9 +351,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 21981,
+      "activityCount": 22047,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:45:04.109Z"
+      "lastSeenAt": "2026-11-27T15:49:29.450Z"
     },
     {
       "key": "01a21d7e-6ffe-7760-9368-1e019a614a82",
@@ -337,23 +371,6 @@
       "activityCount": 637,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-27T15:21:06.418Z"
-    },
-    {
-      "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "sessionId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
-      "title": "Stanford family visas",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "repoName": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 17474,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:14:36.437Z"
     },
     {
       "key": "01a1eef4-734b-7ff0-9102-17c432c2ee5c",
@@ -490,23 +507,6 @@
       "activityCount": 6875,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-27T07:57:56.443Z"
-    },
-    {
-      "key": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "sessionId": "01a032a0-5879-73a3-b05d-6d03297f9945",
-      "title": "Edit outreach drafts",
-      "threadSource": "user",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 21148,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T07:33:30.363Z"
     },
     {
       "key": "01a1e36d-a504-79c0-95b6-cf1c99849cc0",
