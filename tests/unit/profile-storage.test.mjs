@@ -86,3 +86,20 @@ test('a full change journal falls back to an atomic compressed profile', () => {
   assert.equal(storage.getItem('timekeeperDataPro:journal'), null);
   assert.deepEqual(loadStoredProfile(storage, 'timekeeperDataPro'), profile);
 });
+
+test('uncommitted edits cannot change a compressed read or a committed baseline', () => {
+  const storage = makeStorage(true);
+  const key = 'timekeeperDataPro';
+  const data = {
+    entries: [{ id: 1, duration: 60 }],
+    updatedAt: null,
+    backupRevision: 1
+  };
+  persistProfile(storage, key, data);
+  data.entries[0].duration = 120;
+  const readBaseline = persistProfile(storage, key, data);
+  data.entries[0].duration = 180;
+  loadStoredProfile(storage, key).entries[0].duration = 240;
+  assert.equal(readBaseline().entries[0].duration, 120);
+  assert.equal(loadStoredProfile(storage, key).entries[0].duration, 120);
+});

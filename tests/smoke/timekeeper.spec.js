@@ -1784,8 +1784,8 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain(
     'if (requestUrl.origin !== sw.location.origin) return;'
   );
-  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v72';");
-  expect(serviceWorker).toContain("'./src/main.mjs?v=67'");
+  expect(serviceWorker).toContain("const CACHE_NAME = 'timekeeper-app-v73';");
+  expect(serviceWorker).toContain("'./src/main.mjs?v=68'");
   expect(serviceWorker).toContain("'./src/shared/vendor/chart.umd.js?v=4.6.1'");
   expect(serviceWorker).toContain("'./src/shared/profile-storage.mjs'");
   expect(serviceWorker).toContain(
@@ -1802,7 +1802,7 @@ test('service worker never caches private cross-origin API responses', async () 
   expect(serviceWorker).toContain("'./src/features/codex/policy.mjs'");
   expect(serviceWorker).toContain("'./src/features/codex/revaluation.mjs?v=2'");
   expect(serviceWorker).toContain(
-    "url.searchParams.set('timekeeper-update', '72')"
+    "url.searchParams.set('timekeeper-update', '73')"
   );
   expect(serviceWorker).toContain("'./codex-analysis.html'");
   expect(serviceWorker).toContain(
@@ -1812,7 +1812,7 @@ test('service worker never caches private cross-origin API responses', async () 
     "'./assets/timekeeper-codex-usage-history.json'"
   );
   const mainSource = await readFile('src/main.mjs', 'utf8');
-  expect(mainSource).toContain(".register('./service-worker.js?v=72')");
+  expect(mainSource).toContain(".register('./service-worker.js?v=73')");
 });
 
 test('Codex deep analysis renders windows, filters, charts, and CSV export', async ({
@@ -2857,7 +2857,12 @@ test('workout, finances, wealth, and Strava fallback paths still render', async 
   await page.locator('#todoName').fill('Morning Ride');
   await page.locator('#todoIntensity').selectOption('medium');
   await page.locator('#todoForm button[type="submit"]').click();
-  await expect(page.getByText('Morning Ride')).toBeVisible();
+  await expect(
+    page.locator('#workoutPresetsContent').getByText('Morning Ride')
+  ).toBeVisible();
+  await expect(
+    page.locator('#workoutEntriesContent').getByText('Morning Ride')
+  ).toBeVisible();
   await expect(page.locator('#stravaFeedStatus')).toContainText(
     'Strava feed not available yet'
   );
@@ -6289,6 +6294,18 @@ test('backup snapshots can be listed and restored from the selected folder', asy
     // @ts-expect-error Test installs the browser-only File System Access picker.
     window.showDirectoryPicker = async () => window.__timekeeperBackupRoot;
   });
+  const pausedTimer = {
+    id: 'paused-snapshot',
+    projectId: 'snapshot-project',
+    isRunning: true,
+    startTime: '2026-04-01T09:00:00Z',
+    pausedAt: '2026-04-01T09:30:00Z',
+    lastUpdateTime: '2026-04-01T09:30:00Z',
+    effectiveSeconds: 900,
+    elapsedSeconds: 1800,
+    focusFactor: 0.5,
+    manualFactor: 0.5
+  };
   await seedLocalStorage(page, {
     projects: [
       projectFixture({
@@ -6296,7 +6313,7 @@ test('backup snapshots can be listed and restored from the selected folder', asy
         name: 'Snapshot Project'
       })
     ],
-    entries: []
+    entries: [pausedTimer]
   });
 
   await page.goto('/');
@@ -6306,7 +6323,7 @@ test('backup snapshots can be listed and restored from the selected folder', asy
     '1 snapshot available'
   );
   await expect(page.locator('#backupSnapshotsPanel')).toContainText(
-    '1 projects, 0 entries'
+    '1 projects, 1 entries'
   );
 
   await page.getByRole('button', { name: 'Verify Backup' }).click();
@@ -6354,6 +6371,11 @@ test('backup snapshots can be listed and restored from the selected folder', asy
   await expect(page.getByRole('heading', { name: 'After Backup' })).toHaveCount(
     0
   );
+  const restoredEntries = await page.evaluate(
+    () => JSON.parse(localStorage.getItem('timekeeperDataPro')).entries
+  );
+  expect(restoredEntries).toHaveLength(1);
+  expect(restoredEntries[0]).toMatchObject(pausedTimer);
 });
 
 test('backup sync pauses before overwriting newer backup data', async ({

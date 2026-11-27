@@ -10,7 +10,7 @@
     <title>TimeKeeper Pro - Offline</title>
     <!-- Chart.js for graphs -->
     <script defer src="src/shared/vendor/chart.umd.js?v=4.6.1"></script>
-    <link rel="stylesheet" href="style.css?v=50">
+    <link rel="stylesheet" href="style.css?v=51">
   </head>
   <body>
     <div class="sidebar" role="navigation" aria-label="Main navigation">
@@ -163,6 +163,7 @@
             <h3 style="margin:0; font-size:1.1rem; font-weight:600;">Entries</h3>
             <div class="entry-page-actions">
               <button id="addManualEntryBtnPro" class="btn secondary">Add Manual Entry</button>
+              <button id="entryFiltersJump" type="button" class="btn secondary hidden">Filters</button>
               <button id="toggleEntryGroupingBtn" class="btn secondary" type="button">Show Raw</button>
               <!-- Toggle button to switch between showing recent entries and all entries -->
               <button id="toggleEntriesViewBtn" class="btn secondary">Show All</button>
@@ -204,6 +205,7 @@
             </select>
             <button id="saveBillingViewBtn" type="button" class="btn secondary">Save View</button>
             <button id="deleteBillingViewBtn" type="button" class="btn secondary">Delete View</button>
+            <button id="entryResultsJump" type="button" class="btn secondary hidden">Back to entries</button>
           </div>
           <div id="entrySummaryPro" class="entry-summary" aria-live="polite"></div>
           <div id="entryBulkActions" class="entry-bulk-actions" aria-live="polite"></div>
@@ -240,7 +242,7 @@
             </form>
           </div>
           <div id="entryPagination" hidden style="display:none; flex-wrap:wrap; align-items:center; justify-content:center; gap:0.75rem; margin:1rem 0;"></div>
-          <div class="entry-table-scroll" style="overflow-x:auto;">
+          <div class="entry-table-scroll" tabindex="-1" aria-label="Time entries" role="region" style="overflow-x:auto;">
             <table id="entriesTablePro" class="entry-table">
               <thead>
                 <tr>
@@ -781,6 +783,6 @@
       </section>
     </div>
     <div id="mobileNowBar" class="mobile-now-bar hidden" aria-live="polite"></div>
-    <script type="module" src="src/main.mjs?v=67"></script>
+    <script type="module" src="src/main.mjs?v=68"></script>
   </body>
 </html>

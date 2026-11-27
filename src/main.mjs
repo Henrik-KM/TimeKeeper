@@ -28,10 +28,8 @@ import {
 } from './shared/runtime-helpers.mjs';
 import { uuid } from './shared/id.mjs';
 import { acceptsCodexActivityRecord } from './features/agents/activity.mjs?v=1';
-import {
-  loadStoredProfile,
-  persistProfile
-} from './shared/profile-storage.mjs';
+import { loadStoredProfile } from './shared/profile-storage.mjs';
+import { openProfileSession } from './shared/profile-session.mjs';
 import { openFormDialog, requestConfirm, showToast } from './shared/ui.mjs';
 import { encryptCodexContext } from './features/codex/encryption.mjs?v=13';
 import {
@@ -152,7 +150,7 @@ import {
   weekKeyToDate
 } from './features/workouts/runtime.mjs';
 
-(function () {
+(async function () {
   let activeSectionId = null;
   let renderStatsCache = null;
   let localAuditCache = null;
@@ -310,8 +308,7 @@ import {
   let financeWealthRange = 'one-year';
   let financeHistoryPeriod = 'all';
   let financeHistoryBucket = 'all';
-  function ensureWorkoutPreset(name, intensity) {
-    const workouts = ensureWorkoutData();
+  function ensureWorkoutPreset(workouts, name, intensity) {
     const trimmedName = (name || '').trim();
     if (!trimmedName) return null;
     const normalized = normalizeIntensity(intensity);
@@ -342,7 +339,7 @@ import {
       preset.name !== trimmedName ||
       normalizeIntensity(preset.intensity) !== normalized
     ) {
-      preset = ensureWorkoutPreset(trimmedName, normalized);
+      preset = ensureWorkoutPreset(workouts, trimmedName, normalized);
     }
     const when = timestamp ? new Date(timestamp) : new Date();
     if (isNaN(when)) return null;
@@ -391,7 +388,7 @@ import {
     const newIntensity = normalizeIntensity(
       updates.intensity !== undefined ? updates.intensity : entry.intensity
     );
-    let preset = ensureWorkoutPreset(trimmedName, newIntensity);
+    const preset = ensureWorkoutPreset(workouts, trimmedName, newIntensity);
     entry.name = preset ? preset.name : trimmedName;
     entry.intensity = preset ? preset.intensity : newIntensity;
     entry.presetId = preset ? preset.id : null;
@@ -2803,7 +2800,15 @@ import {
     renderStatsCache = null;
     localAuditCache = null;
     timerShortcutGroupsCache = null;
-    persistProfile(localStorage, 'timekeeperDataPro', data);
+    try {
+      data = profileSession.save(data);
+    } catch (error) {
+      if (error.name === 'ProfileConflictError') {
+        showToast(error.message);
+        queueMicrotask(() => reloadSharedProfile(true));
+      }
+      throw error;
+    }
   }
   function saveData() {
     const previousUpdatedAt = data.updatedAt;
@@ -2846,8 +2851,14 @@ import {
     return result.report;
   }
 
+  const undoGenerations = new WeakMap();
   function cloneData(value = data) {
-    return JSON.parse(JSON.stringify(value));
+    const copy = JSON.parse(JSON.stringify(value));
+    undoGenerations.set(
+      copy,
+      undoGenerations.get(value) ?? profileSession.generation
+    );
+    return copy;
   }
 
   function refreshAllViews() {
@@ -2878,13 +2889,26 @@ import {
   }
 
   function restoreDataSnapshot(snapshot) {
+    if (profileSession.changed()) reloadSharedProfile(true);
+    if (undoGenerations.get(snapshot) !== profileSession.generation) {
+      showToast('Another tab changed this profile. This undo has expired.');
+      return false;
+    }
+    const previous = data;
     data = cloneData(snapshot);
+    data.backupRevision = previous.backupRevision;
+    try {
+      saveData();
+    } catch (error) {
+      data = previous;
+      if (error.name !== 'ProfileConflictError')
+        showToast('Undo could not be saved. Please try again.');
+      return false;
+    }
     wealthProjectionNotice = null;
-    persistDataToLocalStorage();
-    needsBackup = true;
-    scheduleBackupSoon();
     refreshAllViews();
     scheduleClaudeAutoImport();
+    return true;
   }
 
   const MOBILE_UNDO_TRAY_VISIBLE_MS = 3500;
@@ -2959,7 +2983,7 @@ import {
     undoBtn.textContent = 'Undo';
     undoBtn.addEventListener('click', () => {
       clearMobileUndoTrayTimer();
-      restoreDataSnapshot(latest.snapshot);
+      if (!restoreDataSnapshot(latest.snapshot)) return;
       mobileActionHistory.shift();
       renderMobileUndoTray();
       if (!isMobileViewport()) showToast('Undo applied.');
@@ -2997,7 +3021,7 @@ import {
         undo.textContent = 'Undo';
         undo.addEventListener('click', () => {
           sheet.close();
-          restoreDataSnapshot(item.snapshot);
+          if (!restoreDataSnapshot(item.snapshot)) return;
           const index = mobileActionHistory.findIndex(
             (candidate) => candidate.id === item.id
           );
@@ -3014,12 +3038,16 @@ import {
   }
 
   function offerUndo(message, snapshot) {
+    if (undoGenerations.get(snapshot) !== profileSession.generation) {
+      showToast(message);
+      return;
+    }
     pushMobileActionHistory(message, snapshot);
     if (isMobileViewport()) return;
     showToast(message, {
       actionLabel: 'Undo',
       onAction: () => {
-        restoreDataSnapshot(snapshot);
+        if (!restoreDataSnapshot(snapshot)) return;
         renderMobileUndoTray();
         showToast('Undo applied.');
       }
@@ -3523,7 +3551,45 @@ import {
     error: '',
     apiUrl: ''
   };
-  let data = loadData();
+  let { initial: data, session: profileSession } = await openProfileSession(
+    'timekeeperDataPro',
+    loadData,
+    showToast,
+    (edits, clear) =>
+      showToast(
+        'Two tabs changed the same field. A copy of the conflicting edits is available.',
+        {
+          actionLabel: 'Download and clear copy',
+          onAction: () => {
+            downloadData(edits, 'timekeeper-conflicting-edits.json');
+            clear();
+          }
+        }
+      )
+  );
+  function reloadSharedProfile(force = false) {
+    // Dialogs may hold a reference to the record being edited. Rebase those
+    // changes at save time, allowing the user to finish the open form.
+    if (
+      !force &&
+      (document.querySelector('[role="dialog"], dialog[open]') ||
+        document.activeElement?.matches('input, select, textarea'))
+    )
+      return;
+    const current = profileSession.refresh(force);
+    if (!current) return;
+    data = current;
+    renderStatsCache = localAuditCache = timerShortcutGroupsCache = null;
+    mobileActionHistory.length = 0;
+    refreshAllViews();
+  }
+  profileSession.onChange(reloadSharedProfile);
+  document.addEventListener('visibilitychange', () => {
+    if (!document.hidden) reloadSharedProfile();
+  });
+  window.addEventListener('pageshow', (event) => {
+    if (event.persisted) reloadSharedProfile();
+  });
   ensureFitnessDefaults();
   ensureWorkoutData();
   ensureMonthlyRecurringPayments();
@@ -9582,16 +9648,17 @@ import {
     sheet.addAction('Close', 'secondary', sheet.close);
   }
 
-  // Download the current data to a JSON file. Uses the same filename
-  // each time so the browser can overwrite older backups.
-  function downloadData() {
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
+  function downloadData(
+    value = data,
+    filename = 'timekeeper-offline-data.json'
+  ) {
+    const blob = new Blob([JSON.stringify(value, null, 2)], {
       type: 'application/json'
     });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'timekeeper-offline-data.json';
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -17306,6 +17373,7 @@ import {
   let weeklyScatterChart = null;
   let monthlyScatterChart = null;
   function showTimerSaveError(error) {
+    if (error?.name === 'ProfileConflictError') return;
     showToast(
       error?.name === 'QuotaExceededError'
         ? 'Timer could not be saved: browser storage is full. Your previous data is safe.'
@@ -21233,9 +21301,10 @@ import {
     data.reminderSettings = normalizeReminderSettings(data.reminderSettings);
     data.codexIntegration = normalizeCodexIntegration(data.codexIntegration);
     data.claudeIntegration = normalizeClaudeIntegration(data.claudeIntegration);
-    // Remove transient timer fields from imported entries.
+    // Unfinished timers need their accumulated credit and last accrual time.
     data.entries = data.entries.map((entry) => normalizeEntryTiming(entry));
     data.entries.forEach((entry) => {
+      if (entry.isRunning) return;
       delete entry.effectiveSeconds;
       delete entry.lastUpdateTime;
       delete entry.factor;
@@ -21765,7 +21834,7 @@ import {
       updatePwaStatusPanel();
     });
     navigator.serviceWorker
-      .register('./service-worker.js?v=72')
+      .register('./service-worker.js?v=73')
       .then((registration) => {
         pendingServiceWorkerRegistration = registration;
         if (registration.waiting) updatePwaStatusPanel();
@@ -21849,8 +21918,34 @@ import {
     }
   }
 
+  const entryList = document.getElementById('entriesTablePro').parentElement;
+  const entryPagination = document.getElementById('entryPagination');
+  const filtersJump = document.getElementById('entryFiltersJump');
+  const resultsJump = document.getElementById('entryResultsJump');
+  function positionEntryList() {
+    const mobile = isMobileViewport();
+    filtersJump.classList.toggle('hidden', !mobile);
+    resultsJump.classList.toggle('hidden', !mobile);
+    if (mobile) {
+      quickLogForm.after(entryList, entryPagination);
+    } else {
+      document
+        .getElementById('manualEntryFormPro')
+        .after(entryPagination, entryList);
+    }
+  }
+  filtersJump.addEventListener('click', () => {
+    closeManualEntryForm({ reset: false });
+    document.getElementById('entryProjectFilter').focus();
+  });
+  resultsJump.addEventListener('click', () => {
+    entryList.scrollIntoView({ block: 'start' });
+    entryList.focus({ preventScroll: true });
+  });
+  positionEntryList();
   applyLaunchRoute();
   window.matchMedia('(max-width: 640px)').addEventListener('change', () => {
+    positionEntryList();
     renderTodayCommandPanel();
     renderMobileNowBar();
     applyMobileChartCollapses();

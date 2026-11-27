@@ -3,13 +3,13 @@
 const sw = /** @type {ServiceWorkerGlobalScope} */ (
   /** @type {unknown} */ (self)
 );
-const CACHE_NAME = 'timekeeper-app-v72';
+const CACHE_NAME = 'timekeeper-app-v73';
 const APP_SHELL = [
   './',
   './index.html',
   './codex-analysis.html',
-  './style.css?v=50',
-  './src/main.mjs?v=67',
+  './style.css?v=51',
+  './src/main.mjs?v=68',
   './src/shared/vendor/chart.umd.js?v=4.6.1',
   './src/features/agents/activity.mjs?v=1',
   './src/features/claude/policy.mjs?v=3',
@@ -24,6 +24,8 @@ const APP_SHELL = [
   './src/shared/runtime-helpers.mjs',
   './src/shared/id.mjs',
   './src/shared/profile-storage.mjs',
+  './src/shared/profile-session.mjs',
+  './src/shared/profile-changes.mjs',
   './src/shared/profile-compression-worker.mjs',
   './src/shared/vendor/lz-string.mjs',
   './src/shared/ui.mjs',
@@ -34,6 +36,7 @@ const APP_SHELL = [
   './src/features/strava/import.mjs',
   './src/features/strava/score-model.mjs',
   './src/features/strava/sessions.mjs',
+  './src/features/finance/core.mjs',
   './src/features/wealth/core.mjs',
   './src/features/workouts/runtime.mjs',
   './src/features/company-operator/core.mjs',
@@ -45,7 +48,7 @@ const APP_SHELL = [
   './src/styles/components.css?v=49',
   './src/styles/features.css?v=49',
   './src/styles/layout.css',
-  './src/styles/interface.css?v=48',
+  './src/styles/interface.css?v=49',
   './assets/icons/house.svg',
   './assets/icons/timer.svg',
   './assets/icons/briefcase-business.svg',
@@ -99,8 +102,8 @@ sw.addEventListener('activate', (event) => {
         if (!refreshExistingClients) return;
         clients.forEach((client) => {
           const url = new URL(client.url);
-          if (url.searchParams.get('timekeeper-update') === '72') return;
-          url.searchParams.set('timekeeper-update', '72');
+          if (url.searchParams.get('timekeeper-update') === '73') return;
+          url.searchParams.set('timekeeper-update', '73');
           client.navigate(url.href).catch(() => undefined);
         });
       })
