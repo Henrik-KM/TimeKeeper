@@ -111,18 +111,15 @@ function getCompressedState(storage, key, raw) {
       }
     }
   }
-  const profile = JSON.parse(body);
   const metadata = journal || base;
-  for (const field of ['updatedAt', 'backupRevision']) {
-    if (Object.hasOwn(metadata, field)) profile[field] = metadata[field];
-  }
   const state = {
     baseRaw: raw,
     journalRaw,
     fingerprint,
     journal,
     body,
-    profile
+    updatedAt: metadata.updatedAt,
+    backupRevision: metadata.backupRevision
   };
   map.set(key, state);
   return state;
@@ -131,12 +128,16 @@ function getCompressedState(storage, key, raw) {
 export function loadStoredProfile(storage, key) {
   const raw = storage.getItem(key);
   if (!raw) return null;
-  return isCompressedProfile(raw)
-    ? getCompressedState(storage, key, raw).profile
-    : parseStoredProfile(raw);
+  if (!isCompressedProfile(raw)) return parseStoredProfile(raw);
+  const state = getCompressedState(storage, key, raw);
+  const profile = JSON.parse(state.body);
+  for (const field of ['updatedAt', 'backupRevision']) {
+    if (state[field] !== undefined) profile[field] = state[field];
+  }
+  return profile;
 }
 
-function scheduleCompaction(storage, key, value, state) {
+function scheduleCompaction(storage, key, value, state, canCompact) {
   if (
     typeof Worker === 'undefined' ||
     state.journalRaw.length < COMPACT_AFTER_CHARS
@@ -169,6 +170,7 @@ function scheduleCompaction(storage, key, value, state) {
   worker.onmessage = (event) => {
     try {
       if (
+        !canCompact() ||
         storage.getItem(key) !== expectedBase ||
         storage.getItem(key + JOURNAL_SUFFIX) !== expectedJournal
       )
@@ -189,7 +191,8 @@ function scheduleCompaction(storage, key, value, state) {
         fingerprint: baseFingerprint(compacted),
         journal: null,
         body: state.body,
-        profile: value
+        updatedAt: state.updatedAt,
+        backupRevision: state.backupRevision
       });
     } catch {
       // The journal remains durable if compaction cannot replace the base.
@@ -201,7 +204,7 @@ function scheduleCompaction(storage, key, value, state) {
   worker.postMessage(serialized);
 }
 
-export function persistProfile(storage, key, value) {
+export function persistProfile(storage, key, value, canCompact = () => true) {
   const raw = storage.getItem(key);
   if (!isCompressedProfile(raw)) {
     const serialized = JSON.stringify(value);
@@ -213,7 +216,7 @@ export function persistProfile(storage, key, value) {
     }
     storage.removeItem(key + JOURNAL_SUFFIX);
     stateMap(storage).delete(key);
-    return;
+    return () => JSON.parse(serialized);
   }
 
   const state = getCompressedState(storage, key, raw);
@@ -233,21 +236,25 @@ export function persistProfile(storage, key, value) {
     storage.setItem(key + JOURNAL_SUFFIX, journalRaw);
   } catch (error) {
     if (error?.name !== 'QuotaExceededError') throw error;
-    storage.setItem(
-      key,
-      COMPRESSED_PREFIX + compressToUTF16(JSON.stringify(value))
-    );
+    const serialized = JSON.stringify(value);
+    storage.setItem(key, COMPRESSED_PREFIX + compressToUTF16(serialized));
     storage.removeItem(key + JOURNAL_SUFFIX);
     stateMap(storage).delete(key);
-    return;
+    return () => JSON.parse(serialized);
   }
   const nextState = {
     ...state,
     journalRaw,
     journal,
     body: nextBody,
-    profile: value
+    updatedAt: journal.updatedAt,
+    backupRevision: journal.backupRevision
   };
   stateMap(storage).set(key, nextState);
-  scheduleCompaction(storage, key, value, nextState);
+  scheduleCompaction(storage, key, value, nextState, canCompact);
+  return () => ({
+    ...JSON.parse(nextBody),
+    updatedAt: journal.updatedAt,
+    backupRevision: journal.backupRevision
+  });
 }
