@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-27T09:37:02.193Z",
+  "updatedAt": "2026-11-27T09:42:02.196Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,12 +17,12 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T09:37:04.002Z",
+    "observedAt": "2026-11-27T09:42:04.497Z",
     "primary": {
       "usedPercent": 6,
       "remainingPercent": 94,
       "windowMinutes": 10080,
-      "resetsAt": "2026-12-04T07:22:34.000Z"
+      "resetsAt": "2026-12-04T07:22:35.000Z"
     },
     "secondary": null
   },
@@ -2189,6 +2189,38 @@
           "repositoryMultiplier": 1,
           "wallSeconds": 123,
           "effectiveSeconds": 61
+        }
+      ],
+      "description": "Codex: Structured AL"
+    },
+    {
+      "id": "codex-ab2de8779b6630a3ccfec380",
+      "threadId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "projectKey": "Structured AL",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-27T09:22:07.357Z",
+      "endTime": "2026-11-27T09:23:19.454Z",
+      "wallSeconds": 72,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 36,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 72,
+          "effectiveSeconds": 36
         }
       ],
       "description": "Codex: Structured AL"
