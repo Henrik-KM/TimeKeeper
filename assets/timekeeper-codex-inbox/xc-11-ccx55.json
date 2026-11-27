@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-27T07:32:01.974Z",
+  "updatedAt": "2026-11-27T07:37:02.003Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T07:32:03.994Z",
+    "observedAt": "2026-11-27T07:37:04.276Z",
     "primary": {
-      "usedPercent": 0,
-      "remainingPercent": 100,
+      "usedPercent": 1,
+      "remainingPercent": 99,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -28,20 +28,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "github/scholarships",
-      "displayPath": "GitHub/Scholarships",
-      "projectFolder": "Scholarships",
-      "repoName": "Scholarships",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-27T07:32:59.015Z"
-    },
     {
       "key": "documents/codex/2026-11-05/hey",
       "displayPath": "Documents/Codex/2026-11-05/hey",
@@ -54,7 +40,21 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-27T07:31:56.232Z"
+      "lastSeenAt": "2026-11-27T07:35:16.432Z"
+    },
+    {
+      "key": "github/scholarships",
+      "displayPath": "GitHub/Scholarships",
+      "projectFolder": "Scholarships",
+      "repoName": "Scholarships",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-11-27T07:33:34.320Z"
     },
     {
       "key": "github/mathem-agent",
@@ -113,20 +113,6 @@
       "lastSeenAt": "2026-11-20T17:36:41.506Z"
     },
     {
-      "key": "documents/codex/2026-11-16/the-github-sub-i-pay-for",
-      "displayPath": "Documents/Codex/2026-11-16/the-github-sub-i-pay-for",
-      "projectFolder": "",
-      "repoName": "the-github-sub-i-pay-for",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 1,
-      "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-20T07:22:55.024Z"
-    },
-    {
       "key": "github/anders/structured al",
       "displayPath": "GitHub/Anders/Structured AL",
       "projectFolder": "Anders",
@@ -157,6 +143,23 @@
   ],
   "sessionMappingAudit": [
     {
+      "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
+      "sessionId": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
+      "title": "Extend CS single-player campaign (2)",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "repoName": "hey",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 2568,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-27T07:35:16.432Z"
+    },
+    {
       "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
       "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
       "title": "",
@@ -169,9 +172,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 917335,
+      "activityCount": 917348,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T07:32:59.015Z"
+      "lastSeenAt": "2026-11-27T07:33:34.320Z"
     },
     {
       "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
@@ -186,9 +189,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 67100,
+      "activityCount": 67103,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T07:31:56.232Z"
+      "lastSeenAt": "2026-11-27T07:33:11.250Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -206,23 +209,6 @@
       "activityCount": 28663,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-26T23:48:31.086Z"
-    },
-    {
-      "key": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
-      "sessionId": "01a1acd8-8895-71f0-ad02-b3e6143e2b88",
-      "title": "Extend CS single-player campaign (2)",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "repoName": "hey",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 2529,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T14:34:45.913Z"
     },
     {
       "key": "01a0dd2b-2516-7130-a66c-555ca01d1cb1",
@@ -291,23 +277,6 @@
       "activityCount": 595,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-20T17:36:41.506Z"
-    },
-    {
-      "key": "01a1e604-46f0-7aa1-bb4d-a0d71171beda",
-      "sessionId": "01a1e604-46f0-7aa1-bb4d-a0d71171beda",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-11-16/the-github-sub-i-pay-for",
-      "repoName": "the-github-sub-i-pay-for",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 10953,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-20T07:22:55.024Z"
     },
     {
       "key": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
