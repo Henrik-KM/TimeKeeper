@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T15:16:02.513Z",
+  "updatedAt": "2026-11-27T15:31:02.448Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T15:16:04.409Z",
+    "observedAt": "2026-11-27T15:31:03.800Z",
     "primary": {
-      "usedPercent": 16,
-      "remainingPercent": 84,
+      "usedPercent": 18,
+      "remainingPercent": 82,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -44,7 +44,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-27T15:15:56.791Z"
+      "lastSeenAt": "2026-11-27T15:29:37.992Z"
     },
     {
       "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
@@ -114,7 +114,7 @@
       "match": "IFLAI",
       "sessionCount": 2160,
       "assistantSessionCount": 2160,
-      "lastSeenAt": "2026-11-27T15:16:01.625Z"
+      "lastSeenAt": "2026-11-27T15:31:05.593Z"
     },
     {
       "key": "github/iflai/website",
@@ -128,7 +128,7 @@
       "match": "IFLAI",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-27T15:16:00.796Z"
+      "lastSeenAt": "2026-11-27T15:21:06.418Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -215,9 +215,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 512,
+      "activityCount": 668,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:15:56.791Z"
+      "lastSeenAt": "2026-11-27T15:29:37.992Z"
     },
     {
       "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
@@ -288,6 +288,23 @@
       "lastSeenAt": "2026-11-23T13:00:43.388Z"
     },
     {
+      "key": "01a1263e-5872-7101-b242-1746293af037",
+      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
+      "title": "Email helper health monitor",
+      "threadSource": "agent_created_thread",
+      "displayPath": "GitHub/IFLAI/email-helper",
+      "repoName": "email-helper",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "projectName": "IFLAI",
+      "match": "IFLAI",
+      "backfillDays": 7,
+      "activityCount": 21765,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-27T15:31:05.593Z"
+    },
+    {
       "key": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "sessionId": "01a21d7d-9dd1-7800-99ee-0627879b21df",
       "title": "Audit email and outreach automation",
@@ -300,9 +317,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 511,
+      "activityCount": 815,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:16:01.625Z"
+      "lastSeenAt": "2026-11-27T15:30:58.191Z"
     },
     {
       "key": "01a21d7e-6ffe-7760-9368-1e019a614a82",
@@ -317,9 +334,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 562,
+      "activityCount": 637,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:16:00.796Z"
+      "lastSeenAt": "2026-11-27T15:21:06.418Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -490,23 +507,6 @@
       "activityCount": 21148,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-27T07:33:30.363Z"
-    },
-    {
-      "key": "01a1263e-5872-7101-b242-1746293af037",
-      "sessionId": "01a1263e-5872-7101-b242-1746293af037",
-      "title": "Email helper health monitor",
-      "threadSource": "agent_created_thread",
-      "displayPath": "GitHub/IFLAI/email-helper",
-      "repoName": "email-helper",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
-      "projectName": "IFLAI",
-      "match": "IFLAI",
-      "backfillDays": 7,
-      "activityCount": 21480,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-26T15:19:52.440Z"
     },
     {
       "key": "01a1e36d-a504-79c0-95b6-cf1c99849cc0",
@@ -37316,8 +37316,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 707,
-    "imported": 653,
+    "discovered": 708,
+    "imported": 654,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140662,6 +140662,50 @@
         "cache_write_input_tokens": 2101,
         "output_tokens": 11169,
         "reasoning_output_tokens": 10755
+      }
+    },
+    {
+      "id": "codex-741769dce10f406a55075a44",
+      "threadId": "14f542a8-e6d1-48fb-925c-9be4a4553e36",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T15:30:24.522Z",
+      "endTime": "2026-11-27T15:30:50.382Z",
+      "wallSeconds": 25,
+      "focusFactor": 0.24,
+      "effectiveSeconds": 6,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 25,
+          "effectiveSeconds": 6
+        }
+      ],
+      "description": "API: outreach",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-outreach",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 31721,
+        "cached_input_tokens": 17414,
+        "cache_write_input_tokens": 14298,
+        "output_tokens": 761,
+        "reasoning_output_tokens": 372
       }
     }
   ]
