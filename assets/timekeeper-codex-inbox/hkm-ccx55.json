@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T16:16:05.209Z",
+  "updatedAt": "2026-11-27T16:31:02.358Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T16:16:07.929Z",
+    "observedAt": "2026-11-27T16:31:04.508Z",
     "primary": {
-      "usedPercent": 23,
-      "remainingPercent": 77,
+      "usedPercent": 25,
+      "remainingPercent": 75,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -44,7 +44,7 @@
       "match": "",
       "sessionCount": 1,
       "assistantSessionCount": 1,
-      "lastSeenAt": "2026-11-27T15:58:29.939Z"
+      "lastSeenAt": "2026-11-27T16:29:06.636Z"
     },
     {
       "key": "documents/codex/2026-11-20/can-you-please-find-potential-ways",
@@ -114,7 +114,7 @@
       "match": "IFLAI",
       "sessionCount": 2160,
       "assistantSessionCount": 2160,
-      "lastSeenAt": "2026-11-27T16:16:43.452Z"
+      "lastSeenAt": "2026-11-27T16:20:35.890Z"
     },
     {
       "key": "github/anders/fulbright_codex_operator_repo_henrik_klein_moberg_v2",
@@ -215,9 +215,9 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 1359,
+      "activityCount": 1662,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T15:58:29.939Z"
+      "lastSeenAt": "2026-11-27T16:29:06.636Z"
     },
     {
       "key": "01a1fa4a-da9f-7d50-ba47-bc61a0c714e1",
@@ -300,9 +300,9 @@
       "projectName": "IFLAI",
       "match": "IFLAI",
       "backfillDays": 7,
-      "activityCount": 21444,
+      "activityCount": 21579,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-27T16:16:43.452Z"
+      "lastSeenAt": "2026-11-27T16:20:35.890Z"
     },
     {
       "key": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
@@ -140621,6 +140621,52 @@
       }
     },
     {
+      "id": "codex-a0e78153fedec251f56f807b",
+      "threadId": "01a21d7d-9dd1-7800-99ee-0627879b21df",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T14:51:42.045Z",
+      "endTime": "2026-11-27T16:05:51.368Z",
+      "wallSeconds": 3957,
+      "focusFactor": 0.3748,
+      "effectiveSeconds": 1483,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "unknown",
+          "effort": "unknown",
+          "baseFactor": 0.4,
+          "factor": 0.2,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.2,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 1,
+          "effectiveSeconds": 0
+        },
+        {
+          "role": "parent",
+          "model": "gpt-6.2-astra",
+          "effort": "max",
+          "baseFactor": 0.75,
+          "factor": 0.375,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.375,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 3955,
+          "effectiveSeconds": 1483
+        }
+      ],
+      "description": "Codex: Audit email and outreach automation"
+    },
+    {
       "id": "codex-b1b0e0cba97ba69736b32315",
       "threadId": "01a21d7e-6ffe-7760-9368-1e019a614a82",
       "projectKey": "Website",
@@ -140861,6 +140907,38 @@
         "output_tokens": 6622,
         "reasoning_output_tokens": 3701
       }
+    },
+    {
+      "id": "codex-347d9393979b60b462598563",
+      "threadId": "01a0f7d5-26e1-7093-90e1-42707e8fe213",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-27T15:57:54.961Z",
+      "endTime": "2026-11-27T16:12:22.291Z",
+      "wallSeconds": 866,
+      "focusFactor": 0.5,
+      "effectiveSeconds": 433,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 866,
+          "effectiveSeconds": 433
+        }
+      ],
+      "description": "Codex: Stanford family visas"
     },
     {
       "id": "codex-3c24e3e2d905de948b12dee5",
