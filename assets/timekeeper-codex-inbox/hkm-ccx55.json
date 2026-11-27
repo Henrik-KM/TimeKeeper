@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-27T22:16:06.060Z",
+  "updatedAt": "2026-11-27T22:31:02.547Z",
   "dayStart": "2026-11-26T23:00:00.000Z",
   "rangeStart": "2026-08-29T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-27T22:16:08.370Z",
+    "observedAt": "2026-11-27T22:31:04.285Z",
     "primary": {
       "usedPercent": 28,
       "remainingPercent": 72,
@@ -141164,6 +141164,70 @@
           "repositoryMultiplier": 0.5,
           "wallSeconds": 421,
           "effectiveSeconds": 105
+        }
+      ],
+      "description": "Codex: Edit outreach drafts"
+    },
+    {
+      "id": "codex-58059e390e364f07de6bc2b7",
+      "threadId": "01a1ca47-2dba-7dd1-aa42-ce3e13529ec3",
+      "projectKey": "Fulbright_Codex_Operator_Repo_Henrik_Klein_Moberg_v2",
+      "timekeeperProjectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "timekeeperProjectName": "Anders",
+      "startTime": "2026-11-27T21:48:09.467Z",
+      "endTime": "2026-11-27T22:04:01.679Z",
+      "wallSeconds": 951,
+      "focusFactor": 0.4995,
+      "effectiveSeconds": 475,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 1,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.5,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.5,
+          "repositoryMultiplier": 1,
+          "wallSeconds": 951,
+          "effectiveSeconds": 475
+        }
+      ],
+      "description": "Codex: Stanford housing and payment"
+    },
+    {
+      "id": "codex-33550a01ecff2b80c0c19f4a",
+      "threadId": "01a032a0-5879-73a3-b05d-6d03297f9945",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-27T22:05:34.992Z",
+      "endTime": "2026-11-27T22:10:05.765Z",
+      "wallSeconds": 270,
+      "focusFactor": 0.2481,
+      "effectiveSeconds": 67,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.2-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 270,
+          "effectiveSeconds": 67
         }
       ],
       "description": "Codex: Edit outreach drafts"
