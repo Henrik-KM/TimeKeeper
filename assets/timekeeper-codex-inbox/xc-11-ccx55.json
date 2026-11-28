@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "xc-11-ccx55",
-  "updatedAt": "2026-11-28T15:22:02.779Z",
+  "updatedAt": "2026-11-28T15:27:02.840Z",
   "dayStart": "2026-11-27T23:00:00.000Z",
   "rangeStart": "2026-08-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,7 +17,7 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-28T15:22:05.192Z",
+    "observedAt": "2026-11-28T15:27:04.601Z",
     "primary": {
       "usedPercent": 44,
       "remainingPercent": 56,
@@ -28,20 +28,6 @@
   },
   "retractedExternalIds": [],
   "mappingAudit": [
-    {
-      "key": "documents/codex/2026-11-05/hey",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "projectFolder": "",
-      "repoName": "hey",
-      "status": "unmapped",
-      "projectId": null,
-      "projectName": "",
-      "matchType": null,
-      "match": "",
-      "sessionCount": 2,
-      "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-28T15:22:13.854Z"
-    },
     {
       "key": "github/scholarships",
       "displayPath": "GitHub/Scholarships",
@@ -54,7 +40,21 @@
       "match": "",
       "sessionCount": 2,
       "assistantSessionCount": 2,
-      "lastSeenAt": "2026-11-28T15:21:55.047Z"
+      "lastSeenAt": "2026-11-28T15:28:00.309Z"
+    },
+    {
+      "key": "documents/codex/2026-11-05/hey",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "projectFolder": "",
+      "repoName": "hey",
+      "status": "unmapped",
+      "projectId": null,
+      "projectName": "",
+      "matchType": null,
+      "match": "",
+      "sessionCount": 2,
+      "assistantSessionCount": 2,
+      "lastSeenAt": "2026-11-28T15:27:10.773Z"
     },
     {
       "key": "github/income-agents",
@@ -110,7 +110,7 @@
       "match": "Anders",
       "sessionCount": 3,
       "assistantSessionCount": 3,
-      "lastSeenAt": "2026-11-28T12:34:05.558Z"
+      "lastSeenAt": "2026-11-28T15:24:16.201Z"
     },
     {
       "key": "github/anders/bao",
@@ -129,23 +129,6 @@
   ],
   "sessionMappingAudit": [
     {
-      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
-      "title": "Extend CS:CZ single-player campaign",
-      "threadSource": "user",
-      "displayPath": "Documents/Codex/2026-11-05/hey",
-      "repoName": "hey",
-      "status": "unmapped",
-      "mappingSource": null,
-      "projectId": null,
-      "projectName": "",
-      "match": "",
-      "backfillDays": 7,
-      "activityCount": 85693,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-28T15:22:13.854Z"
-    },
-    {
       "key": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
       "sessionId": "01a16ecb-b7e7-77a3-baec-450668f44c0f",
       "title": "",
@@ -158,9 +141,26 @@
       "projectName": "",
       "match": "",
       "backfillDays": 7,
-      "activityCount": 932687,
+      "activityCount": 932785,
       "assistantActivity": true,
-      "lastSeenAt": "2026-11-28T15:21:55.047Z"
+      "lastSeenAt": "2026-11-28T15:28:00.309Z"
+    },
+    {
+      "key": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "sessionId": "01a1ac62-cc54-7d81-9858-6f337c6122a9",
+      "title": "Extend CS:CZ single-player campaign",
+      "threadSource": "user",
+      "displayPath": "Documents/Codex/2026-11-05/hey",
+      "repoName": "hey",
+      "status": "unmapped",
+      "mappingSource": null,
+      "projectId": null,
+      "projectName": "",
+      "match": "",
+      "backfillDays": 7,
+      "activityCount": 85827,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-28T15:27:10.773Z"
     },
     {
       "key": "01a18d79-7f15-7d71-97d7-1f0fc5d5b05f",
@@ -248,6 +248,23 @@
       "lastSeenAt": "2026-11-20T18:41:49.018Z"
     },
     {
+      "key": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "sessionId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
+      "title": "",
+      "threadSource": "user",
+      "displayPath": "GitHub/Anders/Structured AL",
+      "repoName": "Structured AL",
+      "status": "automatic",
+      "mappingSource": "githubParentFolder",
+      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
+      "projectName": "Anders",
+      "match": "Anders",
+      "backfillDays": 7,
+      "activityCount": 9115,
+      "assistantActivity": true,
+      "lastSeenAt": "2026-11-28T15:24:16.201Z"
+    },
+    {
       "key": "01a22215-f6be-7693-bb06-1b29827fa6e0",
       "sessionId": "01a22215-f6be-7693-bb06-1b29827fa6e0",
       "title": "",
@@ -263,23 +280,6 @@
       "activityCount": 395,
       "assistantActivity": true,
       "lastSeenAt": "2026-11-28T12:34:05.558Z"
-    },
-    {
-      "key": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "sessionId": "01a1b4e3-4c33-71c0-a5cd-14806a0432ea",
-      "title": "",
-      "threadSource": "user",
-      "displayPath": "GitHub/Anders/Structured AL",
-      "repoName": "Structured AL",
-      "status": "automatic",
-      "mappingSource": "githubParentFolder",
-      "projectId": "9d47c54d-348b-46ee-b6c8-e2165a146f8d",
-      "projectName": "Anders",
-      "match": "Anders",
-      "backfillDays": 7,
-      "activityCount": 9084,
-      "assistantActivity": true,
-      "lastSeenAt": "2026-11-28T12:27:43.093Z"
     },
     {
       "key": "01a12021-bb23-7742-94d9-3d526529e0f5",
