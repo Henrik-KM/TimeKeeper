@@ -4,7 +4,7 @@
   "schemaVersion": 2,
   "source": "timekeeper-codex-bridge",
   "machineId": "hkm-ccx55",
-  "updatedAt": "2026-11-28T11:31:01.947Z",
+  "updatedAt": "2026-11-28T11:46:02.017Z",
   "dayStart": "2026-11-27T23:00:00.000Z",
   "rangeStart": "2026-08-30T22:00:00.000Z",
   "lookbackDays": 90,
@@ -17,10 +17,10 @@
     "01a05bde-fee1-7303-89e3-8f54b5e16505"
   ],
   "usageLimits": {
-    "observedAt": "2026-11-28T11:31:03.377Z",
+    "observedAt": "2026-11-28T11:46:02.985Z",
     "primary": {
-      "usedPercent": 37,
-      "remainingPercent": 63,
+      "usedPercent": 38,
+      "remainingPercent": 62,
       "windowMinutes": 10080,
       "resetsAt": "2026-12-04T07:22:34.000Z"
     },
@@ -37299,8 +37299,8 @@
   ],
   "emailUsageAudit": {
     "source": "henrik-email",
-    "discovered": 712,
-    "imported": 658,
+    "discovered": 713,
+    "imported": 659,
     "invalid": 0,
     "outsideWindow": 0,
     "duplicateSessions": 0,
@@ -140973,6 +140973,50 @@
         }
       ],
       "description": "Codex: Clean up stale Chrome tabs"
+    },
+    {
+      "id": "codex-184e4fe592670127988d3e75",
+      "threadId": "dfafc04a-9bbe-415c-b4b4-57990e7bf025",
+      "projectKey": "email-helper",
+      "timekeeperProjectId": "3e75fab0-bbaf-4e8c-8118-64233620e60c",
+      "timekeeperProjectName": "IFLAI",
+      "startTime": "2026-11-28T11:31:57.784Z",
+      "endTime": "2026-11-28T11:32:20.550Z",
+      "wallSeconds": 22,
+      "focusFactor": 0.2273,
+      "effectiveSeconds": 5,
+      "activityPolicyVersion": 1,
+      "focusPolicyVersion": 7,
+      "repositoryFocusMultiplier": 0.5,
+      "modelBreakdown": [
+        {
+          "role": "parent",
+          "model": "gpt-6.1-sol",
+          "effort": "max",
+          "baseFactor": 0.5,
+          "factor": 0.25,
+          "fastMode": false,
+          "fastModeMultiplier": 1,
+          "creditMultiplier": 1,
+          "creditedFactor": 0.25,
+          "repositoryMultiplier": 0.5,
+          "wallSeconds": 22,
+          "effectiveSeconds": 5
+        }
+      ],
+      "description": "API: email drafting",
+      "executionProvider": "openai-responses",
+      "authoringWorkflow": "henrik-email",
+      "usageSource": "henrik-email",
+      "timingSource": "measured",
+      "executionOutcome": "completed",
+      "tokenUsage": {
+        "input_tokens": 70524,
+        "cached_input_tokens": 24696,
+        "cache_write_input_tokens": 45822,
+        "output_tokens": 807,
+        "reasoning_output_tokens": 425
+      }
     }
   ]
 }
